@@ -1,5 +1,5 @@
 import { changeProfileAccount, unlinkProfileAccount } from '../shared/profile-account-management.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.253';
+import { auth, db } from '../../firebase-config.js?v=1.2.254';
 import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
 import { doc, runTransaction, deleteField, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { createElement, setChildren } from '../../dom-utils.js';
@@ -48,6 +48,21 @@ async function readLinkedPassword(contact) {
     if (auth.currentUser?.uid !== uid) throw new Error('Sessione cambiata');
     return value;
 }
+const linkedAccountNameCache = new Map();
+async function readLinkedAccountName(contact) {
+    const uid = auth.currentUser?.uid;
+    if (!uid || !contact?.linkedAccountId) return '';
+    const companyId = contact.linkedAccountCompanyId || '';
+    const cacheKey = `${uid}|${companyId}|${contact.linkedAccountId}`;
+    if (linkedAccountNameCache.has(cacheKey)) return linkedAccountNameCache.get(cacheKey);
+    const account = companyId
+        ? await getCompanyAccount(uid, companyId, contact.linkedAccountId)
+        : await getPrivateAccount(uid, contact.linkedAccountId);
+    if (auth.currentUser?.uid !== uid || !account || account.isArchived) return '';
+    const name = String(account.nomeAccount || account.name || '').trim();
+    if (name) linkedAccountNameCache.set(cacheKey, name);
+    return name;
+}
 export async function connectCompanyContact(contact, companyId, type) {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
@@ -73,10 +88,25 @@ export function renderCompanyContacts(data, companyId, reload) {
         const fields = [text(contact.label,'view-label'),createElement('div',{className:'company-contact-row'},[text(contact.address||contact.number),copyButton(async()=>contact.address||contact.number)])];
         if (contact.username) fields.push(createElement('div',{},[text('Username','view-label'),text(contact.username)]));
         if (contact.linkedAccountId) fields.push(secretField('Password Account collegato',()=>readLinkedPassword(contact)));
-        if (contact.password) fields.push(secretField('Password nel profilo aziendale',async()=>decryptRequiredValue(contact.password,await ensureVaultKeyMaterial())), text('Conservata fino alla verifica del trasferimento nell’Account.','company-contact-note'));
+        if (contact.password) {
+            const legacyPassword = secretField('Password nel profilo aziendale',async()=>decryptRequiredValue(contact.password,await ensureVaultKeyMaterial()));
+            if (contact.linkedAccountId) {
+                fields.push(createElement('details',{className:'profile-legacy-credential'},[
+                    createElement('summary',{textContent:'Password nel Profilo aziendale (conservata)'}),
+                    legacyPassword,
+                    text('È presente anche una password nell’Account collegato. Le due copie sono state conservate perché non è stata autorizzata la rimozione dal Profilo.','company-contact-note')
+                ]));
+            } else {
+                fields.push(legacyPassword, text('Conservata nel Profilo aziendale.','company-contact-note'));
+            }
+        }
         if (contact.note) fields.push(createElement('div',{className:'company-contact-note'},[text('Nota','view-label'),text(contact.note)]));
         const actions = contact.linkedAccountId ? [button('Apri Account collegato',()=>{window.location.href=profileAccountUrl(contact.linkedAccountId,contact.linkedAccountCompanyId||'');}),button('Cambia Account',()=>changeProfileAccount({contact,type,sourceCompanyId:companyId},reload)),button('Scollega Account',()=>unlinkProfileAccount({contact,type,sourceCompanyId:companyId},reload))] : [button('Collega o crea Account',()=>connectCompanyContact(contact,companyId,type))];
         actions.forEach(action=>action.classList.add('profile-contact-connect'));
+        if (contact.linkedAccountId) {
+            actions[0].classList.add('profile-account-primary');
+            readLinkedAccountName(contact).then(name=>{if(name && actions[0].isConnected) actions[0].textContent=`Apri: ${name}`;}).catch(()=>{});
+        }
         fields.push(createElement('div',{className:contact.linkedAccountId?'company-contact-actions profile-account-actions':'company-contact-actions'},actions));
         const header = createElement('div',{className:'profile-contact-header'},[text(contact.label,'profile-contact-label'),miniButton('Modifica contatto','edit',()=>{window.location.href=editUrl(companyId)+(type==='email'?'#section-email':'');})]);
         return createElement('article',{className:'company-contact-card profile-contact-card'},[header,createElement('div',{className:'profile-contact-fields'},fields.slice(1))]);

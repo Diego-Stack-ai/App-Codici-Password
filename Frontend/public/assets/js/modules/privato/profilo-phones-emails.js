@@ -13,6 +13,7 @@ import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { createProfileItemId, hasLegacyEmailPassword } from './profile-model.js';
 import { showProfileModal } from './profilo-modal.js';
+import { createLinkedAccountButton } from './profilo-links.js';
 
 let _getState = null;
 let _callbacks = null;
@@ -202,13 +203,9 @@ function _createPhoneCard(phone, idx) {
                     createCopyBtn(phone.number)
                 ])
             ]),
-            createElement('div', {className: phone.linkedAccountId ? 'profile-account-actions' : ''}, [createElement('button', {
-                className: 'btn-upload-trigger',
-                textContent: phone.linkedAccountId ? 'Apri Account collegato' : 'Collega o crea Account',
-                onclick: () => phone.linkedAccountId
-                    ? _callbacks.openLinkedAccount(phone.linkedAccountId, phone.linkedAccountCompanyId)
-                    : _callbacks.connectPhoneAccount(phone, _callbacks.syncData)
-            }),
+            createElement('div', {className: phone.linkedAccountId ? 'profile-account-actions' : ''}, [createLinkedAccountButton(phone,
+                () => _callbacks.openLinkedAccount(phone.linkedAccountId, phone.linkedAccountCompanyId),
+                () => _callbacks.connectPhoneAccount(phone, _callbacks.syncData)),
             ...accountManagementButtons(phone,'phone')])
         ])
     ]);
@@ -318,15 +315,9 @@ export function renderEmailsView() {
                 createElement('span', { className: 'profile-contact-note-label', textContent: 'Nota' }),
                 createElement('span', { className: 'profile-contact-note-text', textContent: e.note })
             ]) : null,
-            createElement('div', {className: e.linkedAccountId ? 'profile-account-actions' : ''}, [createElement('button', {
-                className: 'btn-upload-trigger',
-                textContent: e.linkedAccountId
-                    ? 'Apri Account collegato'
-                    : 'Collega o crea Account',
-                onclick: () => e.linkedAccountId
-                    ? _callbacks.openLinkedAccount(e.linkedAccountId, e.linkedAccountCompanyId)
-                    : _callbacks.connectEmailAccount(e, _callbacks.syncData)
-            }),
+            createElement('div', {className: e.linkedAccountId ? 'profile-account-actions' : ''}, [createLinkedAccountButton(e,
+                () => _callbacks.openLinkedAccount(e.linkedAccountId, e.linkedAccountCompanyId),
+                () => _callbacks.connectEmailAccount(e, _callbacks.syncData)),
             ...accountManagementButtons(e,'email')]),
             e.linkedAccountId && hasLegacyEmailPassword(e) ? createElement('button', {
                 className: 'btn-upload-trigger',

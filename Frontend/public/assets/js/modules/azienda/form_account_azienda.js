@@ -8,12 +8,12 @@ import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.253';
+import { db } from '../../firebase-config.js?v=1.2.254';
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.253';
+import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.254';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 async function saveAccount(...args) {
@@ -44,8 +44,8 @@ import { getCompanyAccount, getUserProfile, listContacts } from '../data/vault-r
 import { prepareProfileEmailAccountValues } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { ACCOUNT_MODES, ACCOUNT_MODE_VIEWS, accountModeFromFlagId, accountModeFromFlags, accountModeFromRecord, filterRecipientContacts, getAccountModeFlags, isOwnerRecipientEmail, normalizeAccountModeView, normalizeRecipientEmail, preferenceForRecipient, recipientPreferencesFromSharedWith, selectAccountMode, serializeRecipientPreferences, sharedModeTransitionRevokesRecipients, showAccountModeAlternatives, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.253';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.253';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.254';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.254';
 import { DECRYPT_FAILURE_MESSAGE, createAccountLoadContext, isAccountSaveAllowed } from '../shared/credential-decrypt-guard.js';
 
 // --- STATE ---
@@ -187,6 +187,9 @@ export async function initFormAccountAzienda(user) {
             const contact = profileContactLinkDraft.sourceCompanyId ? await loadCompanyProfileContact(user.uid, profileContactLinkDraft) : findProfileAccountItem(profile, profileContactLinkDraft);
             if (!contact) throw new Error('Contatto non disponibile.');
             const key = await ensureVaultKeyMaterial();
+            Object.defineProperty(profileContactLinkDraft, '_accountPasswordInitiallyEmpty', {
+                value: !get('account-password'), enumerable: false, configurable: true
+            });
             const email = isPhone ? { address: contact.number } : { ...contact,
                 password: await decryptRequiredValue(contact.password, key), note: await decryptRequiredValue(contact.note, key) };
             if (profileContactLinkDraft.contactType === 'document') email.address = await decryptRequiredValue(contact.username, key);

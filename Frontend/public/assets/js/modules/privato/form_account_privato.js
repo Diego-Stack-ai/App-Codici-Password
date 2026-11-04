@@ -1,6 +1,6 @@
 import {normalizeEditableBankingAccounts, hasRealBankingData} from '../shared/banking-model.js';
 import {canRecoverPrivateAccount} from './private-account-offline-policy.js';
-import {auth} from '../../firebase-config.js?v=1.2.253';
+import {auth} from '../../firebase-config.js?v=1.2.254';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -17,15 +17,15 @@ import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listCont
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { ACCOUNT_MODES, accountModeFromFlagId, accountModeFromFlags, accountModeFromRecord, filterRecipientContacts, getAccountModeFlags, isOwnerRecipientEmail, normalizeRecipientEmail, preferenceForRecipient, recipientPreferencesFromSharedWith, selectAccountMode, serializeRecipientPreferences, sharedModeTransitionRevokesRecipients, showAccountModeAlternatives, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.253';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.253';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.254';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.254';
 async function savePrivateAccount(...args) {
     let module;
     // Il modulo di salvataggio e' caricato solo al primo click. Deve quindi
     // partecipare esplicitamente al versionamento della release: senza query
     // il service worker/browser puo' riusare il controller della release
     // precedente e perdere una modifica successiva pur mostrando successo.
-    try { module = await import('./form-privato-save.js?v=1.2.253'); }
+    try { module = await import('./form-privato-save.js?v=1.2.254'); }
     catch {
         if (args[0]?.isActive?.()) {
             showToast('Impossibile caricare il salvataggio. Riprova.', 'error');
@@ -328,6 +328,9 @@ export async function initFormAccountPrivato(user) {
             const key = await ensureVaultKeyMaterial();
             const password = await decodeProfileContactValue(email.password, key);
             const note = await decodeProfileContactValue(email.note, key);
+            Object.defineProperty(profileContactLinkDraft, '_accountPasswordInitiallyEmpty', {
+                value: !get('account-password'), enumerable: false, configurable: true
+            });
             if (profileContactLinkDraft.contactType === 'document') email.address = await decodeProfileContactValue(contact.username, key);
             if (profileContactLinkDraft.contactType === 'utility') email.address = '';
             if (profileContactLinkDraft.sourceCompanyId && contact.username) email.address = await decodeProfileContactValue(contact.username, key);

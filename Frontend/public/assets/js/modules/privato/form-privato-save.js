@@ -1,6 +1,6 @@
 import { findProfileAccountItem, patchProfileAccountItem, profileAccountReferences } from '../privato/profile-model.js';
-import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.253';
+import { prepareCompanyProfileLink, promptCompanyProfilePasswordChoice } from '../azienda/company-profile-link.js';
+import { auth, db } from '../../firebase-config.js?v=1.2.254';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
@@ -86,7 +86,30 @@ export async function savePrivateAccount({
     const isMemoUI = document.getElementById('flag-memo')?.checked || false;
     const isMemoSharedUI = document.getElementById('flag-memo-shared')?.checked || false;
     const mode = accountModeFromFlags({ shared: isSharedUI, memo: isMemoUI, memoShared: isMemoSharedUI });
-    const credentialValues = { username: get('account-username'), account: get('account-code'), password: get('account-password') };
+    let companyPasswordChoice = null;
+    let passwordValue = get('account-password');
+    if (profileContactLinkDraft?.sourceCompanyId && profileContactLinkDraft.contactType === 'email') {
+        try {
+            companyPasswordChoice = await promptCompanyProfilePasswordChoice({
+                uid: currentUid,
+                draft: profileContactLinkDraft,
+                accountName: get('account-name'),
+                accountPassword: passwordValue,
+                vaultKeyMaterial
+            });
+        } catch {
+            showToast('Impossibile verificare le password. Nessun collegamento è stato salvato.', 'error');
+            if (btnSave) btnSave.disabled = false;
+            return;
+        }
+        if (!companyPasswordChoice.proceed) {
+            showToast('Collegamento annullato. Nessun dato è stato modificato.', 'info');
+            if (btnSave) btnSave.disabled = false;
+            return;
+        }
+        passwordValue = companyPasswordChoice.accountPassword;
+    }
+    const credentialValues = { username: get('account-username'), account: get('account-code'), password: passwordValue };
     const modeValidation = validateAccountMode(mode, credentialValues);
     if (modeValidation.reason === 'memo-has-credentials') {
         showToast('Memorandum non può contenere Utente, Account/Codice o Password. Cancella manualmente questi campi.', 'warning');
@@ -285,7 +308,7 @@ export async function savePrivateAccount({
             const profileUserRef = profileContactLinkDraft?.profileContactId && !profileContactLinkDraft.sourceCompanyId ? doc(db, 'users', currentUid) : null;
             const profileUserSnap = profileUserRef ? await transaction.get(profileUserRef) : null;
             const oldData = accountSnap?.exists() ? accountSnap.data() : null;
-            const companyLink = profileContactLinkDraft?.sourceCompanyId ? await prepareCompanyProfileLink(transaction, { uid: currentUid, draft: profileContactLinkDraft, targetId, targetCompanyId: '', oldData, data, isEditing, baseRevision }) : null;
+            const companyLink = profileContactLinkDraft?.sourceCompanyId ? await prepareCompanyProfileLink(transaction, { uid: currentUid, draft: profileContactLinkDraft, targetId, targetCompanyId: '', oldData, data, isEditing, baseRevision, passwordChoice: companyPasswordChoice }) : null;
             let linkedContact = null;
             const contactCollection = profileContactLinkDraft?.contactType === 'phone' ? 'contactPhones' : 'contactEmails';
             if (profileContactLinkDraft?.profileContactId && !profileContactLinkDraft.sourceCompanyId) {

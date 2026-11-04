@@ -21,6 +21,23 @@ test('email legacy e aggiuntive: collegamento e scollegamento conservano credenz
  assert.deepEqual(data,before);assert.doesNotMatch(JSON.stringify(model.companyProfileDraft(model.companyProfileContacts(data).emails[0],'source','email','owner')),/cipher:original/);
 });
 
+test('rimozione password esplicita pulisce sia lo slot email sia il fallback PEC',()=>{
+ const data={aziendaEmail:'pec@example.test',aziendaEmailPassword:'cipher:root',emails:{pec:{email:'pec@example.test',password:'cipher:slot'},extra:[{id:'extra',email:'extra@example.test',password:'cipher:extra'}]}};
+ const pec=model.companyProfileContacts(data).emails.find(item=>item.id==='pec');
+ const pecPatch=model.companyContactLinkPatch(data,pec,'email',{linkedAccountId:'a',linkedAccountCompanyId:''},{clearPassword:true});
+ assert.equal(pecPatch.emails.pec.password,'');assert.equal(pecPatch.aziendaEmailPassword,'');
+ const extra=model.companyProfileContacts(data).emails.find(item=>item.id==='extra');
+ const extraPatch=model.companyContactLinkPatch(data,extra,'email',{linkedAccountId:'b',linkedAccountCompanyId:''},{clearPassword:true});
+ assert.equal(extraPatch.emails.extra[0].password,'');assert.equal(extraPatch.aziendaEmailPassword,undefined);
+});
+
+test('classifica le password del Profilo senza normalizzare o perdere spazi',()=>{
+ assert.equal(model.classifyCompanyProfilePassword('', 'account'),'profile-empty');
+ assert.equal(model.classifyCompanyProfilePassword('profilo', ''),'account-empty');
+ assert.equal(model.classifyCompanyProfilePassword(' uguale ', ' uguale '),'same');
+ assert.equal(model.classifyCompanyProfilePassword(' uguale ', 'uguale'),'different');
+});
+
 test('tessera: selezione rispettata, valori escapati e credenziali escluse',()=>{
  const card=buildCompanyVCard({ragioneSociale:'Nome\nTEL:iniettato',aziendaEmail:'pec@example.test',aziendaEmailPassword:'SECRET',emails:{pec:{password:'SECRET2'},amministrazione:{email:'admin@example.test'},extra:[{email:'hidden@example.test',qr:false,password:'SECRET3'}]},note:'PRIVATE-NOTE',qrConfig:{aziendaEmail:false,adminEmail:true}});
  assert.doesNotMatch(card,/SECRET|PRIVATE-NOTE|pec@example|hidden@example|\nTEL:iniettato/);assert.match(card,/admin@example.test/);assert.match(card,/Nome\\nTEL:iniettato/);

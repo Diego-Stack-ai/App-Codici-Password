@@ -30,8 +30,17 @@ async function loadController(path, dependencies, exports) {
 test('schede Profilo: telefono collegabile e password legacy ancora recuperabile dopo il collegamento', async () => {
     const containers = { 'telefoni-view-container': { children: [] }, 'email-view-container': { children: [] } };
     const createElement = (tag, props = {}, children = []) => ({ tag, ...props, children: children.flat().filter(Boolean), setAttribute(key, value) { this[key] = value; } });
+    const createLinkedAccountButton = (contact, open, connect) => {
+        const linked = Boolean(contact.linkedAccountId);
+        const button = createElement('button', {
+            textContent: linked ? 'Apri Account collegato' : 'Collega o crea Account',
+            onclick: linked ? open : connect
+        });
+        if (linked) Promise.resolve().then(() => { button.textContent = 'Apri: IrenYou'; });
+        return button;
+    };
     const controller = await loadController('privato/profilo-phones-emails.js', {
-        ...model, createElement, clearElement: node => { node.children = []; },
+        ...model, createElement, createLinkedAccountButton, clearElement: node => { node.children = []; },
         setChildren: (node, children) => { node.children = children; },
         document: { getElementById: id => containers[id] }, t: value => value
     }, ['initPhonesEmailsModule', 'renderPhonesView', 'renderEmailsView']);
@@ -39,7 +48,8 @@ test('schede Profilo: telefono collegabile e password legacy ancora recuperabile
     const email = { id: 'e', address: 'fixture@example.test', password: 'SECRET-FIXTURE', linkedAccountId: 'a' };
     const calls = [];
     controller.initPhonesEmailsModule(() => ({ contactPhones: [phone], contactEmails: [email], qrCodeInclusions: { phones: [], emails: [] } }), {
-        connectPhoneAccount: contact => calls.push(contact), openLinkedAccount: id => calls.push(id)
+        connectPhoneAccount: contact => calls.push(contact), openLinkedAccount: id => calls.push(id),
+        readLinkedAccountName: async () => 'IrenYou'
     });
     controller.renderPhonesView();
     controller.renderEmailsView();
@@ -51,7 +61,8 @@ test('schede Profilo: telefono collegabile e password legacy ancora recuperabile
     assert.ok(emailNodes.some(node => node.textContent === 'Password legacy'));
     assert.ok(emailNodes.some(node => node.textContent === 'Verifica trasferimento password'));
     assert.equal(emailNodes.some(node => node.textContent === 'SECRET-FIXTURE'), false);
-    emailNodes.find(node => node.textContent === 'Apri Account collegato').onclick();
+    await Promise.resolve();
+    emailNodes.find(node => node.textContent === 'Apri: IrenYou').onclick();
     assert.equal(calls[1], 'a');
 });
 
@@ -132,7 +143,7 @@ test('un errore di sincronizzazione non apre il form e non persiste la bozza', a
     assert.equal(window.location.href, '');
 });
 
-async function saveFixture({ type = 'email', password = 'legacy', legacy = 'legacy', failCommit = false, conflict = false, missing = false, editing = true, unreadable = false, company = false, wrongCompany = false, sourceCompany = false, multiple = false, shared = false, memo = false, memoShared = false } = {}) {
+async function saveFixture({ type = 'email', password = 'legacy', legacy = 'legacy', failCommit = false, conflict = false, missing = false, editing = true, unreadable = false, company = false, wrongCompany = false, sourceCompany = false, multiple = false, shared = false, memo = false, memoShared = false, companyPasswordDecision = 'keep' } = {}) {
     const profileKey = {email:'contactEmails',phone:'contactPhones',document:'documenti',utility:'userAddresses'}[type];
     const contact = { id: 'contact-1', number: '+390001', address: 'fixture@example.test', password: legacy ? `cipher:${legacy}` : '', note: 'cipher:nota', custom: 'preserve' };
     const records = missing ? [] : [contact, {id:'other',password:'cipher:other',...(multiple?{linkedAccountId:'account-1',linkedAccountCompanyId:company?'company-1':''}:{})}];
@@ -163,6 +174,13 @@ async function saveFixture({ type = 'email', password = 'legacy', legacy = 'lega
             committed.push(...staged);
         },
         showToast: (message, severity) => messages.push({ message, severity }), t: key => key,
+        promptCompanyProfilePasswordChoice: async ({accountPassword}) => ({
+            proceed: companyPasswordDecision !== 'cancel',
+            accountPassword: companyPasswordDecision === 'transfer' ? legacy : accountPassword,
+            clearProfilePassword: ['clear','transfer'].includes(companyPasswordDecision),
+            expectedProfilePassword: `cipher:${legacy}`,
+            outcome: companyPasswordDecision
+        }),
         encrypt: async value => value ? `cipher:${value}` : '', ensureVaultKeyMaterial: async () => 'key',
         decodeProfileContactValue: async value => { if (unreadable) throw new Error('unreadable'); return value?.replace(/^cipher:/, '') || ''; },
         classifyPrivateAccountOfflineWrite: () => ({ eligible: false, reason: 'profile-link' }),
@@ -338,6 +356,42 @@ for (const company of [false,true]) for (const editing of [false,true]) for (con
     assert.deepEqual(account.value.linkedCompanyProfileField,{companyId:'source',type,id:type==='email'?'contact-1':'telefonoAzienda'});
     assert.equal(account.value.linkedProfileField,undefined);
     assert.equal(result.draftRemoved,true);
+});
+for (const company of [false,true]) test('Profilo aziendale: scelta esplicita elimina il duplicato nello stesso commit '+company,async()=>{
+    const result=await saveFixture({sourceCompany:true,company,type:'email',companyPasswordDecision:'clear'});
+    const source=result.committed.find(item=>item.path==='users/owner/aziende/source').value;
+    const account=result.committed.find(item=>item.path.includes('/accounts/')).value;
+    assert.equal(source.emails.extra[0].password,'');
+    assert.equal(account.password,'cipher:legacy');
+});
+test('Profilo aziendale: annullare il confronto non salva né cancella dati',async()=>{
+    const result=await saveFixture({sourceCompany:true,type:'email',companyPasswordDecision:'cancel'});
+    assert.deepEqual(result.committed,[]);
+    assert.equal(result.draftRemoved,false);
+    assert.match(result.messages.at(-1).message,/annullato/i);
+});
+test('scelta password aziendale: uguale, trasferibile e diversa restano decisioni esplicite',async()=>{
+    const draft={sourceCompanyId:'source',contactType:'email',profileContactId:'contact-1',contactValue:'fixture@example.test'};
+    const source={emails:{extra:[{id:'contact-1',email:'fixture@example.test',password:'cipher:profilo'}]}};
+    const answers=[];const prompts=[];
+    const controller=await loadController('azienda/company-profile-link.js',{
+        ...companyModel,auth:{currentUser:{uid:'owner'}},getCompany:async()=>source,
+        decryptRequiredValue:async value=>value.replace(/^cipher:/,''),
+        showConfirmModal:async(...args)=>{prompts.push(args);return answers.shift();}
+    },['promptCompanyProfilePasswordChoice']);
+    answers.push(true);
+    const same=await controller.promptCompanyProfilePasswordChoice({uid:'owner',draft,accountName:'Gmail amministrazione',accountPassword:'profilo',vaultKeyMaterial:'key'});
+    assert.equal(same.clearProfilePassword,true);assert.equal(same.outcome,'removed-duplicate');
+    answers.push(true);draft._accountPasswordInitiallyEmpty=true;
+    const transfer=await controller.promptCompanyProfilePasswordChoice({uid:'owner',draft,accountName:'Gmail amministrazione',accountPassword:'profilo',vaultKeyMaterial:'key'});
+    assert.equal(transfer.accountPassword,'profilo');assert.equal(transfer.clearProfilePassword,true);assert.equal(transfer.outcome,'transferred');
+    answers.push(false);
+    const keepProfile=await controller.promptCompanyProfilePasswordChoice({uid:'owner',draft,accountName:'Gmail amministrazione',accountPassword:'profilo',vaultKeyMaterial:'key'});
+    assert.equal(keepProfile.accountPassword,'');assert.equal(keepProfile.clearProfilePassword,false);assert.equal(keepProfile.outcome,'kept-profile');
+    delete draft._accountPasswordInitiallyEmpty;answers.push(false);
+    const different=await controller.promptCompanyProfilePasswordChoice({uid:'owner',draft,accountName:'Gmail amministrazione',accountPassword:'diversa',vaultKeyMaterial:'key'});
+    assert.equal(different.proceed,false);assert.equal(different.clearProfilePassword,false);assert.equal(different.outcome,'cancelled');
+    assert.match(prompts[0][1],/coincidono/);assert.match(prompts[1][1],/non contiene/);assert.match(prompts[2][1],/non contiene/);assert.match(prompts[3][1],/diverse/);
 });
 for(const company of [false,true]) for(const condition of ['conflict','failCommit']) test('Profilo aziendale: nessuna modifica parziale '+company+' '+condition,async()=>{
     const result=await saveFixture({sourceCompany:true,company,[condition]:true});

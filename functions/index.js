@@ -1026,21 +1026,12 @@ exports.sendDeadlinePushTest = onCall(
             return { ok: false, cooldownSeconds: Math.ceil((60000 - (now - lastTest)) / 1000) };
         }
         await deviceRef.set({ lastTestAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
-        const today = deadlineCalendar.day(new Date());
-        const deadlines = await db.collection("users").doc(request.auth.uid).collection("scadenze")
-            .where("completed", "==", false).get();
-        const upcoming = deadlines.docs.map((item) => {
-            const data = item.data();
-            const dueDay = deadlineCalendar.day(data.dueDate);
-            return { id: item.id, data, dueDay };
-        }).filter((item) => item.dueDay !== null && deadlineCalendar.distance(today, item.dueDay) >= 0)
-            .sort((left, right) => left.dueDay.localeCompare(right.dueDay))[0];
-
-        const deadlineId = upcoming?.id || "";
-        const diffDays = upcoming ? deadlineCalendar.distance(today, upcoming.dueDay) : 0;
-        const text = upcoming
-            ? pushText(upcoming.data, diffDays)
-            : { title: "Codici & Password", body: "Notifica scadenza di prova" };
+        // La prova verifica soltanto il canale: non legge né espone Scadenze reali.
+        const deadlineId = "";
+        const text = {
+            title: "Codici & Password",
+            body: "Notifica di prova ricevuta correttamente"
+        };
         try {
             await admin.messaging().send({
                 token: deviceData.token,
@@ -1050,7 +1041,7 @@ exports.sendDeadlinePushTest = onCall(
                 },
                 webpush: { headers: { TTL: "300", Urgency: "high" } }
             });
-            return { ok: true, opensDeadline: Boolean(deadlineId) };
+            return { ok: true, opensDeadline: false };
         } catch (error) {
             console.error("[PUSH TEST FAILED]", error.code || error.message);
             const invalid = ["messaging/registration-token-not-registered", "messaging/invalid-registration-token"]

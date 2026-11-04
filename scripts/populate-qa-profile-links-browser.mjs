@@ -18,6 +18,7 @@ const browserProfile = await mkdtemp(path.join(os.tmpdir(), 'codici-password-qa-
 const fixture = Object.freeze({
     email: 'profilo.qa@appcodici-password.invalid',
     documentNumber: 'QA-DOC-0001',
+    documentAttachment: 'qa-allegato-sintetico.txt',
     accountName: 'QA Account Profilo',
     accountPassword: 'QA-ACCOUNT-PASSWORD-NON-REALE',
     accountNote: 'QA-SINTETICO · Account creato dal collegamento del Profilo.',
@@ -166,17 +167,25 @@ async function ensureDocumentDeadlineLink(page) {
         await confirmCurrentModal(page);
         await page.waitForURL(/\/aggiungi_scadenza\.html\?profileDocumentId=/, { timeout: 45_000 });
         await waitForTranslatedPage(page);
-        await page.locator('#nome_cognome').waitFor({ state: 'visible', timeout: 20_000 });
+        await page.locator('#profile-document-summary').waitFor({ state: 'visible', timeout: 20_000 });
         await page.waitForFunction(() => {
-            const name = document.getElementById('nome_cognome')?.value?.trim();
+            const name = document.getElementById('profile-document-holder')?.textContent?.trim();
             const dueDate = document.getElementById('dueDate')?.dataset?.isoValue
                 || document.getElementById('dueDate')?.value;
             const rule = document.getElementById('deadline-rule-summary');
             const missingRule = document.body.textContent?.includes('Nessuna regola disponibile');
             return Boolean(name && dueDate && ((rule && !rule.classList.contains('hidden')) || missingRule));
         }, null, { timeout: 30_000 });
-        assert.equal(await page.locator('#nome_cognome').inputValue(), 'Collaudo Sintetico');
+        assert.equal((await page.locator('#profile-document-holder').textContent()).trim(), 'Collaudo Sintetico');
         assert.equal(await page.locator('#dueDate').evaluate(element => element.dataset.isoValue || element.value), '2040-01-15');
+        assert.equal((await page.locator('#profile-document-number').textContent()).trim(), fixture.documentNumber);
+        const templateText = await page.locator('#oggetto_email').inputValue();
+        assert.ok(templateText.includes(fixture.documentNumber), 'Il testo della Scadenza deve includere il numero documento');
+        record('profile-document-deadline-source-fields', 'passed-number-and-text');
+        assert.equal(await page.locator('#attachments-list .attachment-name')
+            .filter({ hasText: fixture.documentAttachment }).count(), 1,
+        'L’allegato del Documento deve essere collegato una sola volta nel form');
+        record('profile-document-deadline-source-attachment', 'passed-single-copy');
         record('profile-document-deadline-prefill', 'passed');
         if (await page.getByText('Nessuna regola disponibile', { exact: true }).count()) {
             await page.screenshot({
@@ -192,7 +201,15 @@ async function ensureDocumentDeadlineLink(page) {
         await page.waitForURL(/\/dettaglio_scadenza\.html\?id=/, { timeout: 45_000 });
         record('profile-document-deadline-link', 'created-without-recipients');
     }
-    await page.locator('body').waitFor({ state: 'visible' });
+    await page.locator('#detail-intestatario').waitFor({ state: 'visible', timeout: 20_000 });
+    assert.equal((await page.locator('#display-veicolo').textContent()).trim(), fixture.documentNumber,
+        'Il dettaglio Scadenza deve mostrare il numero del Documento senza ricomporlo come veicolo');
+    const detailTemplate = (await page.locator('#detail-template').textContent()).trim();
+    assert.ok(detailTemplate.includes(fixture.documentNumber), 'Il dettaglio deve conservare il testo completo col numero Documento');
+    assert.equal(await page.locator('#display-attachments .detail-list-item-title')
+        .filter({ hasText: fixture.documentAttachment }).count(), 1,
+    'Il dettaglio deve contenere una sola copia dell’allegato collegato');
+    record('profile-linked-deadline-source-fields', 'passed-number-text-attachment-no-duplication');
     record('profile-linked-deadline-open', 'passed');
 
     await openProfile(page, 'documents');

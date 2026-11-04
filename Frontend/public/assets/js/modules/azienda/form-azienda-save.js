@@ -1,5 +1,5 @@
 import { findProfileAccountItem, patchProfileAccountItem, profileAccountReferences } from '../privato/profile-model.js';
-import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
+import { prepareCompanyProfileLink, promptCompanyProfilePasswordChoice } from '../azienda/company-profile-link.js';
 /**
  * FORM ACCOUNT AZIENDA — SAVE MODULE (V1.0)
  * Salvataggio e cancellazione degli account aziendali.
@@ -7,7 +7,7 @@ import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.253';
+import { auth, db } from '../../firebase-config.js?v=1.2.254';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteField
@@ -64,7 +64,29 @@ export async function saveAccount({ bankAccounts, invitedEmails, invitePreferenc
         return;
     }
 
-    const passwordToSave = get('account-password');
+    let companyPasswordChoice = null;
+    let passwordToSave = get('account-password');
+    if (profileContactLinkDraft?.sourceCompanyId && profileContactLinkDraft.contactType === 'email') {
+        try {
+            companyPasswordChoice = await promptCompanyProfilePasswordChoice({
+                uid: currentUid,
+                draft: profileContactLinkDraft,
+                accountName: get('account-name'),
+                accountPassword: passwordToSave,
+                vaultKeyMaterial
+            });
+        } catch {
+            showToast('Impossibile verificare le password. Nessun collegamento è stato salvato.', 'error');
+            if (btnSave) btnSave.disabled = false;
+            return;
+        }
+        if (!companyPasswordChoice.proceed) {
+            showToast('Collegamento annullato. Nessun dato è stato modificato.', 'info');
+            if (btnSave) btnSave.disabled = false;
+            return;
+        }
+        passwordToSave = companyPasswordChoice.accountPassword;
+    }
     const data = {
         nomeAccount: (get('account-name') || '').trim(), // In chiaro
         username: await encrypt((get('account-username') || '').trim(), vaultKeyMaterial),
@@ -165,7 +187,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, invitePreferenc
             const profileRef = profileContactLinkDraft && !profileContactLinkDraft.sourceCompanyId ? doc(db, 'users', currentUid) : null;
             const profileSnap = profileRef ? await transaction.get(profileRef) : null;
             const oldData = accountSnap?.exists() ? accountSnap.data() : null;
-            const companyLink = profileContactLinkDraft?.sourceCompanyId ? await prepareCompanyProfileLink(transaction, { uid: currentUid, draft: profileContactLinkDraft, targetId, targetCompanyId: currentAziendaId, oldData, data, isEditing, baseUpdatedAt }) : null;
+            const companyLink = profileContactLinkDraft?.sourceCompanyId ? await prepareCompanyProfileLink(transaction, { uid: currentUid, draft: profileContactLinkDraft, targetId, targetCompanyId: currentAziendaId, oldData, data, isEditing, baseUpdatedAt, passwordChoice: companyPasswordChoice }) : null;
             const contactCollection = profileContactLinkDraft?.contactType === 'phone' ? 'contactPhones' : 'contactEmails';
             let linkedContact = null;
             if (profileContactLinkDraft && !profileContactLinkDraft.sourceCompanyId) {

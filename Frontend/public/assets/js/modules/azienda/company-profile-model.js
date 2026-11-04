@@ -12,16 +12,28 @@ export function companyProfileContacts(data) {
 export function findCompanyProfileContact(data, type, id) {
     return companyProfileContacts(data)[type === 'email' ? 'emails' : 'phones'].find(c => c.id === id);
 }
-export function companyContactLinkPatch(data, contact, type, link) {
+export function companyContactLinkPatch(data, contact, type, link, {clearPassword = false} = {}) {
     if (type === 'phone') return { phoneAccountLinks: { ...data.phoneAccountLinks, [contact.id]: { ...data.phoneAccountLinks?.[contact.id], ...link } } };
     const emails = structuredClone(data.emails || {});
     if (contact.sourceSlot === 'extra') {
-        emails.extra[contact.sourceIndex] = { ...emails.extra[contact.sourceIndex], id: contact.id, ...link };
+        emails.extra[contact.sourceIndex] = { ...emails.extra[contact.sourceIndex], id: contact.id, ...link, ...(clearPassword ? {password: ''} : {}) };
     } else {
-        emails[contact.sourceSlot] = { ...emails[contact.sourceSlot], email: contact.address, ...link };
+        emails[contact.sourceSlot] = { ...emails[contact.sourceSlot], email: contact.address, ...link, ...(clearPassword ? {password: ''} : {}) };
     }
-    // Le credenziali legacy restano intatte fino alla verifica e pulizia esplicita.
-    return { emails };
+    // La PEC può ancora avere una copia nel vecchio campo radice: quando
+    // l'utente sceglie esplicitamente la rimozione vanno pulite entrambe.
+    return {
+        emails,
+        ...(clearPassword && contact.sourceSlot === 'pec' ? {aziendaEmailPassword: ''} : {})
+    };
+}
+
+export function classifyCompanyProfilePassword(profilePassword, accountPassword) {
+    const profile = String(profilePassword || '');
+    const account = String(accountPassword || '');
+    if (!profile) return 'profile-empty';
+    if (!account) return 'account-empty';
+    return profile === account ? 'same' : 'different';
 }
 export function companyProfileDraft(contact, sourceCompanyId, type, ownerUid, targetCompanyId = '') {
     return { profileContactId: contact.id, contactType: type, contactValue: contact.address || contact.number, sourceCompanyId, companyId: targetCompanyId, ownerUid };

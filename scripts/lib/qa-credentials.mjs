@@ -7,6 +7,8 @@ import { spawn } from 'node:child_process';
 const SECRET_SCHEMA = 1;
 const TARGET_NAME = 'CodiciPassword-QA-Automation';
 const ENTROPY = 'CodiciPassword|QA|DPAPI|v1';
+const DEFAULT_QA_EMAIL = 'codex.qa@appcodici-password.invalid';
+const QA_EMAIL_PATTERN = /^codex\.qa(?:[1-9][0-9]*)?@appcodici-password\.invalid$/;
 
 function defaultSecretPath() {
     if (process.env.CODEX_QA_CREDENTIAL_PATH) return path.resolve(process.env.CODEX_QA_CREDENTIAL_PATH);
@@ -26,7 +28,7 @@ function randomPassword(length) {
     return chars.join('');
 }
 
-export function createQaCredentialBundle({ uid = '', email = 'codex.qa@appcodici-password.invalid' } = {}) {
+export function createQaCredentialBundle({ uid = '', email = DEFAULT_QA_EMAIL } = {}) {
     return Object.freeze({
         schemaVersion: SECRET_SCHEMA,
         projectId: 'appcodici-password',
@@ -38,10 +40,13 @@ export function createQaCredentialBundle({ uid = '', email = 'codex.qa@appcodici
     });
 }
 
-export function validateQaCredentialBundle(bundle, { requireUid = true } = {}) {
+export function validateQaCredentialBundle(bundle, { requireUid = true, expectedEmail = '' } = {}) {
     if (!bundle || bundle.schemaVersion !== SECRET_SCHEMA) throw new Error('QA_SECRET_SCHEMA_INVALID');
     if (bundle.projectId !== 'appcodici-password') throw new Error('QA_SECRET_PROJECT_INVALID');
-    if (bundle.email !== 'codex.qa@appcodici-password.invalid') throw new Error('QA_SECRET_EMAIL_INVALID');
+    if (!QA_EMAIL_PATTERN.test(bundle.email || '')) throw new Error('QA_SECRET_EMAIL_INVALID');
+    if (expectedEmail && bundle.email !== String(expectedEmail).trim().toLowerCase()) {
+        throw new Error('QA_SECRET_EMAIL_MISMATCH');
+    }
     if (requireUid && !/^[A-Za-z0-9_-]{6,128}$/.test(bundle.uid || '')) throw new Error('QA_SECRET_UID_INVALID');
     if (typeof bundle.accountPassword !== 'string' || bundle.accountPassword.length < 20) throw new Error('QA_SECRET_ACCOUNT_PASSWORD_INVALID');
     if (typeof bundle.masterPassword !== 'string' || bundle.masterPassword.length < 24) throw new Error('QA_SECRET_MASTER_PASSWORD_INVALID');
@@ -54,16 +59,32 @@ function runPowerShell(script, input) {
         const child = spawn('powershell.exe', [
             '-NoLogo', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', script
         ], { windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
+        let settled = false;
         let output = '';
         let errorOutput = '';
+        const finish = (callback, value) => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            callback(value);
+        };
+        const timer = setTimeout(() => {
+            child.stdin.destroy();
+            child.kill();
+            finish(reject, new Error('QA_DPAPI_TIMEOUT'));
+        }, 15_000);
+        timer.unref?.();
         child.stdout.setEncoding('utf8');
         child.stderr.setEncoding('utf8');
         child.stdout.on('data', chunk => { output += chunk; });
         child.stderr.on('data', chunk => { errorOutput += chunk; });
-        child.once('error', reject);
+        child.once('error', error => finish(reject, error));
         child.once('exit', code => {
-            if (code === 0) resolve(output.trim());
-            else reject(new Error(`QA_DPAPI_FAILED:${code}:${errorOutput.trim().slice(0, 200)}`));
+            if (code === 0) finish(resolve, output.trim());
+            else finish(reject, new Error(`QA_DPAPI_FAILED:${code}:${errorOutput.trim().slice(0, 200)}`));
+        });
+        child.stdin.on('error', error => {
+            if (!settled && error.code !== 'EPIPE') finish(reject, error);
         });
         child.stdin.end(input, 'utf8');
     });
@@ -98,12 +119,13 @@ export async function saveQaCredentialBundle(bundle, filePath = defaultSecretPat
     return filePath;
 }
 
-export async function loadQaCredentialBundle(filePath = defaultSecretPath()) {
+export async function loadQaCredentialBundle(filePath = defaultSecretPath(), options = {}) {
     const encrypted = (await readFile(filePath, 'utf8')).trim();
     if (!/^[A-Za-z0-9+/=]+$/.test(encrypted)) throw new Error('QA_DPAPI_FILE_INVALID');
     const plain = await runPowerShell(unprotectScript, encrypted);
-    return validateQaCredentialBundle(JSON.parse(plain));
+    return validateQaCredentialBundle(JSON.parse(plain), options);
 }
 
 export const QA_CREDENTIAL_TARGET = TARGET_NAME;
 export const QA_CREDENTIAL_PATH = defaultSecretPath();
+export const QA_DEFAULT_EMAIL = DEFAULT_QA_EMAIL;

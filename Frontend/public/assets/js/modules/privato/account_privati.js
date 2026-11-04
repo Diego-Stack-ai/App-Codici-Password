@@ -4,7 +4,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * Gestione liste account: personali, condivisi, memorandum.
  */
 
-import { db, functions } from '../../firebase-config.js?v=1.2.253';
+import { db, functions } from '../../firebase-config.js?v=1.2.254';
 import { LOG } from '../../logger.js';
 import { updateDoc, doc, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -23,6 +23,7 @@ import { createAccountListView } from '../shared/account-list-view.js';
 import { archiveAccount } from '../settings/archive-account-service.js';
 import { archiveRecipients, archiveConfirmMessage } from '../settings/archive-account-model.js';
 import {accountSortMode, compareAccounts, nextAccountSortMode} from '../shared/account-list-sort.js';
+import {startMetric, endMetric} from '../../performance-metrics.js';
 
 // Compatibility entry point: one active mount per canonical document.
 let activeMount = null;
@@ -184,6 +185,7 @@ export function mountAccountPrivati(user, options = {}) {
      */
     async function loadAccounts() {
         try {
+            startMetric('account-list-total');
             const urlParams = new URLSearchParams(query);
             const requireServerRefresh = (urlParams.get('afterWrite') === '1' || urlParams.get('m6refresh') === '1') && navigator.onLine;
             let sharedWithMe = [];
@@ -192,12 +194,50 @@ export function mountAccountPrivati(user, options = {}) {
             LOG('[ACCOUNTS] Searching invites for authenticated user');
             // Account propri e inviti sono indipendenti: avviamo entrambe le letture
             // subito, mantenendo invariato il successivo assemblaggio delle card.
-            const ownAccountsPromise = requireServerRefresh
+            startMetric('account-own-source');
+            startMetric('account-invite-source');
+            const ownAccountsPromise = (requireServerRefresh
                 ? listPrivateAccountsConfirmed(currentUser.uid)
-                : listPrivateAccounts(currentUser.uid);
-            const [ownResult, invites] = await waitFor(Promise.all([ownAccountsPromise, listAcceptedInvites(currentUser.email)]));
+                : listPrivateAccounts(currentUser.uid)).then(records => {
+                    endMetric('account-own-source', {page:'account_privati', records:records.length});
+                    return records;
+                });
+            const invitesPromise = listAcceptedInvites(currentUser.email).then(records => {
+                endMetric('account-invite-source', {page:'account_privati', records:records.length});
+                return records;
+            });
+            const ownResult = await waitFor(ownAccountsPromise);
+
+            // Mostra subito i nomi degli Account propri mentre inviti e credenziali
+            // completano il caricamento. Nessun cifrato o segreto entra nella vista.
+            const ownRecords = ownResult.map(record => ({...record}));
+            if (requireServerRefresh) {
+                const pilot = await waitFor(import('../data/private-account-offline-pilot.js'));
+                const handoffRecord = pilot.consumePrivateAccountHandoff(currentUser.uid);
+                if (handoffRecord && !ownRecords.some(record => record.id === handoffRecord.id)) ownRecords.push(handoffRecord);
+            }
+            const ownAccounts = ownRecords.map(data => {
+                const ownerId = options.readField && Object.hasOwn(data, 'ownerId')
+                    ? data.ownerId : (data.ownerId || currentUser.uid);
+                const isRealOwner = options.readField
+                    ? ownerId === currentUser.uid : (!data.ownerId || data.ownerId === currentUser.uid);
+                return {...data, id:data.id, isOwner:isRealOwner, ownerId, _isGuest:!isRealOwner};
+            }).filter(account => !account.isArchived);
+            const requestedType = urlParams.get('type') || 'standard';
+            if (!options.readField && !['shared','shared_memo'].includes(requestedType)) {
+                allAccounts = ownAccounts.map(account => ({
+                    ...account,
+                    username: '',
+                    account: '',
+                    password: ''
+                }));
+                filterAndRender();
+            }
+
+            const invites = await waitFor(invitesPromise);
             LOG(`[ACCOUNTS] Found ${invites.length} accepted invites.`);
 
+            startMetric('account-shared-records');
             const invitePromises = invites.map(async inv => {
                 const inviteId = inv.id;
                 try {
@@ -280,33 +320,12 @@ export function mountAccountPrivati(user, options = {}) {
                 if (better) byAccount.set(key, record);
             }
             sharedWithMe = [...byAccount.values()];
+            endMetric('account-shared-records', {page:'account_privati', records:sharedWithMe.length});
             LOG(`[ACCOUNTS] Total shared accounts successfully loaded: ${sharedWithMe.length}`);
 
             // 2. Own Accounts
             LOG('[ACCOUNTS] Loading own accounts');
-            const ownRecords = ownResult.map(record => ({...record}));
-            if (requireServerRefresh) {
-                const pilot = await waitFor(import('../data/private-account-offline-pilot.js'));
-                const handoffRecord = pilot.consumePrivateAccountHandoff(currentUser.uid);
-                if (handoffRecord && !ownRecords.some(record => record.id === handoffRecord.id)) {
-                    ownRecords.push(handoffRecord);
-                }
-            }
             LOG(`[ACCOUNTS] Found ${ownRecords.length} own accounts.`);
-            const ownAccounts = ownRecords.map(data => {
-                // A scoped reader must see malformed explicit ownership unchanged.
-                const ownerId = options.readField && Object.hasOwn(data, 'ownerId')
-                    ? data.ownerId : (data.ownerId || currentUser.uid);
-                const isRealOwner = options.readField
-                    ? ownerId === currentUser.uid : (!data.ownerId || data.ownerId === currentUser.uid);
-                return {
-                    ...data,
-                    id: data.id,
-                    isOwner: isRealOwner,
-                    ownerId,
-                    _isGuest: !isRealOwner
-                };
-            }).filter(a => !a.isArchived);
 
             allAccounts = [...ownAccounts, ...sharedWithMe];
 
@@ -337,6 +356,7 @@ export function mountAccountPrivati(user, options = {}) {
                 })))).filter(Boolean);
             } else {
             // 🔐 DECRIPTAZIONE GLOBALE (Auto-Unlock Compliant)
+            startMetric('account-list-decryption');
             const vaultKeyMaterial = await waitFor(ensureVaultKeyMaterial().catch(() => null));
             if (vaultKeyMaterial) {
                 allAccounts = await waitFor(Promise.all(allAccounts.map(async acc => {
@@ -354,9 +374,11 @@ export function mountAccountPrivati(user, options = {}) {
                     return acc;
                 })));
             }
+            endMetric('account-list-decryption', {page:'account_privati', records:allAccounts.length});
 
             }
             filterAndRender();
+            endMetric('account-list-total', {page:'account_privati', records:allAccounts.length});
         } catch (e) {
             if (signal.aborted) return;
             logError("LoadAccounts", e);

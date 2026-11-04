@@ -6,10 +6,14 @@
 
 - usare soltanto l'utente marcato `codexQa` e `synthetic`, con profilo browser isolato;
 - verificare UID e marcatori prima di ogni scrittura; interrompere se il target non coincide;
+- per i runner che operano su una società, richiedere un `CODEX_QA_COMPANY_ID` esplicito, sintatticamente valido e appartenente all'identità QA corrente; interrompere se manca o non coincide e non usare mai fallback verso società di un'altra identità;
 - non ruotare la chiave della Vault tecnica durante provisioning o riconciliazione ordinari;
+- se l'identità tecnica esiste ma il contenitore DPAPI manca, interrompere con `QA_CREDENTIALS_MISSING_EXISTING_VAULT`: non creare nuove credenziali, non sostituire verifier/envelope e non usare `--rotate` come recupero;
+- per riprendere, ripristinare il file DPAPI originale nello stesso profilo Windows oppure creare un nuovo utente QA separato con una nuova Vault; i dati della Vault precedente non sono recuperabili generando una nuova Master Password;
 - assegnare alle fixture un prefisso o identificatore stabile di collaudo, così una seconda esecuzione aggiorna i propri record senza moltiplicarli;
 - usare domini riservati come `example.invalid`, numeri e codici chiaramente fittizi e allegati sintetici di piccole dimensioni;
 - non creare recapiti realmente raggiungibili, documenti formalmente validi, token Push, segreti MFA o credenziali riutilizzabili.
+- usare la modalità estesa isolata soltanto dopo che il lotto base ha identificato in modo univoco la fixture prerequisita; ogni `401/403` App Check o Callable deve essere registrato come **blocco ambientale**, non trasformato in esito superato e non usato per dichiarare riuscita una condivisione.
 
 ### Percorso obbligatorio per ogni pagina
 
@@ -373,3 +377,58 @@ durante il test.
 > Evidenza release 10/10/2026 — candidata `1.2.152`: regressione completa attraversata dopo il nuovo fence globale; corretto il caso di riacquisizione del lock da parte di una nuova purge dopo una release. Ultimi profili rieseguiti con esito verde: QR **2/2**, allegati documento Firestore/Storage **9/9**, collegamenti profilo **2/2**, note Account **1/1**, Account standard **1/1**. Solo fixture ed emulatori sintetici; non equivale a prova su GCS o dispositivi reali e non abilita i motori hard-off.
 
 > Evidenza locale 26/10/2026 — AI.2 candidata `1.2.241`: `test:assistant-local-ai` **49/49**, `test:assistant` **17/17**, probe browser standard verde e probe WebGPU con modello reale verde. La richiesta “Spiegami questa pagina e dimmi a cosa serve” è stata classificata erroneamente dal modello leggero come selezione del secondo risultato; la validazione applicativa l'ha corretta in `explain_page` usando soltanto lo scopo e i passaggi della guida verificata. Suite completa successiva: uscita **0**, inclusi profili Firestore/Auth/Storage Emulator. Un primo passaggio è stato ripetuto perché la porta locale 8080 era occupata da un emulatore residuo; non era un errore applicativo.
+
+## Runner QA Scadenze (04/11/2026)
+
+Il runner opera soltanto tramite UI e richiede il file credenziali DPAPI QA e l'ID esplicito dell'Azienda sintetica:
+
+```powershell
+$env:CODEX_QA_COMPANY_ID='wDYoVnxGwwlTkqge0htJ'
+$env:CODEX_QA_CREDENTIAL_PATH='C:\Users\Diego\AppData\Local\CodiciPassword\qa\credentials.dpapi'
+$env:QA_SKIP_PRIVATE_ARCHIVE='1'
+$env:QA_ALLOW_INCOMPLETE='1' # solo esecuzione informativa, non gate di rilascio
+npm run qa:populate-deadlines-browser
+```
+
+- Il runner si arresta se le notifiche Scadenze sono attive o se compare un recapito non `.invalid`/un canale destinatario attivo.
+- `QA_SKIP_PRIVATE_ARCHIVE=1` esclude completamente la fixture privata duplicata e rinvia archivio/ripristino; senza `QA_ALLOW_INCOMPLETE=1` il gate resta rosso.
+- La cancellazione permanente di TEMP CESTINO è vietata per default; richiede insieme `QA_ALLOW_DESTRUCTIVE=1` e `QA_DELETE_TEMP_TRASH=1`, oltre a un bersaglio identificato nella stessa esecuzione.
+- La bonifica di duplicati richiede due ID espliciti, `QA_ALLOW_DESTRUCTIVE=1`, `QA_CLEANUP_CONFIRM=DELETE_SYNTHETIC_DUPLICATE` e un consenso diretto verificabile. In assenza di tale consenso non impostare queste variabili.
+- Le condivisioni end-to-end, la consegna di notifiche e i dispositivi reali restano fuori dal runner automatico.
+
+Per Documento → Scadenza si serve temporaneamente `Frontend/public` su loopback e si imposta `QA_APP_ORIGIN`. L'upload dell'allegato sorgente deve prima riuscire tramite la UI protetta; un `401` App Check è un blocco da registrare, non da aggirare con scritture dirette.
+
+## Runner QA P0 sicuro (04/11/2026)
+
+`npm run qa:p0-safe-browser` esegue il blocco pre-finale esclusivamente con
+`codex.qa2@appcodici-password.invalid` e UID `1lfhs2WoDRNXA9huOK0u0ffjQC13`.
+Il runner interrompe l'avvio se bundle DPAPI, e-mail o UID non coincidono; non
+può essere usato con Account reali.
+
+```powershell
+$env:CODEX_QA_CREDENTIAL_PATH='C:\Users\Diego\AppData\Local\CodiciPassword\qa\credentials.dpapi'
+npm run qa:p0-safe-browser
+```
+
+Il report e le schermate senza segreti sono scritti in
+`.codex-tmp/qa-p0-safe/<data-ora>/`. Download, archivio ed esportazioni decifrate
+vivono esclusivamente nella directory temporanea del sistema e sono rimossi nel
+`finally`; il report conserva soltanto nome, dimensione e hash SHA-256. Il runner copre: accesso/sblocco e identità
+QA2, preferenze reversibili, Supporto, annullamento popup reset/revoca,
+Credenziali comuni in sola lettura, Archivio Account in consultazione, backup
+cifrato con Recovery Key solo in memoria, restore fino al preflight e annullato,
+Archivio portatile offline, JSON/CSV/ODS/XLSX, Salute credenziali, utilizzo
+campi, diagnostica e logout finale.
+
+Sono vietati: dati reali, delete, cambio password/Master Password, MFA,
+biometria, recovery code, revoca sessioni, reset Vault, applicazione restore e
+notifiche reali. Il guardiano screenshot rifiuta la cattura se vede un campo
+password o la Recovery Key. Se callable, fixture, download o file picker non
+sono affidabili, l'esito deve essere `BLOCKED` e non va forzato.
+
+Esiti: `PASS` = controllo concluso e stato ripristinato; `BLOCKED` =
+prerequisito controllato assente; `FAIL` = difetto o perdita delle garanzie;
+`SKIP` = blocco esplicitamente escluso. Dopo il P0 restano, come fasi separate,
+bonifica repository, Graphify/aiuti, lingue e prove con dispositivi reali.
+Per default `BLOCKED` o `SKIP` rendono rosso il gate. `QA_P0_ALLOW_INCOMPLETE=1`
+consente soltanto un'esecuzione informativa e deve risultare esplicitamente nel report.

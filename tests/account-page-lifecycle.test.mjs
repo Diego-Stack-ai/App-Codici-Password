@@ -36,6 +36,7 @@ async function fixture(company, overrides = {}) {
         ACCOUNT_MODE_VIEWS, accountMatchesModeView, normalizeAccountModeView, summarizeAccountModes,
         window, document: {getElementById: id => elements[id]}, URLSearchParams, AbortController, DOMException,
         navigator: {onLine: true}, console, db: {}, LOG() {}, logError() {}, t: value => value,
+        startMetric() {}, endMetric() {},
         clearElement: node => { node.children = []; }, setChildren: (node, children) => { node.children = children; },
         createElement: (tag, props, children) => ({tag, props, children}),
         createAccountListView: options => {
@@ -192,7 +193,8 @@ for (const company of [false, true]) {
         const current = f.mount(); await current.ready;
         pending.resolve(records()); await old.ready;
         assert.equal(f.views[0].renders.length, 0);
-        assert.equal(f.views[1].renders.length, 1);
+        assert.equal(f.views[1].renders.length, company ? 1 : 2,
+            company ? 'render definitivo unico' : 'render rapido seguito dal completamento definitivo');
         assert.equal(f.toasts.length, 0);
         current.destroy();
     });
@@ -206,7 +208,13 @@ for (const company of [false, true]) {
         assert.equal(decrypts, 1);
         controller.abort(); pending.resolve('fixture-clear'); await mounted.ready;
         assert.equal(decrypts, 1);
-        assert.equal(f.views[0].renders.length, 0);
+        assert.equal(f.views[0].renders.length, company ? 0 : 1,
+            company ? 'nessun render dopo abort' : 'resta soltanto il render rapido privo di segreti');
+        if (!company) {
+            assert.equal(f.views[0].renders[0][0].username, '');
+            assert.equal(f.views[0].renders[0][0].account, '');
+            assert.equal(f.views[0].renders[0][0].password, '');
+        }
     });
     test(`${label}: leaving during delete confirmation never submits a write`, async () => {
         const pending = deferred();
@@ -222,11 +230,12 @@ for (const company of [false, true]) {
         const f = await fixture(company, {updateDoc: () => { submitted++; return pending.promise; }});
         const mounted = f.mount(); await mounted.ready;
         const row = f.views[0].renders[0][0];
+        const rendersBeforeAction = f.views[0].renders.length;
         const action = f.views[0].options.onPin(row);
         mounted.destroy(); pending.resolve(); await action;
         assert.equal(submitted, 1);
         assert.equal(row.isPinned, undefined);
-        assert.equal(f.views[0].renders.length, 1);
+        assert.equal(f.views[0].renders.length, rendersBeforeAction);
     });
     test(`${label}: active pin uses the correct owner path and retains working navigation`, async () => {
         const f = await fixture(company); const mounted = f.mount(); await mounted.ready;

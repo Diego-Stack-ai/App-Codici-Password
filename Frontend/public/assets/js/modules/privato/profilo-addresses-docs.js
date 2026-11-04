@@ -12,6 +12,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { formatDateToIT } from '../../utils.js';
+import { createLinkedAccountButton } from './profilo-links.js';
 
 let _getState = null;
 let _callbacks = null;
@@ -177,7 +178,9 @@ function _renderUtilitiesInCard(utils, list, addrIdx) {
             createCopyBtn(u.value)
         ]),
         createElement('div', {className: u.linkedAccountId ? 'profile-account-actions' : ''}, [
-            createElement('button', {className:'btn-upload-trigger', textContent:u.linkedAccountId?'Apri Account collegato':'Collega o crea Account', onclick:()=>u.linkedAccountId?_callbacks.openLinkedAccount(u.linkedAccountId,u.linkedAccountCompanyId):_callbacks.connectUtilityAccount({...u,parentAddressId:_getState().userAddresses[addrIdx].id},_callbacks.syncData)}),
+            createLinkedAccountButton(u,
+                () => _callbacks.openLinkedAccount(u.linkedAccountId,u.linkedAccountCompanyId),
+                () => _callbacks.connectUtilityAccount({...u,parentAddressId:_getState().userAddresses[addrIdx].id},_callbacks.syncData)),
             ...accountManagementButtons(u,'utility',_getState().userAddresses[addrIdx].id)
         ])
     ]));
@@ -298,7 +301,9 @@ export function renderDocumentiView() {
 
                     createElement('div', {className: 'profile-document-actions'}, [
                         createElement('div', {className: docItem.linkedAccountId ? 'profile-account-actions' : ''}, [
-                            createElement('button',{className:'btn-upload-trigger',textContent:docItem.linkedAccountId?'Apri Account collegato':'Collega o crea Account',onclick:()=>docItem.linkedAccountId?_callbacks.openLinkedAccount(docItem.linkedAccountId,docItem.linkedAccountCompanyId):_callbacks.connectDocumentAccount(docItem,_callbacks.syncData)}),
+                            createLinkedAccountButton(docItem,
+                                () => _callbacks.openLinkedAccount(docItem.linkedAccountId,docItem.linkedAccountCompanyId),
+                                () => _callbacks.connectDocumentAccount(docItem,_callbacks.syncData)),
                             ...accountManagementButtons(docItem,'document')
                         ]),
                         createElement('button', {
