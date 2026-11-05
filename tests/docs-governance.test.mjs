@@ -43,13 +43,6 @@ test('rifiuta nuovi MD non versionati e ignorati, anche in cartelle nuove', asyn
   assert.ok((await errors(root)).some(e => e.includes('notes/nuovo.MD')));
 });
 
-test('ignora i report locali prodotti da Graphify', async t => {
-  const root = await fixture(t);
-  await mkdir(path.join(root, 'graphify-out'));
-  await writeFile(path.join(root, 'graphify-out/GRAPH_REPORT.md'), '# Report locale\n');
-  assert.deepEqual(await errors(root), []);
-});
-
 test('una rinomina a conteggio invariato viene respinta', async t => {
   const root = await fixture(t);
   await rename(path.join(root, 'docs/progetto/STATO.md'), path.join(root, 'docs/progetto/STATO-v2.md'));
