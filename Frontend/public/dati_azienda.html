@@ -5,25 +5,25 @@
   <script src="assets/js/private-auth-gate.js"></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Profilo aziendale</title>
+    <title data-t="company_profile_page_title">Profilo aziendale</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.257" />
+    <link rel="manifest" href="manifest.json?v=1.2.258" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.257">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.258">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/azienda_shared.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/dati_azienda.css?v=1.2.257">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/azienda_shared.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/dati_azienda.css?v=1.2.258">
 
-    <link rel="stylesheet" href="assets/css/profile-contacts.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/profile-layout.css?v=1.2.257">
+    <link rel="stylesheet" href="assets/css/profile-contacts.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/profile-layout.css?v=1.2.258">
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
 </head>
@@ -46,7 +46,7 @@
                         <!-- Logo Azienda -->
                         <div class="detail-avatar-container">
                             <div id="azienda-logo-container" class="detail-avatar border-glow">
-                                <img loading="lazy" id="azienda-logo" class="detail-avatar-img hidden" src="" alt="Logo Azienda" />
+                                <img loading="lazy" id="azienda-logo" class="detail-avatar-img hidden" src="" alt="Logo Azienda" data-t-alt="company_logo" />
                                 <span id="azienda-logo-placeholder"
                                     class="material-symbols-outlined detail-avatar-placeholder notranslate" translate="no">domain</span>
                             </div>
@@ -67,21 +67,21 @@
                     </div>
 
                     <div class="hero-title-container">
-                        <h1 id="ragione-sociale" class="hero-title selectable">Caricamento...</h1>
+                        <h1 id="ragione-sociale" class="hero-title selectable" data-t="loading">Caricamento...</h1>
                         <div id="forma-giuridica" class="company-badge">
-                            Azienda
+                            <span data-t="section_company_title">Azienda</span>
                         </div>
                     </div>
                 </div>
 
-                <nav class="company-profile-tabs profile-tabs" role="tablist" aria-label="Sezioni profilo aziendale">
-<button type="button" class="profile-tab" role="tab" data-company-tab="overview" aria-selected="true">Panoramica</button>
-<button type="button" class="profile-tab" role="tab" data-company-tab="personal" aria-selected="false">Anagrafica</button>
-<button type="button" class="profile-tab" role="tab" data-company-tab="contacts" aria-selected="false">Contatti</button>
-<button type="button" class="profile-tab" role="tab" data-company-tab="addresses" aria-selected="false">Indirizzi</button>
-<button type="button" class="profile-tab" role="tab" data-company-tab="documents" aria-selected="false">Documenti</button>
-<button type="button" class="profile-tab" role="tab" data-company-tab="digital-card" aria-selected="false">Tessera digitale</button>
-<button type="button" class="profile-tab" role="tab" data-company-tab="pdf-summary" aria-selected="false">Scheda PDF</button>
+                <nav class="company-profile-tabs profile-tabs" role="tablist" aria-label="Sezioni profilo aziendale" data-t-aria-label="company_profile_sections_aria">
+<button type="button" class="profile-tab" role="tab" data-company-tab="overview" aria-selected="true" data-t="profile_tab_overview">Panoramica</button>
+<button type="button" class="profile-tab" role="tab" data-company-tab="personal" aria-selected="false" data-t="profile_tab_personal">Anagrafica</button>
+<button type="button" class="profile-tab" role="tab" data-company-tab="contacts" aria-selected="false" data-t="profile_tab_contacts">Contatti</button>
+<button type="button" class="profile-tab" role="tab" data-company-tab="addresses" aria-selected="false" data-t="profile_tab_addresses">Indirizzi</button>
+<button type="button" class="profile-tab" role="tab" data-company-tab="documents" aria-selected="false" data-t="documents">Documenti</button>
+<button type="button" class="profile-tab" role="tab" data-company-tab="digital-card" aria-selected="false" data-t="profile_tab_digital_card">Tessera digitale</button>
+<button type="button" class="profile-tab" role="tab" data-company-tab="pdf-summary" aria-selected="false" data-t="company_profile_pdf_tab">Scheda PDF</button>
 </nav>
 <div class="detail-content-wrap">
 <section data-company-panel="overview" class="detail-section" id="company-overview"></section>
@@ -90,10 +90,10 @@
 
 
                     <section data-company-panel="personal" class="detail-section hidden">
-                        <div class="detail-section-header"><span class="material-symbols-outlined detail-section-icon notranslate" translate="no">domain</span><h3 class="detail-section-title">Anagrafica Principale</h3></div>
+                        <div class="detail-section-header"><span class="material-symbols-outlined detail-section-icon notranslate" translate="no">domain</span><h3 class="detail-section-title" data-t="company_main_details">Anagrafica Principale</h3></div>
                         <div class="form-card">
-                            <div class="data-display-group"><span class="view-label">Ragione sociale</span><span id="company-name-view" class="data-value">-</span></div>
-                            <div class="data-display-group"><span class="view-label">Forma giuridica</span><span id="company-type-view" class="data-value">-</span></div>
+                            <div class="data-display-group"><span class="view-label" data-t="company_name">Ragione sociale</span><span id="company-name-view" class="data-value">-</span></div>
+                            <div class="data-display-group"><span class="view-label" data-t="company_legal_form">Forma giuridica</span><span id="company-type-view" class="data-value">-</span></div>
                         </div>
                     </section>
 
@@ -114,7 +114,7 @@
                                 <div class="referent-header">
                                     <div class="referent-avatar-box">
                                         <img loading="lazy" id="referente-photo" class="referent-avatar-img hidden" src=""
-                                            alt="Foto" />
+                                            alt="Foto" data-t-alt="company_contact_photo" />
                                         <span id="referente-photo-placeholder"
                                             class="material-symbols-outlined referent-avatar-placeholder notranslate" translate="no">person</span>
                                     </div>
@@ -161,7 +161,7 @@
                         <div id="company-locations-list"></div>
                     </section>
 
-                    <section data-company-panel="contacts" class="detail-section hidden"><div class="detail-section-header"><span class="material-symbols-outlined detail-section-icon notranslate" translate="no">call</span><h3 class="detail-section-title">Contatti Telefonici</h3></div><div id="company-phone-list"></div></section>
+                    <section data-company-panel="contacts" class="detail-section hidden"><div class="detail-section-header"><span class="material-symbols-outlined detail-section-icon notranslate" translate="no">call</span><h3 class="detail-section-title" data-t="profile_phones">Contatti Telefonici</h3></div><div id="company-phone-list"></div></section>
 <!-- Section: Email Categorizzate -->
                     <section data-company-panel="contacts" id="wrapper-email-section" class="detail-section hidden">
                         <button class="accordion-trigger-premium group" id="toggle-email-btn">
@@ -263,7 +263,7 @@
                                 <h3 class="detail-section-title" data-t="notes">Note Aziendali</h3>
                             </div>
                             <div class="detail-section-actions">
-                                <button id="btn-cancel-note" class="hidden btn-cancel-text">Annulla</button>
+                                <button id="btn-cancel-note" class="hidden btn-cancel-text" data-t="cancel">Annulla</button>
                                 <button id="btn-edit-note" class="btn-mini-section-action action-blue">
                                     <span class="material-symbols-outlined icon-tiny notranslate" translate="no">edit</span>
                                 </button>

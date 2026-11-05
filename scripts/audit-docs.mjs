@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
 const defaultRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const excluded = new Set(['.git', 'node_modules', '.codex-tmp', '.codex-worktrees']);
+const excluded = new Set(['.git', 'node_modules', '.codex-tmp', '.codex-worktrees', 'graphify-out']);
 const slash = value => value.replaceAll('\\', '/');
 
 function contentLines(text) {

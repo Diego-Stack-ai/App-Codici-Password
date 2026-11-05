@@ -174,7 +174,7 @@ Usare token tipografici, target tattili di almeno 44 px, nomi accessibili, focus
 
 Non applicare divieti globali di `!important`, selettori ID o valori numerici che cancellino eccezioni già presenti nelle fondazioni. Verificare cascade e contesto del componente; una normalizzazione richiede equivalenza e collaudo.
 
-I nuovi testi usano il sistema i18n, inclusi placeholder, ARIA, errori e contenuti dinamici. La revisione editoriale globale di lingue e Impostazioni resta nella fase post-M10. I dizionari generati si aggiornano con `scripts/split-translations.mjs`, non manualmente.
+I nuovi testi usano il sistema i18n, inclusi placeholder, ARIA, errori e contenuti dinamici. I file in `Frontend/public/assets/js/translations/` sono i cataloghi autorevoli e vengono verificati da `npm run test:i18n`. Il comando storico `scripts/split-translations.mjs` non genera piu file: controlla soltanto, senza scritture, la presenza delle chiavi effettivamente usate.
 
 <a id="fonte-frontend-guida-md-4-dati-cache-e-operazioni-asincrone"></a>
 

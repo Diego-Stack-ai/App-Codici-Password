@@ -1,4 +1,4 @@
-import { db, functions } from '../../firebase-config.js?v=1.2.257';
+import { db, functions } from '../../firebase-config.js?v=1.2.258';
 import { addDoc, collection, doc, httpsCallable, serverTimestamp, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
@@ -8,6 +8,10 @@ import {
     normalizeDeadlineCompanyContext,
     replaceContactCompanyAssociations
 } from '../scadenze/deadline-recipient-model.js';
+import { t } from '../../translations.js';
+
+const formatTranslation = (key, values = {}) => Object.entries(values)
+    .reduce((text, [name, value]) => text.replaceAll(`{${name}}`, String(value)), t(key));
 
 let currentUser = null;
 let contacts = [];
@@ -70,7 +74,7 @@ function renderCompanyOptions(selected = []) {
     if (!associationCatalog.length) {
         container.appendChild(createElement('p', {
             className: 'recipient-company-empty',
-            textContent: 'Nessuna azienda disponibile. Il destinatario resterà privato.'
+            textContent: t('recipient_no_company')
         }));
         return;
     }
@@ -99,8 +103,8 @@ function resetForm() {
     document.getElementById('recipient-first-name').value = '';
     document.getElementById('recipient-last-name').value = '';
     document.getElementById('recipient-email').value = '';
-    document.getElementById('recipient-form-title').textContent = 'Nuovo destinatario';
-    document.getElementById('recipient-save').textContent = 'Salva destinatario';
+    document.getElementById('recipient-form-title').textContent = t('recipient_new_title');
+    document.getElementById('recipient-save').textContent = t('recipient_save_action');
     document.getElementById('recipient-cancel').classList.add('hidden');
     renderCompanyOptions(requestedCompanyContext ? [requestedCompanyContext] : []);
 }
@@ -111,33 +115,33 @@ function editContact(contact) {
     document.getElementById('recipient-last-name').value = contact.cognome || '';
     document.getElementById('recipient-email').value = contact.email || '';
     renderCompanyOptions(contactCompanyAssociations(contact));
-    document.getElementById('recipient-form-title').textContent = 'Modifica destinatario';
-    document.getElementById('recipient-save').textContent = 'Aggiorna destinatario';
+    document.getElementById('recipient-form-title').textContent = t('recipient_edit_title');
+    document.getElementById('recipient-save').textContent = t('recipient_update_action');
     document.getElementById('recipient-cancel').classList.remove('hidden');
     document.getElementById('recipient-first-name').focus();
 }
 
 function usageMessage(usage = {}) {
     const parts = [];
-    if (usage.deadlines) parts.push(`${usage.deadlines} Scadenze`);
-    if (usage.shares) parts.push(`${usage.shares} condivisioni account`);
-    if (usage.invites) parts.push(`${usage.invites} inviti`);
-    return parts.join(' e ') || 'uno dei servizi collegati';
+    if (usage.deadlines) parts.push(formatTranslation('recipient_usage_deadlines', {count: usage.deadlines}));
+    if (usage.shares) parts.push(formatTranslation('recipient_usage_account_shares', {count: usage.shares}));
+    if (usage.invites) parts.push(formatTranslation('recipient_usage_invites', {count: usage.invites}));
+    return parts.join(` ${t('recipient_usage_join')} `) || t('recipient_usage_services');
 }
 
 async function deleteContact(contact) {
-    if (!await showConfirmModal('Elimina destinatario', `Vuoi eliminare ${contact.nome || contact.email}? Il controllo comprende Scadenze e condivisioni.`)) return;
+    if (!await showConfirmModal(t('recipient_delete_title'), formatTranslation('recipient_delete_message', {name: contact.nome || contact.email}))) return;
     try {
         const removeContact = httpsCallable(functions, 'deleteContactIfUnused');
         const result = await removeContact({ contactId: contact.id });
         if (!result.data?.deleted) {
-            showToast(`Impossibile eliminare: il destinatario è usato in ${usageMessage(result.data?.usage)}. Puoi disattivarlo.`, 'warning');
+            showToast(formatTranslation('recipient_delete_blocked', {usage: usageMessage(result.data?.usage)}), 'warning');
             return;
         }
-        showToast('Destinatario eliminato.', 'success');
+        showToast(t('recipient_deleted'), 'success');
         await loadContacts();
     } catch (error) {
-        showToast(error?.message || 'Controllo utilizzo non riuscito.', 'error');
+        showToast(error?.message || t('recipient_usage_check_failed'), 'error');
     }
 }
 
@@ -146,7 +150,7 @@ async function toggleActive(contact) {
         active: contact.active === false,
         updatedAt: serverTimestamp()
     });
-    showToast(contact.active === false ? 'Destinatario riattivato.' : 'Destinatario disattivato.', 'success');
+    showToast(contact.active === false ? t('recipient_reactivated') : t('recipient_deactivated'), 'success');
     await loadContacts();
 }
 
@@ -155,27 +159,27 @@ function renderContacts() {
     clearElement(list);
     document.getElementById('recipient-count').textContent = String(contacts.length);
     if (!contacts.length) {
-        list.appendChild(createElement('p', { className: 'recipient-card-email', textContent: 'Nessun destinatario salvato.' }));
+        list.appendChild(createElement('p', { className: 'recipient-card-email', textContent: t('recipient_none_saved') }));
         return;
     }
     const cards = contacts.map(contact => createElement('article', { className: `recipient-card${contact.active === false ? ' is-inactive' : ''}` }, [
         createElement('div', { className: 'recipient-card-copy' }, [
-            createElement('span', { className: 'recipient-card-name', textContent: [contact.nome, contact.cognome].filter(Boolean).join(' ') || 'Destinatario' }),
+            createElement('span', { className: 'recipient-card-name', textContent: [contact.nome, contact.cognome].filter(Boolean).join(' ') || t('recipient_fallback') }),
             createElement('span', { className: 'recipient-card-email', textContent: contact.email }),
             ...(contactCompanyAssociations(contact).length ? [createElement('span', {
                 className: 'recipient-card-associations',
-                textContent: `Aziende: ${contactCompanyAssociations(contact).map(item => item.companyName).join(', ')}`
-            })] : [createElement('span', {className: 'recipient-card-associations'}, [document.createTextNode('Privato')])]),
-            ...(contact.active === false ? [createElement('span', { className: 'recipient-card-status', textContent: 'Disattivato' })] : [])
+                textContent: formatTranslation('recipient_companies', {companies: contactCompanyAssociations(contact).map(item => item.companyName).join(', ')})
+            })] : [createElement('span', {className: 'recipient-card-associations'}, [document.createTextNode(t('recipient_private'))])]),
+            ...(contact.active === false ? [createElement('span', { className: 'recipient-card-status', textContent: t('recipient_inactive') })] : [])
         ]),
         createElement('div', { className: 'recipient-card-actions' }, [
-            createElement('button', { type: 'button', className: 'recipient-icon-button', title: 'Modifica', onclick: () => editContact(contact) }, [
+            createElement('button', { type: 'button', className: 'recipient-icon-button', title: t('edit'), onclick: () => editContact(contact) }, [
                 createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'edit' })
             ]),
-            createElement('button', { type: 'button', className: 'recipient-icon-button', title: contact.active === false ? 'Riattiva' : 'Disattiva', onclick: () => toggleActive(contact) }, [
+            createElement('button', { type: 'button', className: 'recipient-icon-button', title: contact.active === false ? t('recipient_reactivate') : t('recipient_deactivate'), onclick: () => toggleActive(contact) }, [
                 createElement('span', { className: 'material-symbols-outlined notranslate', textContent: contact.active === false ? 'person_off' : 'person_check' })
             ]),
-            createElement('button', { type: 'button', className: 'recipient-icon-button action-delete', title: 'Elimina', onclick: () => deleteContact(contact) }, [
+            createElement('button', { type: 'button', className: 'recipient-icon-button action-delete', title: t('delete'), onclick: () => deleteContact(contact) }, [
                 createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })
             ])
         ])
@@ -201,12 +205,12 @@ async function saveContact() {
     const nome = document.getElementById('recipient-first-name').value.trim();
     const cognome = document.getElementById('recipient-last-name').value.trim();
     const email = normalizeEmail(document.getElementById('recipient-email').value);
-    if (!nome) return showToast('Inserisci il nome o una descrizione.', 'warning');
-    if (!validEmail(email)) return showToast('Inserisci un indirizzo email valido.', 'warning');
+    if (!nome) return showToast(t('recipient_name_required'), 'warning');
+    if (!validEmail(email)) return showToast(t('recipient_email_invalid'), 'warning');
     const duplicate = contacts.find(contact => contact.id !== editingId && normalizeEmail(contact.email) === email);
     if (duplicate) {
         editContact(duplicate);
-        showToast('Questa email è già presente. Ho aperto il destinatario esistente: scegli qui i collegamenti corretti.', 'warning');
+        showToast(t('recipient_duplicate'), 'warning');
         return;
     }
     const existing = contacts.find(contact => contact.id === editingId);
@@ -216,10 +220,10 @@ async function saveContact() {
     const removed = previousAssociations.filter(context => !selectedKeys.has(associationKey(context)));
     if (removed.length) {
         const confirmed = await showConfirmModal(
-            'Rimuovi collegamenti aziendali',
-            `Vuoi rimuovere il collegamento a ${removed.map(item => item.companyName).join(', ')}? Le Scadenze già salvate non verranno modificate.`,
-            'Rimuovi collegamento',
-            'Annulla'
+            t('recipient_remove_links_title'),
+            formatTranslation('recipient_remove_links_message', {companies: removed.map(item => item.companyName).join(', ')}),
+            t('recipient_remove_link_action'),
+            t('cancel')
         );
         if (!confirmed) return;
     }
@@ -232,7 +236,7 @@ async function saveContact() {
     };
     if (editingId) await updateDoc(doc(db, 'users', currentUser.uid, 'contacts', editingId), data);
     else await addDoc(collection(db, 'users', currentUser.uid, 'contacts'), { ...data, createdAt: serverTimestamp() });
-    showToast(editingId ? 'Destinatario aggiornato.' : 'Destinatario salvato.', 'success');
+    showToast(editingId ? t('recipient_updated') : t('recipient_saved'), 'success');
     resetForm();
     await loadContacts();
 }

@@ -7,20 +7,20 @@
     <script src="assets/js/theme-init.js"></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Dettaglio Account Azienda - PROTOCOLLO BASE</title> <!-- PWA / Mobile Capable -->
+    <title data-t="company_account_detail_page_title">Dettaglio Account Azienda - PROTOCOLLO BASE</title> <!-- PWA / Mobile Capable -->
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.257" />
+    <link rel="manifest" href="manifest.json?v=1.2.258" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.257">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.258">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/account_detail.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/dettaglio_account_azienda.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.257">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/account_detail.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/dettaglio_account_azienda.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.258">
 </head>
 
 <body data-private-auth hidden inert class="base-bg" data-ui-model="detail">
@@ -46,7 +46,7 @@
                     </div>
                     <h1 id="hero-title" class="hero-title selectable">-</h1>
                     <div id="account-type-badge" class="account-type-badge hidden">
-                        Azienda
+                            <span data-t="section_company_title">Azienda</span>
                     </div>
                 </div>
 
@@ -220,7 +220,7 @@
                         <div class="flex-col-gap content-spacing">
                             <!-- Nome Referente -->
                             <div class="glass-field-container">
-                                <label class="view-label">Nome Referente</label>
+                                <label class="view-label" data-t="referent_name">Nome Referente</label>
                                 <div class="glass-field border-glow">
                                     <span class="material-symbols-outlined notranslate" translate="no">badge</span>
                                     <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="ref-name" readonly class="field-input no-transform" autocomplete="off">
@@ -235,7 +235,7 @@
                             <!-- Telefoni -->
                             <div class="form-grid-2">
                                 <div class="glass-field-container">
-                                    <label class="view-label">Telefono</label>
+                                    <label class="view-label" data-t="phone">Telefono</label>
                                     <div class="glass-field border-glow">
                                         <span class="material-symbols-outlined notranslate" translate="no">call</span>
                                         <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="ref-phone" readonly class="field-input no-transform"
@@ -254,7 +254,7 @@
                                 </div>
 
                                 <div class="glass-field-container">
-                                    <label class="view-label">Cellulare</label>
+                                    <label class="view-label" data-t="mobile">Cellulare</label>
                                     <div class="glass-field border-glow">
                                         <span class="material-symbols-outlined notranslate" translate="no">smartphone</span>
                                         <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="ref-mobile" readonly class="field-input no-transform"
@@ -279,19 +279,19 @@
                         <div class="detail-section-header detail-section-header-spread">
                             <div class="header-left-group">
                                 <span class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">widgets</span>
-                                <h3 class="detail-section-title">Widget dell’account</h3>
+                                <h3 class="detail-section-title" data-t="account_widgets_title">Widget dell’account</h3>
                             </div>
                         </div>
                         <div id="account-widget-actions" class="account-widget-actions hidden">
                             <div class="account-widget-existing-picker">
-                                <label class="view-label" for="account-widget-template-select">Profili Widget Account disponibili</label>
+                                <label class="view-label" for="account-widget-template-select" data-t="account_widget_profiles_available">Profili Widget Account disponibili</label>
                                 <div class="account-widget-picker-row">
-                                    <select id="account-widget-template-select" class="shared-account-select-control" aria-label="Profili Widget Account"></select>
-                                    <button id="btn-attach-account-widget" type="button" class="btn-modal btn-secondary" disabled>Aggiungi</button>
+                                    <select id="account-widget-template-select" class="shared-account-select-control" aria-label="Profili Widget Account" data-t-aria-label="account_widget_profiles_available"></select>
+                                    <button id="btn-attach-account-widget" type="button" class="btn-modal btn-secondary" disabled data-t="add_short">Aggiungi</button>
                                 </div>
                             </div>
                             <button id="btn-add-account-widget" type="button" class="btn-modal btn-primary">
-                                <span class="material-symbols-outlined notranslate" translate="no">add</span> Crea nuovo profilo Widget Account
+                                <span class="material-symbols-outlined notranslate" translate="no">add</span> <span data-t="account_widget_create_profile">Crea nuovo profilo Widget Account</span>
                             </button>
                         </div>
                         <div id="account-widgets-list" class="shared-account-credentials content-spacing"></div>
@@ -301,9 +301,9 @@
                         <div class="detail-section-header detail-section-header-spread">
                             <div class="header-left-group">
                                 <span class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">key</span>
-                                <h3 class="detail-section-title">Credenziali comuni</h3>
+                                <h3 class="detail-section-title" data-t="account_shared_credentials_title">Credenziali comuni</h3>
                             </div>
-                            <button id="btn-link-shared-credential" type="button" class="btn-icon-header" aria-label="Collega Credenziale comune">
+                            <button id="btn-link-shared-credential" type="button" class="btn-icon-header" aria-label="Collega Credenziale comune" data-t-aria-label="account_link_shared_credential">
                                 <span class="material-symbols-outlined notranslate" translate="no">add_link</span>
                             </button>
                         </div>
@@ -311,16 +311,16 @@
                     </section>
 
                     <!-- NOTE -->
-                    <button id="btn-edit-account-note" type="button" class="btn-modal btn-secondary hidden">Aggiungi nota</button>
+                    <button id="btn-edit-account-note" type="button" class="btn-modal btn-secondary hidden" data-t="add_note">Aggiungi nota</button>
                     <section id="section-notes" class="section-spacing">
                         <div class="detail-section-header">
                             <span
                                 class="material-symbols-outlined detail-section-icon icon-accent-amber notranslate" translate="no">sticky_note_2</span>
                             <h3 class="detail-section-title" data-t="notes">Note</h3>
-                            <button id="btn-modify-account-note" type="button" class="btn-icon-header hidden" title="Modifica nota" aria-label="Modifica nota">
+                            <button id="btn-modify-account-note" type="button" class="btn-icon-header hidden" title="Modifica nota" aria-label="Modifica nota" data-t-title="edit_note" data-t-aria-label="edit_note">
                                 <span class="material-symbols-outlined notranslate" aria-hidden="true" translate="no">edit</span>
                             </button>
-                            <button id="btn-delete-account-note" type="button" class="btn-icon-header hidden" title="Elimina nota" aria-label="Elimina nota">
+                            <button id="btn-delete-account-note" type="button" class="btn-icon-header hidden" title="Elimina nota" aria-label="Elimina nota" data-t-title="delete_note" data-t-aria-label="delete_note">
                                 <span class="material-symbols-outlined notranslate" aria-hidden="true" translate="no">delete</span>
                             </button>
                         </div>
@@ -354,7 +354,7 @@
                     <section id="shared-management-section" class="section-spacing section-bottom hidden">
                         <div class="detail-section-header">
                             <span class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">share</span>
-                            <h3 class="detail-section-title">Condivisione</h3>
+                            <h3 class="detail-section-title" data-t="sharing">Condivisione</h3>
                         </div>
                         <div id="guests-list" class="flex-col-gap content-spacing">
                             <!-- Guest rows injected here -->

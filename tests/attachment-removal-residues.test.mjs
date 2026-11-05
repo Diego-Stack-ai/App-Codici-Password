@@ -85,7 +85,7 @@ test('T-26: rimuovere una riga da `attachments` di una Scadenza lascia i byte', 
         document: {body: {style: {}}, getElementById: id => (id === 'attachments-list' ? list : null)},
         createElement: (tag, props = {}, children = []) => { const element = node(tag, props, children); created.push(element); return element; },
         clearElement: element => { element.children = []; },
-        showConfirmModal: async () => true, console: {warn() {}}
+        showConfirmModal: async () => true, t: value => value, console: {warn() {}}
     });
     vm.runInContext(`${deadlineController}\nglobalThis.createDeadlineAttachmentController = createDeadlineAttachmentController;`, context);
     const controller = context.createDeadlineAttachmentController();

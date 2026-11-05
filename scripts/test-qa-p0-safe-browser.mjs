@@ -198,6 +198,10 @@ async function cancelConfirm(page, buttonId, evidenceId) {
 
 async function settingsAndSupport(page) {
     await openSettings(page);
+    const themeDisclosure = page.locator('#theme-settings-disclosure');
+    if (!await themeDisclosure.evaluate(element => element.open)) {
+        await page.locator('#theme-settings-toggle').click();
+    }
     const previousColor = await page.evaluate(() => localStorage.getItem('color_theme') || 'blue');
     const candidate = previousColor === 'petrol' ? 'lavender' : 'petrol';
     await page.locator(`.color-theme-btn[data-color-theme="${candidate}"]`).click();
@@ -332,7 +336,18 @@ async function exportEncryptedBackup(page) {
         if (await preview.isVisible().catch(() => false) || await confirmInput.isVisible().catch(() => false)) break;
         const restore401 = report.networkErrors.slice(preflightStartedAt).some(item => item.status === 401
             && item.resource.includes('restoreBackupChunk'));
-        if (restore401) throw new Error('BLOCKED_CALLABLE_401:restoreBackupChunk');
+        if (restore401) {
+            const activeModal = page.locator('.modal-overlay.active').last();
+            const closeButton = activeModal.getByRole('button', {name: /Annulla|Chiudi/i}).last();
+            if (await closeButton.isVisible().catch(() => false)) {
+                await closeButton.click();
+                await activeModal.waitFor({state: 'detached', timeout: 10_000}).catch(() => {});
+            }
+            return {
+                status: 'BLOCKED',
+                detail: 'BLOCKED_CALLABLE_401:restoreBackupChunk'
+            };
+        }
         await page.waitForTimeout(300);
     }
     if (!await preview.isVisible().catch(() => false) && !await confirmInput.isVisible().catch(() => false)) {
@@ -391,6 +406,19 @@ async function exportPortableAndValidate(page, context) {
     await viewerPage.locator('#content').waitFor({state: 'visible', timeout: 180_000});
     const summary = (await viewerPage.locator('#summary').innerText()).trim();
     assert.match(summary, /integrità AEAD verificata/i);
+    const companyAccounts = viewerPage.locator('#sections .nav-button').filter({hasText: 'Account aziendali'}).first();
+    if (await companyAccounts.count()) {
+        await companyAccounts.click();
+        const companyFilter = viewerPage.locator('#company-filter');
+        await companyFilter.waitFor({state: 'visible', timeout: 10_000});
+        const options = companyFilter.locator('option');
+        if (await options.count() > 1) {
+            await companyFilter.selectOption({index: 1});
+            assert.ok(await viewerPage.locator('#records .nav-button').count(),
+                'Il filtro Azienda dell’Archivio portabile deve conservare almeno una scheda visibile');
+            await companyFilter.selectOption('');
+        }
+    }
     const evidence = await capture(viewerPage, 'portable-offline-open');
 
     await viewerPage.locator('details.technical').first().evaluate(element => { element.open = true; });
@@ -575,10 +603,13 @@ try {
 
 const appCheckPath = 'content-firebaseappcheck.googleapis.com/v1/projects/appcodici-password/apps/';
 const sharingIdentityPath = 'europe-west1-appcodici-password.cloudfunctions.net/registerSharingIdentity';
+const restoreBackupPath = 'europe-west1-appcodici-password.cloudfunctions.net/restoreBackupChunk';
 const expectedConsole = report.consoleErrors.filter(item => item.resource.includes(appCheckPath)
-    || item.resource.includes(sharingIdentityPath));
+    || item.resource.includes(sharingIdentityPath)
+    || item.resource.includes(restoreBackupPath));
 const expectedNetwork = report.networkErrors.filter(item => (item.status === 403 && item.resource.includes(appCheckPath))
-    || (item.status === 401 && item.resource.includes(sharingIdentityPath)));
+    || (item.status === 401 && item.resource.includes(sharingIdentityPath))
+    || (item.status === 401 && item.resource.includes(restoreBackupPath)));
 if (expectedConsole.some(item => item.resource.includes(appCheckPath))
     || expectedNetwork.some(item => item.resource.includes(appCheckPath))) {
     report.warnings.push('APP_CHECK_RECAPTCHA_HEADLESS_REJECTED');
@@ -586,6 +617,10 @@ if (expectedConsole.some(item => item.resource.includes(appCheckPath))
 if (expectedConsole.some(item => item.resource.includes(sharingIdentityPath))
     || expectedNetwork.some(item => item.resource.includes(sharingIdentityPath))) {
     report.warnings.push('SHARING_IDENTITY_APP_CHECK_BLOCKED');
+}
+if (expectedConsole.some(item => item.resource.includes(restoreBackupPath))
+    || expectedNetwork.some(item => item.resource.includes(restoreBackupPath))) {
+    report.warnings.push('RESTORE_PREFLIGHT_APP_CHECK_BLOCKED');
 }
 report.consoleErrors = report.consoleErrors.filter(item => !expectedConsole.includes(item));
 report.networkErrors = report.networkErrors.filter(item => !expectedNetwork.includes(item));

@@ -105,9 +105,12 @@ test('il dettaglio non ricompone il testo né presenta il numero come veicolo', 
 
 test('la configurazione modifica data e nota e sincronizza la data con il Documento', async () => {
   const source = await read('Frontend/public/assets/js/modules/scadenze/aggiungi_scadenza.js');
+  const datepicker = await read('Frontend/public/assets/js/datepicker_v5.js');
   const save = await read('Frontend/public/assets/js/modules/scadenze/deadline-save-service.js');
   const html = await read('Frontend/public/aggiungi_scadenza.html');
-  assert.match(source, /initDatePickerV5\('dueDate'\)/);
+  assert.equal((source.match(/initDatePickerV5\('dueDate'\)/g) || []).length, 2);
+  assert.match(datepicker, /dataset\.datepickerV5Initialized === 'true'/);
+  assert.match(datepicker, /dataset\.datepickerV5Initialized = 'true'/);
   assert.match(source, /deadlineDateForSave\(profileDocumentLinkDraft/);
   assert.doesNotMatch(source, /deadline-date-field'\)\?\.classList\.add\('hidden'\)/);
   assert.match(save, /expiry_date:\s*deadlineData\.dueDate/);

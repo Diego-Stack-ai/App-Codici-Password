@@ -57,7 +57,7 @@ function setupPasswordSuggestion() {
         password.dispatchEvent(new Event('input', { bubbles: true }));
         password.type = 'text';
         password.focus();
-        showToast('Password sicura generata sul dispositivo. Salvala nel gestore password.', 'success');
+        showToast(t('auth_password_generated'), 'success');
     });
 }
 

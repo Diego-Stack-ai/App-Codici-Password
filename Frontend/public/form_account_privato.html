@@ -5,22 +5,22 @@
   <script src="assets/js/private-auth-gate.js"></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Dettaglio Account Privato - PROTOCOLLO BASE V5.3</title>
+    <title data-t="account_private_form_page_title">Dettaglio Account Privato</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.257" />
+    <link rel="manifest" href="manifest.json?v=1.2.258" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.1 Master) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.257">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.258">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/account_form.css?v=1.2.257">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/account_form.css?v=1.2.258">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.257">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.258">
 
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
@@ -47,7 +47,7 @@
                     <div class="logo-uploader-group">
                         <div id="btn-trigger-logo" class="avatar-wrapper">
                             <div id="logo-preview-container" class="avatar-preview-box border-glow">
-                                <img loading="lazy" id="account-logo-preview" alt="Logo" class="avatar-image hidden" />
+                                <img loading="lazy" id="account-logo-preview" alt="Logo account" data-t-alt="account_logo_alt" class="avatar-image hidden" />
                                 <div id="logo-placeholder" class="logo-placeholder-content">
                                     <span
                                         class="material-symbols-outlined logo-placeholder-icon notranslate" translate="no">add_photo_alternate</span>
@@ -152,7 +152,7 @@
                                     class="material-symbols-outlined detail-section-icon icon-accent-purple notranslate" translate="no">account_balance</span>
                                 <h3 class="detail-section-title" data-t="finance_iban">Coordinate Bancarie</h3>
                             </div>
-                            <button type="button" id="btn-add-iban" class="btn-add-iban">+ IBAN</button>
+                            <button type="button" id="btn-add-iban" class="btn-add-iban" data-t="account_add_iban">+ IBAN</button>
                         </div>
                         <div id="iban-list-container" class="flex-col-gap"></div>
                     </section>
@@ -212,9 +212,9 @@
                             <section id="shared-credentials-section" class="hidden">
                                 <div class="detail-section-header shared-credentials-header">
                                     <span class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">key</span>
-                                    <h3 class="detail-section-title">Credenziali comuni</h3>
-                                    <button id="btn-link-shared-credential" type="button" class="btn-modal btn-secondary" aria-label="Collega Credenziale comune">
-                                        <span class="material-symbols-outlined notranslate" translate="no">add_link</span> Collega credenziale comune
+                                    <h3 class="detail-section-title" data-t="account_shared_credentials_title">Credenziali comuni</h3>
+                                    <button id="btn-link-shared-credential" type="button" class="btn-modal btn-secondary" aria-label="Collega credenziale comune" data-t-aria="account_link_shared_credential">
+                                        <span class="material-symbols-outlined notranslate" translate="no">add_link</span> <span data-t="account_link_shared_credential">Collega credenziale comune</span>
                                     </button>
                                 </div>
                                 <div id="shared-credentials-list" class="shared-account-credentials"></div>
@@ -223,18 +223,18 @@
                             <section id="account-widgets-section" class="hidden">
                                 <div class="detail-section-header">
                                     <span class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">widgets</span>
-                                    <h3 class="detail-section-title">Widget dell’account</h3>
+                                    <h3 class="detail-section-title" data-t="account_widgets_title">Widget dell’account</h3>
                                 </div>
                                 <div id="account-widget-actions" class="account-widget-actions hidden">
                                     <div class="account-widget-existing-picker">
-                                        <label class="view-label" for="account-widget-template-select">Profili Widget Account disponibili</label>
+                                        <label class="view-label" for="account-widget-template-select" data-t="account_widget_profiles_available">Profili Widget Account disponibili</label>
                                         <div class="account-widget-picker-row">
-                                            <select id="account-widget-template-select" class="shared-account-select-control" aria-label="Profili Widget Account"></select>
-                                            <button id="btn-attach-account-widget" type="button" class="btn-modal btn-secondary" disabled>Aggiungi</button>
+                                            <select id="account-widget-template-select" class="shared-account-select-control" aria-label="Profili Widget Account disponibili" data-t-aria="account_widget_profiles_available"></select>
+                                            <button id="btn-attach-account-widget" type="button" class="btn-modal btn-secondary" disabled data-t="add_short">Aggiungi</button>
                                         </div>
                                     </div>
                                     <button id="btn-add-account-widget" type="button" class="btn-modal btn-primary">
-                                        <span class="material-symbols-outlined notranslate" translate="no">add</span> Crea nuovo profilo Widget Account
+                                        <span class="material-symbols-outlined notranslate" translate="no">add</span> <span data-t="account_widget_create_profile">Crea nuovo profilo Widget Account</span>
                                     </button>
                                 </div>
                                 <div id="account-widgets-list" class="shared-account-fields"></div>
@@ -292,13 +292,13 @@
                                     <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="invite-email" type="email"
                                         placeholder="Cerca contatto o inserisci email..."
                                         data-t-placeholder="invite_search_placeholder" class="invite-input" />
-                                    <button id="btn-send-invite" type="button" class="btn-invite">INVITA</button>
+                                    <button id="btn-send-invite" type="button" class="btn-invite" data-t="account_invite_action">INVITA</button>
                                 </div>
                                 <div id="rubrica-suggestions" class="hidden suggestions-box">
                                 </div>
                                 <a class="base-btn-secondary manage-recipients-link" href="gestione_destinatari.html">
                                     <span class="material-symbols-outlined notranslate" translate="no">manage_accounts</span>
-                                    Gestisci destinatari
+                                    <span data-t="account_manage_recipients">Gestisci destinatari</span>
                                 </a>
                             </div>
                         </div>

@@ -6,21 +6,21 @@
     <script src="assets/js/theme-init.js"></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Codici & Password - Registrazione</title>
+    <title data-t="auth_registration_document_title">Codici & Password - Registrazione</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.257" />
+    <link rel="manifest" href="manifest.json?v=1.2.258" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.257">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.258">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/accesso.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/registrati.css?v=1.2.257">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/accesso.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/registrati.css?v=1.2.258">
 </head>
 
 <body class="base-bg">
@@ -95,17 +95,17 @@
                         </div>
                         <button type="button" id="suggest-password-btn" class="password-suggestion-btn">
                             <span class="material-symbols-outlined notranslate" translate="no">password</span>
-                            Suggerisci password sicura
+                            <span data-t="auth_password_suggest">Suggerisci password sicura</span>
                         </button>
                     </div>
 
-                    <ul id="account-password-requirements" class="password-requirements" aria-label="Requisiti password">
-                        <li data-password-rule="minLength">Almeno 12 caratteri</li>
-                        <li data-password-rule="lowercase">Una lettera minuscola</li>
-                        <li data-password-rule="uppercase">Una lettera maiuscola</li>
-                        <li data-password-rule="number">Un numero</li>
-                        <li data-password-rule="symbol">Un simbolo</li>
-                        <li data-password-rule="noOuterWhitespace">Nessuno spazio iniziale o finale</li>
+                    <ul id="account-password-requirements" class="password-requirements" aria-label="Requisiti password" data-t-aria="auth_password_requirements">
+                        <li data-password-rule="minLength" data-t="auth_password_rule_min_12">Almeno 12 caratteri</li>
+                        <li data-password-rule="lowercase" data-t="auth_password_rule_lowercase">Una lettera minuscola</li>
+                        <li data-password-rule="uppercase" data-t="auth_password_rule_uppercase">Una lettera maiuscola</li>
+                        <li data-password-rule="number" data-t="auth_password_rule_number">Un numero</li>
+                        <li data-password-rule="symbol" data-t="auth_password_rule_symbol">Un simbolo</li>
+                        <li data-password-rule="noOuterWhitespace" data-t="auth_password_rule_no_outer_whitespace">Nessuno spazio iniziale o finale</li>
                     </ul>
 
                     <!-- Conferma Password -->
@@ -117,9 +117,9 @@
                     </div>
 
                     <!-- Submit Button -->
-                    <button type="submit" id="register-submit-btn" class="btn-primary" data-t="create_account_btn">
+                    <button type="submit" id="register-submit-btn" class="btn-primary">
                         <span class="material-symbols-outlined notranslate" translate="no">person_add_alt</span>
-                        Nuova registrazione
+                        <span data-t="create_account_btn">Nuova registrazione</span>
                     </button>
                 </form>
 
@@ -133,7 +133,7 @@
 
                 <!-- Footer Legale -->
                 <div class="legal-footer">
-                    <span>&copy; 2026</span>
+                    <span class="notranslate" translate="no">&copy; 2026</span>
                 </div>
 
             </div>

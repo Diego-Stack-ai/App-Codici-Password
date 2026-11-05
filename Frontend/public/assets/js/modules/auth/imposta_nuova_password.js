@@ -4,12 +4,12 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/auth/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.257';
+import { auth } from '../../firebase-config.js?v=1.2.258';
 import { updatePassword, confirmPasswordReset, signOut, verifyPasswordResetCode } from "/assets/js/vendor/firebase-runtime.js";
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
-import { db } from '../../firebase-config.js?v=1.2.257';
+import { db } from '../../firebase-config.js?v=1.2.258';
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { ACCOUNT_PASSWORD_POLICY_VERSION, bindPasswordChecklist, evaluatePassword, firstPasswordPolicyError, generateSecurePassword } from '../core/password-policy.js';
 
@@ -100,7 +100,7 @@ function setupNewPasswordForm() {
                 }, { merge: true });
                 showToast(t('password_success') || "Password di accesso aggiornata. La Master Password della Vault non è cambiata.", "success");
             } else {
-                throw new Error("Sessione non valida o link scaduto.");
+                throw new Error(t('auth_session_invalid'));
             }
 
             // Redirect differenziato
@@ -117,7 +117,7 @@ function setupNewPasswordForm() {
 
             let msg = t('error_generic') || "Impossibile aggiornare la password.";
             if (err.code === 'auth/requires-recent-login') {
-                showToast("Per sicurezza devi accedere di nuovo. Dopo il login tornerai qui.", "warning");
+                showToast(t('auth_reauth_required_message'), "warning");
                 try {
                     await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
                 } finally {
@@ -145,7 +145,7 @@ function setupPasswordSuggestion() {
         password.dispatchEvent(new Event('input', { bubbles: true }));
         password.type = 'text';
         password.focus();
-        showToast('Password sicura generata sul dispositivo. Salvala nel gestore password.', 'success');
+        showToast(t('auth_password_generated'), 'success');
     });
 }
 
@@ -175,7 +175,7 @@ function setupCancelLogic() {
 
     const urlParams = new URLSearchParams(window.location.search);
     const isRequiredPolicyUpdate = urlParams.has('policyUpdate') || urlParams.has('reauthenticated');
-    if (isRequiredPolicyUpdate) cancelBtn.textContent = 'Esci';
+    if (isRequiredPolicyUpdate) cancelBtn.textContent = t('auth_exit');
 
     cancelBtn.onclick = async (e) => {
         e.preventDefault();

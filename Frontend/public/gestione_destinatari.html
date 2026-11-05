@@ -5,18 +5,18 @@
     <script src="assets/js/theme-init.js"></script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Gestione destinatari - Codici & Password</title>
-    <link rel="manifest" href="manifest.json?v=1.2.257">
+    <title data-t="recipient_page_title">Gestione destinatari - Codici & Password</title>
+    <link rel="manifest" href="manifest.json?v=1.2.258">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.257">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.258">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/gestione_destinatari.css?v=1.2.257">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/gestione_destinatari.css?v=1.2.258">
 </head>
 <body data-private-auth hidden inert class="base-bg" data-ui-model="configuration">
     <div class="base-container">
@@ -26,55 +26,55 @@
         <main class="base-main">
             <div class="page-container recipient-manager-page pt-header-extra pb-footer-extra">
                 <section class="recipient-manager-intro">
-                    <h2>Destinatari</h2>
-                    <p>Rubrica unica utilizzata sia dalle Scadenze sia dalla condivisione degli account.</p>
-                    <p class="recipient-manager-warning"><span class="material-symbols-outlined notranslate" translate="no">verified_user</span> Un contatto in uso non può essere eliminato. Può essere disattivato senza modificare i record esistenti.</p>
+                    <h2 data-t="recipient_heading">Destinatari</h2>
+                    <p data-t="recipient_intro">Rubrica unica utilizzata sia dalle Scadenze sia dalla condivisione degli account.</p>
+                    <p class="recipient-manager-warning"><span class="material-symbols-outlined notranslate" translate="no">verified_user</span> <span data-t="recipient_warning">Un contatto in uso non può essere eliminato. Può essere disattivato senza modificare i record esistenti.</span></p>
                 </section>
 
                 <section class="recipient-editor-card">
-                    <h3 id="recipient-form-title">Nuovo destinatario</h3>
+                    <h3 id="recipient-form-title" data-t="recipient_new_title">Nuovo destinatario</h3>
                     <div class="recipient-form-grid">
                         <div class="form-group">
-                            <label class="label-sm" for="recipient-first-name">Nome</label>
-                            <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="recipient-first-name" class="input" type="text" autocomplete="given-name" placeholder="Maria">
+                            <label class="label-sm" for="recipient-first-name" data-t="label_name">Nome</label>
+                            <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="recipient-first-name" class="input" type="text" autocomplete="given-name" placeholder="Maria" data-t-placeholder="recipient_first_placeholder">
                         </div>
                         <div class="form-group">
-                            <label class="label-sm" for="recipient-last-name">Cognome o descrizione</label>
-                            <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="recipient-last-name" class="input" type="text" autocomplete="family-name" placeholder="Rossi o Commercialista">
+                            <label class="label-sm" for="recipient-last-name" data-t="recipient_last_name_label">Cognome o descrizione</label>
+                            <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="recipient-last-name" class="input" type="text" autocomplete="family-name" placeholder="Rossi o Commercialista" data-t-placeholder="recipient_last_placeholder">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="label-sm" for="recipient-email">Email</label>
-                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="recipient-email" class="input" type="email" autocomplete="email" inputmode="email" placeholder="maria@example.com">
+                        <label class="label-sm" for="recipient-email" data-t="email_label">Email</label>
+                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="recipient-email" class="input" type="email" autocomplete="email" inputmode="email" placeholder="maria@example.com" data-t-placeholder="email_placeholder">
                     </div>
                     <div id="recipient-company-context" class="recipient-company-context hidden" aria-live="polite">
                         <span class="material-symbols-outlined notranslate" translate="no">domain</span>
                         <div>
                             <strong id="recipient-company-context-name"></strong>
-                            <p>È l’azienda di partenza della Scadenza. Puoi confermare o cambiare i collegamenti qui sotto.</p>
+                            <p data-t="recipient_company_context_help">È l’azienda di partenza della Scadenza. Puoi confermare o cambiare i collegamenti qui sotto.</p>
                         </div>
                     </div>
                     <fieldset class="recipient-company-scopes">
-                        <legend>Collegamenti aziendali</legend>
-                        <p>Seleziona le aziende che usano questa email. Se non ne selezioni nessuna, il destinatario resta privato.</p>
+                        <legend data-t="recipient_company_links">Collegamenti aziendali</legend>
+                        <p data-t="recipient_company_links_help">Seleziona le aziende che usano questa email. Se non ne selezioni nessuna, il destinatario resta privato.</p>
                         <div id="recipient-company-options" class="recipient-company-options" aria-live="polite"></div>
                     </fieldset>
                     <div class="recipient-form-actions">
-                        <button id="recipient-cancel" type="button" class="base-btn-secondary hidden">Annulla</button>
-                        <button id="recipient-save" type="button" class="btn-primary">Salva destinatario</button>
+                        <button id="recipient-cancel" type="button" class="base-btn-secondary hidden" data-t="cancel">Annulla</button>
+                        <button id="recipient-save" type="button" class="btn-primary" data-t="recipient_save_action">Salva destinatario</button>
                     </div>
                 </section>
 
                 <section class="recipient-list-section">
                     <div class="recipient-list-heading">
-                        <h3>Rubrica</h3>
+                        <h3 data-t="recipient_directory">Rubrica</h3>
                         <span id="recipient-count" class="recipient-count">0</span>
                     </div>
                     <div id="recipient-list" class="recipient-list" aria-live="polite"></div>
                 </section>
 
                 <a id="recipient-return" class="base-btn-secondary recipient-return hidden" href="regole_scadenze.html">
-                    <span class="material-symbols-outlined notranslate" translate="no">arrow_back</span> Torna al modulo precedente
+                    <span class="material-symbols-outlined notranslate" translate="no">arrow_back</span> <span data-t="recipient_return">Torna al modulo precedente</span>
                 </a>
             </div>
         </main>
