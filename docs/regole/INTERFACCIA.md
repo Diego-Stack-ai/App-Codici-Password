@@ -1,5 +1,15 @@
 # Interfaccia
 
+## Home — anteprime Scadenze distinguibili — 05/11/2026
+
+Le mini-card delle sezioni **Scadenze** e **Urgenze** mantengono il tipo della scadenza come titolo. Quando il record possiede `veicolo_modello`, il riferimento del mezzo viene mostrato come sottotitolo compatto, così scadenze omonime restano distinguibili tramite modello e targa. L'assenza del mezzo non produce segnaposti o righe vuote; l'elenco completo resta la fonte per tutti i dettagli.
+
+## Guida visiva Graphify — 05/11/2026
+
+Il comando **Mostra sulla pagina** è disponibile soltanto per la pagina realmente aperta. Il walkthrough presenta una sola istruzione alla volta con contatore, **Avanti**, **Indietro** ed **Esci**. L'evidenziazione è ammessa esclusivamente quando il selettore verificato individua un unico elemento visibile, abilitato e collegato alla vista; ogni altro stato usa il testo completo senza simulare la presenza del comando.
+
+Durante il tour l'app resta inerte: la guida non preme controlli, non apre card o lucchetti, non legge valori, non accetta conferme e non concede permessi. Escape, uscita, cambio pagina, blocco dell'identità e smontaggio rimuovono sovrapposizione ed evidenziazione e ripristinano il focus quando possibile. Testo e controlli rispettano tastiera, screen reader, zoom, safe area e movimento ridotto. I video sono facoltativi, separati e non possono sostituire l'equivalente testuale.
+
 ## Rubrica destinatari — identità e collegamenti aziendali espliciti — 29/10/2026
 
 Nel selettore del compositore ogni voce mostra soltanto **Nome Cognome — e-mail**. Il nome dell’azienda corrente non viene aggiunto all’etichetta e quindi non può far apparire tutti i contatti come appartenenti alla stessa azienda; quando esiste un contesto aziendale, i contatti realmente collegati vengono soltanto ordinati per primi.

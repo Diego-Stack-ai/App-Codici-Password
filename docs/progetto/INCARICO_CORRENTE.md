@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Anteprime Home distinguibili per veicolo — 05/11/2026
+
+Diego conferma che le card **Scadenze** e **Urgenze** della Home devono distinguere scadenze omonime, per esempio due **Revisione Moto**, mostrando anche il mezzo associato. Il renderer usa il riferimento `veicolo_modello` già conservato nella Scadenza e già condiviso dal modello di presentazione: il tipo resta il titolo e modello/targa formano il sottotitolo compatto. I record senza mezzo non mostrano un segnaposto né una riga vuota. L'intervento non modifica Scadenze reali, configurazioni o Rules.
+
+L'ordine autorizza implementazione locale, test pertinenti, aggiornamento della guida D0, bump patch e riallineamento Graphify. Prima di pubblicare si completano precollaudo delle correzioni, collaudo residuo, bonifica tecnica, mappa Graphify, sistema degli aiuti, verifica dei collegamenti e controlli finali; commit, push e deploy restano subordinati ai gate verdi e a un ordine esplicito di pubblicazione.
+
+Il primo incremento del sistema degli aiuti è incluso nella stessa candidata. Il comando **Mostra sulla pagina** usa i target verificati del catalogo e la mappa Graphify per presentare un passo alla volta; un controllo viene evidenziato soltanto se è unico, visibile, abilitato e ancora collegato al documento. In tutti gli altri casi la spiegazione resta testuale. Il tour non legge valori, non attiva controlli, non apre sezioni, non concede permessi e non conferma operazioni. Video e registrazioni restano un incremento editoriale successivo e facoltativo.
+
 ## Sorveglianza sicurezza app e PC — 03/11/2026
 
 Diego approva l'estensione del perimetro dal solo servizio pubblico al PC Windows di sviluppo e conferma il controllo quotidiano alle 07:30 Europe/Rome. Il monitor deve usare l'inventario reale, verificare le notizie su fonti primarie, evitare duplicati e restare silenzioso senza azioni necessarie. Non può leggere dati Vault né installare aggiornamenti, modificare il repository o pubblicare senza un nuovo ordine.

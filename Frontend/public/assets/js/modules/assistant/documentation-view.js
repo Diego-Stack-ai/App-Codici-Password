@@ -1,5 +1,6 @@
 import { createDocumentationGuide } from './documentation-guide.js';
 import { documentationLabel as label } from './documentation-ui-labels.js';
+import { openDocumentationWalkthrough } from './documentation-walkthrough.js';
 
 const CATALOG_URL = '/assets/js/modules/assistant/documentation-catalog.json';
 
@@ -57,7 +58,10 @@ export async function openDocumentationView({ pageId, trigger, signal, onClose }
     const context = element('button', label('guide.ui.context'), 'documentation-button');
     context.type = 'button';
     context.id = 'documentation-current-page';
-    controls.append(pageLabel, select, firstSteps, context);
+    const walkthrough = element('button', label('guide.ui.walkthrough'), 'documentation-button');
+    walkthrough.type = 'button';
+    walkthrough.id = 'documentation-walkthrough-start';
+    controls.append(pageLabel, select, firstSteps, context, walkthrough);
     const journey = element('nav', null, 'documentation-journey');
     journey.setAttribute('aria-label', label('guide.ui.firstSteps'));
     journey.hidden = true;
@@ -68,6 +72,8 @@ export async function openDocumentationView({ pageId, trigger, signal, onClose }
         const guide = service.getPageGuide(selectedId);
         if (!guide) return;
         select.value = guide.pageId;
+        walkthrough.disabled = guide.pageId !== pageId;
+        walkthrough.title = walkthrough.disabled ? label('guide.ui.walkthroughCurrentPage') : '';
         const heading = element('h3', guide.title);
         const purpose = element('p', guide.purpose);
         const instructions = element('ol');
@@ -134,6 +140,11 @@ export async function openDocumentationView({ pageId, trigger, signal, onClose }
     select.addEventListener('change', () => render(select.value));
     firstSteps.addEventListener('click', showFirstSteps);
     context.addEventListener('click', () => { journey.hidden = true; render(pageId); });
+    walkthrough.addEventListener('click', () => {
+        const guide = service.getPageGuide(pageId);
+        close({ restoreFocus: false });
+        openDocumentationWalkthrough({ guide, trigger, signal });
+    });
     panel.append(header, privacy, fallback, controls, journey, article, announce);
     overlay.append(panel);
     render(pageId);
