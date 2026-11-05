@@ -59,7 +59,17 @@ test('T-08: le Rules tengono l’Account archiviato fuori dalla portata del dest
 test('T-08: la condivisione delle Scadenze è un altro percorso', () => {
     // Indice backend in sola amministrazione e copia del destinatario.
     assert.match(rulesSource, /match \/deadlineShares\/\{shareId\} \{\s*\n\s*allow read, write: if false;/);
-    assert.match(rulesSource, /match \/users\/\{userId\}\/receivedDeadlines\/\{receivedDeadlineId\} \{[\s\S]{0,120}allow read: if isOwner\(userId\);/);
+    const receivedDeadlineRules = rulesSource.slice(
+        rulesSource.indexOf('match /users/{userId}/receivedDeadlines/{receivedDeadlineId}'),
+        rulesSource.indexOf('match /users/{userId}/{collection}/{docId}')
+    );
+    assert.match(receivedDeadlineRules, /allow read: if isOwner\(userId\) && hasVerifiedEmail\(\) &&/,
+        'la copia è leggibile soltanto dal proprietario con email verificata');
+    assert.match(receivedDeadlineRules,
+        /resource\.data\.get\('recipientEmail', ''\)\.lower\(\) == myEmail\(\);/,
+        'la copia resta vincolata all’email verificata del destinatario');
+    assert.match(receivedDeadlineRules, /allow write: if false;/,
+        'il client non può scrivere copie ricevute');
     // Chi le scrive: le funzioni backend delle Scadenze, non il purge.
     assert.match(indexSource, /async function syncReceivedDeadlines\(/);
     assert.match(indexSource, /async function removeReceivedDeadlines\(/);

@@ -1,4 +1,4 @@
-import { db, storage } from '../../firebase-config.js?v=1.2.255';
+import { db, storage } from '../../firebase-config.js?v=1.2.256';
 import {
     addDoc,
     arrayUnion,

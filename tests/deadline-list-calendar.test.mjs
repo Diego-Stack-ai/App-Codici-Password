@@ -6,7 +6,7 @@ const base=new URL('../Frontend/public/assets/js/modules/scadenze/',import.meta.
 const strip=s=>s.replace(/^import .*;\r?\n/gm,'').replace(/\bexport /g,'');
 const source=(await Promise.all(['deadline-model.js','scadenze.js'].map(p=>readFile(new URL(p,base),'utf8')))).map(strip).join('\n');
 function fixture(route=''){
- let clock=new Date(2026,8,26,23,59,59).getTime(), ready=true, pending=null;
+ let clock=new Date(2026,8,26,23,59,59).getTime(), ready=true, pending=null, receivedFailure=null;
  class Clock extends Date{constructor(...a){super(...(a.length?a:[clock]));}}
  const events=new Map(),timers=new Map(),callbacks=[],swipes=[],reads=[],writes=[],confirmations=[];
  const target={addEventListener:(n,fn)=>{if(!events.has(n))events.set(n,new Set());events.get(n).add(fn);},removeEventListener:(n,fn)=>events.get(n)?.delete(fn)};
@@ -16,7 +16,7 @@ function fixture(route=''){
   removeEventListener(n,fn){local.get(n)?.delete(fn);},dispatch(n,event={}){for(const fn of local.get(n)||[])fn(event);}};};
  const list=node('div'),count=node('span'),search=node('input',{value:''});
  const data={owned:[{id:'same',type:'Bollo',dueDate:'2026-09-26'}],received:[{id:'same',type:'Bollo',dueDate:'2026-09-26',permission:'view'}]};
- const auth={currentUser:{uid:'A'}};
+ const auth={currentUser:{uid:'A',email:'owner@example.invalid'}};
  const location={search:route,href:`https://app.test/scadenze.html${route}`};
  let replaced='';
  const history={replaceState(_state,_title,value){replaced=value;const parsed=new URL(value,location.href);location.href=parsed.href;location.search=parsed.search;}};
@@ -32,7 +32,7 @@ function fixture(route=''){
   },
   onAuthStateChanged:(_,fn)=>{const cb={fn,stopped:false};callbacks.push(cb);return()=>cb.stopped=true;},
   listDeadlines:async uid=>{reads.push(uid);const result=data.owned;if(pending)await pending;return result;},
-  listReceivedDeadlines:async uid=>{reads.push(uid);const result=data.received;if(pending)await pending;return result;},
+  listReceivedDeadlines:async(uid,email)=>{reads.push(`${uid}:${email}`);if(receivedFailure)throw receivedFailure;const result=data.received;if(pending)await pending;return result;},
   doc:(_, ...parts)=>parts.join('/'),serverTimestamp:()=>({server:true}),
   updateDoc:async(...a)=>writes.push(['update',...a]),deleteDoc:async(...a)=>writes.push(['delete',...a]),
   showConfirmModal:async(...a)=>{confirmations.push(a);return true;},showToast(){},logError(){}
@@ -46,6 +46,7 @@ function fixture(route=''){
   fire:async name=>{for(const fn of [...(events.get(name)||[])])fn();await drain();},
   date:value=>clock=value.getTime(),
   tick:async()=>{const [id,{fn}]=timers.entries().next().value;timers.delete(id);fn();await drain();},
+  failReceived:error=>{receivedFailure=error;},
   defer:()=>{let release;pending=new Promise(r=>release=r);return()=>{pending=null;release();};}
  };
 }
@@ -67,6 +68,11 @@ test('completed records excluded from urgency, invalid dates excluded, 30-day bo
  await f.start();f.filter('expiring');assert.equal(f.count.textContent,2);
  f.filter('urgent');assert.equal(f.count.textContent,1);
  f.filter('completed');assert.equal(f.count.textContent,1);
+});
+test('received deadline permission failures do not hide owned deadlines',async()=>{
+ const f=fixture();f.failReceived(new Error('permission-denied'));await f.start();
+ assert.equal(f.count.textContent,1);assert.equal(f.list.children[0].dataset.href,'dettaglio_scadenza.html?id=same');
+ assert.ok(f.reads.includes('A:owner@example.invalid'));
 });
 for(const event of ['pagehide','private-auth-blocked'])test(`list ${event} cancels timer and stale card/swipe callbacks`,async()=>{
  const f=fixture();await f.start();const card=f.list.children[0],swipe=f.swipes[0].options;

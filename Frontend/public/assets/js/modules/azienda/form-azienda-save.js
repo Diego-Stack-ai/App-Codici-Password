@@ -7,7 +7,7 @@ import { prepareCompanyProfileLink, promptCompanyProfilePasswordChoice } from '.
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.255';
+import { auth, db } from '../../firebase-config.js?v=1.2.256';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteField

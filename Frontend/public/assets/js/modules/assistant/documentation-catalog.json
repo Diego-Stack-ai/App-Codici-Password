@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "contentVersion": 9,
-  "reviewedAppVersion": "1.2.255",
+  "contentVersion": 10,
+  "reviewedAppVersion": "1.2.256",
   "fallbackLocale": "it",
   "pages": [
     {
@@ -832,7 +832,7 @@
         {
           "stepId": "step-2",
           "bodyKey": "guide.pages.impostazioni.step-2",
-          "target": "#theme-selector"
+          "target": "#theme-settings-toggle"
         },
         {
           "stepId": "step-4",

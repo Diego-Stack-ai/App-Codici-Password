@@ -70,7 +70,7 @@ Le attività ancora aperte si dividono in prodotto e certificazione; AI.2 è sto
 4. completare i gate fisici/offline residui: consultazione bancaria su iPhone, fallback senza Web Locks, backup interrotto/ripresa, memoria e dispositivi supportati;
 5. approvare la politica di retention per archivio, allegati e backup e completare il collaudo Windows della Salute credenziali;
 6. eseguire il ciclo finale di maturità: end-to-end sui browser supportati, verifica di produzione, audit indipendente di sicurezza/crittografia, revisione privacy/legale e procedura incidenti;
-7. concludere il riordino definitivo delle Impostazioni e il censimento manuale di tutti i lucchetti/campi protetti.
+7. concludere il censimento manuale di tutti i lucchetti/campi protetti. Il riordino delle Impostazioni è chiuso nella release 1.2.256: **Prima configurazione** è espandibile, aperta solo se il requisito obbligatorio è incompleto, mentre **Tema App** è espandibile e normalmente chiusa.
 
 ## AUDIT-SKILL-01 — sicurezza, qualità visiva e prestazioni — pianificazione 11/10/2026
 

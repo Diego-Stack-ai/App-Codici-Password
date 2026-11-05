@@ -1,7 +1,7 @@
 import {
     getDocServerConfirmed, getDocsServerConfirmed, getDocSmart, getDocsSmart
 } from '/assets/js/offline-firestore.js';
-import {db} from '../../firebase-config.js?v=1.2.255';
+import {db} from '../../firebase-config.js?v=1.2.256';
 import {collection, doc, limit, orderBy, query, where} from '/assets/js/vendor/firebase-runtime.js';
 import {coalesceRead} from './request-coordinator.js';
 
@@ -101,8 +101,13 @@ export const listCompanyAccountsConfirmed = (uid, companyId) => readConfirmedRec
 export const listDeadlines = uid => readRecords(`deadlines:${uid}`,
     collection(db, 'users', uid, 'scadenze'));
 
-export const listReceivedDeadlines = uid => readRecords(`received-deadlines:${uid}`,
-    collection(db, 'users', uid, 'receivedDeadlines'));
+export const listReceivedDeadlines = (uid, email) => {
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    return readRecords(`received-deadlines:${uid}:${normalizedEmail}`, query(
+        collection(db, 'users', uid, 'receivedDeadlines'),
+        where('recipientEmail', '==', normalizedEmail)
+    ));
+};
 
 export const getDeadline = (uid, deadlineId) =>
     getRecordByPath(`users/${uid}/scadenze/${deadlineId}`);

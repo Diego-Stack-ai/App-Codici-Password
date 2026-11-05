@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.255';
+import { auth, db } from '../../firebase-config.js?v=1.2.256';
 import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -59,7 +59,7 @@ export async function initImpostazioni(user) {
 function setupSharedCredentials(user) {
     document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
         try {
-            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.255');
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.256');
             await openSharedCredentialsSettings(user);
         } catch (error) {
             console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
@@ -173,7 +173,7 @@ function setupCredentialHealth(user) {
             'Analisi locale delle credenziali in corso…', current
         );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.255');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.256');
             current.check();
             const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
             current.check();
@@ -305,7 +305,7 @@ function setupAccountFieldUsage(user) {
             'Controllo locale dei campi realmente compilati in corso…'
         );
         try {
-            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.255');
+            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.256');
             const report = await inspectAccountFieldUsage(user.uid);
             working.close();
             showAccountFieldUsage(report);
@@ -1296,10 +1296,15 @@ async function loadUserData(user) {
         }
         const firstConfigurationStatus = document.getElementById('first-configuration-status');
         if (firstConfigurationStatus) {
+            const firstConfiguration = readFirstConfiguration(currentUserData);
             safeSetText(firstConfigurationStatus,
-                await configurationText(readFirstConfiguration(currentUserData).complete
+                await configurationText(firstConfiguration.complete
                     ? 'first_config_status_complete'
                     : 'first_config_status_pending'));
+            const firstConfigurationSummary = document.getElementById('first-configuration-summary');
+            if (firstConfigurationSummary) {
+                firstConfigurationSummary.open = !firstConfiguration.complete;
+            }
             for (const element of document.querySelectorAll('[data-onboarding-key]')) {
                 element.textContent = await configurationText(element.dataset.onboardingKey);
             }

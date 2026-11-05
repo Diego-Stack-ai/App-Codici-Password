@@ -100,7 +100,7 @@ async function seed() {
     await adminDb.doc(SHARE_INDEX_PATH).set({ownerUid: OWNER, deadlineId: 'deadline-1',
         recipientUid: RECIPIENT, recipientEmail: RECIPIENT_EMAIL});
     await adminDb.doc(RECEIVED_PATH).set({ownerUid: OWNER, deadlineId: 'deadline-1', name: 'Scadenza condivisa',
-        recipients: [{email: RECIPIENT_EMAIL}]});
+        recipientEmail: RECIPIENT_EMAIL, recipients: [{email: RECIPIENT_EMAIL}]});
 }
 
 const raw = async path => JSON.stringify((await adminDb.doc(path).get()).data() ?? null);
@@ -138,9 +138,12 @@ test('T-08 su emulatore: il purge rimuove Account, copie applicative e inviti', 
 
 test('T-08 su emulatore: al destinatario non resta leggibile l’invito dell’Account purgato', async () => {
     await seed();
-    const recipient = testEnv.authenticatedContext(RECIPIENT, {email: RECIPIENT_EMAIL}).firestore();
-    const stranger = testEnv.authenticatedContext('stranger-uid', {email: 'stranger@example.invalid'}).firestore();
-    const owner = testEnv.authenticatedContext(OWNER, {email: 'owner@example.invalid'}).firestore();
+    const recipient = testEnv.authenticatedContext(RECIPIENT,
+        {email: RECIPIENT_EMAIL, email_verified: true}).firestore();
+    const stranger = testEnv.authenticatedContext('stranger-uid',
+        {email: 'stranger@example.invalid', email_verified: true}).firestore();
+    const owner = testEnv.authenticatedContext(OWNER,
+        {email: 'owner@example.invalid', email_verified: true}).firestore();
 
     // Prima del purge, con l'Account archiviato, il destinatario non legge l'Account.
     await assertFails(getDoc(doc(recipient, ACCOUNT_PATH)));

@@ -68,9 +68,13 @@ test('Agente base usa il locale vocale derivato dalla lingua dell’app', async 
 test('registrazione e Impostazioni persistono lingua e completamento senza tradurre dati utente', async () => {
     const auth = await readFile('Frontend/public/assets/js/auth.js', 'utf8');
     const settings = await readFile('Frontend/public/assets/js/modules/settings/impostazioni.js', 'utf8');
+    const settingsHtml = await readFile('Frontend/public/impostazioni.html', 'utf8');
     assert.match(auth, /settings:\s*\{[\s\S]*language: selectedLanguage/);
     assert.match(auth, /firstConfiguration:\s*\{[\s\S]*completed: false/);
     assert.match(settings, /firstConfigurationPatch\(code\)/);
+    assert.match(settingsHtml, /<details[^>]+id="first-configuration-summary"/);
+    assert.match(settingsHtml, /<summary[^>]+id="first-configuration-toggle"/);
+    assert.match(settings, /firstConfigurationSummary\.open = !firstConfiguration\.complete/);
     assert.doesNotMatch(settings, /translateUserData|translateVaultData/);
 });
 
