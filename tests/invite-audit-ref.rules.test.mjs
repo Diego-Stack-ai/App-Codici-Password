@@ -26,9 +26,9 @@ const ACCEPTANCE_RECEIPT = {schemaVersion: 1, nonce: REF_A, guestUid: GUEST_UID,
 const INVITE_ID = `${ACCOUNT}_guest_example_invalid`;
 let testEnv;
 
-const asOwner = () => testEnv.authenticatedContext(OWNER, {email: OWNER_EMAIL}).firestore();
-const asGuest = () => testEnv.authenticatedContext(GUEST, {email: EMAIL}).firestore();
-const asStranger = () => testEnv.authenticatedContext(STRANGER, {email: 'stranger@example.invalid'}).firestore();
+const asOwner = () => testEnv.authenticatedContext(OWNER, {email: OWNER_EMAIL, email_verified: true}).firestore();
+const asGuest = () => testEnv.authenticatedContext(GUEST, {email: EMAIL, email_verified: true}).firestore();
+const asStranger = () => testEnv.authenticatedContext(STRANGER, {email: 'stranger@example.invalid', email_verified: true}).firestore();
 
 // Le 14 chiavi che i tre writer reali di creazione/reinvito scrivono
 // (`form-privato-save.js:341`, `form-azienda-save.js:248`,
@@ -332,4 +332,15 @@ test('lettura: proprietario e destinatario leggono, l\'estraneo no', async () =>
     await assertSucceeds(getDoc(doc(asOwner(), 'invites', 'leggibile')));
     await assertSucceeds(getDoc(doc(asGuest(), 'invites', 'leggibile')));
     await assertFails(getDoc(doc(asStranger(), 'invites', 'leggibile')));
+});
+
+test('email non verificata: non crea inviti e non legge quelli destinati allo stesso indirizzo', async () => {
+    await seed('non-verificato', invitePayload({auditRef: REF_A}));
+    const unverifiedOwner = testEnv.authenticatedContext(OWNER,
+        {email: OWNER_EMAIL, email_verified: false}).firestore();
+    const unverifiedGuest = testEnv.authenticatedContext(GUEST,
+        {email: EMAIL, email_verified: false}).firestore();
+    await assertFails(setDoc(doc(unverifiedOwner, 'invites', 'creazione-non-verificata'),
+        invitePayload({inviteId: 'creazione-non-verificata'})));
+    await assertFails(getDoc(doc(unverifiedGuest, 'invites', 'non-verificato')));
 });

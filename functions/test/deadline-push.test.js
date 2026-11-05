@@ -56,6 +56,10 @@ function harness({devices = {[devicePath]: active}, initial = {}, failure, share
     static now() {return now;}
   }
   const context = {recipientDeliveryLedger: ledger, deadlineCalendar: require("../deadline-calendar"), Date: ScenarioClock, crypto, console: {log() {}, error() {}},
+    verifiedUserByEmail: async (auth, email) => {
+      const user = await auth.getUserByEmail(email);
+      return user.emailVerified === true ? user : null;
+    },
     syncReceivedDeadlines: async () => shared,
     admin: {firestore: {FieldValue: {serverTimestamp: () => "synthetic-time", increment: n => ({increment: n})}},
       messaging: () => ({async send(payload) {
@@ -113,7 +117,7 @@ test("real scheduler and recipient sender retry next day, respect cadence and st
   const h = harness({now: Date.parse("2026-09-26T07:00:00Z"),
     initial: {[deadlinePath]: {dueDate: "2026-09-30", completed: false, notif_frequency: 7,
       lastRecipientPushNotifiedAt: "2026-09-18", recipients: [{email: "a@example.invalid", sendPush: true, sendEmail: false}]}},
-    devices: {"users/guest/pushDevices/device": active}, users: {"a@example.invalid": {uid: "guest"}},
+    devices: {"users/guest/pushDevices/device": active}, users: {"a@example.invalid": {uid: "guest", emailVerified: true}},
     shared: new Map([["guest", {}]]), failure: () => recovered ? null : Object.assign(new Error("synthetic"), {code: "messaging/server-unavailable"})});
   const firestore = () => h.db;
   firestore.FieldValue = h.context.admin.firestore.FieldValue;
@@ -201,7 +205,7 @@ test("push no devices still produces inbox record; D0 has distinct ID and short 
 test("recipient push sends only to synchronized recipients, with received ID", async () => {
   const h = harness({devices: {"users/guest/pushDevices/device": active,
     "users/outsider/pushDevices/device": active}, shared: new Map([["guest", {}]]),
-    users: {"a@example.invalid": {uid: "guest"}, "b@example.invalid": {uid: "outsider"}}});
+    users: {"a@example.invalid": {uid: "guest", emailVerified: true}, "b@example.invalid": {uid: "outsider", emailVerified: true}}});
   await h.context.sendRecipientDeadlinePushes(h.db, "owner", "dl", {dueDate: "2026-09-30",
     recipients: [{email: "a@example.invalid", sendPush: true, canManage: true},
       {email: "b@example.invalid", sendPush: true}]}, 4);
@@ -211,10 +215,20 @@ test("recipient push sends only to synchronized recipients, with received ID", a
   assert.equal(h.updates.length, 1);
 });
 
+test("recipient push ignores an unverified Auth email even when a received copy exists", async () => {
+  const h = harness({devices: {"users/guest/pushDevices/device": active},
+    shared: new Map([["guest", {}]]),
+    users: {"a@example.invalid": {uid: "guest", emailVerified: false}}});
+  await h.context.sendRecipientDeadlinePushes(h.db, "owner", "dl", {dueDate: "2026-09-30",
+    recipients: [{email: "a@example.invalid", sendPush: true, canManage: true}]}, 4);
+  assert.equal(h.sent.length, 0);
+  assert.equal(h.updates.length, 0);
+});
+
 test("recipient invalid token disables device without marking successful delivery", async () => {
   const path = "users/guest/pushDevices/device";
   const h = harness({devices: {[path]: active}, shared: new Map([["guest", {}]]),
-    users: {"a@example.invalid": {uid: "guest"}},
+    users: {"a@example.invalid": {uid: "guest", emailVerified: true}},
     failure: Object.assign(new Error("synthetic"), {code: "messaging/invalid-registration-token"})});
   await h.context.sendRecipientDeadlinePushes(h.db, "owner", "dl", {dueDate: "2026-09-30",
     recipients: [{email: "a@example.invalid", sendPush: true}]}, 4);
@@ -229,7 +243,7 @@ test("push frequency crosses DST and both markers use the Italian day", async ()
   assert.equal(spring.context.shouldSendPush({lastPushNotifiedAt: "2026-03-24", notif_frequency: 7}, 3), false);
   const h = harness({now: Date.parse("2026-09-26T22:30:00Z"),
     devices: {[devicePath]: active, "users/guest/pushDevices/device": active},
-    shared: new Map([["guest", {}]]), users: {"a@example.invalid": {uid: "guest"}}});
+    shared: new Map([["guest", {}]]), users: {"a@example.invalid": {uid: "guest", emailVerified: true}}});
   await h.run();
   assert.equal(h.updates[0].value.lastPushNotifiedAt, "2026-09-27");
   await h.context.sendRecipientDeadlinePushes(h.db, "owner", "dl", {dueDate: "2026-09-30",
@@ -241,7 +255,7 @@ test("recipient total temporary failure preserves marker; partial success keeps 
   for (const partial of [false, true]) {
     const h = harness({devices: {"users/guest/pushDevices/one": {...active, token: "one"},
       "users/guest/pushDevices/two": {...active, token: "two"}},
-      users: {"a@example.invalid": {uid: "guest"}}, shared: new Map([["guest", {}]]),
+      users: {"a@example.invalid": {uid: "guest", emailVerified: true}}, shared: new Map([["guest", {}]]),
       failure: payload => partial && payload.token === "one" ? null : Object.assign(new Error("synthetic"), {code: "messaging/server-unavailable"})});
     await h.context.sendRecipientDeadlinePushes(h.db, "owner", "dl", {dueDate: "2026-09-30",
       recipients: [{email: "a@example.invalid", sendPush: true}]}, 4);
@@ -254,7 +268,7 @@ test("recipient total temporary failure preserves marker; partial success keeps 
 test("recipient temporary failure permits a later retry, successful retry advances marker", async () => {
   let recovered = false;
   const h = harness({devices: {"users/guest/pushDevices/one": active},
-    users: {"a@example.invalid": {uid: "guest"}}, shared: new Map([["guest", {}]]),
+    users: {"a@example.invalid": {uid: "guest", emailVerified: true}}, shared: new Map([["guest", {}]]),
     failure: () => recovered ? null : Object.assign(new Error("synthetic"), {code: "messaging/internal-error"})});
   const deadline = {dueDate: "2026-09-30", lastRecipientPushNotifiedAt: "2026-09-18",
     recipients: [{email: "a@example.invalid", sendPush: true}]};
@@ -283,7 +297,7 @@ test("owner partial failure retries the failed device without resending the acce
 test("recipient no-device and failed sends do not advance success marker", async () => {
   for (const errorCode of [null, "messaging/invalid-argument", "messaging/quota-exceeded"]) {
     const h = harness({devices: errorCode ? {"users/guest/pushDevices/device": active} : {},
-      users: {"a@example.invalid": {uid: "guest"}}, shared: new Map([["guest", {}]]),
+      users: {"a@example.invalid": {uid: "guest", emailVerified: true}}, shared: new Map([["guest", {}]]),
       failure: errorCode ? Object.assign(new Error("synthetic"), {code: errorCode}) : null});
     await h.context.sendRecipientDeadlinePushes(h.db, "owner", "dl", {dueDate: "2026-09-30",
       recipients: [{email: "a@example.invalid", sendPush: true}]}, 4);
@@ -295,7 +309,7 @@ test("recipient no-device and failed sends do not advance success marker", async
 test("mixed invalid and temporary failures disable only invalid device and retain marker", async () => {
   const bad = "users/guest/pushDevices/bad";
   const h = harness({devices: {[bad]: {...active, token: "bad"}, "users/guest/pushDevices/temporary": active},
-    users: {"a@example.invalid": {uid: "guest"}}, shared: new Map([["guest", {}]]),
+    users: {"a@example.invalid": {uid: "guest", emailVerified: true}}, shared: new Map([["guest", {}]]),
     failure: payload => Object.assign(new Error("synthetic"), {code: payload.token === "bad"
       ? "messaging/invalid-registration-token" : "messaging/internal-error"})});
   await h.context.sendRecipientDeadlinePushes(h.db, "owner", "dl", {dueDate: "2026-09-30",
@@ -334,7 +348,7 @@ test("overlapping recipient calls share the per-device reservation", async () =>
   const pending = new Promise(resolve => {release = resolve;});
   const started = new Promise(resolve => {entered = resolve;});
   const h = harness({devices: {"users/guest/pushDevices/device": active},
-    users: {"a@example.invalid": {uid: "guest"}}, shared: new Map([["guest", {}]]),
+    users: {"a@example.invalid": {uid: "guest", emailVerified: true}}, shared: new Map([["guest", {}]]),
     failure: async () => {entered(); await pending; return null;}});
   const deadline = {dueDate: "2026-09-30", recipients: [{email: "a@example.invalid", sendPush: true}]};
   const run = () => h.context.sendRecipientDeadlinePushes(h.db, "owner", "dl", deadline, 4);
@@ -350,7 +364,7 @@ test("overlapping recipient calls share the per-device reservation", async () =>
 test("recipient partial success retries only failed device despite today's global marker", async () => {
   let recovered = false;
   const h = harness({devices: {"users/guest/pushDevices/one": {...active, token: "one"},
-    "users/guest/pushDevices/two": {...active, token: "two"}}, users: {"a@example.invalid": {uid: "guest"}},
+    "users/guest/pushDevices/two": {...active, token: "two"}}, users: {"a@example.invalid": {uid: "guest", emailVerified: true}},
     shared: new Map([["guest", {}]]), failure: payload => !recovered && payload.token === "two"
       ? Object.assign(new Error("synthetic"), {code: "messaging/internal-error"}) : null});
   const deadline = {dueDate: "2026-09-30", recipients: [{email: "a@example.invalid", sendPush: true}]};
@@ -362,7 +376,7 @@ test("recipient partial success retries only failed device despite today's globa
 
 test("invalid old push token cannot disable a concurrent replacement", async () => {
   const path = "users/guest/pushDevices/device";
-  const h = harness({devices: {[path]: active}, users: {"a@example.invalid": {uid: "guest"}},
+  const h = harness({devices: {[path]: active}, users: {"a@example.invalid": {uid: "guest", emailVerified: true}},
     shared: new Map([["guest", {}]]), failure: () => {
       h.records.set(path, {...active, token: "replacement"});
       return Object.assign(new Error("synthetic"), {code: "messaging/invalid-registration-token"});

@@ -28,6 +28,7 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
+      "**/graphify-out/**",
       "_dev_tools/**"
     ],
     "rewrites": [

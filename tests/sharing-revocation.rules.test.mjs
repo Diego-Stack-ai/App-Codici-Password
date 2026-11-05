@@ -35,7 +35,7 @@ beforeEach(async () => {
     await setDoc(doc(db, ...accountPath), {
       nomeAccount: 'Account sintetico', type: 'account', revision: 1, visibility: 'shared', acceptedCount: 1,
       sharedWith: {[EMAIL_KEY]: {email: 'guest@example.invalid', status: 'accepted', uid: GUEST}},
-      sharedWithUids: [GUEST]
+      sharedWithUids: [GUEST], sharedWithEmailByUid: {[GUEST]: 'guest@example.invalid'}
     });
     await setDoc(doc(db, ...invitePath), {
       inviteId: INVITE_ID, ownerId: OWNER, senderId: OWNER, senderEmail: 'owner@example.invalid',
@@ -46,7 +46,9 @@ beforeEach(async () => {
 after(async () => testEnv?.cleanup());
 
 const asOwner = () => testEnv.authenticatedContext(OWNER).firestore();
-const asGuest = () => testEnv.authenticatedContext(GUEST).firestore();
+const asGuest = () => testEnv.authenticatedContext(GUEST, {
+  email: 'guest@example.invalid', email_verified: true
+}).firestore();
 const asStranger = () => testEnv.authenticatedContext('stranger').firestore();
 // `withSecurityRulesDisabled` non restituisce il valore del callback: lo
 // catturiamo in una variabile locale.
@@ -69,6 +71,9 @@ async function revocationTransaction(db, {notifyGuest}) {
     transaction.update(accountRef, {
       sharedWith,
       sharedWithUids: Object.values(sharedWith).filter(guest => guest.status === 'accepted' && guest.uid).map(guest => guest.uid),
+      sharedWithEmailByUid: Object.fromEntries(Object.values(sharedWith)
+        .filter(guest => guest.status === 'accepted' && guest.uid)
+        .map(guest => [guest.uid, String(guest.email || '').toLowerCase()])),
       acceptedCount: Math.max(0, (data.acceptedCount || 0) - 1),
       visibility: 'private', type: data.type, updatedAt: 'sintetico'
     });
@@ -117,6 +122,20 @@ test('l\'ospite accettato legge prima della revoca e non legge più dopo', async
   await assertFails(getDoc(doc(asGuest(), ...accountPath)));
 });
 
+test('un ospite con email non verificata non riusa un grant UID già esistente', async () => {
+  const unverified = testEnv.authenticatedContext(GUEST, {
+    email: 'guest@example.invalid', email_verified: false
+  }).firestore();
+  await assertFails(getDoc(doc(unverified, ...accountPath)));
+});
+
+test('lo stesso UID con una diversa email verificata non riusa il grant', async () => {
+  const changedEmail = testEnv.authenticatedContext(GUEST, {
+    email: 'attacker@example.invalid', email_verified: true
+  }).firestore();
+  await assertFails(getDoc(doc(changedEmail, ...accountPath)));
+});
+
 test('l’ospite legge i metadati allegato soltanto finché il Memorandum è condiviso', async () => {
   const attachmentPath = [...accountPath, 'attachments', 'attachment-1'];
   await testEnv.withSecurityRulesDisabled(context => setDoc(doc(context.firestore(), ...attachmentPath), {
@@ -155,6 +174,7 @@ test('un invito pendente non dà lettura e la sua revoca riesce senza notifiche'
     await setDoc(doc(context.firestore(), ...accountPath), {
       nomeAccount: 'Account sintetico', type: 'account', revision: 1, visibility: 'shared', acceptedCount: 0,
       sharedWith: {[EMAIL_KEY]: {email: 'guest@example.invalid', status: 'pending', uid: null}}, sharedWithUids: []
+      , sharedWithEmailByUid: {}
     });
   });
   await assertFails(getDoc(doc(asGuest(), ...accountPath)));

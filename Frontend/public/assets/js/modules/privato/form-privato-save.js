@@ -1,6 +1,6 @@
 import { findProfileAccountItem, patchProfileAccountItem, profileAccountReferences } from '../privato/profile-model.js';
 import { prepareCompanyProfileLink, promptCompanyProfilePasswordChoice } from '../azienda/company-profile-link.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.254';
+import { auth, db } from '../../firebase-config.js?v=1.2.255';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
@@ -367,6 +367,7 @@ export async function savePrivateAccount({
                 }
                 finalData.sharedWith = {};
                 finalData.sharedWithUids = [];
+                finalData.sharedWithEmailByUid = {};
                 finalData.acceptedCount = 0;
             } else {
                 // E' SHARED. Merge new invites into the sharedWith Map
@@ -449,6 +450,9 @@ export async function savePrivateAccount({
                 finalData.sharedWithUids = Object.values(finalData.sharedWith)
                     .filter(g => g.status === 'accepted' && g.uid)
                     .map(g => g.uid);
+                finalData.sharedWithEmailByUid = Object.fromEntries(Object.values(finalData.sharedWith)
+                    .filter(g => g.status === 'accepted' && g.uid && typeof g.email === 'string')
+                    .map(g => [g.uid, g.email.toLowerCase().trim()]));
 
                 // --- AUTO-HEALING DI STATO V5.1: Forza visibilità private se non ci sono inviti attivi ---
                 const hasActive = Object.values(finalData.sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');

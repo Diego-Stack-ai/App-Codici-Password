@@ -6,6 +6,7 @@ const {randomUUID} = require('node:crypto');
 const {HttpsError} = require('firebase-functions/v2/https');
 const {inviteRefOf, responseEventId, buildAuditEvent, auditWriteDecision} = require('../audit-event-service');
 const {assertTransactionGlobalPurgeUnlocked} = require('../archive-purge-global-lock');
+const {verifiedRequestEmail} = require('../verified-email-identity');
 
 // M7-R7B3 — risposta a un invito quando l'Account del proprietario è
 // nell'Archivio.
@@ -110,7 +111,8 @@ function fixture({archived = false, status = 'accepted', hook = null, accountCyc
         }
     };
     const context = vm.createContext({exports: {}, HttpsError, onCall: (_options, run) => run,
-        assertTransactionGlobalPurgeUnlocked,
+        assertTransactionGlobalPurgeUnlocked, verifiedRequestEmail,
+        normalizeEmail: value => String(value || '').trim().toLowerCase(),
         admin: {firestore: () => store}, structuredClone, crypto: {randomUUID},
         FieldValue: {serverTimestamp: () => SERVER_TIMESTAMP, delete: () => DELETE_FIELD},
         buildAcceptanceReceipt: input => {
@@ -127,7 +129,7 @@ function fixture({archived = false, status = 'accepted', hook = null, accountCyc
         bumpCycle: value => { documents.set(ACCOUNT_PATH, {...documents.get(ACCOUNT_PATH), sharingCycle: value});
             versions.set(ACCOUNT_PATH, (versions.get(ACCOUNT_PATH) || 0) + 1); },
         respond: (requested = status) => context.exports.respondToInvitation({
-            auth: {uid: UID, token: {email: EMAIL}},
+            auth: {uid: UID, token: {email: EMAIL, email_verified: true}},
             data: {inviteId: INVITE_ID, status: requested}
         })};
 }
@@ -192,6 +194,7 @@ test('invito su Account attivo: comportamento invariato per accettazione e rifiu
     assert.deepEqual(accepted.writes.map(write => write[0]), [ACCOUNT_PATH, INVITE_PATH, EVENT_PATH]);
     const account = accepted.documents.get(ACCOUNT_PATH);
     assert.deepEqual([...account.sharedWithUids], [UID]);
+    assert.deepEqual({...account.sharedWithEmailByUid}, {[UID]: EMAIL});
     assert.equal(account.sharedWith[KEY].status, 'accepted');
     assert.equal(account.acceptedCount, 1);
     assert.equal(account.visibility, 'shared');
@@ -201,6 +204,7 @@ test('invito su Account attivo: comportamento invariato per accettazione e rifiu
     const rejected = fixture({status: 'rejected'});
     assert.deepEqual({...await rejected.respond('rejected')}, {ok: true, status: 'rejected'});
     assert.deepEqual([...rejected.documents.get(ACCOUNT_PATH).sharedWithUids], []);
+    assert.deepEqual({...rejected.documents.get(ACCOUNT_PATH).sharedWithEmailByUid}, {});
     assert.equal(rejected.documents.get(ACCOUNT_PATH).visibility, 'private');
     assert.equal(rejected.documents.get(INVITE_PATH).status, 'rejected');
     assert.equal(rejected.documents.get(INVITE_PATH).guestUid, null);

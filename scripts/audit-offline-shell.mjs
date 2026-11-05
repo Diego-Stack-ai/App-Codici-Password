@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFile, readdir, stat } from 'node:fs/promises';
+import { access, readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 
 const root = path.resolve(import.meta.dirname, '..');
@@ -13,8 +13,17 @@ async function walk(directory) {
   }))).flat();
 }
 
+function isDeployExcluded(relativePath) {
+  const parts = relativePath.split('/');
+  return parts.includes('graphify-out') || parts.some(part => part.startsWith('.'));
+}
+
 const files = await walk(publicDir);
-const textFiles = files.filter(file => /\.(?:html|js|css|json)$/i.test(file));
+const deployableFiles = files.filter(file => {
+  const relative = path.relative(publicDir, file).replaceAll('\\', '/');
+  return !isDeployExcluded(relative);
+});
+const textFiles = deployableFiles.filter(file => /\.(?:html|js|css|json)$/i.test(file));
 const offlineSource = await readFile(path.join(publicDir, 'offline-assets.js'), 'utf8');
 const assets = JSON.parse(offlineSource.match(/=\s*(\[[\s\S]*\]);?\s*$/)?.[1] || '[]');
 const assetSet = new Set(assets);
@@ -28,13 +37,19 @@ const pushWorker = await readFile(path.join(publicDir, 'firebase-messaging-sw.js
 const loginEntry = await readFile(path.join(publicDir, 'assets/js/login-entry.js'), 'utf8');
 
 assert.ok(assets.length >= 150, `Shell offline incompleta: solo ${assets.length} risorse`);
-for (const file of files) {
+for (const file of deployableFiles) {
   const relative = path.relative(publicDir, file).replaceAll('\\', '/');
   if (/\.(?:html|js|css|json|png|jpe?g|svg|webp|woff2)$/i.test(relative)
       && relative !== 'sw.js'
       && !onlineOnlyDiagnostics.has(relative)) {
     assert.ok(assetSet.has(relative), `Risorsa statica non precaricata: ${relative}`);
   }
+}
+
+for (const asset of assets) {
+  assert.ok(!isDeployExcluded(asset), `Risorsa esclusa dal deploy presente nella shell offline: ${asset}`);
+  await assert.doesNotReject(access(path.join(publicDir, asset)),
+    `Risorsa della shell offline assente dal filesystem: ${asset}`);
 }
 
 for (const diagnostic of onlineOnlyDiagnostics) {

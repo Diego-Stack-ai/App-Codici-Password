@@ -14,10 +14,21 @@ service cloud.firestore {
       );
     }
     function myEmail() {
-      return request.auth.token.email is string ? request.auth.token.email.lower() : "";
+      return hasVerifiedEmail() ? request.auth.token.email.lower() : "";
+    }
+    function hasVerifiedEmail() {
+      return isAuth() &&
+        request.auth.token.get('email_verified', false) == true &&
+        request.auth.token.email is string &&
+        request.auth.token.email.size() > 3;
+    }
+    function isBoundGuest(data) {
+      return hasVerifiedEmail() &&
+        request.auth.uid in data.get('sharedWithUids', []) &&
+        data.get('sharedWithEmailByUid', {}).get(request.auth.uid, '').lower() == myEmail();
     }
     function isAcceptedGuest() {
-      return isAuth() && request.auth.uid in resource.data.get('sharedWithUids', []);
+      return isBoundGuest(resource.data);
     }
     // M7-R7B1a: un Account nell'Archivio è sospeso per gli ospiti, in lettura e
     // in elenco. Il confronto è esplicito (`== false`) perché un valore
@@ -30,14 +41,14 @@ service cloud.firestore {
     function isAcceptedPrivateAccountGuest(userId, accountId) {
       let path = /databases/$(database)/documents/users/$(userId)/accounts/$(accountId);
       let account = get(path);
-      return isAuth() && exists(path) && account.data.get('isArchived', false) == false &&
-        request.auth.uid in account.data.get('sharedWithUids', []);
+      return exists(path) && account.data.get('isArchived', false) == false &&
+        isBoundGuest(account.data);
     }
     function isAcceptedCompanyAccountGuest(userId, companyId, accountId) {
       let path = /databases/$(database)/documents/users/$(userId)/aziende/$(companyId)/accounts/$(accountId);
       let account = get(path);
-      return isAuth() && exists(path) && account.data.get('isArchived', false) == false &&
-        request.auth.uid in account.data.get('sharedWithUids', []);
+      return exists(path) && account.data.get('isArchived', false) == false &&
+        isBoundGuest(account.data);
     }
     function hasSafeRecipientAttachmentEnvelope() {
       // Questo indice viene scritto dalla Cloud Function soltanto nella stessa
@@ -136,7 +147,8 @@ service cloud.firestore {
     // Copia minima di una scadenza ricevuta. Il client può leggerla, mentre
     // creazione, sincronizzazione e gestione passano esclusivamente dal backend.
     match /users/{userId}/receivedDeadlines/{receivedDeadlineId} {
-      allow read: if isOwner(userId);
+      allow read: if isOwner(userId) && hasVerifiedEmail() &&
+        resource.data.get('recipientEmail', '').lower() == myEmail();
       allow write: if false;
     }
 
@@ -307,7 +319,7 @@ service cloud.firestore {
         );
       }
       function isRecipient() {
-        return isAuth() && resource.data.get('recipientEmail', '').lower() == myEmail();
+        return hasVerifiedEmail() && resource.data.get('recipientEmail', '').lower() == myEmail();
       }
       // M7-AUDIT-5R — forma del marcatore opaco dell'istanza di invito
       // (M7-AUDIT-3P-R1): UUID canonico, come lo genera `crypto.randomUUID()`.
@@ -341,7 +353,7 @@ service cloud.firestore {
       }
 
       allow get, list: if isInviteOwner() || isRecipient();
-      allow create: if isAuth() && isGlobalPurgeUnlocked(request.resource.data.get('ownerId', '')) &&
+      allow create: if hasVerifiedEmail() && isGlobalPurgeUnlocked(request.resource.data.get('ownerId', '')) &&
         request.resource.data.keys().hasOnly([
           'inviteId', 'recipientEmail', 'accountId', 'accountName',
           'ownerId', 'senderId', 'senderEmail', 'aziendaId', 'type',

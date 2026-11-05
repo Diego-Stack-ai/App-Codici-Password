@@ -35,7 +35,9 @@ function harness(records = [], failure = "", now = NOW) {
     }};
   }};
   class ScenarioClock extends Clock {constructor(...args) {super(...(args.length ? args : [now]));}}
-  const context = {recipientDeliveryLedger: require("../recipient-delivery-ledger"), deadlineCalendar: require("../deadline-calendar"), Date: ScenarioClock, exports: {}, admin: {firestore: () => db},
+  const context = {recipientDeliveryLedger: require("../recipient-delivery-ledger"),
+    inviteNotificationGuard: {cleanup: async () => 0},
+    deadlineCalendar: require("../deadline-calendar"), Date: ScenarioClock, exports: {}, admin: {firestore: () => db},
     onSchedule: (options, handler) => {config = options; return handler;},
     GMAIL_USER: {value: () => "synthetic@example.invalid"}, GMAIL_APP_PASSWORD: {value: () => "synthetic"},
     createTransporter: () => ({}), deadlineRecipients: s => s.recipients,

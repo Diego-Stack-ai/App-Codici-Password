@@ -1,9 +1,9 @@
 import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
-import { auth, db } from './firebase-config.js?v=1.2.254';
+import { auth, db } from './firebase-config.js?v=1.2.255';
 import { LOG } from './logger.js';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail, sendEmailVerification, setPersistence, browserLocalPersistence, browserSessionPersistence, getMultiFactorResolver, TotpMultiFactorGenerator } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
-import { showToast } from './ui-core-v129.js?v=1.2.254';
+import { showToast } from './ui-core-v129.js?v=1.2.255';
 import { logError } from './utils.js';
 import { ACCOUNT_PASSWORD_POLICY_VERSION, evaluatePassword, firstPasswordPolicyError } from './modules/core/password-policy.js';
 const FIRST_CONFIGURATION_VERSION = 1;
@@ -139,6 +139,9 @@ async function finalizeLogin(user, email) {
         showToast("Verifica l'email prima di accedere alla Vault.", "warning");
         return { user: updatedUser, mfaRequired: false, emailVerificationRequired: true };
     }
+    // Server-side sharing trusts the verified ID-token claim, not only the
+    // refreshed User profile. Refresh the token after mailbox verification.
+    await updatedUser.getIdToken(true);
     await consumePasswordResetPolicyMarker(updatedUser);
     const userDocRef = doc(db, "users", updatedUser.uid);
     const userDoc = await getDoc(userDocRef);
@@ -261,6 +264,10 @@ function checkAuthState() {
                 }
                 return;
             }
+            if (navigator.onLine) {
+                const token = await currentUser.getIdTokenResult();
+                if (token.claims.email_verified !== true) await currentUser.getIdToken(true);
+            }
             if (path.includes('login-v115.html') && reauthFlow === 'password-change') {
                 LOG("[AUTH] Reauthentication completed, returning to password change");
                 window.location.replace('imposta_nuova_password.html?reauthenticated=1');
@@ -312,7 +319,9 @@ async function refreshEmailVerification() {
     const user = auth.currentUser;
     if (!user) return false;
     await user.reload();
-    return auth.currentUser?.emailVerified === true;
+    if (auth.currentUser?.emailVerified !== true) return false;
+    await auth.currentUser.getIdToken(true);
+    return true;
 }
 
 export {

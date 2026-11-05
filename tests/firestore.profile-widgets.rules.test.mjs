@@ -62,7 +62,9 @@ test('la scadenza ricevuta è leggibile solo dal destinatario e non è scrivibil
     });
   });
   const ownerRef = doc(
-    testEnv.authenticatedContext(OWNER_UID).firestore(),
+    testEnv.authenticatedContext(OWNER_UID, {
+      email: 'owner@example.com', email_verified: true
+    }).firestore(),
     'users', OWNER_UID, 'receivedDeadlines', 'received-1'
   );
   const otherRef = doc(
@@ -70,6 +72,18 @@ test('la scadenza ricevuta è leggibile solo dal destinatario e non è scrivibil
     'users', OWNER_UID, 'receivedDeadlines', 'received-1'
   );
   await assertSucceeds(getDoc(ownerRef));
+  await assertFails(getDoc(doc(
+    testEnv.authenticatedContext(OWNER_UID, {
+      email: 'owner@example.com', email_verified: false
+    }).firestore(),
+    'users', OWNER_UID, 'receivedDeadlines', 'received-1'
+  )));
+  await assertFails(getDoc(doc(
+    testEnv.authenticatedContext(OWNER_UID, {
+      email: 'changed@example.com', email_verified: true
+    }).firestore(),
+    'users', OWNER_UID, 'receivedDeadlines', 'received-1'
+  )));
   await assertFails(getDoc(otherRef));
   await assertFails(updateDoc(ownerRef, {dueDate: '2028-09-08'}));
   await assertFails(deleteDoc(ownerRef));

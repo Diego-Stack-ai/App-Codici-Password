@@ -15,6 +15,10 @@ function harness({fail = [], users = {}, lookupFailure = null, now = Date.parse(
   let current;
   const sandbox = {Date: Clock, recipientDeliveryLedger: require("../recipient-delivery-ledger"), deadlineCalendar: require("../deadline-calendar"), console: {log() {}, error: (...args) => errors.push(args.map(String).join(" "))},
     deadlineRecipients: s => s.recipients || [], receivedDeadlineId: () => "synthetic-share-id",
+    verifiedUserByEmail: async (auth, email) => {
+      const user = await auth.getUserByEmail(email);
+      return user.emailVerified === true ? user : null;
+    },
     admin: {auth: () => ({async getUserByEmail(email) {
       lookups.push(email);
       if (lookupFailure) throw lookupFailure;
@@ -115,11 +119,18 @@ test("email total failure does not advance; partial success retries only the fai
 });
 test("email received link belongs only to external registered recipients", async () => {
   for (const uid of ["guest", "owner", null]) {
-    const h = harness({users: uid ? {"a@example.invalid": {uid}} : {}});
+    const h = harness({users: uid ? {"a@example.invalid": {uid, emailVerified: true}} : {}});
     await h.send({recipients: [{email: "a@example.invalid", sendEmail: true, canManage: true}]});
     assert.equal(h.lookups.length, 1);
     assert.equal(h.mails[0].html.includes("?received=synthetic-share-id"), uid === "guest");
   }
+});
+test("email unverified recipients never receive an authenticated app link", async () => {
+  const h = harness({users: {"a@example.invalid": {uid: "guest", emailVerified: false}}});
+  await h.send({recipients: [{email: "a@example.invalid", sendEmail: true, canManage: true}]});
+  assert.equal(h.lookups.length, 1);
+  assert.equal(h.mails[0].html.includes("?received=synthetic-share-id"), false);
+  assert.match(h.mails[0].html, /https:\/\/appcodici-password\.web\.app\//);
 });
 test("each user-controlled email HTML value is escaped independently, subject unchanged", async () => {
   const payload = '<img src=x onerror="synthetic">&\'';

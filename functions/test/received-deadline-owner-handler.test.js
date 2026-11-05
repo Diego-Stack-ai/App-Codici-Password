@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const {readFileSync} = require('node:fs');
 const vm = require('node:vm');
 const {HttpsError} = require('firebase-functions/v2/https');
+const {verifiedRequestEmail} = require('../verified-email-identity');
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const guardStart = source.indexOf('function requireMutationOwner(');
 const guardEnd = source.indexOf('exports.applyOfflineMutation', guardStart);
@@ -29,15 +30,15 @@ function fixture({permission = 'manage', recipientEmail = 'a@example.invalid', a
   const firestore = () => { accesses += 1; return store; };
   firestore.FieldValue = {serverTimestamp: () => 'synthetic-time'};
   const context = vm.createContext({exports: {}, HttpsError, onCall: (_options, handler) => handler,
-    admin: {firestore}, normalizeEmail: value => String(value || '').toLowerCase().trim(),
+    admin: {firestore}, normalizeEmail: value => String(value || '').toLowerCase().trim(), verifiedRequestEmail,
     deadlineRecipients: record => record.recipients,
     validFutureIsoDate: value => /^2099-\d{2}-\d{2}$/.test(value),
     notifyDeadlineOwner: async (...args) => notifications.push(args)
   });
   vm.runInContext(source.slice(guardStart, guardEnd) + '\n' + source.slice(start, end), context);
   return {reads, writes, notifications, accesses: () => accesses,
-    run: (data = command, uid = 'A') => context.exports.manageReceivedDeadline({data,
-      auth: uid ? {uid, token: {email: 'a@example.invalid', name: 'Synthetic'}} : null})};
+    run: (data = command, uid = 'A', emailVerified = true) => context.exports.manageReceivedDeadline({data,
+      auth: uid ? {uid, token: {email: 'a@example.invalid', email_verified: emailVerified, name: 'Synthetic'}} : null})};
 }
 
 test('received deadline owner binding rejects missing/malformed owner and A command with B token before DB', async () => {
@@ -56,6 +57,12 @@ test('received deadline still requires authentication before processing any comm
   const f = fixture();
   await assert.rejects(f.run(command, null), error => error.code === 'unauthenticated');
   assert.equal(f.accesses(), 0); assert.equal(f.writes.length, 0);
+});
+
+test('received deadline rejects an unverified email before database access', async () => {
+  const f = fixture();
+  await assert.rejects(f.run(command, 'A', false), error => error.code === 'permission-denied');
+  assert.equal(f.accesses(), 0); assert.equal(f.writes.length, 0); assert.equal(f.notifications.length, 0);
 });
 
 test('bound completion and renewal preserve recipient/source updates and owner notification', async () => {

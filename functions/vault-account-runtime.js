@@ -386,6 +386,7 @@ function assertProfileLinkAccount(record, uid2, selection, { destination = false
   if (record.visibility !== void 0 && record.visibility !== "private" || record.type !== void 0 && record.type !== "account" || record.acceptedCount != null && record.acceptedCount !== 0 || record.recipientEmail != null && record.recipientEmail !== "") fail();
   for (const key of ["sharedWithUids", "sharedWithEmails"]) if (record[key] != null && (!Array.isArray(record[key]) || record[key].length)) fail();
   if (record.sharedWith != null && (!object(record.sharedWith) || Object.keys(record.sharedWith).length)) fail();
+  if (record.sharedWithEmailByUid != null && (!object(record.sharedWithEmailByUid) || Object.keys(record.sharedWithEmailByUid).length)) fail();
 }
 
 // experiments/persistent-vault-shell/profile-text-contract.mjs
@@ -812,6 +813,7 @@ function minimalCreatedAccount({ uid: uid2, accountId, request, timestamp }) {
     banking: [],
     sharedWith: {},
     sharedWithUids: [],
+    sharedWithEmailByUid: {},
     acceptedCount: 0,
     schemaVersion: 1,
     revision: 0,

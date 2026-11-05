@@ -19,6 +19,8 @@ const { getStorage } = require("firebase-admin/storage");
 const nodemailer = require("nodemailer");
 const deadlineCalendar = require("./deadline-calendar");
 const recipientDeliveryLedger = require("./recipient-delivery-ledger");
+const inviteNotificationGuard = require("./invite-notification-guard");
+const {verifiedRequestEmail, verifiedUserByEmail} = require("./verified-email-identity");
 const crypto = require("crypto");
 const { setGlobalOptions } = require("firebase-functions");
 const {
@@ -780,8 +782,8 @@ async function resolveRecipientUsers(recipients, ownerUid) {
     const resolved = new Map();
     for (const recipient of recipients.filter((item) => item.sendPush || item.canManage)) {
         try {
-            const user = await admin.auth().getUserByEmail(recipient.email);
-            if (user.uid !== ownerUid) resolved.set(user.uid, { recipient, user });
+            const user = await verifiedUserByEmail(admin.auth(), recipient.email);
+            if (user && user.uid !== ownerUid) resolved.set(user.uid, { recipient, user });
         } catch (error) {
             if (error.code !== "auth/user-not-found") {
                 console.error("[RECEIVED DEADLINE LOOKUP FAILED]", error.code || error.message);
@@ -871,12 +873,12 @@ async function sendRecipientDeadlinePushes(db, ownerUid, deadlineId, scadenza, d
     const deadlineRef = db.collection("users").doc(ownerUid).collection("scadenze").doc(deadlineId);
     for (const recipient of recipients) {
         let recipientUser;
-        try { recipientUser = await admin.auth().getUserByEmail(recipient.email); }
+        try { recipientUser = await verifiedUserByEmail(admin.auth(), recipient.email); }
         catch (error) {
             if (error.code !== "auth/user-not-found") console.error("[RECIPIENT LOOKUP FAILED]", "RECIPIENT_LOOKUP_FAILED");
             continue;
         }
-        if (!sharedRecipients.has(recipientUser.uid)) continue;
+        if (!recipientUser || !sharedRecipients.has(recipientUser.uid)) continue;
         const shareId = receivedDeadlineId(ownerUid, deadlineId);
         const recipientBody = recipient.canManage
             ? `${text.body}\nSe la gestisci tu, apri l'app e aggiorna la prossima data.`
@@ -1106,9 +1108,9 @@ exports.manageReceivedDeadline = onCall(
             throw new HttpsError("invalid-argument", "Inserisci una prossima data valida, da oggi in avanti.");
         }
 
-        const db = admin.firestore();
         const recipientUid = request.auth.uid;
-        const recipientEmail = normalizeEmail(request.auth.token.email);
+        const recipientEmail = verifiedRequestEmail(request, HttpsError);
+        const db = admin.firestore();
         const receivedRef = db.collection("users").doc(recipientUid).collection("receivedDeadlines").doc(shareId);
         let ownerUid;
         let deadlineId;
@@ -1180,8 +1182,7 @@ exports.respondToInvitation = onCall(
         }
 
         const uid = request.auth.uid;
-        const email = String(request.auth.token.email || "").toLowerCase().trim();
-        if (!email) throw new HttpsError("permission-denied", "Email verificabile mancante.");
+        const email = verifiedRequestEmail(request, HttpsError);
 
         const firestore = admin.firestore();
         const inviteRef = firestore.collection("invites").doc(inviteId);
@@ -1254,6 +1255,9 @@ exports.respondToInvitation = onCall(
             sharedWith[guestKey] = { ...guest, status, uid: status === "accepted" ? uid : null };
             const acceptedGuests = Object.values(sharedWith).filter((item) => item?.status === "accepted" && item?.uid);
             const sharedWithUids = [...new Set(acceptedGuests.map((item) => item.uid))];
+            const sharedWithEmailByUid = Object.fromEntries(acceptedGuests
+                .filter((item) => normalizeEmail(item.email))
+                .map((item) => [item.uid, normalizeEmail(item.email)]));
             const hasActive = Object.values(sharedWith).some((item) => ["pending", "accepted"].includes(item?.status));
 
             // M7-AUDIT-4 (opzione A, decisione D-7) — evento del registro tecnico
@@ -1308,6 +1312,7 @@ exports.respondToInvitation = onCall(
             transaction.update(accountRef, {
                 sharedWith,
                 sharedWithUids,
+                sharedWithEmailByUid,
                 acceptedCount: acceptedGuests.length,
                 visibility: hasActive ? "shared" : "private",
                 updatedAt: new Date().toISOString()
@@ -1457,7 +1462,7 @@ function createTransporter(gmailUser, gmailPass) {
     });
 }
 
-exports.onInviteCreated = onDocumentCreated(
+exports.onInviteCreated = onDocumentWritten(
     {
         document: "invites/{inviteId}",
         secrets: [GMAIL_USER, GMAIL_APP_PASSWORD],
@@ -1466,41 +1471,51 @@ exports.onInviteCreated = onDocumentCreated(
         timeoutSeconds: 60,
     },
     async (event) => {
-        const invite = event.data.data();
-        if (invite.status !== "pending") return;
-        const recipientEmail = normalizeEmail(invite.recipientEmail);
-        if (!recipientEmail) return;
+        const before = event.data.before.exists ? event.data.before.data() : null;
+        const invite = event.data.after.exists ? event.data.after.data() : null;
+        if (!inviteNotificationGuard.isNotificationTransition(before, invite)) return;
+        const store = admin.firestore();
+        const inviteId = event.params.inviteId;
         const tasks = [];
-        if (invite.notifyEmail === true) {
-            const transporter = createTransporter(GMAIL_USER.value(), GMAIL_APP_PASSWORD.value());
-            tasks.push(transporter.sendMail({
-                from: `"Codex Notifiche" <${GMAIL_USER.value()}>`,
-                to: recipientEmail,
-                subject: "Invito a un account condiviso — Codici & Password",
-                html: `<p>Hai ricevuto un invito per un account condiviso in Codici & Password.</p><p>Apri l'app per accettarlo o rifiutarlo.</p><p><a href="https://appcodici-password.web.app/">Apri o installa Codici & Password</a></p>`
-            }));
-        }
-        if (invite.notifyPush === true) {
-            tasks.push((async () => {
+        tasks.push(inviteNotificationGuard.deliver({db: store, invite, inviteId, channel: "email",
+            send: async current => {
+                const transporter = createTransporter(GMAIL_USER.value(), GMAIL_APP_PASSWORD.value());
+                await transporter.sendMail({
+                    from: `"Codex Notifiche" <${GMAIL_USER.value()}>`,
+                    to: current.recipientEmail,
+                    subject: "Invito a un account condiviso — Codici & Password",
+                    html: `<p>Hai ricevuto un invito per un account condiviso in Codici & Password.</p><p>Apri l'app per accettarlo o rifiutarlo.</p><p><a href="https://appcodici-password.web.app/">Apri o installa Codici & Password</a></p>`
+                });
+                return true;
+            }
+        }));
+        tasks.push(inviteNotificationGuard.deliver({db: store, invite, inviteId, channel: "push",
+            send: async current => {
                 let recipientUser;
-                try { recipientUser = await admin.auth().getUserByEmail(recipientEmail); }
+                try { recipientUser = await verifiedUserByEmail(admin.auth(), current.recipientEmail); }
                 catch (error) {
                     if (error.code !== "auth/user-not-found") throw error;
-                    return;
+                    return false;
                 }
-                const devices = await activePushDevices(admin.firestore(), recipientUser.uid, "sharing");
-                await Promise.allSettled(devices.map((device) => admin.messaging().send({
+                if (!recipientUser) return false;
+                const devices = await activePushDevices(store, recipientUser.uid, "sharing");
+                if (!devices.length) return false;
+                const deliveries = await Promise.allSettled(devices.map((device) => admin.messaging().send({
                     token: device.data().token,
                     data: {
                         eventType: "share_invite",
                         title: "Nuovo invito — Codici & Password",
-                        body: `Hai ricevuto un invito per ${String(invite.accountName || "un account condiviso").slice(0, 100)}.`,
-                        deliveryTag: `share-${event.params.inviteId}`
+                        body: `Hai ricevuto un invito per ${current.accountName}.`,
+                        deliveryTag: `share-${crypto.createHash("sha256").update(inviteId).digest("hex").slice(0, 24)}`
                     },
                     webpush: { headers: { TTL: "86400", Urgency: "high" } }
                 })));
-            })());
-        }
+                if (!deliveries.some(result => result.status === "fulfilled")) {
+                    throw new Error("INVITE_PUSH_DELIVERY_FAILED");
+                }
+                return true;
+            }
+        }));
         const results = await Promise.allSettled(tasks);
         results.filter((result) => result.status === "rejected")
             .forEach(() => console.error("[INVITE NOTIFICATION FAILED] DELIVERY_FAILED"));
@@ -1787,8 +1802,8 @@ async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
         let buttonLabel = "Apri o installa Codici & Password";
         if (recipient.sendPush || recipient.canManage) {
             try {
-                const recipientUser = await admin.auth().getUserByEmail(recipient.email);
-                if (recipientUser.uid !== ownerUid) {
+                const recipientUser = await verifiedUserByEmail(admin.auth(), recipient.email);
+                if (recipientUser && recipientUser.uid !== ownerUid) {
                     const shareId = receivedDeadlineId(ownerUid, docRef.id);
                     appUrl = `https://appcodici-password.web.app/dettaglio_scadenza.html?received=${shareId}`;
                     buttonLabel = "Apri la scadenza nell'app";
@@ -1865,6 +1880,8 @@ exports.checkDeadlines = onSchedule(
         try {
             try { await recipientDeliveryLedger.cleanup(db); }
             catch { console.error("[RECIPIENT LEDGER CLEANUP]", "CLEANUP_FAILED"); }
+            try { await inviteNotificationGuard.cleanup(db); }
+            catch { console.error("[INVITE NOTIFICATION CLEANUP]", "CLEANUP_FAILED"); }
             const usersSnap = await db.collection("users").get();
 
             for (const userDoc of usersSnap.docs) {

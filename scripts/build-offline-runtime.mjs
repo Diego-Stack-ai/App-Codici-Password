@@ -110,11 +110,18 @@ const onlineOnlyDiagnostics = new Set([
   'assets/css/prova.css',
   'assets/js/prova.js'
 ]);
+function isDeployExcluded(relativePath) {
+  const parts = relativePath.split('/');
+  return parts.includes('graphify-out') || parts.some(part => part.startsWith('.'));
+}
 const publicFiles = await walk(publicDir);
 const offlineAssets = publicFiles
   .filter(file => cacheableExtensions.has(path.extname(file).toLowerCase()))
   .filter(file => path.basename(file) !== 'sw.js')
   .map(file => path.relative(publicDir, file).replaceAll('\\', '/'))
+  // Keep the precache manifest aligned with Firebase Hosting. Graphify output is
+  // local analysis material, while dot-paths are excluded by firebase.json.
+  .filter(file => !isDeployExcluded(file))
   .filter(file => !onlineOnlyDiagnostics.has(file))
   .sort();
 await writeFile(

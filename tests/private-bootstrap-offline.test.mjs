@@ -8,10 +8,16 @@ const source = await readFile(new URL('../Frontend/public/assets/js/main-v129.js
 const start = source.indexOf('const publicPages =');
 const end = source.indexOf('if (isPrivatePage && navigator.onLine) firebaseRuntime.enableAppCheck', start);
 assert.ok(start >= 0 && end > start);
-function fixture({online = false, verified = true, refresh, page = 'account_privati'} = {}) {
+function fixture({online = false, verified = true, tokenVerified = true, refresh, page = 'account_privati'} = {}) {
     const redirects = [];
     const state = {reloads: 0, initialized: 0};
-    const user = {uid: 'fixture', emailVerified: verified, async reload() {
+    const user = {uid: 'fixture', emailVerified: verified, async getIdTokenResult() {
+        return {claims: {email_verified: tokenVerified}};
+    }, async getIdToken(force) {
+        if (force) state.tokenRefreshes = (state.tokenRefreshes || 0) + 1;
+        tokenVerified = true;
+        return 'synthetic-token';
+    }, async reload() {
         state.reloads++;
         if (refresh) return refresh(auth, user);
         if (!online) throw new Error('auth/network-request-failed');
@@ -46,4 +52,8 @@ for (const current of [null, {uid: 'other', emailVerified: true}]) test(`identit
 });
 test('verified online identity can initialize the private page', async () => {
     const f = fixture({online: true}); await f.run(); assert.equal(f.state.reloads, 1); assert.equal(f.state.initialized, 1);
+});
+test('verified profile with stale ID token refreshes the claim before private initialization', async () => {
+    const f = fixture({online: true, tokenVerified: false}); await f.run();
+    assert.equal(f.state.tokenRefreshes, 1); assert.equal(f.state.initialized, 1);
 });

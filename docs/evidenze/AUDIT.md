@@ -3166,3 +3166,56 @@ separatamente. Nessun comportamento applicativo è stato modificato da questo au
 09/10/2026 — MFA-CONSUME riduzione del rischio locale: dopo la prenotazione del recovery code, l'handler rilegge l'utente Auth e confronta l'insieme ordinato `{factorId, uid}` prima del full-replace. Un fattore aggiunto nel frattempo produce `failed-precondition`, zero `updateUser` e codice conservato. Test mirati 14/14, concorrenza Firestore 2/2. Il controllo riduce ma non elimina la race: un fattore aggiunto dopo la seconda lettura e prima di `updateUser(...enrolledFactors:null)` non è protetto; gate ancora aperto in assenza di rimozione TOTP selettiva/CAS.
 
 09/10/2026 — Decisione MFA e distribuzione: il full-replace dei fattori è stato rimosso dal runtime. Con MFA attivo `recoverMfaWithCode` ora fallisce chiuso e indirizza all'assistenza senza prenotare o consumare codici e senza invocare `updateUser`. Commit `b18d6c88`, deploy limitato alla sola Function e verifica remota `ACTIVE` (`europe-west1`, Node.js 22, hash `44c5590082c851780a3e5b34745f726bbbe233ad`). Nessun recupero MFA reale è stato eseguito; audit indipendente e prove fisiche restano non dichiarati.
+
+## Riesame sicurezza pre-finale — 04/11/2026
+
+È stata eseguita una scansione standard dell'intero repository con Codex Security
+(`scanId 50d842de-52ef-4ac2-98b1-8fb927f86692`), seguita da analisi dei percorsi di
+attacco e revisione indipendente delle correzioni. La scansione ha individuato due
+confini applicativi da rafforzare; le modifiche descritte qui sono ancora locali e
+non costituiscono un deploy o una certificazione di sicurezza.
+
+1. L'e-mail Firebase non è più usata come identità autorizzativa se il claim
+   `email_verified` non è strettamente `true`. Lo stesso requisito vale per le
+   risoluzioni e-mail→UID eseguite con Firebase Admin. Le Rules applicano inoltre
+   il controllo al momento della lettura degli Account condivisi, degli allegati e
+   delle scadenze ricevute. Ogni UID accettato è ora legato anche all'e-mail
+   verificata con cui ha accettato: un successivo cambio di indirizzo sullo stesso
+   account Firebase non riattiva quindi un grant storico. Il client forza il
+   rinnovo del token quando il profilo risulta verificato ma il claim è ancora
+   obsoleto. Gli Account storici richiedono il backfill amministrativo dedicato
+   prima della pubblicazione delle Rules; lo script è fail-closed, parte in dry-run
+   e scrive soltanto dopo doppia conferma esplicita del progetto.
+2. Le notifiche generate dagli inviti vengono ora ammesse soltanto dopo aver
+   riletto l'Account autorevole e verificato proprietario, Account, azienda, ciclo,
+   destinatario pendente e preferenze correnti. Un registro tecnico server-side
+   impedisce duplicati per singola istanza dell'invito e canale; un nuovo reinvito
+   sullo stesso documento usa un nuovo identificatore opaco e può quindi notificare
+   una sola volta. Limiti separati proteggono proprietario e destinatario. I
+   registri conservano hash e contatori, non indirizzi e-mail in chiaro, e vengono
+   rimossi dopo il periodo tecnico previsto. Una seconda revisione indipendente ha
+   inoltre richiesto limiti giornalieri per proprietario e globali per canale, così
+   da proteggere la quota condivisa dei provider; la capacità giornaliera del cleanup
+   è superiore alla massima produzione teorica dei relativi registri tecnici.
+
+Sono stati esclusi `graphify-out` e i percorsi nascosti dal manifest offline e dal
+perimetro Firebase Hosting. Il runner browser offline chiude esplicitamente il
+profilo persistente usato nelle prove, evitando processi Edge lasciati attivi.
+
+Evidenze locali: 491 test Functions Security (482 superati, 9 esclusi), 84 test
+Firestore Rules, 23 test Storage Rules complessivi, 98 test data-access, 43 test
+sharing-prototype, 14 test offline e 17 test logici dell'Archivio portabile, oltre
+alle prove browser e capacità fino a 485 MiB, tutti senza errori. Queste sono prove
+sintetiche/emulate: non equivalgono a penetration test, audit indipendente,
+verifica delle configurazioni Firebase/Google Cloud distribuite o collaudo fisico
+su tutti i dispositivi. Nessun dato reale della Vault è stato letto o modificato.
+
+Pubblicazione del 05/11/2026: il backfill amministrativo ha esaminato 256 Account,
+ne ha aggiornati 4 e il controllo successivo ha confermato 256/256 record conformi,
+senza rifiuti né aggiornamenti residui. La versione `v1.2.255` è stata distribuita
+su Cloud Functions, Firestore Rules, Storage Rules e Firebase Hosting. La vecchia
+Function `getAppPresentation`, già assente dal codice e non più collegata a Hosting,
+è stata rimossa prima del deploy; riguardava soltanto il precedente video di
+presentazione, non gli allegati degli Account. Il controllo remoto ha restituito
+HTTP 200, intestazione `no-cache/no-store` e versione `v1.2.255`; le Functions
+elencate dal progetto risultavano `ACTIVE` su Node.js 22.
