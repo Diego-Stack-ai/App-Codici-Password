@@ -1,4 +1,4 @@
-import { auth, db, functions } from '../../firebase-config.js?v=1.2.254';
+import { auth, db, functions } from '../../firebase-config.js?v=1.2.256';
 import { deleteField, doc, httpsCallable, onAuthStateChanged, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createArchiveMetadata } from './archive-account-model.js';
@@ -239,6 +239,7 @@ export async function restoreArchivedAccount(uid, account, options = {}) {
                 }
                 patch.sharedWith = sharedWith;
                 patch.sharedWithUids = [];
+                patch.sharedWithEmailByUid = {};
                 patch.acceptedCount = 0;
                 patch.sharingCycle = nextCycle;
                 sharingCycle = nextCycle;
@@ -339,6 +340,7 @@ export async function archiveAccount(uid, account, options = {}) {
                 revision: currentRevision + 1,
                 sharingCycle: nextCycle,
                 sharedWithUids: [],
+                sharedWithEmailByUid: {},
                 acceptedCount: 0,
                 sharedWith
             });

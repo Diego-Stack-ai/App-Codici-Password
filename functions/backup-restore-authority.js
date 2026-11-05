@@ -2,7 +2,7 @@
 
 // Backup content is not authority to recreate a revoked invitation or grant.
 // Existing access is copied from the transaction snapshot, never from the file.
-const SHARING_FIELDS = ['sharedWith', 'sharedWithUids', 'acceptedCount', 'sharingCycle', 'visibility'];
+const SHARING_FIELDS = ['sharedWith', 'sharedWithUids', 'sharedWithEmailByUid', 'acceptedCount', 'sharingCycle', 'visibility'];
 function preserveRestoreAuthority(path, backup, current = null) {
   if (/^users\/[^/]+\/scadenze\/[^/]+$/.test(path)) {
     const result = {...backup};

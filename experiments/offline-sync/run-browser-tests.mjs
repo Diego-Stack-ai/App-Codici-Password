@@ -2,8 +2,8 @@ import {createServer} from 'node:http';
 import {readFile, mkdtemp, rm} from 'node:fs/promises';
 import {resolve, relative, dirname, sep} from 'node:path';
 import {tmpdir} from 'node:os';
-import {spawn} from 'node:child_process';
 import {build} from 'esbuild';
+import {chromium} from 'playwright';
 
 // Synthetic data and disposable browser profile. Optional backend is emulator-only.
 const browserPath = process.argv[2];
@@ -75,7 +75,7 @@ const paths = new Map([
     ['/queue.js', 'Frontend/public/assets/js/modules/data/offline-mutation-queue.js'],
     ['/crypto-utils.js', 'Frontend/public/assets/js/modules/core/crypto-utils.js']
 ]);
-let accept, reject, child, timer;
+let accept, reject, browserContext, timer;
 const result = new Promise((resolveResult, rejectResult) => { accept = resolveResult; reject = rejectResult; });
 const server = createServer(async (request, response) => {
     try {
@@ -106,19 +106,21 @@ try {
     // `--two-tabs` serve due **schede reali** dello stesso profilo e della stessa origine: il
     // browser headless non accetta due target da riga di comando, quindi la seconda scheda viene
     // aperta dalla prima (`window.open`) e il blocco dei popup va disattivato.
-    child = spawn(browserPath, ['--headless=new', ...sandboxArgs, '--disable-gpu', '--no-first-run', '--disable-sync',
-        '--disable-background-networking', ...(twoTabs ? ['--disable-popup-blocking'] : []),
-        `--user-data-dir=${profile}`, origin],
-    {windowsHide: true, stdio: 'ignore'});
-    child.on('error', reject);
-    child.on('exit', code => { if (code) reject(new Error('BROWSER_EXITED')); });
+    browserContext = await chromium.launchPersistentContext(profile, {
+        executablePath: browserPath,
+        headless: true,
+        args: [...sandboxArgs, '--disable-gpu', '--no-first-run', '--disable-sync',
+            '--disable-background-networking', ...(twoTabs ? ['--disable-popup-blocking'] : [])]
+    });
+    const page = browserContext.pages()[0] || await browserContext.newPage();
+    await page.goto(origin);
     timer = setTimeout(() => reject(new Error('BROWSER_TEST_TIMEOUT')), 45000);
     const report = await result;
     if (report.ok !== true || !Array.isArray(report.passed)) throw new Error(JSON.stringify(report));
     console.log(JSON.stringify(report, null, 2));
 } finally {
     clearTimeout(timer);
-    child?.kill();
+    await browserContext?.close().catch(() => {});
     server.closeAllConnections(); // Also release deliberately held SDK test responses on failure.
     await new Promise(done => server.close(done));
     await bridge?.close();

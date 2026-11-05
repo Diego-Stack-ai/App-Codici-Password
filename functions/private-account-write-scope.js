@@ -20,6 +20,7 @@ function assertPrivateAccountWriteScope({uid, record}) {
     if (own(record, field) && record[field] !== false) deny();
   }
   if (!emptyMap(record.sharedWith) || !emptyList(record.sharedWithUids) ||
+      !emptyMap(record.sharedWithEmailByUid) ||
       !emptyList(record.sharedWithEmails) || !emptyText(record.recipientEmail) ||
       (record.acceptedCount != null && record.acceptedCount !== 0)) deny();
   // Support the canonical banking array and detect the historical top-level

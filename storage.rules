@@ -6,6 +6,20 @@ service firebase.storage {
       return request.auth != null && request.auth.uid == userId;
     }
 
+    function hasVerifiedEmail() {
+      return request.auth != null &&
+        request.auth.token.get('email_verified', false) == true &&
+        request.auth.token.email is string &&
+        request.auth.token.email.size() > 3;
+    }
+
+    function isBoundGuest(account) {
+      return hasVerifiedEmail() &&
+        request.auth.uid in account.data.get('sharedWithUids', []) &&
+        account.data.get('sharedWithEmailByUid', {}).get(request.auth.uid, '').lower() ==
+          request.auth.token.email.lower();
+    }
+
     function isGlobalPurgeUnlocked(userId) {
       let path = /databases/(default)/documents/archivePurgeLocks/$(userId);
       let lock = firestore.get(path);
@@ -33,15 +47,15 @@ service firebase.storage {
     function isAcceptedPrivateAccountGuest(userId, accountId) {
       let path = /databases/(default)/documents/users/$(userId)/accounts/$(accountId);
       let account = firestore.get(path);
-      return request.auth != null && firestore.exists(path) && account.data.get('isArchived', false) == false &&
-        request.auth.uid in account.data.get('sharedWithUids', []);
+      return firestore.exists(path) && account.data.get('isArchived', false) == false &&
+        isBoundGuest(account);
     }
 
     function isAcceptedCompanyAccountGuest(userId, companyId, accountId) {
       let path = /databases/(default)/documents/users/$(userId)/aziende/$(companyId)/accounts/$(accountId);
       let account = firestore.get(path);
-      return request.auth != null && firestore.exists(path) && account.data.get('isArchived', false) == false &&
-        request.auth.uid in account.data.get('sharedWithUids', []);
+      return firestore.exists(path) && account.data.get('isArchived', false) == false &&
+        isBoundGuest(account);
     }
 
     // Materiale editoriale dell'app: leggibile esclusivamente dopo il login.

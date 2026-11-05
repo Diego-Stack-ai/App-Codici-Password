@@ -26,5 +26,6 @@ export function canRecoverPrivateAccount(record, uid) {
         !(record.sharedWithEmails || []).length &&
         (!record.banking || (Array.isArray(record.banking) && record.banking.length === 0)) &&
         !Object.keys(record.sharedWith || {}).length && !(record.sharedWithUids || []).length &&
+        !Object.keys(record.sharedWithEmailByUid || {}).length &&
         !Object.keys(record.pendingInvites || {}).length);
 }

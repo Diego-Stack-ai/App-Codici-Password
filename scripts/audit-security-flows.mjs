@@ -186,7 +186,13 @@ assert.doesNotMatch(
     /allow\s+[^;]*\b(?:write|create|update|delete)\b[^;]*:\s*if[^;]*(?:isAcceptedGuest|isGuestReadableAccount)\s*\(/s,
     'Un ospite può ancora modificare account altrui'
 );
-assert.match(firestoreRules, /request\.auth\.uid in resource\.data\.get\('sharedWithUids', \[\]\)/, 'La lettura condivisa non richiede un UID accettato');
+assert.match(firestoreRules, /function isBoundGuest\(data\)/, 'La lettura condivisa non usa il vincolo UID/e-mail verificata');
+assert.match(firestoreRules, /request\.auth\.uid in data\.get\('sharedWithUids', \[\]\)/, 'La lettura condivisa non richiede un UID accettato');
+assert.match(firestoreRules, /sharedWithEmailByUid/, 'La lettura condivisa non lega l’UID all’e-mail verificata');
+assert.match(firestoreRules, /data\.get\('sharedWithEmailByUid', \{\}\)\.get\(request\.auth\.uid, ''\)\.lower\(\) == myEmail\(\)/,
+    'La lettura condivisa non confronta l’e-mail verificata corrente con quella accettata');
+assert.match(firestoreRules, /resource\.data\.get\('recipientEmail', ''\)\.lower\(\) == myEmail\(\)/,
+    'Le scadenze ricevute non sono vincolate all’e-mail verificata del destinatario');
 assert.doesNotMatch(firestoreRules, /request\.query\.filters\.size/, 'Gli inviti accettano ancora una query con filtro arbitrario');
 // M7-AUDIT-5R: l'aggiornamento dell'invito è ora separato dalla cancellazione ed
 // è ristretto al proprietario **con i campi vincolati** (allowlist verificata in

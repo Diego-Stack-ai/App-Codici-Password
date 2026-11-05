@@ -1,7 +1,7 @@
 import {after, before, test} from 'node:test';
 import {readFile} from 'node:fs/promises';
 import {assertFails, assertSucceeds, initializeTestEnvironment} from '@firebase/rules-unit-testing';
-import {collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc} from 'firebase/firestore';
+import {collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where} from 'firebase/firestore';
 
 const PROJECT_ID = 'demo-codici-password-rules-test';
 const OWNER_UID = 'owner-user';
@@ -62,7 +62,9 @@ test('la scadenza ricevuta è leggibile solo dal destinatario e non è scrivibil
     });
   });
   const ownerRef = doc(
-    testEnv.authenticatedContext(OWNER_UID).firestore(),
+    testEnv.authenticatedContext(OWNER_UID, {
+      email: 'owner@example.com', email_verified: true
+    }).firestore(),
     'users', OWNER_UID, 'receivedDeadlines', 'received-1'
   );
   const otherRef = doc(
@@ -70,6 +72,22 @@ test('la scadenza ricevuta è leggibile solo dal destinatario e non è scrivibil
     'users', OWNER_UID, 'receivedDeadlines', 'received-1'
   );
   await assertSucceeds(getDoc(ownerRef));
+  await assertSucceeds(getDocs(query(
+    collection(ownerRef.firestore, 'users', OWNER_UID, 'receivedDeadlines'),
+    where('recipientEmail', '==', 'owner@example.com')
+  )));
+  await assertFails(getDoc(doc(
+    testEnv.authenticatedContext(OWNER_UID, {
+      email: 'owner@example.com', email_verified: false
+    }).firestore(),
+    'users', OWNER_UID, 'receivedDeadlines', 'received-1'
+  )));
+  await assertFails(getDoc(doc(
+    testEnv.authenticatedContext(OWNER_UID, {
+      email: 'changed@example.com', email_verified: true
+    }).firestore(),
+    'users', OWNER_UID, 'receivedDeadlines', 'received-1'
+  )));
   await assertFails(getDoc(otherRef));
   await assertFails(updateDoc(ownerRef, {dueDate: '2028-09-08'}));
   await assertFails(deleteDoc(ownerRef));

@@ -66,8 +66,11 @@ async function metrics(files) {
   let bytes = 0;
   let gzip = 0;
   for (const file of files) {
-    const content = await readFile(file);
-    bytes += content.length;
+    // HTML, CSS e JavaScript sono asset testuali. Normalizzare gli EOL rende
+    // il budget ripetibile fra checkout Windows (CRLF) e runner Linux (LF),
+    // senza concedere più peso alla pagina pubblicata.
+    const content = (await readFile(file, 'utf8')).replace(/\r\n/g, '\n');
+    bytes += Buffer.byteLength(content);
     gzip += gzipSync(content).length;
   }
   return { bytes, gzip };
@@ -117,7 +120,7 @@ for (const row of sorted.slice(0, 8)) markdown += `- \`${row.name}\`: ${formatKb
 markdown += '\n## Asset condivisi da almeno il 75% delle pagine\n\n';
 for (const [file, count] of shared) {
   const relative = path.relative(publicRoot, file).replaceAll('\\', '/');
-  const content = await readFile(file);
+  const content = (await readFile(file, 'utf8')).replace(/\r\n/g, '\n');
   markdown += `- \`${relative}\`: ${formatKb(gzipSync(content).length)} gzip stimati, usato da ${count}/${rows.length} pagine.\n`;
 }
 

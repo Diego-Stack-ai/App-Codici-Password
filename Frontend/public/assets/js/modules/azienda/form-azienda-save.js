@@ -7,7 +7,7 @@ import { prepareCompanyProfileLink, promptCompanyProfilePasswordChoice } from '.
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.254';
+import { auth, db } from '../../firebase-config.js?v=1.2.256';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteField
@@ -245,6 +245,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, invitePreferenc
                 }
                 finalData.sharedWith = {};
                 finalData.sharedWithUids = [];
+                finalData.sharedWithEmailByUid = {};
                 finalData.acceptedCount = 0;
             } else {
                 // E' SHARED. Merge new invites into the sharedWith Map
@@ -326,6 +327,9 @@ export async function saveAccount({ bankAccounts, invitedEmails, invitePreferenc
                 finalData.sharedWithUids = Object.values(finalData.sharedWith)
                     .filter(g => g.status === 'accepted' && g.uid)
                     .map(g => g.uid);
+                finalData.sharedWithEmailByUid = Object.fromEntries(Object.values(finalData.sharedWith)
+                    .filter(g => g.status === 'accepted' && g.uid && typeof g.email === 'string')
+                    .map(g => [g.uid, g.email.toLowerCase().trim()]));
 
                 // AUTO-HEALING V5.1: Forza visibilità private se non ci sono inviti attivi
                 const hasActive = Object.values(finalData.sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');

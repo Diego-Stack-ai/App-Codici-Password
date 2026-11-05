@@ -14,6 +14,10 @@ const OWNER_UID = 'owner-user';
 const OTHER_UID = 'other-user';
 let testEnv;
 
+const verifiedRecipientStorage = () => testEnv.authenticatedContext(OTHER_UID, {
+  email: 'other@example.invalid', email_verified: true
+}).storage();
+
 async function seedPurgeLock(status, fields = {}) {
   await testEnv.withSecurityRulesDisabled(context => setDoc(
     doc(context.firestore(), 'archivePurgeLocks', OWNER_UID),
@@ -135,7 +139,8 @@ test('un destinatario accettato legge i byte cifrati e la revoca blocca subito i
   const objectPath = `users/${OWNER_UID}/accounts/${accountId}/attachments/shared.bin`;
   await testEnv.withSecurityRulesDisabled(async context => {
     await setDoc(doc(context.firestore(), 'users', OWNER_UID, 'accounts', accountId), {
-      type: 'memo', visibility: 'shared', isArchived: false, sharedWithUids: [OTHER_UID]
+      type: 'memo', visibility: 'shared', isArchived: false, sharedWithUids: [OTHER_UID],
+      sharedWithEmailByUid: {[OTHER_UID]: 'other@example.invalid'}
     });
   });
   await assertSucceeds(uploadBytes(
@@ -143,12 +148,18 @@ test('un destinatario accettato legge i byte cifrati e la revoca blocca subito i
     new Uint8Array([4, 5, 6]),
     {contentType: 'application/octet-stream', customMetadata: {encrypted: 'v1'}}
   ));
-  await assertSucceeds(getBytes(ref(testEnv.authenticatedContext(OTHER_UID).storage(), objectPath)));
+  await assertSucceeds(getBytes(ref(verifiedRecipientStorage(), objectPath)));
+  await assertFails(getBytes(ref(testEnv.authenticatedContext(OTHER_UID, {
+    email: 'other@example.invalid', email_verified: false
+  }).storage(), objectPath)));
+  await assertFails(getBytes(ref(testEnv.authenticatedContext(OTHER_UID, {
+    email: 'changed@example.invalid', email_verified: true
+  }).storage(), objectPath)));
   await testEnv.withSecurityRulesDisabled(context => setDoc(
     doc(context.firestore(), 'users', OWNER_UID, 'accounts', accountId),
-    {type: 'memo', visibility: 'private', isArchived: false, sharedWithUids: []}
+    {type: 'memo', visibility: 'private', isArchived: false, sharedWithUids: [], sharedWithEmailByUid: {}}
   ));
-  await assertFails(getBytes(ref(testEnv.authenticatedContext(OTHER_UID).storage(), objectPath)));
+  await assertFails(getBytes(ref(verifiedRecipientStorage(), objectPath)));
 });
 
 test('un estraneo non usa il percorso allegati aziendale e la revoca vale anche lì', async () => {
@@ -156,7 +167,8 @@ test('un estraneo non usa il percorso allegati aziendale e la revoca vale anche 
   const objectPath = `users/${OWNER_UID}/aziende/${companyId}/accounts/${accountId}/attachments/shared.bin`;
   await testEnv.withSecurityRulesDisabled(async context => {
     await setDoc(doc(context.firestore(), 'users', OWNER_UID, 'aziende', companyId, 'accounts', accountId), {
-      type: 'memo', visibility: 'shared', isArchived: false, sharedWithUids: [OTHER_UID]
+      type: 'memo', visibility: 'shared', isArchived: false, sharedWithUids: [OTHER_UID],
+      sharedWithEmailByUid: {[OTHER_UID]: 'other@example.invalid'}
     });
   });
   await assertSucceeds(uploadBytes(
@@ -164,13 +176,13 @@ test('un estraneo non usa il percorso allegati aziendale e la revoca vale anche 
     new Uint8Array([7, 8, 9]),
     {contentType: 'application/octet-stream', customMetadata: {encrypted: 'v1'}}
   ));
-  await assertSucceeds(getBytes(ref(testEnv.authenticatedContext(OTHER_UID).storage(), objectPath)));
+  await assertSucceeds(getBytes(ref(verifiedRecipientStorage(), objectPath)));
   await assertFails(getBytes(ref(testEnv.authenticatedContext('stranger').storage(), objectPath)));
   await testEnv.withSecurityRulesDisabled(context => setDoc(
     doc(context.firestore(), 'users', OWNER_UID, 'aziende', companyId, 'accounts', accountId),
-    {type: 'memo', visibility: 'private', isArchived: false, sharedWithUids: []}
+    {type: 'memo', visibility: 'private', isArchived: false, sharedWithUids: [], sharedWithEmailByUid: {}}
   ));
-  await assertFails(getBytes(ref(testEnv.authenticatedContext(OTHER_UID).storage(), objectPath)));
+  await assertFails(getBytes(ref(verifiedRecipientStorage(), objectPath)));
 });
 
 test('i contenuti editoriali sono leggibili dagli utenti autenticati ma non modificabili dal client', async () => {

@@ -10,19 +10,19 @@
     <title data-t="title_settings">Impostazioni - PROTOCOLLO BASE V5.0</title>
 
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.254" />
+    <link rel="manifest" href="manifest.json?v=1.2.256" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.254">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.256">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.254">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.256">
 
-    <link rel="stylesheet" href="assets/css/impostazioni.css?v=1.2.254">
+    <link rel="stylesheet" href="assets/css/impostazioni.css?v=1.2.256">
 </head>
 
 <body data-private-auth hidden inert class="base-bg" data-ui-model="configuration">
@@ -120,8 +120,8 @@
                         </button>
                     </div>
 
-                    <section class="settings-item settings-item-stack" id="first-configuration-summary" aria-labelledby="first-configuration-heading">
-                        <div class="settings-item-header-row">
+                    <details class="settings-item settings-item-stack settings-disclosure" id="first-configuration-summary">
+                        <summary class="settings-item-header-row" id="first-configuration-toggle" aria-labelledby="first-configuration-heading first-configuration-status">
                             <div class="settings-icon-box icon-emerald">
                                 <span class="material-symbols-outlined notranslate" translate="no">checklist</span>
                             </div>
@@ -129,16 +129,19 @@
                                 <span class="settings-label" id="first-configuration-heading" data-onboarding-key="first_config_heading">Prima configurazione</span>
                                 <span class="settings-desc" id="first-configuration-status">Da completare</span>
                             </div>
+                            <span class="material-symbols-outlined settings-disclosure-chevron notranslate" translate="no" aria-hidden="true">expand_more</span>
+                        </summary>
+                        <div class="settings-disclosure-content">
+                            <div class="settings-subsection-label" data-onboarding-key="first_config_required_heading">Obbligatorio</div>
+                            <p class="settings-desc" data-onboarding-key="first_config_required_language">Conferma la lingua dell’app usando il selettore qui sopra.</p>
+                            <div class="settings-subsection-label" data-onboarding-key="first_config_optional_heading">Facoltativo</div>
+                            <p class="settings-desc" data-onboarding-key="first_config_optional_description">Tema, area Azienda, notifiche, MFA, biometria e backup possono essere configurati anche in seguito.</p>
                         </div>
-                        <div class="settings-subsection-label" data-onboarding-key="first_config_required_heading">Obbligatorio</div>
-                        <p class="settings-desc" data-onboarding-key="first_config_required_language">Conferma la lingua dell’app usando il selettore qui sopra.</p>
-                        <div class="settings-subsection-label" data-onboarding-key="first_config_optional_heading">Facoltativo</div>
-                        <p class="settings-desc" data-onboarding-key="first_config_optional_description">Tema, area Azienda, notifiche, MFA, biometria e backup possono essere configurati anche in seguito.</p>
-                    </section>
+                    </details>
 
                     <!-- Tema -->
-                    <div class="settings-item settings-item-stack">
-                        <div class="settings-item-header-row">
+                    <details class="settings-item settings-item-stack settings-disclosure" id="theme-settings-disclosure">
+                        <summary class="settings-item-header-row" id="theme-settings-toggle">
                             <div class="settings-icon-box icon-blue">
                                 <span class="material-symbols-outlined notranslate" translate="no">palette</span>
                             </div>
@@ -146,26 +149,29 @@
                                 <span class="settings-label" data-t="theme_title">Tema Visivo</span>
                                 <span class="settings-desc" data-t="theme_desc">Look & Feel</span>
                             </div>
+                            <span class="material-symbols-outlined settings-disclosure-chevron notranslate" translate="no" aria-hidden="true">expand_more</span>
+                        </summary>
+                        <div class="settings-disclosure-content">
+                            <div class="settings-controls-row" id="theme-selector">
+                                <button class="timer-btn timer-btn-flex theme-btn" data-theme="light"
+                                    data-t="theme_light">Chiaro</button>
+                                <button class="timer-btn timer-btn-flex theme-btn" data-theme="auto"
+                                    data-t="theme_auto">Auto</button>
+                                <button class="timer-btn timer-btn-flex theme-btn" data-theme="dark"
+                                    data-t="theme_dark">Scuro</button>
+                            </div>
+                            <div class="settings-subsection-label" data-t="theme_color_title">Colore dell’app</div>
+                            <div class="settings-controls-row color-theme-selector" id="color-theme-selector" aria-label="Colore dell’app" data-t-aria="theme_color_title">
+                                <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="blue" aria-pressed="false"><span class="theme-swatch swatch-blue" aria-hidden="true"></span><span data-t="theme_color_blue">Blu</span></button>
+                                <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="green" aria-pressed="false"><span class="theme-swatch swatch-green" aria-hidden="true"></span><span data-t="theme_color_green">Verde</span></button>
+                                <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="red" aria-pressed="false"><span class="theme-swatch swatch-red" aria-hidden="true"></span><span data-t="theme_color_red">Rosso</span></button>
+                                <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="sand" aria-pressed="false"><span class="theme-swatch swatch-sand" aria-hidden="true"></span><span data-t="theme_color_sand">Sabbia</span></button>
+                                <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="petrol" aria-pressed="false"><span class="theme-swatch swatch-petrol" aria-hidden="true"></span><span data-t="theme_color_petrol">Petrolio</span></button>
+                                <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="lavender" aria-pressed="false"><span class="theme-swatch swatch-lavender" aria-hidden="true"></span><span data-t="theme_color_lavender">Lavanda</span></button>
+                                <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="dusty-rose" aria-pressed="false"><span class="theme-swatch swatch-dusty-rose" aria-hidden="true"></span><span data-t="theme_color_dusty_rose">Rosa polvere</span></button>
+                            </div>
                         </div>
-                        <div class="settings-controls-row" id="theme-selector">
-                            <button class="timer-btn timer-btn-flex theme-btn" data-theme="light"
-                                data-t="theme_light">Chiaro</button>
-                            <button class="timer-btn timer-btn-flex theme-btn" data-theme="auto"
-                                data-t="theme_auto">Auto</button>
-                            <button class="timer-btn timer-btn-flex theme-btn" data-theme="dark"
-                                data-t="theme_dark">Scuro</button>
-                        </div>
-                        <div class="settings-subsection-label" data-t="theme_color_title">Colore dell’app</div>
-                        <div class="settings-controls-row color-theme-selector" id="color-theme-selector" aria-label="Colore dell’app" data-t-aria="theme_color_title">
-                            <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="blue" aria-pressed="false"><span class="theme-swatch swatch-blue" aria-hidden="true"></span><span data-t="theme_color_blue">Blu</span></button>
-                            <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="green" aria-pressed="false"><span class="theme-swatch swatch-green" aria-hidden="true"></span><span data-t="theme_color_green">Verde</span></button>
-                            <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="red" aria-pressed="false"><span class="theme-swatch swatch-red" aria-hidden="true"></span><span data-t="theme_color_red">Rosso</span></button>
-                            <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="sand" aria-pressed="false"><span class="theme-swatch swatch-sand" aria-hidden="true"></span><span data-t="theme_color_sand">Sabbia</span></button>
-                            <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="petrol" aria-pressed="false"><span class="theme-swatch swatch-petrol" aria-hidden="true"></span><span data-t="theme_color_petrol">Petrolio</span></button>
-                            <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="lavender" aria-pressed="false"><span class="theme-swatch swatch-lavender" aria-hidden="true"></span><span data-t="theme_color_lavender">Lavanda</span></button>
-                            <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="dusty-rose" aria-pressed="false"><span class="theme-swatch swatch-dusty-rose" aria-hidden="true"></span><span data-t="theme_color_dusty_rose">Rosa polvere</span></button>
-                        </div>
-                    </div>
+                    </details>
 
                     <div class="settings-item">
                         <div class="row-layout">

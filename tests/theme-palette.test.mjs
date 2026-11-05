@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 
 const root = new URL('../Frontend/public/', import.meta.url);
-const [init, core, settings, settingsScript, privateAccounts, companyAccounts, coreUi, accountAvatar, accountList, privateArea] = await Promise.all([
+const [init, core, settings, settingsScript, privateAccounts, companyAccounts, coreUi, accountAvatar, accountList, privateArea, guideCatalog] = await Promise.all([
   readFile(new URL('assets/js/theme-init.js', root), 'utf8'),
   readFile(new URL('assets/css/core.css', root), 'utf8'),
   readFile(new URL('impostazioni.html', root), 'utf8'),
@@ -14,7 +14,8 @@ const [init, core, settings, settingsScript, privateAccounts, companyAccounts, c
   readFile(new URL('assets/css/core_ui.css', root), 'utf8'),
   readFile(new URL('assets/js/modules/shared/account-avatar.js', root), 'utf8'),
   readFile(new URL('assets/js/modules/shared/account-list-view.js', root), 'utf8'),
-  readFile(new URL('assets/js/modules/privato/area_privata.js', root), 'utf8')
+  readFile(new URL('assets/js/modules/privato/area_privata.js', root), 'utf8'),
+  readFile(new URL('assets/js/modules/assistant/documentation-catalog.json', root), 'utf8')
 ]);
 
 function luminance(hex) {
@@ -49,6 +50,11 @@ test('seven palettes define light and dark identity tokens without overriding st
 
 test('settings exposes seven independent color choices and persists only allowed values', () => {
   for (const theme of ['blue','green','red','sand','petrol','lavender','dusty-rose']) assert.match(settings, new RegExp(`data-color-theme="${theme}"`));
+  const disclosure = settings.match(/<details[^>]+id="theme-settings-disclosure"[^>]*>/)?.[0] || '';
+  assert.ok(disclosure);
+  assert.doesNotMatch(disclosure, /\sopen(?:\s|=|>)/);
+  assert.match(settings, /<summary[^>]+id="theme-settings-toggle"/);
+  assert.match(guideCatalog, /"target":\s*"#theme-settings-toggle"/);
   assert.match(settingsScript, /localStorage\.setItem\('color_theme', selected\)/);
   assert.match(settingsScript, /\['blue', 'green', 'red', 'sand', 'petrol', 'lavender', 'dusty-rose'\]\.includes\(selected\)/);
 });

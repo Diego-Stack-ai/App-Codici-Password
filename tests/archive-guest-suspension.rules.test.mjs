@@ -27,7 +27,7 @@ const account = isArchived => ({
     nomeAccount: 'Account sintetico', type: 'account', revision: 1, visibility: 'shared', acceptedCount: 1,
     isArchived,
     sharedWith: {[EMAIL_KEY]: {email: 'guest@example.invalid', status: 'accepted', uid: GUEST}},
-    sharedWithUids: [GUEST]
+    sharedWithUids: [GUEST], sharedWithEmailByUid: {[GUEST]: 'guest@example.invalid'}
 });
 
 before(async () => {
@@ -45,7 +45,7 @@ beforeEach(async () => {
         // M7-R7C-1: Account ripristinato dopo l'archiviazione: la revoca è
         // persistente, quindi la lista dei grant è vuota e resterà vuota.
         await setDoc(doc(db, ...restoredPath), {...account(false), sharingCycle: 1,
-            sharedWithUids: [], acceptedCount: 0,
+            sharedWithUids: [], sharedWithEmailByUid: {}, acceptedCount: 0,
             sharedWith: {[EMAIL_KEY]: {email: 'guest@example.invalid', status: 'suspended', suspendedAt: '2026-01-01T00:00:00.000Z'}}});
         await setDoc(doc(db, ...guestInvitePath), {inviteId: `${ACCOUNT}_${EMAIL_KEY}`, ownerId: OWNER, senderId: OWNER,
             accountId: ACCOUNT, recipientEmail: 'guest@example.invalid', status: 'accepted',
@@ -53,6 +53,7 @@ beforeEach(async () => {
         // M7-R7C-2: Account archiviato PRIMA del protocollo, con grant ancora attivi.
         await setDoc(doc(db, ...legacyPath), {nomeAccount: 'Account legacy', type: 'account', revision: 1,
             isArchived: true, acceptedCount: 1, sharedWithUids: [GUEST],
+            sharedWithEmailByUid: {[GUEST]: 'guest@example.invalid'},
             sharedWith: {[EMAIL_KEY]: {email: 'guest@example.invalid', status: 'accepted', uid: GUEST}}});
         await setDoc(doc(db, ...legacyInvitePath), {inviteId: `legacy-1_${EMAIL_KEY}`, ownerId: OWNER, senderId: OWNER,
             accountId: 'legacy-1', recipientEmail: 'guest@example.invalid', status: 'accepted'});
@@ -66,12 +67,14 @@ beforeEach(async () => {
 });
 after(async () => testEnv?.cleanup());
 
-const asGuest = () => testEnv.authenticatedContext(GUEST, {email: 'guest@example.invalid'}).firestore();
+const asGuest = () => testEnv.authenticatedContext(GUEST, {email: 'guest@example.invalid', email_verified: true}).firestore();
+const asGuestWithDifferentVerifiedEmail = () => testEnv.authenticatedContext(GUEST,
+    {email: 'attacker@example.invalid', email_verified: true}).firestore();
 const asPending = () => testEnv.authenticatedContext(PENDING).firestore();
 const asStranger = () => testEnv.authenticatedContext(STRANGER).firestore();
 const asOwner = () => testEnv.authenticatedContext(OWNER).firestore();
-const asOwnerWithEmail = () => testEnv.authenticatedContext(OWNER, {email: 'owner@example.invalid'}).firestore();
-const asStrangerWithEmail = () => testEnv.authenticatedContext(STRANGER, {email: 'stranger@example.invalid'}).firestore();
+const asOwnerWithEmail = () => testEnv.authenticatedContext(OWNER, {email: 'owner@example.invalid', email_verified: true}).firestore();
+const asStrangerWithEmail = () => testEnv.authenticatedContext(STRANGER, {email: 'stranger@example.invalid', email_verified: true}).firestore();
 async function readAsAdmin(...path) {
     let snapshot;
     await testEnv.withSecurityRulesDisabled(async context => { snapshot = await getDoc(doc(context.firestore(), ...path)); });
@@ -81,6 +84,11 @@ async function readAsAdmin(...path) {
 test('ospite accettato: legge l\'Account attivo privato e aziendale', async () => {
     await assertSucceeds(getDoc(doc(asGuest(), ...activePath)));
     await assertSucceeds(getDoc(doc(asGuest(), ...activeCompanyPath)));
+});
+
+test('lo stesso UID con una diversa email verificata non riattiva il grant', async () => {
+    await assertFails(getDoc(doc(asGuestWithDifferentVerifiedEmail(), ...activePath)));
+    await assertFails(getDoc(doc(asGuestWithDifferentVerifiedEmail(), ...activeCompanyPath)));
 });
 
 test('ospite accettato: negato sull\'Account archiviato in tutti i percorsi', async () => {
@@ -106,7 +114,9 @@ test('Account ripristinato: l\'ospite precedente non rilegge', async () => {
 test('dopo l\'accettazione del nuovo invito l\'accesso torna', async () => {
     await assertFails(getDoc(doc(asGuest(), ...restoredPath)), 'prima dell\'accettazione nessun accesso');
     await testEnv.withSecurityRulesDisabled(async context => {
-        await updateDoc(doc(context.firestore(), ...restoredPath), {sharedWithUids: [GUEST]});
+        await updateDoc(doc(context.firestore(), ...restoredPath), {
+            sharedWithUids: [GUEST], sharedWithEmailByUid: {[GUEST]: 'guest@example.invalid'}
+        });
     });
     await assertSucceeds(getDoc(doc(asGuest(), ...restoredPath)), 'con il grant accettato l\'ospite rilegge');
 });
@@ -212,6 +222,7 @@ test('ripristino legacy: la transazione del proprietario revoca i grant e l\'osp
             isArchived: false,
             sharedWith,
             sharedWithUids: [],
+            sharedWithEmailByUid: {},
             acceptedCount: 0,
             sharingCycle: 1,
             revision: 2

@@ -4,7 +4,7 @@ const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.s
 const TECHNICAL_FIELDS = new Set([
     'id', 'key', 'scope', 'uid', 'owner', 'ownerUid', 'companyId', 'accountId',
     'visibility', 'views', 'revision', 'version', 'schemaVersion', 'sharedWith',
-    'sharedWithUids', 'acceptedCount', 'createdAt', 'updatedAt', 'createdBy',
+    'sharedWithUids', 'sharedWithEmailByUid', 'acceptedCount', 'createdAt', 'updatedAt', 'createdBy',
     'updatedBy', 'isPinned'
 ]);
 const ACCOUNT_TECHNICAL_FIELDS = new Set([

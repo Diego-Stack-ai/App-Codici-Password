@@ -65,6 +65,38 @@
     gap: 1.25rem;
 }
 
+.settings-disclosure > summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+.settings-disclosure > summary::-webkit-details-marker {
+    display: none;
+}
+
+.settings-disclosure > summary:focus-visible {
+    border-radius: 12px;
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+}
+
+.settings-disclosure-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    width: 100%;
+    cursor: default;
+}
+
+.settings-disclosure-chevron {
+    flex: 0 0 auto;
+    transition: transform 0.2s ease;
+}
+
+.settings-disclosure[open] .settings-disclosure-chevron {
+    transform: rotate(180deg);
+}
+
 /* --- 4. ICON BOX SYSTEM --- */
 .settings-icon-box {
     width: 44px;

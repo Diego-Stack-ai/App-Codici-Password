@@ -7,7 +7,7 @@ const vm = require("node:vm");
 
 test("un errore di notifica non espone l'invito o il messaggio del provider nei log", async () => {
   const source = fs.readFileSync(require.resolve("../index.js"), "utf8");
-  const start = source.indexOf("exports.onInviteCreated = onDocumentCreated(");
+  const start = source.indexOf("exports.onInviteCreated = onDocumentWritten(");
   const end = source.indexOf("// ─────────────────────────────────────────────", start);
   assert.ok(start >= 0 && end > start);
 
@@ -16,9 +16,14 @@ test("un errore di notifica non espone l'invito o il messaggio del provider nei 
   const providerError = "provider refused email.personale@example.invalid";
   const sandbox = {
     exports: {},
-    onDocumentCreated: (_options, handler) => handler,
+    onDocumentWritten: (_options, handler) => handler,
     GMAIL_USER: {value: () => "sender@example.invalid"},
     GMAIL_APP_PASSWORD: {value: () => "synthetic"},
+    admin: {firestore: () => ({})},
+    inviteNotificationGuard: {isNotificationTransition: () => true, deliver: async ({channel, send}) => {
+      if (channel !== "email") return {status: "ineligible"};
+      return send({recipientEmail: "email.personale@example.invalid", accountName: "Synthetic"});
+    }},
     normalizeEmail: value => value,
     createTransporter: () => ({sendMail: async () => { throw new Error(providerError); }}),
     console: {error: (...args) => logs.push(args.map(String).join(" "))},
@@ -27,7 +32,10 @@ test("un errore di notifica non espone l'invito o il messaggio del provider nei 
   vm.runInNewContext(source.slice(start, end), sandbox, {filename: "index.js:onInviteCreated"});
   await sandbox.exports.onInviteCreated({
     params: {inviteId},
-    data: {data: () => ({status: "pending", recipientEmail: "email.personale@example.invalid", notifyEmail: true})}
+    data: {
+      before: {exists: false},
+      after: {exists: true, data: () => ({status: "pending", recipientEmail: "email.personale@example.invalid", notifyEmail: true})}
+    }
   });
 
   assert.equal(logs.length, 1);
