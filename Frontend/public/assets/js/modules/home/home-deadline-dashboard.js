@@ -5,7 +5,7 @@
 import { createElement, clearElement } from '../../dom-utils.js';
 import { t } from '../../translations.js';
 import { listDeadlines } from '../data/vault-repository.js';
-import { auth } from '../../firebase-config.js?v=1.2.256';
+import { auth } from '../../firebase-config.js?v=1.2.257';
 import { currentDiffDays, deadlineBucket, deadlinePresentation } from '../scadenze/deadline-model.js';
 
 let dashboardEpoch = 0;
@@ -62,6 +62,7 @@ function renderDeadlineGroup(prefix, items, today) {
 
 function renderMiniItem(item, today) {
     const diffDays = item.diffDays;
+    const presentation = deadlinePresentation(item);
     let label = '';
     if (diffDays < 0) label = t('expired');
     else if (diffDays === 0) label = t('today');
@@ -72,7 +73,12 @@ function renderMiniItem(item, today) {
         createElement('div', { className: 'item-icon-box' }, [
             createElement('span', { className: 'material-symbols-outlined notranslate', textContent: item.icon || 'event' })
         ]),
-        createElement('span', { className: 'item-title', textContent: deadlinePresentation(item).category }),
+        createElement('span', { className: 'item-copy' }, [
+            createElement('span', { className: 'item-title', textContent: presentation.category }),
+            ...(presentation.vehicle
+                ? [createElement('span', { className: 'item-subtitle', textContent: presentation.vehicle })]
+                : [])
+        ]),
         createElement('span', { className: 'item-badge', textContent: label })
     ]);
 }

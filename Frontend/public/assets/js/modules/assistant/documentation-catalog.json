@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "contentVersion": 10,
-  "reviewedAppVersion": "1.2.256",
+  "contentVersion": 11,
+  "reviewedAppVersion": "1.2.257",
   "fallbackLocale": "it",
   "pages": [
     {
@@ -1162,7 +1162,7 @@
       "guide.pages.home_page.title": "Home",
       "guide.pages.home_page.purpose": "Scegli l’area in cui lavorare, controlla i riepiloghi e avvia rapidamente le operazioni principali.",
       "guide.pages.home_page.step-1": "Apri Privato per Account e dati personali, Azienda per i dati aziendali, Scadenze per l’elenco delle date.",
-      "guide.pages.home_page.step-2": "Una scadenza di oggi resta nelle Scadenze; passa alle Urgenze dal giorno successivo. Il riepilogo non sostituisce l’elenco completo.",
+      "guide.pages.home_page.step-2": "Una scadenza di oggi resta nelle Scadenze; passa alle Urgenze dal giorno successivo. Nelle anteprime delle scadenze per automezzi, modello e targa distinguono veicoli con lo stesso tipo di scadenza. Il riepilogo non sostituisce l’elenco completo.",
       "guide.pages.home_page.step-4": "Dal footer puoi creare direttamente un nuovo Account privato o aprire Nuova Scadenza. Per un Account aziendale scegli prima l’azienda dal menu rapido; la creazione o modifica resta sempre una tua azione esplicita.",
       "guide.pages.area_privata.title": "Area privata",
       "guide.pages.area_privata.purpose": "Scegli fra Account, Account condivisi, memorandum privati e memorandum condivisi.",

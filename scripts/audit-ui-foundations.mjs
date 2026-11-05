@@ -16,6 +16,7 @@ function walk(directory) {
 
 const files = walk(publicRoot).filter(file =>
   !file.includes('ui-preview') &&
+  !file.includes(`${path.sep}graphify-out${path.sep}`) &&
   !file.includes(`${path.sep}vendor${path.sep}`)
 );
 const cssFiles = files.filter(file => file.endsWith('.css'));

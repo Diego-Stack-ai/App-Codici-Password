@@ -156,3 +156,21 @@ test('dashboard keeps the calendar 30-day window and caps previews at three',asy
     assert.equal(f.document.getElementById('upcoming-list-container').children.length,3);
     assert.equal(f.document.getElementById('expired-count').textContent,1);
 });
+
+test('dashboard distinguishes vehicle deadlines with model and plate',async()=>{
+    const f=fixture();
+    f.data.records=[
+        {...deadline,id:'moto-1',type:'Revisione Moto',veicolo_modello:'Moto Guzzi V7 · AB123CD'},
+        {...deadline,id:'moto-2',type:'Revisione Moto',veicolo_modello:'Honda SH · EF456GH'}
+    ];
+    f.data.notifications=[];
+    await f.start();
+    const cards=f.document.getElementById('upcoming-list-container').children;
+    assert.equal(cards.length,2);
+    assert.deepEqual(cards.map(card=>f.walk(card).find(node=>node.className==='item-title')?.textContent),[
+        'Revisione Moto','Revisione Moto'
+    ]);
+    assert.deepEqual(cards.map(card=>f.walk(card).find(node=>node.className==='item-subtitle')?.textContent),[
+        'Moto Guzzi V7 · AB123CD','Honda SH · EF456GH'
+    ]);
+});

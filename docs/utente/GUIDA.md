@@ -37,7 +37,7 @@ Nelle sette linguette operative di **Regole scadenze** la nota iniziale è separ
 
 ## Guida pagina per pagina e aiuto contestuale
 
-La guida descrive come orientarsi e quali comandi usare; lo stato di implementazione, delle verifiche e della distribuzione è soltanto in [STATO](../progetto/STATO.md). La matrice seguente è l’inventario della superficie canonica, derivato dal [registro delle pagine](../regole/INTERFACCIA.md#fonte-docs-canonical-page-registry-md-l1), dagli HTML e dai moduli, riesaminato sulla base `14c61754` (`1.2.183`) e integrato nella candidata `1.2.184`. Non certifica dispositivi, recapito di notifiche o ambienti distribuiti. I walkthrough e i video indicano il formato progettato; non implicano pulsanti di aiuto già disponibili nell’app.
+La guida descrive come orientarsi e quali comandi usare; lo stato di implementazione, delle verifiche e della distribuzione è soltanto in [STATO](../progetto/STATO.md). La matrice seguente è l’inventario della superficie canonica, derivato dal [registro delle pagine](../regole/INTERFACCIA.md#fonte-docs-canonical-page-registry-md-l1), dagli HTML e dai moduli. Il walkthrough è disponibile nella candidata `1.2.257`; i video indicano invece un formato editoriale possibile e non implicano clip già disponibili. La matrice non certifica dispositivi, recapito di notifiche o ambienti distribuiti.
 
 | pageId | Obiettivo dell’utente | Aiuto per funzioni e controlli | Formato previsto |
 |---|---|---|---|
@@ -90,7 +90,7 @@ Negli ingressi pubblici il comando apre la scheda della pagina corrente. «Pagin
 
 Chiudi con il pulsante, Escape o il fondale. Il focus ritorna al comando di apertura quando ancora disponibile; Tab e Shift-Tab restano dentro il dialogo. Le istruzioni sono leggibili anche quando il Vault è bloccato o l'Assistente è disattivato; sulle pagine private resta necessario superare il normale gate di identità, e un eventuale altro dialogo dell'app deve essere chiuso prima dell'apertura. Se un dialogo dell'app compare mentre consulti la guida, la guida si chiude e può essere riaperta dopo averlo gestito. Non inserire segreti per usare la guida. Per la consultazione senza rete prepara prima la shell PWA mentre sei online; la disponibilità delle istruzioni non implica quella dei dati personali.
 
-Questa prima vista usa testo e selezione delle schede. Evidenziazione dei comandi, avanzamento dei walkthrough, video e traduzioni aggiuntive mantengono i gate sotto riportati. Per implementazione/verifica/distribuzione vedere soltanto [STATO](../progetto/STATO.md).
+La vista usa testo e selezione delle schede. Sulla pagina aperta **Mostra sulla pagina** avvia il walkthrough con evidenziazione sicura, avanzamento, ritorno e uscita; quando un controllo non è disponibile resta il testo completo. Video e traduzioni aggiuntive mantengono i gate sotto riportati. Per implementazione, verifica e distribuzione vedere soltanto [STATO](../progetto/STATO.md).
 
 ### Regole per l’uso degli aiuti
 

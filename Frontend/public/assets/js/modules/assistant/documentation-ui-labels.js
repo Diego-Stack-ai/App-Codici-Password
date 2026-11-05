@@ -14,6 +14,15 @@ export const DOCUMENTATION_UI_LABELS = Object.freeze({
     'guide.ui.error': 'La guida non è disponibile. Riprova; per usarla offline prepara prima la shell dell’app.',
     'guide.ui.busy': 'Chiudi il dialogo corrente prima di aprire la guida.',
     'guide.ui.version': 'Edizione delle istruzioni'
+    , 'guide.ui.walkthrough': 'Mostra sulla pagina'
+    , 'guide.ui.walkthroughCurrentPage': 'La guida visiva è disponibile soltanto per la pagina aperta.'
+    , 'guide.ui.exit': 'Esci'
+    , 'guide.ui.previous': 'Indietro'
+    , 'guide.ui.next': 'Avanti'
+    , 'guide.ui.finish': 'Termina'
+    , 'guide.ui.stepCounter': 'Passaggio {current} di {total}'
+    , 'guide.ui.highlighted': 'Il comando indicato è evidenziato. La guida non lo attiva.'
+    , 'guide.ui.textOnly': 'Il comando non è visibile in questo momento: segui l’istruzione testuale.'
 });
 
 export function documentationLabel(key) {

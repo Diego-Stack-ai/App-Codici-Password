@@ -1,4 +1,4 @@
-import { db } from '../../firebase-config.js?v=1.2.256';
+import { db } from '../../firebase-config.js?v=1.2.257';
 import { clearElement } from '../../dom-utils.js';
 import { doc, serverTimestamp, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { listCompanies } from '../data/vault-repository.js';

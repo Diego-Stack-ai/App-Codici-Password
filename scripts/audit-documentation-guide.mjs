@@ -37,7 +37,7 @@ export async function auditDocumentationGuide() {
         'Il nucleo D0 non deve leggere DOM/dati, eseguire codice o usare rete/persistenza');
     assert.ok(Object.entries(DOCUMENTATION_UI_LABELS).every(([key, value]) => /^guide\.ui\./.test(key) && typeof value === 'string' && value.length > 0),
         'Tutti i nuovi comandi visibili devono avere chiavi linguistiche');
-    for (const file of ['guide.js', 'modules/assistant/documentation-view.js']) {
+    for (const file of ['guide.js', 'modules/assistant/documentation-view.js', 'modules/assistant/documentation-walkthrough.js']) {
         const source = await readFile(new URL(`assets/js/${file}`, publicRoot), 'utf8');
         assert.doesNotMatch(source, /firebase|security-manager|vault-data-loader|ensureVaultKeyMaterial|signOut|onAuthStateChanged/, `Guida D0 accoppiata ai dati: ${file}`);
         assert.doesNotMatch(source, /innerHTML|\.click\(|window\.location\s*=|location\.href\s*=/, `Azioni o HTML interpretato nella guida: ${file}`);
@@ -57,6 +57,7 @@ export async function auditDocumentationGuide() {
     const offlineAssets = JSON.parse(offlineSource.match(/=\s*(\[[\s\S]*\]);?\s*$/)[1]);
     for (const asset of ['assets/js/guide.js', 'assets/js/modules/assistant/documentation-guide.js',
         'assets/js/modules/assistant/documentation-view.js', 'assets/js/modules/assistant/documentation-ui-labels.js',
+        'assets/js/modules/assistant/documentation-walkthrough.js',
         'assets/js/modules/assistant/documentation-catalog.json', 'assets/css/documentation-guide.css']) {
         assert.ok(offlineAssets.includes(asset), `Guida assente dalla shell offline: ${asset}`);
     }

@@ -113,6 +113,23 @@ try {
     await wait('!!document.querySelector(".documentation-panel")');
     assert.equal(await evaluate('document.querySelector(".documentation-article h3").textContent'), 'Impostazioni');
     console.log('Browser: prima apertura della guida offline con shell reale e Vault sintetico bloccato: OK');
+    assert.equal(await evaluate('document.getElementById("documentation-walkthrough-start").disabled'), false);
+    await evaluate('document.getElementById("documentation-walkthrough-start").click()');
+    await wait('!!document.querySelector(".documentation-walkthrough-panel")');
+    const walkthroughState = await evaluate(`(()=>({counter:document.querySelector('.documentation-walkthrough-counter').textContent,
+        presentation:document.querySelector('.documentation-walkthrough').dataset.presentation,
+        modal:document.querySelector('.documentation-walkthrough-panel').getAttribute('aria-modal'),
+        focus:document.activeElement.textContent, appInert:[...document.body.children].filter(node=>!node.classList.contains('documentation-walkthrough')).every(node=>node.inert)}))()`);
+    assert.match(walkthroughState.counter, /1 di 20/);
+    assert.equal(walkthroughState.presentation, 'highlight');
+    assert.equal(walkthroughState.modal, 'true');
+    assert.equal(walkthroughState.focus, 'Esci');
+    assert.equal(walkthroughState.appInert, true);
+    await key('Escape');
+    assert.equal(await evaluate('document.querySelector(".documentation-walkthrough") === null && document.activeElement.id === "documentation-help-open"'), true);
+    console.log('Browser: guida visiva senza azioni, target univoco, focus e cleanup: OK');
+    await evaluate('document.getElementById("documentation-help-open").click()');
+    await wait('!!document.querySelector(".documentation-panel")');
     await key('Escape');
     await command('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
 
