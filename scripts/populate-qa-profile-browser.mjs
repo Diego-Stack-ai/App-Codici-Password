@@ -285,22 +285,31 @@ try {
     await documentCard.getByText(fixture.documentNumber, { exact: true }).waitFor({ state: 'visible' });
     await documentCard.getByText(fixture.documentNote, { exact: true }).waitFor({ state: 'visible' });
 
+    let profileDocumentAttachmentAvailable = await documentCard.getByText(fixture.attachmentName, { exact: true }).count() > 0;
     if (origin !== 'https://appcodici-password.web.app') {
         record('profile-document-attachment', 'skipped-on-local-app-check-origin');
-    } else if (!await documentCard.getByText(fixture.attachmentName, { exact: true }).count()) {
+    } else if (!profileDocumentAttachmentAvailable) {
         const attachmentPath = path.join(profileDir, fixture.attachmentName);
         await writeFile(attachmentPath, 'Allegato sintetico QA. Nessun dato reale.\n', 'utf8');
         await documentCard.locator('[data-action="document-attachments"]').click();
         const attachmentsDialog = page.locator('.profile-document-attachments-dialog');
         await attachmentsDialog.waitFor({ state: 'visible', timeout: 20_000 });
         await attachmentsDialog.locator('input[accept*=".txt"]').setInputFiles(attachmentPath);
-        await attachmentsDialog.getByText(/1\/10 allegati\./).waitFor({ state: 'visible', timeout: 45_000 });
+        try {
+            await attachmentsDialog.getByText(/1\/10 allegati\./).waitFor({ state: 'visible', timeout: 45_000 });
+            profileDocumentAttachmentAvailable = true;
+            record('profile-document-attachment', 'created-encrypted');
+        } catch (error) {
+            const appCheckBlocked = report.networkErrors.some(entry => entry.status === 401
+                && entry.url?.includes('uploadProfileDocumentAttachment'));
+            if (!appCheckBlocked) throw error;
+            record('profile-document-attachment', 'blocked-by-app-check-no-bypass');
+        }
         await attachmentsDialog.locator('button[title="Chiudi"]').click();
         await attachmentsDialog.waitFor({ state: 'detached', timeout: 20_000 });
-        record('profile-document-attachment', 'created-encrypted');
         documentCard = documentsContainer.locator('.form-card').filter({ hasText: fixture.documentNumber }).first();
     } else record('profile-document-attachment', 'already-present');
-    if (origin === 'https://appcodici-password.web.app') {
+    if (profileDocumentAttachmentAvailable) {
         await documentCard.getByText(fixture.attachmentName, { exact: true }).first().waitFor({ state: 'visible', timeout: 20_000 });
     }
 
@@ -357,6 +366,20 @@ try {
     await widgetCard.getByText(fixture.widgetSecretLabel, { exact: true }).waitFor({ state: 'visible', timeout: 20_000 });
     await widgetCard.getByText('••••••••', { exact: true }).waitFor({ state: 'visible', timeout: 20_000 });
 
+    await activateTab(page, 'overview');
+    const qrPrimaryCoverage = [];
+    for (const selector of ['#qr-toggle-nome', '#qr-toggle-cf', '#qr-toggle-nascita']) {
+        const toggle = page.locator(selector);
+        if (!await toggle.isVisible()) {
+            qrPrimaryCoverage.push(`${selector}:not-visible-not-applicable`);
+            continue;
+        }
+        if (!await toggle.isChecked()) await toggle.check();
+        assert.equal(await toggle.isChecked(), true, `${selector} deve risultare incluso nel QR del profilo QA`);
+        qrPrimaryCoverage.push(`${selector}:selected`);
+    }
+    record('profile-qr-primary-fields', 'checked-visible-controls', qrPrimaryCoverage.join(', '));
+
     await activateTab(page, 'digital-card');
     const digitalCard = page.locator('#profile-digital-card');
     await digitalCard.getByText('Anteprima Tessera digitale', { exact: true }).waitFor({ state: 'visible', timeout: 20_000 });
@@ -385,7 +408,7 @@ try {
     await activateTab(page, 'documents');
     await expandSection(page, 'documenti');
     await page.locator('#documenti-view-container').getByText(fixture.documentNumber, { exact: true }).waitFor({ state: 'visible' });
-    if (origin === 'https://appcodici-password.web.app') {
+    if (profileDocumentAttachmentAvailable) {
         await page.locator('#documenti-view-container').getByText(fixture.attachmentName, { exact: true }).first().waitFor({ state: 'visible' });
     } else {
         record('profile-document-attachment-reload', 'skipped-on-local-app-check-origin');
@@ -420,13 +443,19 @@ try {
 
 const appCheckUrl = 'content-firebaseappcheck.googleapis.com/v1/projects/appcodici-password/apps/';
 const sharingUrl = 'europe-west1-appcodici-password.cloudfunctions.net/registerSharingIdentity';
-report.consoleErrors = report.consoleErrors.filter(error => !error.resource.includes(appCheckUrl) && !error.resource.includes(sharingUrl));
+const profileAttachmentUrl = 'europe-west1-appcodici-password.cloudfunctions.net/uploadProfileDocumentAttachment';
+const attachmentBlockedByAppCheck = report.actions.some(action => action.action === 'profile-document-attachment'
+    && action.status === 'blocked-by-app-check-no-bypass');
+report.consoleErrors = report.consoleErrors.filter(error => !error.resource.includes(appCheckUrl)
+    && !error.resource.includes(sharingUrl)
+    && !(attachmentBlockedByAppCheck && error.resource.includes(profileAttachmentUrl)));
 report.consoleErrors = report.consoleErrors.filter(error => !(error.text.includes("Framing 'https://www.google.com/'")
     && error.text.includes('report-only Content Security Policy') && error.text.includes("frame-ancestors 'self'")));
 report.consoleErrors = report.consoleErrors.filter(error => !(origin.startsWith('http://localhost:')
     && error.resource === `${origin}/favicon.ico` && error.text.includes('404')));
 report.networkErrors = report.networkErrors.filter(error => !((error.status === 403 && error.url.includes(appCheckUrl))
-    || (error.status === 401 && error.url.includes(sharingUrl))));
+    || (error.status === 401 && error.url.includes(sharingUrl))
+    || (attachmentBlockedByAppCheck && error.status === 401 && error.url.includes(profileAttachmentUrl))));
 report.completedAt = new Date().toISOString();
 report.ok = report.actions.length >= 14 && !report.failure && !report.consoleErrors.length && !report.networkErrors.length;
 await mkdir(outputRoot, { recursive: true });

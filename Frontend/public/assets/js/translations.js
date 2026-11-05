@@ -5,9 +5,32 @@ const normalizeAppLanguage = (value, fallback = 'it') => {
     const code = String(value || '').trim().toLowerCase().split('-')[0];
     return APP_LANGUAGE_CODES.includes(code) ? code : fallback;
 };
+const LOCAL_QA_LANGUAGE_KEY = 'codex_qa_language_override_v1';
+const LOCAL_QA_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
+
+export function getLocalQaLanguageOverride() {
+    try {
+        if (!LOCAL_QA_HOSTS.has(window.location.hostname)) return null;
+        return normalizeAppLanguage(window.sessionStorage.getItem(LOCAL_QA_LANGUAGE_KEY), '') || null;
+    } catch {
+        return null;
+    }
+}
 
 let _dict = {};
 async function loadPageCatalog(language) {
+    if (/(?:^|\/)(?:login-v115|registrati|reset_password|imposta_nuova_password|contatto_condiviso)(?:\.html)?$/i.test(location.pathname)) {
+        const { accessCatalogs } = await import('./translations/access.js');
+        return accessCatalogs[language] || {};
+    }
+    if (/(?:^|\/)gestione_destinatari(?:\.html)?$/i.test(location.pathname)) {
+        const { recipientCatalogs } = await import('./translations/recipients.js');
+        return recipientCatalogs[language] || {};
+    }
+    if (/(?:^|\/)(?:profilo_privato|dati_azienda)(?:\.html)?$/i.test(location.pathname)) {
+        const { profileCatalogs } = await import('./translations/profile.js');
+        return profileCatalogs[language] || {};
+    }
     if (/(?:^|\/)impostazioni(?:\.html)?$/i.test(location.pathname)) {
         const { settingsCatalogs } = await import('./translations/settings.js');
         return settingsCatalogs[language] || {};
@@ -38,7 +61,7 @@ export const supportedLanguages = [
 ];
 
 export function getCurrentLanguage() {
-    try { return normalizeAppLanguage(localStorage.getItem('app_language')); } catch { return 'it'; }
+    try { return getLocalQaLanguageOverride() || normalizeAppLanguage(localStorage.getItem('app_language')); } catch { return 'it'; }
 }
 
 let _italianCatalogPromise;

@@ -13,7 +13,13 @@ function components(value) {
     return parts.map(unescapeText);
 }
 
-export function contactDetails(card) {
+const DEFAULT_CONTACT_LABELS = Object.freeze({
+    firstName: 'Nome', lastName: 'Cognome', phone: 'Telefono', email: 'Email', address: 'Indirizzo',
+    birthDate: 'Data di nascita', fiscalCode: 'Codice fiscale', birthPlace: 'Luogo di nascita', note: 'Nota', website: 'Sito web'
+});
+
+export function contactDetails(card, labels = DEFAULT_CONTACT_LABELS) {
+    const text = key => labels[key] || DEFAULT_CONTACT_LABELS[key];
     return card.lines.flatMap(line => {
         const colon = line.indexOf(':');
         const field = line.slice(0, colon).split(';')[0];
@@ -21,12 +27,12 @@ export function contactDetails(card) {
         if (field === 'FN') return [];
         if (field === 'N') {
             const parts = components(raw);
-            return [['Nome', parts[1]], ['Cognome', parts[0]]].filter(([, value]) => value).map(([label, value]) => ({label, value}));
+            return [[text('firstName'), parts[1]], [text('lastName'), parts[0]]].filter(([, value]) => value).map(([label, value]) => ({label, value}));
         }
-        const labels = {TEL:'Telefono', EMAIL:'Email', ADR:'Indirizzo', BDAY:'Data di nascita', 'X-CF':'Codice fiscale', 'X-BIRTHPLACE':'Luogo di nascita', NOTE:'Nota', URL:'Sito web'};
-        if (!labels[field]) return [];
+        const fieldLabels = {TEL:'phone', EMAIL:'email', ADR:'address', BDAY:'birthDate', 'X-CF':'fiscalCode', 'X-BIRTHPLACE':'birthPlace', NOTE:'note', URL:'website'};
+        if (!fieldLabels[field]) return [];
         const value = field === 'ADR' ? components(raw).filter(Boolean).join(', ') : unescapeText(raw);
-        return value ? [{label: labels[field], value}] : [];
+        return value ? [{label: text(fieldLabels[field]), value}] : [];
     });
 }
 

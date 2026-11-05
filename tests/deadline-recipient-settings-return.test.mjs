@@ -85,4 +85,7 @@ test('il controller delega la navigazione al salvataggio della bozza', async () 
     assert.doesNotMatch(contacts, /mergeContactCompanyAssociation/);
     assert.match(controller, /sortDeadlineContacts\(contacts, getCompanyContext\?\.\(\)\)/);
     assert.match(controller, /deadlineRecipientDisplayName\(contact\)/);
+    assert.match(controller, /const select = event\.currentTarget;/);
+    assert.match(controller, /if \(select\.isConnected\) select\.value = '';/);
+    assert.doesNotMatch(controller, /await add\(contact\);\s*event\.currentTarget\.value/);
 });

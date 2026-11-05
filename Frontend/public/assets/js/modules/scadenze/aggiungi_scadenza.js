@@ -4,7 +4,7 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.257';
+import { auth } from '../../firebase-config.js?v=1.2.258';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
@@ -795,6 +795,10 @@ export async function initAggiungiScadenza(user) {
         }
     }
 
+    // Il bootstrap privato e il catalogo sono asincroni. Una seconda chiamata
+    // idempotente garantisce che anche il nodo definitivo della modalità
+    // modifica usi il calendario applicativo, senza duplicare i listener.
+    initDatePickerV5('dueDate');
     restoreDeadlineEditorAfterRecipientManagement();
 
     
@@ -1028,7 +1032,7 @@ async function loadScadenzaForEdit(id) {
             document.getElementById('linked-document-date-help')?.classList.remove('hidden');
             let sourceDraft = null;
             try {
-                const {loadLinkedDocumentDeadlineDraft} = await import('../privato/profile-document-deadline-link.js?v=1.2.257');
+                const {loadLinkedDocumentDeadlineDraft} = await import('../privato/profile-document-deadline-link.js?v=1.2.258');
                 sourceDraft = await loadLinkedDocumentDeadlineDraft(currentUser.uid, linkedSourceRef.id);
             } catch (error) {
                 console.warn('[TRACE] Documento sorgente non disponibile per il riepilogo:', error?.message || error);

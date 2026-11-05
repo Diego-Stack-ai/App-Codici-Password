@@ -26,6 +26,12 @@ function fixture() {
     styleCompanySections() {}, companyProfileContacts: () => ({emails: []}),
     createElement: () => node(), setChildren() {}, text: () => node(), button: () => node(),
     renderCompanyContacts() {}, renderQRCode() {},
+    t: key => ({
+      company_pdf_loading: 'Caricamento scheda PDF…',
+      company_pdf_unavailable: 'Scheda PDF non disponibile. Riprova online.'
+    })[key] || key,
+    formatTranslation: (key, values = {}) => Object.entries(values)
+      .reduce((value, [name, replacement]) => value.replaceAll(`{${name}}`, String(replacement)), key),
   });
   vm.runInContext(source, context);
   vm.runInContext("initCompanyProfile({}, 'firm', {buildVCard: () => '', reload() {}})", context);

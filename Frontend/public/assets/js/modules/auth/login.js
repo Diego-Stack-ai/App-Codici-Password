@@ -7,11 +7,11 @@
 import {
     login, completeTotpLogin, checkAuthState, logout,
     resendVerificationEmail, refreshEmailVerification
-} from '../../auth.js?v=1.2.257';
-import { initComponents } from '../../components-v129.js?v=1.2.257';
+} from '../../auth.js?v=1.2.258';
+import { initComponents } from '../../components-v129.js?v=1.2.258';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showInputModal } from '../../ui-core-v129.js?v=1.2.257';
+import { showToast, showInputModal } from '../../ui-core-v129.js?v=1.2.258';
 import { recoverTotpAccess } from '../core/mfa-manager.js';
 import { openInitialLanguageDialog, rememberUserLanguage, setLanguagePreference } from '../settings/first-configuration.js';
 
@@ -68,13 +68,13 @@ function setupEmailVerificationGate() {
         button.disabled = true;
         try {
             if (await refreshEmailVerification()) {
-                showToast('Email verificata. Accesso autorizzato.', 'success');
+                showToast(t('auth_email_verified'), 'success');
                 window.location.replace('home_page.html');
             } else {
-                showToast('La verifica non risulta ancora completata. Apri il collegamento ricevuto via email.', 'warning');
+                showToast(t('auth_email_verification_pending'), 'warning');
             }
         } catch {
-            showToast('Impossibile controllare la verifica. Verifica la connessione e riprova.', 'error');
+            showToast(t('auth_email_verification_error'), 'error');
         } finally {
             button.disabled = false;
         }
@@ -161,7 +161,7 @@ function setupLoginForm() {
         throttleTimer = setInterval(() => {
             const icon = createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'lock_clock' });
             clearElement(submitBtn);
-            setChildren(submitBtn, [icon, document.createTextNode(` Attendi ${remaining}s`)]);
+            setChildren(submitBtn, [icon, document.createTextNode(` ${t('auth_wait_seconds').replace('{seconds}', remaining)}`)]);
             remaining--;
 
             if (remaining < 0) {
@@ -204,7 +204,7 @@ function setupLoginForm() {
         }
 
         if (!navigator.onLine) {
-            showToast('Per effettuare un nuovo accesso o verificare la 2FA è necessaria una connessione. Se questo dispositivo era già autenticato, riapri l’app senza eseguire il logout.', 'warning');
+            showToast(t('auth_offline_required'), 'warning');
             return;
         }
 
@@ -230,12 +230,12 @@ function setupLoginForm() {
                     await recoverTotpAccess(pendingEmail, password, recoveryCode);
                     passwordEl.value = '';
                     document.getElementById('recovery-code').value = '';
-                    showToast('Accesso recuperato. La 2FA è stata disattivata: accedi di nuovo e riconfigurala.', 'success');
+                    showToast(t('auth_recovery_success'), 'success');
                     setTimeout(() => window.location.reload(), 1800);
                     return;
                 }
                 if (!/^\d{6}$/.test(totpCode)) {
-                    throw new Error("Inserisci il codice Authenticator di 6 cifre.");
+                    throw new Error(t('auth_totp_invalid'));
                 }
                 result = await completeTotpLogin(totpCode, pendingEmail);
             } else {
@@ -258,11 +258,11 @@ function setupLoginForm() {
                     clearElement(submitBtn);
                     setChildren(submitBtn, [
                         createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'verified_user' }),
-                        document.createTextNode(' Verifica codice')
+                        document.createTextNode(` ${t('auth_verify_code')}`)
                     ]);
                     submitBtn.disabled = false;
                     document.body.classList.remove('is-auth-progress');
-                    showToast("Inserisci il codice generato dalla tua app Authenticator.", "info");
+                    showToast(t('auth_totp_prompt'), "info");
                     return;
                 }
             }
@@ -295,12 +295,12 @@ function setupLoginForm() {
 
             let errorMsg = t('error_auth_failed') || "Credenziali non valide.";
             if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-                errorMsg = "Email o Password errati.";
+                errorMsg = t('auth_invalid_credentials');
             } else if (err.code === 'auth/too-many-requests') {
-                errorMsg = "Troppi tentativi falliti. Riprova più tardi.";
+                errorMsg = t('auth_too_many_attempts');
                 failedAttempts = 5; // Forza attesa massima se Firebase blocca
             } else if (err.code === 'auth/invalid-verification-code') {
-                errorMsg = "Codice Authenticator errato o scaduto.";
+                errorMsg = t('auth_totp_error');
             } else if (err.message) {
                 errorMsg = err.message;
             }

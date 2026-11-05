@@ -14,17 +14,17 @@
 
     <!-- PWA / Mobile Capable -->
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.257" />
+    <link rel="manifest" href="manifest.json?v=1.2.258" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.257&deadline-share=20260908a">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.258&deadline-share=20260908a">
 
     <!-- CORE JS (Orchestrator V5.0) -->
 </head>
@@ -89,7 +89,7 @@
                         <div id="deadline-rule-field" class="form-group">
                             <span class="label-sm"><span data-t="deadline_form_rule">Regola</span></span>
                             <div class="deadline-rule-select-row">
-                                <label class="sr-only" for="deadline-rule-select">Regola</label>
+                                <label class="sr-only" for="deadline-rule-select" data-t="deadline_form_rule">Regola</label>
                                 <select id="deadline-rule-select" class="input" required></select>
                                 <button type="button" id="btn-add-deadline-rule" class="deadline-rule-add-button" title="Nuova regola" aria-label="Nuova regola" data-t-title="deadline_form_new_rule" data-t-aria="deadline_form_new_rule">
                                     <span class="material-symbols-outlined notranslate" translate="no">add</span>
@@ -161,11 +161,11 @@
                             <div class="input-wrapper">
                                 <span class="material-symbols-outlined notranslate" translate="no">person</span>
                                 <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="nome_cognome" list="names-list" type="text" class="input"
-                                    placeholder="Mario Rossi">
+                                    placeholder="Mario Rossi" data-t-placeholder="deadline_contact_name_placeholder">
                                 <datalist id="names-list"></datalist>
                                 <button type="button" id="btn-remove-saved-name" class="btn-icon-header"
-                                    title="Elimina il nominativo selezionato dalla lista salvata"
-                                    aria-label="Elimina nominativo salvato">
+                                    title="Elimina il nominativo selezionato dalla lista salvata" data-t-title="deadline_saved_recipient_delete_title"
+                                    aria-label="Elimina nominativo salvato" data-t-aria="deadline_saved_recipient_delete_aria">
                                     <span class="material-symbols-outlined notranslate" translate="no">delete</span>
                                 </button>
                             </div>
@@ -185,7 +185,7 @@
                                     </div>
                                     <div class="dropdown-actions">
                                         <button type="button" class="btn-manage-config-inline"
-                                            data-config-id="tipo_scadenza" title="Aggiungi nuovo">
+                                            data-config-id="tipo_scadenza" title="Aggiungi nuovo" data-t-title="deadline_add_new_title">
                                             <span class="material-symbols-outlined notranslate" translate="no">add</span>
                                         </button>
                                         <span class="material-symbols-outlined arrow-icon notranslate" translate="no">expand_more</span>
@@ -212,7 +212,7 @@
                                     </div>
                                     <div class="dropdown-actions">
                                         <button type="button" class="btn-manage-config-inline"
-                                            data-config-id="modello_veicolo" title="Aggiungi nuovo">
+                                            data-config-id="modello_veicolo" title="Aggiungi nuovo" data-t-title="deadline_add_new_title">
                                             <span class="material-symbols-outlined notranslate" translate="no">add</span>
                                         </button>
                                         <span class="material-symbols-outlined arrow-icon notranslate" translate="no">expand_more</span>
@@ -238,7 +238,7 @@
                                     </div>
                                     <div class="dropdown-actions">
                                         <button type="button" class="btn-manage-config-inline"
-                                            data-config-id="testo_email_select" title="Aggiungi nuovo">
+                                            data-config-id="testo_email_select" title="Aggiungi nuovo" data-t-title="deadline_add_new_title">
                                             <span class="material-symbols-outlined notranslate" translate="no">add</span>
                                         </button>
                                         <span class="material-symbols-outlined arrow-icon notranslate" translate="no">expand_more</span>
@@ -280,7 +280,7 @@
                                 <div class="input-wrapper read-only input-wrapper-textarea">
                                     <textarea data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="oggetto_email" readonly
                                         class="input italic input-textarea-resize-none"
-                                        placeholder="Oggetto automatico..." rows="3"></textarea>
+                                        placeholder="Oggetto automatico..." data-t-placeholder="deadline_subject_placeholder" rows="3"></textarea>
                                 </div>
                                 <p id="profile-document-message-help" class="deadline-field-help hidden" data-t="deadline_form_personal_message_help">Il testo arriva dalla regola selezionata e viene composto con i dati del documento.</p>
                             </div>
@@ -318,20 +318,20 @@
 
                     <div class="flex-col-gap-4">
                         <div class="deadline-recipient-add-row">
-                            <select id="deadline-contact-select" class="base-btn-secondary deadline-contact-select" aria-label="Seleziona una persona dalla rubrica">
-                                <option value="">Seleziona dalla rubrica…</option>
+                            <select id="deadline-contact-select" class="base-btn-secondary deadline-contact-select" aria-label="Seleziona una persona dalla rubrica" data-t-aria="deadline_contact_select_aria">
+                                <option value="" data-t="deadline_contact_select">Seleziona dalla rubrica…</option>
                             </select>
                         </div>
                         <button type="button" id="btn-manage-deadline-contacts" class="base-btn-secondary">
                             <span class="material-symbols-outlined notranslate" translate="no">manage_accounts</span>
-                            Gestisci destinatari
+                            <span data-t="deadline_manage_recipients">Gestisci destinatari</span>
                         </button>
                         <div id="deadline-recipients-list" class="deadline-recipients-list" aria-live="polite"></div>
-                        <p class="deadline-recipient-help">Email e Push sono indipendenti. La Push arriva solo a destinatari registrati nell’app che l’hanno attivata sul proprio dispositivo. “Può gestire” consente al destinatario registrato di segnare la scadenza come eseguita o impostare la prossima data.</p>
+                        <p class="deadline-recipient-help" data-t="deadline_recipient_help">Email e Push sono indipendenti. La Push arriva solo a destinatari registrati nell’app che l’hanno attivata sul proprio dispositivo. “Può gestire” consente al destinatario registrato di segnare la scadenza come eseguita o impostare la prossima data.</p>
                         <input id="notif_channel_select" type="hidden" value="multichannel">
                     </div>
                 </div>
-                <p class="deadline-automation-note">
+                <p class="deadline-automation-note" data-t="deadline_automation_note">
                     ⏱ Controllo automatico ogni giorno alle 09:00</p>
             </div>
 
@@ -346,7 +346,7 @@
                     <div class="form-group">
                         <label class="label-sm" for="deadline_url">
                             <span class="material-symbols-outlined icon-amber label-icon notranslate" translate="no">link</span>
-                            <span>URL</span>
+                            <span data-t="deadline_url_label">URL</span>
                         </label>
                         <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="deadline_url" class="input" type="url" inputmode="url" autocomplete="url"
                             placeholder="https://esempio.it">
@@ -358,7 +358,7 @@
                             <span class="material-symbols-outlined icon-amber label-icon notranslate" translate="no">description</span>
                             <span data-t="notes">Note Aggiuntive</span>
                         </label>
-                        <textarea data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="notes" class="input-textarea" placeholder="Dettagli sulla scadenza..."></textarea>
+                        <textarea data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="notes" class="input-textarea" placeholder="Dettagli sulla scadenza..." data-t-placeholder="deadline_notes_placeholder"></textarea>
                     </div>
 
                     <!-- Allegati Logic Wrapper (Premium V4.1) -->
@@ -369,15 +369,15 @@
                                 <span class="material-symbols-outlined notranslate" translate="no">attach_file</span>
                             </div>
                             <div class="upload-text">
-                                <span class="upload-title">Aggiungi Allegato</span>
-                                <span class="upload-subtitle">Foto, PDF o Documenti</span>
+                                <span class="upload-title" data-t="deadline_attachment_add">Aggiungi Allegato</span>
+                                <span class="upload-subtitle" data-t="deadline_attachment_types">Foto, PDF o Documenti</span>
                             </div>
                         </button>
 
                         <!-- Attachments List (Sotto il pulsante) -->
                         <div id="attachments-list" class="attachments-list">
                             <!-- Injected via JS -->
-                            <p class="placeholder-text-standard">
+                            <p class="placeholder-text-standard" data-t="deadline_attachment_none">
                                 Nessun allegato
                             </p>
                         </div>
@@ -394,36 +394,35 @@
 
     <!-- Hidden File Inputs -->
     <input type="file" id="input-camera" accept="image/*" capture="environment" class="hidden"
-        aria-label="Upload da Camera">
-    <input type="file" id="input-gallery" accept="image/*,video/*" class="hidden" aria-label="Upload da Galleria">
+        aria-label="Upload da Camera" data-t-aria="upload_camera_aria">
+    <input type="file" id="input-gallery" accept="image/*,video/*" class="hidden" aria-label="Upload da Galleria" data-t-aria="upload_gallery_aria">
     <input type="file" id="input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" class="hidden"
-        aria-label="Upload Documento">
+        aria-label="Upload Documento" data-t-aria="upload_document_aria">
 
     <!-- Source Selector Modal (Semantic) -->
     <div id="source-selector-modal" class="modal-overlay">
         <div class="source-modal-box modal-box">
-            <h3 class="modal-title-source">
-                Seleziona Sorgente</h3>
+            <h3 class="modal-title-source" data-t="select_source">Seleziona Sorgente</h3>
 
             <div class="modal-grid">
                 <button type="button" class="source-option-btn" data-source="camera">
                     <span class="material-symbols-outlined notranslate" translate="no">photo_camera</span>
-                    <span class="source-btn-label">Camera</span>
+                    <span class="source-btn-label" data-t="deadline_source_camera">Camera</span>
                 </button>
 
                 <button type="button" class="source-option-btn" data-source="gallery">
                     <span class="material-symbols-outlined notranslate" translate="no">collections</span>
-                    <span class="source-btn-label">Galleria</span>
+                    <span class="source-btn-label" data-t="gallery">Galleria</span>
                 </button>
 
                 <button type="button" class="source-option-btn full-width source-btn-row" data-source="file">
                     <span class="material-symbols-outlined notranslate" translate="no">description</span>
-                    <span class="source-btn-label">Documento</span>
+                    <span class="source-btn-label" data-t="document">Documento</span>
                 </button>
             </div>
 
             <button type="button" id="btn-cancel-source" class="source-btn-cancel">
-                Annulla
+                <span data-t="cancel">Annulla</span>
             </button>
         </div>
     </div>

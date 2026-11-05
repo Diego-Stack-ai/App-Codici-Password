@@ -1,4 +1,5 @@
 import { clearElement, createElement } from '../../dom-utils.js';
+import { t } from '../../translations.js';
 import {
     contactHasCompanyAssociation,
     deadlineRecipientDisplayName,
@@ -17,7 +18,7 @@ export function createDeadlineRecipientController({ onManageContacts, getCompany
         if (!container) return;
         clearElement(container);
         if (!recipients.length) {
-            container.appendChild(createElement('p', { className: 'deadline-recipient-help', textContent: 'Nessun destinatario aggiuntivo. Il proprietario continuerà a ricevere le proprie Push.' }));
+            container.appendChild(createElement('p', { className: 'deadline-recipient-help', textContent: t('deadline_no_additional_recipients') }));
             return;
         }
         recipients.forEach((recipient, index) => {
@@ -26,7 +27,7 @@ export function createDeadlineRecipientController({ onManageContacts, getCompany
             const pushToggle = createElement('input', { type: 'checkbox', checked: recipient.sendPush, dataset: { recipientIndex: String(index), channel: 'push' } });
             container.appendChild(createElement('div', { className: `deadline-recipient-card${recipient.sendEmail || recipient.sendPush || recipient.canManage || owner ? '' : ' is-paused'}` }, [
                 createElement('div', {}, [
-                    createElement('span', { className: 'deadline-recipient-name', textContent: recipient.displayName || 'Destinatario' }),
+                    createElement('span', { className: 'deadline-recipient-name', textContent: recipient.displayName || t('deadline_recipient_fallback') }),
                     createElement('span', { className: 'deadline-recipient-email', textContent: recipient.email })
                 ]),
                 createElement('div', { className: 'deadline-recipient-controls' }, [
@@ -34,9 +35,9 @@ export function createDeadlineRecipientController({ onManageContacts, getCompany
                     createElement('label', { className: 'deadline-channel-label' }, [pushToggle, document.createTextNode('Push')]),
                     ...(owner ? [] : [createElement('label', { className: 'deadline-channel-label' }, [
                         createElement('input', { type: 'checkbox', checked: recipient.canManage, dataset: { recipientIndex: String(index), channel: 'manage' } }),
-                        document.createTextNode('Può gestire')
+                        document.createTextNode(t('deadline_recipient_can_manage'))
                     ])]),
-                    createElement('button', { type: 'button', className: 'deadline-recipient-remove', dataset: { recipientRemove: String(index) }, title: 'Rimuovi destinatario' }, [
+                    createElement('button', { type: 'button', className: 'deadline-recipient-remove', dataset: { recipientRemove: String(index) }, title: t('deadline_recipient_remove') }, [
                         createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })
                     ])
                 ])
@@ -48,7 +49,7 @@ export function createDeadlineRecipientController({ onManageContacts, getCompany
         const select = document.getElementById('deadline-contact-select');
         if (!select) return;
         clearElement(select);
-        select.appendChild(new Option('Seleziona dalla rubrica…', ''));
+        select.appendChild(new Option(t('deadline_contact_select'), ''));
         sortDeadlineContacts(contacts, getCompanyContext?.()).forEach(contact => {
             const email = normalizeRecipientEmail(contact.email);
             if (!email) return;
@@ -89,10 +90,11 @@ export function createDeadlineRecipientController({ onManageContacts, getCompany
             window.location.href = `gestione_destinatari.html?return=${encodeURIComponent(returnTo)}`;
         });
         document.getElementById('deadline-contact-select')?.addEventListener('change', async event => {
-            const selectedValue = event.currentTarget.value || '';
+            const select = event.currentTarget;
+            const selectedValue = select.value || '';
             const contact = contacts.find(item => item.id === selectedValue || `email:${normalizeRecipientEmail(item.email)}` === selectedValue);
             if (contact) await add(contact);
-            event.currentTarget.value = '';
+            if (select.isConnected) select.value = '';
         });
         document.getElementById('deadline-recipients-list')?.addEventListener('change', event => {
             const input = event.target.closest('input[data-recipient-index]');

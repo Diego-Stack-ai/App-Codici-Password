@@ -1,6 +1,7 @@
 import { clearElement, createElement } from '../../dom-utils.js';
 import { showConfirmModal } from '../../ui-core-v129.js';
 import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
+import { t } from '../../translations.js';
 
 export function createDeadlineAttachmentController() {
     let selectedFiles = [];
@@ -16,7 +17,7 @@ export function createDeadlineAttachmentController() {
             ...selectedFiles.map((file, index) => ({ name: file.name, existing: false, index }))
         ];
         if (!attachments.length) {
-            container.appendChild(createElement('p', { className: 'placeholder-text-standard', textContent: 'Nessun allegato' }));
+            container.appendChild(createElement('p', { className: 'placeholder-text-standard', textContent: t('deadline_attachment_none') }));
             return;
         }
 
@@ -30,14 +31,16 @@ export function createDeadlineAttachmentController() {
                     createElement('span', { className: `material-symbols-outlined attachment-icon ${color}`, textContent: icon }),
                     createElement('div', { className: 'attachment-meta' }, [
                         createElement('span', { className: 'attachment-name', textContent: file.name }),
-                        createElement('span', { className: 'attachment-status', textContent: file.linkedSource ? 'Collegato dalla scheda origine' : file.existing ? 'Caricato' : 'Nuovo' })
+                        createElement('span', { className: 'attachment-status', textContent: file.linkedSource
+                            ? t('deadline_attachment_linked') : file.existing ? t('deadline_attachment_uploaded') : t('deadline_attachment_new') })
                     ])
                 ]),
                 createElement('button', {
                     type: 'button', className: 'btn-delete-attachment',
                     onclick: async event => {
                         event.stopPropagation();
-                        const confirmed = await showConfirmModal('ELIMINA ALLEGATO', `Vuoi rimuovere l'allegato ${file.name}?`, 'Elimina', 'Annulla');
+                        const confirmed = await showConfirmModal(t('deadline_attachment_delete_title'),
+                            t('deadline_attachment_delete_message').replace('{name}', file.name), t('delete'), t('cancel'));
                         if (!confirmed) return;
                         if (file.existing) existingAttachments.splice(file.index, 1);
                         else selectedFiles.splice(file.index, 1);

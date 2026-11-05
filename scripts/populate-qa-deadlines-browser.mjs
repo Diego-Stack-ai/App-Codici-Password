@@ -60,6 +60,7 @@ function isoOffset(days) {
 const deadlineFixtures = Object.freeze([
     {key: 'private-future', owner: 'QA Scadenza Privata', rule: 'QA Contratto privato', domain: 'contracts', dueDate: isoOffset(400), contactKey: 'private', attachment: true},
     {key: 'company-future', owner: 'QA Scadenza Aziendale', rule: 'QA Licenza aziendale', domain: 'company', dueDate: isoOffset(500), contactKey: 'company', company: true},
+    {key: 'external-company', owner: 'QA Scadenza Azienda Esterna', rule: 'QA Licenza aziendale', domain: 'company', dueDate: isoOffset(550), companyExternal: true, companyName: 'QA Azienda Esterna Sintetica'},
     {key: 'today', owner: 'QA Scadenza Odierna', rule: 'QA Contratto privato', domain: 'contracts', dueDate: isoOffset(0), expectedFilter: 'all'},
     {key: 'urgent', owner: 'QA Scadenza Urgente', rule: 'QA Contratto privato', domain: 'contracts', dueDate: isoOffset(-1), expectedFilter: 'urgent'},
     {key: 'temp-trash', owner: 'QA Scadenza TEMP CESTINO', rule: 'QA Contratto privato', domain: 'contracts', dueDate: isoOffset(700), temporary: true}
@@ -322,10 +323,17 @@ async function selectRule(page, fixture) {
     const parameter = page.locator('#deadline-parameter-select');
     await parameter.waitFor({state: 'visible', timeout: 25_000});
     await parameter.selectOption({index: 1});
-    if (fixture.company) {
+    if (fixture.company || fixture.companyExternal) {
         const company = page.locator('#deadline-company-context-select');
         await company.waitFor({state: 'visible', timeout: 25_000});
-        await company.selectOption(companyId);
+        if (fixture.companyExternal) {
+            await company.selectOption('external');
+            const externalName = page.locator('#deadline-external-company-name');
+            await externalName.waitFor({state: 'visible', timeout: 10_000});
+            await externalName.fill(fixture.companyName);
+        } else {
+            await company.selectOption(companyId);
+        }
     }
 }
 
@@ -333,8 +341,14 @@ async function selectDateThroughUi(page, isoDate) {
     const [targetYear, targetMonth, targetDay] = isoDate.split('-').map(Number);
     const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
         'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-    await page.locator('#dueDate').click();
+    const trigger = page.locator('#dueDate');
+    await trigger.click();
     const modal = page.locator('#datepicker-modal-v5');
+    if (!await modal.isVisible().catch(() => false)) {
+        assert.ok(await trigger.evaluate(element => element.classList.contains('input-datepicker-trigger')),
+            'QA_DATEPICKER_NOT_INITIALIZED');
+        await trigger.dispatchEvent('click');
+    }
     await modal.waitFor({state: 'visible', timeout: 15_000});
     let guard = 0;
     while (guard++ < 40) {
@@ -434,6 +448,15 @@ async function verifyDeadlineDetail(page, fixture, id) {
     report.fixtureIds[fixture.key] = id;
     await page.screenshot({path: path.join(outputRoot, `deadline-${fixture.key}-detail.png`), fullPage: true});
     record(`${fixture.key}-detail`, 'passed');
+    if (fixture.companyExternal) {
+        await page.locator('.btn-fab-scadenza').click();
+        await page.waitForURL(/\/aggiungi_scadenza\.html\?id=/, {timeout: 45_000});
+        await waitForTranslatedPage(page);
+        await page.locator('#deadline-company-context-select').waitFor({state: 'visible', timeout: 25_000});
+        assert.equal(await page.locator('#deadline-company-context-select').inputValue(), 'external');
+        assert.equal(await page.locator('#deadline-external-company-name').inputValue(), fixture.companyName);
+        record(`${fixture.key}-external-company-readback`, 'passed', fixture.companyName);
+    }
 }
 
 async function verifyListFilter(page, fixture, filter) {
@@ -481,6 +504,12 @@ async function exerciseTempTrash(page) {
     const fixture = deadlineFixtures.find(item => item.key === 'temp-trash');
     const found = await findDeadline(page, fixture);
     assert.ok(found && found.id === report.fixtureIds[fixture.key]);
+    const cardId = await found.card.getAttribute('data-id');
+    const cardText = await found.card.textContent();
+    if (!cardId || cardId !== report.fixtureIds['temp-trash']) throw new Error('QA_DESTRUCTIVE_TARGET_NOT_IDENTIFIED');
+    if (!cardText?.toLocaleLowerCase('it-IT').includes(fixture.owner.toLocaleLowerCase('it-IT'))) {
+        throw new Error('QA_DESTRUCTIVE_TARGET_TEXT_MISMATCH');
+    }
     await swipe(page, found.card, 'left');
     const modal = page.locator('#protocol-confirm-modal');
     await modal.waitFor({state: 'visible', timeout: 15_000});
@@ -490,9 +519,6 @@ async function exerciseTempTrash(page) {
         record('temp-trash-permanent-delete', 'confirmation-only-safe-default');
         return;
     }
-    const cardId = await found.card.getAttribute('data-id');
-    if (!cardId || cardId !== report.fixtureIds['temp-trash']) throw new Error('QA_DESTRUCTIVE_TARGET_NOT_IDENTIFIED');
-    if (!(await found.card.textContent()).includes(fixture.owner)) throw new Error('QA_DESTRUCTIVE_TARGET_TEXT_MISMATCH');
     await modal.locator('#confirm-ok-btn').click();
     await found.card.waitFor({state: 'detached', timeout: 45_000});
     record('temp-trash-permanent-delete', 'passed-explicit-opt-in', cardId);

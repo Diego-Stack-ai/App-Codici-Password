@@ -23,6 +23,15 @@ if (!/^[A-Za-z0-9_-]{8,128}$/.test(companyId)) throw new Error('QA_COMPANY_ID_IN
 const credentials = await loadQaCredentialBundle(undefined, {expectedEmail});
 if (credentials.uid !== expectedUid) throw new Error('QA2_UID_MISMATCH');
 const extendedOnly = process.env.CODEX_QA_EXTENDED_ONLY === '1';
+const auditOnly = process.env.CODEX_QA_ACCOUNT_AUDIT_ONLY === '1';
+const duplicateCleanup = Object.freeze({
+    enabled: process.env.CODEX_QA_ACCOUNT_DUPLICATE_CLEANUP === '1',
+    keepId: String(process.env.CODEX_QA_ACCOUNT_KEEP_ID || '').trim(),
+    deleteId: String(process.env.CODEX_QA_ACCOUNT_DELETE_ID || '').trim(),
+    consent: String(process.env.CODEX_QA_ACCOUNT_CLEANUP_CONFIRM || '').trim()
+});
+const auditCandidateIds = String(process.env.CODEX_QA_ACCOUNT_AUDIT_IDS || '')
+    .split(',').map(value => value.trim()).filter(value => /^[A-Za-z0-9_-]{8,128}$/.test(value));
 const allowDestructive = process.env.QA_ALLOW_DESTRUCTIVE === '1';
 const attachmentCleanup = Object.freeze({
     accountId: String(process.env.QA_CLEANUP_ACCOUNT_ATTACHMENT_ID || '').trim(),
@@ -37,7 +46,7 @@ const fixtures = Object.freeze([
     {context: 'company', mode: 'banking', name: 'QA Azienda Account Bancario', username: 'qa.azienda.banca', code: 'QA-AZIENDA-BANCA-001', password: secret},
     {context: 'company', mode: 'memo', name: 'QA Azienda Memorandum', username: '', code: '', password: ''}
 ]);
-const report = {schemaVersion: 1, origin, companyId, extendedOnly, startedAt: new Date().toISOString(), fixtureIds: {}, actions: [], warnings: [], consoleErrors: [], networkErrors: []};
+const report = {schemaVersion: 1, origin, companyId, extendedOnly, auditOnly, startedAt: new Date().toISOString(), fixtureIds: {}, actions: [], warnings: [], consoleErrors: [], networkErrors: []};
 
 function record(action, status, detail = '') {
     report.actions.push({action, status, ...(detail ? {detail} : {})});
@@ -246,6 +255,11 @@ async function verifySharedValidation(page, context) {
         element.dispatchEvent(new Event('change', {bubbles: true}));
     });
     await page.locator('#shared-management').waitFor({state: 'visible', timeout: 10_000});
+    const inviteEmail = page.locator('#invite-email');
+    await inviteEmail.fill('destinatario.qa@appcodici-password.invalid');
+    assert.equal(await inviteEmail.inputValue(), 'destinatario.qa@appcodici-password.invalid');
+    record(`${context}-shared-invite-field`, 'synthetic-invalid-address-accepted-not-sent');
+    await inviteEmail.fill('');
     const save = page.locator(context === 'private' ? '#btn-save-footer' : '#save-btn-footer');
     await save.click();
     const toast = page.getByText('Scegli o aggiungi almeno un contatto per condividere.', {exact: false});
@@ -331,7 +345,7 @@ async function tryAccountWidget(page, fixture) {
     await page.locator('#account-widgets-section').waitFor({state: 'visible', timeout: 30_000});
     if (await page.locator('.account-widget-block').filter({hasText: title}).count()) {
         record('private-standard-widget', 'reused');
-        return;
+        return true;
     }
     await page.locator('#btn-add-account-widget').click();
     const catalog = page.locator('.account-widget-editor-modal').filter({hasText: 'Profili Widget Account'}).last();
@@ -352,10 +366,35 @@ async function tryAccountWidget(page, fixture) {
         const detail = (await page.locator('#toast').textContent().catch(() => ''))?.trim() || 'Widget non creato';
         report.warnings.push({area: 'account-widget', detail: detail.slice(0, 240)});
         record('private-standard-widget', 'blocked');
-        return;
+        return false;
     }
     await page.screenshot({path: path.join(outputRoot, 'private-standard-widget.png'), fullPage: true});
     record('private-standard-widget', 'passed');
+    return true;
+}
+
+async function tryAttachExistingAccountWidget(page, fixture) {
+    const title = 'QA Widget Account Sintetico';
+    await openForm(page, fixture);
+    await page.locator('#account-widgets-section').waitFor({state: 'visible', timeout: 30_000});
+    const existing = page.locator('.account-widget-block').filter({hasText: title});
+    if (await existing.count()) {
+        record(`${fixture.context}-${fixture.mode}-existing-widget-template`, 'reused');
+        return;
+    }
+    const select = page.locator('#account-widget-template-select');
+    await select.waitFor({state: 'visible', timeout: 30_000});
+    const option = select.locator('option').filter({hasText: title}).first();
+    await option.waitFor({state: 'attached', timeout: 30_000});
+    const value = await option.getAttribute('value');
+    assert.ok(value, 'Il profilo Widget QA deve essere disponibile nel menu dei Widget esistenti');
+    await select.selectOption(value);
+    const attach = page.locator('#btn-attach-account-widget');
+    assert.equal(await attach.isEnabled(), true, 'Il pulsante Aggiungi deve attivarsi dopo la selezione del profilo Widget');
+    await attach.click();
+    await existing.waitFor({state: 'visible', timeout: 30_000});
+    await page.screenshot({path: path.join(outputRoot, `${fixture.context}-${fixture.mode}-existing-widget-template.png`), fullPage: true});
+    record(`${fixture.context}-${fixture.mode}-existing-widget-template`, 'attached-and-persisted');
 }
 
 async function trySharedCredential(page, fixture) {
@@ -434,6 +473,16 @@ async function swipeRight(page, row) {
     await page.mouse.up();
 }
 
+async function swipeLeft(page, row) {
+    const box = await row.boundingBox();
+    if (!box) throw new Error('QA_SWIPE_TARGET_MISSING');
+    const y = box.y + Math.min(box.height / 2, 80);
+    await page.mouse.move(box.x + box.width - Math.min(40, box.width / 6), y);
+    await page.mouse.down();
+    await page.mouse.move(box.x + (box.width * 0.28), y, {steps: 12});
+    await page.mouse.up();
+}
+
 async function tryArchiveRestore(page, fixture) {
     const accountId = report.fixtureIds[`${fixture.context}-${fixture.mode}`];
     if (!accountId || fixture.context !== 'private') throw new Error('QA_ARCHIVE_FIXTURE_NOT_IDENTIFIED');
@@ -467,6 +516,114 @@ async function tryArchiveRestore(page, fixture) {
     record('private-standard-restore', 'passed');
 }
 
+async function auditPrivateStandardState(page) {
+    const fixture = fixtures[0];
+    await page.goto(listUrl(fixture), {waitUntil: 'domcontentloaded', timeout: 45_000});
+    await waitForTranslatedPage(page);
+    await page.waitForFunction(() => !document.querySelector('#accounts-container .loading-full-box'), null, {timeout: 30_000});
+    await page.waitForTimeout(5_000);
+    await page.locator('#account-search').fill(fixture.name);
+    await page.waitForTimeout(1_000);
+    const activeRendered = await page.locator('.account-card').evaluateAll(cards => cards.map(card => ({
+        id: card.getAttribute('data-id'),
+        name: card.querySelector('.account-card-title')?.textContent?.trim() || ''
+    })));
+    const active = await page.locator('.account-card').evaluateAll((cards, expectedName) => cards
+        .filter(card => card.querySelector('.account-card-title')?.textContent?.trim() === expectedName)
+        .map(card => ({id: card.getAttribute('data-id'), name: expectedName})), fixture.name);
+
+    await page.goto(`${origin}/archivio_account.html`, {waitUntil: 'domcontentloaded', timeout: 45_000});
+    await waitForTranslatedPage(page);
+    await page.waitForFunction(() => !document.querySelector('#accounts-container .loading-full-box'), null, {timeout: 30_000});
+    await page.waitForTimeout(5_000);
+    await page.locator('#archive-search').fill(fixture.name);
+    await page.waitForTimeout(1_000);
+    const archivedRendered = await page.locator('.archive-row-container').evaluateAll(rows => rows.map(row => ({
+        key: row.getAttribute('data-key'),
+        name: row.querySelector('.archive-item-name')?.textContent?.trim() || ''
+    })));
+    const archived = await page.locator('.archive-row-container').evaluateAll((rows, expectedName) => rows
+        .filter(row => row.querySelector('.archive-item-name')?.textContent?.trim() === expectedName)
+        .map(row => ({key: row.getAttribute('data-key'), name: expectedName})), fixture.name);
+
+    const direct = [];
+    for (const accountId of new Set([...auditCandidateIds, ...archived.map(item => JSON.parse(item.key || '[]')[1]).filter(Boolean)])) {
+        await page.goto(`${origin}/dettaglio_account_privato.html?id=${encodeURIComponent(accountId)}`, {
+            waitUntil: 'domcontentloaded', timeout: 45_000
+        });
+        await waitForTranslatedPage(page);
+        await page.waitForTimeout(5_000);
+        direct.push({
+            id: accountId,
+            page: safeUrl(page.url()),
+            name: await page.locator('#detail-nomeAccount').inputValue().catch(() => ''),
+            errorVisible: await page.locator('.error-message, .empty-state, #toast').filter({hasText: /errore|non trovato|mancante/i})
+                .first().isVisible().catch(() => false)
+        });
+    }
+    report.accountAudit = {fixture: fixture.name, active, archived, activeRendered, archivedRendered, direct};
+    record('private-standard-state-audit', 'passed', `active=${active.length};archived=${archived.length}`);
+}
+
+async function exactArchivedRow(page, accountId, expectedName) {
+    const rows = page.locator('.archive-row-container').filter({hasText: expectedName});
+    for (let index = 0; index < await rows.count(); index += 1) {
+        const row = rows.nth(index);
+        const key = await row.getAttribute('data-key');
+        const name = (await row.locator('.archive-item-name').textContent().catch(() => ''))?.trim();
+        if (name === expectedName && key === JSON.stringify(['privato', accountId])) return row;
+    }
+    throw new Error(`QA_ARCHIVED_ACCOUNT_NOT_FOUND:${accountId}`);
+}
+
+async function cleanupPrivateStandardDuplicate(page) {
+    if (!duplicateCleanup.enabled) return;
+    if (duplicateCleanup.consent !== 'DELETE_QA2_SYNTHETIC_DUPLICATE') throw new Error('QA_DUPLICATE_CLEANUP_CONFIRMATION_REQUIRED');
+    if (!/^[A-Za-z0-9_-]{8,128}$/.test(duplicateCleanup.keepId)
+        || !/^[A-Za-z0-9_-]{8,128}$/.test(duplicateCleanup.deleteId)
+        || duplicateCleanup.keepId === duplicateCleanup.deleteId) throw new Error('QA_DUPLICATE_CLEANUP_IDS_INVALID');
+    const audit = report.accountAudit;
+    const activeIds = new Set((audit?.active || []).map(item => item.id));
+    const archivedIds = new Set((audit?.archived || []).map(item => JSON.parse(item.key || '[]')[1]));
+    const bothArchived = activeIds.size === 0 && archivedIds.size === 2
+        && archivedIds.has(duplicateCleanup.keepId) && archivedIds.has(duplicateCleanup.deleteId);
+    const keepAlreadyActive = activeIds.size === 1 && activeIds.has(duplicateCleanup.keepId)
+        && archivedIds.size === 1 && archivedIds.has(duplicateCleanup.deleteId);
+    if (!bothArchived && !keepAlreadyActive) throw new Error('QA_DUPLICATE_CLEANUP_STATE_MISMATCH');
+
+    const fixture = fixtures[0];
+    await page.goto(`${origin}/archivio_account.html`, {waitUntil: 'domcontentloaded', timeout: 45_000});
+    await waitForTranslatedPage(page);
+    await page.waitForFunction(() => !document.querySelector('#accounts-container .loading-full-box'), null, {timeout: 30_000});
+    await page.waitForTimeout(5_000);
+    await page.locator('#archive-search').fill(fixture.name);
+    await page.waitForTimeout(1_000);
+    if (bothArchived) {
+        const keepRow = await exactArchivedRow(page, duplicateCleanup.keepId, fixture.name);
+        await swipeRight(page, keepRow);
+        const restored = await keepRow.waitFor({state: 'detached', timeout: 30_000}).then(() => true).catch(() => false);
+        if (!restored) throw new Error(`QA_DUPLICATE_RESTORE_FAILED:${duplicateCleanup.keepId}`);
+        record('private-standard-duplicate-keep-restored', 'passed', duplicateCleanup.keepId);
+
+        await page.reload({waitUntil: 'domcontentloaded', timeout: 45_000});
+        await waitForTranslatedPage(page);
+        await page.waitForFunction(() => !document.querySelector('#accounts-container .loading-full-box'), null, {timeout: 30_000});
+        await page.waitForTimeout(5_000);
+        await page.locator('#archive-search').fill(fixture.name);
+        await page.waitForTimeout(1_000);
+    } else {
+        record('private-standard-duplicate-keep-already-active', 'passed', duplicateCleanup.keepId);
+    }
+    const deleteRow = await exactArchivedRow(page, duplicateCleanup.deleteId, fixture.name);
+    await swipeLeft(page, deleteRow);
+    const confirmation = page.locator('.modal-overlay.active');
+    await confirmation.waitFor({state: 'visible', timeout: 20_000});
+    await confirmation.locator('input.modal-input-glass').fill('SI');
+    await confirmation.locator('button.btn-primary').click();
+    const removedFromView = await deleteRow.waitFor({state: 'detached', timeout: 30_000}).then(() => true).catch(() => false);
+    record('private-standard-duplicate-delete', removedFromView ? 'verification-pending' : 'blocked', duplicateCleanup.deleteId);
+}
+
 await mkdir(outputRoot, {recursive: true});
 const attachmentPath = path.join(fixtureDir, 'qa-account-allegato-sintetico.txt');
 await writeFile(attachmentPath, 'QA-SINTETICO\nAllegato Account non reale.\n', 'utf8');
@@ -486,22 +643,41 @@ try {
 
     await loginAndUnlock(page);
     await verifyQa2CompanyOwnership(page);
-    await cleanupAuthorizedAttachmentDuplicate(page);
-    if (!extendedOnly) {
-        for (const fixture of fixtures) {
-            await populate(page, fixture);
-            await verifyDetail(page, fixture);
+    if (auditOnly) {
+        await auditPrivateStandardState(page);
+        if (duplicateCleanup.enabled) {
+            await cleanupPrivateStandardDuplicate(page);
+            await auditPrivateStandardState(page);
+            const deleteAction = report.actions.find(action => action.action === 'private-standard-duplicate-delete');
+            const stillArchived = (report.accountAudit?.archived || []).some(item => {
+                try { return JSON.parse(item.key || '[]')[1] === duplicateCleanup.deleteId; }
+                catch { return false; }
+            });
+            if (deleteAction) deleteAction.status = stillArchived ? 'blocked-app-check' : 'passed';
         }
-        await attachSmallFile(page, fixtures[0], attachmentPath);
-        await verifySharedValidation(page, 'private');
-        await verifySharedValidation(page, 'company');
+        record('qa-accounts-audit-only', 'passed');
     } else {
-        assert.equal(await findAndOpen(page, fixtures[0]), true, 'Fixture QA2 richiesta dal lotto esteso non trovata');
-        record('private-standard-extended-prerequisite', 'passed');
+        await cleanupAuthorizedAttachmentDuplicate(page);
+        if (!extendedOnly) {
+            for (const fixture of fixtures) {
+                await populate(page, fixture);
+                await verifyDetail(page, fixture);
+            }
+            await attachSmallFile(page, fixtures[0], attachmentPath);
+            await verifySharedValidation(page, 'private');
+            await verifySharedValidation(page, 'company');
+        } else {
+            assert.equal(await findAndOpen(page, fixtures[0]), true, 'Fixture QA2 richiesta dal lotto esteso non trovata');
+            record('private-standard-extended-prerequisite', 'passed');
+        }
+        if (await tryAccountWidget(page, fixtures[0])) {
+            await tryAttachExistingAccountWidget(page, fixtures[2]);
+        } else {
+            record('private-memo-existing-widget-template', 'blocked-missing-template');
+        }
+        await trySharedCredential(page, fixtures[0]);
+        await tryArchiveRestore(page, fixtures[0]);
     }
-    await tryAccountWidget(page, fixtures[0]);
-    await trySharedCredential(page, fixtures[0]);
-    await tryArchiveRestore(page, fixtures[0]);
 } catch (error) {
     report.warnings.push({area: 'runner', page: safeUrl(activePage?.url?.() || ''),
         detail: String(error?.message || error).slice(0, 300)});

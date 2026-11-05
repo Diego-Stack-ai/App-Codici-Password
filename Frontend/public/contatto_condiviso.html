@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" data-i18n="loading">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -7,22 +7,22 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Salva contatto — Codici &amp; Password</title>
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.257">
+    <title data-t="shared_contact_document_title">Salva contatto — Codici &amp; Password</title>
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.258">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
-    <link rel="stylesheet" href="assets/css/contact-card-receiver.css?v=1.2.257">
+    <link rel="stylesheet" href="assets/css/contact-card-receiver.css?v=1.2.258">
 </head>
 <body class="base-bg">
     <main class="shared-contact-card">
-        <p class="shared-contact-brand">Codici &amp; Password</p>
-        <h1 id="contact-name">Contatto condiviso</h1>
-        <img id="contact-photo" alt="Foto del contatto" hidden>
-        <dl id="contact-details" aria-label="Dati del contatto"></dl>
-        <p id="contact-status" role="status" aria-live="polite">Preparazione del contatto…</p>
-        <a id="save-contact" class="shared-contact-button" download="contatto.vcf" hidden>Salva contatto</a>
-        <button id="retry-contact" class="shared-contact-button" type="button" hidden>Riprova</button>
-        <noscript>Attiva JavaScript per preparare il contatto con la foto.</noscript>
+        <p class="shared-contact-brand notranslate" translate="no">Codici &amp; Password</p>
+        <h1 id="contact-name" data-t="shared_contact_heading">Contatto condiviso</h1>
+        <img id="contact-photo" alt="Foto del contatto" data-t-alt="shared_contact_photo_alt" hidden>
+        <dl id="contact-details" aria-label="Dati del contatto" data-t-aria="shared_contact_details"></dl>
+        <p id="contact-status" role="status" aria-live="polite" data-t="shared_contact_preparing">Preparazione del contatto…</p>
+        <a id="save-contact" class="shared-contact-button" download="contatto.vcf" data-t="shared_contact_save" hidden>Salva contatto</a>
+        <button id="retry-contact" class="shared-contact-button" type="button" data-t="shared_contact_retry" hidden>Riprova</button>
+        <noscript data-t="shared_contact_noscript">Attiva JavaScript per preparare il contatto con la foto.</noscript>
     </main>
-    <script type="module" src="assets/js/contact-card-receiver.js?v=1.2.257"></script>
+    <script type="module" src="assets/js/contact-card-receiver.js?v=1.2.258"></script>
 </body>
 </html>

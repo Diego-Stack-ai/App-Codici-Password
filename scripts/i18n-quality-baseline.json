@@ -21,7 +21,15 @@
     "PIN",
     "PUK",
     "MFA",
-    "2FA"
+    "2FA",
+    "Italiano",
+    "English",
+    "Español",
+    "Français",
+    "Deutsch",
+    "中文",
+    "हिन्दी",
+    "Português"
   ],
   "excludedPathFragments": [
     "/assets/js/vendor/",

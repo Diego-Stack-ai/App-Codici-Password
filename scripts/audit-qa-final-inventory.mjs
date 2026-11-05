@@ -135,7 +135,9 @@ export function renderQaFinalInventory(inventory) {
     return markdown;
 }
 
-const inventory = await buildQaFinalInventory();
-await writeGeneratedDocSection(outputPath, 'pages', renderQaFinalInventory(inventory));
-console.log(`Inventario QA finale: ${inventory.totals.pages} pagine, ${inventory.totals.steps} istruzioni, `
-    + `${inventory.totals.targets} target e ${inventory.totals.staticFields} campi statici.`);
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+    const inventory = await buildQaFinalInventory();
+    await writeGeneratedDocSection(outputPath, 'pages', renderQaFinalInventory(inventory));
+    console.log(`Inventario QA finale: ${inventory.totals.pages} pagine, ${inventory.totals.steps} istruzioni, `
+        + `${inventory.totals.targets} target e ${inventory.totals.staticFields} campi statici.`);
+}

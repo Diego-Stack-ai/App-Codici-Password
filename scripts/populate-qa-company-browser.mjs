@@ -268,8 +268,20 @@ async function verifyCompany(page) {
     const digitalCard = page.locator('#company-digital-card');
     await digitalCard.getByText(/Capacità utilizzata:/).waitFor({ state: 'visible', timeout: 20_000 });
     assert.equal(await digitalCard.locator('.digital-card-choice input[type="checkbox"]').count(), 14);
+    const qrChoices = digitalCard.locator('.digital-card-choice input[type="checkbox"]');
+    for (let index = 0; index < await qrChoices.count(); index += 1) {
+        const choice = qrChoices.nth(index);
+        if (!await choice.isChecked()) await choice.check();
+    }
+    await digitalCard.getByRole('button', { name: 'Salva selezione', exact: true }).click();
+    await page.getByText('Tessera aggiornata', { exact: true }).waitFor({ state: 'visible', timeout: 30_000 });
+    await page.locator('#company-digital-card').getByText(/Capacità utilizzata:/)
+        .waitFor({ state: 'visible', timeout: 30_000 });
+    assert.equal(await page.locator('#company-digital-card .digital-card-choice input[type="checkbox"]:checked').count(), 14,
+        'Tutti i campi pubblici della Tessera aziendale QA devono restare selezionati dopo il salvataggio');
     assert.equal(await digitalCard.getByText(fixture.password, { exact: true }).count(), 0,
         'La Tessera digitale non deve contenere password');
+    record('company-digital-card-fields', 'all-public-fields-selected-and-persisted');
     await page.screenshot({ path: path.join(outputRoot, 'company-digital-card.png'), fullPage: true });
 
     await page.locator('[data-company-tab="pdf-summary"]').click();
@@ -282,6 +294,22 @@ async function verifyCompany(page) {
     assert.equal(await pdfPanel.getByText(fixture.password, { exact: true }).count(), 0,
         'Il riepilogo PDF non deve contenere password');
     await page.screenshot({ path: path.join(outputRoot, 'company-pdf-summary.png'), fullPage: true });
+
+    await page.goto(`${origin}/modifica_azienda.html?id=${encodeURIComponent(companyId)}`, {
+        waitUntil: 'domcontentloaded', timeout: 45_000
+    });
+    await waitForTranslatedPage(page);
+    const qrEditFields = [
+        '#qr-ragione-sociale', '#qr-partita-iva', '#qr-sdicodici', '#qr-cciaa', '#qr-data-iscr',
+        '#qr-referente-titolo', '#qr-referente-nome', '#qr-referente-cognome', '#qr-referente-cellulare',
+        '#qr-sede-legale', '#qr-pec', '#qr-amministrazione', '#qr-personale'
+    ];
+    for (const selector of qrEditFields) {
+        const checkbox = page.locator(selector);
+        await checkbox.waitFor({state: 'attached', timeout: 20_000});
+        assert.equal(await checkbox.isChecked(), true, `${selector} deve rileggere la selezione QR salvata`);
+    }
+    record('company-edit-qr-fields', 'all-legacy-form-controls-read-back');
     record('company-readback', 'passed', companyId);
     return companyId;
 }
@@ -335,10 +363,13 @@ try {
 }
 
 const appCheckUrl = 'content-firebaseappcheck.googleapis.com/v1/projects/appcodici-password/apps/';
-report.consoleErrors = report.consoleErrors.filter(error => !error.resource.includes(appCheckUrl));
+const sharingUrl = 'europe-west1-appcodici-password.cloudfunctions.net/registerSharingIdentity';
+report.consoleErrors = report.consoleErrors.filter(error => !error.resource.includes(appCheckUrl)
+    && !error.resource.includes(sharingUrl));
 report.consoleErrors = report.consoleErrors.filter(error => !(error.text.includes("Framing 'https://www.google.com/'")
     && error.text.includes('report-only Content Security Policy') && error.text.includes("frame-ancestors 'self'")));
-report.networkErrors = report.networkErrors.filter(error => !(error.status === 403 && error.url.includes(appCheckUrl)));
+report.networkErrors = report.networkErrors.filter(error => !((error.status === 403 && error.url.includes(appCheckUrl))
+    || (error.status === 401 && error.url.includes(sharingUrl))));
 report.completedAt = new Date().toISOString();
 report.ok = report.actions.length >= 4 && !report.failure && !report.consoleErrors.length && !report.networkErrors.length;
 await mkdir(outputRoot, { recursive: true });

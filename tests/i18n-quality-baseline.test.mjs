@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { readFile } from 'node:fs/promises';
 import { buildI18nInventory, evaluateI18nBaseline } from '../scripts/audit-i18n-quality.mjs';
 
 test('l’inventario i18n non peggiora rispetto alla baseline integrata 1.2.190', () => {
@@ -34,6 +35,75 @@ test('il catalogo inglese è completo e non può ricadere su testi italiani', ()
     const inventory = buildI18nInventory();
   assert.ok(inventory.completeLanguages.includes('en'));
   assert.deepEqual(inventory.missingKeysByLanguage.en, []);
+});
+
+test('le etichette condivise dal Profilo non restano confinate al catalogo Impostazioni', async () => {
+  const languages = ['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt'];
+  for (const language of languages) {
+    const source = await readFile(new URL(`../Frontend/public/assets/js/translations/${language}.js`, import.meta.url), 'utf8');
+    assert.match(source, /["']?click_to_enlarge["']?\s*:/, `click_to_enlarge assente dal catalogo base ${language}`);
+  }
+  const settings = await readFile(new URL('../Frontend/public/assets/js/translations/settings.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(settings, /["']?click_to_enlarge["']?\s*:/);
+});
+
+test('i contenuti dinamici dei Profili hanno un catalogo completo in tutte le lingue', async () => {
+  const languages = ['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt'];
+  const profileSource = await readFile(new URL('../Frontend/public/assets/js/translations/profile.js', import.meta.url), 'utf8');
+  const { profileCatalogs } = await import(`data:text/javascript;base64,${Buffer.from(profileSource).toString('base64')}`);
+  const expectedKeys = Object.keys(profileCatalogs.it).sort();
+  assert.equal(expectedKeys.length, 50);
+  for (const language of languages) {
+    assert.deepEqual(Object.keys(profileCatalogs[language]).sort(), expectedKeys, `catalogo Profilo incompleto: ${language}`);
+    for (const key of ['common_show_hide_field', 'company_open_named_account', 'company_attachments_open',
+      'digital_card_capacity_warning', 'digital_card_capacity_used']) {
+      assert.match(profileCatalogs[language][key], /\{(?:label|name|count|bytes)\}/);
+    }
+  }
+  const loader = await readFile(new URL('../Frontend/public/assets/js/translations.js', import.meta.url), 'utf8');
+  assert.match(loader, /profilo_privato\|dati_azienda/);
+  assert.match(loader, /translations\/profile\.js/);
+});
+
+test('la Gestione destinatari ha un catalogo completo e mantiene i segnaposto in tutte le lingue', async () => {
+  const languages = ['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt'];
+  const recipientSource = await readFile(new URL('../Frontend/public/assets/js/translations/recipients.js', import.meta.url), 'utf8');
+  const { recipientCatalogs } = await import(`data:text/javascript;base64,${Buffer.from(recipientSource).toString('base64')}`);
+  const expectedKeys = Object.keys(recipientCatalogs.it).sort();
+  assert.equal(expectedKeys.length, 44);
+  for (const language of languages) {
+    assert.deepEqual(Object.keys(recipientCatalogs[language]).sort(), expectedKeys, `catalogo Destinatari incompleto: ${language}`);
+    const placeholders = {
+      recipient_usage_deadlines: '{count}',
+      recipient_usage_account_shares: '{count}',
+      recipient_usage_invites: '{count}',
+      recipient_delete_message: '{name}',
+      recipient_delete_blocked: '{usage}',
+      recipient_companies: '{companies}',
+      recipient_remove_links_message: '{companies}'
+    };
+    for (const [key, placeholder] of Object.entries(placeholders)) {
+      assert.ok(recipientCatalogs[language][key].includes(placeholder), `${language}.${key} non conserva ${placeholder}`);
+    }
+  }
+  const loader = await readFile(new URL('../Frontend/public/assets/js/translations.js', import.meta.url), 'utf8');
+  assert.match(loader, /gestione_destinatari/);
+  assert.match(loader, /translations\/recipients\.js/);
+});
+
+test('le pagine di accesso e il contatto condiviso hanno un catalogo completo in tutte le lingue', async () => {
+  const languages = ['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt'];
+  const accessSource = await readFile(new URL('../Frontend/public/assets/js/translations/access.js', import.meta.url), 'utf8');
+  const { accessCatalogs } = await import(`data:text/javascript;base64,${Buffer.from(accessSource).toString('base64')}`);
+  const expectedKeys = Object.keys(accessCatalogs.it).sort();
+  assert.equal(expectedKeys.length, 59);
+  for (const language of languages) {
+    assert.deepEqual(Object.keys(accessCatalogs[language]).sort(), expectedKeys, `catalogo Accesso incompleto: ${language}`);
+    assert.ok(accessCatalogs[language].auth_wait_seconds.includes('{seconds}'));
+  }
+  const loader = await readFile(new URL('../Frontend/public/assets/js/translations.js', import.meta.url), 'utf8');
+  assert.match(loader, /login-v115\|registrati\|reset_password\|imposta_nuova_password\|contatto_condiviso/);
+  assert.match(loader, /translations\/access\.js/);
 });
 
 test('la baseline conserva lo storico del delta Archivio senza nasconderlo', () => {

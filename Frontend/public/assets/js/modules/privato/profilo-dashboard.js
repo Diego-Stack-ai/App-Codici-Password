@@ -1,5 +1,9 @@
 import { createElement, setChildren } from '../../dom-utils.js';
 import { buildProfileOverview } from './profile-model.js';
+import { t } from '../../translations.js';
+
+const formatTranslation = (key, values = {}) => Object.entries(values)
+    .reduce((text, [name, value]) => text.replaceAll(`{${name}}`, String(value)), t(key));
 
 let _getState;
 let _callbacks;
@@ -56,12 +60,13 @@ export function renderProfileOverview() {
         userAddresses: state.userAddresses,
         documenti: state.userDocuments
     });
+    const notProvided = t('profile_value_not_provided');
     const summary = [
-        ['badge', 'Codice fiscale', overview.fiscalCode || 'Non indicato', _callbacks?.editFiscalDocument],
-        ['call', 'Telefono principale', overview.primaryPhone?.number || 'Non indicato'],
-        ['mail', 'Email principale', overview.primaryEmail?.address || 'Non indicata'],
-        ['home', 'Indirizzo principale', overview.primaryAddress ?
-            `${overview.primaryAddress.address || ''} ${overview.primaryAddress.civic || ''}, ${overview.primaryAddress.city || ''}`.trim() : 'Non indicato']
+        ['badge', t('label_cf'), overview.fiscalCode || notProvided, _callbacks?.editFiscalDocument],
+        ['call', t('profile_primary_phone'), overview.primaryPhone?.number || notProvided],
+        ['mail', t('profile_primary_email'), overview.primaryEmail?.address || notProvided],
+        ['home', t('profile_primary_address'), overview.primaryAddress ?
+            `${overview.primaryAddress.address || ''} ${overview.primaryAddress.civic || ''}, ${overview.primaryAddress.city || ''}`.trim() : notProvided]
     ];
     const cards = summary.map(([icon, label, value, onActivate]) => createElement(onActivate ? 'button' : 'article', {
         className: `profile-summary-card${onActivate ? ' profile-summary-card-action' : ''}`,
@@ -77,19 +82,19 @@ export function renderProfileOverview() {
     const expiryItems = overview.expiringDocuments.length
         ? overview.expiringDocuments.map(item => createElement('button', {
             className: 'profile-expiry-item',
-            textContent: `${item.type || 'Documento'} — ${item.expiry_date}`,
+            textContent: `${item.type || t('profile_document_fallback')} — ${item.expiry_date}`,
             onclick: () => activateProfileTab('documents')
         }))
-        : [createElement('p', { className: 'card-no-data', textContent: 'Nessun documento in scadenza nei prossimi 90 giorni.' })];
+        : [createElement('p', { className: 'card-no-data', textContent: t('profile_no_expiring_documents') })];
     setChildren(container, [
         createElement('div', { className: 'profile-overview-heading' }, [
             createElement('div', {}, [
-                createElement('span', { className: 'data-label', textContent: 'Profilo personale' }),
-                createElement('h2', { className: 'profile-overview-name', textContent: overview.fullName || 'Utente' })
+                createElement('span', { className: 'data-label', textContent: t('profile_overview_label') }),
+                createElement('h2', { className: 'profile-overview-name', textContent: overview.fullName || t('profile_user_fallback') })
             ]),
             createElement('button', {
                 className: 'btn-upload-trigger',
-                textContent: 'Modifica anagrafica',
+                textContent: t('profile_edit_personal'),
                 onclick: () => {
                     activateProfileTab('personal');
                     _callbacks?.editPersonalData?.();
@@ -98,7 +103,7 @@ export function renderProfileOverview() {
         ]),
         createElement('div', { className: 'profile-summary-grid' }, cards),
         createElement('section', { className: 'form-card profile-expiry-card' }, [
-            createElement('h3', { className: 'form-section-title', textContent: 'Documenti prossimi alla scadenza' }),
+            createElement('h3', { className: 'form-section-title', textContent: t('profile_expiring_documents') }),
             ...expiryItems
         ])
     ]);
@@ -126,39 +131,39 @@ export function renderDigitalCard() {
     const capacityWarning = vcardSize > 1200;
     const selected = (type, item, index) => state.qrCodeInclusions[type]?.includes(item.id) || state.qrCodeInclusions[type]?.includes(index);
     const choices = [
-        qrChoice('Foto nel contatto importato', state.qrCodeInclusions.photo === true, value => _callbacks.setQRScalar('photo', value), 'La scansione apre una scheda: premi Salva contatto per importare anche la foto. Serve internet.'),
-        qrChoice('Nome e cognome', state.qrCodeInclusions.nome, value => _callbacks.setQRScalar('nome', value)),
-        qrChoice('Codice fiscale', state.qrCodeInclusions.cf, value => _callbacks.setQRScalar('cf', value), 'Dato personale: sarà leggibile da chi scansiona il QR.'),
-        qrChoice('Dati di nascita', state.qrCodeInclusions.nascita, value => _callbacks.setQRScalar('nascita', value), 'Dato personale: condividilo solo se necessario.'),
-        ...state.contactPhones.map((item, index) => qrChoice(`Telefono: ${item.label || item.number}`, selected('phones', item, index), () => _callbacks.toggleQRInclusion('phones', item.id))),
-        ...state.contactEmails.map((item, index) => qrChoice(`Email: ${item.label || item.address}`, selected('emails', item, index), () => _callbacks.toggleQRInclusion('emails', item.id))),
-        ...state.userAddresses.map((item, index) => qrChoice(`Indirizzo: ${item.type || item.address}`, selected('addresses', item, index), () => _callbacks.toggleQRInclusion('addresses', item.id))),
+        qrChoice(t('digital_card_photo_choice'), state.qrCodeInclusions.photo === true, value => _callbacks.setQRScalar('photo', value), t('digital_card_photo_warning')),
+        qrChoice(t('label_name_surname'), state.qrCodeInclusions.nome, value => _callbacks.setQRScalar('nome', value)),
+        qrChoice(t('label_cf'), state.qrCodeInclusions.cf, value => _callbacks.setQRScalar('cf', value), t('digital_card_cf_warning')),
+        qrChoice(t('label_birth_data'), state.qrCodeInclusions.nascita, value => _callbacks.setQRScalar('nascita', value), t('digital_card_birth_warning')),
+        ...state.contactPhones.map((item, index) => qrChoice(`${t('phone')}: ${item.label || item.number}`, selected('phones', item, index), () => _callbacks.toggleQRInclusion('phones', item.id))),
+        ...state.contactEmails.map((item, index) => qrChoice(`${t('email_label')}: ${item.label || item.address}`, selected('emails', item, index), () => _callbacks.toggleQRInclusion('emails', item.id))),
+        ...state.userAddresses.map((item, index) => qrChoice(`${t('address')}: ${item.type || item.address}`, selected('addresses', item, index), () => _callbacks.toggleQRInclusion('addresses', item.id))),
         ...(state.customWidgets || []).flatMap(widget => (widget.fields || [])
             .filter(field => !field.encrypted && !['sensitive', 'password', 'pin', 'puk', 'attachment', 'pdf', 'photo'].includes(field.type))
-            .map(field => qrChoice(`Campo personalizzato: ${field.label}`, field.includeInQr === true,
+            .map(field => qrChoice(`${t('digital_card_custom_field')}: ${field.label}`, field.includeInQr === true,
                 value => _callbacks.setWidgetFieldQr(widget.id, field.id, value))))
     ];
     const qrWrapper = document.querySelector('.qr-code-wrapper');
     setChildren(container, [
         createElement('div', { className: 'digital-card-layout' }, [
             createElement('section', { className: 'form-card digital-card-preview' }, [
-                createElement('h2', { className: 'form-section-title', textContent: 'Anteprima Tessera digitale' }),
+                createElement('h2', { className: 'form-section-title', textContent: t('digital_card_preview_title') }),
                 qrWrapper,
-                createElement('p', { className: 'digital-card-warning', textContent: 'Il QR contiene dati in chiaro. Password, PIN, chiavi e allegati sono sempre esclusi.' }),
+                createElement('p', { className: 'digital-card-warning', textContent: t('digital_card_plaintext_warning') }),
                 createElement('p', {
                     className: capacityWarning ? 'digital-card-capacity is-warning' : 'digital-card-capacity',
                     textContent: capacityWarning
-                        ? `Il QR contiene ${vcardSize} byte: riduci i campi per renderlo più facile da leggere.`
-                        : `Capacità utilizzata: ${vcardSize} byte.`
+                        ? formatTranslation('digital_card_capacity_warning', { bytes: vcardSize })
+                        : formatTranslation('digital_card_capacity_used', { bytes: vcardSize })
                 }),
                 createElement('div', { className: 'digital-card-actions' }, [
-                    createElement('button', { className: 'btn-upload-trigger', textContent: 'Salva vCard', onclick: () => _callbacks.downloadVCard() }),
-                    createElement('button', { className: 'btn-upload-trigger', textContent: 'Condividi', onclick: () => _callbacks.shareVCard() })
+                    createElement('button', { className: 'btn-upload-trigger', textContent: t('digital_card_save_vcard'), onclick: () => _callbacks.downloadVCard() }),
+                    createElement('button', { className: 'btn-upload-trigger', textContent: t('digital_card_share'), onclick: () => _callbacks.shareVCard() })
                 ])
             ]),
             createElement('section', { className: 'form-card digital-card-fields' }, [
-                createElement('h2', { className: 'form-section-title', textContent: 'Dati inclusi' }),
-                createElement('p', { className: 'data-value-sub', textContent: 'Nessun dato viene incluso automaticamente. Ogni scelta aggiorna subito il QR.' }),
+                createElement('h2', { className: 'form-section-title', textContent: t('digital_card_included_data') }),
+                createElement('p', { className: 'data-value-sub', textContent: t('digital_card_no_auto_include') }),
                 ...choices
             ])
         ])

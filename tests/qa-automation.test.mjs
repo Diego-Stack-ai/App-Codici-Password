@@ -99,6 +99,13 @@ test('il lotto Account QA richiede esplicitamente l Azienda QA2 e usa solo UI re
     assert.match(source, /QA_CLEANUP_ACCOUNT_ATTACHMENT_ID/);
     assert.match(source, /QA_CLEANUP_ATTACHMENT_CONFIRM/);
     assert.match(source, /QA_ATTACHMENT_CLEANUP_DESTRUCTIVE_AUTH_REQUIRED/);
+    assert.match(source, /CODEX_QA_ACCOUNT_AUDIT_ONLY/);
+    assert.match(source, /CODEX_QA_ACCOUNT_DUPLICATE_CLEANUP/);
+    assert.match(source, /CODEX_QA_ACCOUNT_KEEP_ID/);
+    assert.match(source, /CODEX_QA_ACCOUNT_DELETE_ID/);
+    assert.match(source, /DELETE_QA2_SYNTHETIC_DUPLICATE/);
+    assert.match(source, /QA_DUPLICATE_CLEANUP_STATE_MISMATCH/);
+    assert.match(source, /blocked-app-check/);
     assert.doesNotMatch(source, /DzU5YMXcMV58DwpUezuN/);
     assert.match(source, /QA Privato Standard/);
     assert.match(source, /QA Privato Bancario/);
@@ -174,4 +181,44 @@ test('il runner P0 separa esecuzione e gate e cancella gli export decifrati', as
     assert.match(source, /zipEntryNames/);
     assert.match(source, /CSV_FORMULA_NOT_NEUTRALIZED/);
     assert.match(source, /await rm\(exported\.path, \{force: true\}\)/);
+});
+
+test('la matrice multilingua usa un override solo loopback e rileva i fallback', async () => {
+    const [runner, translations, main] = await Promise.all([
+        readFile(new URL('../scripts/test-qa-page-matrix-browser.mjs', import.meta.url), 'utf8'),
+        readFile(new URL('../Frontend/public/assets/js/translations.js', import.meta.url), 'utf8'),
+        readFile(new URL('../Frontend/public/assets/js/main-v129.js', import.meta.url), 'utf8')
+    ]);
+    assert.match(runner, /QA_LANGUAGES/);
+    assert.match(runner, /QA_LANGUAGE_MATRIX_REQUIRES_LOCAL_ORIGIN/);
+    assert.match(runner, /QA_PAGE_IDS/);
+    assert.match(runner, /QA_PAGE_IDS_INVALID/);
+    assert.match(runner, /knownPageIds/);
+    assert.match(runner, /QA_INTERACTIVE_SCREENSHOTS/);
+    assert.match(runner, /INTERACTIVE_I18N_FALLBACK/);
+    assert.match(runner, /INTERACTIVE_HORIZONTAL_OVERFLOW/);
+    assert.match(runner, /INTERACTIVE_TRANSLATION_MISMATCH/);
+    assert.match(runner, /QA_ALLOW_CONTEXT_REDIRECTS/);
+    assert.match(runner, /CODEX_QA_PRIVATE_ACCOUNT_ID/);
+    assert.match(runner, /CODEX_QA_COMPANY_ID/);
+    assert.match(runner, /CODEX_QA_COMPANY_ACCOUNT_ID/);
+    assert.match(runner, /CODEX_QA_DEADLINE_ID/);
+    assert.match(runner, /\^\[A-Za-z0-9_-\]\{8,128\}\$/);
+    assert.match(runner, /contextFixtures: Object\.fromEntries/);
+    assert.match(runner, /\['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt'\]/);
+    assert.match(runner, /missingTranslationKeys/);
+    assert.match(runner, /LANGUAGE_MISMATCH/);
+    assert.match(runner, /I18N_FALLBACK/);
+    assert.match(runner, /#profile-overview \.profile-overview-heading/);
+    assert.match(runner, /captureInteractiveRecipientStates/);
+    assert.match(runner, /recipient_delete_message/);
+    assert.match(runner, /#confirm-cancel-btn/);
+    assert.match(runner, /DYNAMIC_CONTENT_TIMEOUT/);
+    assert.match(runner, /allowContextRedirects && entry\.status === 'NEEDS_FIXTURE_OR_CONTEXT'/);
+    assert.match(runner, /`\$\{language\}-\$\{viewport\.name\}-\$\{currentRoute\}\.png`/);
+    assert.match(translations, /LOCAL_QA_HOSTS = new Set\(\['localhost', '127\.0\.0\.1', '::1'\]\)/);
+    assert.match(translations, /window\.sessionStorage\.getItem\(LOCAL_QA_LANGUAGE_KEY\)/);
+    assert.match(main, /getLocalQaLanguageOverride\(\) \|\| getCurrentLanguage\(\)/);
+    assert.match(main, /getLocalQaLanguageOverride\(\) \|\| profileLanguage/);
+    assert.doesNotMatch(runner, /updateDoc|setDoc|addDoc|deleteDoc/);
 });

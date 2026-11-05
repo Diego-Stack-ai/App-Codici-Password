@@ -25,6 +25,8 @@ const WEEK_DAYS = ['lun', 'mar', 'mer', 'gio', 'ven', 'sab', 'dom'];
 export function initDatePickerV5(inputElementId) {
     const inputElement = document.getElementById(inputElementId);
     if (!inputElement) return;
+    if (inputElement.dataset.datepickerV5Initialized === 'true') return;
+    inputElement.dataset.datepickerV5Initialized = 'true';
 
     // Disabilita tastiera mobile e input diretto
     inputElement.readOnly = true;

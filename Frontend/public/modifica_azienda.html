@@ -5,23 +5,23 @@
   <script src="assets/js/private-auth-gate.js"></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Modifica Azienda - PROTOCOLLO OPERATORE V5.4</title>
+    <title data-t="company_edit_page_title">Modifica Azienda</title>
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.257" />
+    <link rel="manifest" href="manifest.json?v=1.2.258" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.1 Master) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.257">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.258">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/azienda_shared.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/form_azienda.css?v=1.2.257">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.257">
+    <link rel="stylesheet" href="assets/css/azienda_shared.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/form_azienda.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.258">
 
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
@@ -45,7 +45,7 @@
                             <!-- Logo Azienda -->
                             <div class="detail-avatar-container">
                                 <div id="btn-trigger-logo" class="detail-avatar border-glow group">
-                                    <img loading="lazy" id="logo-preview" class="detail-avatar-img hidden" src="" alt="Preview Logo" />
+                                    <img loading="lazy" id="logo-preview" class="detail-avatar-img hidden" src="" alt="Anteprima logo azienda" data-t-alt="company_logo_preview_alt" />
                                     <div id="logo-placeholder" class="detail-avatar-placeholder">
                                         <span class="material-symbols-outlined icon-large notranslate" translate="no">add_a_photo</span>
                                     </div>
@@ -53,9 +53,9 @@
                                         <span class="material-symbols-outlined icon-tiny notranslate" translate="no">edit</span>
                                     </div>
                                 </div>
-                                <label for="logo-upload" class="sr-only">Logo Azienda</label>
+                                <label for="logo-upload" class="sr-only" data-t="company_logo">Logo Azienda</label>
                                 <input type="file" id="logo-upload" name="logo-upload" accept="image/*" class="hidden"
-                                    aria-label="Carica Logo Azienda" />
+                                    aria-label="Carica Logo Azienda" data-t-aria="company_logo_upload_aria" />
                                 <div class="hero-status-dot">
                                     <span class="material-symbols-outlined icon-small notranslate" translate="no">business</span>
                                 </div>
@@ -87,10 +87,10 @@
                                             autocomplete="off" autocorrect="off" spellcheck="false" />
                                         <div class="field-action-qr">
                                             <input id="qr-ragione-sociale" type="checkbox"
-                                                data-qr-field="ragioneSociale" title="Includi in QR"
-                                                aria-label="Includi Ragione Sociale nel QR" class="checkbox-qr"
+                                                data-qr-field="ragioneSociale" title="Includi in QR" data-t-title="company_qr_include_title"
+                                                aria-label="Includi Ragione Sociale nel QR" data-t-aria="company_qr_include_name" class="checkbox-qr"
                                                 checked />
-                                            <label for="qr-ragione-sociale" class="sr-only">Includi Ragione Sociale nel
+                                            <label for="qr-ragione-sociale" class="sr-only" data-t="company_qr_include_name">Includi Ragione Sociale nel
                                                 QR</label>
                                         </div>
                                     </div>
@@ -162,10 +162,10 @@
                                                         autocorrect="off" spellcheck="false" />
                                                     <div class="field-action-qr">
                                                         <input id="qr-partita-iva" name="qr-partita-iva" type="checkbox"
-                                                            data-qr-field="partitaIva" title="Includi in QR"
-                                                            aria-label="Includi Partita IVA nel QR" class="checkbox-qr"
+                                                            data-qr-field="partitaIva" title="Includi in QR" data-t-title="company_qr_include_title"
+                                                            aria-label="Includi Partita IVA nel QR" data-t-aria="company_qr_include_vat" class="checkbox-qr"
                                                             checked />
-                                                        <label for="qr-partita-iva" class="sr-only">Includi Partita IVA
+                                                        <label for="qr-partita-iva" class="sr-only" data-t="company_qr_include_vat">Includi Partita IVA
                                                             nel QR</label>
                                                     </div>
                                                 </div>
@@ -184,10 +184,10 @@
                                                         maxlength="7" />
                                                     <div class="field-action-qr">
                                                         <input id="qr-sdicodici" name="qr-sdicodici" type="checkbox"
-                                                            data-qr-field="codiceSDI" title="Includi in QR"
-                                                            aria-label="Includi Codice SDI nel QR" class="checkbox-qr"
+                                                            data-qr-field="codiceSDI" title="Includi in QR" data-t-title="company_qr_include_title"
+                                                            aria-label="Includi Codice SDI nel QR" data-t-aria="company_qr_include_sdi" class="checkbox-qr"
                                                             checked />
-                                                        <label for="qr-sdicodici" class="sr-only">Includi Codice SDI nel
+                                                        <label for="qr-sdicodici" class="sr-only" data-t="company_qr_include_sdi">Includi Codice SDI nel
                                                             QR</label>
                                                     </div>
                                                 </div>
@@ -208,9 +208,9 @@
                                                     <div class="field-action-qr">
                                                         <input id="qr-cciaa" name="qr-cciaa" type="checkbox"
                                                             data-qr-field="numeroCCIAA"
-                                                            aria-label="Includi Numero CCIAA nel QR" class="checkbox-qr"
+                                                            aria-label="Includi Numero CCIAA nel QR" data-t-aria="company_qr_include_cciaa" class="checkbox-qr"
                                                             checked />
-                                                        <label for="qr-cciaa" class="sr-only">Includi CCIAA nel
+                                                        <label for="qr-cciaa" class="sr-only" data-t="company_qr_include_cciaa">Includi CCIAA nel
                                                             QR</label>
                                                     </div>
                                                 </div>
@@ -226,9 +226,9 @@
                                                     <div class="field-action-qr">
                                                         <input id="qr-data-iscr" name="qr-data-iscr" type="checkbox"
                                                             data-qr-field="dataIscrizione"
-                                                            aria-label="Includi Data Iscrizione nel QR"
+                                                            aria-label="Includi Data Iscrizione nel QR" data-t-aria="company_qr_include_registration_date"
                                                             class="checkbox-qr" checked />
-                                                        <label for="qr-data-iscr" class="sr-only">Includi Data
+                                                        <label for="qr-data-iscr" class="sr-only" data-t="company_qr_include_registration_date">Includi Data
                                                             Iscrizione nel QR</label>
                                                     </div>
                                                 </div>
@@ -260,16 +260,16 @@
                                         <div id="btn-trigger-ref-photo" class="referent-avatar-box group">
                                             <img loading="lazy" id="referente-photo-preview"
                                                 class="detail-avatar-img hidden referent-avatar-round" src=""
-                                                alt="Referente Preview" />
+                                                alt="Anteprima foto referente" data-t-alt="company_contact_preview_alt" />
                                             <span id="referente-photo-placeholder"
                                                 class="material-symbols-outlined icon-large opacity-placeholder notranslate" translate="no">person</span>
                                             <div class="qr-zoom-indicator">
                                                 <span class="material-symbols-outlined icon-tiny notranslate" translate="no">edit</span>
                                             </div>
                                         </div>
-                                        <label for="referente-photo-upload" class="sr-only">Foto Referente</label>
+                                        <label for="referente-photo-upload" class="sr-only" data-t="company_contact_photo">Foto Referente</label>
                                         <input type="file" id="referente-photo-upload" name="referente-photo-upload"
-                                            accept="image/*" class="hidden" aria-label="Carica Foto Referente" />
+                                            accept="image/*" class="hidden" aria-label="Carica Foto Referente" data-t-aria="company_contact_photo_upload_aria" />
                                         <div class="referent-fields">
                                             <div class="glass-field-container">
                                                 <label class="view-label" for="referente-ruolo"
@@ -283,9 +283,9 @@
                                                     <div class="field-action-qr">
                                                         <input id="qr-referente-titolo" name="qr-referente-titolo"
                                                             type="checkbox" data-qr-field="referenteTitolo"
-                                                            aria-label="Includi Ruolo nel QR" class="checkbox-qr"
+                                                            aria-label="Includi Ruolo nel QR" data-t-aria="company_qr_include_role" class="checkbox-qr"
                                                             checked />
-                                                        <label for="qr-referente-titolo" class="sr-only">Includi Ruolo
+                                                        <label for="qr-referente-titolo" class="sr-only" data-t="company_qr_include_role">Includi Ruolo
                                                             nel QR</label>
                                                     </div>
                                                 </div>
@@ -305,8 +305,8 @@
                                                 <div class="field-action-qr">
                                                     <input id="qr-referente-nome" name="qr-referente-nome"
                                                         type="checkbox" data-qr-field="referenteNome"
-                                                        aria-label="Includi Nome nel QR" class="checkbox-qr" checked />
-                                                    <label for="qr-referente-nome" class="sr-only">Includi Nome nel
+                                                        aria-label="Includi Nome nel QR" data-t-aria="company_qr_include_first_name" class="checkbox-qr" checked />
+                                                    <label for="qr-referente-nome" class="sr-only" data-t="company_qr_include_first_name">Includi Nome nel
                                                         QR</label>
                                                 </div>
                                             </div>
@@ -322,9 +322,9 @@
                                                 <div class="field-action-qr">
                                                     <input id="qr-referente-cognome" name="qr-referente-cognome"
                                                         type="checkbox" data-qr-field="referenteCognome"
-                                                        aria-label="Includi Cognome nel QR" class="checkbox-qr"
+                                                        aria-label="Includi Cognome nel QR" data-t-aria="company_qr_include_last_name" class="checkbox-qr"
                                                         checked />
-                                                    <label for="qr-referente-cognome" class="sr-only">Includi Cognome
+                                                    <label for="qr-referente-cognome" class="sr-only" data-t="company_qr_include_last_name">Includi Cognome
                                                         nel
                                                         QR</label>
                                                 </div>
@@ -344,8 +344,8 @@
                                             <div class="field-action-qr">
                                                 <input id="qr-referente-cellulare" name="qr-referente-cellulare"
                                                     type="checkbox" data-qr-field="referenteCellulare"
-                                                    aria-label="Includi Cellulare nel QR" class="checkbox-qr" checked />
-                                                <label for="qr-referente-cellulare" class="sr-only">Includi Cellulare
+                                                    aria-label="Includi Cellulare nel QR" data-t-aria="company_qr_include_mobile" class="checkbox-qr" checked />
+                                                <label for="qr-referente-cellulare" class="sr-only" data-t="company_qr_include_mobile">Includi Cellulare
                                                     nel
                                                     QR</label>
                                             </div>
@@ -382,7 +382,7 @@
                                                     <span
                                                         class="material-symbols-outlined icon-accent-blue notranslate" translate="no">gavel</span>
                                                     <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="tipo-sede-legale" name="legale_type_master" type="text"
-                                                        class="email-type-input text-blue-400" placeholder="Sede Legale"
+                                                        class="email-type-input text-blue-400" placeholder="Sede Legale" data-t-placeholder="company_legal_address_placeholder"
                                                         value="Sede Legale" data-stop-propagation />
                                                 </div>
                                                 <div class="email-actions-group">
@@ -390,8 +390,8 @@
                                                         <input id="qr-sede-legale" name="qr-sede-legale" type="checkbox"
                                                             data-qr-field="qrLegale" class="checkbox-qr" checked
                                                             data-stop-propagation
-                                                            aria-label="Includi Sede Legale nel QR" />
-                                                        <label for="qr-sede-legale" class="sr-only">QR</label>
+                                                            aria-label="Includi Sede Legale nel QR" data-t-aria="company_qr_include_legal_address" />
+                                                        <label for="qr-sede-legale" class="sr-only" data-t="company_qr_label">QR</label>
                                                     </div>
                                                     <span id="arrow-section-legale"
                                                         class="material-symbols-outlined icon-chevron transition-transform notranslate" translate="no">expand_more</span>
@@ -493,14 +493,14 @@
                                             <div class="email-card-header btn-toggle-section" data-target="body-pec">
                                                 <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="type-pec" name="type-pec" type="text"
                                                     class="email-type-input text-emerald-400"
-                                                    placeholder="PEC Aziendale" value="PEC Aziendale"
+                                                    placeholder="PEC Aziendale" data-t-placeholder="company_pec_placeholder" value="PEC Aziendale"
                                                     data-stop-propagation />
                                                 <div class="email-actions-group">
                                                     <div class="field-action-qr field-action-muted">
                                                         <input id="qr-pec" name="qr-pec" type="checkbox"
-                                                            data-qr-field="aziendaEmail" aria-label="Includi PEC nel QR"
+                                                            data-qr-field="aziendaEmail" aria-label="Includi PEC nel QR" data-t-aria="company_qr_include_pec"
                                                             class="checkbox-qr" checked data-stop-propagation />
-                                                        <label for="qr-pec" class="sr-only">Includi PEC nel
+                                                        <label for="qr-pec" class="sr-only" data-t="company_qr_include_pec">Includi PEC nel
                                                             QR</label>
                                                     </div>
                                                     <button type="button" class="btn-remove-item" data-stop-propagation>
@@ -561,15 +561,15 @@
                                                     data-target="body-amministrazione">
                                                     <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="type-amministrazione" name="type-amministrazione"
                                                         type="text" class="email-type-input text-blue-400"
-                                                        placeholder="Amministrazione" value="Amministrazione"
+                                                        placeholder="Amministrazione" data-t-placeholder="company_admin_email_placeholder" value="Amministrazione"
                                                         data-stop-propagation />
                                                     <div class="email-actions-group">
                                                         <div class="field-action-qr field-action-muted">
                                                             <input id="qr-amministrazione" name="qr-amministrazione"
                                                                 type="checkbox" data-qr-field="adminEmail"
-                                                                aria-label="Includi Amministrazione nel QR"
+                                                                aria-label="Includi Amministrazione nel QR" data-t-aria="company_qr_include_admin_email"
                                                                 class="checkbox-qr" checked data-stop-propagation />
-                                                            <label for="qr-amministrazione" class="sr-only">Includi
+                                                            <label for="qr-amministrazione" class="sr-only" data-t="company_qr_include_admin_email">Includi
                                                                 Amministrazione nel QR</label>
                                                         </div>
                                                         <button type="button" class="btn-remove-item"
@@ -633,15 +633,15 @@
                                                 <div class="email-card-header btn-toggle-section"
                                                     data-target="body-personale">
                                                     <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="type-personale" name="type-personale" type="text"
-                                                        class="email-type-input text-purple-400" placeholder="Personale"
+                                                        class="email-type-input text-purple-400" placeholder="Personale" data-t-placeholder="company_personal_email_placeholder"
                                                         value="Personale" data-stop-propagation />
                                                     <div class="email-actions-group">
                                                         <div class="field-action-qr field-action-muted">
                                                             <input id="qr-personale" name="qr-personale" type="checkbox"
                                                                 data-qr-field="persEmail"
-                                                                aria-label="Includi Personale nel QR"
+                                                                aria-label="Includi Personale nel QR" data-t-aria="company_qr_include_personal_email"
                                                                 class="checkbox-qr" checked data-stop-propagation />
-                                                            <label for="qr-personale" class="sr-only">Includi
+                                                            <label for="qr-personale" class="sr-only" data-t="company_qr_include_personal_email">Includi
                                                                 Personale
                                                                 nel
                                                                 QR</label>
@@ -774,15 +774,15 @@
     </div>
 
     <!-- Hidden File Inputs -->
-    <label for="input-camera" class="sr-only">Fotocamera</label>
+    <label for="input-camera" class="sr-only" data-t="camera">Fotocamera</label>
     <input type="file" id="input-camera" name="input-camera" accept="image/*" capture="environment" class="hidden"
-        aria-label="Upload da Camera">
-    <label for="input-gallery" class="sr-only">Galleria</label>
+        aria-label="Upload da Camera" data-t-aria="upload_camera_aria">
+    <label for="input-gallery" class="sr-only" data-t="gallery">Galleria</label>
     <input type="file" id="input-gallery" name="input-gallery" accept="image/*,video/*" class="hidden"
-        aria-label="Upload da Galleria">
-    <label for="input-file" class="sr-only">Documento</label>
+        aria-label="Upload da Galleria" data-t-aria="upload_gallery_aria">
+    <label for="input-file" class="sr-only" data-t="document">Documento</label>
     <input type="file" id="input-file" name="input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" class="hidden"
-        aria-label="Upload Documento">
+        aria-label="Upload Documento" data-t-aria="upload_document_aria">
 
     <!-- Source Selector Modal -->
     <div id="source-selector-modal" class="modal-overlay">

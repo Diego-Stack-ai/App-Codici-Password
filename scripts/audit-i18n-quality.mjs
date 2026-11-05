@@ -64,7 +64,7 @@ function readDictionaries() {
   const dictionaries = {
     it: fs.existsSync(italianFile) ? dictionaryKeys(fs.readFileSync(italianFile, 'utf8')) : []
   };
-  const domainSources = ['settings.js', 'deadline-rules.js']
+  const domainSources = ['access.js', 'settings.js', 'deadline-rules.js', 'profile.js', 'recipients.js']
     .map(file => fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'translations', file), 'utf8'));
   for (const language of declaredLanguages.filter(language => language !== 'it')) {
     const file = path.join(publicRoot, 'assets', 'js', 'translations', `${language}.js`);
@@ -113,18 +113,21 @@ function collectHtmlLiterals() {
       .replace(/<!--([\s\S]*?)-->/g, '');
     for (const match of withoutNonUi.matchAll(/>([^<>]+)</g)) {
       const value = match[1].replace(/\s+/g, ' ').trim();
-      if (isAllowlistedLiteral(value)) continue;
-      const before = withoutNonUi.slice(Math.max(0, match.index - 220), match.index);
-      if (/material-(?:symbols|icons)[^>]*>[^<]*$/i.test(before)) continue;
       const tagStart = withoutNonUi.lastIndexOf('<', match.index);
       const openingTag = withoutNonUi.slice(tagStart, match.index + 1);
-      if (/\bdata-t\s*=/.test(openingTag)) continue;
+      if (/\bclass\s*=\s*["'][^"']*\bnotranslate\b/i.test(openingTag)
+        || /\btranslate\s*=\s*["']no["']/i.test(openingTag)) continue;
+      if (isAllowlistedLiteral(value)) continue;
+      if (/\bclass\s*=\s*["'][^"']*\bmaterial-(?:symbols|icons)\b/i.test(openingTag)) continue;
+      if (/\bdata-(?:t|onboarding-key)\s*=/.test(openingTag)) continue;
       pageFindings.push({ file: page, line: lineOf(withoutNonUi, match.index), kind: 'text', value });
     }
     for (const match of withoutNonUi.matchAll(/\b(placeholder|title|aria-label|alt)\s*=\s*["']([^"']+)["']/gi)) {
       const value = match[2].replace(/\s+/g, ' ').trim();
       const tagStart = withoutNonUi.lastIndexOf('<', match.index);
       const tag = withoutNonUi.slice(tagStart, withoutNonUi.indexOf('>', match.index) + 1);
+      if (/\bclass\s*=\s*["'][^"']*\bnotranslate\b/i.test(tag)
+        || /\btranslate\s*=\s*["']no["']/i.test(tag)) continue;
       const translatedAttribute = match[1].toLowerCase() === 'placeholder' ? 'data-t-placeholder'
         : match[1].toLowerCase() === 'title' ? 'data-t-title'
           : match[1].toLowerCase() === 'aria-label' ? 'data-t-aria' : 'data-t-alt';
