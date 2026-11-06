@@ -1,5 +1,13 @@
 # Rilascio
 
+## Rilascio 1.2.260 — prerequisiti recovery disabilitati e Hosting — 06/11/2026
+
+L'ordine corrente «Pubblica», registrato nell'[incarico](../progetto/INCARICO_CORRENTE.md), autorizza per questa release i soli 43 prerequisiti Functions, Firestore Rules e Storage Rules, seguiti da Hosting sullo stesso SHA verificato. Sono state integrate le PR #263 e #264 e pubblicato **`a392b9c80e006dcce50c724cad232020194500e2`**: backend **42250314439**, confronto indipendente metadata/Rules e Hosting **42252368644** sono riusciti. La conferma CLI riguarda soltanto i quattro retry approvati; ogni altra domanda interrompe il processo, senza `--force` e senza modificare la retention degli artefatti già configurata.
+
+Il manifest online attesta **1.2.260**, sorgente pulito, 325 file e hash **`4a117f4ad67a2435e70c6f81cc14cfa4b654f06f843c877875d731c130e506b2`**. La ricevuta completa e i limiti delle verifiche sono nei [collaudi](../evidenze/COLLAUDI.md). I commit successivi delle sole ricevute non richiedono un altro deploy e non sostituiscono lo SHA di provenienza del sito. Recovery mantiene policy `disabled`, coorte vuota e flag client `false`; attivazione, drain, canary, migrazioni e scritture recovery restano esclusi.
+
+La versione Hosting precedente identificata per un eventuale ritorno è **0321154d29c61fee**, release **1793955523972000**. Non è stata ripristinata. Un eventuale ritorno di Hosting non autorizza un ripristino globale delle vecchie Functions/Rules: fence, writer protetti e lock/piani incompleti devono restare conservati.
+
 ## Candidata 1.2.249 — grafo di conoscenza condiviso per Ricerca e Codex AI.2 — 02/11/2026
 
 Il catalogo verificato della guida genera ora una mappa immutabile delle pagine e dei percorsi dell’app. **Ricerca** la usa deterministicamente per rispondere alle domande operative e spiegare la pagina corrente; **Codex AI.2** riceve soltanto la scheda della pagina e un massimo di quattro riepiloghi correlati. Query string, valori della Vault, credenziali, immagini e strumenti restano esclusi.
