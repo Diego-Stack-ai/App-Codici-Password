@@ -7,7 +7,7 @@ const testPages = new Set([
 ]);
 const accessPages = new Set([
   'index.html',
-  'login-v115.html',
+  'login.html',
   'registrati.html',
   'reset_password.html',
   'imposta_nuova_password.html'
@@ -148,7 +148,7 @@ for (const name of [...accessPages].filter(name => name !== 'index.html')) {
 
 const indexSource = await readFile(new URL('index.html', publicRoot), 'utf8');
 assert.match(indexSource, /<html[^>]*class=["'][^"']*\bdark\b/, 'index.html: tema dark iniziale mancante');
-assert.match(indexSource, /http-equiv=["']refresh["'][^>]*login-v115\.html/, 'index.html: inoltro alla pagina di accesso mancante');
+assert.match(indexSource, /http-equiv=["']refresh["'][^>]*login\.html/, 'index.html: inoltro alla pagina di accesso mancante');
 
 const core = await readFile(new URL('assets/css/core.css', publicRoot), 'utf8');
 const bars = await readFile(new URL('assets/css/core_fascie.css', publicRoot), 'utf8');

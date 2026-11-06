@@ -26,7 +26,7 @@ function fixture() {
 }
 
 test('all 22 private HTML entries are hidden and inert before JavaScript; public exceptions stay public', async () => {
-    const publicPages = new Set(['index.html','login-v115.html','registrati.html','reset_password.html','imposta_nuova_password.html','privacy.html','termini.html','contatto_condiviso.html','prova.html']);
+    const publicPages = new Set(['index.html','login.html','registrati.html','reset_password.html','imposta_nuova_password.html','privacy.html','termini.html','contatto_condiviso.html','prova.html']);
     let count = 0;
     for (const name of (await readdir(root)).filter(name => name.endsWith('.html'))) {
         const html = await readFile(new URL(name, root), 'utf8');
@@ -47,7 +47,7 @@ test('direct unauthenticated access stays hidden and redirects to absolute login
     assert.equal(f.body.hidden, true);
     f.gate.begin(null); f.gate.reject();
     assert.equal(f.body.hidden, true); assert.equal(f.body.inert, true);
-    assert.deepEqual(f.redirects, ['/login-v115.html']);
+    assert.deepEqual(f.redirects, ['/login.html']);
 });
 
 test('verified Firebase identity reveals the page only after the pending check', () => {
@@ -71,7 +71,7 @@ for (const kind of ['error', 'timeout']) test(kind + ' keeps the page hidden and
     else [...f.timers.values()][0].fn();
     assert.equal(f.gate.acceptIdentity(ticket, verifiedUser), false);
     assert.equal(f.body.hidden, true);
-    assert.deepEqual(f.redirects, ['/login-v115.html?authCheck=' + kind]);
+    assert.deepEqual(f.redirects, ['/login.html?authCheck=' + kind]);
 });
 
 test('missing bootstrap also times out closed', () => {
@@ -114,7 +114,7 @@ for (const outcome of ['success','failure','timeout']) test('logout ' + outcome 
     await pending;
     assert.equal(f.storage.get('codex_explicit_logout'), '1');
     assert.equal(f.storage.get('unrelated-preference'), 'retain');
-    assert.deepEqual(f.redirects, ['/login-v115.html']);
+    assert.deepEqual(f.redirects, ['/login.html']);
 });
 
 test('real bootstrap wires observer error, confirms before data reads and rejects null users', () => {

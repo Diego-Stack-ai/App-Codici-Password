@@ -8,3 +8,18 @@ Frontend/public/assets/local-ai/**/*.json text eol=lf
 Frontend/public/assets/local-ai/**/*.txt text eol=lf
 Frontend/public/assets/local-ai/**/*.js text eol=lf
 Frontend/public/assets/local-ai/**/*.mjs text eol=lf
+
+# Il manifest di rilascio calcola hash byte-per-byte. I sorgenti testuali
+# devono quindi avere la stessa terminazione riga su Windows e in CI Linux.
+*.css text eol=lf
+*.html text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.mjs text eol=lf
+*.rules text eol=lf
+*.sh text eol=lf
+*.txt text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+Frontend/public/assets/pdf/LICENSE_* text eol=lf

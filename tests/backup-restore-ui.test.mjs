@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
+import {testTranslate} from './helpers/test-translator.mjs';
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/settings/impostazioni.js', import.meta.url), 'utf8');
 const ui = source.slice(source.indexOf('let disposeRestoreSetup'), source.indexOf('function showRecoveryKeyOnce'))
     .replace("import('./backup-import-service.js')", 'loadImport()');
@@ -48,7 +49,7 @@ function fixture({health = false, exporting = false} = {}) {
     };
     const context = vm.createContext({
         auth, AbortController, createElement,
-        t: key => key === 'cancel' ? 'Annulla' : key,
+        t: testTranslate, tf: testTranslate,
         document: {body, getElementById: id => nodes.find(node => node.id === id && node.isConnected), get activeElement() { return activeElement; }},
         onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),

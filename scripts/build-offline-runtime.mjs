@@ -33,6 +33,11 @@ const sourceFiles = (await walk(jsDir))
   .filter(file => !file.startsWith(vendorDir));
 const requestedExports = new Map();
 const requestedNames = new Set();
+// App Check and Messaging both export getToken. Bind domain-specific aliases
+// explicitly instead of selecting whichever package is visited first.
+const exportAliases = {
+  getMessagingToken: { module: 'firebase-messaging', name: 'getToken' }
+};
 
 for (const file of sourceFiles) {
   const source = await readFile(file, 'utf8');
@@ -49,12 +54,15 @@ const ownerByExport = new Map();
 for (const [moduleName, packageName] of Object.entries(packageByModule)) {
   const packageExports = await import(packageName);
   for (const name of requestedNames) {
-    if (!(name in packageExports)) continue;
+    const alias = exportAliases[name];
+    if (alias && alias.module !== moduleName) continue;
+    const original = alias?.name || name;
+    if (!(original in packageExports)) continue;
     const previousOwner = ownerByExport.get(name);
     if (!previousOwner) {
       ownerByExport.set(name, moduleName);
       const names = requestedExports.get(moduleName) || new Set();
-      names.add(name);
+      names.add(alias ? `${original} as ${name}` : name);
       requestedExports.set(moduleName, names);
     }
   }
@@ -106,13 +114,17 @@ await build({
 
 const cacheableExtensions = new Set(['.html', '.js', '.mjs', '.css', '.json', '.png', '.jpg', '.jpeg', '.svg', '.webp', '.woff2', '.ttf']);
 const onlineOnlyDiagnostics = new Set([
+  'release-manifest.json',
   'prova.html',
   'assets/css/prova.css',
   'assets/js/prova.js'
 ]);
 function isDeployExcluded(relativePath) {
   const parts = relativePath.split('/');
-  return parts.includes('graphify-out') || parts.some(part => part.startsWith('.'));
+  return relativePath === 'assets/local-ai-packages'
+    || relativePath.startsWith('assets/local-ai-packages/')
+    || parts.includes('graphify-out')
+    || parts.some(part => part.startsWith('.'));
 }
 const publicFiles = await walk(publicDir);
 const offlineAssets = publicFiles

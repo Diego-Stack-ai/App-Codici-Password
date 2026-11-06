@@ -1,5 +1,9 @@
 # Programma
 
+## Prossimo lotto dopo il contenimento locale — 06/11/2026
+
+Il primo lotto locale della candidata 1.2.259 è rendicontato in [STATO](STATO.md) e [COLLAUDI](../evidenze/COLLAUDI.md). La priorità successiva è completare e provare il recupero coerente di Vault, identità di condivisione e allegati profilo, mantenendo il divieto di restore generico di `settings/security`. Seguono cache applicativa cifrata con parità offline e conversione legacy riprendibile/CAS, prima del ritiro del fallback; la shell RAM completa recupererà la continuità di navigazione. Nessuna migrazione reale parte automaticamente e nessun blocco di pubblicazione viene chiuso dalla sola riuscita del lotto precedente.
+
 ## SEC-MON-01 — mappa d'attacco e sorveglianza permanente — 03/11/2026
 
 1. mantenere l'inventario versionato di applicazione, runtime, dipendenze, browser e toolchain del PC;

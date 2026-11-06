@@ -26,6 +26,10 @@ const vaultSessionSource = strip(await read('assets/js/modules/core/vault-sessio
 const queueSource = await read('assets/js/modules/data/offline-mutation-queue.js');
 const queue = await import(`data:text/javascript;base64,${Buffer.from(queueSource).toString('base64')}`);
 const swSource = await read('sw.js');
+const offlineAssetsSource = await read('offline-assets.js');
+const offlineAssetsContext = vm.createContext({self: {}});
+vm.runInContext(offlineAssetsSource, offlineAssetsContext);
+const offlineAssets = [...offlineAssetsContext.self.__OFFLINE_ASSETS];
 
 // ── 1. Logout: che cosa viene azzerato e che cosa no ────────────────────────
 
@@ -58,7 +62,7 @@ function logoutFixture({signOutFails = false} = {}) {
     vm.runInContext(`${vaultSessionSource}\n${logoutSource}\n`
         + 'globalThis.logoutWithCleanup = logoutWithCleanup;\nglobalThis.clearVaultSession = clearVaultSession;', context);
     return {context, session, local, calls, events,
-        logout: (redirect = '/login-v115.html') => context.logoutWithCleanup(async () => {
+        logout: (redirect = '/login.html') => context.logoutWithCleanup(async () => {
             calls.push(['signOut']);
             if (signOutFails) throw new Error('synthetic signOut failure');
         }, redirect)};
@@ -89,7 +93,7 @@ test('T-23: il logout azzera la sessione Vault e non tocca gli archivi persisten
     // Il gate viene bloccato, l'evento di blocco emesso e il redirect eseguito.
     assert.ok(f.calls.some(([name]) => name === 'gate.block'));
     assert.deepEqual(f.events, ['private-auth-blocked']);
-    assert.deepEqual(f.calls.find(([name]) => name === 'location.replace'), ['location.replace', '/login-v115.html']);
+    assert.deepEqual(f.calls.find(([name]) => name === 'location.replace'), ['location.replace', '/login.html']);
     assert.equal(f.calls.filter(([name]) => name === 'signOut').length, 1);
 });
 
@@ -141,7 +145,10 @@ test('T-23: nel runtime del client non esiste alcuna cancellazione degli archivi
 
 // ── 3. Cache Storage: che cosa il service worker conserva davvero ───────────
 
-function serviceWorkerFixture(shell = ['home_page.html', 'assets/js/modules/privato/profilo-ui.js']) {
+function serviceWorkerFixture(shell = ['home_page.html', 'assets/js/modules/privato/profilo-ui.js'], {
+    cached = new Map(),
+    fetchFails = false
+} = {}) {
     const put = [], deleted = [], opened = [];
     const caches = {
         keys: async () => ['codex-shell-v1.2.126', 'codex-shell-v1.2.127', 'workbox-precache-v2'],
@@ -149,15 +156,19 @@ function serviceWorkerFixture(shell = ['home_page.html', 'assets/js/modules/priv
         open: async name => {
             opened.push(name);
             return {put: async (request, response) => put.push({key: typeof request === 'string' ? request : request.url, response}),
-                match: async () => undefined};
+                match: async request => cached.get(typeof request === 'string' ? request : request.url)};
         },
-        match: async () => undefined
+        match: async request => cached.get(typeof request === 'string' ? request : request.url)
     };
     const listeners = new Map();
     const fetched = [];
     const context = vm.createContext({
         URL, console, Response: {error: () => ({error: true})},
-        caches, fetch: async request => { fetched.push(request.url); return {ok: true, clone() { return this; }}; },
+        caches, fetch: async request => {
+            fetched.push(request.url);
+            if (fetchFails) throw new Error('offline sintetico');
+            return {ok: true, clone() { return this; }};
+        },
         importScripts() {},
         self: {__OFFLINE_ASSETS: shell, skipWaiting() {}, clients: {claim: async () => {}},
             location: {origin: 'https://appcodici-password.web.app'},
@@ -213,6 +224,30 @@ test('T-23: le chiavi della cache conservano la query string, ma solo per la she
     await activation;
     assert.deepEqual(f.deleted, ['codex-shell-v1.2.126', 'codex-shell-v1.2.127'],
         'le cache estranee e quella corrente non vengono toccate');
+});
+
+test('T-23: gli alias di navigazione offline restituiscono sempre la pagina canonica', async () => {
+    const cached = new Map([
+        ['index.html', {page: 'index'}],
+        ['home_page.html', {page: 'home'}],
+        ['login.html', {page: 'login'}]
+    ]);
+    const f = serviceWorkerFixture(['index.html', 'home_page.html', 'login.html'], {cached, fetchFails: true});
+    const cases = [
+        ['https://appcodici-password.web.app/', 'index'],
+        ['https://appcodici-password.web.app/home', 'home'],
+        ['https://appcodici-password.web.app/login-v115.html', 'login']
+    ];
+    for (const [url, expected] of cases) {
+        const response = await fetchEvent(f, {url, mode: 'navigate'});
+        assert.equal(response.page, expected, `${url} deve usare la pagina canonica ${expected}`);
+    }
+    assert.deepEqual(f.put, [], 'una risposta di rete fallita non deve entrare in cache');
+});
+
+test('T-23: l alias env legacy resta disponibile anche nella shell offline', () => {
+    assert.ok(offlineAssets.includes('assets/js/app-env.js'), 'il runtime canonico deve essere precacheato');
+    assert.ok(offlineAssets.includes('assets/js/env-v126.js'), 'l alias legacy deve essere precacheato');
 });
 
 // ── 4. Coda offline: presente dopo il logout, ma cifrata ───────────────────

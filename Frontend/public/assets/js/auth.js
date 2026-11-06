@@ -1,11 +1,12 @@
 import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
-import { auth, db } from './firebase-config.js?v=1.2.258';
+import { auth, db } from './firebase-config.js?v=1.2.259';
 import { LOG } from './logger.js';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail, sendEmailVerification, setPersistence, browserLocalPersistence, browserSessionPersistence, getMultiFactorResolver, TotpMultiFactorGenerator } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
-import { showToast } from './ui-core-v129.js?v=1.2.258';
+import { showToast } from './ui-core-v129.js?v=1.2.259';
 import { logError } from './utils.js';
 import { ACCOUNT_PASSWORD_POLICY_VERSION, evaluatePassword, firstPasswordPolicyError } from './modules/core/password-policy.js';
+import { authSessionFence } from './auth-session-fence.js';
 const FIRST_CONFIGURATION_VERSION = 1;
 const normalizeLanguage = (value, fallback = 'it') => {
     const code = String(value || '').trim().toLowerCase().split('-')[0];
@@ -13,6 +14,7 @@ const normalizeLanguage = (value, fallback = 'it') => {
 };
 
 let pendingMfaResolver = null;
+let pendingLoginPermit = null;
 const RESET_POLICY_MARKER = 'codex_password_reset_policy_v1';
 
 async function consumePasswordResetPolicyMarker(user) {
@@ -45,13 +47,13 @@ async function consumePasswordResetPolicyMarker(user) {
 export function observeAuth(callback) {
     onAuthStateChanged(auth, (user) => {
         const path = window.location.pathname.toLowerCase();
-        const authPages = ['login-v115.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
+        const authPages = ['login.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
         const isAuthPage = authPages.some(p => path.includes(p)) || path === '/' || path.endsWith('/');
 
         if (!user) {
             // Se non siamo in una pagina di auth, reindirizza al login
             if (!isAuthPage) {
-                window.location.href = 'login-v115.html';
+                window.location.href = 'login.html';
                 return;
             }
         }
@@ -130,11 +132,12 @@ async function register(nome, cognome, email, password, language) {
  * @param {string} email - User's email.
  * @param {string} password - User's password.
  */
-async function finalizeLogin(user, email) {
+async function finalizeLogin(user, email, permit) {
     LOG("AUTH SUCCESS");
 
     await user.reload();
     const updatedUser = auth.currentUser;
+    if (updatedUser?.uid !== user.uid) throw Object.assign(new Error('AUTH_SESSION_CHANGED'), {code:'auth/session-changed'});
     if (!updatedUser?.emailVerified) {
         showToast("Verifica l'email prima di accedere alla Vault.", "warning");
         return { user: updatedUser, mfaRequired: false, emailVerificationRequired: true };
@@ -162,17 +165,23 @@ async function finalizeLogin(user, email) {
         showToast("Login effettuato con successo!", "success");
     }
 
+    if (auth.currentUser?.uid !== updatedUser.uid) throw Object.assign(new Error('AUTH_SESSION_CHANGED'), {code:'auth/session-changed'});
+    await authSessionFence.completeExplicitLogin(permit, updatedUser);
     sessionStorage.removeItem('codex_explicit_logout');
     pendingMfaResolver = null;
+    pendingLoginPermit = null;
     return { user: updatedUser, mfaRequired: false, profileData };
 }
 
 async function login(email, password, rememberDevice = true) {
     try {
         LOG("LOGIN START");
+        pendingMfaResolver = null;
+        const permit = await authSessionFence.beginExplicitLogin();
+        pendingLoginPermit = permit;
         await setPersistence(auth, rememberDevice ? browserLocalPersistence : browserSessionPersistence);
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        return await finalizeLogin(userCredential.user, email);
+        return await finalizeLogin(userCredential.user, email, permit);
     } catch (error) {
         if (error.code === 'auth/multi-factor-auth-required') {
             pendingMfaResolver = getMultiFactorResolver(auth, error);
@@ -203,12 +212,14 @@ async function login(email, password, rememberDevice = true) {
 
 async function completeTotpLogin(code, email) {
     if (!pendingMfaResolver) throw new Error("Sessione 2FA scaduta. Ripeti il login.");
-    const hint = pendingMfaResolver.hints.find(
+    const resolver = pendingMfaResolver;
+    const permit = pendingLoginPermit;
+    const hint = resolver.hints.find(
         item => item.factorId === TotpMultiFactorGenerator.FACTOR_ID
     );
     const assertion = TotpMultiFactorGenerator.assertionForSignIn(hint.uid, code);
-    const credential = await pendingMfaResolver.resolveSignIn(assertion);
-    return finalizeLogin(credential.user, email || credential.user.email);
+    const credential = await resolver.resolveSignIn(assertion);
+    return finalizeLogin(credential.user, email || credential.user.email, permit);
 }
 
 /**
@@ -216,6 +227,7 @@ async function completeTotpLogin(code, email) {
  */
 async function logout() {
     pendingMfaResolver = null;
+    pendingLoginPermit = null;
     window.privateAuthGate?.block();
     try { sessionStorage.setItem('codex_explicit_logout', '1'); } catch { /* Remain locked if storage is unavailable. */ }
     const { logoutWithCleanup } = await import('./logout-session.js');
@@ -237,26 +249,29 @@ function checkAuthState() {
     onAuthStateChanged(auth, async (user) => {
         const path = window.location.pathname.toLowerCase();
         const reauthFlow = new URLSearchParams(window.location.search).get('reauth');
-        const authPages = ['login-v115.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
+        const authPages = ['login.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
         const isAuthPage = authPages.some(p => path.includes(p)) || path === '/' || path.endsWith('/');
 
         LOG(`[AUTH CHECK] State: ${user ? 'authenticated' : 'guest'}, Path: ${path}, isAuthPage: ${isAuthPage}`);
 
         if (sessionStorage.getItem('codex_explicit_logout') === '1' || new URLSearchParams(window.location.search).has('authCheck')) return;
+        let permit;
+        try { permit = await authSessionFence.readPermit(); } catch { return; }
+        if (!permit) return;
         if (user) {
             try {
                 await user.reload();
             } catch (error) {
                 logError("Auth VerificationRefresh", error);
                 if (!isAuthPage) {
-                    window.location.replace('/login-v115.html?verifyEmail=1');
+                    window.location.replace('/login.html?verifyEmail=1');
                     return;
                 }
             }
             const currentUser = auth.currentUser;
             if (!currentUser?.emailVerified) {
                 if (!isAuthPage) {
-                    window.location.replace('/login-v115.html?verifyEmail=1');
+                    window.location.replace('/login.html?verifyEmail=1');
                 } else {
                     window.dispatchEvent(new CustomEvent('codex:email-verification-required', {
                         detail: { email: currentUser.email || '' }
@@ -268,12 +283,13 @@ function checkAuthState() {
                 const token = await currentUser.getIdTokenResult();
                 if (token.claims.email_verified !== true) await currentUser.getIdToken(true);
             }
-            if (path.includes('login-v115.html') && reauthFlow === 'password-change') {
+            if (auth.currentUser?.uid !== currentUser.uid || !await authSessionFence.isCurrent(permit)) return;
+            if (path.includes('login.html') && reauthFlow === 'password-change') {
                 LOG("[AUTH] Reauthentication completed, returning to password change");
                 window.location.replace('imposta_nuova_password.html?reauthenticated=1');
                 return;
             }
-            if (path.includes('login-v115.html') && reauthFlow === 'security-settings') {
+            if (path.includes('login.html') && reauthFlow === 'security-settings') {
                 LOG("[AUTH] Security reauthentication completed, returning to settings");
                 window.location.replace('impostazioni.html');
                 return;
@@ -290,9 +306,9 @@ function checkAuthState() {
             // Utente non loggato: se siamo su una pagina protetta, andiamo al login
             if (!isAuthPage) {
                 // Evitiamo di ricaricare se siamo già sulla root o sul login versionato.
-                if (!path.includes('login-v115.html') && path !== '/' && path !== '') {
-                    LOG("[AUTH] No session, redirecting to /login-v115.html");
-                    window.location.href = '/login-v115.html';
+                if (!path.includes('login.html') && path !== '/' && path !== '') {
+                    LOG("[AUTH] No session, redirecting to /login.html");
+                    window.location.href = '/login.html';
                 }
             }
         }
@@ -317,10 +333,14 @@ async function resendVerificationEmail() {
 
 async function refreshEmailVerification() {
     const user = auth.currentUser;
+    const permit = pendingLoginPermit;
     if (!user) return false;
     await user.reload();
     if (auth.currentUser?.emailVerified !== true) return false;
     await auth.currentUser.getIdToken(true);
+    if (auth.currentUser?.uid !== user.uid) return false;
+    if (permit) await finalizeLogin(auth.currentUser, auth.currentUser.email, permit);
+    else if (!await authSessionFence.readPermit()) return false;
     return true;
 }
 

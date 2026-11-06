@@ -1,144 +1,93 @@
-import {test, beforeEach} from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-
-class StorageMock {
-  #items = new Map();
-  getItem(key) { return this.#items.has(key) ? this.#items.get(key) : null; }
-  setItem(key, value) { this.#items.set(key, String(value)); }
-  removeItem(key) { this.#items.delete(key); }
-  clear() { this.#items.clear(); }
-}
-
-globalThis.sessionStorage = new StorageMock();
-globalThis.window = {dispatchEvent() {}};
-globalThis.Event = class Event { constructor(type) { this.type = type; } };
-globalThis.btoa = value => Buffer.from(value, 'binary').toString('base64');
-globalThis.atob = value => Buffer.from(value, 'base64').toString('binary');
+import {webcrypto} from 'node:crypto';
+import vm from 'node:vm';
 
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/core/vault-session.js', import.meta.url), 'utf8');
-const {saveVaultSession, restoreVaultSession, clearVaultSession} = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
-
-beforeEach(() => sessionStorage.clear());
-
-test('la sessione ripristina il Vault Key material solo per lo stesso UID', async () => {
-  await saveVaultSession('vault-key-material', 'uid-a');
-  assert.equal(await restoreVaultSession('uid-a'), 'vault-key-material');
-  assert.equal(await restoreVaultSession('uid-b'), null);
-});
-
-test('blocco e logout eliminano payload e chiave di wrapping', async () => {
-  await saveVaultSession('vault-key-material', 'uid-a');
-  assert.ok(sessionStorage.getItem('vault_session_v1'));
-  assert.ok(sessionStorage.getItem('codex_vault_session_wrapping_key_v1'));
-  clearVaultSession();
-  assert.equal(sessionStorage.getItem('vault_session_v1'), null);
-  assert.equal(sessionStorage.getItem('codex_vault_session_wrapping_key_v1'), null);
-  assert.equal(await restoreVaultSession('uid-a'), null);
-});
-
-// ── M10-LOG-1: nei log solo un'etichetta stabile e sanificata ─────────────────
-const labelPattern = /^[A-Za-z][A-Za-z0-9_./-]{0,63}$/;
-
-async function captureWarnings(action) {
-  const captured = [];
-  const original = console.warn;
-  console.warn = (...args) => captured.push(args);
-  try { return {result: await action(), captured}; } finally { console.warn = original; }
+const legacy = ['vault_session_v1', 'codex_vault_session_wrapping_key_v1', 'vault_s_key', 'vault_s_expiry'];
+function fixture(storage = new Map(), overrides = {}) {
+    const warnings = [], events = [], writes = [];
+    const subtle = Object.fromEntries(['generateKey', 'encrypt', 'decrypt'].map(name => [name, (...args) => webcrypto.subtle[name](...args)]));
+    const context = vm.createContext({
+        crypto: {subtle, getRandomValues: a => webcrypto.getRandomValues(a)},
+        sessionStorage: {getItem: key => storage.get(key) ?? null,
+            setItem: (key, value) => {writes.push(key); storage.set(key, value);},
+            removeItem: key => storage.delete(key), ...overrides},
+        TextEncoder, TextDecoder, Uint8Array, Date, Event,
+        btoa: v => Buffer.from(v, 'binary').toString('base64'),
+        atob: v => Buffer.from(v, 'base64').toString('binary'),
+        window: {dispatchEvent: e => events.push(e.type)},
+        console: {warn: (...args) => warnings.push(args)}
+    });
+    vm.runInContext(source.replace(/^export /gm, ''), context);
+    return {context, storage, subtle, events, warnings, writes, run: code => vm.runInContext(code, context)};
 }
 
-test('persistenza fallita: il log riceve solo l’etichetta, mai oggetto, messaggio o dati', async () => {
-  const secret = 'SYNTHETIC-SECRET-NOT-TO-BE-LOGGED';
-  const originalSetItem = sessionStorage.setItem.bind(sessionStorage);
-  sessionStorage.setItem = () => {
-    const error = new Error(`messaggio con ${secret}`);
-    error.name = 'SyntheticError';
-    error.code = 'permission-denied';
-    error.details = {secret};
-    throw error;
-  };
-  let outcome;
-  try { outcome = await captureWarnings(() => saveVaultSession('vault-key-material', 'uid-a')); }
-  finally { sessionStorage.setItem = originalSetItem; }
-  assert.equal(outcome.result, false);
-  assert.equal(outcome.captured.length, 1);
-  const [message, label] = outcome.captured[0];
-  assert.equal(message, '[Vault Session] Persistenza non disponibile:');
-  assert.match(label, labelPattern);
-  assert.equal(label, 'permission-denied');
-  const text = JSON.stringify(outcome.captured) + String(outcome.captured[0][0]) + String(outcome.captured[0][1]);
-  for (const leak of [secret, 'messaggio', 'details', 'SyntheticError', 'at ']) {
-    assert.equal(text.includes(leak), false, `il log non deve contenere ${leak}`);
-  }
+test('same-document UID, cleanup and unlock event remain functional without storage writes', async () => {
+    const f = fixture();
+    assert.equal(await f.run("saveVaultSession('SYNTHETIC-KEY', 'a')"), true);
+    assert.equal(await f.run("restoreVaultSession('a')"), 'SYNTHETIC-KEY');
+    assert.equal(await f.run("restoreVaultSession('b')"), null);
+    assert.deepEqual(f.writes, []);
+    assert.deepEqual(f.events, ['vault-session-unlocked']);
+    for (const name of legacy) assert.equal(f.storage.has(name), false);
 });
 
-// M10-LOG-1 R1: un codice sintatticamente valido ma arbitrario non è un'etichetta diagnostica.
-test('codice valido ma sensibile: diventa l’etichetta generica, mai il valore', async () => {
-  const sensitive = 'SYNTHETIC_SECRET_PASSWORD';
-  const originalSetItem = sessionStorage.setItem.bind(sessionStorage);
-  sessionStorage.setItem = () => { throw Object.assign(new Error('x'), {code: sensitive}); };
-  let outcome;
-  try { outcome = await captureWarnings(() => saveVaultSession('vault-key-material', 'uid-a')); }
-  finally { sessionStorage.setItem = originalSetItem; }
-  assert.equal(outcome.result, false);
-  assert.equal(outcome.captured[0][1], 'Error');
-  assert.equal(JSON.stringify(outcome.captured).includes(sensitive), false);
+test('copying all browser storage cannot unlock a fresh document', async () => {
+    const storage = new Map([['preference', 'keep']]);
+    const first = fixture(storage);
+    await first.run("saveVaultSession('SYNTHETIC-KEY', 'a')");
+    const second = fixture(new Map(storage));
+    assert.equal(await second.run("restoreVaultSession('a')"), null);
+    assert.equal(await first.run("restoreVaultSession('a')"), 'SYNTHETIC-KEY');
+    first.run('clearVaultSession()');
+    assert.equal(await first.run("restoreVaultSession('a')"), null);
+    assert.equal(first.run('wrappingKey'), null);
+    assert.equal(first.run('sessionPayload'), null);
+    assert.equal(second.storage.get('preference'), 'keep');
 });
 
-// M10-LOG-1 R1: la lettura delle proprietà non deve poter interrompere il flusso del chiamante.
-test('getter che lancia: nessuna eccezione dall’helper, pulizia e ritorno invariati', async () => {
-  const originalSetItem = sessionStorage.setItem.bind(sessionStorage);
-  originalSetItem('vault_session_v1', 'SYNTHETIC-RESIDUE');
-  const hostile = {};
-  Object.defineProperty(hostile, 'code', {get() { throw new Error('getter failed'); }});
-  sessionStorage.setItem = () => { throw hostile; };
-  let outcome;
-  try { outcome = await captureWarnings(() => saveVaultSession('vault-key-material', 'uid-a')); }
-  finally { sessionStorage.setItem = originalSetItem; }
-  assert.equal(outcome.result, false);
-  assert.equal(outcome.captured.length, 1);
-  assert.equal(outcome.captured[0][1], 'Error');
-  assert.equal(JSON.stringify(outcome.captured).includes('getter failed'), false);
-  assert.equal(sessionStorage.getItem('vault_session_v1'), null, 'la pulizia della sessione deve restare invariata');
-  assert.equal(sessionStorage.getItem('codex_vault_session_wrapping_key_v1'), null);
+test('all legacy key/payload aliases are purged at initialization, never imported', async () => {
+    const f = fixture(new Map(legacy.map(k => [k, 'SYNTHETIC-OLD-SECRET'])));
+    assert.equal(await f.run("restoreVaultSession('a')"), null);
+    for (const name of legacy) assert.equal(f.storage.has(name), false);
 });
 
-test('valore non-Error: il log riceve l’etichetta generica', async () => {
-  const originalSetItem = sessionStorage.setItem.bind(sessionStorage);
-  sessionStorage.setItem = () => { throw 'SYNTHETIC-THROWN-STRING-NOT-TO-BE-LOGGED'; };
-  let outcome;
-  try { outcome = await captureWarnings(() => saveVaultSession('vault-key-material', 'uid-a')); }
-  finally { sessionStorage.setItem = originalSetItem; }
-  assert.equal(outcome.result, false);
-  assert.equal(outcome.captured[0][1], 'Error');
-  assert.equal(JSON.stringify(outcome.captured).includes('SYNTHETIC-THROWN-STRING'), false);
+test('failed purge still attempts every alias and refuses initialization', () => {
+    const calls = [];
+    assert.throws(() => fixture(new Map(), {removeItem(key) {
+        calls.push(key);
+        if (key === legacy[0]) throw new Error('blocked');
+    }}), /blocked/);
+    assert.deepEqual(calls, legacy);
 });
 
-test('ripristino fallito: il log non contiene il payload corrotto', async () => {
-  await saveVaultSession('vault-key-material', 'uid-a');
-  const stored = JSON.parse(sessionStorage.getItem('vault_session_v1'));
-  sessionStorage.setItem('vault_session_v1', JSON.stringify({...stored, ciphertext: 'AAAA'}));
-  const outcome = await captureWarnings(() => restoreVaultSession('uid-a'));
-  assert.equal(outcome.result, null);
-  assert.equal(outcome.captured.length, 1);
-  const [message, label] = outcome.captured[0];
-  assert.equal(message, '[Vault Session] Ripristino non riuscito:');
-  assert.match(label, labelPattern);
-  const text = JSON.stringify(outcome.captured);
-  for (const leak of ['AAAA', stored.ciphertext, stored.iv]) assert.equal(text.includes(leak), false);
+test('RAM expiry preserves the inactivity contract', async () => {
+    const f = fixture();
+    await f.run("saveVaultSession('SYNTHETIC-KEY', 'a', Date.now() - 1)");
+    assert.equal(await f.run("restoreVaultSession('a')"), null);
+    await f.run("saveVaultSession('SYNTHETIC-KEY', 'a')");
+    f.run('touchVaultSession(60000)');
+    assert.ok(f.run('getVaultSessionExpiry()') > Date.now());
+    assert.deepEqual(f.writes, []);
 });
 
-test('nessuna chiamata console nei due moduli di sicurezza riceve dati dell’errore', async () => {
-  for (const name of ['security-manager.js', 'vault-session.js']) {
-    const source = await readFile(new URL(`../Frontend/public/assets/js/modules/core/${name}`, import.meta.url), 'utf8');
-    const calls = [...source.matchAll(/console\.(?:log|info|warn|error|debug)\(([\s\S]*?)\);/g)];
-    assert.ok(calls.length >= 2, `${name}: nessuna chiamata console trovata`);
-    for (const call of calls) {
-      const arguments_ = call[1].split(',').map(part => part.trim()).filter(Boolean);
-      for (const argument of arguments_) {
-        assert.match(argument, /^(?:'[^']*'|"[^"]*"|`[^`]*`|logErrorLabel\([A-Za-z_$][\w$]*\))$/,
-          `${name}: argomento non sanificato → ${argument}`);
-      }
-    }
-  }
+for (const phase of ['encrypt', 'decrypt']) test(phase + ' failure clears state and logs only a stable label', async () => {
+    const f = fixture();
+    if (phase === 'decrypt') await f.run("saveVaultSession('SYNTHETIC-KEY', 'a')");
+    f.subtle[phase] = async () => {throw Object.assign(new Error('SYNTHETIC-SECRET'), {code:'permission-denied'});};
+    const result = await f.run(phase === 'encrypt' ? "saveVaultSession('SYNTHETIC-KEY', 'a')" : "restoreVaultSession('a')");
+    assert.equal(result, phase === 'encrypt' ? false : null);
+    assert.equal(f.warnings[0][1], 'permission-denied');
+    assert.doesNotMatch(JSON.stringify(f.warnings), /SYNTHETIC/);
+    assert.equal(await f.run("restoreVaultSession('a')"), null);
+});
+
+test('sensitive codes and throwing getters cannot leak through diagnostic labels', () => {
+    const f = fixture();
+    f.context.error = {code: 'SYNTHETIC_SECRET_PASSWORD'};
+    assert.equal(f.run('logErrorLabel(error)'), 'Error');
+    Object.defineProperty(f.context.error, 'code', {get(){throw new Error('SYNTHETIC');}});
+    assert.equal(f.run('logErrorLabel(error)'), 'Error');
 });

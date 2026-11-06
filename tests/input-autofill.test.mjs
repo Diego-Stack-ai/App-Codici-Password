@@ -31,7 +31,7 @@ test('dynamic local fields opt out while explicit credentials and OTP retain the
 });
 
 test('only actual login or Account credentials use password inputs in HTML', async () => {
-    const allowed = new Set(['login-v115.html', 'registrati.html', 'imposta_nuova_password.html', 'form_account_privato.html', 'form_account_azienda.html']);
+    const allowed = new Set(['login.html', 'registrati.html', 'imposta_nuova_password.html', 'form_account_privato.html', 'form_account_azienda.html']);
     for (const file of (await readdir(root)).filter(f => f.endsWith('.html'))) {
         const source = await read(file);
         assert.doesNotMatch(source, /user_login_trap|password_trap/, file);
@@ -43,7 +43,7 @@ test('only actual login or Account credentials use password inputs in HTML', asy
         assert.match(source, /id="account-password"[^>]*type="password"[^>]*autocomplete="current-password"/);
         assert.doesNotMatch(source.match(/<input\b[^>]*id="account-code"[^>]*>/)[0], /data-form-type="other"/);
     }
-    assert.match(await read('login-v115.html'), /id="password"[^>]*autocomplete="current-password"/);
+    assert.match(await read('login.html'), /id="password"[^>]*autocomplete="current-password"/);
 });
 
 test('widgets and banking never become password fields when shown or hidden', async () => {

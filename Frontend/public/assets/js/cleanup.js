@@ -67,7 +67,7 @@ function initGlobalDelegation() {
                 const text = target.dataset.text;
                 if (text) {
                     navigator.clipboard.writeText(text).then(() => {
-                        showToast("Copiato!", "success");
+                        showToast(t('copied'), "success");
                     }).catch(() => showToast("Errore copia", "error"));
                 }
                 break;

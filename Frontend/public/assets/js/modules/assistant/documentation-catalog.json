@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contentVersion": 11,
-  "reviewedAppVersion": "1.2.258",
+  "reviewedAppVersion": "1.2.259",
   "fallbackLocale": "it",
   "pages": [
     {
@@ -18,30 +18,30 @@
         }
       ],
       "relatedPageIds": [
-        "login-v115"
+        "login"
       ],
       "tutorialId": null
     },
     {
-      "pageId": "login-v115",
-      "route": "/login-v115.html",
+      "pageId": "login",
+      "route": "/login.html",
       "family": "access",
-      "titleKey": "guide.pages.login-v115.title",
-      "purposeKey": "guide.pages.login-v115.purpose",
+      "titleKey": "guide.pages.login.title",
+      "purposeKey": "guide.pages.login.purpose",
       "steps": [
         {
           "stepId": "step-1",
-          "bodyKey": "guide.pages.login-v115.step-1",
+          "bodyKey": "guide.pages.login.step-1",
           "target": "#login-form"
         },
         {
           "stepId": "step-2",
-          "bodyKey": "guide.pages.login-v115.step-2",
+          "bodyKey": "guide.pages.login.step-2",
           "target": "#totp-help"
         },
         {
           "stepId": "step-3",
-          "bodyKey": "guide.pages.login-v115.step-3",
+          "bodyKey": "guide.pages.login.step-3",
           "target": "#link-forgot-password"
         }
       ],
@@ -75,7 +75,7 @@
         }
       ],
       "relatedPageIds": [
-        "login-v115",
+        "login",
         "privacy",
         "termini"
       ],
@@ -100,7 +100,7 @@
         }
       ],
       "relatedPageIds": [
-        "login-v115",
+        "login",
         "imposta_nuova_password"
       ],
       "tutorialId": null
@@ -124,7 +124,7 @@
         }
       ],
       "relatedPageIds": [
-        "login-v115"
+        "login"
       ],
       "tutorialId": null
     },
@@ -1077,7 +1077,7 @@
       "journeyId": "first-use",
       "titleKey": "guide.journeys.first-use.title",
       "pageIds": [
-        "login-v115",
+        "login",
         "home_page",
         "profilo_privato",
         "form_account_privato",
@@ -1130,7 +1130,7 @@
       "titleKey": "guide.journeys.security-and-recovery.title",
       "pageIds": [
         "impostazioni",
-        "login-v115",
+        "login",
         "reset_password",
         "archivio_account"
       ]
@@ -1141,11 +1141,11 @@
       "guide.pages.index.title": "Ingresso",
       "guide.pages.index.purpose": "Raggiungi la pagina di accesso all’app.",
       "guide.pages.index.step-1": "L’ingresso apre automaticamente la pagina di accesso. Se il passaggio non avviene, usa il collegamento presente nella pagina.",
-      "guide.pages.login-v115.title": "Accesso",
-      "guide.pages.login-v115.purpose": "Accedi con l’identità del tuo account; lo sblocco del Vault è un passaggio distinto.",
-      "guide.pages.login-v115.step-1": "Inserisci email e password di accesso. Non inserire qui la Master Password del Vault.",
-      "guide.pages.login-v115.step-2": "Se hai attivato un Authenticator, segui la richiesta del secondo fattore. Non comunicare codici o password nella Ricerca.",
-      "guide.pages.login-v115.step-3": "Se hai dimenticato la password di accesso, apri il recupero. Il recupero della password di accesso non ricostruisce il segreto del Vault.",
+      "guide.pages.login.title": "Accesso",
+      "guide.pages.login.purpose": "Accedi con l’identità del tuo account; lo sblocco del Vault è un passaggio distinto.",
+      "guide.pages.login.step-1": "Inserisci email e password di accesso. Non inserire qui la Master Password del Vault.",
+      "guide.pages.login.step-2": "Se hai attivato un Authenticator, segui la richiesta del secondo fattore. Non comunicare codici o password nella Ricerca.",
+      "guide.pages.login.step-3": "Se hai dimenticato la password di accesso, apri il recupero. Il recupero della password di accesso non ricostruisce il segreto del Vault.",
       "guide.pages.registrati.title": "Registrazione",
       "guide.pages.registrati.purpose": "Crea l’account di accesso e segui la verifica dell’email.",
       "guide.pages.registrati.step-1": "Compila i dati richiesti e scegli una password di accesso conforme ai requisiti mostrati.",

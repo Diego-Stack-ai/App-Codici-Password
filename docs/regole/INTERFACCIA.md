@@ -318,7 +318,7 @@ Il laboratorio è escluso dagli audit che certificano la superficie applicativa.
 
 - ingresso tecnico: `index.html`;
 - ricevitore pubblico contatto: `contatto_condiviso.html` → `assets/js/contact-card-receiver.js`;
-- autenticazione: `login-v115.html`, `registrati.html`, `reset_password.html`, `imposta_nuova_password.html`;
+- autenticazione: `login.html`, `registrati.html`, `reset_password.html`, `imposta_nuova_password.html`;
 - Home: `home_page.html`;
 - Privato: `area_privata.html`, `account_privati.html`, `form_account_privato.html`, `dettaglio_account_privato.html`, `profilo_privato.html`;
 - Azienda: `lista_aziende.html`, `dati_azienda.html`, `modifica_azienda.html`, `account_azienda.html`, `form_account_azienda.html`, `dettaglio_account_azienda.html`;
@@ -326,7 +326,7 @@ Il laboratorio è escluso dagli audit che certificano la superficie applicativa.
 - Impostazioni: `impostazioni.html`, `gestione_destinatari.html`, `archivio_account.html`;
 - informative: `privacy.html`, `termini.html`.
 
-Il nome storico `login-v115.html` viene mantenuto finché i flussi di autenticazione e i collegamenti installati non sono migrati con redirect verificato; non autorizza la creazione di nuove varianti.
+Il nome canonico è `login.html`. La route storica `login-v115.html` resta soltanto come redirect temporaneo 302 durante la finestra di rollback; non autorizza nuovi riferimenti o nuove varianti.
 
 <a id="fonte-docs-canonical-page-registry-md-riscontro-integrazione--13092026"></a>
 
@@ -363,7 +363,7 @@ Questo documento definisce esclusivamente la struttura delle 30 pagine canoniche
 
 ### Perimetro ufficiale
 
-- **Famiglia accesso:** `index.html`, `login-v115.html`, `registrati.html`, `reset_password.html`, `imposta_nuova_password.html`.
+- **Famiglia accesso:** `index.html`, `login.html`, `registrati.html`, `reset_password.html`, `imposta_nuova_password.html`.
 - **Famiglia interna:** le 24 pagine canoniche operative elencate in `CANONICAL_PAGE_REGISTRY.md`.
 - I confronti Home e i redirect storici sono conservati in `archive/home-experiments/` e non appartengono al runtime pubblico.
 - `prova.html` è un laboratorio temporaneo pubblicato per il collaudo fisico del viewport. Non è una pagina canonica, non entra nel conteggio né nel gate statico delle 30 pagine e non può introdurre eccezioni nel contratto definitivo.

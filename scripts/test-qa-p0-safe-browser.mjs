@@ -131,7 +131,7 @@ async function waitTranslated(page) {
 }
 
 async function loginAndUnlock(page) {
-    await page.goto(`${origin}/login-v115.html`, {waitUntil: 'networkidle', timeout: 45_000});
+    await page.goto(`${origin}/login.html`, {waitUntil: 'networkidle', timeout: 45_000});
     await waitTranslated(page);
     const languageDialog = page.locator('#initial-language-dialog');
     if (await languageDialog.isVisible().catch(() => false)) {
@@ -148,7 +148,7 @@ async function loginAndUnlock(page) {
     await master.waitFor({state: 'visible', timeout: 30_000});
     await master.fill(credentials.masterPassword);
     await page.locator('#modal-confirm-btn').click();
-    await page.waitForFunction(() => Boolean(sessionStorage.getItem('vault_session_v1')), null, {timeout: 45_000});
+    await page.waitForFunction(async () => (await import('/assets/js/modules/core/security-manager.js')).isVaultUnlocked(), null, {timeout: 45_000});
     await assertQa2Identity(page);
 }
 
@@ -158,7 +158,7 @@ async function unlockIfNeeded(page) {
     if (!requested) return;
     await master.fill(credentials.masterPassword);
     await page.locator('#modal-confirm-btn').click();
-    await page.waitForFunction(() => Boolean(sessionStorage.getItem('vault_session_v1')), null, {timeout: 45_000});
+    await page.waitForFunction(async () => (await import('/assets/js/modules/core/security-manager.js')).isVaultUnlocked(), null, {timeout: 45_000});
 }
 
 async function assertQa2Identity(page) {
@@ -237,7 +237,7 @@ async function securityCancellation(page) {
     await openSettings(page);
     const resetEvidence = await cancelConfirm(page, 'btn-reset-vault', 'security-reset-cancel');
     const revokeEvidence = await cancelConfirm(page, 'btn-revoke-all-sessions', 'security-revoke-cancel');
-    assert.ok(await page.evaluate(() => Boolean(sessionStorage.getItem('vault_session_v1'))), 'VAULT_SESSION_LOST_AFTER_CANCEL');
+    assert.ok(await page.evaluate(async () => (await import('/assets/js/modules/core/security-manager.js')).isVaultUnlocked()), 'VAULT_SESSION_LOST_AFTER_CANCEL');
     return {detail: 'Popup reset locale e revoca sessioni annullati; sessione QA2 intatta.', evidence: [resetEvidence, revokeEvidence]};
 }
 
@@ -360,7 +360,7 @@ async function exportEncryptedBackup(page) {
         await page.locator('.modal-overlay.active').getByRole('button', {name: 'Annulla'}).click();
     }
     assert.ok(
-        await page.evaluate(() => Boolean(sessionStorage.getItem('vault_session_v1'))),
+        await page.evaluate(async () => (await import('/assets/js/modules/core/security-manager.js')).isVaultUnlocked()),
         'VAULT_SESSION_LOST_AFTER_BACKUP_PREFLIGHT'
     );
     return {
@@ -526,8 +526,8 @@ async function logoutFinal(page) {
     const modal = page.locator('.modal-overlay.active').last();
     await modal.waitFor({state: 'visible', timeout: 10_000});
     await modal.getByRole('button', {name: /^Esci$/}).click();
-    await page.waitForURL(/\/login-v115\.html(?:[?#]|$)/, {timeout: 30_000});
-    assert.equal(await page.evaluate(() => Boolean(sessionStorage.getItem('vault_session_v1'))), false);
+    await page.waitForURL(/\/login\.html(?:[?#]|$)/, {timeout: 30_000});
+    assert.equal(await page.evaluate(async () => (await import('/assets/js/modules/core/security-manager.js')).isVaultUnlocked()), false);
     return {detail: 'Logout QA2 completato come ultimo passo; sessione Vault rimossa.'};
 }
 

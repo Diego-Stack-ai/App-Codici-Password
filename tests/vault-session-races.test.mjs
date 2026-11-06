@@ -26,7 +26,7 @@ function storage() {
 function sessionFixture() {
     const sessionStorage = storage();
     const events = [];
-    const subtle = Object.fromEntries(['importKey', 'encrypt', 'decrypt'].map(name => [
+    const subtle = Object.fromEntries(['generateKey', 'importKey', 'encrypt', 'decrypt'].map(name => [
         name, (...args) => webcrypto.subtle[name](...args)
     ]));
     const context = vm.createContext({

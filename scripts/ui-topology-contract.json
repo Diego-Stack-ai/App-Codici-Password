@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "coverage": {
+    "minimumPages": 30,
+    "minimumControls": 180,
+    "minimumEventBindings": 100,
+    "minimumSurfaces": 20,
+    "maximumUnmappedControlRate": 0.02
+  },
+  "knownDormantControls": [
+    {
+      "page": "aggiungi_scadenza.html",
+      "selector": "#mode-automezzi",
+      "reason": "Selettore legacy nel contenitore #deadline-mode-selector permanentemente nascosto; sostituito dai domini dinamici."
+    },
+    {
+      "page": "aggiungi_scadenza.html",
+      "selector": "#mode-documenti",
+      "reason": "Selettore legacy nel contenitore #deadline-mode-selector permanentemente nascosto; sostituito dai domini dinamici."
+    },
+    {
+      "page": "aggiungi_scadenza.html",
+      "selector": "#mode-generali",
+      "reason": "Selettore legacy nel contenitore #deadline-mode-selector permanentemente nascosto; sostituito dai domini dinamici."
+    }
+  ],
+  "criticalFlows": [
+    {
+      "id": "settings-app-info",
+      "page": "impostazioni.html",
+      "trigger": "#btn-toggle-app-info",
+      "event": "click",
+      "target": { "kind": "surface", "value": "#info-app-content" },
+      "translations": ["app_info_title", "app_info_security_desc", "settings_app_version_label"]
+    },
+    {
+      "id": "settings-privacy-summary",
+      "page": "impostazioni.html",
+      "trigger": "#btn-toggle-privacy",
+      "event": "click",
+      "target": { "kind": "surface", "value": "#privacy-dropdown-content" },
+      "translations": ["privacy_short_title", "settings_privacy_summary", "privacy_short_details_link"]
+    },
+    {
+      "id": "settings-terms-summary",
+      "page": "impostazioni.html",
+      "trigger": "#btn-toggle-terms",
+      "event": "click",
+      "target": { "kind": "surface", "value": "#terms-dropdown-content" },
+      "translations": ["terms_short_title", "settings_terms_summary", "terms_short_details_link"]
+    },
+    {
+      "id": "settings-expiry-rules-route",
+      "page": "impostazioni.html",
+      "trigger": "#btn-expiry-rules",
+      "event": "click",
+      "target": { "kind": "route", "value": "regole_scadenze.html" },
+      "translations": ["expiry_rules"]
+    },
+    {
+      "id": "settings-shared-credentials-dialog",
+      "page": "impostazioni.html",
+      "trigger": "#btn-shared-credentials",
+      "event": "click",
+      "target": { "kind": "symbol", "value": "openSharedCredentialsSettings" },
+      "translations": ["settings_shared_credentials_title", "settings_shared_credentials_desc"]
+    },
+    {
+      "id": "settings-encrypted-backup-dialog",
+      "page": "impostazioni.html",
+      "trigger": "#btn-export-encrypted-backup",
+      "event": "click",
+      "target": { "kind": "symbol", "value": "setupEncryptedBackup" },
+      "translations": ["settings_backup_export_title", "settings_backup_export_desc"]
+    },
+    {
+      "id": "settings-credential-health-dialog",
+      "page": "impostazioni.html",
+      "trigger": "#btn-credential-health",
+      "event": "click",
+      "target": { "kind": "symbol", "value": "showCredentialHealthResults" },
+      "translations": ["settings_credential_health_title", "settings_credential_health_desc"]
+    },
+    {
+      "id": "settings-account-field-usage-dialog",
+      "page": "impostazioni.html",
+      "trigger": "#btn-account-field-usage",
+      "event": "click",
+      "target": { "kind": "symbol", "value": "showAccountFieldUsage" },
+      "translations": ["settings_field_usage_title", "settings_field_usage_desc"]
+    },
+    {
+      "id": "settings-master-password-dialog",
+      "page": "impostazioni.html",
+      "trigger": "#btn-change-master-password",
+      "event": "click",
+      "target": { "kind": "symbol", "value": "changeMasterPassword" },
+      "translations": ["settings_master_password_title", "settings_master_password_desc"]
+    },
+    {
+      "id": "settings-revoke-sessions-confirmation",
+      "page": "impostazioni.html",
+      "trigger": "#btn-revoke-all-sessions",
+      "event": "click",
+      "target": { "kind": "symbol", "value": "showConfirmModal" },
+      "translations": ["settings_revoke_sessions_title", "settings_revoke_sessions_desc"]
+    }
+  ],
+  "runtimeScenarios": [
+    { "page": "impostazioni.html", "trigger": "#btn-toggle-app-info", "expectVisible": "#info-app-content" },
+    { "page": "impostazioni.html", "trigger": "#btn-toggle-privacy", "expectVisible": "#privacy-dropdown-content" },
+    { "page": "impostazioni.html", "trigger": "#btn-toggle-terms", "expectVisible": "#terms-dropdown-content" }
+  ]
+}

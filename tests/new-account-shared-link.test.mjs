@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
+import {testTranslate} from './helpers/test-translator.mjs';
 const source = (await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-shared-credentials.js', import.meta.url), 'utf8')).replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/export (async )?function/g, '$1function');
 test('new account link action saves first and never links an absent record', () => {
     let clicks = 0, visible = false, destroyed; const created=[];
@@ -9,7 +10,7 @@ test('new account link action saves first and never links an absent record', () 
     const nodes = {'shared-credentials-section':{classList:{remove(){visible=true;}}},'btn-link-shared-credential':add,save};
     const body={children:[],appendChild(node){this.children.push(node)}};
     const createElement=(tag,props={},children=[])=>{const node={tag,...props,children:Array.isArray(children)?children:[children],remove(){this.removed=true}};created.push(node);return node};
-    const sandbox = {destroyAccountWidgetMount:section=>{destroyed=section;},createElement,setChildren:(node,children)=>{node.children=Array.isArray(children)?children:[children]},document:{body,getElementById:id=>nodes[id]},navigator:{onLine:true},showToast(){}};
+    const sandbox = {destroyAccountWidgetMount:section=>{destroyed=section;},createElement,setChildren:(node,children)=>{node.children=Array.isArray(children)?children:[children]},document:{body,getElementById:id=>nodes[id]},navigator:{onLine:true},showToast(){},t:testTranslate};
     vm.createContext(sandbox);vm.runInContext(source,sandbox);
     sandbox.initNewAccountSharedCredentials({saveButtonId:'save'});
     assert.equal(destroyed,nodes['shared-credentials-section']);

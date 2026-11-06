@@ -3,7 +3,7 @@
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.258';
+import { db, storage } from '../../firebase-config.js?v=1.2.259';
 import { doc, collection, addDoc, setDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -265,7 +265,7 @@ function renderAttachments(list, mount) {
     if (list.length === 0) {
         container.appendChild(createElement('p', {
             className: 'text-[10px] text-white/20 uppercase text-center py-4',
-            textContent: 'Nessun allegato'
+            textContent: t('deadline_attachment_none')
         }));
         return;
     }

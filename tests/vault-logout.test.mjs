@@ -88,7 +88,7 @@ for (const fails of [false, true]) {
         await vm.runInContext('logout()', context);
         assert.deepEqual(calls, ['signOut']);
         assert.deepEqual(beforeSignOut, [{key: null, auto: false, values: [null, null, null, null]}]);
-        assert.equal(window.location.href, '/login-v115.html');
+        assert.equal(window.location.href, '/login.html');
         assert.equal(sessionStorage.getItem('unrelated'), 'keep');
     });
 }

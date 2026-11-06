@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-shell-v1.2.258';
+const CACHE_NAME = 'codex-shell-v1.2.259';
 const APP_CACHE_PREFIX = 'codex-';
 
 importScripts('./offline-assets.js');
@@ -7,6 +7,11 @@ importScripts('./offline-assets.js');
 // release sono disponibili senza richiedere che l'utente le visiti prima.
 const APP_SHELL = self.__OFFLINE_ASSETS || [];
 const APP_SHELL_PATHS = new Set(APP_SHELL.map(asset => `/${asset.replace(/^\.\//, '')}`));
+const NAVIGATION_ALIASES = new Map([
+    ['/', 'index.html'],
+    ['/home', 'home_page.html'],
+    ['/login-v115.html', 'login.html']
+]);
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
@@ -45,8 +50,10 @@ async function navigationFallback(request) {
     if (exact) return exact;
 
     const url = new URL(request.url);
-    const isHome = url.pathname === '/home' || url.pathname.endsWith('/home_page.html');
-    return (await cache.match(isHome ? 'home_page.html' : 'login-v115.html')) || Response.error();
+    const alias = NAVIGATION_ALIASES.get(url.pathname);
+    if (alias) return (await cache.match(alias)) || Response.error();
+    const isHome = url.pathname.endsWith('/home_page.html');
+    return (await cache.match(isHome ? 'home_page.html' : 'login.html')) || Response.error();
 }
 
 self.addEventListener('fetch', (event) => {
@@ -56,15 +63,16 @@ self.addEventListener('fetch', (event) => {
     const url = new URL(request.url);
     if (url.origin !== self.location.origin) return;
 
-    // Solo le risorse dichiarate nella shell possono entrare nella Cache API.
-    // Evita di conservare accidentalmente future risposte private same-origin.
-    if (!APP_SHELL_PATHS.has(url.pathname)) return;
-
-    // HTML: sempre rete prima; offline usa la pagina esatta o la shell corretta.
-    if (request.mode === 'navigate') {
+    // HTML e alias Hosting: sempre rete prima; offline usa la pagina canonica.
+    if (request.mode === 'navigate' &&
+        (APP_SHELL_PATHS.has(url.pathname) || NAVIGATION_ALIASES.has(url.pathname))) {
         event.respondWith(fetchAndCache(request).catch(() => navigationFallback(request)));
         return;
     }
+
+    // Solo le risorse dichiarate nella shell possono entrare nella Cache API.
+    // Evita di conservare accidentalmente future risposte private same-origin.
+    if (!APP_SHELL_PATHS.has(url.pathname)) return;
 
     // Codice e stili: rete prima, fallback solo sulla stessa URL completa.
     // Non usiamo ignoreSearch: una query diversa identifica una release diversa.

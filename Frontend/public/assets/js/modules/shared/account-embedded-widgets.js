@@ -1,4 +1,5 @@
 import {createElement, setChildren, clearElement} from '../../dom-utils.js';
+import {t} from '../../translations.js';
 import {showToast} from '../../ui-core-v129.js';
 import {decrypt, ensureVaultKeyMaterial} from '../core/security-manager.js';
 import {
@@ -40,7 +41,7 @@ function fieldRow(field = {}, structureLocked = false) {
         className: 'shared-account-select-control', 'aria-label': 'Tipo del campo', disabled: structureLocked
     }, [
         createElement('option', {value: 'text', textContent: 'Testo'}),
-        createElement('option', {value: 'date', textContent: 'Data'})
+        createElement('option', {value: 'date', textContent: t('data_tag')})
     ]);
     type.value = field.type === 'date' || field.type === 'expiry' ? 'date' : 'text';
     const value = createElement('input', {
@@ -77,7 +78,7 @@ function fieldRow(field = {}, structureLocked = false) {
         value.classList.toggle('local-data-masked', event.target.checked);
         visibility.hidden = !event.target.checked;
         visibility.classList.toggle('hidden', !event.target.checked);
-        visibility.setAttribute('aria-label', 'Mostra valore');
+        visibility.setAttribute('aria-label', t('aria_show_value'));
         visibilityIcon.textContent = 'visibility';
     });
     const remove = createElement('button', {
@@ -113,7 +114,7 @@ async function openEditor(widget, context, refresh) {
     if (!context.active()) return false;
     let fields;
     try { fields = await editableFields(widget); } catch {
-        if (context.active()) showToast('Impossibile aprire i campi del Widget.', 'warning');
+        if (context.active()) showToast(t('dyn_widget_open_failed'), 'warning');
         return false;
     }
     if (!context.active()) { fields.forEach(field => { field.value = ''; }); return false; }
@@ -152,25 +153,25 @@ async function openEditor(widget, context, refresh) {
         type: 'button', className: 'btn-modal btn-secondary', textContent: 'Aggiungi campo',
         onclick: () => fieldList.appendChild(fieldRow()), hidden: Boolean(widget?.profileId)
     });
-    const save = createElement('button', {type: 'submit', className: 'btn-modal btn-primary', textContent: 'Salva'});
+    const save = createElement('button', {type: 'submit', className: 'btn-modal btn-primary', textContent: t('save')});
     const form = createElement('form', {className: 'account-widget-editor', autocomplete: 'off', 'data-form-type': 'other'});
     form.addEventListener('submit', async event => {
         event.preventDefault();
         if (save.disabled || closed || !context.active()) return;
         if (placement.value && context.isBankSaved && !context.isBankSaved(placement.value)) {
-            showToast('Salva prima l’Account per registrare il conto bancario, poi riapri Modifica e aggiungi il Widget. I campi inseriti qui restano disponibili.', 'warning');
+            showToast(t('dyn_widget_bank_save_first'), 'warning');
             return;
         }
         const rows = [...fieldList.children];
         if (!title.value.trim() || !rows.length || rows.some(row => !row.getValue().label.trim())) {
-            showToast('Inserisci titolo e nome di ogni campo.', 'warning');
+            showToast(t('dyn_widget_fields_required'), 'warning');
             return;
         }
         save.disabled = true;
         try {
             const category = placement.value ? 'bank' : 'account';
             if (widget?.profileCategory && widget.profileCategory !== category) {
-                showToast('Un Widget Account non può diventare bancario e viceversa. Crea un nuovo profilo Widget.', 'warning');
+                showToast(t('dyn_widget_type_immutable'), 'warning');
                 return;
             }
             const draftFields = rows.map((row, order) => ({...row.getValue(), order}));
@@ -218,7 +219,7 @@ async function openEditor(widget, context, refresh) {
             : 'Crea liberamente un nuovo profilo: aggiungi soltanto i campi che ti servono. Il profilo sarà riutilizzabile.'}),
         placement, title, fieldList, addField,
         createElement('div', {className: 'modal-actions account-widget-editor-actions'}, [
-            createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: close}),
+            createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: t('cancel'), onclick: close}),
             save
         ])
     ]);
@@ -238,7 +239,7 @@ async function reveal(button, field, context) {
         value.textContent = '••••••••';
         button.dataset.revealed = 'false';
         if (icon) icon.textContent = 'visibility';
-        button.setAttribute('aria-label', `Mostra ${field.label}`);
+        button.setAttribute('aria-label', t('aria_show_field').replace('{label}', field.label));
         return;
     }
     try {
@@ -249,9 +250,9 @@ async function reveal(button, field, context) {
         value.textContent = decoded || '—';
         button.dataset.revealed = 'true';
         if (icon) icon.textContent = 'visibility_off';
-        button.setAttribute('aria-label', `Nascondi ${field.label}`);
+        button.setAttribute('aria-label', t('aria_hide_field').replace('{label}', field.label));
     } catch {
-        if (context.active()) showToast('Sblocca la Vault per visualizzare il dato.', 'warning');
+        if (context.active()) showToast(t('dyn_vault_unlock_view'), 'warning');
     }
 }
 
@@ -265,16 +266,16 @@ async function copyField(field, context) {
             value = await decrypt(field.valueEnc, key) || '';
         }
         if (!context.active()) return;
-        if (!value) return showToast('Il campo è vuoto.', 'warning');
+        if (!value) return showToast(t('dyn_field_empty'), 'warning');
         await navigator.clipboard.writeText(String(value));
-        if (context.active()) showToast('Copiato!', 'success');
+        if (context.active()) showToast(t('copied'), 'success');
     } catch {
-        if (context.active()) showToast('Sblocca la Vault per copiare il dato.', 'warning');
+        if (context.active()) showToast(t('dyn_vault_unlock_copy'), 'warning');
     }
 }
 
 async function prepareAccountDeadline(field, value, widget, context) {
-    if (!value) return showToast('Inserisci prima la data.', 'warning');
+    if (!value) return showToast(t('dyn_date_required'), 'warning');
     const attachments = context.context === 'company'
         ? await listCompanyAccountAttachments(context.uid, context.companyId, context.accountId)
         : await listPrivateAccountAttachments(context.uid, context.accountId);
@@ -330,7 +331,7 @@ function widgetCard(widget, context, refresh, catalogState = {}) {
                         if (!context.active()) return;
                         const revealed = !input.classList.contains('local-data-masked');
                         input.classList.toggle('local-data-masked', revealed);
-                        event.currentTarget.setAttribute('aria-label', `${revealed ? 'Mostra' : 'Nascondi'} ${field.label}`);
+                        event.currentTarget.setAttribute('aria-label', t(revealed ? 'aria_show_field' : 'aria_hide_field').replace('{label}', field.label));
                         const icon = event.currentTarget.querySelector('.material-symbols-outlined');
                         if (icon) icon.textContent = revealed ? 'visibility' : 'visibility_off';
                     }
@@ -381,7 +382,7 @@ function widgetCard(widget, context, refresh, catalogState = {}) {
             collapsed = !collapsed;
             applyCollapsedState();
             event.currentTarget.setAttribute('aria-expanded', String(!collapsed));
-            event.currentTarget.setAttribute('aria-label', `${collapsed ? 'Apri' : 'Chiudi'} ${widget.title}`);
+            event.currentTarget.setAttribute('aria-label', t(collapsed ? 'aria_open_field' : 'aria_close_field').replace('{label}', widget.title));
             if (context.editable) markDirty();
         }
     }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'expand_more'})]);
@@ -415,7 +416,7 @@ function widgetCard(widget, context, refresh, catalogState = {}) {
                     ], {placeholder: widget.title});
                 if (!context.active() || confirmation === null) return;
                 if (confirmation.input.trim() !== widget.title.trim()) {
-                    showToast('Il nome inserito non corrisponde. Widget non eliminato.', 'warning');
+                    showToast(t('dyn_widget_delete_name_mismatch'), 'warning');
                     return;
                 }
                 let widgetRemoved = false;
@@ -553,7 +554,7 @@ export async function initAccountEmbeddedWidgets(context) {
                     type: 'button', className: 'btn-modal btn-secondary',
                     textContent: duplicate ? 'Widget già inserito' : bankCatalog ? 'Aggiungi al conto' : 'Aggiungi all’Account',
                     onclick: async () => {
-                        if (duplicate) return showToast('Widget già inserito. Crea un nuovo profilo widget.', 'warning');
+                        if (duplicate) return showToast(t('dyn_widget_duplicate'), 'warning');
                         const fields = profile.fields.map((field, order) => ({
                             id: newId('field'), label: field.label, type: field.type,
                             encrypted: field.encrypted === true, value: '', order
@@ -589,7 +590,7 @@ export async function initAccountEmbeddedWidgets(context) {
                 : 'Scegli un profilo riutilizzabile. I valori saranno salvati soltanto in questo Account.'}),
             body,
             createElement('div', {className: 'modal-actions account-widget-editor-actions'}, [
-                createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Chiudi', onclick: close}),
+                createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: t('close'), onclick: close}),
                 createNew
             ])
         ]));
@@ -598,11 +599,11 @@ export async function initAccountEmbeddedWidgets(context) {
     const openNewWidget = async (bankId = null) => {
         if (!context.editable || !context.active()) return false;
         if (typeof bankId === 'string' && context.isBankSaved && !context.isBankSaved(bankId)) {
-            showToast('Salva prima l’Account per registrare questo conto bancario, poi riapri Modifica e aggiungi il Widget.', 'warning');
+            showToast(t('dyn_widget_bank_register_first'), 'warning');
             return false;
         }
         if (!navigator.onLine) {
-            showToast('La creazione dei Widget richiede internet.', 'warning');
+            showToast(t('dyn_widget_create_online'), 'warning');
             return false;
         }
         try {
@@ -613,7 +614,7 @@ export async function initAccountEmbeddedWidgets(context) {
             openProfileCatalog('account');
             return true;
         } catch {
-            if (context.active()) showToast('Impossibile caricare i Widget disponibili. Riprova.', 'error');
+            if (context.active()) showToast(t('dyn_widget_load_failed'), 'error');
             return false;
         }
     };
@@ -644,7 +645,7 @@ export async function initAccountEmbeddedWidgets(context) {
         const choice = templateChoices.get(templateSelect.value);
         if (!choice) return false;
         if (!navigator.onLine) {
-            showToast('L’aggiunta di un Widget richiede internet.', 'warning');
+            showToast(t('dyn_widget_add_online'), 'warning');
             return false;
         }
         attachTemplate.disabled = true;

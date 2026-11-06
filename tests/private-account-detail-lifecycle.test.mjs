@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
+import {testTranslate} from './helpers/test-translator.mjs';
 
 const root = new URL('../Frontend/public/assets/js/modules/privato/', import.meta.url);
 const strip = value => value.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
@@ -45,7 +46,7 @@ function detailFixture() {
         createElement: (tag, props = {}, children = []) => node({tag, ...props, children}),
         clearElement: element => { element.children = []; element.textContent = ''; },
         setChildren: (element, children) => { element.children = Array.isArray(children) ? children : [children]; },
-        createSafeAccountIcon: () => node(), t: () => '', showToast: (...args) => calls.push(['toast', ...args]),
+        createSafeAccountIcon: () => node(), t: testTranslate, showToast: (...args) => calls.push(['toast', ...args]),
         LOG() {}, logError: (...args) => calls.push(['error', ...args]), console: {warn() {}},
         navigator: {onLine: true, clipboard: {writeText: async value => copies.push(value)}},
         openExternalUrl: value => { navigations.push(value); return true; }, db: {},
@@ -147,7 +148,7 @@ function attachmentFixture() {
         closeAttachmentSourcePicker() {},
         selectAttachmentSource: async () => null,
         consumeAttachmentInitialMode: input => input?.dataset?.attachmentInitialMode === 'card' ? 'card' : 'free',
-        showConfirmModal: async () => true, showToast() {}, showAlertModal: async () => {}, logError() {}, t: () => '',
+        showConfirmModal: async () => true, showToast() {}, showAlertModal: async () => {}, logError() {}, t: testTranslate,
         storage: {}, db: {}, ref: (_storage, path) => path, doc: (_db, ...path) => path.join('/'), collection: (_db, ...path) => path.join('/'),
         deleteObject: async path => operations.push(['storage-delete', path]), deleteDoc: async path => operations.push(['document-delete', path]),
         uploadBytes: async path => { operations.push(['upload', path]); return {ref: path}; },

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readdir, readFile} from 'node:fs/promises';
+import {testTranslate} from './helpers/test-translator.mjs';
 
 // M7-T24 — Copie di consultazione (report, Excel, altre copie) e purge.
 //
@@ -143,7 +144,8 @@ test('T-24: il report salute credenziali resta in memoria, senza segreti e azzer
         created.push(element);
         return element;
     };
-    const context = vm.createContext({createElement, document: {activeElement: null, body: node('body')},
+    const context = vm.createContext({createElement, t: testTranslate, tf: testTranslate,
+        document: {activeElement: null, body: node('body')},
         setTimeout: () => 1, clearTimeout() {}, console});
     vm.runInContext(`${source}\nglobalThis.showCredentialHealthResults = showCredentialHealthResults;`, context);
     const secret = 'SYNTHETIC-PASSWORD-NOT-RENDERED';

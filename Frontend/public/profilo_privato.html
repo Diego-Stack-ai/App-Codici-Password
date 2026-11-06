@@ -13,21 +13,21 @@
     <title data-t="page_title_profile">Profilo Utente - PROTOCOLLO BASE V5.0</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.258" />
+    <link rel="manifest" href="manifest.json?v=1.2.259" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
 
     <!-- CSS Modular System V5.0 -->
     <!-- 1. Modulo specifico Base -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.259">
     <!-- 2. Estensioni Core -->
-    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.258">
-    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.258">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.259">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.259">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.259">
     <!-- 3. Stile di Pagina -->
-    <link rel="stylesheet" href="assets/css/profilo_privato.css?v=1.2.258&touch=20261017b">
-    <link rel="stylesheet" href="assets/css/profile-contacts.css?v=1.2.258">
-    <link rel="stylesheet" href="assets/css/profile-layout.css?v=1.2.258">
-    <link rel="stylesheet" href="assets/css/profile-document-attachments.css?v=1.2.258">
+    <link rel="stylesheet" href="assets/css/profilo_privato.css?v=1.2.259&touch=20261017b">
+    <link rel="stylesheet" href="assets/css/profile-contacts.css?v=1.2.259">
+    <link rel="stylesheet" href="assets/css/profile-layout.css?v=1.2.259">
+    <link rel="stylesheet" href="assets/css/profile-document-attachments.css?v=1.2.259">
 </head>
 
 <body data-private-auth hidden inert class="base-bg" data-ui-model="detail">
@@ -54,7 +54,7 @@
                         <div class="avatar-group">
                             <div id="avatar-trigger" class="profile-avatar-xl cursor-pointer"
                                 data-action="trigger-click" data-target="avatar-input">
-                                <img id="profile-avatar" class="profile-avatar-pending" alt="Profile">
+                                <img id="profile-avatar" class="profile-avatar-pending" alt="Profile" data-t-alt="profile_image_alt">
                                 <div class="profile-avatar-overlay">
                                     <span class="material-symbols-outlined notranslate" translate="no">photo_camera</span>
                                 </div>
@@ -74,7 +74,7 @@
                     </div>
                 </div>
 
-                <nav id="profile-tabs" class="profile-tabs" role="tablist" aria-label="Sezioni profilo">
+                <nav id="profile-tabs" class="profile-tabs" role="tablist" aria-label="Sezioni profilo" data-t-aria-label="profile_sections_aria">
                     <button class="profile-tab is-active" role="tab" aria-selected="true" data-profile-tab-target="overview" data-t="profile_tab_overview">Panoramica</button>
                     <button class="profile-tab" role="tab" aria-selected="false" data-profile-tab-target="personal" data-t="profile_tab_personal">Anagrafica</button>
                     <button class="profile-tab" role="tab" aria-selected="false" data-profile-tab-target="contacts" data-t="profile_tab_contacts">Contatti</button>
@@ -127,7 +127,7 @@
                                 </div>
                                 <div class="field-value-row">
                                     <button type="button" class="profile-document-value-button" data-action="manage-fiscal-document"
-                                        aria-label="Gestisci il codice fiscale nei Documenti">
+                                        aria-label="Gestisci il codice fiscale nei Documenti" data-t-aria-label="profile_manage_tax_code_aria">
                                         <span id="cf-view" class="data-value">-</span>
                                         <span class="material-symbols-outlined notranslate" aria-hidden="true" translate="no">edit_document</span>
                                     </button>
@@ -135,7 +135,7 @@
                                         <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                     </button>
                                 </div>
-                                <span class="profile-document-value-hint">Gestisci nei Documenti</span>
+                                <span class="profile-document-value-hint" data-t="profile_manage_documents">Gestisci nei Documenti</span>
                             </div>
 
                             <div id="field-nascita" class="data-display-group">

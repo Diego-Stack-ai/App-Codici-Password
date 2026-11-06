@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.258';
+import { auth, db } from '../../firebase-config.js?v=1.2.259';
 import { collection, deleteDoc, doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
@@ -6,6 +6,7 @@ import { encrypt, decrypt, ensureVaultKeyMaterial } from '../core/security-manag
 import { PROFILE_TABS, PROFILE_WIDGET_FIELD_LIMIT, PROFILE_WIDGET_TABS, validateProfileWidget } from './profile-model.js';
 import { showProfileModal } from './profilo-modal.js';
 import {listProfileWidgets} from '../data/vault-repository.js';
+import { t } from '../../translations.js';
 
 let widgets = [];
 let onChanged = null;
@@ -259,9 +260,9 @@ function renderWidgets() {
                         createElement('button', { textContent: '↑', title: 'Sposta widget su', onclick: () => moveWidget(widget, -1) }),
                         createElement('button', { textContent: '↓', title: 'Sposta widget giù', onclick: () => moveWidget(widget, 1) }),
                         createElement('button', { textContent: widget.collapsed ? 'Apri' : 'Comprimi', onclick: () => toggleCollapsed(widget) }),
-                        createElement('button', { textContent: 'Modifica', onclick: () => editWidget(widget) }),
+                        createElement('button', { textContent: t('edit'), onclick: () => editWidget(widget) }),
                         createElement('button', { textContent: 'Duplica', onclick: () => duplicateWidget(widget) }),
-                        createElement('button', { textContent: 'Elimina', onclick: () => removeWidget(widget) })
+                        createElement('button', { textContent: t('delete'), onclick: () => removeWidget(widget) })
                     ])
                 ]),
                 widget.collapsed ? null : createElement('div', { className: 'profile-widget-body' }, [
@@ -269,7 +270,7 @@ function renderWidgets() {
                         const card = fieldCard(field);
                         setChildren(card.querySelector('.profile-widget-field-actions'), [
                             field.copyable && !field.encrypted ? createElement('button', {
-                                textContent: 'Copia',
+                                textContent: t('common_copy'),
                                 onclick: async () => {
                                     await navigator.clipboard.writeText(field.value || '');
                                     showToast('Valore copiato.', 'success');
@@ -277,8 +278,8 @@ function renderWidgets() {
                             }) : null,
                             createElement('button', { textContent: '↑', title: 'Sposta su', onclick: () => moveField(widget, field, -1) }),
                             createElement('button', { textContent: '↓', title: 'Sposta giù', onclick: () => moveField(widget, field, 1) }),
-                            createElement('button', { textContent: 'Modifica', onclick: () => editField(widget, field) }),
-                            createElement('button', { textContent: 'Elimina', onclick: () => removeField(widget, field) })
+                            createElement('button', { textContent: t('edit'), onclick: () => editField(widget, field) }),
+                            createElement('button', { textContent: t('delete'), onclick: () => removeField(widget, field) })
                         ].filter(Boolean));
                         return card;
                     }),

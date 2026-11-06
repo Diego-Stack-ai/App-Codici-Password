@@ -1,4 +1,5 @@
 import { SwipeList } from '../../swipe-list-v6.js';
+import { t } from '../../translations.js';
 import {
     classifySpeechRecognitionError,
     createSpeechTranscriptState,
@@ -42,15 +43,15 @@ export function createAssistantUI({
     document.body.style.top = `-${pageScrollY}px`;
     const backdrop = element('div', 'vault-assistant-backdrop');
     const panel = element('section', 'vault-assistant-panel');
-    panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true'); panel.setAttribute('aria-label', 'Ricerca');
+    panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true'); panel.setAttribute('aria-label', t('aria_search'));
     const header = element('header', 'vault-assistant-header');
     const heading = element('div');
     heading.append(element('h2', '', 'Ricerca'), element('p', '', 'Ricerca locale con testo o dettatura vocale'));
     const headerActions = element('div', 'vault-assistant-header-actions');
     const help = element('button', 'vault-assistant-help', '?');
-    help.type = 'button'; help.setAttribute('aria-label', 'Istruzioni Ricerca'); help.setAttribute('aria-expanded', 'false');
+    help.type = 'button'; help.setAttribute('aria-label', t('aria_search_instructions')); help.setAttribute('aria-expanded', 'false');
     const close = element('button', 'vault-assistant-close', '×');
-    close.type = 'button'; close.setAttribute('aria-label', 'Chiudi'); close.addEventListener('click', onClose);
+    close.type = 'button'; close.setAttribute('aria-label', t('close')); close.addEventListener('click', onClose);
     headerActions.append(help, close); header.append(heading, headerActions);
 
     const instructions = element('section', 'vault-assistant-instructions');
@@ -68,11 +69,11 @@ export function createAssistantUI({
     const searchRow = element('form', 'vault-assistant-search-row');
     const input = element('input', 'vault-assistant-input');
     input.type = 'text'; input.autocomplete = 'off'; input.spellcheck = false; input.placeholder = 'Chiedimi cosa stai cercando…';
-    input.setAttribute('aria-label', 'Cerca nell’app');
+    input.setAttribute('aria-label', t('aria_search_app'));
     const send = element('button', 'vault-assistant-send');
-    send.type = 'submit'; send.setAttribute('aria-label', 'Invia richiesta'); send.append(element('span', 'material-symbols-outlined', 'arrow_upward'));
+    send.type = 'submit'; send.setAttribute('aria-label', t('aria_send_request')); send.append(element('span', 'material-symbols-outlined', 'arrow_upward'));
     const microphone = element('button', 'vault-assistant-microphone');
-    microphone.type = 'button'; microphone.setAttribute('aria-label', 'Detta la ricerca'); microphone.append(element('span', 'material-symbols-outlined', 'mic'));
+    microphone.type = 'button'; microphone.setAttribute('aria-label', t('aria_dictate_search')); microphone.append(element('span', 'material-symbols-outlined', 'mic'));
     searchRow.append(input, send, microphone);
     const status = element('p', 'vault-assistant-status', 'I dati segreti non vengono mostrati nella conversazione.');
     const swipeLists = new Set();

@@ -132,7 +132,7 @@ try {
         acceptDownloads: false
     });
     const page = browser.pages()[0] || await browser.newPage();
-    let currentRoute = 'login-v115';
+    let currentRoute = 'login';
     let currentLanguage = 'it';
     page.on('console', message => {
         if (message.type() !== 'error') return;
@@ -144,7 +144,7 @@ try {
         report.networkErrors.push({ page: currentRoute, language: currentLanguage, status: response.status(), resource: safeResource(response.url()) });
     });
 
-    await page.goto(`${origin}/login-v115.html`, { waitUntil: 'networkidle', timeout: 45_000 });
+    await page.goto(`${origin}/login.html`, { waitUntil: 'networkidle', timeout: 45_000 });
     await page.waitForFunction(() => document.documentElement.getAttribute('data-i18n') === 'ready', null, { timeout: 20_000 });
     const languageDialog = page.locator('#initial-language-dialog');
     if (await languageDialog.isVisible().catch(() => false)) {
@@ -161,14 +161,14 @@ try {
     await masterInput.waitFor({ state: 'visible', timeout: 30_000 });
     await masterInput.fill(credentials.masterPassword);
     await page.locator('#modal-confirm-btn').click();
-    await page.waitForFunction(() => Boolean(sessionStorage.getItem('vault_session_v1')), null, { timeout: 45_000 });
+    await page.waitForFunction(async () => (await import('/assets/js/modules/core/security-manager.js')).isVaultUnlocked(), null, { timeout: 45_000 });
 
     const unlockVaultIfRequested = async () => {
         const input = page.locator('#protocol-input-modal-input');
         if (!await input.isVisible().catch(() => false)) return false;
         await input.fill(credentials.masterPassword);
         await page.locator('#modal-confirm-btn').click();
-        await page.waitForFunction(() => Boolean(sessionStorage.getItem('vault_session_v1')), null, { timeout: 45_000 });
+        await page.waitForFunction(async () => (await import('/assets/js/modules/core/security-manager.js')).isVaultUnlocked(), null, { timeout: 45_000 });
         return true;
     };
 

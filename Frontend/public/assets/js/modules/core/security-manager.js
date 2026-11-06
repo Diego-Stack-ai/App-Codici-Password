@@ -1,12 +1,12 @@
 /**
  * SECURITY MANAGER (V9.0 - Vault Verifier & PRF)
- * - Il materiale della Vault Key è tenuto in RAM e cifrato per la durata della scheda attiva.
+ * - Il materiale della Vault Key resta in RAM nel solo documento corrente.
  * - Sblocco biometrico usa WebAuthn PRF.
  */
 
 import { encrypt, decrypt, isEncryptedValue, generateVaultKey, createVaultKeyring, wrapVaultKey, unwrapVaultKey, createVaultVerifier, verifyVaultVerifier } from './crypto-utils.js';
 import { showInputModal, showToast, showConfirmModal } from '../../ui-core-v129.js';
-import { db, auth } from '../../firebase-config.js?v=1.2.258';
+import { db, auth } from '../../firebase-config.js?v=1.2.259';
 import { doc, setDoc, updateDoc, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';
@@ -298,6 +298,7 @@ export function isBiometricUnlockConfigured() {
 
 export async function ensureVaultKeyMaterial(options = {}) {
     const forceReload = typeof options === 'boolean' ? options : !!options.forceReload;
+    if (_vaultKeyMaterial && !isVaultUnlocked()) softLock();
     if (_vaultKeyMaterial && !forceReload) return _vaultKeyMaterial;
     if (_unlockPromise && !forceReload) return _unlockPromise;
 
@@ -596,6 +597,8 @@ export async function changeMasterPassword() {
 }
 
 window.addEventListener('private-auth-blocked', () => clearSession());
+window.addEventListener('pagehide', () => clearSession());
+globalThis.document?.addEventListener('freeze', () => clearSession());
 
 export function clearSession() {
     invalidatePendingUnlock();

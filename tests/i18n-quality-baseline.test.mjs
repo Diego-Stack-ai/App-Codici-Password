@@ -13,7 +13,7 @@ test('l’inventario copre markup, attributi, chiamate t e sink UI dinamici', ()
   const inventory = buildI18nInventory();
   assert.ok(inventory.usedKeys.count > 0);
   assert.ok(Object.keys(inventory.html.pages).length >= 30);
-  assert.ok(inventory.html.literals.some(item => item.kind === 'aria-label'));
+  assert.ok(inventory.html.literals.every(item => item.kind !== 'aria-label'));
   assert.ok(inventory.javascript.literalSinks.some(item => item.kind === 'toast'));
   assert.deepEqual(inventory.declaredLanguages, ['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt']);
 });
@@ -35,6 +35,26 @@ test('il catalogo inglese è completo e non può ricadere su testi italiani', ()
     const inventory = buildI18nInventory();
   assert.ok(inventory.completeLanguages.includes('en'));
   assert.deepEqual(inventory.missingKeysByLanguage.en, []);
+});
+
+test('i pannelli Supporto delle Impostazioni non mescolano diagnostica, notifiche o lingue', async () => {
+  const languages = ['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt'];
+  const catalogSource = await readFile(new URL('../Frontend/public/assets/js/translations/settings.js', import.meta.url), 'utf8');
+  const { settingsCatalogs } = await import(`data:text/javascript;base64,${Buffer.from(catalogSource).toString('base64')}`);
+  const expectedKeys = ['settings_app_version_label', 'settings_privacy_summary', 'settings_terms_summary'];
+  for (const language of languages) {
+    for (const key of expectedKeys) {
+      assert.ok(settingsCatalogs[language][key]?.trim(), `${language}.${key} mancante`);
+    }
+  }
+
+  const settingsSource = await readFile(new URL('../Frontend/public/assets/js/modules/settings/impostazioni.js', import.meta.url), 'utf8');
+  for (const key of expectedKeys) assert.match(settingsSource, new RegExp(`t\\('${key}'\\)`));
+  assert.match(settingsSource, /Codex Security System/);
+  assert.match(settingsSource, /APP_VERSION/);
+  assert.doesNotMatch(settingsSource, /RESET NOTIFICHE COMPLETATO/);
+  assert.doesNotMatch(settingsSource, /Notifiche Push e Email sospese/);
+  assert.doesNotMatch(settingsSource, /Termini e Condizioni invariati/);
 });
 
 test('le etichette condivise dal Profilo non restano confinate al catalogo Impostazioni', async () => {
@@ -102,7 +122,7 @@ test('le pagine di accesso e il contatto condiviso hanno un catalogo completo in
     assert.ok(accessCatalogs[language].auth_wait_seconds.includes('{seconds}'));
   }
   const loader = await readFile(new URL('../Frontend/public/assets/js/translations.js', import.meta.url), 'utf8');
-  assert.match(loader, /login-v115\|registrati\|reset_password\|imposta_nuova_password\|contatto_condiviso/);
+  assert.match(loader, /login\|registrati\|reset_password\|imposta_nuova_password\|contatto_condiviso/);
   assert.match(loader, /translations\/access\.js/);
 });
 

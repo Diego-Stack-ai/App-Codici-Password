@@ -32,7 +32,7 @@ function domainDictionaryKeys(source, language) {
   if (start < 0) return [];
   const end = source.indexOf('\n};', start);
   const keys = [...source.slice(start, end).matchAll(/(?:^|,)\s*([A-Za-z][A-Za-z0-9_.-]*)\s*:/gm)].map(match => match[1]);
-  for (const catalogName of ['portable', 'portableLarge']) {
+  for (const catalogName of ['portable', 'portableLarge', 'supportDetails']) {
     const catalogStart = source.indexOf(`const ${catalogName} = {`);
     const catalogEnd = source.indexOf('\n};', catalogStart);
     const portableStart = source.indexOf(`  ${language}: {`, catalogStart);
@@ -64,7 +64,7 @@ function readDictionaries() {
   const dictionaries = {
     it: fs.existsSync(italianFile) ? dictionaryKeys(fs.readFileSync(italianFile, 'utf8')) : []
   };
-  const domainSources = ['access.js', 'settings.js', 'deadline-rules.js', 'profile.js', 'recipients.js']
+  const domainSources = ['access.js', 'settings.js', 'deadline-rules.js', 'profile.js', 'recipients.js', 'dynamic-ui.js']
     .map(file => fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'translations', file), 'utf8'));
   for (const language of declaredLanguages.filter(language => language !== 'it')) {
     const file = path.join(publicRoot, 'assets', 'js', 'translations', `${language}.js`);
@@ -146,6 +146,7 @@ function collectHtmlLiterals() {
 
 function collectJsLiteralSinks() {
   const findings = [];
+  const materialSymbolLiterals = new Set(baseline.materialSymbolLiterals || []);
   const patterns = [
     ['textContent', /\btextContent\s*(?::|=)\s*(["'`])([^\n]*?)\1/g],
     ['toast', /\bshowToast\s*\(\s*(["'`])([^\n]*?)\1/g],
@@ -158,6 +159,7 @@ function collectJsLiteralSinks() {
       for (const match of source.matchAll(pattern)) {
         const value = match[2].replace(/\\[nrt]/g, ' ').replace(/\s+/g, ' ').trim();
         if (isAllowlistedLiteral(value) || /\bt\(\s*["']/.test(value)) continue;
+        if (kind === 'textContent' && materialSymbolLiterals.has(value)) continue;
         findings.push({ file: relative(file), line: lineOf(source, match.index), kind, value });
       }
     }
@@ -190,7 +192,10 @@ export function buildI18nInventory() {
     schemaVersion: 1,
     declaredLanguages,
     completeLanguages: baseline.completeLanguages,
-    dictionaries: Object.fromEntries(Object.entries(dictionaries).map(([language, keys]) => [language, { keys: keys.length }])),
+    dictionaries: Object.fromEntries(Object.entries(dictionaries).map(([language, keys]) => [language, {
+      keys: keys.length,
+      keyList: [...new Set(keys)].sort()
+    }])),
     usedKeys: { count: usedKeys.length, keys: usedKeys, locations: Object.fromEntries(usage) },
     duplicateKeys,
     missingKeysByLanguage,

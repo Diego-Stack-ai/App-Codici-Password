@@ -3,7 +3,7 @@
     "short_name": "Codex",
     "id": "/",
     "description": "Cassaforte sicura per le tue credenziali e scadenze.",
-    "start_url": "login-v115.html",
+    "start_url": "login.html",
     "scope": "./",
     "display": "standalone",
     "background_color": "#0a0f1e",

@@ -120,7 +120,7 @@ assert.doesNotMatch(uiSource, /const vaultAnswer = onAsk\(value\)/);
 assert.match(uiSource, /Promise\.resolve\(onAsk\(value\)\)/);
 assert.doesNotMatch(uiSource, /onExplain|aiConversation|Codex AI\.2/);
 assert.doesNotMatch(uiSource, /Ciao\. Dimmi cosa stai cercando/);
-assert.match(uiSource, /aria-label', 'Ricerca'/);
+assert.match(uiSource, /aria-label', t\('aria_search'\)/);
 assert.match(uiSource, /'Come usare Ricerca'/);
 assert.match(uiSource, /l’audio non viene registrato né conservato/);
 assert.match(uiSource, /normalized\.items \|\| \[\], Number\(normalized\.offset\) \|\| 0/);

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
 const defaultRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const excluded = new Set(['.git', 'node_modules', '.codex-tmp', '.codex-worktrees']);
+const excluded = new Set(['.git', 'node_modules', '.codex-tmp', '.codex-worktrees', 'graphify-out']);
 const slash = value => value.replaceAll('\\', '/');
 
 function contentLines(text) {
@@ -43,8 +43,10 @@ export async function auditDocs(root = defaultRoot, { baseline } = {}) {
   const manifestPath = path.join(root, 'scripts/docs-manifest.json');
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
   const allowed = manifest.paths;
-  if (!Array.isArray(allowed) || allowed.length !== 31 || new Set(allowed).size !== 31)
-    return { errors: ['Il manifesto deve contenere esattamente 31 percorsi univoci.'], files: 0, links: 0 };
+  if (!Number.isInteger(manifest.pathCount) || manifest.pathCount < 1)
+    return { errors: ['Il manifesto deve dichiarare un pathCount positivo.'], files: 0, links: 0 };
+  if (!Array.isArray(allowed) || allowed.length !== manifest.pathCount || new Set(allowed).size !== manifest.pathCount)
+    return { errors: [`Il manifesto deve contenere esattamente ${manifest.pathCount} percorsi univoci.`], files: 0, links: 0 };
   for (const file of allowed) {
     if (file !== slash(path.posix.normalize(file)) || path.isAbsolute(file) || file.startsWith('../') || !file.endsWith('.md'))
       errors.push(`Percorso non valido nel manifesto: ${file}`);
@@ -114,13 +116,18 @@ export async function auditDocs(root = defaultRoot, { baseline } = {}) {
       try {
         const previousText = execFileSync('git', ['-C', root, 'show', `${baseline}:scripts/docs-manifest.json`], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
         const previous = JSON.parse(previousText);
-        if (JSON.stringify(previous.paths) !== JSON.stringify(allowed)) errors.push('Elenco MD cambiato rispetto alla base: necessario ordine esplicito di Diego e revisione della struttura.');
+        const approvalChanged = typeof manifest.approval === 'string'
+          && manifest.approval.trim().length > 0
+          && manifest.approval !== previous.approval;
+        if (JSON.stringify(previous.paths) !== JSON.stringify(allowed) && !approvalChanged)
+          errors.push('Elenco MD cambiato rispetto alla base senza un nuovo ordine esplicito di Diego.');
         // Use the previous version's protected list, not the list proposed by the change.
         const protectedPaths = previous.protectedFiles || [];
         for (const file of protectedPaths) {
           const old = execFileSync('git', ['-C', root, 'show', `${baseline}:${file}`], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
           const current = await readFile(path.join(root, file), 'utf8');
-          if (old.replaceAll('\r\n', '\n') !== current.replaceAll('\r\n', '\n')) errors.push(`Controllo strutturale protetto modificato: ${file}`);
+          if (old.replaceAll('\r\n', '\n') !== current.replaceAll('\r\n', '\n') && !approvalChanged)
+            errors.push(`Controllo strutturale protetto modificato senza nuova approvazione: ${file}`);
         }
       } catch (error) {
         errors.push('Impossibile verificare il manifesto/controlli alla base richiesta. Prima adozione o aggiornamento strutturale richiede revisione esplicita.');

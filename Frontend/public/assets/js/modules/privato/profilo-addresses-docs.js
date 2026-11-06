@@ -122,7 +122,7 @@ function _createAddressCard(addr, idx) {
                         checked: qrCodeInclusions.addresses.includes(addr.id) || qrCodeInclusions.addresses.includes(idx),
                         onclick: (e) => { e.stopPropagation(); _callbacks.toggleQRInclusion('addresses', addr.id); }
                     }),
-                    createElement('label', { className: 'qr-mini-label', textContent: 'QR' }),
+                    createElement('label', { className: 'qr-mini-label', textContent: t('company_qr_label') }),
                     createElement('span', { className: 'data-label', textContent: t('label_address') })
                 ]),
                 createElement('div', { className: 'field-value-row' }, [
@@ -323,5 +323,5 @@ export function renderDocumentiView() {
 
 function accountManagementButtons(contact,type,parentAddressId='') {
     if(!contact.linkedAccountId) return [];
-    return [createElement('button',{className:'btn-upload-trigger',textContent:'Cambia Account',onclick:()=>_callbacks.changeProfileAccount({contact,type,parentAddressId})}),createElement('button',{className:'btn-upload-trigger',textContent:'Scollega Account',onclick:()=>_callbacks.unlinkProfileAccount({contact,type,parentAddressId})})];
+    return [createElement('button',{className:'btn-upload-trigger',textContent:t('company_change_account'),onclick:()=>_callbacks.changeProfileAccount({contact,type,parentAddressId})}),createElement('button',{className:'btn-upload-trigger',textContent:t('company_unlink_account'),onclick:()=>_callbacks.unlinkProfileAccount({contact,type,parentAddressId})})];
 }

@@ -15,6 +15,7 @@ Frontend/public/assets/local-ai-packages/
 tools/native-ai2/bin/
 tools/native-ai2/obj/
 graphify-out/
+Frontend/public/release-manifest.json
 
 # Firebase config
 

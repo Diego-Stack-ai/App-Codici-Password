@@ -1,5 +1,13 @@
 # Assistente app
 
+## Topologia UI e storyboard verificabile — candidata locale 05/11/2026
+
+La mappa di sviluppo affianca al grafo del codice un overlay deterministico dell'interfaccia. Ogni nodo pagina può essere collegato a controlli, binding di evento, handler, destinazioni di navigazione, popup o superfici dinamiche, chiavi di traduzione, schede e passi della guida. I journey aggiungono l'ordine editoriale fra i passi; questo consente di ricavare uno storyboard per i futuri video senza inventare schermate o comandi non presenti nel prodotto.
+
+L'overlay non viene caricato dall'app e non sostituisce `documentation-catalog.json`. Il catalogo D0 resta la fonte runtime dei testi verificati; Graphify e `ui-topology.json` sono evidenze di sviluppo rigenerabili. I test devono fallire quando un controllo critico, il target di un passo o una relazione del journey non è più risolvibile. Stati che dipendono da autenticazione, dati, autorizzazioni, App Check o dispositivo fisico richiedono comunque scenari browser separati: la presenza statica di un popup non equivale alla sua apertura riuscita.
+
+L'audit `audit-ui-translations.mjs` attraversa le relazioni della topologia e verifica separatamente testo, placeholder, etichette ARIA, title, alt e chiavi usate dai flussi critici. Per evitare falsi positivi non basta che una chiave esista in un catalogo qualsiasi: la chiave deve avere un valore non vuoto e non tecnico nel catalogo base o nel catalogo dominio effettivamente caricato dalla route. Il report separa inoltre la guida D0, che può usare un fallback dichiarato, dai candidati letterali HTML/JavaScript che richiedono revisione editoriale o osservazione browser. Una chiave presente in otto dizionari non prova da sola che ogni stato dinamico sia visivamente tradotto.
+
 ## Stabilizzazione del lease e grounding AI.2 — candidata locale 02/11/2026
 
 La distruzione del dialogo chiama ancora il percorso di annullamento, ma il servizio inoltra `interruptGenerate` soltanto quando esiste una generazione realmente attiva. Dopo una risposta conclusa la chiusura non altera il Worker e il lease condiviso resta riutilizzabile per trenta minuti nella stessa pagina e per lo stesso pacchetto. Un annullamento effettivo o un timeout ricicla invece il runtime, come richiesto dal contratto WebLLM. Lo stato mostrato durante una domanda è **Elaborazione risposta locale** e non simula un nuovo avvio del motore.

@@ -1,3 +1,5 @@
+import {t} from '../../translations.js';
+
 const CARD_RATIO = 1012 / 638;
 const PREVIEW_SIZE = {width: 1012, height: 638};
 const CAMERA_IDEAL_SIZE = {width: 4096, height: 2160};
@@ -76,11 +78,11 @@ export async function captureCardPhoto() {
         const preview = document.createElement('canvas'); preview.className = 'card-camera-preview'; preview.width = PREVIEW_SIZE.width; preview.height = PREVIEW_SIZE.height;
         const help = document.createElement('p'); help.className = 'card-camera-help'; help.textContent = 'Centra la tessera nel rettangolo e mantieni il telefono fermo';
         const controls = document.createElement('div'); controls.className = 'card-camera-controls';
-        const cancel = document.createElement('button'); cancel.type = 'button'; cancel.textContent = 'Annulla';
-        const shoot = document.createElement('button'); shoot.type = 'button'; shoot.className = 'card-camera-shoot'; shoot.setAttribute('aria-label', 'Scatta foto della tessera');
+        const cancel = document.createElement('button'); cancel.type = 'button'; cancel.textContent = t('cancel');
+        const shoot = document.createElement('button'); shoot.type = 'button'; shoot.className = 'card-camera-shoot'; shoot.setAttribute('aria-label', t('aria_capture_card'));
         const retake = document.createElement('button'); retake.type = 'button'; retake.textContent = 'Ripeti foto'; retake.className = 'card-camera-preview-control';
         const use = document.createElement('button'); use.type = 'button'; use.textContent = 'Usa foto'; use.className = 'card-camera-preview-control card-camera-use';
-        const zoom = document.createElement('input'); zoom.type = 'range'; zoom.min = String(MIN_ZOOM); zoom.max = String(MAX_ZOOM); zoom.step = '.01'; zoom.value = '1'; zoom.className = 'card-camera-zoom'; zoom.setAttribute('aria-label', 'Zoom tessera');
+        const zoom = document.createElement('input'); zoom.type = 'range'; zoom.min = String(MIN_ZOOM); zoom.max = String(MAX_ZOOM); zoom.step = '.01'; zoom.value = '1'; zoom.className = 'card-camera-zoom'; zoom.setAttribute('aria-label', t('aria_zoom_card'));
         const source = document.createElement('canvas');
         let adjustment = {zoom: 1, x: 0, y: 0};
         let previewing = false;

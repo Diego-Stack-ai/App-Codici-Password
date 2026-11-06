@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const source = (await readFile(new URL('../Frontend/public/assets/js/app-diagnostics.js', import.meta.url), 'utf8'))
-    .replace("import { APP_VERSION } from './env-v126.js';", "const APP_VERSION = 'v-test';");
+    .replace("import { APP_VERSION } from './app-env.js';", "const APP_VERSION = 'v-test';");
 const { getEnginePolicyReport, runAppDiagnostics } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 
 function storageFixture() {
@@ -26,7 +26,7 @@ test('diagnostica esegue solo sonde locali e same-origin senza contenuti Vault',
     });
     assert.equal(report.overall, 'pass');
     assert.equal(requests.length, 1);
-    assert.match(requests[0].url, /^\/assets\/js\/env-v126\.js\?diagnostic=/);
+    assert.match(requests[0].url, /^\/assets\/js\/app-env\.js\?diagnostic=/);
     assert.equal(requests[0].options.credentials, 'same-origin');
     assert.equal(storage.values.size, 0);
     assert.doesNotMatch(JSON.stringify(report), /password|ciphertext|email/i);

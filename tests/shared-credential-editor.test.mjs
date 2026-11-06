@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
+import {testTranslate} from './helpers/test-translator.mjs';
 const source=(await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-shared-credentials.js',import.meta.url),'utf8')).replace(/^import[\s\S]*?;\r?\n/gm,'').replace(/export (async )?function/g, '$1function');
 function fixture(){
  const nodes=[], updates=[]; let decrypted=0, active=true, confirm=true, fail=false;
@@ -9,7 +10,7 @@ function fixture(){
  const body=createElement('body');
  const context={editable:true,active:()=>active,registerCleanup:()=>()=>{},requestDecision:async()=>typeof confirm === 'function' ? confirm() : confirm};
  const record={id:'common',revision:3,title:'Legalmail',fields:[{id:'secret',label:'PIN',type:'sensitive',encrypted:true,valueEnc:'cipher'},{id:'bool',label:'Flag',type:'boolean',value:false,encrypted:false}]};
- const sandbox={clearWidgetValues:root=>{ for(const node of nodes) if(node.tag==='input') node.value=''; },createElement,document:{body},ensureVaultKeyMaterial:async()=> 'key',decrypt:async()=>{decrypted++;return 'old'},showConfirmModal:async()=>typeof confirm === 'function' ? confirm() : confirm,showToast(){},updateSharedCredential:async(...args)=>{if(fail)throw Error('failure');updates.push(args)}};
+ const sandbox={clearWidgetValues:root=>{ for(const node of nodes) if(node.tag==='input') node.value=''; },createElement,document:{body},ensureVaultKeyMaterial:async()=> 'key',decrypt:async()=>{decrypted++;return 'old'},showConfirmModal:async()=>typeof confirm === 'function' ? confirm() : confirm,showToast(){},t:testTranslate,updateSharedCredential:async(...args)=>{if(fail)throw Error('failure');updates.push(args)}};
  vm.createContext(sandbox);vm.runInContext(source,sandbox);
  return {nodes,updates,record,context,open:()=>sandbox.editCredential(record,context,async()=>{}),get decrypted(){return decrypted},set active(v){active=v},set confirm(v){confirm=v},set fail(v){fail=v},button:t=>nodes.find(n=>n.textContent===t),inputs:()=>nodes.filter(n=>n.tag==='input')};
 }

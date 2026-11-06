@@ -12,12 +12,12 @@ const [settings, inactivity, security, webauthn, mfa, auth, login, settingsHtml,
     read('Frontend/public/assets/js/auth.js'),
     read('Frontend/public/assets/js/modules/auth/login.js'),
     read('Frontend/public/impostazioni.html'),
-    read('Frontend/public/login-v115.html'),
+    read('Frontend/public/login.html'),
     read('Frontend/public/assets/js/modules/auth/imposta_nuova_password.js')
     ,read('Frontend/public/sw.js')
     ,read('Frontend/public/assets/js/firebase-config.js')
     ,read('Frontend/public/assets/js/modules/core/vault-session.js')
-    ,read('Frontend/public/assets/js/env-v126.js')
+    ,read('Frontend/public/assets/js/app-env.js')
     ,read('Frontend/public/assets/js/components-v129.js')
     ,read('Frontend/public/home_page.html')
     ,read('package.json')
@@ -74,17 +74,16 @@ assert.doesNotMatch(homeHtml, /app-version-label">V8\.0/, 'La home contiene anco
 assert.doesNotMatch(components, /app-version-badge/, 'La versione è ancora visualizzata nell’header');
 assert.match(components, /dataset\.appVersion = APP_VERSION/, 'La versione non viene propagata al documento di ogni pagina');
 
-// Compatibilità funzionale legacy: questi controlli non certificano la separazione
-// fra chiave e ciphertext, ancora aperta in docs/evidenze/AUDIT.md.
-assert.match(security, /restoreVaultSession\(uid\)/, 'La chiave Vault non viene ripristinata tra le pagine');
-assert.match(security, /saveVaultSession\(_vaultKeyMaterial, uid\)/, 'Lo sblocco Vault non viene conservato nella sessione');
-assert.match(inactivity, /getVaultSessionExpiry\(\)/, 'Il timeout non verifica la scadenza condivisa tra pagine');
+// Il contratto resta compatibile nel documento, senza continuità da storage.
+assert.match(security, /restoreVaultSession\(uid\)/, 'Manca il recupero RAM nel documento');
+assert.match(security, /saveVaultSession\(_vaultKeyMaterial, uid\)/, 'Manca il segnale di sblocco nel documento');
+assert.match(inactivity, /getVaultSessionExpiry\(\)/, 'Il timeout non verifica la scadenza RAM');
 assert.match(inactivity, /if \(!expired\) startMonitoring\(\)/, 'La nuova pagina resetta il timer prima di verificarne la scadenza');
 assert.match(vaultSession, /AES-GCM/, 'Il segreto della sessione Vault non è cifrato');
 assert.doesNotMatch(vaultSession, /indexedDB/, 'La sessione Vault dipende ancora da CryptoKey in IndexedDB');
-assert.match(vaultSession, /crypto\.subtle\.importKey\('raw'/, 'La chiave di sessione compatibile non viene importata con Web Crypto');
-assert.doesNotMatch(vaultSession, /localStorage\.getItem\(WRAPPING_KEY\)|localStorage\.setItem\(WRAPPING_KEY/, 'La chiave di sessione non deve persistere dopo la chiusura della scheda');
-assert.match(vaultSession, /sessionStorage\.removeItem\(WRAPPING_KEY\)/, 'Blocco e logout non eliminano la chiave di sessione');
+assert.match(vaultSession, /crypto\.subtle\.generateKey\([\s\S]*?false/, 'La chiave effimera deve essere non esportabile');
+assert.doesNotMatch(vaultSession, /(?:sessionStorage|localStorage)\.(?:getItem|setItem)\(/, 'La sessione Vault non deve leggere o scrivere lo storage');
+assert.match(vaultSession, /sessionStorage\.removeItem\(name\)/, 'Manca la pulizia delle chiavi legacy');
 assert.match(security, /if \(_unlockPromise && !forceReload\) return _unlockPromise/, 'Le richieste concorrenti possono ancora aprire più sblocchi');
 assert.match(offlineAssets, /modules\/core\/vault-session\.js/, 'Il supporto sessione Vault non è disponibile offline');
 assert.match(serviceWorker, /url\.pathname\.endsWith\('\.js'\).*url\.pathname\.endsWith\('\.css'\)/s, 'Gli asset applicativi non usano una strategia network-first coerente');
@@ -117,10 +116,10 @@ assert.doesNotMatch(loginHtml, /caches\.keys|registration\?\.update/, 'Il login 
 assert.doesNotMatch(loginHtml, /serviceWorker|getRegistrations|unregister\(/, 'Il login esegue ancora operazioni PWA durante il caricamento');
 assert.match(main, /const serviceWorkerEnabled = true/, 'Il Service Worker ricostruito non è stato riattivato');
 assert.doesNotMatch(main, /controllerchange[\s\S]{0,300}window\.location\.reload/, 'Il Service Worker può ancora innescare un ciclo di ricaricamento');
-assert.match(offlineAssets, /login-v115\.html/, 'La shell offline non usa il nuovo percorso di login');
-assert.match(auth, /login-v115\.html/, 'I redirect Auth non usano il nuovo percorso di login');
+assert.match(offlineAssets, /login\.html/, 'La shell offline non usa il nuovo percorso di login');
+assert.match(auth, /login\.html/, 'I redirect Auth non usano il nuovo percorso di login');
 assert.match(auth, /emailVerificationRequired:\s*true/, 'Il login non blocca gli account con email non verificata');
-assert.match(main, /user\.reload\(\)[\s\S]*?emailVerified[\s\S]*?login-v115\.html\?verifyEmail=1/,
+assert.match(main, /user\.reload\(\)[\s\S]*?emailVerified[\s\S]*?login\.html\?verifyEmail=1/,
     'Le pagine private non verificano lo stato email prima di leggere la Vault');
 assert.match(loginHtml, /id="email-verification-panel"[\s\S]*?id="btn-email-verified"[\s\S]*?id="btn-resend-verification"/,
     'Il login non offre il controllo e il reinvio della verifica email');
@@ -137,7 +136,7 @@ assert.match(security, /if \(await isNewVault\(uid\)\)/, 'La policy Master Passw
 assert.match(registrationHtml, /id="account-password-requirements"/, 'La registrazione non mostra i requisiti password');
 assert.doesNotMatch(registrationHtml, /user_login_trap|password_trap/, 'La registrazione ostacola i suggerimenti password del dispositivo');
 assert.match(registrationHtml, /name="new-password"[^>]+autocomplete="new-password"/, 'Il password manager non riconosce la nuova password');
-assert.match(password, /auth\/requires-recent-login[\s\S]+signOut\(auth\)[\s\S]+login-v115\.html\?reauth=password-change/, 'Il cambio password non avvia una riautenticazione reale');
+assert.match(password, /auth\/requires-recent-login[\s\S]+signOut\(auth\)[\s\S]+login\.html\?reauth=password-change/, 'Il cambio password non avvia una riautenticazione reale');
 assert.match(auth, /reauthFlow\s*===\s*['"]password-change['"][\s\S]+imposta_nuova_password\.html\?reauthenticated=1/, 'Il login non ritorna al cambio password dopo la riautenticazione');
 assert.match(password, /isRequiredPolicyUpdate[\s\S]+cancelBtn\.textContent\s*=\s*(?:['"]Esci['"]|t\(['"]auth_exit['"]\))[\s\S]+signOut\(auth\)/, 'L\'annullamento dell\'aggiornamento obbligatorio crea ancora un ciclo con la home');
 assert.match(passwordPolicy, /crypto\.getRandomValues/, 'Il generatore password non usa casualità crittografica locale');
@@ -299,8 +298,8 @@ assert.doesNotMatch(profileActions, /cf:\s*await encrypt\(normalizedCf, vaultKey
     'Il codice fiscale viene ancora duplicato nel documento principale utente');
 assert.match(profileDashboard, /editFiscalDocument/,
     'La Panoramica non apre direttamente il documento Codice Fiscale');
-assert.equal(functionsPackage.dependencies?.['firebase-admin'], '^14.3.0', 'Firebase Admin non è aggiornato alla baseline P4');
-assert.equal(functionsPackage.dependencies?.nodemailer, '^9.1.1', 'Nodemailer non è aggiornato alla baseline P4');
+assert.equal(functionsPackage.dependencies?.['firebase-admin'], '14.5.0', 'Firebase Admin non è aggiornato alla baseline P4');
+assert.equal(functionsPackage.dependencies?.nodemailer, '10.3.1', 'Nodemailer non è aggiornato alla baseline P4');
 assert.match(storageRules, /match \/\{allPaths=\*\*\}[\s\S]*?allow read, write: if false;/, 'Storage non usa una chiusura predefinita');
 assert.match(deployWorkflow, /npm ci[\s\S]*?npm test[\s\S]*?firebase\.js deploy/, 'Il deploy non è preceduto dai test del repository');
 assert.match(deployWorkflow, /Classify validation scope[\s\S]*?run_full_suite=true[\s\S]*?GITHUB_EVENT_NAME[^\n]*pull_request[\s\S]*?git diff --name-only[\s\S]*?\(\^docs\/[\s\S]*?\\\.md\$[\s\S]*?run_full_suite=false/,
@@ -313,13 +312,13 @@ assert.match(deployWorkflow, /if: github\.event_name == 'workflow_dispatch' && g
     'Il deploy manuale può partire da un riferimento diverso da master');
 assert.match(deployWorkflow, /Verify manual release source[\s\S]*?git ls-remote origin refs\/heads\/master[\s\S]*?GITHUB_SHA[\s\S]*?remote_master/,
     'La validazione manuale non confronta la candidata con il master remoto');
-assert.match(deployWorkflow, /Verify master before deploy[\s\S]*?GITHUB_SHA[\s\S]*?remote_master[\s\S]*?Deploy Hosting only/,
+assert.match(deployWorkflow, /Recheck master and deploy Hosting only[\s\S]*?remote_master[\s\S]*?GITHUB_SHA[\s\S]*?firebase\.js deploy/,
     'Il deploy non ricontrolla master immediatamente prima della pubblicazione');
 assert.doesNotMatch(deployWorkflow, /assistant-local-ai|local-ai-packages|AI 2 packages/,
     'Il deploy Hosting contiene ancora passaggi dei pacchetti AI rimossi');
-assert.match(deployWorkflow, /Deploy Hosting only[\s\S]*?Record deployed commit[\s\S]*?GITHUB_SHA[\s\S]*?GITHUB_STEP_SUMMARY/,
+assert.match(deployWorkflow, /Recheck master and deploy Hosting only[\s\S]*?firebase\.js deploy[\s\S]*?Verify deployed manifest and critical assets[\s\S]*?Record deployed commit[\s\S]*?GITHUB_SHA[\s\S]*?GITHUB_STEP_SUMMARY/,
     'Il workflow non verifica e registra lo SHA distribuito dopo il deploy');
-assert.equal(JSON.parse(packageJson).devDependencies?.['firebase-tools'], '15.28.2', 'La Firebase CLI non è fissata a una versione');
+assert.equal(JSON.parse(packageJson).devDependencies?.['firebase-tools'], '15.35.0', 'La Firebase CLI non è fissata a una versione');
 assert.match(loginHtml, /id="recovery-code"[^>]+autocomplete="off"/, 'Campo codice recupero assente o esposto ad autofill');
 assert.match(login, /recoverTotpAccess\(pendingEmail, password, recoveryCode\)/, 'Flusso recupero 2FA non collegato al login');
 assert.match(settingsHtml, /id="btn-revoke-all-sessions"/, 'Comando disconnessione postazioni assente');

@@ -1,11 +1,11 @@
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.258';
+import { auth } from './firebase-config.js?v=1.2.259';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
 import { setFooterReady } from './footer-state.js';
-import { APP_VERSION } from './env-v126.js';
+import { APP_VERSION } from './app-env.js';
 
 // Guard idempotenza — sostituisce window.__componentsInitialized
 let _componentsInitialized = false;
@@ -13,7 +13,7 @@ let _componentsInitialized = false;
 const AUTH_PATHS = new Set([
     '/',
     '/index.html',
-    '/login-v115.html',
+    '/login.html',
     '/registrati.html',
     '/reset_password.html',
     '/imposta_nuova_password.html'
@@ -66,7 +66,7 @@ export async function initComponents() {
 
         const isHome = document.body?.classList.contains('home-page') || path === '/home' || path.endsWith('home_page.html') || /^\/home-v\d+\.html$/.test(path);
         // Pagine che non devono avere header/footer standard (Login, Registrazione, etc)
-        const isAuth = ['login-v115.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'].some(p => path.endsWith(p)) || path.endsWith('/');
+        const isAuth = ['login.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'].some(p => path.endsWith(p)) || path.endsWith('/');
 
         const h = new Date().getHours();
         const timeGreeting = (h >= 6 && h < 13) ? t('greeting_morning') : (h >= 13 && h < 18) ? t('greeting_afternoon') : t('greeting_evening');
@@ -256,7 +256,7 @@ export async function initComponents() {
                     ariaLabel: 'Apri Ricerca'
                 }, [
                     createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'search' }),
-                    createElement('span', { className: 'search-status-label', textContent: 'Ricerca' })
+                    createElement('span', { className: 'search-status-label', textContent: t('aria_search') })
                 ]));
             }
 

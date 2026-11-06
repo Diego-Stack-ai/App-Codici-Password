@@ -11,7 +11,7 @@ const outputPath = path.join(root, 'docs', 'evidenze', 'COLLAUDI.md');
 
 export const FIXTURE_PLANS = Object.freeze({
     index: 'Nessuna scrittura; ingresso e inoltro verso Accesso.',
-    'login-v115': 'Identità QA verificata, password tecnica e Master Password DPAPI; nessun dato reale.',
+    'login': 'Identità QA verificata, password tecnica e Master Password DPAPI; nessun dato reale.',
     registrati: 'Solo percorso controllato o ambiente isolato; non creare nuove identità durante il passaggio ordinario.',
     reset_password: 'Solo controllo UI; non inviare e-mail durante il passaggio ordinario.',
     imposta_nuova_password: 'Solo controllo UI con collegamento sintetico dedicato quando autorizzato.',
@@ -43,7 +43,7 @@ export const FIXTURE_PLANS = Object.freeze({
 });
 
 const BASELINE = new Map([
-    ['login-v115', 'BASELINE AUTOMATICA'],
+    ['login', 'BASELINE AUTOMATICA'],
     ['home_page', 'BASELINE AUTOMATICA'],
     ['profilo_privato', 'PARZIALE · dati completi e Account collegato; Scadenza rinviata alla creazione della regola QA'],
     ['lista_aziende', 'PASSA · azienda sintetica unica creata e riletta'],
