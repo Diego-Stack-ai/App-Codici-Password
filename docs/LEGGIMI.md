@@ -35,8 +35,9 @@ DECISIONI conserva autorità, fonte e successione delle scelte; non è un espedi
 
 `scripts/docs-source-map.json` associa ciascuno dei 71 vecchi documenti ai nuovi intervalli e alle sezioni. I vecchi riferimenti `:N` sono riferiti alla base `2900ccc0`. Il testo originale resta in Git; le sezioni migrate conservano intestazioni e date, con note esplicite per le successioni M6/M7.
 
-## Elenco dei 31 file
+## Catalogo corrente
 
+- [SECURITY.md](../SECURITY.md)
 - [.github/copilot-instructions.md](../.github/copilot-instructions.md)
 - [docs/LEGGIMI.md](LEGGIMI.md)
 - [docs/domande/M10_RILASCIO.md](domande/M10_RILASCIO.md)

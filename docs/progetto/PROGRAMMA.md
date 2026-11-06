@@ -1,5 +1,9 @@
 # Programma
 
+## Ripresa dopo il rilascio verificato — 06/11/2026
+
+La **1.2.259** è pubblicata tramite GitHub e attestata dal manifest pubblico del commit `16c94c24`; esito e limiti sono in [STATO](STATO.md) e [COLLAUDI](../evidenze/COLLAUDI.md). Il gate della credenziale riguarda ora il controllo provider automatico, mentre la ricostruzione dei vecchi log rimane aperta. Il prossimo lotto conserva come priorità il recovery completo, seguito da cache cifrata e conversione legacy; la shell persistente resta separata. Nel prossimo aggiornamento minore correggere anche il 404 del favicon emerso nello smoke online e rendere coerenti le terminazioni riga delle copie Windows preesistenti con la forma canonica CI. Le guide italiane con fallback e i testi dinamici residui restano censiti, non dichiarati completati dal rilascio.
+
 ## Prossimo lotto dopo il contenimento locale — 06/11/2026
 
 Il primo lotto locale della candidata 1.2.259 è rendicontato in [STATO](STATO.md) e [COLLAUDI](../evidenze/COLLAUDI.md). La priorità successiva è completare e provare il recupero coerente di Vault, identità di condivisione e allegati profilo, mantenendo il divieto di restore generico di `settings/security`. Seguono cache applicativa cifrata con parità offline e conversione legacy riprendibile/CAS, prima del ritiro del fallback; la shell RAM completa recupererà la continuità di navigazione. Nessuna migrazione reale parte automaticamente e nessun blocco di pubblicazione viene chiuso dalla sola riuscita del lotto precedente.
