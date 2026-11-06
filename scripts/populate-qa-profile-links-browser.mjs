@@ -44,7 +44,7 @@ async function waitForTranslatedPage(page) {
 }
 
 async function loginAndUnlock(page) {
-    await page.goto(`${origin}/login-v115.html`, { waitUntil: 'networkidle', timeout: 45_000 });
+    await page.goto(`${origin}/login.html`, { waitUntil: 'networkidle', timeout: 45_000 });
     await waitForTranslatedPage(page);
     const languageDialog = page.locator('#initial-language-dialog');
     if (await languageDialog.isVisible().catch(() => false)) {
@@ -58,13 +58,13 @@ async function loginAndUnlock(page) {
     await page.locator('#login-submit-btn').click();
     await page.waitForURL(/\/home_page\.html(?:[?#]|$)/, { timeout: 45_000 });
     const masterInput = page.locator('#protocol-input-modal-input');
-    const sessionAlreadyOpen = await page.evaluate(() => Boolean(sessionStorage.getItem('vault_session_v1')));
+    const sessionAlreadyOpen = await page.evaluate(async () => (await import('/assets/js/modules/core/security-manager.js')).isVaultUnlocked());
     if (!sessionAlreadyOpen) {
         await masterInput.waitFor({ state: 'visible', timeout: 20_000 });
         await masterInput.fill(credentials.masterPassword);
         await page.locator('#modal-confirm-btn').click();
     }
-    await page.waitForFunction(() => Boolean(sessionStorage.getItem('vault_session_v1')), null, { timeout: 45_000 });
+    await page.waitForFunction(async () => (await import('/assets/js/modules/core/security-manager.js')).isVaultUnlocked(), null, { timeout: 45_000 });
     record('qa-login-and-vault', 'passed');
 }
 

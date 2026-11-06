@@ -3,10 +3,10 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.258';
+import { auth, db } from '../../firebase-config.js?v=1.2.259';
 import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
-import { t, getCurrentLanguage } from '../../translations.js';
+import { t, tf, getCurrentLanguage } from '../../translations.js';
 import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.js';
 import { safeSetText, setChildren, createElement, clearElement } from '../../dom-utils.js';
@@ -19,6 +19,7 @@ import { getUserProfile, getUserSetting, listProfileWidgets } from '../data/vaul
 import { setupPushSettings } from './push-settings-controller.js?push=20261022a';
 import { configurationText, firstConfigurationPatch, readFirstConfiguration, setLanguagePreference } from './first-configuration.js';
 import {evaluatePortableArchivePassword} from './portable-archive-stream.js';
+import {APP_VERSION} from '../../app-env.js';
 
 const portableArchiveModulePromise = import('./portable-archive-service.js');
 
@@ -59,7 +60,7 @@ export async function initImpostazioni(user) {
 function setupSharedCredentials(user) {
     document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
         try {
-            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.258');
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.259');
             await openSharedCredentialsSettings(user);
         } catch (error) {
             console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
@@ -76,7 +77,7 @@ function showCredentialHealthResults(report, action) {
         className: 'modal-overlay', role: 'dialog', 'aria-modal': 'true',
         'aria-labelledby': 'credential-health-title'
     });
-    const closeButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Chiudi'});
+    const closeButton = createElement('button', {className: 'btn-modal btn-primary', textContent: t('close')});
     const previouslyFocused = document.activeElement;
     const close = () => {
         const restoreFocus = action.active();
@@ -93,7 +94,7 @@ function showCredentialHealthResults(report, action) {
     closeButton.addEventListener('click', close);
     const list = createElement('div', {
         className: 'credential-health-list', tabIndex: 0,
-        role: 'region', 'aria-label': 'Risultati del controllo credenziali'
+        role: 'region', 'aria-label': t('dyn_health_results_aria')
     });
     const onKeydown = event => {
         if (!action.active()) return;
@@ -109,13 +110,13 @@ function showCredentialHealthResults(report, action) {
     if (!report.results.length) {
         list.appendChild(createElement('p', {
             className: 'credential-health-empty',
-            textContent: 'Nessuna password debole, duplicata o datata rilevata.'
+            textContent: t('dyn_health_none')
         }));
     } else {
         report.results.forEach(item => {
             const context = item.area === 'azienda'
-                ? `Azienda${item.companyName ? ` · ${item.companyName}` : ''}`
-                : 'Privato';
+                ? `${t('dyn_health_company')}${item.companyName ? ` · ${item.companyName}` : ''}`
+                : t('dyn_health_private');
             const extraFlags = item.flags.filter(flag => flag !== 'weak');
             const tags = createElement('div', {className: 'credential-health-tags'}, [
                 createElement('span', {
@@ -137,19 +138,19 @@ function showCredentialHealthResults(report, action) {
         });
     }
     const unavailable = report.unavailable
-        ? ` · ${report.unavailable} non leggibili`
+        ? ` · ${tf('dyn_health_unreadable', {count: report.unavailable})}`
         : '';
     modal.appendChild(createElement('div', {className: 'modal-box credential-health-modal'}, [
         createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'health_and_safety'}),
-        createElement('h3', {id: 'credential-health-title', className: 'modal-title', textContent: 'Salute credenziali'}),
+        createElement('h3', {id: 'credential-health-title', className: 'modal-title', textContent: t('settings_credential_health_title')}),
         createElement('p', {
             className: 'modal-text',
-            textContent: `${report.scanned} password controllate · ${report.atRisk} Account da verificare${unavailable}. Analisi eseguita soltanto in memoria. I dati disponibili possono provenire dalla cache: il risultato non garantisce di includere le ultime modifiche su altri dispositivi.`
+            textContent: tf('dyn_health_summary', {scanned: report.scanned, risk: report.atRisk, unavailable})
         }),
         list,
         createElement('p', {
             className: 'credential-health-privacy',
-            textContent: 'Il controllo delle violazioni online non è attivo. Nessuna password o impronta viene salvata.'
+            textContent: t('dyn_health_online_note')
         }),
         createElement('div', {className: 'modal-actions'}, [closeButton])
     ]));
@@ -173,7 +174,7 @@ function setupCredentialHealth(user) {
             'Analisi locale delle credenziali in corso…', current
         );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.258');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.259');
             current.check();
             const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
             current.check();
@@ -182,7 +183,7 @@ function setupCredentialHealth(user) {
         } catch (error) {
             working.close();
             if (current.active() && error?.message !== 'USER_CANCELLED') {
-                showToast('Controllo non completato. Nessun dato è stato salvato.', 'error');
+                showToast(t('dyn_settings_health_incomplete'), 'error');
             }
             current.dispose();
         } finally {
@@ -224,7 +225,7 @@ function usageTable(title, rows) {
             createElement('strong', {textContent: row.status}),
             createElement('span', {textContent: row.recommendation}),
             row.unavailable
-                ? createElement('small', {textContent: `${row.unavailable} valori non leggibili`})
+                ? createElement('small', {textContent: tf('dyn_field_unreadable', {count: row.unavailable})})
                 : null
         ])
     ])));
@@ -233,12 +234,12 @@ function usageTable(title, rows) {
         createElement('div', {className: 'account-field-usage-scroll'}, [
             createElement('table', {className: 'account-field-usage-table'}, [
                 createElement('thead', {}, [createElement('tr', {}, [
-                    createElement('th', {scope: 'col', textContent: 'Campo'}),
-                    createElement('th', {scope: 'col', textContent: 'Priv.'}),
-                    createElement('th', {scope: 'col', textContent: 'Az.'}),
-                    createElement('th', {scope: 'col', textContent: 'Usati'}),
+                    createElement('th', {scope: 'col', textContent: t('dyn_field_col_name')}),
+                    createElement('th', {scope: 'col', textContent: t('dyn_field_col_private')}),
+                    createElement('th', {scope: 'col', textContent: t('dyn_field_col_company')}),
+                    createElement('th', {scope: 'col', textContent: t('dyn_field_col_used')}),
                     createElement('th', {scope: 'col', textContent: '%'}),
-                    createElement('th', {scope: 'col', textContent: 'Valutazione'})
+                    createElement('th', {scope: 'col', textContent: t('dyn_field_col_rating')})
                 ])]),
                 body
             ])
@@ -251,8 +252,8 @@ function showAccountFieldUsage(report) {
         className: 'modal-overlay', role: 'dialog', 'aria-modal': 'true',
         'aria-labelledby': 'account-field-usage-title'
     });
-    const closeButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: 'Chiudi'});
-    const copyButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Copia report'});
+    const closeButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: t('close')});
+    const copyButton = createElement('button', {className: 'btn-modal btn-primary', textContent: t('settings_copy_report')});
     const previouslyFocused = document.activeElement;
     const close = () => {
         modal.classList.remove('active');
@@ -265,27 +266,27 @@ function showAccountFieldUsage(report) {
     copyButton.addEventListener('click', async () => {
         try {
             await navigator.clipboard.writeText(usageReportText(report));
-            showToast('Report aggregato copiato. Non contiene valori degli Account.', 'success');
+            showToast(t('dyn_field_report_copied'), 'success');
         } catch {
-            showToast('Copia non disponibile su questo dispositivo.', 'error');
+            showToast(t('dyn_copy_unavailable_device'), 'error');
         }
     });
     modal.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
     const summary = report.totals;
     const content = [
         createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'table_view'}),
-        createElement('h3', {id: 'account-field-usage-title', className: 'modal-title', textContent: 'Utilizzo campi Account'}),
+        createElement('h3', {id: 'account-field-usage-title', className: 'modal-title', textContent: t('settings_field_usage_title')}),
         createElement('p', {
             className: 'modal-text',
-            textContent: `${summary.accounts} Account analizzati: ${summary.privateAccounts} privati e ${summary.companyAccounts} aziendali. ${summary.archivedExcluded} archiviati esclusi.`
+            textContent: tf('dyn_field_summary', {accounts: summary.accounts, private: summary.privateAccounts, company: summary.companyAccounts, archived: summary.archivedExcluded})
         }),
         createElement('p', {
             className: 'account-field-usage-privacy',
-            textContent: 'I valori sono stati decifrati soltanto in memoria. Il report contiene esclusivamente conteggi.'
+            textContent: t('dyn_field_privacy')
         }),
-        usageTable('Campi standard', report.fields)
+        usageTable(t('dyn_field_standard'), report.fields)
     ];
-    if (report.widgets.length) content.push(usageTable('Campi dei widget', report.widgets));
+    if (report.widgets.length) content.push(usageTable(t('dyn_field_widgets'), report.widgets));
     content.push(createElement('div', {className: 'modal-actions'}, [closeButton, copyButton]));
     modal.appendChild(createElement('div', {className: 'modal-box account-field-usage-modal'}, content));
     document.body.appendChild(modal);
@@ -305,7 +306,7 @@ function setupAccountFieldUsage(user) {
             'Controllo locale dei campi realmente compilati in corso…'
         );
         try {
-            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.258');
+            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.259');
             const report = await inspectAccountFieldUsage(user.uid);
             working.close();
             showAccountFieldUsage(report);
@@ -313,7 +314,7 @@ function setupAccountFieldUsage(user) {
             working.close();
             if (error?.message !== 'USER_CANCELLED') {
                 console.warn('[ACCOUNT FIELD USAGE] Analisi non disponibile.', error?.message);
-                showToast('Analisi non completata. Nessun dato è stato salvato.', 'error');
+                showToast(t('dyn_field_analysis_incomplete'), 'error');
             }
         } finally {
             button.disabled = false;
@@ -379,8 +380,8 @@ function showBackupRestoreInput(action, title, placeholder, description, secret 
                 createElement('h3', {className: 'modal-title', textContent: title}),
                 createElement('p', {className: 'modal-text', textContent: description}), input,
                 createElement('div', {className: 'modal-actions'}, [
-                    createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: () => close(null)}),
-                    createElement('button', {type: 'submit', className: 'btn-modal btn-primary', textContent: 'Conferma'})
+                    createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: t('cancel'), onclick: () => close(null)}),
+                    createElement('button', {type: 'submit', className: 'btn-modal btn-primary', textContent: t('confirm')})
                 ])
             ])
         ]);
@@ -402,13 +403,13 @@ function showBackupRestoreRetry(action) {
             if (action.active() && previousFocus?.isConnected) previousFocus.focus();
         };
         const retry = createElement('button', {type: 'button', className: 'btn-modal btn-primary',
-            textContent: 'Verifica e riprendi', onclick: () => { if (action.active()) close(true); }});
+            textContent: t('dyn_restore_verify_resume'), onclick: () => { if (action.active()) close(true); }});
         const modal = createElement('div', {className: 'modal-overlay active'}, [
-            createElement('section', {className: 'modal-box', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Risposta non ricevuta'}, [
-                createElement('h3', {className: 'modal-title', textContent: 'Risposta non ricevuta'}),
-                createElement('p', {className: 'modal-text', textContent: 'Il server potrebbe aver già applicato una parte del ripristino. Puoi verificarne l’esito e riprendere gli elementi mancanti mantenendo la selezione confermata.'}),
+            createElement('section', {className: 'modal-box', role: 'dialog', 'aria-modal': 'true', 'aria-label': t('dyn_restore_no_response')}, [
+                createElement('h3', {className: 'modal-title', textContent: t('dyn_restore_no_response')}),
+                createElement('p', {className: 'modal-text', textContent: t('dyn_restore_server_partial')}),
                 createElement('div', {className: 'modal-actions'}, [
-                    createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Interrompi', onclick: () => close(false)}), retry
+                    createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: t('dyn_stop'), onclick: () => close(false)}), retry
                 ])
             ])
         ]);
@@ -525,20 +526,20 @@ function setupEncryptedRestore(user) {
         } catch (error) {
             if (!currentAction.active()) return;
             if (error?.progress?.mayHaveApplied) {
-                showToast('Ripristino interrotto: alcuni dati potrebbero essere già stati applicati. Verifica il Vault prima di riprovare.', 'warning');
+                showToast(t('dyn_restore_partial_warning'), 'warning');
                 return;
             }
             if (error?.code === 'BACKUP_PREVIEW_STALE' || error?.message === 'BACKUP_PREVIEW_STALE') {
-                showToast('I dati sono cambiati dopo l’anteprima. Riapri il backup per confrontarli di nuovo prima del ripristino.', 'warning');
+                showToast(t('dyn_restore_data_changed'), 'warning');
                 return;
             }
             if (error?.code === 'BACKUP_TIMESTAMP_PRECISION_UNSUPPORTED' || error?.message === 'BACKUP_TIMESTAMP_PRECISION_UNSUPPORTED') {
-                showToast('Ripristino bloccato: una data nel backup ha una precisione che il database non può conservare esattamente. Nessun arrotondamento è stato applicato.', 'warning');
+                showToast(t('dyn_restore_precision_blocked'), 'warning');
                 return;
             }
             const collision = error?.code === 'BACKUP_COLLISIONS' || String(error?.message || '').startsWith('BACKUP_COLLISIONS:');
             if (error?.message === 'BACKUP_PREVIEW_CAPACITY_EXCEEDED') {
-                showToast('Questo backup supera la capacità dell’anteprima. Nessun dato è stato ripristinato: conserva il file per un ripristino assistito.', 'warning');
+                showToast(t('dyn_restore_preview_capacity'), 'warning');
                 return;
             }
             showToast(collision
@@ -557,7 +558,7 @@ function setupEncryptedRestore(user) {
 function reloadAfterBackupRestore(result, action) {
     action.check();
     showToast(
-        `Ripristino completato: ${result.recordCount} elementi e ${result.attachmentCount} allegati. Aggiornamento dati…`,
+        tf('dyn_restore_completed', {records: result.recordCount, attachments: result.attachmentCount}),
         'success'
     );
     return new Promise(resolve => {
@@ -612,26 +613,26 @@ function showBackupRestorePreview(plan, action) {
         let settled = false, unregister = () => {};
         const modal = createElement('div', {className: 'modal-overlay'});
         const closeButton = createElement('button', {
-            className: 'btn-modal btn-secondary', textContent: 'Chiudi anteprima'
+            className: 'btn-modal btn-secondary', textContent: t('dyn_restore_close_preview')
         });
         const restoreButton = createElement('button', {
-            className: 'btn-modal btn-primary', textContent: 'Ripristina selezionati'
+            className: 'btn-modal btn-primary', textContent: t('dyn_restore_selected')
         });
         const summaryToggle = createElement('button', {
             type: 'button', className: 'backup-preview-toggle',
-            'aria-expanded': 'true', 'aria-label': 'Riduci riepilogo anteprima'
+            'aria-expanded': 'true', 'aria-label': t('dyn_preview_collapse_aria')
         }, [
-            createElement('span', {textContent: 'Riduci riepilogo'}),
+            createElement('span', {textContent: t('dyn_preview_collapse')}),
             createElement('span', {
                 className: 'material-symbols-outlined notranslate', textContent: 'expand_less', 'aria-hidden': 'true'
             })
         ]);
-        const labels = {missing: 'Mancante', unchanged: 'Invariato', changed: 'Modificato'};
+        const labels = {missing: t('dyn_restore_missing'), unchanged: t('dyn_restore_unchanged'), changed: t('dyn_restore_changed')};
         const scopeLabels = {
-            profile: 'Profilo', settings: 'Impostazione', 'private-account': 'Account privato',
-            company: 'Azienda', 'company-account': 'Account aziendale', deadline: 'Scadenza',
-            contact: 'Contatto', 'profile-widget': 'Widget',
-            'private-account-attachment': 'Allegato privato', 'company-account-attachment': 'Allegato aziendale'
+            profile: t('dyn_scope_profile'), settings: t('dyn_scope_settings'), 'private-account': t('dyn_scope_private_account'),
+            company: t('dyn_scope_company'), 'company-account': t('dyn_scope_company_account'), deadline: t('dyn_scope_deadline'),
+            contact: t('dyn_scope_contact'), 'profile-widget': t('dyn_scope_profile_widget'),
+            'private-account-attachment': t('dyn_scope_private_attachment'), 'company-account-attachment': t('dyn_scope_company_attachment')
         };
         const scopeCounts = new Map();
         plan.comparison.entries.forEach(entry => {
@@ -640,14 +641,14 @@ function showBackupRestorePreview(plan, action) {
         const summary = createElement('div', {className: 'backup-preview-summary'}, [...scopeCounts].map(([scope, count]) =>
             createElement('span', {
                 className: 'backup-preview-summary-item',
-                textContent: `${scopeLabels[scope] || scope}: ${count}`
+                textContent: tf('dyn_scope_count', {scope: scopeLabels[scope] || scope, count})
             })
         ));
         const selectable = [];
         const rows = plan.comparison.entries.map(entry => {
             const checkbox = createElement('input', {
                 type: 'checkbox', checked: entry.status === 'missing', disabled: entry.status === 'unchanged',
-                'aria-label': `Seleziona ${entry.description}`
+                'aria-label': tf('dyn_restore_select', {description: entry.description})
             });
             if (entry.status !== 'unchanged') selectable.push({entry, checkbox});
             const details = createElement('span', {className: 'backup-preview-details'}, [
@@ -670,7 +671,7 @@ function showBackupRestorePreview(plan, action) {
         const updateRestoreButton = () => {
             const count = selectable.filter(item => item.checkbox.checked).length;
             restoreButton.disabled = count === 0;
-            restoreButton.textContent = count ? `Ripristina selezionati (${count})` : 'Ripristina selezionati';
+            restoreButton.textContent = count ? tf('dyn_restore_selected_count', {count}) : t('dyn_restore_selected');
         };
         selectable.forEach(item => item.checkbox.addEventListener('change', updateRestoreButton));
         closeButton.addEventListener('click', () => close([]));
@@ -680,19 +681,19 @@ function showBackupRestorePreview(plan, action) {
         updateRestoreButton();
         const summaryContent = createElement('div', {className: 'backup-preview-summary-content'}, [
             createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'preview'}),
-            createElement('h3', {className: 'modal-title', textContent: 'Anteprima Vault di ripristino'}),
+            createElement('h3', {className: 'modal-title', textContent: t('dyn_restore_preview_title')}),
             createElement('p', {
                 className: 'modal-text',
-                textContent: `Il backup è integro. Mancanti: ${plan.comparison.counts.missing}; modificati: ${plan.comparison.counts.changed}; invariati: ${plan.comparison.counts.unchanged}. Seleziona cosa recuperare: i mancanti sono già selezionati, i modificati no.`
+                textContent: tf('dyn_restore_comparison', plan.comparison.counts)
             }),
             summary
         ]);
         summaryToggle.addEventListener('click', () => {
             const expanded = summaryToggle.getAttribute('aria-expanded') === 'true';
             summaryToggle.setAttribute('aria-expanded', String(!expanded));
-            summaryToggle.setAttribute('aria-label', expanded ? 'Mostra riepilogo anteprima' : 'Riduci riepilogo anteprima');
+            summaryToggle.setAttribute('aria-label', expanded ? t('dyn_preview_expand_aria') : t('dyn_preview_collapse_aria'));
             summaryContent.hidden = expanded;
-            summaryToggle.firstElementChild.textContent = expanded ? 'Mostra riepilogo' : 'Riduci riepilogo';
+            summaryToggle.firstElementChild.textContent = expanded ? t('dyn_preview_expand') : t('dyn_preview_collapse');
             summaryToggle.lastElementChild.textContent = expanded ? 'expand_more' : 'expand_less';
         });
         modal.appendChild(createElement('div', {className: 'modal-box backup-preview-modal'}, [
@@ -714,13 +715,13 @@ function showRecoveryKeyOnce(recoveryKey, summary, action) {
         const modal = createElement('div', {className: 'modal-overlay'});
         const keyField = createElement('input', {
             className: 'glass-field modal-input-glass backup-recovery-key-field', value: recoveryKey, readOnly: true,
-            'aria-label': 'Recovery Key del backup', autocomplete: 'off', spellcheck: false
+            'aria-label': t('dyn_recovery_key_aria'), autocomplete: 'off', spellcheck: false
         });
         const acknowledged = createElement('input', {type: 'checkbox', id: 'backup-key-saved'});
         const closeButton = createElement('button', {
-            className: 'btn-modal btn-primary', textContent: 'Ho salvato la chiave', disabled: true
+            className: 'btn-modal btn-primary', textContent: t('dyn_recovery_saved'), disabled: true
         });
-        const copyButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: 'Copia chiave'});
+        const copyButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: t('dyn_recovery_copy')});
         const close = () => {
             if (settled) return;
             settled = true; recoveryKey = ''; keyField.value = ''; copyButton.disabled = closeButton.disabled = true;
@@ -731,11 +732,11 @@ function showRecoveryKeyOnce(recoveryKey, summary, action) {
             if (settled || !action.active()) return;
             try {
                 await navigator.clipboard.writeText(recoveryKey);
-                if (!settled && action.active()) showToast('Recovery Key copiata', 'success');
+                if (!settled && action.active()) showToast(t('dyn_recovery_key_copied'), 'success');
             } catch {
                 if (settled || !action.active()) return;
                 keyField.focus(); keyField.select();
-                showToast('Seleziona e copia manualmente la Recovery Key', 'info');
+                showToast(t('dyn_recovery_key_copy_manual'), 'info');
             }
         });
         closeButton.addEventListener('click', () => {
@@ -744,14 +745,14 @@ function showRecoveryKeyOnce(recoveryKey, summary, action) {
         });
         const confirmation = createElement('label', {className: 'backup-key-confirmation'}, [
             acknowledged,
-            createElement('span', {textContent: 'Confermo di aver salvato la Recovery Key in un luogo sicuro.'})
+            createElement('span', {textContent: t('dyn_recovery_confirm')})
         ]);
         modal.appendChild(createElement('div', {className: 'modal-box'}, [
             createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'key'}),
-            createElement('h3', {className: 'modal-title', textContent: 'Recovery Key — unica visualizzazione'}),
+            createElement('h3', {className: 'modal-title', textContent: t('dyn_recovery_title')}),
             createElement('p', {
                 className: 'modal-text',
-                textContent: `Backup completato: ${summary.recordCount} record e ${summary.attachmentCount} allegati. Senza questa chiave il file non è recuperabile.`
+                textContent: tf('dyn_backup_completed', {records: summary.recordCount, attachments: summary.attachmentCount})
             }),
             keyField,
             confirmation,
@@ -775,14 +776,14 @@ function setupEncryptedBackup(user) {
         button.disabled = true;
         const modal = createElement('div', {className: 'modal-overlay'});
         const cancelButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: t('cancel')});
-        const startButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Preparazione…', disabled: true});
+        const startButton = createElement('button', {className: 'btn-modal btn-primary', textContent: t('dyn_backup_preparing'), disabled: true});
         const modulePromise = import('./backup-export-service.js');
         modulePromise.then(() => {
             if (!action.active()) return;
             startButton.disabled = false;
-            startButton.textContent = 'Scegli file e crea backup';
+            startButton.textContent = t('dyn_backup_choose');
         }).catch(() => {
-            if (action.active()) startButton.textContent = 'Backup non disponibile';
+            if (action.active()) startButton.textContent = t('dyn_backup_unavailable');
         });
         const close = () => modal.remove();
         action.own(() => { close(); if (currentAction === action) button.disabled = false; });
@@ -797,17 +798,17 @@ function setupEncryptedBackup(user) {
                 const exportPromise = exportOwnerBackup(user.uid, {signal: action.signal, isActive: action.active});
                 close();
                 button.disabled = true;
-                showToast('Preparazione backup in corso…', 'info');
+                showToast(t('dyn_backup_preparing'), 'info');
                 result = await exportPromise;
                 action.check();
                 await showRecoveryKeyOnce(result.recoveryKey, result, action);
             } catch (error) {
                 if (action.active() && error?.name !== 'AbortError') {
                     showToast(error?.code === 'BACKUP_EXPORT_CAPACITY_EXCEEDED'
-                        ? 'Backup troppo grande per il download in memoria. Ripeti da un browser che consente il salvataggio diretto su file. Nessun dato è stato modificato.'
+                        ? t('dyn_backup_too_large')
                         : error?.code === 'BACKUP_EXPORT_RECORD_CAPACITY_EXCEEDED'
-                            ? 'Il Vault supera la capacità di esportazione attualmente supportata. Il backup non è stato completato; nessun dato è stato modificato.'
-                        : 'Backup non completato. Nessun dato è stato modificato.', 'error');
+                            ? t('dyn_backup_capacity')
+                        : t('dyn_backup_incomplete'), 'error');
                 }
             } finally {
                 if (result) result.recoveryKey = '';
@@ -816,10 +817,10 @@ function setupEncryptedBackup(user) {
         });
         modal.appendChild(createElement('div', {className: 'modal-box'}, [
             createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'encrypted'}),
-            createElement('h3', {className: 'modal-title', textContent: 'Crea backup cifrato'}),
+            createElement('h3', {className: 'modal-title', textContent: t('dyn_backup_create')}),
             createElement('p', {
                 className: 'modal-text',
-                textContent: 'Verranno esportati Profilo, impostazioni, Account, Aziende, Scadenze, contatti, widget e allegati. La Recovery Key sarà mostrata una sola volta.'
+                textContent: t('dyn_backup_contents')
             }),
             createElement('div', {className: 'modal-actions'}, [cancelButton, startButton])
         ]));
@@ -921,9 +922,9 @@ function setupPortableArchive(user) {
                 preparedOutput = null;
                 action.check();
                 const destination = result.streamed
-                    ? ` Pacchetto salvato nella cartella ${result.packageName}.`
-                    : ' Browser senza salvataggio progressivo: scaricati archivio e visualizzatore separati entro il limite sicuro.';
-                showToast(`Archivio creato: ${result.recordCount} schede e ${result.attachmentCount} allegati.${destination}`, 'success');
+                    ? tf('dyn_archive_streamed', {package: result.packageName})
+                    : t('dyn_archive_downloaded');
+                showToast(tf('dyn_archive_created', {records: result.recordCount, attachments: result.attachmentCount, destination}), 'success');
             } catch (error) {
                 try { await preparedOutput?.cleanup(); } catch {}
                 if (action.active() && error?.name !== 'AbortError') {
@@ -1016,11 +1017,11 @@ function setupPerformanceDiagnostics() {
         const latest = report.samples.slice(-12).reverse();
         const context = createElement('p', {
             className: 'diagnostics-context',
-            textContent: `${report.context.online ? 'Online' : 'Offline'} · ${report.context.deviceClass} · schermo ${report.context.viewport} · rete ${report.context.connection}`
+            textContent: tf('dyn_diagnostics_context', {status: report.context.online ? t('dyn_online') : t('dyn_offline'), device: report.context.deviceClass, viewport: report.context.viewport, connection: report.context.connection})
         });
         const list = createElement('div', { className: 'diagnostics-sample-list' });
         if (!latest.length) {
-            list.appendChild(createElement('p', { className: 'settings-desc', textContent: 'Nessuna misura registrata. Naviga nell’app e torna qui.' }));
+            list.appendChild(createElement('p', { className: 'settings-desc', textContent: t('dyn_diagnostics_none') }));
         } else {
             latest.forEach(sample => {
                 const details = [sample.page, `${sample.durationMs} ms`];
@@ -1039,7 +1040,7 @@ function setupPerformanceDiagnostics() {
     toggle.addEventListener('change', () => {
         setPerformanceDiagnosticsEnabled(toggle.checked);
         render();
-        showToast(toggle.checked ? 'Diagnostica locale attivata' : 'Diagnostica disattivata e misure cancellate', 'success');
+        showToast(toggle.checked ? t('dyn_diagnostics_local_on') : t('dyn_diagnostics_local_off'), 'success');
     });
     document.getElementById('btn-refresh-performance-diagnostics')?.addEventListener('click', render);
     document.getElementById('btn-run-app-diagnostics')?.addEventListener('click', async event => {
@@ -1047,21 +1048,21 @@ function setupPerformanceDiagnostics() {
         if (!appSummary || button.disabled) return;
         button.disabled = true;
         button.setAttribute('aria-busy', 'true');
-        setChildren(appSummary, createElement('p', { className: 'settings-desc', textContent: 'Controlli in corso…' }));
+        setChildren(appSummary, createElement('p', { className: 'settings-desc', textContent: t('dyn_diagnostics_checking') }));
         try {
             const report = await runAppDiagnostics({ authenticated: Boolean(auth.currentUser) });
             const heading = createElement('div', { className: `diagnostics-overall diagnostics-status-${report.overall}` }, [
-                createElement('strong', { textContent: report.overall === 'pass' ? 'Controlli superati' : report.overall === 'warn' ? 'Controlli con avvisi' : 'Controlli da verificare' }),
-                createElement('span', { textContent: `Versione ${report.appVersion}` })
+                createElement('strong', { textContent: report.overall === 'pass' ? t('dyn_diagnostics_pass') : report.overall === 'warn' ? t('dyn_diagnostics_warn') : t('dyn_diagnostics_verify') }),
+                createElement('span', { textContent: tf('dyn_version_value', {version: report.appVersion}) })
             ]);
             const checks = createElement('div', { className: 'diagnostics-check-list' });
             report.checks.forEach(check => checks.appendChild(createElement('div', { className: `diagnostics-check diagnostics-status-${check.status}` }, [
                 createElement('span', { className: 'material-symbols-outlined notranslate', textContent: check.status === 'pass' ? 'check_circle' : check.status === 'warn' ? 'warning' : 'error' }),
                 createElement('div', {}, [createElement('strong', { textContent: check.label }), createElement('small', { textContent: check.detail })])
             ])));
-            const enginesTitle = createElement('h4', { className: 'diagnostics-section-title', textContent: 'Stato Motori Della Release' });
+            const enginesTitle = createElement('h4', { className: 'diagnostics-section-title', textContent: t('dyn_diagnostics_engines') });
             const engines = createElement('div', { className: 'diagnostics-engine-list' });
-            const labels = { active: 'Attivo', limited: 'Limitato', off: 'Disabilitato' };
+            const labels = { active: t('dyn_state_active'), limited: t('dyn_state_limited'), off: t('dyn_state_off') };
             report.engines.forEach(engine => engines.appendChild(createElement('div', { className: `diagnostics-engine diagnostics-engine-${engine.state}` }, [
                 createElement('div', {}, [createElement('strong', { textContent: engine.label }), createElement('small', { textContent: engine.detail })]),
                 createElement('span', { className: 'diagnostics-badge', textContent: labels[engine.state] })
@@ -1070,7 +1071,7 @@ function setupPerformanceDiagnostics() {
             setChildren(appSummary, heading, checks, enginesTitle, engines, limit);
             appSummary.dataset.report = JSON.stringify(report);
         } catch {
-            setChildren(appSummary, createElement('p', { className: 'diagnostics-status-fail', textContent: 'Impossibile completare i controlli in questa scheda.' }));
+            setChildren(appSummary, createElement('p', { className: 'diagnostics-status-fail', textContent: t('dyn_diagnostics_failed') }));
         } finally {
             button.disabled = false;
             button.removeAttribute('aria-busy');
@@ -1079,16 +1080,16 @@ function setupPerformanceDiagnostics() {
     document.getElementById('btn-clear-performance-diagnostics')?.addEventListener('click', () => {
         clearPerformanceSamples();
         render();
-        showToast('Misure diagnostiche cancellate', 'success');
+        showToast(t('dyn_diagnostics_cleared'), 'success');
     });
     document.getElementById('btn-copy-performance-diagnostics')?.addEventListener('click', async () => {
         try {
             const report = { performance: getPerformanceDiagnosticReport() };
             if (appSummary?.dataset.report) report.application = JSON.parse(appSummary.dataset.report);
             await navigator.clipboard.writeText(JSON.stringify(report, null, 2));
-            showToast('Report tecnico copiato', 'success');
+            showToast(t('dyn_technical_report_copied'), 'success');
         } catch {
-            showToast('Copia non disponibile su questo dispositivo', 'error');
+            showToast(t('dyn_copy_unavailable'), 'error');
         }
     });
     window.addEventListener('codex:performance', render);
@@ -1111,7 +1112,7 @@ function setupCompanyAreaToggle(user, data) {
             console.error('[COMPANY AREA] Salvataggio preferenza fallito.', error);
             toggle.checked = !enabled;
             cacheCompanyAreaPreference(!enabled, user.uid);
-            showToast('Impossibile salvare la preferenza Azienda', 'error');
+            showToast(t('dyn_company_preference_failed'), 'error');
         } finally {
             toggle.disabled = false;
         }
@@ -1132,7 +1133,7 @@ async function requireSecurityReauthentication(message) {
         window.privateAuthGate?.block();
         await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
     } finally {
-        window.location.replace('login-v115.html?reauth=security-settings');
+        window.location.replace('login.html?reauth=security-settings');
     }
 }
 
@@ -1186,10 +1187,10 @@ function setupSecurityToggles(data) {
             manager.isWebAuthnSupported().then(supported => {
                 if (prfStatusEl) {
                     if (supported) {
-                        prfStatusEl.textContent = "Dispositivo compatibile (WebAuthn PRF)";
+                        prfStatusEl.textContent = t('dyn_prf_compatible');
                         prfStatusEl.style.color = "var(--success-color, green)";
                     } else {
-                        prfStatusEl.textContent = "Non compatibile (WebAuthn non supportato)";
+                        prfStatusEl.textContent = t('dyn_prf_incompatible');
                         prfStatusEl.style.color = "var(--error-color, red)";
                         tFace.disabled = true;
                     }
@@ -1214,10 +1215,10 @@ function setupSecurityToggles(data) {
             } catch (e) {
                 tFace.checked = !val;
                 const message = e.name === 'NotAllowedError'
-                    ? 'Verifica biometrica annullata o non autorizzata.'
+                    ? t('dyn_biometric_cancelled')
                     : (e.message === 'PRF_NOT_SUPPORTED'
-                        ? 'Questo dispositivo non supporta lo sblocco Vault tramite WebAuthn PRF.'
-                        : "Operazione biometrica non riuscita. Puoi usare la Master Password.");
+                        ? t('dyn_biometric_prf_unsupported')
+                        : t('dyn_biometric_failed'));
                 showToast(message, "error");
             }
         });
@@ -1232,11 +1233,11 @@ async function generateAndShowRecoveryCodes() {
     );
     const close = () => modal.remove();
     setChildren(modal, createElement('div', { className: 'modal-box' }, [
-        createElement('h3', { className: 'modal-title', textContent: 'Codici di recupero 2FA' }),
-        createElement('p', { className: 'modal-text', textContent: 'Salvali ora in un luogo sicuro. Ogni codice funziona una sola volta e non sarà più mostrato.' }),
+        createElement('h3', { className: 'modal-title', textContent: t('settings_recovery_codes_title') }),
+        createElement('p', { className: 'modal-text', textContent: t('dyn_recovery_codes_help') }),
         list,
         createElement('div', { className: 'modal-actions' }, [
-            createElement('button', { className: 'btn-modal btn-primary', textContent: 'Li ho salvati', onclick: close })
+            createElement('button', { className: 'btn-modal btn-primary', textContent: t('dyn_recovery_codes_saved'), onclick: close })
         ])
     ]));
     document.body.appendChild(modal);
@@ -1369,7 +1370,7 @@ function initSettingsEvents(user) {
                 } catch (error) {
                     btn.disabled = false;
                     console.error('[SETTINGS] Salvataggio lingua non riuscito.', error);
-                    showToast('Impossibile salvare la lingua. Riprova.', 'error');
+                    showToast(t('dyn_language_save_failed'), 'error');
                 }
             }
         });
@@ -1382,7 +1383,7 @@ function initSettingsEvents(user) {
             clearSession(); // 🔐 Pulisce vaultKeyMaterial e sessionStorage
             window.privateAuthGate?.block();
         await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
-            window.location.href = 'login-v115.html';
+            window.location.href = 'login.html';
         }
     });
 
@@ -1420,7 +1421,7 @@ function initSettingsEvents(user) {
             clearSession();
             window.privateAuthGate?.block();
         await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
-            window.location.replace('login-v115.html?reauth=sessions-revoked');
+            window.location.replace('login.html?reauth=sessions-revoked');
         } catch (error) {
             showToast(error.message || 'Revoca delle sessioni non riuscita.', 'error');
         }
@@ -1479,7 +1480,7 @@ function setupTimeoutSelector(data) {
             try {
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { lock_timeout: val });
                 await syncTimeoutWithFirestore(auth.currentUser.uid);
-                showToast("Sicurezza inattività aggiornata", "success");
+                showToast(t('dyn_inactivity_updated'), "success");
             } catch (e) {
                 console.error(e);
             }
@@ -1491,20 +1492,29 @@ function setupAppInfo() {
     const p = document.getElementById('info-app-text-placeholder');
     if (!p) return;
     setChildren(p, createElement('div', { className: 'info-stack' }, [
-        createElement('p', {}, [createElement('strong', {}, ["Codex"]), " Security System"]),
+        createElement('p', {}, [createElement('strong', {textContent: 'Codex Security System'})]),
         createElement('p', { textContent: t('app_info_security_desc') }),
-        createElement('div', { className: 'app-version-info', textContent: "RESET NOTIFICHE COMPLETATO" })
+        createElement('div', {
+            className: 'app-version-info',
+            textContent: `${t('settings_app_version_label')} ${APP_VERSION}`
+        })
     ]));
 }
 
 function setupPrivacyShort() {
     const p = document.getElementById('privacy-short-text-placeholder');
     if (!p) return;
-    setChildren(p, createElement('div', { className: 'info-stack', textContent: "Privacy Policy invariata. Notifiche Push e Email sospese." }));
+    setChildren(p, createElement('div', {
+        className: 'info-stack',
+        textContent: t('settings_privacy_summary')
+    }));
 }
 
 function setupTermsShort() {
     const p = document.getElementById('terms-short-text-placeholder');
     if (!p) return;
-    setChildren(p, createElement('div', { className: 'info-stack', textContent: "Termini e Condizioni invariati." }));
+    setChildren(p, createElement('div', {
+        className: 'info-stack',
+        textContent: t('settings_terms_summary')
+    }));
 }

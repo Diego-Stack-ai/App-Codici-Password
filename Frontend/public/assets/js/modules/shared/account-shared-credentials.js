@@ -1,4 +1,5 @@
 import {createElement, setChildren, clearElement} from '../../dom-utils.js';
+import {t} from '../../translations.js';
 import {showToast} from '../../ui-core-v129.js';
 import {decrypt, ensureVaultKeyMaterial} from '../core/security-manager.js';
 import {
@@ -65,9 +66,9 @@ async function editCredential(record, context, refresh) {
                     close();
                     if (!context.active()) return;
                     await refresh(true);
-                    if (context.active()) showToast('Credenziale comune aggiornata.', 'success');
+                    if (context.active()) showToast(t('dyn_shared_credential_updated'), 'success');
                 } catch {
-                    if (context.active() && !closed) showToast('Modifica non completata. I valori inseriti restano disponibili: verifica e riprova.', 'error');
+                    if (context.active() && !closed) showToast(t('dyn_shared_credential_edit_failed'), 'error');
                     else close();
                 } finally { save.disabled = false; }
             }
@@ -78,14 +79,14 @@ async function editCredential(record, context, refresh) {
                 createElement('p', {className: 'modal-text', textContent: 'Questi valori sono condivisi: ogni Account collegato vedrà la modifica.'}),
                 createElement('div', {className: 'account-widget-editor-fields'}, rows.map(row => row.element)),
                 createElement('div', {className: 'modal-actions account-widget-editor-actions'}, [
-                    createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: close}), save
+                    createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: t('cancel'), onclick: close}), save
                 ])
             ])
         ]);
         document.body.appendChild(overlay);
     } catch {
         close();
-        if (context.active()) showToast('Impossibile aprire i valori della Credenziale comune. Sblocca la Vault e riprova.', 'warning');
+        if (context.active()) showToast(t('dyn_shared_credential_open_failed'), 'warning');
     }
 }
 
@@ -113,7 +114,9 @@ async function revealField(button, field, context) {
         valueElement.textContent = '••••••••';
         button.dataset.revealed = 'false';
         if (icon) icon.textContent = 'visibility';
-        button.setAttribute('aria-label', `Mostra ${field.label || 'dato'}`);
+        button.setAttribute('aria-label', field.label
+            ? t('aria_show_field').replace('{label}', field.label)
+            : t('aria_show_value'));
         return;
     }
     try {
@@ -124,9 +127,11 @@ async function revealField(button, field, context) {
         valueElement.textContent = value || '—';
         button.dataset.revealed = 'true';
         if (icon) icon.textContent = 'visibility_off';
-        button.setAttribute('aria-label', `Nascondi ${field.label || 'dato'}`);
+        button.setAttribute('aria-label', field.label
+            ? t('aria_hide_field').replace('{label}', field.label)
+            : t('aria_hide_value'));
     } catch {
-        if (context.active()) showToast('Sblocca la Vault per visualizzare il dato.', 'warning');
+        if (context.active()) showToast(t('dyn_vault_unlock_view'), 'warning');
     }
 }
 
@@ -172,7 +177,7 @@ function credentialCard(record, widget, context, refresh) {
                 await unlinkSharedCredential(record.id, Number(record.revision || 0), linkPayload(context, widget.order));
                 if (!context.active()) return;
                 await refresh(true);
-                if (context.active()) showToast('Credenziale scollegata.', 'success');
+                if (context.active()) showToast(t('dyn_shared_credential_unlinked'), 'success');
             } catch (error) {
                 if (context.active()) showToast(error.message || 'Scollegamento non riuscito.', 'error');
             }
@@ -209,7 +214,7 @@ function selectorModal(records, close, onSelect) {
         createElement('p', {className: 'modal-text', textContent: records.length ? 'Seleziona la Credenziale comune da mostrare in questo Account.' : 'Non ci sono altre Credenziali comuni disponibili. Puoi crearne una dalle Impostazioni.'}),
         credentialSelect,
         createElement('div', {className: 'modal-actions'}, [
-            createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: () => close(overlay)}),
+            createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: t('cancel'), onclick: () => close(overlay)}),
             confirm
         ])
     ]));
@@ -224,7 +229,7 @@ function newAccountExplanationModal(onContinue) {
         createElement('p', {className: 'modal-text', textContent: 'Questa funzione salva prima il nuovo Account e poi permette di collegargli una Credenziale comune già creata nelle Impostazioni.'}),
         createElement('p', {className: 'modal-text', textContent: 'La Credenziale non viene duplicata: le modifiche al dato centrale saranno disponibili in tutti gli Account collegati. Scollegarla in seguito non eliminerà la Credenziale comune.'}),
         createElement('div', {className: 'modal-actions'}, [
-            createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: close}),
+            createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: t('cancel'), onclick: close}),
             createElement('button', {type: 'button', className: 'btn-modal btn-primary', textContent: 'Salva e continua', onclick: () => { close(); onContinue(); }})
         ])
     ]));
@@ -239,7 +244,7 @@ export function initNewAccountSharedCredentials({saveButtonId}) {
     section.classList.remove('hidden');
     add.textContent = 'Salva Account e collega credenziale';
     add.onclick = () => {
-        if (!navigator.onLine) return showToast('Salva online l’Account prima di collegare una credenziale comune.', 'warning');
+        if (!navigator.onLine) return showToast(t('dyn_shared_credential_save_account_first'), 'warning');
         const save = document.getElementById(saveButtonId);
         if (!save || save.disabled) return;
         document.body.appendChild(newAccountExplanationModal(() => {
@@ -280,7 +285,7 @@ export async function initAccountSharedCredentials(context) {
             add.onclick = () => {
                 if (!context.active()) return;
                 if (!navigator.onLine) {
-                    showToast('Il collegamento richiede la connessione internet.', 'warning');
+                    showToast(t('dyn_shared_credential_link_online'), 'warning');
                     return;
                 }
                 const linkedIds = new Set(widgets.map(widget => widget.sharedDataId));
@@ -294,7 +299,7 @@ export async function initAccountSharedCredentials(context) {
                         close(overlay);
                         if (!context.active()) return;
                         await refresh(true);
-                        if (context.active()) showToast('Credenziale comune collegata.', 'success');
+                        if (context.active()) showToast(t('dyn_shared_credential_linked'), 'success');
                     } catch (error) {
                         if (context.active()) showToast(error.message || 'Collegamento non riuscito.', 'error');
                     }

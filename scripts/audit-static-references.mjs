@@ -5,6 +5,11 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const publicRoot = path.join(root, 'Frontend', 'public');
+const firebase = JSON.parse(await readFile(path.join(root, 'firebase.json'), 'utf8'));
+const virtualHostingRoutes = new Set([
+  ...(firebase.hosting?.redirects || []).map(item => item.source),
+  ...(firebase.hosting?.rewrites || []).map(item => item.source)
+]);
 const exists = async file => access(file).then(() => true, () => false);
 const walk = async dir => (await Promise.all((await readdir(dir, { withFileTypes: true })).map(async entry => {
   const target = path.join(dir, entry.name);
@@ -34,6 +39,7 @@ for (const file of textFiles) {
   for (const { value: reference, base } of references) {
     if (!reference || /^(?:https?:|data:|blob:|mailto:|tel:|#|\/\/)/i.test(reference)) continue;
     const clean = reference.split(/[?#]/)[0];
+    if (virtualHostingRoutes.has(clean)) continue;
     const target = clean.startsWith('/')
       ? path.join(publicRoot, clean.slice(1))
       : path.resolve(base, clean);

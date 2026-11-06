@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
+import {testTranslate} from './helpers/test-translator.mjs';
 const source = (await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-embedded-widgets.js', import.meta.url), 'utf8')).replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 const lifecycleSource = (await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-widget-lifecycle.js', import.meta.url), 'utf8')).replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 function fixture(editable = true) {
@@ -47,7 +48,7 @@ function fixture(editable = true) {
         isWidgetTemplateAlreadyInserted:(items,template,bankId=null)=>template.kind==='widget-profile'
             ? items.some(item=>item.profileId===template.id&&(item.bankId||null)===(bankId||null))
             : items.some(item=>(item.bankId||null)===(bankId||null)&&item.title===template.templateSignature),
-        listSharedVaultDataConfirmed:async()=>[], showToast(){},
+        listSharedVaultDataConfirmed:async()=>[], showToast(){}, t:testTranslate,
         createWidgetProfile:async()=>({profileId:'created-profile'}), deleteWidgetProfile:async(...args)=>profileDeletes.push(args),
         deleteAccountWidget:async(...args)=>widgetDeletes.push(args),
         updateAccountWidget:async (...args)=>updates.push(args), createAccountWidget:async(...args)=>updates.push(args)};

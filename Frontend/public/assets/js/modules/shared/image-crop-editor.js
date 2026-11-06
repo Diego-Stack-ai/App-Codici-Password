@@ -1,3 +1,5 @@
+import {t} from '../../translations.js';
+
 const EDITABLE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const MAX_SIDE = 4096;
 const CARD_SIZE = {width: 1012, height: 638};
@@ -206,10 +208,10 @@ export async function editImageBeforeUpload(file, {initialMode = 'free'} = {}) {
         const dialog = document.createElement('section'); dialog.className = 'image-editor-dialog'; dialog.setAttribute('role', 'dialog'); dialog.setAttribute('aria-modal', 'true');
         const title = document.createElement('h2'); title.textContent = 'Prepara immagine';
         const help = document.createElement('p'); help.className = 'image-editor-help';
-        const modes = document.createElement('div'); modes.className = 'image-editor-modes'; modes.setAttribute('role', 'group'); modes.setAttribute('aria-label', 'Formato immagine');
+        const modes = document.createElement('div'); modes.className = 'image-editor-modes'; modes.setAttribute('role', 'group'); modes.setAttribute('aria-label', t('aria_image_format'));
         const freeMode = button('Foto libera', () => setMode('free')), cardMode = button('Tessera / carta', () => setMode('card'));
         const stage = document.createElement('div'); stage.className = 'image-editor-stage';
-        const preview = document.createElement('canvas'); preview.className = 'image-editor-preview'; preview.setAttribute('aria-label', 'Anteprima con quattro angoli di ritaglio');
+        const preview = document.createElement('canvas'); preview.className = 'image-editor-preview'; preview.setAttribute('aria-label', t('aria_image_crop_preview'));
         const magnifier = document.createElement('canvas'); magnifier.className = 'image-editor-magnifier'; magnifier.width = 240; magnifier.height = 240; magnifier.setAttribute('aria-hidden', 'true');
         const warning = document.createElement('p'); warning.className = 'image-editor-warning'; warning.setAttribute('aria-live', 'polite');
         const controls = document.createElement('div'); controls.className = 'image-editor-controls';

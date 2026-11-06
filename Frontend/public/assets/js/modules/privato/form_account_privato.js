@@ -1,6 +1,6 @@
 import {normalizeEditableBankingAccounts, hasRealBankingData} from '../shared/banking-model.js';
 import {canRecoverPrivateAccount} from './private-account-offline-policy.js';
-import {auth} from '../../firebase-config.js?v=1.2.258';
+import {auth} from '../../firebase-config.js?v=1.2.259';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -17,18 +17,18 @@ import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listCont
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { ACCOUNT_MODES, accountModeFromFlagId, accountModeFromFlags, accountModeFromRecord, filterRecipientContacts, getAccountModeFlags, isOwnerRecipientEmail, normalizeRecipientEmail, preferenceForRecipient, recipientPreferencesFromSharedWith, selectAccountMode, serializeRecipientPreferences, sharedModeTransitionRevokesRecipients, showAccountModeAlternatives, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.258';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.258';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.259';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.259';
 async function savePrivateAccount(...args) {
     let module;
     // Il modulo di salvataggio e' caricato solo al primo click. Deve quindi
     // partecipare esplicitamente al versionamento della release: senza query
     // il service worker/browser puo' riusare il controller della release
     // precedente e perdere una modifica successiva pur mostrando successo.
-    try { module = await import('./form-privato-save.js?v=1.2.258'); }
+    try { module = await import('./form-privato-save.js?v=1.2.259'); }
     catch {
         if (args[0]?.isActive?.()) {
-            showToast('Impossibile caricare il salvataggio. Riprova.', 'error');
+            showToast(t('dyn_private_save_load_failed'), 'error');
             const button = document.getElementById('btn-save-footer');
             if (button) button.disabled = false;
         }
@@ -76,12 +76,12 @@ const rerender = async () => {
             onAddWidget: bankId => {
                 if (!active()) return;
                 if (accountWidgetController) return accountWidgetController.openNewWidget(bankId);
-                showToast('Salva prima l’Account, poi aggiungi i Widget del conto.', 'warning');
+                showToast(t('dyn_private_bank_widget_save_first'), 'warning');
             },
             onWidgetsMount: () => active() && accountWidgetController?.placeBankWidgets()
         });
     } catch {
-        if (active()) showToast('Impossibile visualizzare i dati bancari. Riprova ad aprire la sezione.', 'warning');
+        if (active()) showToast(t('dyn_private_bank_data_failed'), 'warning');
     }
 };
 
@@ -264,7 +264,7 @@ export async function initFormAccountPrivato(user) {
                     return;
                 }
                 if (!sessionLive()) {
-                    showToast('Sessione o Account cambiati: salvataggio annullato.', 'warning');
+                    showToast(t('dyn_private_save_session_changed'), 'warning');
                     saveBtn.disabled = false;
                     return;
                 }
@@ -342,10 +342,10 @@ export async function initFormAccountPrivato(user) {
                 if (input) input.value = value;
             }
             if (!get('account-name')) document.getElementById('account-name').value = ({phone:'Telefono ',email:'Email ',utility:'Utenza ',document:'Documento '}[profileContactLinkDraft.contactType]) + (contact.label || contact.type || email.address || '');
-            showToast('Verifica i dati e salva per collegare la scheda. Le credenziali esistenti dell’Account vengono mantenute.', 'info');
+            showToast(t('dyn_private_profile_link_review'), 'info');
             document.getElementById('btn-save-footer').disabled = false;
         } catch {
-            showToast('Dati del contatto non disponibili: torna al Profilo e riprova. Nessun dato è stato trasferito.', 'error');
+            showToast(t('dyn_private_profile_data_unavailable'), 'error');
             const saveButton = document.getElementById('btn-save-footer');
             if (saveButton) saveButton.disabled = true;
             return;
@@ -408,13 +408,13 @@ export async function initFormAccountPrivato(user) {
                         const revision = server.revision === undefined ? 0 : server.revision;
                         await restoreM6ConflictDraft(operation, vaultKeyMaterial, revision, active);
                         if (saveButton) saveButton.disabled = false;
-                        showToast('Modifica recuperata. La copia offline resta conservata finché premi Salva.', 'warning');
+                        showToast(t('dyn_private_offline_recovered'), 'warning');
                     }
                 } else if (operation?.recordId) {
-                    showToast('È presente una modifica offline relativa a un altro Account. Questo Account può essere modificato normalmente.', 'warning');
+                    showToast(t('dyn_private_offline_other_account'), 'warning');
                 }
             } else if (lastState?.state === 'recoverable-error' || outcome?.status === 'recoverable-error') {
-                showToast('Sincronizzazione M6 temporaneamente non disponibile. La modifica resta conservata.', 'warning');
+                showToast(t('dyn_private_sync_unavailable'), 'warning');
             } else if (Number(outcome?.completed || 0) > 0) {
                 const pendingRecord = lastState?.operation || null;
                 if (pendingRecord?.recordId && pendingRecord?.record) {
@@ -425,13 +425,13 @@ export async function initFormAccountPrivato(user) {
                         record: pendingRecord.record
                     });
                 }
-                showToast('Sincronizzazione M6 completata.', 'success');
+                showToast(t('dyn_private_sync_complete'), 'success');
                 setTimeout(() => { if (active()) window.location.replace(getPrivateAccountListDestination({refresh: true})); }, 800);
             }
         } catch (error) {
             if (!active()) return;
             logError('M6PilotResume', error);
-            showToast('Sincronizzazione M6 temporaneamente non disponibile. La modifica resta conservata.', 'warning');
+            showToast(t('dyn_private_sync_unavailable'), 'warning');
         }
     }
 
@@ -468,7 +468,7 @@ async function loadData() {
             try {
                 vaultKeyMaterial = await ensureVaultKeyMaterial();
             } catch (e) {
-                showToast("Dati cifrati: chiave obbligatoria.", "error");
+                showToast(t('dyn_encrypted_key_required'), "error");
                 context.markFailed(loadToken, 'ACCOUNT_VAULT_KEY_UNAVAILABLE');
                 if (profileContactLinkDraft) throw e;
                 history.back();
@@ -612,7 +612,7 @@ function setupUI() {
             if (f.checked) {
                 if (!namePopulated) {
                     f.checked = false;
-                    showToast("Il campo 'Nome Account' è obbligatorio prima di attivare questa opzione.", "warning");
+                    showToast(t('dyn_private_account_name_required'), "warning");
                     return;
                 }
 
@@ -792,10 +792,10 @@ function setupUI() {
                     input.value = '';
                     renderGuestsList();
                 } else {
-                    showToast("Email già aggiunte", "warning");
+                    showToast(t('dyn_email_already_added'), "warning");
                 }
             } else if (val !== '') {
-                showToast("Inserisci un'email valida", "warning");
+                showToast(t('error_invalid_email'), "warning");
             }
         };
     }
@@ -845,8 +845,8 @@ function renderGuestsList() {
             createElement('div', {className: 'account-guest-main'}, [
                 createElement('span', {className: 'account-guest-email', textContent: email}),
                 createElement('div', {className: 'account-guest-channels'}, [
-                    createElement('label', {className: 'account-guest-channel'}, [push, createElement('span', {textContent: 'Push'})]),
-                    createElement('label', {className: 'account-guest-channel'}, [notifyEmail, createElement('span', {textContent: 'Email'})])
+                    createElement('label', {className: 'account-guest-channel'}, [push, createElement('span', {textContent: t('deadline_personal_channel_push')})]),
+                    createElement('label', {className: 'account-guest-channel'}, [notifyEmail, createElement('span', {textContent: t('deadline_personal_channel_email')})])
                 ])
             ]),
             createElement('button', {

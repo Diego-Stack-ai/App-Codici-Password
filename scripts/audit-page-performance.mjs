@@ -131,7 +131,8 @@ const ceilings = budget.absoluteStaticCeilings;
 const violations = [];
 for (const row of rows) {
   const gzipKb = row.gzip / 1024;
-  if (gzipKb > ceilings.maxInitialLocalGzipKb) violations.push(`${row.name}: ${gzipKb.toFixed(1)} KB gzip > ${ceilings.maxInitialLocalGzipKb} KB`);
+  const gzipCeiling = ceilings.maxInitialLocalGzipKbByPage?.[row.name] ?? ceilings.maxInitialLocalGzipKb;
+  if (gzipKb > gzipCeiling) violations.push(`${row.name}: ${gzipKb.toFixed(1)} KB gzip > ${gzipCeiling} KB`);
   if (row.js.size > ceilings.maxJsModules) violations.push(`${row.name}: ${row.js.size} moduli JS > ${ceilings.maxJsModules}`);
   if (row.css.size > ceilings.maxCssFiles) violations.push(`${row.name}: ${row.css.size} CSS > ${ceilings.maxCssFiles}`);
 }

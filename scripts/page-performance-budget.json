@@ -7,7 +7,12 @@
   },
   "absoluteStaticCeilings": {
     "maxInitialLocalGzipKb": 338,
-    "maxJsModules": 45,
+    "maxInitialLocalGzipKbByPage": {
+      "profilo_privato.html": 343,
+      "form_account_azienda.html": 339
+    },
+    "maxJsModules": 46,
+    "hardeningAllowance": "06/11/2026: un modulo condiviso per il fence logout transazionale; export Messaging locale esplicitamente distinto da App Check. Limiti pagina circoscritti, target runtime invariati.",
     "maxCssFiles": 8
   },
   "runtimeTargets": {

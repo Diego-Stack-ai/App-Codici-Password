@@ -102,7 +102,7 @@ export function showProfileAccountPicker({ title, accounts, companies, onSelect,
         ]),
         createElement('div', { className: 'profile-account-filters' }, [search, scope]), count, list, ...(allowCreate ? [create] : []),
         createElement('div', { className: 'modal-actions' }, [
-            createElement('button', { className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: close }), confirm
+            createElement('button', { className: 'btn-modal btn-secondary', textContent: t('cancel'), onclick: close }), confirm
         ])
     ]);
     modal.appendChild(box);

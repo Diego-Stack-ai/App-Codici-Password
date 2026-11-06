@@ -43,6 +43,13 @@ test('rifiuta nuovi MD non versionati e ignorati, anche in cartelle nuove', asyn
   assert.ok((await errors(root)).some(e => e.includes('notes/nuovo.MD')));
 });
 
+test('ignora soltanto gli artefatti Markdown tecnici generati da Graphify', async t => {
+  const root = await fixture(t);
+  await mkdir(path.join(root, 'graphify-out', 'memory'), {recursive: true});
+  await writeFile(path.join(root, 'graphify-out', 'memory', 'query.md'), '# Memoria tecnica');
+  assert.deepEqual(await errors(root), []);
+});
+
 test('una rinomina a conteggio invariato viene respinta', async t => {
   const root = await fixture(t);
   await rename(path.join(root, 'docs/progetto/STATO.md'), path.join(root, 'docs/progetto/STATO-v2.md'));
@@ -84,7 +91,7 @@ test('un manifesto con percorsi duplicati non può mascherare un file mancante',
   const changed = structuredClone(original);
   changed.paths[1] = changed.paths[0];
   await writeFile(path.join(root, 'scripts/docs-manifest.json'), JSON.stringify(changed));
-  assert.ok((await errors(root)).some(e => e.includes('31 percorsi univoci')));
+  assert.ok((await errors(root)).some(e => e.includes('percorsi univoci')));
 });
 
 test('il confronto con la base rileva manifesto e controllo modificati', async t => {

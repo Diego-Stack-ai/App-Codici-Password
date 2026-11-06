@@ -10,7 +10,7 @@ import os from 'node:os';
 const root = path.resolve(import.meta.dirname, '../Frontend/public');
 const workerSource = await readFile(path.join(root, 'sw.js'), 'utf8');
 const shellCache = workerSource.match(/const CACHE_NAME = '([^']+)'/)[1];
-const cases = ['impostazioni', 'login-v115', 'contatto_condiviso'];
+const cases = ['impostazioni', 'login', 'contatto_condiviso'];
 const executable = process.env.GUIDE_TEST_BROWSER || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 const server = createServer(async (request, response) => {

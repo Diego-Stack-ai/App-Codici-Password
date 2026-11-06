@@ -1,3 +1,5 @@
+import {t} from '../../translations.js';
+
 const STYLE_ID = 'attachment-source-picker-styles';
 let activePicker = null;
 
@@ -51,7 +53,7 @@ export function selectAttachmentSource() {
         overlay.className = 'attachment-source-picker';
         overlay.setAttribute('role', 'dialog');
         overlay.setAttribute('aria-modal', 'true');
-        overlay.setAttribute('aria-label', 'Seleziona sorgente allegato');
+        overlay.setAttribute('aria-label', t('aria_select_attachment_source'));
         const card = document.createElement('section');
         card.className = 'attachment-source-picker-card';
         const heading = document.createElement('h3');
@@ -61,7 +63,7 @@ export function selectAttachmentSource() {
         const cancel = document.createElement('button');
         cancel.type = 'button';
         cancel.className = 'attachment-source-picker-cancel';
-        cancel.textContent = 'Annulla';
+        cancel.textContent = t('cancel');
         card.append(heading, grid, cancel);
         overlay.append(card);
         finish = value => {

@@ -2,7 +2,7 @@
 (() => {
     const AUTH_CHECK_TIMEOUT_MS = 45000;
     const FAILURE_MARKER_KEY = 'codex_auth_gate_last_failure_v1';
-    let epoch = 0, blocked = false, ready = false, acceptedUid = null;
+    let epoch = 0, blocked = false, ready = false, acceptedUid = null, redirecting = false;
     let timer, armedAt = 0;
     const setPendingState = pending => {
         const root = document.documentElement;
@@ -34,7 +34,10 @@
             } catch { /* La diagnostica non deve impedire il blocco fail-closed. */ }
         }
         block();
-        window.location.replace('/login-v115.html' + (reason ? '?authCheck=' + reason : ''));
+        if (!redirecting) {
+            redirecting = true;
+            window.location.replace('/login.html' + (reason ? '?authCheck=' + reason : ''));
+        }
     };
     // Safari/PWA può impiegare più di 15 secondi a ripristinare Firebase e IndexedDB.
     // La pagina resta comunque nascosta e inert fino alla conferma dell'identità.
@@ -48,18 +51,21 @@
             hide(); ready = false;
             let loggedOut = true;
             try { loggedOut = sessionStorage.getItem('codex_explicit_logout') === '1'; } catch { /* fail closed */ }
-            if (blocked || loggedOut || (acceptedUid && acceptedUid !== uid)) { reject(); return null; }
+            if (blocked || loggedOut || (window.authSessionFence && !window.authSessionFence.isLocallyAllowed()) ||
+                (acceptedUid && acceptedUid !== uid)) { reject(); return null; }
             arm();
             return ++epoch;
         },
         acceptIdentity(ticket, user) {
-            if (blocked || ticket === null || ticket !== epoch || !user?.uid || !user.emailVerified) return false;
+            if (blocked || ticket === null || ticket !== epoch || !user?.uid || !user.emailVerified ||
+                (window.authSessionFence && !window.authSessionFence.isLocallyAllowed())) return false;
             clearTimeout(timer); acceptedUid = user.uid; ready = true;
             setPendingState(false);
             document.body.hidden = false; document.body.inert = false;
             return true;
         },
-        active: ticket => !blocked && ticket !== null && ticket === epoch,
+        active: ticket => !blocked && ticket !== null && ticket === epoch &&
+            (!window.authSessionFence || window.authSessionFence.isLocallyAllowed()),
         isReady: () => ready,
         block, reject
     });

@@ -1,8 +1,9 @@
-import {auth, db} from '../../firebase-config.js?v=1.2.258';
+import {auth, db} from '../../firebase-config.js?v=1.2.259';
 import {doc, runTransaction, onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {ensureVaultKeyMaterial, encrypt, decrypt} from '../core/security-manager.js';
 import {createElement} from '../../dom-utils.js';
 import {showToast} from '../../ui-core-v129.js';
+import {t} from '../../translations.js';
 
 const mounted = new WeakMap();
 const failure = code => Object.assign(new Error(code), {code});
@@ -74,7 +75,7 @@ export function initAccountNoteEditor({account, storedNote, ownerId, accountId, 
         const present = Boolean(note?.trim());
         document.getElementById('section-notes')?.classList.toggle('hidden', !present);
         const text = document.getElementById('detail-note'); if (text) text.textContent = note || '';
-        button.textContent = 'Aggiungi nota';
+        button.textContent = t('add_note');
         button.classList.toggle('hidden', present);
         for (const action of [editButton, deleteButton]) action?.classList.toggle('hidden', !present);
     };
@@ -93,8 +94,8 @@ export function initAccountNoteEditor({account, storedNote, ownerId, accountId, 
                 value: clear || '', readOnly: deleting, maxLength: 100000, autocomplete: 'off', 'data-form-type': 'other',
                 'data-1p-ignore': 'true', 'data-lpignore': 'true', 'aria-label': 'Nota Account'});
             const errorText = createElement('p', {className: 'modal-text', role: 'status'});
-            const save = createElement('button', {type: 'button', className: 'btn-modal btn-primary', textContent: deleting ? 'Elimina nota' : 'Salva'});
-            const cancel = createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla'});
+            const save = createElement('button', {type: 'button', className: 'btn-modal btn-primary', textContent: deleting ? t('delete_note') : t('save')});
+            const cancel = createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: t('cancel')});
             cancel.onclick = () => { if (!busy) { close(); focusAction(); } };
             modal = createElement('div', {className: 'modal-overlay active', role: 'dialog', 'aria-modal': 'true',
                 'aria-labelledby': 'inline-note-title'}, [createElement('div', {className: 'modal-box inline-note-dialog'}, [

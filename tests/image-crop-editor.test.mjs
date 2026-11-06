@@ -3,8 +3,12 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
+const withoutTranslationImport = source => source.replace(
+    /^import \{t\} from '\.\.\/\.\.\/translations\.js';\r?\n/u,
+    ''
+);
 const loadEditor = async () => {
-    const source = await read('Frontend/public/assets/js/modules/shared/image-crop-editor.js');
+    const source = withoutTranslationImport(await read('Frontend/public/assets/js/modules/shared/image-crop-editor.js'));
     return import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 };
 
@@ -56,7 +60,7 @@ test('acquisizione tessera usa guida ID-1 e conferma dedicata con pan e zoom lim
 
 test('regolazione tessera limita zoom e spostamento senza creare aree vuote', async () => {
     const source = await read('Frontend/public/assets/js/modules/shared/card-camera-capture.js');
-    const pureSource = source.slice(0, source.indexOf('export async function captureCardPhoto'));
+    const pureSource = withoutTranslationImport(source.slice(0, source.indexOf('export async function captureCardPhoto')));
     const module = await import(`data:text/javascript;base64,${Buffer.from(pureSource).toString('base64')}`);
     const minimum = module.clampCardAdjustment({zoom: 0, x: -9999, y: 9999}, 1080, 681);
     const maximum = module.clampCardAdjustment({zoom: 4, x: 9999, y: -9999}, 1080, 681);

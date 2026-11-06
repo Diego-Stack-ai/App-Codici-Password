@@ -169,7 +169,7 @@ Dopo creazione/modifica il dettaglio usa getCompanyConfirmed su afterWrite=1, co
 
 | Area visibile | Entrata/modulo principale | Dati remoti attuali | Contratto da preservare |
 |---|---|---|---|
-| Login, registrazione, recupero | `login-v115.html`, `registrati.html`, `reset_password.html`, moduli `auth/*` | Firebase Auth; `users/{uid}`; funzioni MFA | Login, 2FA, recupero e rotazione password senza esporre Master Password o codici |
+| Login, registrazione, recupero | `login.html`, `registrati.html`, `reset_password.html`, moduli `auth/*` | Firebase Auth; `users/{uid}`; funzioni MFA | Login, 2FA, recupero e rotazione password senza esporre Master Password o codici |
 | Sblocco Vault | `modules/core/security-manager.js`, `vault-session.js` | `users/{uid}/settings/security`; campi compatibili in `users/{uid}` | verifier, envelope, WebAuthn/PRF e fallback legacy controllato |
 | Home | `home_page.html`, `modules/home/home.js` | profilo, `aziende`, `scadenze`, `deadlineNotifications` | accesso rapido, conteggi, avvisi pendenti e Agente locale senza bloccare il primo contenuto |
 | Area privata | `area_privata.html`, `modules/privato/area_privata.js` | `users/{uid}/accounts`, `contacts`, inviti top-level | riepilogo, account frequenti, contatti e inviti |

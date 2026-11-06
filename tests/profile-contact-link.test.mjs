@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import {testTranslate} from './helpers/test-translator.mjs';
 const guardSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/credential-decrypt-guard.js', import.meta.url), 'utf8');
 const {DECRYPT_FAILURE_MESSAGE, assertAccountSaveAllowed, createAccountLoadContext, isAccountSaveAllowed} =
     await import(`data:text/javascript;base64,${Buffer.from(guardSource).toString('base64')}`);
@@ -316,7 +317,8 @@ test('password Account: mascherata all’avvio, copia senza rivelare, mostra e n
     let reads = 0, fail = false;
     const copied = [];
     const controller = await loadController('privato/profilo-phones-emails.js', {
-        createElement, navigator: {clipboard: {writeText: async value => copied.push(value)}}
+        createElement, t: testTranslate,
+        navigator: {clipboard: {writeText: async value => copied.push(value)}}
     }, ['initPhonesEmailsModule', 'createLinkedAccountPassword']);
     controller.initPhonesEmailsModule(() => ({}), {readLinkedEmailAccountPassword: async () => {reads++; if(fail) throw Error('unreadable'); return 'SECRET-FIXTURE';}});
     const row = controller.createLinkedAccountPassword({linkedAccountId:'a'});

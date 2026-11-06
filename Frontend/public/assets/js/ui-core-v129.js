@@ -252,7 +252,7 @@ export function showInputModal(title, initialValue = '', placeholder = '', descr
         const btnSuggest = options.suggestPassword ? createElement('button', {
             type: 'button',
             className: 'btn-modal btn-secondary',
-            textContent: 'Suggerisci password sicura'
+            textContent: t('auth_password_suggest')
         }) : null;
         const btnVisibility = isVaultSecret ? createElement('button', {
             type: 'button', className: 'btn-modal btn-secondary', textContent: 'Mostra'

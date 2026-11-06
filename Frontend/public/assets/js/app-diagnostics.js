@@ -1,4 +1,4 @@
-import { APP_VERSION } from './env-v126.js';
+import { APP_VERSION } from './app-env.js';
 
 const ENGINE_POLICY = Object.freeze([
     { id: 'm7-purge', label: 'M7 · Cancellazione definitiva', state: 'active', detail: 'Disponibile con conferma esplicita, fence globale, ricevuta e audit.' },
@@ -29,7 +29,7 @@ async function checkLocalStorage(storage) {
 async function checkHosting(fetcher, online) {
     if (!online) return result('hosting', 'File applicazione', 'warn', 'Dispositivo offline: controllo remoto non eseguito.');
     try {
-        const response = await fetcher(`/assets/js/env-v126.js?diagnostic=${Date.now()}`, { cache: 'no-store', credentials: 'same-origin' });
+        const response = await fetcher(`/assets/js/app-env.js?diagnostic=${Date.now()}`, { cache: 'no-store', credentials: 'same-origin' });
         return result('hosting', 'File applicazione', response.ok ? 'pass' : 'fail', response.ok ? `Versione ${APP_VERSION} raggiungibile.` : `Risposta HTTP ${response.status}.`);
     } catch {
         return result('hosting', 'File applicazione', 'fail', 'File della versione non raggiungibile.');

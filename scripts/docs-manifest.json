@@ -1,9 +1,11 @@
 {
   "version": 1,
   "approvedBy": "Diego",
-  "approval": "Ordine procedi nella conversazione Astra - Codici & Password, 23/09/2026",
+  "approval": "Ordine concludi il lavoro e procedi nella conversazione Codex - Codici & Password, 05/11/2026",
   "baseline": "2900ccc0bbd83997de8e50d260b1868f33bc5e38",
+  "pathCount": 32,
   "paths": [
+    "SECURITY.md",
     ".github/copilot-instructions.md",
     "docs/LEGGIMI.md",
     "docs/domande/M10_RILASCIO.md",

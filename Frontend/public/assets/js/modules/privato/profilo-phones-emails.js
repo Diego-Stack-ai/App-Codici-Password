@@ -55,7 +55,7 @@ function createLinkedAccountPassword(email) {
         revealed = false;
         value.textContent = masked;
         icon.textContent = 'visibility';
-        toggle.setAttribute('aria-label', 'Mostra password Account');
+        toggle.setAttribute('aria-label', t('aria_show_account_password'));
         toggle.setAttribute('aria-pressed', 'false');
         toggle.title = 'Mostra password Account';
     };
@@ -76,7 +76,7 @@ function createLinkedAccountPassword(email) {
                 value.textContent = password;
                 revealed = true;
                 icon.textContent = 'visibility_off';
-                toggle.setAttribute('aria-label', 'Nascondi password Account');
+                toggle.setAttribute('aria-label', t('aria_hide_account_password'));
                 toggle.setAttribute('aria-pressed', 'true');
                 toggle.title = 'Nascondi password Account';
                 status.textContent = '';
@@ -100,7 +100,7 @@ function createLinkedAccountPassword(email) {
         onclick: event => { event.stopPropagation(); return run(true); }
     }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'content_copy' })]);
     const row = createElement('div', { className: 'card-field-group' }, [
-        createElement('span', { className: 'data-label', textContent: 'Password Account collegato' }),
+        createElement('span', { className: 'data-label', textContent: t('company_linked_password') }),
         createElement('div', { className: 'field-value-row' }, [value, toggle, copy]), status
     ]);
     return row;
@@ -135,7 +135,7 @@ function createLegacyPasswordRecovery(password) {
 
     const copy = createCopyBtn(password);
     copy.title = 'Copia password legacy';
-    copy.setAttribute('aria-label', 'Copia password legacy');
+    copy.setAttribute('aria-label', t('aria_copy_legacy_password'));
 
     return createElement('div', { className: 'card-field-group' }, [
         createElement('span', { className: 'data-label', textContent: 'Password legacy' }),
@@ -195,7 +195,7 @@ function _createPhoneCard(phone, idx) {
                         checked: qrCodeInclusions.phones.includes(phone.id) || qrCodeInclusions.phones.includes(idx),
                         onclick: (e) => { e.stopPropagation(); _callbacks.toggleQRInclusion('phones', phone.id); }
                     }),
-                    createElement('label', { className: 'qr-mini-label', textContent: 'QR' }),
+                    createElement('label', { className: 'qr-mini-label', textContent: t('company_qr_label') }),
                     createElement('span', { className: 'data-label', textContent: 'Numero' })
                 ]),
                 createElement('div', { className: 'field-value-row' }, [
@@ -288,7 +288,7 @@ export function renderEmailsView() {
                     checked: qrCodeInclusions.emails.includes(e.id) || qrCodeInclusions.emails.includes(idx),
                     onclick: (ev) => { ev.stopPropagation(); _callbacks.toggleQRInclusion('emails', e.id); }
                 }),
-                createElement('label', { className: 'qr-mini-label', textContent: 'QR' }),
+                createElement('label', { className: 'qr-mini-label', textContent: t('company_qr_label') }),
                 createElement('span', { className: 'card-title-accent profile-contact-label', textContent: e.label || 'Email' })
             ]),
             createElement('div', { className: 'card-actions-row' }, [
@@ -312,7 +312,7 @@ export function renderEmailsView() {
             e.note ? createElement('div', {
                 className: 'profile-contact-note'
             }, [
-                createElement('span', { className: 'profile-contact-note-label', textContent: 'Nota' }),
+                createElement('span', { className: 'profile-contact-note-label', textContent: t('shared_contact_field_note') }),
                 createElement('span', { className: 'profile-contact-note-text', textContent: e.note })
             ]) : null,
             createElement('div', {className: e.linkedAccountId ? 'profile-account-actions' : ''}, [createLinkedAccountButton(e,
@@ -389,5 +389,5 @@ export async function editEmail(idx) {
 
 function accountManagementButtons(contact,type) {
     if(!contact.linkedAccountId) return [];
-    return [createElement('button',{className:'btn-upload-trigger',textContent:'Cambia Account',onclick:()=>_callbacks.changeProfileAccount({contact,type})}),createElement('button',{className:'btn-upload-trigger',textContent:'Scollega Account',onclick:()=>_callbacks.unlinkProfileAccount({contact,type})})];
+    return [createElement('button',{className:'btn-upload-trigger',textContent:t('company_change_account'),onclick:()=>_callbacks.changeProfileAccount({contact,type})}),createElement('button',{className:'btn-upload-trigger',textContent:t('company_unlink_account'),onclick:()=>_callbacks.unlinkProfileAccount({contact,type})})];
 }

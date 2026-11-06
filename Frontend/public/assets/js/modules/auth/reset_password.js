@@ -1,4 +1,4 @@
-﻿/**
+/**
  * RESET PASSWORD MODULE (V4.1)
  * Gestisce l'invio delle istruzioni di recupero credenziali.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/auth/.
@@ -70,7 +70,7 @@ function setupResetForm() {
 
             // Redirect al login dopo successo per migliorare la UX
             setTimeout(() => {
-                window.location.href = "login-v115.html";
+                window.location.href = "login.html";
             }, 3000);
 
         } catch (err) {

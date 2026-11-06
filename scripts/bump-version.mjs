@@ -7,7 +7,7 @@ const write = (path, content) => writeFile(new URL(path, root), content, 'utf8')
 
 const packagePath = 'package.json';
 const lockPath = 'package-lock.json';
-const envPath = 'Frontend/public/assets/js/env-v126.js';
+const envPath = 'Frontend/public/assets/js/app-env.js';
 const homePath = 'Frontend/public/home_page.html';
 const workerPath = 'Frontend/public/sw.js';
 const versionedExtensions = new Set(['.html', '.js']);

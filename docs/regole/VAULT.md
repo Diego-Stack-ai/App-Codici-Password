@@ -1,5 +1,9 @@
 # Vault
 
+## Contenimento locale multipagina — 06/11/2026
+
+La candidata locale 1.2.259 mantiene payload di sessione e CryptoKey non esportabile esclusivamente nella memoria del documento; nessun valore della sessione viene letto o scritto nello storage browser. Al bootstrap e al blocco vengono rimossi i nomi legacy. UID, scadenza, eventi di sblocco e invalidazione generazionale restano obbligatori; uscita dal documento/freeze revocano la RAM. Una nuova pagina o un refresh richiedono nuovo sblocco tramite Master Password o PRF compatibile. Questo contenimento non certifica la shell completa, non protegge da codice malevolo già attivo nello stesso contesto e non sana cache personali o cifrature legacy. La produzione precedente conserva lo stato storico riportato sotto; per prove e distribuzione vale [STATO](../progetto/STATO.md).
+
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
 > Indice e autorità: [LEGGIMI](../LEGGIMI.md). Stato verificato e limiti: [STATO](../progetto/STATO.md).
 

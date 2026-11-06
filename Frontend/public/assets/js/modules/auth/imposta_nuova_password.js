@@ -4,14 +4,31 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/auth/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.258';
+import { auth } from '../../firebase-config.js?v=1.2.259';
 import { updatePassword, confirmPasswordReset, signOut, verifyPasswordResetCode } from "/assets/js/vendor/firebase-runtime.js";
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
-import { db } from '../../firebase-config.js?v=1.2.258';
+import { db } from '../../firebase-config.js?v=1.2.259';
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { ACCOUNT_PASSWORD_POLICY_VERSION, bindPasswordChecklist, evaluatePassword, firstPasswordPolicyError, generateSecurePassword } from '../core/password-policy.js';
+import { authSessionFence } from '../../auth-session-fence.js';
+
+async function updateAuthenticatedPassword(newPassword) {
+    const user = auth.currentUser;
+    const permit = await authSessionFence.readPermit();
+    const current = () => Boolean(user?.uid && auth.currentUser?.uid === user.uid);
+    if (!permit || !current() || !await authSessionFence.isCurrent(permit)) {
+        throw Object.assign(new Error('AUTH_SESSION_CHANGED'), {code:'auth/session-changed'});
+    }
+    await updatePassword(user, newPassword);
+    if (!current() || !await authSessionFence.isCurrent(permit)) {
+        throw Object.assign(new Error('AUTH_SESSION_CHANGED'), {code:'auth/session-changed'});
+    }
+    await setDoc(doc(db, 'users', user.uid), {
+        passwordPolicyVersion: ACCOUNT_PASSWORD_POLICY_VERSION
+    }, { merge: true });
+}
 
 export async function initImpostaNuovaPassword() {
     
@@ -94,10 +111,7 @@ function setupNewPasswordForm() {
                 showToast(t('password_success') || "Password ripristinata! Ora puoi accedere.", "success");
             } else if (auth.currentUser) {
                 // CASO CAMBIO INTERNO
-                await updatePassword(auth.currentUser, newPassword);
-                await setDoc(doc(db, 'users', auth.currentUser.uid), {
-                    passwordPolicyVersion: ACCOUNT_PASSWORD_POLICY_VERSION
-                }, { merge: true });
+                await updateAuthenticatedPassword(newPassword);
                 showToast(t('password_success') || "Password di accesso aggiornata. La Master Password della Vault non è cambiata.", "success");
             } else {
                 throw new Error(t('auth_session_invalid'));
@@ -105,7 +119,7 @@ function setupNewPasswordForm() {
 
             // Redirect differenziato
             setTimeout(() => {
-                window.location.href = auth.currentUser ? 'home_page.html' : 'login-v115.html';
+                window.location.href = auth.currentUser ? 'home_page.html' : 'login.html';
             }, 2500);
 
         } catch (err) {
@@ -121,7 +135,7 @@ function setupNewPasswordForm() {
                 try {
                     await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
                 } finally {
-                    window.location.replace('login-v115.html?reauth=password-change');
+                    window.location.replace('login.html?reauth=password-change');
                 }
                 return;
             } else if (err.code === 'auth/expired-action-code') {
@@ -183,11 +197,11 @@ function setupCancelLogic() {
 
         if (isRequiredPolicyUpdate) {
             await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
-            window.location.replace('login-v115.html');
+            window.location.replace('login.html');
             return;
         }
 
-        window.location.href = (auth.currentUser && !isReset) ? 'impostazioni.html' : 'login-v115.html';
+        window.location.href = (auth.currentUser && !isReset) ? 'impostazioni.html' : 'login.html';
     };
 }
 

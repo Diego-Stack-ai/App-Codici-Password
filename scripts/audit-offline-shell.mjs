@@ -15,7 +15,10 @@ async function walk(directory) {
 
 function isDeployExcluded(relativePath) {
   const parts = relativePath.split('/');
-  return parts.includes('graphify-out') || parts.some(part => part.startsWith('.'));
+  return relativePath === 'assets/local-ai-packages'
+    || relativePath.startsWith('assets/local-ai-packages/')
+    || parts.includes('graphify-out')
+    || parts.some(part => part.startsWith('.'));
 }
 
 const files = await walk(publicDir);
@@ -28,6 +31,7 @@ const offlineSource = await readFile(path.join(publicDir, 'offline-assets.js'), 
 const assets = JSON.parse(offlineSource.match(/=\s*(\[[\s\S]*\]);?\s*$/)?.[1] || '[]');
 const assetSet = new Set(assets);
 const onlineOnlyDiagnostics = new Set([
+  'release-manifest.json',
   'prova.html',
   'assets/css/prova.css',
   'assets/js/prova.js'
@@ -58,11 +62,8 @@ for (const diagnostic of onlineOnlyDiagnostics) {
 
 for (const file of textFiles.filter(file => !file.includes(`${path.sep}vendor${path.sep}`))) {
   const source = await readFile(file, 'utf8');
-  const isOnlinePushRuntime = file.endsWith(`${path.sep}assets${path.sep}js${path.sep}push-messaging-client.js`);
-  if (!isOnlinePushRuntime) {
-    assert.doesNotMatch(source, /https:\/\/www\.gstatic\.com\/firebasejs\//,
-      `Dipendenza Firebase remota in ${path.relative(root, file)}`);
-  }
+  assert.doesNotMatch(source, /https:\/\/www\.gstatic\.com\/firebasejs\//,
+    `Dipendenza Firebase remota in ${path.relative(root, file)}`);
   if (file.endsWith('.js') && !file.endsWith('offline-firestore.js')) {
     assert.doesNotMatch(source, /import\s*\{[^}]*\bgetDocs?\b[^}]*\}\s*from\s*["']\/assets\/js\/vendor\/firebase-runtime\.js["']/,
       `Lettura Firestore senza percorso cache-first in ${path.relative(root, file)}`);
@@ -81,4 +82,4 @@ assert.doesNotMatch(serviceWorker, /protected-media\/presentation|\/assets\/loca
 assert.match(loginEntry, /serviceWorker\.register\('\.\/sw\.js'\)/);
 assert.ok(assetSet.has('assets/js/offline-firestore.js'), 'Adattatore Firestore offline non precaricato');
 
-console.log(`Shell offline verificata: ${assets.length} risorse locali; eccezione CDN limitata al client Push online.`);
+console.log(`Shell offline verificata: ${assets.length} risorse locali; nessun import Firebase CDN.`);

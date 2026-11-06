@@ -19,7 +19,7 @@ export function getLocalQaLanguageOverride() {
 
 let _dict = {};
 async function loadPageCatalog(language) {
-    if (/(?:^|\/)(?:login-v115|registrati|reset_password|imposta_nuova_password|contatto_condiviso)(?:\.html)?$/i.test(location.pathname)) {
+    if (/(?:^|\/)(?:login|registrati|reset_password|imposta_nuova_password|contatto_condiviso)(?:\.html)?$/i.test(location.pathname)) {
         const { accessCatalogs } = await import('./translations/access.js');
         return accessCatalogs[language] || {};
     }
@@ -66,8 +66,10 @@ export function getCurrentLanguage() {
 
 let _italianCatalogPromise;
 async function loadItalianCatalog() {
-    _italianCatalogPromise ||= import('./translations/it.js')
-        .then(module => Object.assign(_it, module.default));
+    _italianCatalogPromise ||= Promise.all([
+        import('./translations/it.js'),
+        import('./translations/dynamic-ui.js')
+    ]).then(([base, dynamic]) => Object.assign(_it, base.default, dynamic.dynamicUiCatalogs.it));
     await _italianCatalogPromise;
 }
 
@@ -85,8 +87,11 @@ export async function loadLanguage(lang = 'it') {
     }
     try {
         const baseUrl = import.meta.url.replace(/[^/]+$/, '');
-        const module = await import(`${baseUrl}translations/${lang}.js`);
-        _dict = { ...module.default, ...(await loadPageCatalog(lang)) };
+        const [module, dynamic] = await Promise.all([
+            import(`${baseUrl}translations/${lang}.js`),
+            import('./translations/dynamic-ui.js')
+        ]);
+        _dict = { ...module.default, ...(dynamic.dynamicUiCatalogs[lang] || {}), ...(await loadPageCatalog(lang)) };
         LOG(`[i18n] Lingua attiva: ${lang} (${Object.keys(_dict).length} chiavi)`);
     } catch (e) {
         console.warn(`[i18n] Lingua '${lang}' non disponibile — fallback a 'it'`);
@@ -102,6 +107,13 @@ export function t(key) {
         console.warn(`[i18n] Chiave mancante per ${_activeLanguage}: ${key}`);
     }
     return _it[key] || key;
+}
+
+export function tf(key, values = {}) {
+    return Object.entries(values).reduce(
+        (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+        t(key)
+    );
 }
 
 export function getMissingTranslationKeys() {

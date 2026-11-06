@@ -168,5 +168,53 @@ const portableLarge = {
   }
 };
 
+const supportDetails = {
+  it: {
+    settings_app_version_label: 'Versione',
+    settings_privacy_summary: 'Consulta l’informativa completa per sapere come vengono trattati e protetti i dati personali.',
+    settings_terms_summary: 'Consulta le condizioni complete che regolano l’utilizzo del servizio.'
+  },
+  en: {
+    settings_app_version_label: 'Version',
+    settings_privacy_summary: 'Read the full policy to learn how personal data is processed and protected.',
+    settings_terms_summary: 'Read the full terms that govern use of the service.'
+  },
+  es: {
+    settings_app_version_label: 'Versión',
+    settings_privacy_summary: 'Consulta la política completa para saber cómo se tratan y protegen los datos personales.',
+    settings_terms_summary: 'Consulta las condiciones completas que regulan el uso del servicio.'
+  },
+  fr: {
+    settings_app_version_label: 'Version',
+    settings_privacy_summary: 'Consultez la politique complète pour savoir comment les données personnelles sont traitées et protégées.',
+    settings_terms_summary: 'Consultez les conditions complètes qui régissent l’utilisation du service.'
+  },
+  de: {
+    settings_app_version_label: 'Version',
+    settings_privacy_summary: 'Lesen Sie die vollständige Erklärung, um zu erfahren, wie personenbezogene Daten verarbeitet und geschützt werden.',
+    settings_terms_summary: 'Lesen Sie die vollständigen Bedingungen für die Nutzung des Dienstes.'
+  },
+  zh: {
+    settings_app_version_label: '版本',
+    settings_privacy_summary: '请阅读完整政策，了解个人数据如何被处理和保护。',
+    settings_terms_summary: '请阅读规范服务使用的完整条款。'
+  },
+  hi: {
+    settings_app_version_label: 'संस्करण',
+    settings_privacy_summary: 'व्यक्तिगत डेटा के संसाधन और संरक्षण की जानकारी के लिए पूरी नीति पढ़ें।',
+    settings_terms_summary: 'सेवा के उपयोग को नियंत्रित करने वाले पूरे नियम पढ़ें।'
+  },
+  pt: {
+    settings_app_version_label: 'Versão',
+    settings_privacy_summary: 'Consulte a política completa para saber como os dados pessoais são tratados e protegidos.',
+    settings_terms_summary: 'Consulte os termos completos que regulam a utilização do serviço.'
+  }
+};
+
 export const settingsCatalogs = Object.fromEntries(Object.entries({ it, en, es, fr, de, zh, hi, pt })
-  .map(([language, catalog]) => [language, { ...catalog, ...portable[language], ...portableLarge[language] }]));
+  .map(([language, catalog]) => [language, {
+    ...catalog,
+    ...supportDetails[language],
+    ...portable[language],
+    ...portableLarge[language]
+  }]));

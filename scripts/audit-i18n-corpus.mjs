@@ -166,7 +166,7 @@ const missingByLanguage = Object.fromEntries(Object.entries(buildI18nInventory()
 
 const pageMatrix = {};
 const PAGE_ROUTE_MODULES = {
-  'Frontend/public/login-v115.html': 'Frontend/public/assets/js/modules/auth/login.js',
+  'Frontend/public/login.html': 'Frontend/public/assets/js/modules/auth/login.js',
   'Frontend/public/registrati.html': 'Frontend/public/assets/js/modules/auth/registrati.js',
   'Frontend/public/reset_password.html': 'Frontend/public/assets/js/modules/auth/reset_password.js',
   'Frontend/public/imposta_nuova_password.html': 'Frontend/public/assets/js/modules/auth/imposta_nuova_password.js',

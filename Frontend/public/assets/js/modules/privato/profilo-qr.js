@@ -8,10 +8,11 @@
  *   profilo_privato.js → profilo-qr.js → qr_code_utils.js, firebase
  */
 
-import { db } from '../../firebase-config.js?v=1.2.258';
+import { db } from '../../firebase-config.js?v=1.2.259';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
 import { ensureQRCodeLib, buildVCard, buildProfileQrPayload, renderQRCode } from '../shared/qr_code_utils-v2.js';
+import { t } from '../../translations.js';
 
 let _getState = null;
 let _renders = null;
@@ -120,7 +121,7 @@ function _showEnlargedQR(vcard) {
             createElement('div', { id: 'qr-enlarged', className: 'qr-zoom-container' }),
             createElement('button', {
                 className: 'btn-modal btn-secondary',
-                textContent: 'Chiudi',
+                textContent: t('close'),
                 dataset: { t: 'close' },
                 onclick: () => { modal.classList.remove('active'); setTimeout(() => modal.remove(), 300); }
             })

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
+import {testTranslate} from './helpers/test-translator.mjs';
 const guardSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/credential-decrypt-guard.js', import.meta.url), 'utf8');
 const {DECRYPT_FAILURE_MESSAGE, assertAccountSaveAllowed, createAccountLoadContext, isAccountSaveAllowed} =
     await import(`data:text/javascript;base64,${Buffer.from(guardSource).toString('base64')}`);
@@ -75,7 +76,7 @@ test('scelta locale o più tardi non elimina la coda; solo scelta server la scar
   const sandbox={outcome:{status:'reconciliation-required',operation},lastState:null,currentDocId:'record',user:{uid:'owner'},vaultKeyMaterial:'key',
    active:()=>active,document:{getElementById:()=>button},showToast(){},showM6ConflictChoice:async()=>{if(choice==='expired')active=false;return choice==='expired'?'server':choice},
    pilot:{discardPrivateAccountPilotRecord:async()=>{discarded++;return{discarded:2,remaining:0}}},getPrivateAccountConfirmed:async()=>({type:'account',visibility:'private',revision:2}),
-   canRecoverPrivateAccount,restoreM6ConflictDraft:async()=>restored++,setTimeout(){}};
+   canRecoverPrivateAccount,restoreM6ConflictDraft:async()=>restored++,t:testTranslate,setTimeout(){}};
   vm.createContext(sandbox);vm.runInContext(flow,sandbox);await sandbox.resume();
   assert.equal(discarded,choice==='server'?1:0);assert.equal(restored,choice==='local'?1:0);assert.equal(button.disabled,choice!=='local');
  }
@@ -99,7 +100,7 @@ test('unsupported review offers no local recovery and only explicit server choic
  const flow=('async function resume(){'+formSource.slice(start,end)+'}}').replace("const pilot = await import('../data/private-account-offline-pilot.js');",'');
  for(const choice of ['local','server',null]){
   let discarded=0,restored=0,readServer=0;const operation={uid:'owner',operationId:'old',recordId:'record',_reviewReason:'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED',record:{type:'account'}};
-  const sandbox={outcome:{status:'reconciliation-required',operation},lastState:null,currentDocId:'record',user:{uid:'owner'},vaultKeyMaterial:'key',active:()=>true,document:{getElementById:()=>({})},showToast(){},showM6ConflictChoice:async(reconcile,unsupported)=>{assert.equal(unsupported,true);return choice},pilot:{discardPrivateAccountPilotRecord:async()=>{discarded++;return{discarded:3,remaining:0}}},getPrivateAccountConfirmed:async()=>{readServer++;return{}},restoreM6ConflictDraft:async()=>restored++,setTimeout(){}};
+  const sandbox={outcome:{status:'reconciliation-required',operation},lastState:null,currentDocId:'record',user:{uid:'owner'},vaultKeyMaterial:'key',active:()=>true,document:{getElementById:()=>({})},showToast(){},showM6ConflictChoice:async(reconcile,unsupported)=>{assert.equal(unsupported,true);return choice},pilot:{discardPrivateAccountPilotRecord:async()=>{discarded++;return{discarded:3,remaining:0}}},getPrivateAccountConfirmed:async()=>{readServer++;return{}},restoreM6ConflictDraft:async()=>restored++,t:testTranslate,setTimeout(){}};
   vm.createContext(sandbox);vm.runInContext(flow,sandbox);await sandbox.resume();assert.equal(discarded,choice==='server'?1:0);assert.equal(restored,0);assert.equal(readServer,0);
  }
 });
@@ -125,12 +126,12 @@ test('una nuova creazione offline resta nel modulo e non viene accodata come sal
 });
 test('un conflitto di un altro account non apre popup e non disabilita il salvataggio corrente',()=>{
  assert.doesNotMatch(formSource,/showM6ForeignConflictChoice/);
- assert.match(formSource,/Questo Account può essere modificato normalmente/);
+ assert.match(formSource,/t\('dyn_private_offline_other_account'\)/);
  assert.match(formSource,/discardPrivateAccountPilotRecord/);
 });
 test('bootstrap completion timer does not navigate after form context expires',async()=>{
  const start=formSource.indexOf('            const reconciliation =');const end=formSource.indexOf('        } catch (error)',start);
  let active=true,navigated=0;
- const sandbox={lastState:null,outcome:{completed:1},active:()=>active,showToast(){},setTimeout:fn=>{active=false;fn()},window:{location:{replace:()=>navigated++}},getPrivateAccountListDestination:()=> 'fixture'};
+ const sandbox={lastState:null,outcome:{completed:1},active:()=>active,showToast(){},t:testTranslate,setTimeout:fn=>{active=false;fn()},window:{location:{replace:()=>navigated++}},getPrivateAccountListDestination:()=> 'fixture'};
  vm.createContext(sandbox);vm.runInContext('async function resume(){'+formSource.slice(start,end)+'}',sandbox);await sandbox.resume();assert.equal(navigated,0);
 });

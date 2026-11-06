@@ -141,7 +141,7 @@ try {
         if (response.status() >= 400) report.networkErrors.push({ status: response.status(), url: response.url().slice(0, 300) });
     });
 
-    await page.goto(`${origin}/login-v115.html`, { waitUntil: 'networkidle', timeout: 45_000 });
+    await page.goto(`${origin}/login.html`, { waitUntil: 'networkidle', timeout: 45_000 });
     await page.waitForFunction(() => document.documentElement.getAttribute('data-i18n') === 'ready', null, { timeout: 20_000 });
     const languageDialog = page.locator('#initial-language-dialog');
     if (await languageDialog.isVisible().catch(() => false)) {
@@ -157,7 +157,7 @@ try {
     await page.waitForURL(/\/home_page\.html(?:[?#]|$)/, { timeout: 45_000 });
     await page.locator('#protocol-input-modal-input').fill(credentials.masterPassword);
     await page.locator('#modal-confirm-btn').click();
-    await page.waitForFunction(() => Boolean(sessionStorage.getItem('vault_session_v1')), null, { timeout: 45_000 });
+    await page.waitForFunction(async () => (await import('/assets/js/modules/core/security-manager.js')).isVaultUnlocked(), null, { timeout: 45_000 });
 
     await page.goto(`${origin}/profilo_privato.html`, { waitUntil: 'domcontentloaded', timeout: 45_000 });
     await page.waitForFunction(() => document.documentElement.getAttribute('data-i18n') === 'ready', null, { timeout: 20_000 });

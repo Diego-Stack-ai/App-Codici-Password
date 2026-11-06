@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
+import {testTranslate} from './helpers/test-translator.mjs';
 const {parse} = createRequire(import.meta.url)('@babel/parser');
 
 test('entrambi i dettagli usano auth importato da Firebase per avviare le note', async () => {
@@ -53,7 +54,7 @@ function fixture() {
     const context = vm.createContext({auth: {currentUser: {uid: 'owner'}}, db: {},
         onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
         document: {getElementById: id => nodes.find(n => n.id === id), body: new Node('body')},
-        createElement: (...args) => new Node(...args), showToast: (...args) => toasts.push(args),
+        createElement: (...args) => new Node(...args), showToast: (...args) => toasts.push(args), t: testTranslate,
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
         ensureVaultKeyMaterial: async () => 'key', encrypt: async value => value ? `sealed:${value}` : '',
         decrypt: async value => value.replace(/^sealed:/, ''), doc: (_db, ...parts) => parts.join('/'),

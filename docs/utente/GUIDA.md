@@ -1,5 +1,9 @@
 # Guida
 
+## Sblocco della candidata locale
+
+Nella candidata locale successiva al controllo del 06/11/2026 la Vault si sblocca per la pagina aperta. Cambiando pagina o ricaricando può quindi essere richiesta nuovamente la Master Password, oppure la verifica biometrica sui dispositivi già configurati e compatibili. La password dell'account e la Master Password restano distinte. Il messaggio «Verifica accesso in corso…» indica il controllo iniziale della sessione, durante il quale il contenuto privato rimane nascosto. Queste modifiche locali non sono ancora disponibili sul sito pubblicato; consultare [STATO](../progetto/STATO.md).
+
 ## Consultare l'Archivio portatile
 
 Nel visualizzatore scegli `archivio.cpportable` e inserisci la password dedicata. Le schede mostrano subito i dati utili; identificativi, revisioni, condivisioni e altri metadati restano disponibili in **Informazioni tecniche**. Foto, video, audio, PDF e testo si aprono con **Visualizza** o **Riproduci** quando il browser li supporta. **Salva sul PC** conserva il singolo file e **Salva tutti gli allegati** permette di scegliere una cartella.
@@ -42,7 +46,7 @@ La guida descrive come orientarsi e quali comandi usare; lo stato di implementaz
 | pageId | Obiettivo dell’utente | Aiuto per funzioni e controlli | Formato previsto |
 |---|---|---|---|
 | `index` | Ingresso: Raggiungi la pagina di accesso all’app. | Collegamento all’accesso | Testo |
-| `login-v115` | Accesso: Accedi con l’identità del tuo account; lo sblocco del Vault è un passaggio distinto. | Distinzione password/Vault, MFA e recupero | Testo + walkthrough breve |
+| `login` | Accesso: Accedi con l’identità del tuo account; lo sblocco del Vault è un passaggio distinto. | Distinzione password/Vault, MFA e recupero | Testo + walkthrough breve |
 | `registrati` | Registrazione: Crea l’account di accesso e segui la verifica dell’email. | Requisiti, conferma e verifica email | Checklist + walkthrough |
 | `reset_password` | Recupero dell’accesso: Richiedi l’email per cambiare la password di accesso. | Email di recupero e collegamento riservato | Testo |
 | `imposta_nuova_password` | Nuova password di accesso: Scegli la nuova password di accesso dal percorso autorizzato. | Requisiti e conferma password accesso | Checklist |
@@ -161,7 +165,7 @@ pagina e un solo modulo inizializzatore.
 
 | Funzione | Che cosa fa | Fonte | Stato |
 |---|---|---|---|
-| Registrazione, accesso, reset password | creazione account, accesso e recupero via Firebase Auth | `registrati.html`, `reset_password.html`, `imposta_nuova_password.html`, `login-v115.html` | [V] nei test di autenticazione; [E] matrice fisica |
+| Registrazione, accesso, reset password | creazione account, accesso e recupero via Firebase Auth | `registrati.html`, `reset_password.html`, `imposta_nuova_password.html`, `login.html` | [V] nei test di autenticazione; [E] matrice fisica |
 | Sblocco del Vault con Master Password | deriva la chiave (KEK) e apre la chiave del Vault | `modules/core/crypto-utils.js` (PBKDF2-SHA256 600 000 per verificatore/KEK) | [V] |
 | Sblocco biometrico (passkey/WebAuthn PRF) | secondo fattore locale con estensione PRF; fail-closed se il PRF non c'è | `modules/core/webauthn-manager.js`, `security-manager.js` | [V] nei test di laboratorio; [E] su dispositivo |
 | Recupero MFA con codice | password + codice di recupero **monouso**, limite per email+IP, codice conservato per hash | `functions/index.js` (`recoverMfaWithCode`) | [V] lettura del codice e test Functions; [E] prova reale |

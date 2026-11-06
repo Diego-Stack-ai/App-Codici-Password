@@ -4,6 +4,7 @@
  */
 
 import { showToast } from './ui-core-v129.js';
+import { t } from './translations.js';
 
 /**
  * [LOGIC] SETUP PASSWORD TOGGLES
@@ -65,7 +66,7 @@ export function setupCopyButtons() {
                                 icon.textContent = 'done';
                                 setTimeout(() => icon.textContent = oldIcon, 1500);
                             }
-                            showToast('Copiato!');
+                            showToast(t('copied'));
                         } catch (err) {
                             console.error('Copy failed', err);
                         }

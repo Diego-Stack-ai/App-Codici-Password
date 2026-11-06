@@ -1,4 +1,4 @@
-﻿/**
+/**
  * REGISTRATION MODULE (V4.1)
  * Gestisce la creazione di utenze e i relativi feedback di sistema.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/auth/.
@@ -126,7 +126,7 @@ function setupRegisterForm() {
 
                 // Redirect al login dopo successo
                 setTimeout(() => {
-                    window.location.href = "login-v115.html";
+                    window.location.href = "login.html";
                 }, 3000);
             } else {
                 // Rimetto lo stato originale se fallisce internamente

@@ -149,7 +149,7 @@ export function addExtraEmail(data = null) {
                     checked: data ? (data.qr !== false) : true,
                     'data-stop-propagation': true
                 }),
-                createElement('label', { for: `qr_${uniqueId}`, className: 'sr-only', textContent: 'QR' })
+                createElement('label', { for: `qr_${uniqueId}`, className: 'sr-only', textContent: t('company_qr_label') })
             ]),
             createElement('button', {
                 type: 'button',
@@ -260,7 +260,7 @@ export function addExtraSede(data = null) {
                     'data-stop-propagation': true,
                     'aria-label': 'Includi sede nel QR'
                 }),
-                createElement('label', { for: `qr_${uniqueId}`, className: 'sr-only', textContent: 'QR' })
+                createElement('label', { for: `qr_${uniqueId}`, className: 'sr-only', textContent: t('company_qr_label') })
             ]),
             createElement('button', {
                 type: 'button',

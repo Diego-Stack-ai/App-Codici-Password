@@ -20,11 +20,24 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
+
+      - name: Prepare release secret scan
+        run: node scripts/prepare-gitleaks-config.mjs --output "$RUNNER_TEMP/gitleaks.toml"
+
+      - name: Scan release commits for secrets
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: ${{ runner.temp }}/gitleaks.toml
+          GITLEAKS_VERSION: 8.30.1
+          GITLEAKS_ENABLE_COMMENTS: false
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: false
 
       - name: Classify validation scope
         id: scope
@@ -65,14 +78,14 @@ jobs:
 
       - name: Setup Node.js
         if: steps.scope.outputs.run_full_suite == 'true'
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 22
           cache: npm
 
       - name: Setup Java for Firebase Emulator
         if: steps.scope.outputs.run_full_suite == 'true'
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           distribution: temurin
           java-version: 21
@@ -89,6 +102,16 @@ jobs:
         if: steps.scope.outputs.run_full_suite == 'true'
         run: npm test
 
+      - name: Verify canonical release version
+        if: steps.scope.outputs.run_full_suite == 'true'
+        run: npm run version:check
+
+      - name: Build and verify release manifest
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          node scripts/release-manifest.mjs --write --commit "$GITHUB_SHA" --require-clean
+          node scripts/release-manifest.mjs --check --commit "$GITHUB_SHA" --require-clean
+
       - name: Confirm documentation-only pull request
         if: steps.scope.outputs.run_full_suite == 'false'
         run: echo "Application checks skipped; the dedicated documentation workflow validates this pull request."
@@ -98,13 +121,14 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'
     needs: validate
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     environment: production
     concurrency:
       group: firebase-production
       cancel-in-progress: false
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Verify master before deploy
         shell: bash
@@ -115,7 +139,7 @@ jobs:
           test "$GITHUB_SHA" = "$remote_master"
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 22
           cache: npm
@@ -123,10 +147,30 @@ jobs:
       - name: Install deployment dependencies
         run: npm ci
 
+      - name: Prepare immutable release manifest
+        run: |
+          node scripts/release-manifest.mjs --write --commit "$GITHUB_SHA" --require-clean
+          node scripts/release-manifest.mjs --check --commit "$GITHUB_SHA" --require-clean
+
       # Le Functions restano escluse e richiedono un'autorizzazione separata.
       # FIREBASE_TOKEN resta temporaneamente il metodo CI esistente.
-      - name: Deploy Hosting only
-        run: node node_modules/firebase-tools/lib/bin/firebase.js deploy --project appcodici-password --only hosting --token ${{ secrets.FIREBASE_TOKEN }}
+      - name: Recheck master and deploy Hosting only
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_master="$(git ls-remote origin refs/heads/master | cut -f1)"
+          test -n "$remote_master"
+          test "$GITHUB_SHA" = "$remote_master"
+          node node_modules/firebase-tools/lib/bin/firebase.js deploy --project appcodici-password --only hosting --token ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Verify deployed manifest and critical assets
+        run: >-
+          node scripts/release-manifest.mjs
+          --commit "$GITHUB_SHA"
+          --require-clean
+          --verify-url https://appcodici-password.web.app
+          --retries 8
+          --delay-ms 5000
 
       - name: Record deployed commit
         shell: bash
@@ -134,10 +178,13 @@ jobs:
           set -euo pipefail
           remote_master="$(git ls-remote origin refs/heads/master | cut -f1)"
           test -n "$remote_master"
-          test "$GITHUB_SHA" = "$remote_master"
           {
             echo "### Firebase Hosting deployed"
             echo "- Ref: \`$GITHUB_REF\`"
             echo "- Commit: \`$GITHUB_SHA\`"
+            echo "- Master after deploy: \`$remote_master\`"
             echo "- Scope: \`hosting\`"
+            if [ "$GITHUB_SHA" != "$remote_master" ]; then
+              echo "- Notice: master advanced after the final pre-deploy check; the approved workflow SHA remains the deployed source."
+            fi
           } >> "$GITHUB_STEP_SUMMARY"

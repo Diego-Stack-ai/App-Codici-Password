@@ -6,6 +6,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  */
 
 import { LOG, LOG_ERROR, LOG_WARN } from './logger.js';
+import { authSessionFence } from './auth-session-fence.js';
 
 
 console.log      = (...args) => { try { LOG(...args);       } catch (e) {} };
@@ -26,7 +27,7 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.258';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.259';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, limit, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
@@ -35,7 +36,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage, getLocalQaLanguageOverride, observeTranslatedSubtrees } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.258&push=20261022a&ai=20261019b&deadline-share=20260908a&touch=20261017b';
+import * as Pages from './pages-init.js?v=1.2.259&push=20261022a&ai=20261019b&deadline-share=20260908a&touch=20261017b';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric, captureNavigationMetric } from './performance-metrics.js';
@@ -241,6 +242,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const n1Epoch = ++n1CallbackEpoch;
         stopN1ShareRevokedNotices();
         const gate = window.privateAuthGate;
+        let fenceTicket;
+        try { fenceTicket = await authSessionFence.readPermit(); }
+        catch { gate?.reject('error'); return; }
+        if (n1Epoch !== n1CallbackEpoch) return;
+        if (!fenceTicket) { gate?.reject(); return; }
         const authAttempt = gate?.begin(user?.uid);
         if (gate && authAttempt === null) { inviteUnsubscribe?.(); return; }
         if (user) {
@@ -256,7 +262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (auth.currentUser?.uid !== user.uid) return;
                     if (!auth.currentUser?.emailVerified) {
                         gate?.block();
-                        window.location.replace('/login-v115.html?verifyEmail=1');
+                        window.location.replace('/login.html?verifyEmail=1');
                         return;
                     }
                     if (navigator.onLine) {
@@ -264,6 +270,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (token.claims.email_verified !== true) await auth.currentUser.getIdToken(true);
                     }
                 }
+                if (isPrivatePage && !await authSessionFence.isCurrent(fenceTicket)) { gate?.reject(); return; }
                 if (isPrivatePage && !gate?.acceptIdentity(authAttempt, auth.currentUser)) return;
                 if (isPrivatePage && navigator.onLine) firebaseRuntime.enableAppCheck?.();
 
@@ -392,7 +399,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     try {
                         const trigger = document.getElementById('search-status');
                         const includeCompanies = getSyncedCompanyAreaPreference(userDoc.data() || {}, user.uid);
-                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.258');
+                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.259');
                         await initVaultAssistant(user, { includeCompanies });
                         trigger?.classList.remove('hidden');
                     } catch (error) {
@@ -470,7 +477,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     sessionStorage.setItem('pending_deadline_link', `${window.location.pathname}${window.location.search}`);
                 }
                 gate?.reject();
-                if (!gate) window.location.replace('/login-v115.html');
+                if (!gate) window.location.replace('/login.html');
             }
         }
     }, () => { window.privateAuthGate?.reject('error'); });
@@ -566,7 +573,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 createElement('div', { className: 'modal-actions grid grid-cols-2 gap-4 mt-2' }, [
                     createElement('button', {
                         className: 'w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white/60 font-black uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all active:scale-95',
-                        textContent: 'Archivia',
+                        textContent: t('deadline_archive_action'),
                         onclick: async () => {
                             await updateDoc(doc(db, "invites", inviteId), { senderNotified: true });
                             modal.remove();
@@ -574,7 +581,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }),
                     createElement('button', {
                         className: 'w-full p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 font-black uppercase text-[10px] tracking-widest hover:bg-red-500/20 transition-all active:scale-95',
-                        textContent: 'Elimina',
+                        textContent: t('delete'),
                         onclick: async () => {
                             await deleteDoc(doc(db, "invites", inviteId));
                             modal.remove();

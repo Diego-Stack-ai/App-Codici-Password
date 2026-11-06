@@ -1,6 +1,6 @@
 import { findProfileAccountItem, patchProfileAccountItem, profileAccountReferences } from '../privato/profile-model.js';
 import { prepareCompanyProfileLink, promptCompanyProfilePasswordChoice } from '../azienda/company-profile-link.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.258';
+import { auth, db } from '../../firebase-config.js?v=1.2.259';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
@@ -268,7 +268,7 @@ export async function savePrivateAccount({
                 if (btnSave) {
                     btnSave.disabled = true;
                     btnSave.dataset.m6Queued = 'true';
-                    btnSave.setAttribute('aria-label', 'Modifica già conservata sul dispositivo');
+                    btnSave.setAttribute('aria-label', t('aria_saved_on_device'));
                 }
                 return;
             }

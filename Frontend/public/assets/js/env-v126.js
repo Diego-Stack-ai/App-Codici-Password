@@ -1,7 +1,5 @@
 /**
- * ENV SINGLETON (V1.0)
- * Sostituisce window.__APP_ENV con un export ES6.
- * Letto una sola volta al caricamento del modulo.
+ * Alias di compatibilita temporaneo per client e Service Worker precedenti.
+ * Il runtime canonico e assets/js/app-env.js; non aggiungere logica qui.
  */
-export const APP_ENV = document.documentElement.dataset.env || 'production';
-export const APP_VERSION = 'v1.2.258';
+export {APP_ENV, APP_VERSION} from './app-env.js';

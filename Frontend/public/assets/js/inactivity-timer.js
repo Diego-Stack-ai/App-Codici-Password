@@ -1,5 +1,5 @@
 import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
-import { auth, db } from './firebase-config.js?v=1.2.258';
+import { auth, db } from './firebase-config.js?v=1.2.259';
 import { LOG } from './logger.js';
 import { getVaultSessionExpiry, touchVaultSession } from './modules/core/vault-session.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
@@ -104,7 +104,7 @@ function recordActivity() {
 async function lockVaultForInactivity() {
     try {
         const currentPage = window.location.pathname.split('/').pop();
-        if (currentPage === 'login-v115.html' || currentPage === '') return;
+        if (currentPage === 'login.html' || currentPage === '') return;
 
         const { softLock } = await import('./modules/core/security-manager.js');
         softLock();
@@ -112,7 +112,7 @@ async function lockVaultForInactivity() {
         window.location.reload();
     } catch (e) {
         console.error("[Titan-Lock] Errore durante il blocco Vault:", e);
-        window.location.href = 'login-v115.html';
+        window.location.href = 'login.html';
     }
 }
 

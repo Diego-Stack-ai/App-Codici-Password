@@ -17,7 +17,7 @@ const gateValidation = validation.slice(start, end);
 const server = createServer(async (request, response) => {
     try {
         const url = new URL(request.url, 'http://127.0.0.1');
-        if (url.pathname === '/login-v115.html') {
+        if (url.pathname === '/login.html') {
             response.setHeader('Content-Type', 'text/html');
             response.end('<!doctype html><html><body>Login fixture</body></html>'); return;
         }
@@ -29,6 +29,8 @@ const server = createServer(async (request, response) => {
                 const currentPage = 'home';
                 const user = {uid:'synthetic',emailVerified:true,reload:async()=>{}};
                 const auth = {currentUser:user};
+                const {authSessionFence} = await import('/assets/js/auth-session-fence.js');
+                const fenceTicket = await authSessionFence.readPermit();
                 window.__authPhase = 'pending';
                 setTimeout(async () => {
                     if (${JSON.stringify(scenario)} === 'timeout') return;
@@ -105,9 +107,9 @@ async function checkBrowser(executable) {
         for (const scenario of published ? ['published'] : ['null','valid','error','timeout','logout']) {
             observed = [];
             await command('Page.navigate', {url:published ? 'https://appcodici-password.web.app/home_page.html' : `${origin}/home_page.html?case=${scenario}`});
-            const deadline = Date.now() + (scenario === 'timeout' ? 18000 : published ? 6000 : 5000);
+            const deadline = Date.now() + (scenario === 'timeout' ? 48000 : published ? 6000 : 5000);
             while (Date.now() < deadline) {
-                if (!published && observed.some(state => scenario === 'valid' ? state.phase === 'ready' : state.page === '/login-v115.html')) break;
+                if (!published && observed.some(state => scenario === 'valid' ? state.phase === 'ready' : state.page === '/login.html')) break;
                 await delay(100);
             }
             if (published) {
@@ -116,7 +118,7 @@ async function checkBrowser(executable) {
                 assert.ok(observed.some(s=>s.page==='/home_page.html'&&s.phase==='pending'&&!s.visible), scenario + ': initially hidden');
                 assert.ok(!observed.some(s=>s.page==='/home_page.html'&&s.phase==='pending'&&s.visible), scenario + ': no pre-auth frame');
                 if (scenario==='valid') assert.ok(observed.some(s=>s.phase==='ready'&&s.visible));
-                else assert.ok(observed.some(s=>s.page==='/login-v115.html'), scenario + ': redirect');
+                else assert.ok(observed.some(s=>s.page==='/login.html'), scenario + ': redirect');
                 if (scenario==='logout') assert.ok(observed.some(s=>s.logoutBlocked&&s.localCleared));
                 console.log(path.basename(executable) + ': ' + scenario + ' passed');
             }

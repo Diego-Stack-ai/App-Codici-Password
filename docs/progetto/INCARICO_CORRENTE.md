@@ -1,5 +1,31 @@
 # Incarico corrente
 
+## Checkpoint GitHub e rilascio del primo lotto — 06/11/2026
+
+Diego richiede esplicitamente «pubblica, committa in GitHub le modifiche» e poi di proseguire con i lotti residui. Sono autorizzati commit, push, pull request, merge e avvio del workflow manuale del solo Hosting per la candidata 1.2.259 verificata. Il rilascio è parziale e conserva dichiarati il fallback italiano delle guide, i testi dinamici ancora da classificare, il recovery incompleto, la cache persistente e la migrazione legacy aperta. Il gate editoriale non richiede quindi di attendere il completamento di tutti i lotti. Resta da verificare la revoca/rotazione della credenziale privata storica e il controllo dei log; questo checkpoint non la dichiara avvenuta. Functions, Rules, indici, migrazioni e dati reali restano esclusi dalla pubblicazione corrente.
+
+## Hardening mirato autorizzato — 06/11/2026
+
+Diego approva con «procedi» il piano derivato dai cinque rilievi e la correzione del messaggio di verifica accesso. Il primo lotto locale comprende sessione Vault confinata alla RAM del documento, logout condiviso fra schede, Firebase Messaging locale e contrasto chiaro/scuro. È accettata la conseguenza temporanea dello sblocco a ogni nuova pagina o ricaricamento; la shell persistente completa resta il percorso successivo per ridurre questi gesti. Un solo esecutore modifica il workspace e i revisori indipendenti restano in sola lettura.
+
+Cache cifrata e migrazione legacy restano lotti distinti: prima di convertire dati reali occorrono recovery completo provato, inventario delle dipendenze dal keyring, gestione dei dispositivi offline e fence dei vecchi writer. Questo incarico non attiva migrazioni, non cancella cache o code, non modifica dati reali e non supera per inferenza i gate cloud o la revoca della credenziale storica.
+
+## Chiusura locale e gate finali — 05/11/2026
+
+La candidata viene chiusa localmente come **1.2.259** con un solo percorso di pubblicazione: workflow GitHub manuale del solo Hosting, sorgente `master` pulito, manifest di rilascio verificabile e nessun deploy diretto dal PC. Le modifiche cloud, incluse revoca credenziali, backup/PITR, App Check, protezioni GitHub e migrazione del token di deploy, richiedono una verifica separata e un'autorizzazione esplicita.
+
+Il rilascio resta bloccato da due gate che non possono essere dichiarati superati per inferenza: conferma della revoca della chiave privata storica e decisione consapevole sul perimetro editoriale delle guide multilingue. Le chiavi runtime dell'interfaccia sono complete nelle otto lingue; le guide restano italiane con fallback dichiarato e il debito letterale dinamico resta censito. A fine lavoro il riesame con Claude deve partire dagli stessi artefatti, numeri di test, diff e blocchi esterni, senza usare versioni dichiarate soltanto nei documenti.
+
+## Albero completo dell'interfaccia per aiuti e video — 05/11/2026
+
+Diego richiede che la mappa di sviluppo censisca l'intero albero osservabile dell'app, non soltanto file e import: pagine, controlli, listener e handler, navigazioni, popup e altre superfici dinamiche, traduzioni, passi della guida e percorsi ordinati. Questa topologia servirà come base verificabile per progettare i futuri video di aiuto, scegliere le scene e mantenere il collegamento fra ciascuna istruzione e il controllo reale mostrato all'utente.
+
+Graphify resta uno strumento di sviluppo e non diventa una fonte runtime né un asset Hosting. La guida D0 conserva come autorità il catalogo versionato; il nuovo overlay tecnico deve invece poter essere rigenerato in modo deterministico, fallire se un flusso critico perde un nodo o una relazione e distinguere esplicitamente controlli operativi, controlli legacy inattivi e scenari che richiedono ancora una prova browser autenticata. Una copertura statica completa non equivale alla registrazione o al collaudo di tutti gli stati runtime.
+
+La verifica linguistica richiesta attraversa la stessa topologia e controlla che ogni chiave UI sia presente, valorizzata e raggiungibile dal catalogo effettivamente caricato dalla pagina in tutte le otto lingue. L'esito locale è verde per **909 chiavi runtime uniche** su **31 pagine**, ma mantiene aperti e visibili il fallback italiano delle **185 chiavi guida** nelle altre sette lingue e il debito di testi letterali candidati. La mappa serve quindi a dare copertura e priorità alla revisione; non sostituisce la verifica visiva di popup, errori, menu e stati dipendenti dai dati.
+
+L'ordine autorizza implementazione locale, rigenerazione Graphify, test e aggiornamento della documentazione. Non autorizza commit, push, deploy, registrazione di dati reali o conferma di operazioni distruttive.
+
 ## Collaudo post-pubblicazione 1.2.257 — 05/11/2026
 
 La release `1.2.257` è pubblicata e allineata tra repository locale, `master` GitHub e Firebase Hosting. Il collaudo automatico autenticato usa soltanto l'identità QA2 e la sua Master Password tecnica: login, sblocco, Home e logout sono verdi; la matrice copre **48/48** combinazioni pagina/viewport senza errori Console o rete applicativi.

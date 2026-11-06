@@ -6,7 +6,7 @@ import { chromium } from 'playwright';
 
 const publicRoot = path.resolve(import.meta.dirname, '../Frontend/public');
 const languages = ['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt'];
-const pages = ['login-v115', 'registrati', 'imposta_nuova_password', 'contatto_condiviso'];
+const pages = ['login', 'registrati', 'imposta_nuova_password', 'contatto_condiviso'];
 const contentTypes = new Map([
     ['.css', 'text/css'], ['.html', 'text/html'], ['.js', 'text/javascript'], ['.json', 'application/json'],
     ['.png', 'image/png'], ['.jpg', 'image/jpeg'], ['.svg', 'image/svg+xml'], ['.woff2', 'font/woff2']

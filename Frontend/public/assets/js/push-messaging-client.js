@@ -1,11 +1,11 @@
-import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import { initializeApp, getApps } from "/assets/js/vendor/firebase-runtime.js";
 import {
     deleteToken,
     getMessaging,
-    getToken,
+    getMessagingToken as getToken,
     isSupported,
     onMessage
-} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-messaging.js";
+} from "/assets/js/vendor/firebase-runtime.js";
 
 const PUSH_APP_NAME = 'codici-password-push';
 const firebaseConfig = {

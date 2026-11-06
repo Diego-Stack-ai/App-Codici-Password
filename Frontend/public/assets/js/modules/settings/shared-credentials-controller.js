@@ -1,5 +1,6 @@
 import {createElement, setChildren, clearElement} from '../../dom-utils.js';
 import {showConfirmModal, showToast} from '../../ui-core-v129.js';
+import {t} from '../../translations.js';
 import {decrypt, ensureVaultKeyMaterial} from '../core/security-manager.js';
 import {
     listCompanies, listCompanyAccounts, listPrivateAccounts,
@@ -210,10 +211,10 @@ async function openEditor(record, refresh) {
         type: 'button', className: 'btn-modal shared-credentials-add',
         onclick: () => fieldList.appendChild(fieldEditor())
     }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'add'}), 'Aggiungi campo']);
-    const save = createElement('button', {type: 'submit', className: 'btn-modal btn-primary', textContent: 'Salva'});
-    const actions = [createElement('button', {type: 'button', className: 'btn-modal', textContent: 'Annulla', onclick: close})];
+    const save = createElement('button', {type: 'submit', className: 'btn-modal btn-primary', textContent: t('save')});
+    const actions = [createElement('button', {type: 'button', className: 'btn-modal', textContent: t('cancel'), onclick: close})];
     if (record) actions.unshift(createElement('button', {
-        type: 'button', className: 'btn-modal shared-credentials-delete', textContent: 'Elimina',
+        type: 'button', className: 'btn-modal shared-credentials-delete', textContent: t('delete'),
         onclick: async () => {
             const confirmed = await showConfirmModal(
                 'Elimina Credenziale comune',
@@ -307,7 +308,7 @@ export async function openSharedCredentialsSettings(user) {
         }
         shell.body.appendChild(list);
         shell.body.appendChild(createElement('div', {className: 'modal-actions'}, [
-            createElement('button', {type: 'button', className: 'btn-modal', textContent: 'Chiudi', onclick: close}),
+            createElement('button', {type: 'button', className: 'btn-modal', textContent: t('close'), onclick: close}),
             createElement('button', {
                 type: 'button', className: 'btn-modal btn-primary', disabled: !navigator.onLine,
                 textContent: 'Nuova credenziale', onclick: () => openEditor(null, render)

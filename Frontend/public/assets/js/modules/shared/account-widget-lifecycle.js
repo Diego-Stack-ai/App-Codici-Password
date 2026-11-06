@@ -1,6 +1,7 @@
-import {auth} from '../../firebase-config.js?v=1.2.258';
+import {auth} from '../../firebase-config.js?v=1.2.259';
 import {onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {createElement, clearElement} from '../../dom-utils.js';
+import {t} from '../../translations.js';
 
 const mounts = new WeakMap();
 let promptId = 0;
@@ -107,7 +108,7 @@ export function createAccountWidgetLifecycle(context, {section, list, add}) {
                 createElement('h3', {id: titleId, className: 'modal-title', textContent: title}),
                 createElement('p', {className: 'modal-text', textContent: message}), input,
                 createElement('div', {className: 'modal-actions'}, [
-                    createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla',
+                    createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: t('cancel'),
                         onclick: () => close(null)}),
                     ...actionButtons
                 ])

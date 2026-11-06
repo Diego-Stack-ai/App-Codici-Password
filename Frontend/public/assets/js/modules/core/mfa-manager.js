@@ -1,4 +1,4 @@
-import { auth, functions, enableAppCheck } from '../../firebase-config.js?v=1.2.258';
+import { auth, functions, enableAppCheck } from '../../firebase-config.js?v=1.2.259';
 import {
     multiFactor,
     onAuthStateChanged,
@@ -6,6 +6,7 @@ import {
 } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren } from '../../dom-utils.js';
+import { t } from '../../translations.js';
 import { ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils.js';
 
 export function getTotpEnrollment(user = auth.currentUser) {
@@ -64,7 +65,7 @@ function requestEnrollmentCode(qrUri, secretKey, expectedUser = auth.currentUser
             createElement('label', { className: 'label', htmlFor: 'mfa-enrollment-code', textContent: 'Codice di verifica' }),
             codeInput,
             createElement('div', { className: 'modal-actions' }, [
-                createElement('button', { className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: () => finish(null) }),
+                createElement('button', { className: 'btn-modal btn-secondary', textContent: t('cancel'), onclick: () => finish(null) }),
                 createElement('button', {
                     className: 'btn-modal btn-primary',
                     textContent: 'Attiva 2FA',

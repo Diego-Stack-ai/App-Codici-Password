@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
+import {testTranslate} from './helpers/test-translator.mjs';
 const source = async name => (await readFile(new URL('../Frontend/public/assets/js/modules/shared/' + name, import.meta.url),'utf8')).replace(/^import[\s\S]*?;\r?\n/gm,'').replace(/^export /gm,'');
 function node(tag = 'div', props = {}, children = []) {
     const n = {tag, ...props, children: children.filter(Boolean), appendChild(child) {
@@ -96,7 +97,7 @@ for (const area of ['privato', 'azienda']) test(`${area} bank plus explains savi
     assert.ok(start >= 'onAddWidget: '.length && end > start);
     const callback = text.slice(start, end).trim().replace(/,$/, '');
     const messages = [], ids = [];
-    const realm = vm.createContext({accountWidgetController: null, active: () => true, showToast: message => messages.push(message)});
+    const realm = vm.createContext({accountWidgetController: null, active: () => true, showToast: message => messages.push(message), t: testTranslate});
     const options = {onAddWidget: vm.runInContext('(' + callback + ')', realm)};
     options.onAddWidget('bank'); assert.match(messages[0], /Salva prima/);
     realm.accountWidgetController = {openNewWidget: id => ids.push(id)};
