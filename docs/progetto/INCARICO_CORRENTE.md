@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Verifica provider e prosecuzione del rilascio — 06/11/2026
+
+Gli ordini di pubblicazione vengono eseguiti mantenendo la scansione completa della cronologia e il solo Hosting. La verifica aggiuntiva risolve il gate sullo stato attuale della credenziale storica: IAM con progetto esplicito restituisce account inesistente; entrambi gli endpoint pubblici Google dei certificati restituiscono 404, mentre un'identità valida di controllo restituisce 200 con certificati validi. Il riesame indipendente considera la chiave attualmente inutilizzabile secondo il provider; non viene dichiarata una revoca eseguita né ricostruito un evento storico non verificato. Questa prova tecnica sostituisce la sola conferma a memoria del proprietario richiesta nelle sezioni precedenti.
+
+Sono riconosciuti esclusivamente i dodici fingerprint storici individuali già classificati. Nessuna eccezione per interi percorsi o regole e nessuna esclusione dei nuovi commit. Il rilascio manuale ricontrolla il provider prima dello scan e immediatamente prima del deploy; un errore o la ricomparsa dell'identità blocca la pubblicazione. Il riesame dei vecchi log e dell'eventuale abuso passato rimane aperto come attività separata, senza impedire questo aggiornamento Hosting verificato. Non sono autorizzate ulteriori modifiche cloud, uso della vecchia chiave o conversioni di dati.
+
 ## Checkpoint GitHub e rilascio del primo lotto — 06/11/2026
 
 Diego richiede esplicitamente «pubblica, committa in GitHub le modifiche» e poi di proseguire con i lotti residui. Sono autorizzati commit, push, pull request, merge e avvio del workflow manuale del solo Hosting per la candidata 1.2.259 verificata. Il rilascio è parziale e conserva dichiarati il fallback italiano delle guide, i testi dinamici ancora da classificare, il recovery incompleto, la cache persistente e la migrazione legacy aperta. Il gate editoriale non richiede quindi di attendere il completamento di tutti i lotti. Resta da verificare la revoca/rotazione della credenziale privata storica e il controllo dei log; questo checkpoint non la dichiara avvenuta. Functions, Rules, indici, migrazioni e dati reali restano esclusi dalla pubblicazione corrente.

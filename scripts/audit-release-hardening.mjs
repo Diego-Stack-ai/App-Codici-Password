@@ -69,6 +69,12 @@ assert.match(deployWorkflow, /release-manifest\.mjs --write[\s\S]*--require-clea
   'Il workflow deve generare un manifest da un sorgente pulito');
 assert.match(deployWorkflow, /prepare-gitleaks-config\.mjs[\s\S]*gitleaks\/gitleaks-action@[a-f0-9]{40}/,
   'Il workflow di rilascio deve includere direttamente la scansione segreti reale');
+assert.match(deployWorkflow,
+  /name: Verify historical credential status before release scan\s+if: github\.event_name == 'workflow_dispatch'\s+run: node scripts\/verify-historical-credential-status\.mjs[\s\S]*?name: Scan release commits for secrets/,
+  'Il rilascio manuale deve verificare lo stato provider prima della scansione storica');
+assert.match(deployWorkflow,
+  /name: Verify historical credential status before publication\s+run: node scripts\/verify-historical-credential-status\.mjs[\s\S]*?name: Recheck master and deploy Hosting only/,
+  'Lo stato provider deve essere ricontrollato prima della pubblicazione Hosting');
 assert.match(deployWorkflow, /release-manifest\.mjs[\s\S]*?--verify-url/,
   'Il workflow deve verificare manifest e asset dopo il deploy');
 assert.match(deployWorkflow,
