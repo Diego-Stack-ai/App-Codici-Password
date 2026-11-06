@@ -161,6 +161,30 @@ test('security settings are authenticated by the file but excluded before previe
     assert.equal(f.calls.length, 1);
     assert.equal(f.calls[0].command.records.length, 1);
     assert.equal(f.calls[0].command.records.some(record => record.scope === 'settings' && record.id === 'security'), false);
+    const result = await f.context.executeBackupRestore(plan);
+    assert.equal(result.recordCount, 1);
+    const applied = f.calls.filter(call => call.command.mode === 'apply');
+    assert.equal(applied.length, 1);
+    assert.equal(applied[0].command.records.some(record => record.scope === 'settings' && record.id === 'security'), false);
+    f.context.releaseBackupRestore(plan);
+});
+
+test('a changed excluded security record still invalidates the authenticated restore source', async () => {
+    const f = fixture();
+    const lines = (await f.file.text()).split('\n').map(JSON.parse);
+    const security = {kind: 'record', scope: 'settings', id: 'security', data: {
+        verifier: 'synthetic-verifier', vaultKeyEnvelope: 'synthetic-envelope'
+    }};
+    lines.splice(2, 0, security);
+    lines.at(-1).entryCount += 1;
+    lines.at(-1).recordCount += 1;
+    f.setFileContent(lines.map(JSON.stringify).join('\n'));
+    const plan = await f.prepare();
+    security.data.verifier = 'another-synthetic-verifier';
+    f.setFileContent(lines.map(JSON.stringify).join('\n'));
+    await assert.rejects(f.context.executeBackupRestore(plan), /BACKUP_RESTORE_INTERRUPTED/);
+    assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 0);
+    assert.equal(f.uploads.length, 0);
     f.context.releaseBackupRestore(plan);
 });
 

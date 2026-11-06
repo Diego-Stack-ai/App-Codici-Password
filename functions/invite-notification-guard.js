@@ -1,6 +1,7 @@
 "use strict";
 
 const crypto = require("node:crypto");
+const {assertTransactionGlobalPurgeUnlocked} = require("./archive-purge-global-lock");
 
 const LEDGER_COLLECTION = "inviteNotificationLedger";
 const RATE_COLLECTION = "inviteNotificationRateLimits";
@@ -65,34 +66,52 @@ function accountPath(invite) {
   return companyId ? `users/${ownerId}/aziende/${companyId}/accounts/${accountId}` : "";
 }
 
-async function authoritativeInvite({db, invite, inviteId}) {
+async function resolveRecipientUid(auth, email) {
+  if (!auth || typeof auth.getUserByEmail !== 'function') throw Error('INVITE_NOTIFICATION_AUTH_REQUIRED');
+  try {
+    const user = await auth.getUserByEmail(email);
+    if (typeof user?.uid !== 'string' || !/^[A-Za-z0-9._:-]{1,160}$/.test(user.uid)) throw Error('INVITE_RECIPIENT_INVALID');
+    return user.uid;
+  } catch (error) {
+    if (error?.code === 'auth/user-not-found') return null;
+    throw error;
+  }
+}
+async function assertParticipants(tx, db, ownerId, recipientUid) {
+  await assertTransactionGlobalPurgeUnlocked(tx, db, ownerId);
+  if (recipientUid && recipientUid !== ownerId) await assertTransactionGlobalPurgeUnlocked(tx, db, recipientUid);
+}
+async function authoritativeInvite({db, auth, invite, inviteId}) {
   const notificationInstance = instanceRef(invite);
-  if (!safeInviteId(inviteId) || !notificationInstance || invite?.inviteId !== inviteId || invite?.status !== "pending") return null;
+  if (!safeInviteId(inviteId) || !notificationInstance || invite?.inviteId !== inviteId || invite?.status !== 'pending') return null;
   const recipientEmail = normalizeEmail(invite.recipientEmail);
   const path = accountPath(invite);
   const inviteCycle = cycle(invite.cycle);
   if (!recipientEmail || !path || inviteCycle === null) return null;
-  const expectedInviteId = `${invite.accountId}_${sanitizeEmail(recipientEmail)}${inviteCycle > 0 ? `_c${inviteCycle}` : ""}`;
+  const expectedInviteId = `${invite.accountId}_${sanitizeEmail(recipientEmail)}${inviteCycle > 0 ? `_c${inviteCycle}` : ''}`;
   if (inviteId !== expectedInviteId) return null;
-  const snapshot = await db.doc(path).get();
-  if (!snapshot.exists) return null;
-  const account = snapshot.data();
-  if (!account || account.isArchived === true || cycle(account.sharingCycle) !== inviteCycle) return null;
-  const entry = account.sharedWith?.[sanitizeEmail(recipientEmail)];
-  if (!entry || entry.status !== "pending" || normalizeEmail(entry.email) !== recipientEmail) return null;
-  return Object.freeze({
-    ownerId: invite.ownerId,
-    notificationInstance,
-    recipientEmail,
-    notifyEmail: entry.notifyEmail === true,
-    notifyPush: entry.notifyPush !== false,
-    accountName: String(account.nomeAccount || "un account condiviso").trim().slice(0, 100) || "un account condiviso"
+  const recipientUid = await resolveRecipientUid(auth, recipientEmail);
+  return db.runTransaction(async tx => {
+    await assertParticipants(tx, db, invite.ownerId, recipientUid);
+    const [snapshot, live] = await Promise.all([tx.get(db.doc(path)), tx.get(db.doc(`invites/${inviteId}`))]);
+    if (!snapshot.exists || !live.exists) return null;
+    const liveInvite = live.data();
+    if (liveInvite?.status !== 'pending' || instanceRef(liveInvite) !== notificationInstance ||
+        accountPath(liveInvite) !== path || cycle(liveInvite.cycle) !== inviteCycle ||
+        normalizeEmail(liveInvite.recipientEmail) !== recipientEmail) return null;
+    const account = snapshot.data();
+    if (!account || account.isArchived === true || cycle(account.sharingCycle) !== inviteCycle) return null;
+    const entry = account.sharedWith?.[sanitizeEmail(recipientEmail)];
+    if (!entry || entry.status !== 'pending' || normalizeEmail(entry.email) !== recipientEmail) return null;
+    return Object.freeze({ownerId: invite.ownerId, recipientUid, notificationInstance, recipientEmail,
+      notifyEmail: entry.notifyEmail === true, notifyPush: entry.notifyPush !== false,
+      accountName: String(account.nomeAccount || 'un account condiviso').trim().slice(0, 100) || 'un account condiviso'});
   });
 }
 
-async function claim({db, inviteId, notificationInstance, ownerId, recipientEmail, channel, now = Date.now}) {
+async function claim({db, inviteId, notificationInstance, ownerId, recipientUid = null, recipientEmail, channel, now = Date.now}) {
   if (!safeInviteId(inviteId) || !INSTANCE_REF.test(notificationInstance || "") ||
-      !safeSegment(ownerId) || !normalizeEmail(recipientEmail) ||
+      !safeSegment(ownerId) || (recipientUid !== null && (typeof recipientUid !== 'string' || !/^[A-Za-z0-9._:-]{1,160}$/.test(recipientUid))) || !normalizeEmail(recipientEmail) ||
       !["email", "push"].includes(channel)) return {status: "invalid"};
   const time = now();
   const bucket = Math.floor(time / HOUR_MS);
@@ -103,10 +122,17 @@ async function claim({db, inviteId, notificationInstance, ownerId, recipientEmai
   const recipientRef = db.collection(RATE_COLLECTION).doc(hash(["recipient", recipientEmail, channel, bucket]));
   const globalDailyRef = db.collection(RATE_COLLECTION).doc(hash(["global-day", channel, dayBucket]));
   return db.runTransaction(async tx => {
+    await assertParticipants(tx, db, ownerId, recipientUid);
     const [delivery, owner, ownerDaily, recipient, globalDaily] = await Promise.all([
       tx.get(deliveryRef), tx.get(ownerRef), tx.get(ownerDailyRef), tx.get(recipientRef), tx.get(globalDailyRef)
     ]);
-    if (delivery.exists) return {status: "duplicate"};
+    if (delivery.exists) {
+      const prior = delivery.data();
+      // A known unsubmitted claim may resume without charging rates again.
+      if (prior.state === 'claimed' && prior.ownerId === ownerId && prior.recipientUid === recipientUid &&
+          prior.notificationInstance === notificationInstance && prior.channel === channel) return {status: 'claimed', ref: deliveryRef};
+      return {status: 'duplicate'};
+    }
     const ownerCount = Number(owner.exists ? owner.data().count : 0);
     const ownerDailyCount = Number(ownerDaily.exists ? ownerDaily.data().count : 0);
     const recipientCount = Number(recipient.exists ? recipient.data().count : 0);
@@ -123,40 +149,55 @@ async function claim({db, inviteId, notificationInstance, ownerId, recipientEmai
     tx.set(ownerDailyRef, {kind: "owner-day", bucket: dayBucket, count: ownerDailyCount + 1, expiresAt});
     tx.set(recipientRef, {kind: "recipient", bucket, count: recipientCount + 1, expiresAt});
     tx.set(globalDailyRef, {kind: "global-day", bucket: dayBucket, count: globalDailyCount + 1, expiresAt});
-    tx.set(deliveryRef, {state: "claimed", channel, claimedAt: time, expiresAt});
+    tx.set(deliveryRef, {state: "claimed", ownerId, recipientUid, notificationInstance, channel, claimedAt: time, expiresAt});
     return {status: "claimed", ref: deliveryRef};
   });
 }
 
-async function finish({db, ref, status, now = Date.now}) {
-  if (!ref || !["sent", "cancelled", "failed"].includes(status)) return false;
-  await db.runTransaction(async tx => {
-    const snapshot = await tx.get(ref);
-    if (!snapshot.exists || snapshot.data().state !== "claimed") return;
-    tx.set(ref, {state: status, channel: snapshot.data().channel,
-      finishedAt: now(), expiresAt: now() + RETENTION_MS});
-  });
-  return true;
+function sameParticipantBinding(record, current) {
+  return record?.ownerId === current.ownerId && record.recipientUid === current.recipientUid &&
+    record.notificationInstance === current.notificationInstance;
 }
-
-async function deliver({db, invite, inviteId, channel, send, now = Date.now}) {
-  const current = await authoritativeInvite({db, invite, inviteId});
-  if (!current || !current[channel === "email" ? "notifyEmail" : "notifyPush"]) return {status: "ineligible"};
-  const reservation = await claim({db, inviteId, ownerId: current.ownerId,
-    notificationInstance: current.notificationInstance,
-    recipientEmail: current.recipientEmail, channel, now});
-  if (reservation.status !== "claimed") return reservation;
+async function beginDelivery({db, ref, current}) {
+  return db.runTransaction(async tx => {
+    await assertParticipants(tx, db, current.ownerId, current.recipientUid);
+    const snapshot = await tx.get(ref);
+    if (!snapshot.exists || snapshot.data().state !== 'claimed' || !sameParticipantBinding(snapshot.data(), current)) return false;
+    tx.set(ref, {...snapshot.data(), state: 'sending'});
+    return true;
+  });
+}
+async function finish({db, ref, current, status, now = Date.now}) {
+  if (!ref || !['sent', 'cancelled', 'failed'].includes(status)) return false;
+  return db.runTransaction(async tx => {
+    await assertParticipants(tx, db, current.ownerId, current.recipientUid);
+    const snapshot = await tx.get(ref);
+    if (!snapshot.exists || !['claimed', 'sending'].includes(snapshot.data().state) ||
+        !sameParticipantBinding(snapshot.data(), current)) return false;
+    tx.set(ref, {...snapshot.data(), state: status, finishedAt: now(), expiresAt: now() + RETENTION_MS});
+    return true;
+  });
+}
+async function deliver({db, auth, invite, inviteId, channel, send, now = Date.now}) {
+  const current = await authoritativeInvite({db, auth, invite, inviteId});
+  if (!current || !current[channel === 'email' ? 'notifyEmail' : 'notifyPush']) return {status: 'ineligible'};
+  const reservation = await claim({db, inviteId, ownerId: current.ownerId, recipientUid: current.recipientUid,
+    notificationInstance: current.notificationInstance, recipientEmail: current.recipientEmail, channel, now});
+  if (reservation.status !== 'claimed') return reservation;
   try {
-    const rechecked = await authoritativeInvite({db, invite, inviteId});
-    if (!rechecked || !rechecked[channel === "email" ? "notifyEmail" : "notifyPush"]) {
-      await finish({db, ref: reservation.ref, status: "cancelled", now});
-      return {status: "cancelled"};
+    const rechecked = await authoritativeInvite({db, auth, invite, inviteId});
+    if (!rechecked || !sameParticipantBinding(rechecked, current) || !rechecked[channel === 'email' ? 'notifyEmail' : 'notifyPush']) {
+      await finish({db, ref: reservation.ref, current, status: 'cancelled', now});
+      return {status: 'cancelled'};
     }
+    // CAS makes concurrent retries of a deferred claim submit at most once.
+    if (!await beginDelivery({db, ref: reservation.ref, current})) return {status: 'duplicate'};
     const sent = await send(rechecked);
-    await finish({db, ref: reservation.ref, status: sent === false ? "cancelled" : "sent", now});
-    return {status: sent === false ? "cancelled" : "sent"};
+    await finish({db, ref: reservation.ref, current, status: sent === false ? 'cancelled' : 'sent', now});
+    return {status: sent === false ? 'cancelled' : 'sent'};
   } catch (error) {
-    await finish({db, ref: reservation.ref, status: "failed", now});
+    if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(error?.code || error?.message))) throw error;
+    await finish({db, ref: reservation.ref, current, status: 'failed', now});
     throw error;
   }
 }

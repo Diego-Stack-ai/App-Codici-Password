@@ -13,6 +13,15 @@ on:
       - master
       - 'experiment/**'
   workflow_dispatch:
+    inputs:
+      release_scope:
+        description: Reviewed production release scope
+        type: choice
+        required: true
+        default: hosting
+        options:
+          - hosting
+          - recovery-prerequisites-disabled
 
 permissions:
   contents: read
@@ -82,8 +91,11 @@ jobs:
       - name: Verify manual release source
         if: github.event_name == 'workflow_dispatch'
         shell: bash
+        env:
+          RELEASE_SCOPE: ${{ inputs.release_scope || 'hosting' }}
         run: |
           set -euo pipefail
+          case "$RELEASE_SCOPE" in hosting|recovery-prerequisites-disabled) ;; *) exit 1 ;; esac
           test "$GITHUB_REF" = "refs/heads/master"
           remote_master="$(git ls-remote origin refs/heads/master | cut -f1)"
           test -n "$remote_master"
@@ -140,8 +152,10 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'
     needs: validate
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     environment: production
+    env:
+      RELEASE_SCOPE: ${{ inputs.release_scope || 'hosting' }}
     concurrency:
       group: firebase-production
       cancel-in-progress: false
@@ -166,6 +180,10 @@ jobs:
       - name: Install deployment dependencies
         run: npm ci
 
+      - name: Install backend deployment dependencies
+        if: inputs.release_scope == 'recovery-prerequisites-disabled'
+        run: npm ci --prefix functions
+
       - name: Prepare immutable release manifest
         run: |
           node scripts/release-manifest.mjs --write --commit "$GITHUB_SHA" --require-clean
@@ -174,9 +192,10 @@ jobs:
       - name: Verify historical credential status before publication
         run: node scripts/verify-historical-credential-status.mjs
 
-      # Le Functions restano escluse e richiedono un'autorizzazione separata.
+      # Il backend richiede la scelta manuale separata e resta disabilitato.
       # FIREBASE_TOKEN resta temporaneamente il metodo CI esistente.
       - name: Recheck master and deploy Hosting only
+        if: inputs.release_scope != 'recovery-prerequisites-disabled'
         shell: bash
         run: |
           set -euo pipefail
@@ -185,7 +204,25 @@ jobs:
           test "$GITHUB_SHA" = "$remote_master"
           node node_modules/firebase-tools/lib/bin/firebase.js deploy --project appcodici-password --only hosting --token ${{ secrets.FIREBASE_TOKEN }}
 
+      - name: Recheck master and deploy disabled recovery prerequisites only
+        if: inputs.release_scope == 'recovery-prerequisites-disabled'
+        shell: bash
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          set -euo pipefail
+          remote_master="$(git ls-remote origin refs/heads/master | cut -f1)"
+          test -n "$remote_master"
+          test "$GITHUB_SHA" = "$remote_master"
+          node scripts/plan-recovery-canary.mjs --check
+          node scripts/build-vault-account-backend.mjs --check
+          node scripts/plan-recovery-canary.mjs >> "$GITHUB_STEP_SUMMARY"
+          selectors="$(node scripts/plan-recovery-canary.mjs --selectors)"
+          test -n "$selectors"
+          node node_modules/firebase-tools/lib/bin/firebase.js deploy --project appcodici-password --only "$selectors" --non-interactive --token "$FIREBASE_TOKEN"
+
       - name: Verify deployed manifest and critical assets
+        if: inputs.release_scope != 'recovery-prerequisites-disabled'
         run: >-
           node scripts/release-manifest.mjs
           --commit "$GITHUB_SHA"
@@ -201,11 +238,14 @@ jobs:
           remote_master="$(git ls-remote origin refs/heads/master | cut -f1)"
           test -n "$remote_master"
           {
-            echo "### Firebase Hosting deployed"
+            echo "### Firebase production deployment"
             echo "- Ref: \`$GITHUB_REF\`"
             echo "- Commit: \`$GITHUB_SHA\`"
             echo "- Master after deploy: \`$remote_master\`"
-            echo "- Scope: \`hosting\`"
+            echo "- Scope: \`$RELEASE_SCOPE\`"
+            if [ "$RELEASE_SCOPE" = "recovery-prerequisites-disabled" ]; then
+              echo "- Recovery remains disabled. Revision census, drain and a separately reviewed canary are still required."
+            fi
             if [ "$GITHUB_SHA" != "$remote_master" ]; then
               echo "- Notice: master advanced after the final pre-deploy check; the approved workflow SHA remains the deployed source."
             fi

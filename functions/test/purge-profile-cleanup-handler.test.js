@@ -53,7 +53,7 @@ function fixture({previous = null, companies = 1, malformed = false, attachments
       return result;
     }};
   class HttpsError extends Error { constructor(code, message) { super(message); this.code = code; } }
-  const context = vm.createContext({...legacyPolicy, ...receipts, ...lockApi, exports: {}, onCall: (_config, run) => run, HttpsError,
+  const context = vm.createContext({...require('../archive-purge-global-lock'), ...require('../vault-recovery-fence'), ...legacyPolicy, ...receipts, ...lockApi, exports: {}, onCall: (_config, run) => run, HttpsError,
     getFirestore: () => store, getStorage: () => ({bucket: () => ({})}), FieldValue: {serverTimestamp: () => 'time'}});
   vm.runInContext(ownerGuard + handler, context);
   return {states, counters: () => ({deletions, transactions}), run: () => context.exports.purgeArchivedAccount({auth: {uid: 'owner'}, data: command})};

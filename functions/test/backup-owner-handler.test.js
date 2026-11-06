@@ -23,7 +23,7 @@ function fixture() {
       get: async ref => { reads.push(ref.path); return {exists: false, data: () => undefined}; },
       set: (...args) => writes.push(args),
     })};
-  const context = vm.createContext({
+  const context = vm.createContext({...require('../archive-purge-global-lock'), ...require('../vault-recovery-fence'),
     exports: {}, HttpsError, ...backupService, ...backupReceipt, ...previewApi, ...authorityApi, onCall: (_options, handler) => handler,
     assertTransactionGlobalPurgeUnlocked,
     getFirestore: () => { storeAccesses += 1; return store; },
@@ -55,7 +55,7 @@ test('matching expected owner preserves preview and apply behavior under the aut
   for (const mode of ['preview', 'apply']) {
     const f = fixture(), result = await f.run(command(mode));
     assert.equal(result.status, mode === 'preview' ? 'ready' : 'applied');
-    assert.ok(f.reads.every(value => (value.startsWith('users/A/') || value.startsWith('mutationResults/A/') || value === 'archivePurgeLocks/A')));
+    assert.ok(f.reads.every(value => (value.startsWith('users/A/') || value.startsWith('mutationResults/A/') || (value === 'archivePurgeLocks/A' || value === 'vaultRecoveryLocks/A'))));
     assert.equal(f.writes.length, mode === 'preview' ? 0 : 3);
     assert.ok(f.writes.every(([ref]) => (ref.path.startsWith('users/A/') || ref.path.startsWith('mutationResults/A/'))));
   }
@@ -64,7 +64,7 @@ test('matching expected owner preserves preview and apply behavior under the aut
 test('real SDK Auth token microtask gap can select B, but the captured owner A still prevents the restore', async () => {
   // This executes the installed SDK method with synthetic users, not Firebase
   // Auth or an HTTP endpoint. It characterizes the token lookup ordering.
-  const directory = path.resolve(path.dirname(require.resolve('../index')), '../node_modules/@firebase/auth/dist/esm');
+  const directory = path.dirname(require.resolve('@firebase/auth').replace(/dist[\\/]node[\\/].*$/, 'dist/esm/index.js'));
   const sdk = readdirSync(directory).filter(name => name.endsWith('.js'))
     .map(name => readFileSync(path.join(directory, name), 'utf8'))
     .find(text => text.includes('    async getToken(forceRefresh) {'));

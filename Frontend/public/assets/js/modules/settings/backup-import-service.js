@@ -1,4 +1,4 @@
-import {auth, functions, storage} from '../../firebase-config.js?v=1.2.259';
+import {auth, functions, storage} from '../../firebase-config.js?v=1.2.260';
 import {getBytes, httpsCallable, onAuthStateChanged, ref, uploadBytes} from '/assets/js/vendor/firebase-runtime.js';
 import {decryptBackupEntry, deriveBackupKey, parseBackupLine} from './backup-crypto.js';
 import {chunkRestoreRecords, describeRestoreRecords, restoreRecordKey, validateBackupFooter, validateRestoreStoragePath} from './backup-import-model.js';
@@ -21,6 +21,11 @@ const BACKUP_LINE_METADATA_BYTES = 64 * 1024;
 const MAX_BACKUP_LINE_CHARACTERS = Math.ceil((Math.ceil(MAX_ATTACHMENT_BYTES / 3) * 4 +
     BACKUP_LINE_METADATA_BYTES + 16) / 3) * 4 + BACKUP_LINE_METADATA_BYTES;
 const sessions = new WeakMap();
+
+function isExcludedSecurityRecord(entry) {
+    return entry?.kind === 'record' && entry.scope === 'settings' &&
+        typeof entry.id === 'string' && entry.id.trim() === 'security';
+}
 
 function freezeRestoreValue(value) {
     if (value && typeof value === 'object' && !Object.isFrozen(value)) {
@@ -245,6 +250,7 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
         const storagePaths = new Set();
         const attachmentDigests = new Map();
         const recordKeys = new Set();
+        const excludedSecurityDigests = [];
         let excludedSecuritySettings = 0;
         session.own(() => recordKeys.clear());
         let recordCharacters = 0, attachmentCharacters = 0;
@@ -253,7 +259,11 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
             if (entry.kind === 'record') {
                 // The backup authenticates this entry through its encrypted chain/footer,
                 // but a restore must retain the live Vault verifier and key envelope.
-                if (entry.scope === 'settings' && entry.id === 'security') {
+                if (isExcludedSecurityRecord(entry)) {
+                    if (excludedSecurityDigests.length >= MAX_RESTORE_RECORDS || typeof digest !== 'string' || !digest) {
+                        throw new Error('BACKUP_PREVIEW_CAPACITY_EXCEEDED');
+                    }
+                    excludedSecurityDigests.push(digest);
                     excludedSecuritySettings += 1;
                     return;
                 }
@@ -347,7 +357,8 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
         session.source = {file, recoveryKey, backupId: scan.header.backupId,
             headerText: JSON.stringify(scan.header), records: freezeRestoreValue(records), comparison: freezeRestoreValue(comparison),
             counts: freezeRestoreValue(scan.counts), collisionCount: collisions,
-            storagePaths: freezeRestoreValue([...storagePaths]), attachmentDigests};
+            storagePaths: freezeRestoreValue([...storagePaths]), attachmentDigests,
+            excludedSecurityDigests: freezeRestoreValue(excludedSecurityDigests)};
         if (typeof isBackupRestoreV2Enabled === 'function' && isBackupRestoreV2Enabled()) {
             const locator = loadBackupRestoreV2Locator(globalThis.localStorage, uid);
             if (locator?.backupId === scan.header.backupId) {
@@ -453,9 +464,16 @@ function prepareRestoreExecution(session, selection) {
 async function verifyRestoreSource(session) {
     const source = session.source;
     let recordIndex = 0;
+    let excludedSecurityIndex = 0;
     const visited = new Set();
     const scan = await scanBackup(source.file, session.uid, source.recoveryKey, (entry, digest) => {
         if (entry.kind === 'record') {
+            if (isExcludedSecurityRecord(entry)) {
+                if (digest !== source.excludedSecurityDigests[excludedSecurityIndex++]) {
+                    throw new Error('BACKUP_SOURCE_CHANGED');
+                }
+                return;
+            }
             if (JSON.stringify(entry) !== JSON.stringify(source.records[recordIndex++])) {
                 throw new Error('BACKUP_SOURCE_CHANGED');
             }
@@ -469,7 +487,8 @@ async function verifyRestoreSource(session) {
         }
     }, session.check, session.signal);
     session.check();
-    if (recordIndex !== source.records.length || visited.size !== source.attachmentDigests.size ||
+    if (recordIndex !== source.records.length || excludedSecurityIndex !== source.excludedSecurityDigests.length ||
+        visited.size !== source.attachmentDigests.size ||
         JSON.stringify(scan.header) !== source.headerText) throw new Error('BACKUP_SOURCE_CHANGED');
 }
 

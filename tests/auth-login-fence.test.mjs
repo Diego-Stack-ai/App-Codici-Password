@@ -14,7 +14,7 @@ function fixture({verified=true}={}) {
     const user={uid:'synthetic',email:'synthetic@example.invalid',emailVerified:verified,reload:async()=>{},getIdToken:async()=>{}};
     const session=new Map();
     const context=vm.createContext({auth:{currentUser:user},authSessionFence:fence,
-        LOG(){},showToast(){},logError(){},db:{},doc:()=>({}),
+        LOG(){},showToast(){},logError(){},db:{},doc:()=>({}),hasCompleteRecoveryIntent:()=>false,
         getDoc:async()=>({exists:()=>true,data:()=>({})}),
         localStorage:{getItem:()=>null,removeItem(){}},
         sessionStorage:{getItem:key=>session.get(key)??null,removeItem:key=>session.delete(key)},

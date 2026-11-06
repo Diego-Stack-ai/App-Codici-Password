@@ -110,7 +110,7 @@ function fixture({archived = false, status = 'accepted', hook = null, accountCyc
             throw new Error('TRANSACTION_RETRY_EXHAUSTED');
         }
     };
-    const context = vm.createContext({exports: {}, HttpsError, onCall: (_options, run) => run,
+    const context = vm.createContext({...require('../archive-purge-global-lock'), ...require('../vault-recovery-fence'), exports: {}, HttpsError, onCall: (_options, run) => run,
         assertTransactionGlobalPurgeUnlocked, verifiedRequestEmail,
         normalizeEmail: value => String(value || '').trim().toLowerCase(),
         admin: {firestore: () => store}, structuredClone, crypto: {randomUUID},
@@ -455,7 +455,7 @@ test('ordine letture/scritture: invito, Account ed evento si leggono prima di og
     const f = fixture();
     await f.respond('accepted');
     assert.deepEqual(f.journal.filter(entry => entry[0] === 'read').map(entry => entry[1]),
-        [INVITE_PATH, 'archivePurgeLocks/A', ACCOUNT_PATH, EVENT_PATH]);
+        [INVITE_PATH, 'archivePurgeLocks/A', 'vaultRecoveryLocks/A', 'archivePurgeLocks/guest-uid', 'vaultRecoveryLocks/guest-uid', ACCOUNT_PATH, EVENT_PATH]);
     assertReadsBeforeWrites(f);
 });
 
@@ -517,4 +517,33 @@ test('sequenza inversa: audit valido poi saltato, risposta confermata e un solo 
     assert.deepEqual([...f.documents.get('users/A/aziende/A@B/accounts/account').sharedWithUids], [UID],
         'la risposta è confermata anche senza evento');
     assert.deepEqual(f.writes.map(write => write[0]), ['users/A/aziende/A@B/accounts/account', INVITE_PATH]);
+});
+
+test('recovery active or malformed on either owner or acting guest defers all invitation writes', async () => {
+  const fence = require('../vault-recovery-fence');
+  for (const uid of ['A', UID]) for (const malformed of [false, true]) {
+    const f = fixture();
+    f.documents.set(`vaultRecoveryLocks/${uid}`, malformed ? {status: 'released'} : fence.acquireVaultRecoveryFence(null,
+      fence.createVaultRecoveryBinding({uid, operationId: 'recover', planDigest: 'a'.repeat(64)})).record);
+    await assert.rejects(f.respond('accepted'), /RECOVERY_FENCE_(ACTIVE|CORRUPT)/);
+    assert.deepEqual(f.writes, []);
+  }
+});
+
+test('writer retry after recovery wins fence transaction aborts without partial Account/invite/audit writes', async () => {
+  const fence = require('../vault-recovery-fence');
+  let injected = false;
+  const f = fixture({hook: ({path, documents, versions}) => {
+    if (path === ACCOUNT_PATH && !injected) {
+      injected = true;
+      const path = 'vaultRecoveryLocks/A';
+      documents.set(path, fence.acquireVaultRecoveryFence(null,
+        fence.createVaultRecoveryBinding({uid: 'A', operationId: 'recover', planDigest: 'a'.repeat(64)})).record);
+      versions.set(path, 1);
+    }
+  }});
+  await assert.rejects(f.respond('accepted'), /RECOVERY_FENCE_ACTIVE/);
+  assert.equal(f.attempts, 2);
+  assert.deepEqual(f.writes, []);
+  assert.equal(f.documents.get(INVITE_PATH).status, 'pending');
 });

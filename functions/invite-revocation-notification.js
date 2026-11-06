@@ -4,6 +4,7 @@
 const {ACCEPTANCE_MARKER_KIND, ACCEPTANCE_MARKER_PREFIX, acceptanceMarkerId,
   acceptanceNotificationId, acceptanceNotificationPlan, isAcceptanceMarker,
   isValidAcceptanceReceipt, acceptanceEventWindow} = require("./invite-acceptance-receipt");
+const {assertTransactionGlobalPurgeUnlocked} = require('./archive-purge-global-lock');
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function markerNonceOf(path) {
@@ -29,6 +30,8 @@ async function runInviteRevocationNotification({db, inviteId, before, eventTimeM
     : `users/${receipt.ownerUid}/accounts/${receipt.accountId}`);
   const inviteRef = db.doc(`invites/${inviteId}`);
   return db.runTransaction(async transaction => {
+    await assertTransactionGlobalPurgeUnlocked(transaction, db, receipt.ownerUid);
+    await assertTransactionGlobalPurgeUnlocked(transaction, db, receipt.guestUid);
     const marker = await transaction.get(markerRef);
     const notification = await transaction.get(notificationRef);
     const invite = await transaction.get(inviteRef);
@@ -60,6 +63,8 @@ async function runAcceptanceMarkerCleanup({db, statePath, now = () => Date.now()
   for (const candidate of page.docs) {
     if (markerNonceOf(candidate.ref.path) === null || candidate.data()?.kind !== ACCEPTANCE_MARKER_KIND) continue;
     const committed = await db.runTransaction(async transaction => {
+      // A fence aborts this bounded page before its cursor is persisted.
+      await assertTransactionGlobalPurgeUnlocked(transaction, db, candidate.ref.path.split('/')[1]);
       const snapshot = await transaction.get(candidate.ref);
       if (!snapshot.exists || markerNonceOf(snapshot.ref.path) === null) return false;
       const data = snapshot.data();

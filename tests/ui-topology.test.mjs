@@ -48,7 +48,10 @@ test('i riferimenti degli handler restano confinati al callback del singolo even
   const privacySurface = 'ui:surface:impostazioni.html:privacy-dropdown-content';
   const references = topology.edges.filter(edge => edge.relation === 'ui_handler_references' && edge.target === privacySurface);
   assert.ok(references.length >= 1, 'il callback Privacy deve riferire la propria superficie');
-  assert.ok(references.every(edge => edge.source.includes(':initSettingsEvents:1345')),
+  const privacyHandlers = topology.edges.filter(edge => edge.relation === 'ui_binds_event' && edge.event === 'click'
+    && edge.source === 'ui:control:impostazioni.html:btn-toggle-privacy').map(edge => edge.target);
+  assert.equal(privacyHandlers.length, 1, 'il controllo Privacy deve avere un singolo callback click');
+  assert.ok(references.every(edge => privacyHandlers.includes(edge.source)),
     'la superficie Privacy non deve essere attribuita agli altri listener della funzione di inizializzazione');
 });
 

@@ -1,12 +1,13 @@
 import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
-import { auth, db } from './firebase-config.js?v=1.2.259';
+import { auth, db } from './firebase-config.js?v=1.2.260';
 import { LOG } from './logger.js';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail, sendEmailVerification, setPersistence, browserLocalPersistence, browserSessionPersistence, getMultiFactorResolver, TotpMultiFactorGenerator } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
-import { showToast } from './ui-core-v129.js?v=1.2.259';
+import { showToast } from './ui-core-v129.js?v=1.2.260';
 import { logError } from './utils.js';
 import { ACCOUNT_PASSWORD_POLICY_VERSION, evaluatePassword, firstPasswordPolicyError } from './modules/core/password-policy.js';
 import { authSessionFence } from './auth-session-fence.js';
+import {hasCompleteRecoveryIntent, COMPLETE_RECOVERY_ENABLED, COMPLETE_RECOVERY_PATH, COMPLETE_RECOVERY_LOGIN_PATH} from './app-env.js';
 const FIRST_CONFIGURATION_VERSION = 1;
 const normalizeLanguage = (value, fallback = 'it') => {
     const code = String(value || '').trim().toLowerCase().split('-')[0];
@@ -53,7 +54,7 @@ export function observeAuth(callback) {
         if (!user) {
             // Se non siamo in una pagina di auth, reindirizza al login
             if (!isAuthPage) {
-                window.location.href = 'login.html';
+                window.location.href = hasCompleteRecoveryIntent(window.location) ? COMPLETE_RECOVERY_LOGIN_PATH : 'login.html';
                 return;
             }
         }
@@ -145,6 +146,13 @@ async function finalizeLogin(user, email, permit) {
     // Server-side sharing trusts the verified ID-token claim, not only the
     // refreshed User profile. Refresh the token after mailbox verification.
     await updatedUser.getIdToken(true);
+    if (hasCompleteRecoveryIntent(window.location)) {
+        if (auth.currentUser?.uid !== updatedUser.uid) throw Object.assign(new Error('AUTH_SESSION_CHANGED'), {code: 'auth/session-changed'});
+        await authSessionFence.completeExplicitLogin(permit, updatedUser);
+        sessionStorage.removeItem('codex_explicit_logout');
+        pendingMfaResolver = null; pendingLoginPermit = null;
+        return {user: updatedUser, mfaRequired: false, profileData: null};
+    }
     await consumePasswordResetPolicyMarker(updatedUser);
     const userDocRef = doc(db, "users", updatedUser.uid);
     const userDoc = await getDoc(userDocRef);
@@ -252,6 +260,9 @@ function checkAuthState() {
         const authPages = ['login.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
         const isAuthPage = authPages.some(p => path.includes(p)) || path === '/' || path.endsWith('/');
 
+        if (path.includes('login.html') && reauthFlow === 'complete-recovery' && hasCompleteRecoveryIntent(window.location)) return;
+        if (path.includes('login.html') && reauthFlow === 'security-settings' && COMPLETE_RECOVERY_ENABLED) return;
+
         LOG(`[AUTH CHECK] State: ${user ? 'authenticated' : 'guest'}, Path: ${path}, isAuthPage: ${isAuthPage}`);
 
         if (sessionStorage.getItem('codex_explicit_logout') === '1' || new URLSearchParams(window.location.search).has('authCheck')) return;
@@ -264,14 +275,14 @@ function checkAuthState() {
             } catch (error) {
                 logError("Auth VerificationRefresh", error);
                 if (!isAuthPage) {
-                    window.location.replace('/login.html?verifyEmail=1');
+                    window.location.replace(hasCompleteRecoveryIntent(window.location) ? COMPLETE_RECOVERY_LOGIN_PATH + '&verifyEmail=1' : '/login.html?verifyEmail=1');
                     return;
                 }
             }
             const currentUser = auth.currentUser;
             if (!currentUser?.emailVerified) {
                 if (!isAuthPage) {
-                    window.location.replace('/login.html?verifyEmail=1');
+                    window.location.replace(hasCompleteRecoveryIntent(window.location) ? COMPLETE_RECOVERY_LOGIN_PATH + '&verifyEmail=1' : '/login.html?verifyEmail=1');
                 } else {
                     window.dispatchEvent(new CustomEvent('codex:email-verification-required', {
                         detail: { email: currentUser.email || '' }
@@ -284,6 +295,7 @@ function checkAuthState() {
                 if (token.claims.email_verified !== true) await currentUser.getIdToken(true);
             }
             if (auth.currentUser?.uid !== currentUser.uid || !await authSessionFence.isCurrent(permit)) return;
+            if (hasCompleteRecoveryIntent(window.location)) { window.location.replace(COMPLETE_RECOVERY_PATH); return; }
             if (path.includes('login.html') && reauthFlow === 'password-change') {
                 LOG("[AUTH] Reauthentication completed, returning to password change");
                 window.location.replace('imposta_nuova_password.html?reauthenticated=1');
@@ -308,7 +320,7 @@ function checkAuthState() {
                 // Evitiamo di ricaricare se siamo già sulla root o sul login versionato.
                 if (!path.includes('login.html') && path !== '/' && path !== '') {
                     LOG("[AUTH] No session, redirecting to /login.html");
-                    window.location.href = '/login.html';
+                    window.location.href = hasCompleteRecoveryIntent(window.location) ? COMPLETE_RECOVERY_LOGIN_PATH : '/login.html';
                 }
             }
         }

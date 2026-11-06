@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const {deleteStageGeneration} = require('./backup-attachment-stage');
 
 const MAX_CLEAR_BYTES = 32 * 1024 * 1024;
 const MAX_CIPHER_BYTES = MAX_CLEAR_BYTES + 64;
@@ -82,7 +83,8 @@ function createProfileDocumentAttachmentService({db, bucket, timestamp, assertUn
     const digest = crypto.createHash('sha256').update(bytes).digest('hex');
     const userRef = db.collection('users').doc(uid);
     const recordRef = userRef.collection('profileDocumentAttachments').doc(attachmentId);
-    await db.runTransaction(async transaction => {
+    const reservationId = crypto.randomUUID();
+    const reservation = await db.runTransaction(async transaction => {
       await assertUnlocked(transaction, db, uid);
       const [profile, existing, attachments] = await Promise.all([
         transaction.get(userRef), transaction.get(recordRef),
@@ -93,33 +95,59 @@ function createProfileDocumentAttachmentService({db, bucket, timestamp, assertUn
       }
       if (existing.exists) {
         const current = existing.data();
-        if (current.digest === digest && current.storagePath === storagePath && current.status === 'ready') return;
+        if (current.digest === digest && current.storagePath === storagePath && current.status === 'ready') return {duplicate: true};
         failure(HttpsError, 'already-exists', 'Identificatore allegato già utilizzato.', 'ATTACHMENT_EXISTS');
       }
       if (attachments.size >= MAX_PER_DOCUMENT) failure(HttpsError, 'resource-exhausted', 'Limite allegati raggiunto.', 'ATTACHMENT_LIMIT');
       transaction.create(recordRef, {ownerId: uid, documentId, storagePath, mimeType, size, encryptedName,
-        encryption, digest, status: 'reserved', schemaVersion: 1, createdAt: timestamp()});
+        encryption, digest, reservationId, status: 'reserved', schemaVersion: 1, createdAt: timestamp()});
+      return {duplicate: false};
     });
 
+    if (reservation.duplicate) { bytes.fill(0); return {status: 'confirmed', attachmentId}; }
     const file = bucket.file(storagePath);
+    let generation;
+    const ownsReservation = current => current?.reservationId === reservationId && current.digest === digest &&
+      current.storagePath === storagePath && current.status === 'reserved';
     try {
       await file.save(bytes, {resumable: false, contentType: 'application/octet-stream',
-        metadata: {metadata: {encrypted: 'v1'}}, preconditionOpts: {ifGenerationMatch: 0}});
+        metadata: {metadata: {encrypted: 'v1', reservationId, digest}}, preconditionOpts: {ifGenerationMatch: 0}});
       const [metadata] = await file.getMetadata();
+      if (metadata.metadata?.reservationId !== reservationId || metadata.metadata?.digest !== digest ||
+          typeof metadata.generation !== 'string' || !/^[1-9][0-9]*$/.test(metadata.generation)) {
+        failure(HttpsError, 'aborted', 'Caricamento non verificabile.', 'ATTACHMENT_STATE_CHANGED');
+      }
+      generation = metadata.generation;
       await db.runTransaction(async transaction => {
         await assertUnlocked(transaction, db, uid);
         const snapshot = await transaction.get(recordRef);
-        const current = snapshot.data();
-        if (!snapshot.exists || current.status !== 'reserved' || current.digest !== digest || current.storagePath !== storagePath) {
+        if (!snapshot.exists || !ownsReservation(snapshot.data())) {
           failure(HttpsError, 'aborted', 'Caricamento non confermabile.', 'ATTACHMENT_STATE_CHANGED');
         }
-        transaction.update(recordRef, {status: 'ready', generation: String(metadata.generation), readyAt: timestamp()});
+        transaction.update(recordRef, {status: 'ready', generation, readyAt: timestamp()});
       });
       return {status: 'confirmed', attachmentId};
     } catch (error) {
+      // An uncertain save/metadata lookup retains the durable reservation. Never
+      // delete an unverified live object or another operation's ready record.
+      if (generation) {
+        try {
+          const owned = await db.runTransaction(async transaction => {
+            await assertUnlocked(transaction, db, uid);
+            const snapshot = await transaction.get(recordRef);
+            return snapshot.exists && ownsReservation(snapshot.data());
+          });
+          if (owned) {
+            await deleteStageGeneration(bucket, {storagePath}, generation);
+            await db.runTransaction(async transaction => {
+              await assertUnlocked(transaction, db, uid);
+              const snapshot = await transaction.get(recordRef);
+              if (snapshot.exists && ownsReservation(snapshot.data())) transaction.delete(recordRef);
+            });
+          }
+        } catch { /* Keep the marker until storage cleanup is verified. */ }
+      }
       if (error instanceof HttpsError) throw error;
-      try { await recordRef.delete(); } catch {}
-      try { await file.delete({ignoreNotFound: true}); } catch {}
       failure(HttpsError, 'internal', 'Caricamento non completato.', 'ATTACHMENT_UPLOAD_FAILED');
     } finally { bytes.fill(0); }
   }
@@ -129,25 +157,48 @@ function createProfileDocumentAttachmentService({db, bucket, timestamp, assertUn
     const {attachmentId} = request.data || {};
     if (!ID.test(attachmentId || '')) failure(HttpsError, 'invalid-argument', 'Allegato non valido.');
     const recordRef = db.collection('users').doc(uid).collection('profileDocumentAttachments').doc(attachmentId);
-    let record;
-    await db.runTransaction(async transaction => {
+    const record = await db.runTransaction(async transaction => {
       await assertUnlocked(transaction, db, uid);
       const snapshot = await transaction.get(recordRef);
-      if (!snapshot.exists) return;
-      record = snapshot.data();
-      if (record.ownerId !== uid || record.storagePath !== expectedStoragePath(uid, record.documentId, attachmentId) || record.status !== 'ready') {
+      if (!snapshot.exists) return null;
+      const current = snapshot.data();
+      if (current.ownerId !== uid || current.storagePath !== expectedStoragePath(uid, current.documentId, attachmentId) ||
+          !['ready', 'deleting'].includes(current.status) || typeof current.generation !== 'string' ||
+          !/^[1-9][0-9]*$/.test(current.generation) || typeof current.digest !== 'string' ||
+          !/^[a-f0-9]{64}$/.test(current.digest) || (current.status === 'deleting' &&
+            (typeof current.deletionId !== 'string' || !/^[a-f0-9-]{36}$/i.test(current.deletionId)))) {
         failure(HttpsError, 'failed-precondition', 'Allegato non eliminabile.', 'ATTACHMENT_STATE_INVALID');
       }
-      transaction.update(recordRef, {status: 'deleting', deletingAt: timestamp()});
+      if (current.status === 'deleting') return current;
+      const deleting = {...current, status: 'deleting', deletionId: crypto.randomUUID()};
+      transaction.update(recordRef, {status: 'deleting', deletionId: deleting.deletionId, deletingAt: timestamp()});
+      return deleting;
     });
     if (!record) return {status: 'confirmed', attachmentId};
+    const ownsDeletion = current => current?.ownerId === uid && current.status === 'deleting' &&
+      current.deletionId === record.deletionId && current.storagePath === record.storagePath &&
+      current.generation === record.generation && current.digest === record.digest;
     try {
-      await bucket.file(record.storagePath).delete({ignoreNotFound: true,
-        ...(record.generation ? {ifGenerationMatch: Number(record.generation)} : {})});
-      await recordRef.delete();
+      // Every retry targets the same immutable generation. A concurrent old
+      // DELETE cannot affect a replacement generation after another confirms.
+      await deleteStageGeneration(bucket, {storagePath: record.storagePath}, record.generation);
+      let absent = false;
+      try { await bucket.file(record.storagePath).getMetadata(); }
+      catch (error) { if (Number(error?.code) === 404) absent = true; else throw error; }
+      if (!absent) failure(HttpsError, 'aborted', 'Oggetto allegato cambiato.', 'ATTACHMENT_STORAGE_CHANGED');
+      await db.runTransaction(async transaction => {
+        await assertUnlocked(transaction, db, uid);
+        const snapshot = await transaction.get(recordRef);
+        if (!snapshot.exists) return; // Another matching attempt already confirmed.
+        if (!ownsDeletion(snapshot.data())) {
+          failure(HttpsError, 'aborted', 'Eliminazione non confermabile.', 'ATTACHMENT_STATE_CHANGED');
+        }
+        transaction.delete(recordRef);
+      });
       return {status: 'confirmed', attachmentId};
     } catch {
-      try { await recordRef.update({status: 'ready', deletingAt: null}); } catch {}
+      // Never restore ready after an uncertain DELETE. The durable binding is
+      // resumable; only exact-generation deletion plus verified absence clears it.
       failure(HttpsError, 'aborted', 'Eliminazione non completata. Riprova.', 'ATTACHMENT_DELETE_FAILED');
     }
   }

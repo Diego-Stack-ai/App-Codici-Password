@@ -61,7 +61,7 @@ function fixture() {
             }
         }
     };
-    const context = vm.createContext({
+    const context = vm.createContext({...require('../archive-purge-global-lock'), ...require('../vault-recovery-fence'),
         exports: {},
         onDocumentWritten: (_options, run) => run,
         inviteTransition, invitedEventId, removedEventId, buildAuditEvent, auditWriteDecision,

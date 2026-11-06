@@ -59,7 +59,7 @@ function handlerFixture({record = basic(), receipt = null, legacy = null, profil
     const staged = [];
     const result = await run({get: async ref => {
       refs.push(ref.path);
-      if (ref.path === 'archivePurgeLocks/owner') return {exists: false, data: () => undefined};
+      if ((ref.path === 'archivePurgeLocks/owner' || ref.path === 'vaultRecoveryLocks/owner')) return {exists: false, data: () => undefined};
       if (ref.path === 'users/owner') return {exists: true, data: () => profile};
       if (ref.path === 'users/owner/aziende') return {docs: companies.map(value => ({data: () => value}))};
       const value = ref.path.startsWith('mutationResults/') ? receipt : ref.path.includes('/operationResults/') ? legacy : record;
@@ -68,7 +68,7 @@ function handlerFixture({record = basic(), receipt = null, legacy = null, profil
     writes.push(...staged); return result;
   }};
   class HttpsError extends Error { constructor(code, message, details) { super(message); this.code = code; this.details = details; } }
-  const context = vm.createContext({exports: {}, onCall: (_options, handler) => handler,
+  const context = vm.createContext({...require('../archive-purge-global-lock'), ...require('../vault-recovery-fence'), exports: {}, onCall: (_options, handler) => handler,
     HttpsError, getFirestore: () => store, FieldValue: {serverTimestamp: () => 'synthetic-time'},
     validatePrivateAccountMutation, privateAccountMutationDecision, createMutationBinding, verifyMutationResult,
     currentMutationRevision, assertPrivateAccountWriteScope, assertPrivateAccountReferenceScope,

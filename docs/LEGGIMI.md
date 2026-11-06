@@ -7,7 +7,7 @@
 
 ## Regole di struttura approvate da Diego
 
-L’ordine “procedi” del 23/09/2026 autorizza questa migrazione e il controllo della struttura proposta di **31 Markdown**. Solo Diego può autorizzare variazioni dell’elenco o della funzione dei documenti. La struttura include storico, evidenze e istruzioni per agenti; non cresce automaticamente con anni, incarichi o suffissi v2/finale.
+L’elenco vincolante approvato da Diego comprende **32 Markdown**, come registrato in `scripts/docs-manifest.json`, inclusa `SECURITY.md`. Solo Diego può autorizzare variazioni dell’elenco o della funzione dei documenti. La struttura include storico, evidenze e istruzioni per agenti; non cresce automaticamente con anni, incarichi o suffissi v2/finale.
 
 L’elenco vincolante è in `scripts/docs-manifest.json`. Non modificarlo, modificarne il controllo o spostare il problema in una cartella esclusa per far passare una consegna. Nessun agente crea/rinomina/elimina MD senza ordine esplicito. I contenuti si aggiornano invece nel normale incarico autorizzato, senza chiedere conferma a ogni frase.
 

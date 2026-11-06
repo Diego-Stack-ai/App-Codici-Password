@@ -1,5 +1,6 @@
 const crypto = require('node:crypto');
 const {accountPath} = require('./archive-purge-service');
+const {assertTransactionVaultRecoveryUnlocked} = require('./vault-recovery-fence');
 
 const IDENTIFIER = /^[A-Za-z0-9._:-]{1,160}$/;
 const LOCK_SCHEMA_VERSION = 1;
@@ -98,10 +99,19 @@ async function assertTransactionGlobalPurgeUnlocked(transaction, db, uid) {
   if (!transaction || typeof transaction.get !== 'function') fail('PURGE_LOCK_ADAPTER_INVALID');
   const snapshot = await transaction.get(globalPurgeLockRef(db, uid));
   assertGlobalPurgeUnlocked(snapshot?.exists ? snapshot.data() : null);
+  await assertTransactionVaultRecoveryUnlocked(transaction, db, uid);
   return true;
 }
 
+async function fencedUserWrite(db, uids, write) {
+  return db.runTransaction(async transaction => {
+    for (const uid of new Set(uids)) await assertTransactionGlobalPurgeUnlocked(transaction, db, uid);
+    return write(transaction);
+  });
+}
+
 module.exports = {
+  fencedUserWrite,
   LOCK_SCHEMA_VERSION,
   acquireGlobalPurgeLock,
   assertGlobalPurgeLockHeld,

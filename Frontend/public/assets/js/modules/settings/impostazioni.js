@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.259';
+import { auth, db } from '../../firebase-config.js?v=1.2.260';
 import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, tf, getCurrentLanguage } from '../../translations.js';
@@ -20,6 +20,7 @@ import { setupPushSettings } from './push-settings-controller.js?push=20261022a'
 import { configurationText, firstConfigurationPatch, readFirstConfiguration, setLanguagePreference } from './first-configuration.js';
 import {evaluatePortableArchivePassword} from './portable-archive-stream.js';
 import {APP_VERSION} from '../../app-env.js';
+import {COMPLETE_RECOVERY_ENABLED, COMPLETE_RECOVERY_PATH} from './complete-recovery-config.js';
 
 const portableArchiveModulePromise = import('./portable-archive-service.js');
 
@@ -48,6 +49,11 @@ export async function initImpostazioni(user) {
     setupEncryptedBackup(user);
     setupPortableArchive(user);
     setupEncryptedRestore(user);
+    if (COMPLETE_RECOVERY_ENABLED && !document.getElementById('complete-recovery-entry-link')) {
+        const link = createElement('a', {id: 'complete-recovery-entry-link', href: COMPLETE_RECOVERY_PATH,
+            className: 'btn-modal btn-secondary', textContent: t('recovery_entry')});
+        document.getElementById('btn-restore-encrypted-backup')?.insertAdjacentElement('afterend', link);
+    }
     setupCredentialHealth(user);
     setupAccountFieldUsage(user);
     setupSharedCredentials(user);
@@ -60,7 +66,7 @@ export async function initImpostazioni(user) {
 function setupSharedCredentials(user) {
     document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
         try {
-            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.259');
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.260');
             await openSharedCredentialsSettings(user);
         } catch (error) {
             console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
@@ -174,7 +180,7 @@ function setupCredentialHealth(user) {
             'Analisi locale delle credenziali in corso…', current
         );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.259');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.260');
             current.check();
             const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
             current.check();
@@ -306,7 +312,7 @@ function setupAccountFieldUsage(user) {
             'Controllo locale dei campi realmente compilati in corso…'
         );
         try {
-            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.259');
+            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.260');
             const report = await inspectAccountFieldUsage(user.uid);
             working.close();
             showAccountFieldUsage(report);
@@ -778,7 +784,9 @@ function setupEncryptedBackup(user) {
         const cancelButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: t('cancel')});
         const startButton = createElement('button', {className: 'btn-modal btn-primary', textContent: t('dyn_backup_preparing'), disabled: true});
         const modulePromise = import('./backup-export-service.js');
-        modulePromise.then(() => {
+        const completePromise = COMPLETE_RECOVERY_ENABLED ? import('./complete-recovery-entry.js') : null;
+        const readyPromise = COMPLETE_RECOVERY_ENABLED ? Promise.all([modulePromise, completePromise]) : modulePromise;
+        readyPromise.then(() => {
             if (!action.active()) return;
             startButton.disabled = false;
             startButton.textContent = t('dyn_backup_choose');
@@ -791,11 +799,19 @@ function setupEncryptedBackup(user) {
         startButton.addEventListener('click', async () => {
             if (!action.active() || startButton.disabled) return;
             startButton.disabled = true;
-            let result;
+            let result, completeOptions;
             try {
                 const {exportOwnerBackup} = await modulePromise;
                 action.check();
-                const exportPromise = exportOwnerBackup(user.uid, {signal: action.signal, isActive: action.active});
+                const options = {signal: action.signal, isActive: action.active};
+                if (COMPLETE_RECOVERY_ENABLED) {
+                    const {createCompleteRecoveryExportOptions} = await completePromise;
+                    action.check();
+                    completeOptions = createCompleteRecoveryExportOptions({uid: user.uid, ...options});
+                    if (completeOptions?.profile !== 'complete-recovery') throw new Error('RECOVERY_UI_NOT_CONFIGURED');
+                    Object.assign(options, completeOptions);
+                }
+                const exportPromise = exportOwnerBackup(user.uid, options);
                 close();
                 button.disabled = true;
                 showToast(t('dyn_backup_preparing'), 'info');
@@ -803,7 +819,10 @@ function setupEncryptedBackup(user) {
                 action.check();
                 await showRecoveryKeyOnce(result.recoveryKey, result, action);
             } catch (error) {
-                if (action.active() && error?.name !== 'AbortError') {
+                if (COMPLETE_RECOVERY_ENABLED && (error?.code || error?.message) === 'RECOVERY_ASSET_RECENT_AUTH_REQUIRED' && action.active()) {
+                    const accepted = await showCompleteExportReauthentication(action);
+                    if (accepted && action.active()) window.location.replace('/login.html?reauth=security-settings');
+                } else if (action.active() && error?.name !== 'AbortError' && error?.message !== 'RECOVERY_EXPORT_CANCELLED') {
                     showToast(error?.code === 'BACKUP_EXPORT_CAPACITY_EXCEEDED'
                         ? t('dyn_backup_too_large')
                         : error?.code === 'BACKUP_EXPORT_RECORD_CAPACITY_EXCEEDED'
@@ -812,6 +831,7 @@ function setupEncryptedBackup(user) {
                 }
             } finally {
                 if (result) result.recoveryKey = '';
+                completeOptions?.dispose();
                 action.dispose();
             }
         });
@@ -820,7 +840,7 @@ function setupEncryptedBackup(user) {
             createElement('h3', {className: 'modal-title', textContent: t('dyn_backup_create')}),
             createElement('p', {
                 className: 'modal-text',
-                textContent: t('dyn_backup_contents')
+                textContent: t(COMPLETE_RECOVERY_ENABLED ? 'recovery_export_description' : 'dyn_backup_contents')
             }),
             createElement('div', {className: 'modal-actions'}, [cancelButton, startButton])
         ]));
@@ -829,6 +849,35 @@ function setupEncryptedBackup(user) {
     };
     button.addEventListener('click', click);
     disposeExportSetup = () => { currentAction?.dispose(); button.removeEventListener('click', click); button.disabled = false; };
+}
+
+function showCompleteExportReauthentication(action) {
+    return new Promise(resolve => {
+        if (!action.active()) return resolve(false);
+        let settled = false, unregister = () => {};
+        const previous = document.activeElement;
+        const close = accepted => {
+            if (settled) return; settled = true; modal.remove(); unregister();
+            if (action.active() && previous?.isConnected) previous.focus();
+            resolve(accepted === true);
+        };
+        const cancel = createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: t('cancel'), onclick: () => close(false)});
+        const accept = createElement('button', {type: 'button', className: 'btn-modal btn-primary', textContent: t('recovery_export_sign_in'),
+            onclick: () => close(action.active())});
+        const modal = createElement('div', {className: 'modal-overlay active'}, [createElement('section', {
+            className: 'modal-box', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'complete-export-reauth-title'
+        }, [createElement('h3', {id: 'complete-export-reauth-title', className: 'modal-title', textContent: t('dyn_backup_create')}),
+            createElement('p', {className: 'modal-text', textContent: t('recovery_export_reauth')}),
+            createElement('div', {className: 'modal-actions'}, [cancel, accept])])]);
+        modal.addEventListener('keydown', event => {
+            if (event.key === 'Escape') { event.preventDefault(); close(false); }
+            if (event.key === 'Tab' && ((event.shiftKey && document.activeElement === cancel) || (!event.shiftKey && document.activeElement === accept))) {
+                event.preventDefault(); (event.shiftKey ? accept : cancel).focus();
+            }
+        });
+        unregister = action.own(() => close(false));
+        document.body.appendChild(modal); cancel.focus();
+    });
 }
 
 let disposePortableArchiveSetup = () => {};

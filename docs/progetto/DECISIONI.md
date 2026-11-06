@@ -1,5 +1,11 @@
 # Decisioni
 
+## 06/11/2026 — recovery completo con Recovery Key
+
+Diego risponde «Sì, recupero completo con Recovery Key» alla domanda che esplicita il recupero della Vault tramite file e Recovery Key anche senza la vecchia Master Password, scegliendone poi una nuova. Chi possiede entrambi può quindi recuperare il materiale della Vault. Il nuovo profilo completo conserva questo materiale soltanto nella capsula cifrata del file e nella RAM client; non lo invia in chiaro al server né lo inserisce nell'archivio portabile o nei piani di ripresa.
+
+Il recupero resta vincolato allo stesso proprietario autenticato. Il formato v2 ordinario rimane compatibile e non acquisisce implicitamente questa proprietà. L'implementazione e le prove locali sono autorizzate; distribuzione backend/Rules, recupero con scritture cloud, migrazione legacy e rotazione della Vault QA richiedono i rispettivi gate già indicati nell'incarico. Questa decisione non dichiara il percorso completo implementato o distribuito.
+
 ## 03/11/2026 — monitoraggio sicurezza dell'app e del PC
 
 La sorveglianza finale comprende sia l'app pubblica sia il PC Windows usato per sviluppo e rilascio. Il controllo viene eseguito ogni giorno alle 07:30 Europe/Rome, resta silenzioso quando non esistono novità applicabili e non applica automaticamente patch, commit o deploy. Gli allarmi richiedono conferma su fonti primarie, correlazione con le versioni realmente usate e indicazione di una misura concreta.

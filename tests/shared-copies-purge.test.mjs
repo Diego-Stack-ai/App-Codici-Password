@@ -73,7 +73,14 @@ test('T-08: la condivisione delle Scadenze è un altro percorso', () => {
     // Chi le scrive: le funzioni backend delle Scadenze, non il purge.
     assert.match(indexSource, /async function syncReceivedDeadlines\(/);
     assert.match(indexSource, /async function removeReceivedDeadlines\(/);
-    assert.match(indexSource, /batch\.delete\(db\.collection\("users"\)\.doc\(recipientUid\)\.collection\("receivedDeadlines"\)/);
+    const removeSlice = indexSource.slice(indexSource.indexOf('async function removeReceivedDeadlines('),
+        indexSource.indexOf('function shouldSendPush('));
+    assert.match(removeSlice, /db\.runTransaction\(async transaction =>/);
+    assert.match(removeSlice, /transaction\.delete\(db\.collection\('users'\)\.doc\(uid\)\.collection\('receivedDeadlines'\)\.doc\(shareId\)\)/);
+    assert.match(removeSlice, /for \(const uid of new Set\(\[ownerUid, \.\.\.uids\]\)\) await assertTransactionGlobalPurgeUnlocked\(transaction, db, uid\)/,
+        'la cancellazione verifica il fence del proprietario e di tutti i destinatari nella transazione');
+    assert.match(removeSlice, /if \(sourceSnapshot\.exists\) return;/,
+        'un evento ritardato non cancella le copie di una Scadenza ricreata');
     const syncSlice = indexSource.slice(indexSource.indexOf('async function syncReceivedDeadlines('),
         indexSource.indexOf('async function removeReceivedDeadlines('));
     assert.match(syncSlice, /receivedDeadlineShareRef\(db, ownerUid, deadlineId\)/,

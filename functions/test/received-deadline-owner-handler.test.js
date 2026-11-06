@@ -17,7 +17,7 @@ function fixture({permission = 'manage', recipientEmail = 'a@example.invalid', a
   let accesses = 0;
   const reads = [], writes = [], notifications = [];
   const reference = path => ({path, collection: id => reference(`${path}/${id}`), doc: id => reference(`${path}/${id}`)});
-  const store = {collection: reference, runTransaction: callback => callback({
+  const store = {doc: reference, collection: reference, runTransaction: callback => callback({
     get: async ref => {
       reads.push(ref.path);
       const data = ref.path === `users/A/receivedDeadlines/${shareId}`
@@ -29,7 +29,7 @@ function fixture({permission = 'manage', recipientEmail = 'a@example.invalid', a
   })};
   const firestore = () => { accesses += 1; return store; };
   firestore.FieldValue = {serverTimestamp: () => 'synthetic-time'};
-  const context = vm.createContext({exports: {}, HttpsError, onCall: (_options, handler) => handler,
+  const context = vm.createContext({...require('../archive-purge-global-lock'), ...require('../vault-recovery-fence'), exports: {}, HttpsError, onCall: (_options, handler) => handler,
     admin: {firestore}, normalizeEmail: value => String(value || '').toLowerCase().trim(), verifiedRequestEmail,
     deadlineRecipients: record => record.recipients,
     validFutureIsoDate: value => /^2099-\d{2}-\d{2}$/.test(value),

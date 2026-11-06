@@ -34,7 +34,7 @@ function fixture() {
       set: (reference, value) => { writes.push(reference.path); states.set(reference.path, {...states.get(reference.path), ...value}); },
       update: reference => writes.push(reference.path),
     })};
-  const context = vm.createContext({...legacyPolicy, ...receipts, ...lockApi, exports: {}, HttpsError, onCall: (_options, run) => run,
+  const context = vm.createContext({...require('../archive-purge-global-lock'), ...require('../vault-recovery-fence'), ...legacyPolicy, ...receipts, ...lockApi, exports: {}, HttpsError, onCall: (_options, run) => run,
     validatePurgeCommand: data => { accesses.validation++; return policy.validatePurgeCommand(data); },
     getFirestore: () => { accesses.firestore++; return store; },
     getStorage: () => { accesses.storage++; return {bucket: () => ({})}; },
@@ -74,5 +74,5 @@ test('matching owner preserves purge and constrains all paths to that owner', as
   assert.deepEqual(f.accesses, {validation: 1, firestore: 1, storage: 1, recursiveDelete: 1});
   assert.ok(f.reads.length > 0); assert.ok(f.writes.length > 0);
   assert.ok([...f.reads, ...f.writes].every(path =>
-    /^(users|mutationResults)\/A(?:\/|$)/.test(path) || path === 'archivePurgeLocks/A' || path === 'invites'));
+    /^(users|mutationResults)\/A(?:\/|$)/.test(path) || (path === 'archivePurgeLocks/A' || path === 'vaultRecoveryLocks/A') || path === 'invites'));
 });

@@ -1324,6 +1324,19 @@ h3.settings-desc {
     text-align: center;
 }
 
+.modal-box.complete-recovery-form {
+    transform: none;
+    overflow: visible;
+    max-height: none;
+    width: 100%;
+    max-width: 44rem;
+    margin: 0 auto;
+}
+
+.complete-recovery-counts {
+    white-space: pre-line;
+}
+
 .backup-preview-modal {
     display: flex;
     flex-direction: column;

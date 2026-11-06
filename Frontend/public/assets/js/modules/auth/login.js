@@ -7,13 +7,14 @@
 import {
     login, completeTotpLogin, checkAuthState, logout,
     resendVerificationEmail, refreshEmailVerification
-} from '../../auth.js?v=1.2.259';
-import { initComponents } from '../../components-v129.js?v=1.2.259';
+} from '../../auth.js?v=1.2.260';
+import { initComponents } from '../../components-v129.js?v=1.2.260';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showInputModal } from '../../ui-core-v129.js?v=1.2.259';
+import { showToast, showInputModal } from '../../ui-core-v129.js?v=1.2.260';
 import { recoverTotpAccess } from '../core/mfa-manager.js';
 import { openInitialLanguageDialog, rememberUserLanguage, setLanguagePreference } from '../settings/first-configuration.js';
+import {COMPLETE_RECOVERY_ENABLED, COMPLETE_RECOVERY_LOGIN_PATH, COMPLETE_RECOVERY_PATH, hasCompleteRecoveryIntent} from '../../app-env.js';
 
 /**
  * LOGIN MODULE (V5.0 ADAPTER)
@@ -42,6 +43,8 @@ export async function initLogin() {
 
         // 4. SETUP FUNZIONALITÀ PAGINA
         setupLoginForm();
+        if (COMPLETE_RECOVERY_ENABLED) document.getElementById('login-form')?.appendChild(createElement('a', {
+            href: COMPLETE_RECOVERY_LOGIN_PATH, textContent: t('recovery_entry')}));
         setupLanguageSelector();
         setupPasswordToggle(); // Funzione locale definita sotto
 
@@ -69,7 +72,7 @@ function setupEmailVerificationGate() {
         try {
             if (await refreshEmailVerification()) {
                 showToast(t('auth_email_verified'), 'success');
-                window.location.replace('home_page.html');
+                window.location.replace(hasCompleteRecoveryIntent(window.location) ? COMPLETE_RECOVERY_PATH : 'home_page.html');
             } else {
                 showToast(t('auth_email_verification_pending'), 'warning');
             }
@@ -87,7 +90,7 @@ function setupEmailVerificationGate() {
     });
     document.getElementById('btn-change-verification-email')?.addEventListener('click', async () => {
         await logout();
-        window.location.replace('login.html');
+        window.location.replace(hasCompleteRecoveryIntent(window.location) ? COMPLETE_RECOVERY_LOGIN_PATH : 'login.html');
     });
 
 }
@@ -275,7 +278,9 @@ function setupLoginForm() {
             // Navigazione esplicita: non dipende dall'evento auth globale e resta
             // affidabile anche se la shell offline ha mostrato il login sotto un URL protetto.
             const reauthFlow = new URLSearchParams(window.location.search).get('reauth');
-            if (reauthFlow === 'password-change') {
+            if (hasCompleteRecoveryIntent(window.location)) {
+                window.location.replace(COMPLETE_RECOVERY_PATH);
+            } else if (reauthFlow === 'password-change') {
                 window.location.replace('imposta_nuova_password.html?reauthenticated=1');
             } else if (reauthFlow === 'security-settings') {
                 window.location.replace('impostazioni.html');

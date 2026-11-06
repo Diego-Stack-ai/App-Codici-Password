@@ -22,6 +22,7 @@ const requireFunctions = createRequire(new URL('../functions/package.json', impo
 const {initializeApp, deleteApp} = requireFunctions('firebase-admin/app');
 const {getFirestore, Timestamp, FieldPath, FieldValue} = requireFunctions('firebase-admin/firestore');
 const service = requireFunctions('./audit-retention-service.js');
+const {fencedUserWrite, assertTransactionGlobalPurgeUnlocked} = requireFunctions('./archive-purge-global-lock.js');
 
 const source = readFileSync(new URL('../functions/index.js', import.meta.url), 'utf8');
 const start = source.indexOf('const AUDIT_RETENTION_PAGE_SIZE');
@@ -34,10 +35,10 @@ const jobSource = source.slice(start, end);
 // restituirebbe un `Promise` riconosciuto da `runTransaction`.
 const silentConsole = {log() {}, warn() {}, error() {}};
 const jobFactory = new Function('Timestamp', 'FieldPath', 'FieldValue', 'console', 'auditEventPath', 'classifyAuditEvent',
-    'planAuditRetention', 'runAuditRetention', 'DEFAULT_BATCH_SIZE', 'MAX_EVENTS_PER_RUN',
+    'planAuditRetention', 'runAuditRetention', 'DEFAULT_BATCH_SIZE', 'MAX_EVENTS_PER_RUN', 'fencedUserWrite', 'assertTransactionGlobalPurgeUnlocked',
     `${jobSource}\nreturn {collectExpiredAuditEvents, deleteAuditBatchWithConfirmation, runAuditRetentionJob};`);
 const job = jobFactory(Timestamp, FieldPath, FieldValue, silentConsole, service.auditEventPath, service.classifyAuditEvent,
-    service.planAuditRetention, service.runAuditRetention, service.DEFAULT_BATCH_SIZE, service.MAX_EVENTS_PER_RUN);
+    service.planAuditRetention, service.runAuditRetention, service.DEFAULT_BATCH_SIZE, service.MAX_EVENTS_PER_RUN, fencedUserWrite, assertTransactionGlobalPurgeUnlocked);
 
 const app = initializeApp({projectId: PROJECT_ID}, `audit-retention-${process.pid}`);
 const db = getFirestore(app);
