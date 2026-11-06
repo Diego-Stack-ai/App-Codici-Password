@@ -22,9 +22,9 @@ test('backend release is a fixed manual choice behind validation, production env
     for (const [before, after] of [
         ['default: hosting', 'default: recovery-prerequisites-disabled'], ['environment: production', 'environment: unreviewed'],
         ["if: inputs.release_scope == 'recovery-prerequisites-disabled'", 'if: always()'],
-        ['--only "$selectors" --non-interactive', '--only functions --non-interactive'],
+        ['node scripts/deploy-recovery-prerequisites.mjs', 'node node_modules/firebase-tools/lib/bin/firebase.js deploy --only functions'],
         ['node scripts/plan-recovery-canary.mjs --check', 'node unrelated.mjs'],
-        ['--non-interactive --token "$FIREBASE_TOKEN"', '--non-interactive --force --token "$FIREBASE_TOKEN"']
+        ['node scripts/deploy-recovery-prerequisites.mjs', 'node scripts/deploy-recovery-prerequisites.mjs --force']
     ]) { assert.ok(source.includes(before)); assert.throws(() => verifyRecoveryCanaryWorkflow(source.replaceAll(before, after))); }
 });
 test('writer census drift, gate activation and alternate rule/configuration targets block the prerequisite contract', () => {

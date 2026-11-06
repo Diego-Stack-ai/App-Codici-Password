@@ -217,9 +217,7 @@ jobs:
           node scripts/plan-recovery-canary.mjs --check
           node scripts/build-vault-account-backend.mjs --check
           node scripts/plan-recovery-canary.mjs >> "$GITHUB_STEP_SUMMARY"
-          selectors="$(node scripts/plan-recovery-canary.mjs --selectors)"
-          test -n "$selectors"
-          node node_modules/firebase-tools/lib/bin/firebase.js deploy --project appcodici-password --only "$selectors" --non-interactive --token "$FIREBASE_TOKEN"
+          node scripts/deploy-recovery-prerequisites.mjs
 
       - name: Verify deployed manifest and critical assets
         if: inputs.release_scope != 'recovery-prerequisites-disabled'

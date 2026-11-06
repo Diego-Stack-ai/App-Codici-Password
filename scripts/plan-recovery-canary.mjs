@@ -36,8 +36,7 @@ export function verifyRecoveryCanaryWorkflow(source) {
     assert.match(backend.run, /test "\$GITHUB_SHA" = "\$remote_master"/);
     assert.match(backend.run, /node scripts\/plan-recovery-canary\.mjs --check/);
     assert.match(backend.run, /node scripts\/build-vault-account-backend\.mjs --check/);
-    assert.match(backend.run, /selectors="\$\(node scripts\/plan-recovery-canary\.mjs --selectors\)"/);
-    assert.match(backend.run, /firebase\.js deploy --project appcodici-password --only "\$selectors" --non-interactive --token "\$FIREBASE_TOKEN"/);
+    assert.match(backend.run, /^\s*node scripts\/deploy-recovery-prerequisites\.mjs\s*$/m);
     assert.doesNotMatch(backend.run, /--force|--only functions(?:\s|$)/);
     return true;
 }
@@ -87,7 +86,7 @@ export function planRecoveryCanary() {
         'functions/full-recovery-adapter.js', 'functions/full-recovery-runtime.js', 'functions/vault-recovery-fence.js',
         'functions/archive-purge-global-lock.js', 'functions/vault-account-runtime.js', 'functions/package-lock.json',
         'firestore.rules', 'storage.rules', 'firebase.json', 'Frontend/public/assets/js/app-env.js', '.github/workflows/firebase-deploy.yml',
-        'scripts/plan-recovery-canary.mjs'];
+        'scripts/plan-recovery-canary.mjs', 'scripts/deploy-recovery-prerequisites.mjs'];
     return {schemaVersion: 1, executable: false, cloudCalls: false, target: RECOVERY_TARGET,
         stage: 'prerequisites-disabled', ...contract, excludedFunctions: EXCLUDED_FUNCTIONS,
         sourceDigests: Object.fromEntries(evidenceFiles.map(path => [path, createHash('sha256').update(read(path).replace(/\r\n/g, '\n')).digest('hex')])),
