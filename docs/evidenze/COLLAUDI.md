@@ -1,5 +1,9 @@
 # Collaudi
 
+## Pulizia del report scanner e manifest nelle PR — 06/11/2026
+
+La run manuale `42188321874` sul commit `83e7336b` supera i controlli provider, Gitleaks, suite completa e versione. Fallisce prima di Hosting con `Il manifest di produzione richiede un worktree tracciato pulito.` Il sorgente dell'Action fissata conferma che `results.sarif` viene sempre scritto nella root e che disabilitare il caricamento non lo elimina. Il workflow rimuove quindi il solo report regolare, non tracciato e non symlink; qualsiasi altro file resta visibile al gate. La generazione/verifica del manifest con `--require-clean` viene eseguita anche nelle PR che svolgono la suite applicativa, anziché essere provata per la prima volta al deploy manuale. L'errore non ha pubblicato una versione incompleta.
+
 ## Gate storico verificato e baseline esatta — 06/11/2026
 
 La run manuale `42185150887` si è fermata su Gitleaks, senza eseguire Hosting. I dodici reperti sono poi stati riconciliati individualmente: due copie della stessa chiave privata storica oggi inutilizzabile secondo lo stato provider, sette configurazioni pubbliche Firebase/VAPID e tre valori sintetici di test. La baseline usa soltanto `commit:percorso:regola:riga`; il preparatore ne verifica l'insieme esatto e non autorizza intere regole, percorsi o nuovi commit.

@@ -43,6 +43,20 @@ jobs:
           GITLEAKS_ENABLE_COMMENTS: false
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: false
 
+      - name: Remove temporary secret scan report
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -L results.sarif
+          if [ -e results.sarif ]; then
+            test -f results.sarif
+            if git ls-files --error-unmatch -- results.sarif >/dev/null 2>&1; then
+              echo "Refusing to remove a tracked file: results.sarif" >&2
+              exit 1
+            fi
+            rm -- results.sarif
+          fi
+
       - name: Classify validation scope
         id: scope
         shell: bash
@@ -111,8 +125,9 @@ jobs:
         run: npm run version:check
 
       - name: Build and verify release manifest
-        if: github.event_name == 'workflow_dispatch'
+        if: steps.scope.outputs.run_full_suite == 'true'
         run: |
+          git status --porcelain=v1 --untracked-files=all
           node scripts/release-manifest.mjs --write --commit "$GITHUB_SHA" --require-clean
           node scripts/release-manifest.mjs --check --commit "$GITHUB_SHA" --require-clean
 
