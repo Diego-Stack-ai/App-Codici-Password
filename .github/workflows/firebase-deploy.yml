@@ -27,6 +27,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Verify historical credential status before release scan
+        if: github.event_name == 'workflow_dispatch'
+        run: node scripts/verify-historical-credential-status.mjs
+
       - name: Prepare release secret scan
         run: node scripts/prepare-gitleaks-config.mjs --output "$RUNNER_TEMP/gitleaks.toml"
 
@@ -151,6 +155,9 @@ jobs:
         run: |
           node scripts/release-manifest.mjs --write --commit "$GITHUB_SHA" --require-clean
           node scripts/release-manifest.mjs --check --commit "$GITHUB_SHA" --require-clean
+
+      - name: Verify historical credential status before publication
+        run: node scripts/verify-historical-credential-status.mjs
 
       # Le Functions restano escluse e richiedono un'autorizzazione separata.
       # FIREBASE_TOKEN resta temporaneamente il metodo CI esistente.

@@ -1,5 +1,15 @@
 # Collaudi
 
+## Gate storico verificato e baseline esatta — 06/11/2026
+
+La run manuale `42185150887` si è fermata su Gitleaks, senza eseguire Hosting. I dodici reperti sono poi stati riconciliati individualmente: due copie della stessa chiave privata storica oggi inutilizzabile secondo lo stato provider, sette configurazioni pubbliche Firebase/VAPID e tre valori sintetici di test. La baseline usa soltanto `commit:percorso:regola:riga`; il preparatore ne verifica l'insieme esatto e non autorizza intere regole, percorsi o nuovi commit.
+
+Evidenza aggiuntiva: IAM sul progetto esplicito restituisce `NOT_FOUND`; entrambi gli endpoint pubblici Google dei certificati della vecchia identità restituiscono 404 JSON, mentre il controllo valido restituisce 200 con certificati X.509 validi. Il preflight live è verde alle **08:17:53 UTC**. Gli endpoint pubblici sono descritti nella [documentazione Google sulle chiavi](https://docs.cloud.google.com/iam/docs/best-practices-for-managing-service-account-keys); il comportamento del progetto esplicito è documentato nel [riferimento IAM get](https://docs.cloud.google.com/iam/docs/reference/rest/v1/projects.serviceAccounts/get). La prova non usa la chiave privata, non genera token e non modifica Google Cloud. Il riesame indipendente distingue lo stato corrente verificato dalla ricostruzione storica ancora aperta; non si dichiara avvenuta una revoca né si esclude un abuso passato.
+
+Hardening rilascio **21/21 senza skip**, inclusi Gitleaks reale sulla reintroduzione della stessa chiave in un nuovo commit e in un altro percorso, baseline alterata, URL provider fissati da un controllo indipendente e matrice provider su rete, timeout, permessi, falso 404 e certificati non validi. Lo scan reale Gitleaks 8.30.1 copre **1.612 commit / circa 112 MB**, senza reperti aggiuntivi rispetto ai dodici riconosciuti. Il workflow ricontrolla lo stato provider prima dello scan manuale e immediatamente prima di Hosting, fallendo chiuso su ogni anomalia.
+
+Rollback verificato tramite lettura dell'API Hosting: release attiva prima del nuovo deploy `sites/appcodici-password/releases/1793899336876000`, versione `sites/appcodici-password/versions/7b00f8b1afadf81b`, pubblicata il **05/11/2026 17:22:16.876 UTC**, osservata come **1.2.258**. Nessuna operazione di rollback è stata eseguita.
+
 ## Checkpoint GitHub 1.2.259 — 06/11/2026
 
 Commit applicativo `3401d601`, PR #258, merge `4a485d92`. La run GitHub `42183152903` ha concluso con successo la validazione completa su Linux e il controllo della versione; i controlli documentali e Gitleaks dei nuovi commit sono verdi. Il deploy è stato correttamente saltato perché non è una run manuale di produzione. Prima del commit Gitleaks 8.30.1 sullo staging non rileva segreti; i test di hardening rilascio sono 14/14 senza skip. La fixture PEM sintetica è costruita a runtime e il test reale conferma che lo scanner la blocca.

@@ -1,0 +1,16 @@
+# Reviewed historical findings only: full commit, path, rule and line.
+# Public Firebase/VAPID configuration and synthetic fixture/emulator values.
+0c8029efd813227c6820e7642549144fb32d42af:tests/fixtures/maturity-dataset.json:generic-api-key:27
+0c8029efd813227c6820e7642549144fb32d42af:tests/fixtures/maturity-dataset.json:generic-api-key:38
+bc40fe48d10ca6b41a758a2e9208927c654d614e:scripts/test-functions-emulator.mjs:jwt:6
+b91a76962df4ab3808e66f78801d2cdbc9538f36:Frontend/public/assets/js/modules/shared/push-manager.js:generic-api-key:6
+b98a751ccbbc0b67abd6eaeee9879b5588467191:Frontend/public/sw.js:gcp-api-key:8
+b98a751ccbbc0b67abd6eaeee9879b5588467191:Frontend/public/assets/js/modules/shared/push-manager.js:generic-api-key:6
+6e8ea85a5fdb9d4c6d959367e8facd8c9a81bec8:scripts_import_dati/verify_pwd.js:gcp-api-key:1
+cbbe0d6ebe0794e2f88b164ace58e2c5f1e320f5:Frontend/public/assets/js/modules/shared/push_manager.js:generic-api-key:11
+20b4e6e8db4f56aa10bade4a5336f2b3919ff91b:Frontend/public/assets/js/modules/home/setup_flusso.js:generic-api-key:182
+20b4e6e8db4f56aa10bade4a5336f2b3919ff91b:Frontend/public/assets/js/modules/settings/impostazioni.js:generic-api-key:461
+# Same historical credential in two commits; issuer absent at provider on 2026-11-06.
+# Production verifies provider status again; incident-log review remains open.
+c33e735e4885c7806209947d6f976bc7aef8de18:Frontend/modifiche.txt:private-key:3167
+14e908ee6256825057421316ecc771092a591a70:functions/index.js:private-key:22
