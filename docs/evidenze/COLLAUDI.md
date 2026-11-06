@@ -1,5 +1,13 @@
 # Collaudi
 
+## Pubblicazione Hosting 1.2.259 e verifica online — 06/11/2026
+
+[Run di rilascio 42190828545](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42190828545) conclusa con successo: verifica provider, Gitleaks completo, pulizia del report, suite integrale, versione, manifest, deploy del solo Hosting e verifica del manifest/asset reali. Il [manifest pubblico](https://appcodici-password.web.app/release-manifest.json) indica schema 2, versione **1.2.259**, commit **16c94c24e4d7b342600382dad077cbc491902e6a**, **314 file** e hash CI **e08f553f434a26e41ff73ac3266fce72abcba081d6e57d6c1d2047b5f914e437**. Questa è la provenienza verificata della distribuzione; i successivi commit soltanto documentali non vengono confusi con il commit pubblicato.
+
+Il confronto indipendente fra tutti i fingerprint pubblici e la copia Windows rileva 151 file testuali con CRLF locali anziché LF del checkout CI: normalizzando esclusivamente le terminazioni riga tutti i 151 corrispondono, mentre gli altri file corrispondono già byte per byte. Nessuna differenza di contenuto resta inspiegata. Un manifest calcolato sui byte grezzi di una vecchia copia Windows non sostituisce quello canonico generato e verificato in CI.
+
+Smoke autenticato sulla produzione con la sola QA autorizzata: login, Master Password, Home, quattro navigazioni con nuovo sblocco (`area_privata`, `account_privati`, `impostazioni`, `home_page`), logout e diniego di una scheda nuova sono superati. Il report funzionale è `ok: true`, senza errori di rete applicativi o avvisi App Check. Il runner termina però con codice **1** per un solo errore Console: richiesta automatica del browser a `/favicon.ico`, che risponde 404. Il difetto resta dichiarato e programmato, senza alterare il test per nasconderlo. Non sono state eseguite operazioni CRUD su dati reali; Safari/iPhone/PWA e Push fisico conservano i rispettivi gate separati.
+
 ## Pulizia del report scanner e manifest nelle PR — 06/11/2026
 
 La run manuale `42188321874` sul commit `83e7336b` supera i controlli provider, Gitleaks, suite completa e versione. Fallisce prima di Hosting con `Il manifest di produzione richiede un worktree tracciato pulito.` Il sorgente dell'Action fissata conferma che `results.sarif` viene sempre scritto nella root e che disabilitare il caricamento non lo elimina. Il workflow rimuove quindi il solo report regolare, non tracciato e non symlink; qualsiasi altro file resta visibile al gate. La generazione/verifica del manifest con `--require-clean` viene eseguita anche nelle PR che svolgono la suite applicativa, anziché essere provata per la prima volta al deploy manuale. L'errore non ha pubblicato una versione incompleta.
