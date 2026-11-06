@@ -1,5 +1,11 @@
 # Collaudi
 
+## Checkpoint GitHub 1.2.259 — 06/11/2026
+
+Commit applicativo `3401d601`, PR #258, merge `4a485d92`. La run GitHub `42183152903` ha concluso con successo la validazione completa su Linux e il controllo della versione; i controlli documentali e Gitleaks dei nuovi commit sono verdi. Il deploy è stato correttamente saltato perché non è una run manuale di produzione. Prima del commit Gitleaks 8.30.1 sullo staging non rileva segreti; i test di hardening rilascio sono 14/14 senza skip. La fixture PEM sintetica è costruita a runtime e il test reale conferma che lo scanner la blocca.
+
+La scansione redatta dell'intera cronologia copre 1.611 commit e circa 112 MB, con 12 occorrenze revisionate: due copie di una sola chiave privata storica, sette valori pubblici Firebase/VAPID e tre valori sintetici di fixture/emulator. Nessuna nuova credenziale attiva è stata identificata, ma questo non prova la revoca della chiave storica. Il vecchio account risponde `NOT_FOUND` e il certificato pubblico HTTP 404; la verifica del progetto con l'identità attuale non è conclusiva. Nessuna revoca, rotazione, eccezione Gitleaks per la chiave privata o pubblicazione Hosting è stata eseguita. La prova dell'eliminazione con l'identità proprietaria e la revisione dei log restano necessarie per chiudere il gate.
+
 ## 06/11/2026 — primo lotto hardening locale, non distribuito
 
 - `npm test`: codice **0**, nessun gruppo fallito; il log conserva nove skip espliciti nei profili generici (ricevute Widget, purge preflight, recovery/MFA storica, unlink condiviso). Non sono presentati come prove eseguite. Dopo le correzioni finali sono stati rieseguiti i controlli pertinenti sul sorgente corrente.
