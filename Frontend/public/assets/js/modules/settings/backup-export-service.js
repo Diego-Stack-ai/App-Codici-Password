@@ -1,11 +1,12 @@
-import {auth, storage} from '../../firebase-config.js?v=1.2.259';
+import {auth, storage} from '../../firebase-config.js?v=1.2.260';
 import {createBackupExportBuffer, createBackupRecordBuffer} from './backup-export-buffer.js';
 import {getBytes, ref, onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {
     getBackupProfile, listBackupCompanies, listBackupCompanyAccounts, listBackupCompanyAttachments,
     listBackupAccountWidgetProfiles, listBackupAccountWidgets,
     listBackupContacts, listBackupDeadlines, listBackupPrivateAccounts, listBackupPrivateAttachments,
-    listBackupProfileWidgets, listBackupSettings, listBackupSharedVaultData, listBackupSharedVaultLinks
+    listBackupProfileWidgets, listBackupSettings, listBackupSharedVaultData, listBackupSharedVaultLinks,
+    getBackupSecurity, listBackupProfileDocumentAttachments, getBackupSharingPublicIdentity, getBackupSharingPrivateIdentity
 } from '../data/vault-repository.js';
 import {
     createBackupHeader, deriveBackupKey, encryptBackupEntry, generateRecoveryKey, serializeBackupLine
@@ -158,6 +159,33 @@ function bytesToBase64(value) {
 }
 
 export async function exportOwnerBackup(uid, options = {}) {
+    if (options.profile === 'complete-recovery') {
+        const {writeCompleteRecoveryBackup} = await import('./full-recovery-service.js');
+        const session = createExportSession(uid, options);
+        let sink;
+        try {
+            // Until the dedicated UI/backend protocol is integrated, complete mode
+            // requires an explicit fresh prompt and a generation-pinned Storage reader.
+            if (typeof options.promptMasterPassword !== 'function' || typeof options.readAsset !== 'function') {
+                throw new Error('RECOVERY_ADAPTER_REQUIRED');
+            }
+            sink = await openSink(`codici-password-complete-${new Date().toISOString().slice(0, 10)}.cpbackup`, session.check);
+            const result = await writeCompleteRecoveryBackup({uid, check: session.check,
+                collectRecords: () => collectRecords(uid, session.check), readSecurity: getBackupSecurity,
+                promptMasterPassword: options.promptMasterPassword,
+                readIdentity: async () => {
+                    const [publicIdentity, privateEnvelope] = await Promise.all([
+                        getBackupSharingPublicIdentity(uid), getBackupSharingPrivateIdentity(uid)]);
+                    return {publicIdentity, privateEnvelope};
+                }, listProfileAttachments: listBackupProfileDocumentAttachments,
+                readAsset: options.readAsset, writeLine: line => sink.write(line)});
+            session.check(); await sink.close(); session.check();
+            return {...result, streamed: sink.streamed};
+        } catch (error) {
+            try { await sink?.abort(); } catch {}
+            throw error;
+        } finally { session.dispose(); }
+    }
     const session = createExportSession(uid, options), check = session.check;
     const date = new Date().toISOString().slice(0, 10);
     let sink, records, storagePaths, recoveryKey = '';

@@ -40,6 +40,7 @@ function harness(errorFactory) {
     const deadlineCollection = {where: () => ({get: async () => ({docs: []})})};
     const userRef = {collection: name => name === "pushDevices" ? deviceCollection : deadlineCollection};
     const db = {
+        doc: path => ({path, get: async () => ({exists: false})}),
         collection: () => ({doc: () => userRef}),
         runTransaction: async callback => callback({
             get: ref => ref.get(),
@@ -51,7 +52,7 @@ function harness(errorFactory) {
         serverTimestamp: () => "server-time",
         delete: () => deleted
     };
-    const context = {
+    const context = {...require('../archive-purge-global-lock'), ...require('../vault-recovery-fence'),
         Date,
         deadlineCalendar: require("../deadline-calendar"),
         exports: {},

@@ -57,7 +57,7 @@ test("transaction rereads changed candidate, preserving renewed or foreign recor
   for (const changed of [marker(now + 1), {...marker(), kind: "deadline"}]) {
     const f = fixture({[path]: marker()}, {hook: store => store.set(path, changed)});
     assert.equal((await f.run()).deleted, 0);
-    assert.equal(f.reads, 1);
+    assert.equal(f.reads, 3);
     assert.deepEqual(f.deletions, []);
     assert.deepEqual(f.store.get(path), changed);
   }
@@ -81,4 +81,14 @@ test("invalid clock cannot delete; candidate count bounded", async () => {
   const f = fixture({[path]: marker()}, {clock: NaN});
   assert.equal((await f.run()).deleted, 0);
   await assert.rejects(() => cleanup({db: {}, statePath: state, limit: 101}), /N1_CLEANUP_LIMIT_INVALID/);
+});
+
+test('fenced marker owner defers deletion and never advances bounded cleanup cursor', async () => {
+  const fence = require('../vault-recovery-fence');
+  const lock = fence.acquireVaultRecoveryFence(null,
+    fence.createVaultRecoveryBinding({uid: 'a', operationId: 'recover', planDigest: 'a'.repeat(64)})).record;
+  const f = fixture({[path]: marker(), 'vaultRecoveryLocks/a': lock}, {limit: 1});
+  await assert.rejects(f.run(), /RECOVERY_FENCE_ACTIVE/);
+  assert.deepEqual(f.deletions, []); assert.equal(f.store.has(state), false);
+  assert.equal(f.store.has(path), true);
 });

@@ -2,6 +2,8 @@ const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 const FORMAT = 'codici-password-backup';
 const SCHEMA_VERSION = 2;
+const FULL_RECOVERY_SCHEMA_VERSION = 3;
+const FULL_RECOVERY_PROFILE = 'complete-recovery';
 const KDF_ITERATIONS = 600000;
 
 function bytesToBase64(value) {
@@ -23,7 +25,7 @@ async function digest(value) {
 }
 
 function canonicalHeader(header) {
-    return JSON.stringify({
+    const value = {
         format: header.format,
         schemaVersion: header.schemaVersion,
         ownerUid: header.ownerUid,
@@ -31,15 +33,31 @@ function canonicalHeader(header) {
         createdAt: header.createdAt,
         kdf: header.kdf,
         cipher: header.cipher
-    });
+    };
+    if (header.schemaVersion === FULL_RECOVERY_SCHEMA_VERSION) value.profile = header.profile;
+    return JSON.stringify(value);
 }
 
-function validateHeader(header, ownerUid) {
-    if (header?.format !== FORMAT || header.schemaVersion !== SCHEMA_VERSION ||
+export function validateBackupHeader(header, ownerUid) {
+    if (header?.format !== FORMAT || ![SCHEMA_VERSION, FULL_RECOVERY_SCHEMA_VERSION].includes(header.schemaVersion) ||
         header.ownerUid !== ownerUid || header.kdf?.name !== 'PBKDF2-SHA256' ||
         header.kdf?.iterations !== KDF_ITERATIONS || header.cipher !== 'AES-GCM-256-CHAINED') {
         throw new Error('BACKUP_FORMAT_INVALID');
     }
+    if (header.schemaVersion === FULL_RECOVERY_SCHEMA_VERSION) {
+        const keys = Object.keys(header).sort().join(',');
+        const salt = typeof header.kdf.salt === 'string' ? base64ToBytes(header.kdf.salt) : new Uint8Array();
+        if (keys !== 'backupId,cipher,createdAt,format,kdf,ownerUid,profile,schemaVersion' ||
+            header.profile !== FULL_RECOVERY_PROFILE || typeof ownerUid !== 'string' ||
+            !/^[A-Za-z0-9._:-]{1,160}$/.test(ownerUid) ||
+            !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(header.backupId || '') ||
+            !Number.isSafeInteger(header.createdAt) || header.createdAt < 0 ||
+            Object.keys(header.kdf).sort().join(',') !== 'iterations,name,salt' ||
+            salt.length !== 32 || bytesToBase64(salt) !== header.kdf.salt) {
+            throw new Error('BACKUP_FORMAT_INVALID');
+        }
+    }
+    return header;
 }
 
 export function generateRecoveryKey() {
@@ -47,21 +65,23 @@ export function generateRecoveryKey() {
     return Array.from(random, value => value.toString(16).padStart(2, '0')).join('').match(/.{1,8}/g).join('-');
 }
 
-export function createBackupHeader(ownerUid, createdAt = Date.now()) {
+export function createBackupHeader(ownerUid, createdAt = Date.now(), options = {}) {
     if (!ownerUid) throw new Error('BACKUP_OWNER_REQUIRED');
-    return {
+    const header = {
         format: FORMAT,
-        schemaVersion: SCHEMA_VERSION,
+        schemaVersion: options.profile === FULL_RECOVERY_PROFILE ? FULL_RECOVERY_SCHEMA_VERSION : SCHEMA_VERSION,
         ownerUid,
         backupId: crypto.randomUUID(),
         createdAt,
         kdf: {name: 'PBKDF2-SHA256', iterations: KDF_ITERATIONS, salt: bytesToBase64(crypto.getRandomValues(new Uint8Array(32)))},
         cipher: 'AES-GCM-256-CHAINED'
     };
+    if (header.schemaVersion === FULL_RECOVERY_SCHEMA_VERSION) header.profile = FULL_RECOVERY_PROFILE;
+    return validateBackupHeader(header, ownerUid);
 }
 
 export async function deriveBackupKey(header, recoveryKey, ownerUid) {
-    validateHeader(header, ownerUid);
+    validateBackupHeader(header, ownerUid);
     if (!/^[a-f0-9]{8}(?:-[a-f0-9]{8}){5}$/.test(String(recoveryKey))) {
         throw new Error('RECOVERY_KEY_INVALID');
     }
@@ -75,9 +95,10 @@ export async function encryptBackupEntry({header, key, sequence, previousDigest 
     if (!Number.isInteger(sequence) || sequence < 0 || !entry?.kind) throw new Error('BACKUP_ENTRY_INVALID');
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const aad = `${canonicalHeader(header)}\n${sequence}\n${previousDigest}`;
-    const ciphertext = await crypto.subtle.encrypt(
-        {name: 'AES-GCM', iv, additionalData: encoder.encode(aad)}, key, encoder.encode(JSON.stringify(entry))
-    );
+    const clear = encoder.encode(JSON.stringify(entry));
+    let ciphertext;
+    try { ciphertext = await crypto.subtle.encrypt({name: 'AES-GCM', iv, additionalData: encoder.encode(aad)}, key, clear); }
+    finally { clear.fill(0); }
     const envelope = {sequence, previousDigest, iv: bytesToBase64(iv), ciphertext: bytesToBase64(ciphertext)};
     return {envelope, digest: await digest(JSON.stringify(envelope))};
 }
@@ -90,7 +111,8 @@ export async function decryptBackupEntry({header, key, expectedSequence, previou
     const plaintext = await crypto.subtle.decrypt({
         name: 'AES-GCM', iv: base64ToBytes(envelope.iv), additionalData: encoder.encode(aad)
     }, key, base64ToBytes(envelope.ciphertext));
-    return {entry: JSON.parse(decoder.decode(plaintext)), digest: await digest(JSON.stringify(envelope))};
+    try { return {entry: JSON.parse(decoder.decode(plaintext)), digest: await digest(JSON.stringify(envelope))}; }
+    finally { new Uint8Array(plaintext).fill(0); }
 }
 
 export async function verifyBackupChain({header, key, envelopes}) {
@@ -121,4 +143,4 @@ export function parseBackupLine(line) {
     return JSON.parse(line);
 }
 
-export {FORMAT, SCHEMA_VERSION};
+export {FORMAT, SCHEMA_VERSION, FULL_RECOVERY_SCHEMA_VERSION, FULL_RECOVERY_PROFILE};

@@ -14,7 +14,7 @@ test("creation trigger observes Italian midnight and rejects invalid/expired dat
   for (const [dueDate, expected] of [["2026-09-27", 0], ["2026-09-28", 1], ["2026-09-26", null], ["2026-02-30", null]]) {
     const calls = [];
     class Clock extends Date {constructor(...args) {super(...(args.length ? args : ["2026-09-26T22:30:00Z"]));}}
-    const context = {Date: Clock, deadlineCalendar: require("../deadline-calendar"), exports: {},
+    const context = {...require('../archive-purge-global-lock'), ...require('../vault-recovery-fence'), Date: Clock, deadlineCalendar: require("../deadline-calendar"), exports: {},
       onDocumentCreated: (_config, handler) => handler, admin: {firestore: () => ({})},
       syncReceivedDeadlines: async () => {}, console: {log() {}, error() {}},
       GMAIL_USER: {value: () => "synthetic"}, GMAIL_APP_PASSWORD: {value: () => "synthetic"},
@@ -35,7 +35,7 @@ test("creation trigger blocks disabled and pilot deadlines before sync or delive
     {experimentTag: " Prova-Scadenze "}
   ]) {
     const calls = [];
-    const context = {Date, deadlineCalendar: require("../deadline-calendar"), exports: {},
+    const context = {...require('../archive-purge-global-lock'), ...require('../vault-recovery-fence'), Date, deadlineCalendar: require("../deadline-calendar"), exports: {},
       onSchedule: (_config, handler) => handler, onDocumentCreated: (_config, handler) => handler,
       admin: {firestore: () => ({})},
       syncReceivedDeadlines: async () => calls.push("sync"), console: {log() {}, error() {}},
@@ -62,9 +62,12 @@ test("manual push test is neutral and never reads or exposes a real deadline", a
     let queriedDeadlines = 0;
     const ref = {doc: () => ref, collection: () => ref, get: async () => ({exists: true, data: () => device}),
       set: async () => {}, where: () => {queriedDeadlines++; throw new Error("deadline query forbidden in a neutral test");}};
+    ref.runTransaction = async callback => callback({get: target => target.get(), set: () => {}});
+    ref.doc = path => path.startsWith('archivePurgeLocks/') || path.startsWith('vaultRecoveryLocks/')
+      ? {get: async () => ({exists: false})} : ref;
     const firestore = () => ref;
     firestore.FieldValue = {serverTimestamp: () => "synthetic"};
-    const context = {Date: Clock, deadlineCalendar: require("../deadline-calendar"), exports: {},
+    const context = {...require('../archive-purge-global-lock'), ...require('../vault-recovery-fence'), Date: Clock, deadlineCalendar: require("../deadline-calendar"), exports: {},
       onCall: (_config, handler) => handler, HttpsError: Error, console: {error() {}},
       admin: {firestore, messaging: () => ({send: async payload => sent.push(payload)})}};
     vm.runInNewContext(source.slice(a, b), context);

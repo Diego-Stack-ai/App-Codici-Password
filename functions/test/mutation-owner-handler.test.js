@@ -49,7 +49,7 @@ function fixture(name, {lockActive = false} = {}) {
     },
     set: (...args) => writes.push(args), delete: (...args) => writes.push(args),
   })};
-  const context = vm.createContext({
+  const context = vm.createContext({...require('../archive-purge-global-lock'), ...require('../vault-recovery-fence'),
     exports: {}, HttpsError, ...binding, ...privateService, ...offlineService, ...sharedService, ...sharedReceipt, ...widgetReceipt, ...widgetService, ...widgetProfileService, ...scopeService, ...recoveryService, ...recoveryReceipt,
     assertTransactionGlobalPurgeUnlocked,
     require: () => require('../reference-callables'), onCall: (_options, handler) => handler,
@@ -85,7 +85,7 @@ for (const [name, ownerField, command] of cases) {
     const f = fixture(name), result = await f.run(command);
     const expected = {trashSyncRecord: 'trashed', restoreSyncRecord: 'restored'}[name] || 'applied';
     assert.equal(result.status, expected); assert.ok(f.writes.length >= 2);
-    assert.ok(f.reads.every(path => /^(users|mutationResults)\/A(?:\/|$)/.test(path) || path === 'archivePurgeLocks/A'));
+    assert.ok(f.reads.every(path => /^(users|mutationResults)\/A(?:\/|$)/.test(path) || (path === 'archivePurgeLocks/A' || path === 'vaultRecoveryLocks/A')));
     assert.ok(f.writes.every(([ref]) => /^(users|mutationResults)\/A(?:\/|$)/.test(ref.path)));
   });
 }

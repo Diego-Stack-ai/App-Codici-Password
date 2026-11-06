@@ -57,13 +57,15 @@ const {createBackupRestoreBinding, verifyBackupRestoreReceipt} = require("./back
 const {createBackupRestoreV2Callable} = require('./backup-restore-v2-callable');
 const {createArchivePurgeBinding, verifyArchivePurgeReceipt} = require("./archive-purge-receipt");
 const {
-    acquireGlobalPurgeLock, assertGlobalPurgeLockHeld, assertTransactionGlobalPurgeUnlocked,
+    acquireGlobalPurgeLock, assertGlobalPurgeLockHeld, assertTransactionGlobalPurgeUnlocked, fencedUserWrite,
     createGlobalPurgeLockBinding, globalPurgeLockRef, releaseGlobalPurgeLock
 } = require("./archive-purge-global-lock");
+const {assertTransactionVaultRecoveryUnlocked} = require('./vault-recovery-fence');
 const {createRecoveryBinding, verifyRecoveryReceipt} = require("./recovery-command-receipt");
 const {createVaultAccountCallables} = require('./vault-account-runtime');
 const {createSharedAttachmentService} = require('./shared-attachment-service');
 const {createProfileDocumentAttachmentService} = require('./profile-document-attachment-service');
+const {createProductionRecoveryCallables} = require('./full-recovery-production');
 const {
     accountEventId, accountTransition, auditWriteDecision, buildAuditEvent, inviteRefOf, inviteTransition,
     invitedEventId, removedEventId, responseEventId
@@ -81,6 +83,12 @@ const firestore = () => getFirestore();
 firestore.FieldValue = FieldValue;
 const admin = { auth: getAuth, firestore, messaging: getMessaging };
 setGlobalOptions({ maxInstances: 10, region: "europe-west1" });
+
+// Inert until a reviewed source policy names the dedicated synthetic canary.
+// This registration does not enable the UI or bypass ordinary writer fences.
+const fullRecovery = createProductionRecoveryCallables({onCall, HttpsError, getFirestore, getStorage, Timestamp, FieldValue});
+exports.manageFullVaultRecovery = fullRecovery.manageFullVaultRecovery;
+exports.readRecoveryBackupAsset = fullRecovery.readRecoveryBackupAsset;
 
 // Exported for local end-to-end verification only. The handler itself contains
 // a code-level hard-off interlock and cannot reach Firestore until activation.
@@ -432,6 +440,7 @@ exports.purgeArchivedAccount = onCall(
             return cleanup;
         };
         const preparation = await store.runTransaction(async transaction => {
+            await assertTransactionVaultRecoveryUnlocked(transaction, store, ownerUid);
             const [recordSnapshot, operationSnapshot, legacySnapshot, lockSnapshot] = await Promise.all([
                 transaction.get(recordRef), transaction.get(operationRef), transaction.get(legacyRef), transaction.get(lockRef)
             ]);
@@ -801,29 +810,23 @@ async function syncReceivedDeadlines(db, ownerUid, deadlineId, scadenza, previou
         : new Map();
     const shareId = receivedDeadlineId(ownerUid, deadlineId);
     const shareRef = receivedDeadlineShareRef(db, ownerUid, deadlineId);
-    const shareSnapshot = await shareRef.get();
-    const recordedRecipientUids = Array.isArray(shareSnapshot.data()?.recipientUids)
-        ? shareSnapshot.data().recipientUids.filter((uid) => typeof uid === "string" && uid)
-        : [];
-    for (const uid of recordedRecipientUids) previous.set(uid, previous.get(uid) || {});
-    const batch = db.batch();
-
-    for (const [recipientUid] of previous) {
-        if (!current.has(recipientUid)) {
-            batch.delete(db.collection("users").doc(recipientUid).collection("receivedDeadlines").doc(shareId));
+    await db.runTransaction(async transaction => {
+        const shareSnapshot = await transaction.get(shareRef);
+        const recorded = Array.isArray(shareSnapshot.data()?.recipientUids) ? shareSnapshot.data().recipientUids : [];
+        const priorUids = new Set([...previous.keys(), ...recorded.filter(uid => typeof uid === 'string' && uid)]);
+        for (const uid of new Set([ownerUid, ...priorUids, ...current.keys()])) {
+            await assertTransactionGlobalPurgeUnlocked(transaction, db, uid);
         }
-    }
-    for (const [recipientUid, resolved] of current) {
-        const ref = db.collection("users").doc(recipientUid).collection("receivedDeadlines").doc(shareId);
-        batch.set(ref, receivedDeadlineData(owner, ownerUid, deadlineId, scadenza, resolved.recipient), { merge: true });
-    }
-    batch.set(shareRef, {
-        ownerUid,
-        deadlineId,
-        recipientUids: [...current.keys()],
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        for (const uid of priorUids) {
+            if (!current.has(uid)) transaction.delete(db.collection('users').doc(uid).collection('receivedDeadlines').doc(shareId));
+        }
+        for (const [uid, resolved] of current) {
+            const ref = db.collection('users').doc(uid).collection('receivedDeadlines').doc(shareId);
+            transaction.set(ref, receivedDeadlineData(owner, ownerUid, deadlineId, scadenza, resolved.recipient), {merge: true});
+        }
+        transaction.set(shareRef, {ownerUid, deadlineId, recipientUids: [...current.keys()],
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()});
     });
-    await batch.commit();
     return current;
 }
 
@@ -831,17 +834,18 @@ async function removeReceivedDeadlines(db, ownerUid, deadlineId, scadenza) {
     const recipients = await resolveRecipientUsers(deadlineRecipients(scadenza), ownerUid);
     const shareId = receivedDeadlineId(ownerUid, deadlineId);
     const shareRef = receivedDeadlineShareRef(db, ownerUid, deadlineId);
-    const shareSnapshot = await shareRef.get();
-    const recordedRecipientUids = Array.isArray(shareSnapshot.data()?.recipientUids)
-        ? shareSnapshot.data().recipientUids.filter((uid) => typeof uid === "string" && uid)
-        : [];
-    for (const uid of recordedRecipientUids) recipients.set(uid, recipients.get(uid) || {});
-    const batch = db.batch();
-    for (const [recipientUid] of recipients) {
-        batch.delete(db.collection("users").doc(recipientUid).collection("receivedDeadlines").doc(shareId));
-    }
-    batch.delete(shareRef);
-    await batch.commit();
+    await db.runTransaction(async transaction => {
+        const [shareSnapshot, sourceSnapshot] = await Promise.all([
+            transaction.get(shareRef), transaction.get(db.collection('users').doc(ownerUid).collection('scadenze').doc(deadlineId))
+        ]);
+        // A delayed deletion event cannot erase a new incarnation's copies.
+        if (sourceSnapshot.exists) return;
+        const recorded = Array.isArray(shareSnapshot.data()?.recipientUids) ? shareSnapshot.data().recipientUids : [];
+        const uids = new Set([...recipients.keys(), ...recorded.filter(uid => typeof uid === 'string' && uid)]);
+        for (const uid of new Set([ownerUid, ...uids])) await assertTransactionGlobalPurgeUnlocked(transaction, db, uid);
+        for (const uid of uids) transaction.delete(db.collection('users').doc(uid).collection('receivedDeadlines').doc(shareId));
+        transaction.delete(shareRef);
+    });
 }
 
 function shouldSendPush(scadenza, diffDays, forceImmediate = false, lastField = "lastPushNotifiedAt") {
@@ -875,6 +879,7 @@ async function sendRecipientDeadlinePushes(db, ownerUid, deadlineId, scadenza, d
         let recipientUser;
         try { recipientUser = await verifiedUserByEmail(admin.auth(), recipient.email); }
         catch (error) {
+            if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(error?.code || error?.message))) throw error;
             if (error.code !== "auth/user-not-found") console.error("[RECIPIENT LOOKUP FAILED]", "RECIPIENT_LOOKUP_FAILED");
             continue;
         }
@@ -915,8 +920,11 @@ async function sendRecipientDeadlinePushes(db, ownerUid, deadlineId, scadenza, d
                 if (outcome.status === "sent") sent += 1;
                 if (outcome.status === "policy-blocked") console.error("[RECIPIENT LEDGER]", "CADENCE_RETENTION_DECISION_REQUIRED");
             } catch (error) {
+                if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(error?.code || error?.message))) throw error;
                 const invalid = ["messaging/registration-token-not-registered", "messaging/invalid-registration-token"].includes(error.code);
                 if (invalid) await db.runTransaction(async transaction => {
+                    await assertTransactionGlobalPurgeUnlocked(transaction, db, recipientUser.uid);
+                    await assertTransactionGlobalPurgeUnlocked(transaction, db, ownerUid);
                     const current = await transaction.get(device.ref);
                     if (current.exists && current.data().token === device.data().token) {
                         transaction.set(device.ref, {enabled: false, status: "invalid",
@@ -929,8 +937,8 @@ async function sendRecipientDeadlinePushes(db, ownerUid, deadlineId, scadenza, d
     }
     // Informational only: per-recipient/device ledger controls retries/cadence.
     if (sent > 0) {
-        await db.collection("users").doc(ownerUid).collection("scadenze").doc(deadlineId)
-            .update({ lastRecipientPushNotifiedAt: deadlineCalendar.day(new Date()) });
+        await fencedUserWrite(db, [ownerUid], transaction => transaction.update(deadlineRef,
+            {lastRecipientPushNotifiedAt: deadlineCalendar.day(new Date())}));
     }
     console.log(`[RECIPIENT PUSH] ${deadlineId}: ${sent} dispositivi raggiunti`);
 }
@@ -943,6 +951,7 @@ async function sendDeadlinePush(db, uid, deadlineId, scadenza, diffDays, options
     const notificationId = `${deadlineId}_${dueVersion}_${stage}`.replace(/[^a-zA-Z0-9_-]/g, "_");
     const notificationRef = db.collection("users").doc(uid).collection("deadlineNotifications").doc(notificationId);
     await db.runTransaction(async (transaction) => {
+        await assertTransactionGlobalPurgeUnlocked(transaction, db, uid);
         const existing = await transaction.get(notificationRef);
         if (!existing.exists) {
             transaction.set(notificationRef, {
@@ -961,6 +970,7 @@ async function sendDeadlinePush(db, uid, deadlineId, scadenza, diffDays, options
         const deliveryId = `${notificationId}_${device.id}`.replace(/[^a-zA-Z0-9_-]/g, "_");
         const deliveryRef = db.collection("users").doc(uid).collection("notificationDeliveries").doc(deliveryId);
         const reserved = await db.runTransaction(async (transaction) => {
+            await assertTransactionGlobalPurgeUnlocked(transaction, db, uid);
             const existing = await transaction.get(deliveryRef);
             if (existing.exists && existing.data().status === "sent") return false;
             if (existing.exists && existing.data().status === "sending") {
@@ -985,25 +995,27 @@ async function sendDeadlinePush(db, uid, deadlineId, scadenza, diffDays, options
                 },
                 webpush: { headers: { TTL: diffDays === 0 ? "21600" : "86400", Urgency: "high" } }
             });
-            await deliveryRef.set({ status: "sent", sentAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+            await fencedUserWrite(db, [uid], transaction => transaction.set(deliveryRef, {status: "sent", sentAt: admin.firestore.FieldValue.serverTimestamp()}, {merge: true}));
             acceptedCount += 1;
         } catch (error) {
+            if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(error?.code || error?.message))) throw error;
             const invalid = ["messaging/registration-token-not-registered", "messaging/invalid-registration-token"]
                 .includes(error.code);
-            await deliveryRef.set({
-                status: "failed", errorCode: String(error.code || "unknown").slice(0, 120),
-                updatedAt: admin.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-            if (invalid) await device.ref.set({ enabled: false, status: "invalid", invalidatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
-            else retryableFailure = true;
+            await fencedUserWrite(db, [uid], transaction => {
+                transaction.set(deliveryRef, {status: "failed", errorCode: String(error.code || "unknown").slice(0, 120),
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp()}, {merge: true});
+                if (invalid) transaction.set(device.ref, {enabled: false, status: "invalid",
+                    invalidatedAt: admin.firestore.FieldValue.serverTimestamp()}, {merge: true});
+            });
+            if (!invalid) retryableFailure = true;
             console.error(`[PUSH FAILED] ${deadlineId}/${device.id}:`, error.code || error.message);
         }
     }
 
     if (acceptedCount > 0 && !retryableFailure) {
-        await db.collection("users").doc(uid).collection("scadenze").doc(deadlineId).update({
-            lastPushNotifiedAt: deadlineCalendar.day(new Date())
-        });
+        await fencedUserWrite(db, [uid], transaction => transaction.update(
+            db.collection("users").doc(uid).collection("scadenze").doc(deadlineId),
+            {lastPushNotifiedAt: deadlineCalendar.day(new Date())}));
     }
 }
 
@@ -1027,7 +1039,7 @@ exports.sendDeadlinePushTest = onCall(
         if (now - lastTest < 60000) {
             return { ok: false, cooldownSeconds: Math.ceil((60000 - (now - lastTest)) / 1000) };
         }
-        await deviceRef.set({ lastTestAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+        await fencedUserWrite(db, [request.auth.uid], transaction => transaction.set(deviceRef, {lastTestAt: admin.firestore.FieldValue.serverTimestamp()}, {merge: true}));
         // La prova verifica soltanto il canale: non legge né espone Scadenze reali.
         const deadlineId = "";
         const text = {
@@ -1045,11 +1057,13 @@ exports.sendDeadlinePushTest = onCall(
             });
             return { ok: true, opensDeadline: false };
         } catch (error) {
+            if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(error?.code || error?.message))) throw error;
             console.error("[PUSH TEST FAILED]", error.code || error.message);
             const invalid = ["messaging/registration-token-not-registered", "messaging/invalid-registration-token"]
                 .includes(error.code);
             if (invalid) {
                 await db.runTransaction(async transaction => {
+                    await assertTransactionGlobalPurgeUnlocked(transaction, db, request.auth.uid);
                     const current = await transaction.get(deviceRef);
                     if (!current.exists) return;
                     const patch = {lastTestAt: admin.firestore.FieldValue.delete()};
@@ -1127,6 +1141,8 @@ exports.manageReceivedDeadline = onCall(
             ownerUid = String(shared.ownerUid || "");
             deadlineId = String(shared.sourceDeadlineId || "");
             const sourceRef = db.collection("users").doc(ownerUid).collection("scadenze").doc(deadlineId);
+            await assertTransactionGlobalPurgeUnlocked(transaction, db, recipientUid);
+            await assertTransactionGlobalPurgeUnlocked(transaction, db, ownerUid);
             const sourceSnapshot = await transaction.get(sourceRef);
             if (!sourceSnapshot.exists) throw new HttpsError("not-found", "La scadenza originale non esiste più.");
             const source = sourceSnapshot.data();
@@ -1211,6 +1227,7 @@ exports.respondToInvitation = onCall(
             }
 
             await assertTransactionGlobalPurgeUnlocked(transaction, firestore, invite.ownerId);
+            await assertTransactionGlobalPurgeUnlocked(transaction, firestore, uid);
 
             const accountPath = invite.aziendaId
                 ? `users/${invite.ownerId}/aziende/${invite.aziendaId}/accounts/${invite.accountId}`
@@ -1466,7 +1483,7 @@ exports.onInviteCreated = onDocumentWritten(
     {
         document: "invites/{inviteId}",
         secrets: [GMAIL_USER, GMAIL_APP_PASSWORD],
-        region: "europe-west1",
+        region: "europe-west1", retry: true,
         memory: "256MiB",
         timeoutSeconds: 60,
     },
@@ -1477,7 +1494,7 @@ exports.onInviteCreated = onDocumentWritten(
         const store = admin.firestore();
         const inviteId = event.params.inviteId;
         const tasks = [];
-        tasks.push(inviteNotificationGuard.deliver({db: store, invite, inviteId, channel: "email",
+        tasks.push(inviteNotificationGuard.deliver({db: store, auth: admin.auth(), invite, inviteId, channel: "email",
             send: async current => {
                 const transporter = createTransporter(GMAIL_USER.value(), GMAIL_APP_PASSWORD.value());
                 await transporter.sendMail({
@@ -1489,7 +1506,7 @@ exports.onInviteCreated = onDocumentWritten(
                 return true;
             }
         }));
-        tasks.push(inviteNotificationGuard.deliver({db: store, invite, inviteId, channel: "push",
+        tasks.push(inviteNotificationGuard.deliver({db: store, auth: admin.auth(), invite, inviteId, channel: "push",
             send: async current => {
                 let recipientUser;
                 try { recipientUser = await verifiedUserByEmail(admin.auth(), current.recipientEmail); }
@@ -1497,9 +1514,10 @@ exports.onInviteCreated = onDocumentWritten(
                     if (error.code !== "auth/user-not-found") throw error;
                     return false;
                 }
-                if (!recipientUser) return false;
+                if (!recipientUser || recipientUser.uid !== current.recipientUid) return false;
                 const devices = await activePushDevices(store, recipientUser.uid, "sharing");
                 if (!devices.length) return false;
+                await fencedUserWrite(store, [current.ownerId, recipientUser.uid], () => true);
                 const deliveries = await Promise.allSettled(devices.map((device) => admin.messaging().send({
                     token: device.data().token,
                     data: {
@@ -1517,6 +1535,9 @@ exports.onInviteCreated = onDocumentWritten(
             }
         }));
         const results = await Promise.allSettled(tasks);
+        const deferred = results.find(result => result.status === 'rejected' &&
+            /^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(result.reason?.code || result.reason?.message)));
+        if (deferred) throw deferred.reason;
         results.filter((result) => result.status === "rejected")
             .forEach(() => console.error("[INVITE NOTIFICATION FAILED] DELIVERY_FAILED"));
     }
@@ -1590,6 +1611,7 @@ exports.onInviteWritten = onDocumentWritten(
         }
         const eventDocument = firestore().doc(`users/${source.ownerId}/auditEvents/${effect.id}`);
         await firestore().runTransaction(async (transaction) => {
+            await assertTransactionGlobalPurgeUnlocked(transaction, firestore(), source.ownerId);
             const snapshot = await transaction.get(eventDocument);
             const decision = auditWriteDecision(snapshot.exists === true, effect);
             if (decision.write) {
@@ -1683,6 +1705,7 @@ async function recordAccountTransitionAudit(type, event) {
     }
     const eventDocument = firestore().doc(`users/${params.uid}/auditEvents/${effect.id}`);
     await firestore().runTransaction(async (transaction) => {
+        await assertTransactionGlobalPurgeUnlocked(transaction, firestore(), params.uid);
         const snapshot = await transaction.get(eventDocument);
         const decision = auditWriteDecision(snapshot.exists === true, effect);
         if (decision.write) {
@@ -1809,6 +1832,7 @@ async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
                     buttonLabel = "Apri la scadenza nell'app";
                 }
             } catch (error) {
+                if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(error?.code || error?.message))) throw error;
                 if (error.code !== "auth/user-not-found") {
                     console.error("[EMAIL RECIPIENT LOOKUP FAILED]", "EMAIL_LOOKUP_FAILED");
                 }
@@ -1840,9 +1864,8 @@ async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
     }
 
     // Informational only: never suppress failed recipients with a global marker.
-    await docRef.update({
-        lastNotifiedAt: deadlineCalendar.day(new Date()),
-    });
+    await fencedUserWrite(docRef.firestore, [ownerUid], transaction => transaction.update(docRef,
+        {lastNotifiedAt: deadlineCalendar.day(new Date())}));
 
     console.log(`[OK] Email inviata a ${sentCount}/${recipients.length} destinatari (diffDays: ${diffDays})`);
     return true;
@@ -1884,59 +1907,71 @@ exports.checkDeadlines = onSchedule(
             catch { console.error("[INVITE NOTIFICATION CLEANUP]", "CLEANUP_FAILED"); }
             const usersSnap = await db.collection("users").get();
 
+            let deferredFenceError;
             for (const userDoc of usersSnap.docs) {
                 const uid = userDoc.id;
-                const scadenzeSnap = await db
-                    .collection("users").doc(uid)
-                    .collection("scadenze")
-                    .where("completed", "==", false)
-                    .get();
+                try {
+                    const scadenzeSnap = await db
+                        .collection("users").doc(uid)
+                        .collection("scadenze")
+                        .where("completed", "==", false)
+                        .get();
 
-                for (const sDoc of scadenzeSnap.docs) {
-                    const s = sDoc.data();
-                    if (!deadlineDeliveryEnabled(s)) continue;
-                    if (!s.dueDate) continue;
+                    for (const sDoc of scadenzeSnap.docs) {
+                        const s = sDoc.data();
+                        if (!deadlineDeliveryEnabled(s)) continue;
+                        if (!s.dueDate) continue;
 
-                    const dueDay = deadlineCalendar.day(s.dueDate);
-                    if (dueDay === null) continue;
-                    const diffDays = deadlineCalendar.distance(today, dueDay);
-                    if (diffDays === null) continue;
+                        const dueDay = deadlineCalendar.day(s.dueDate);
+                        if (dueDay === null) continue;
+                        const diffDays = deadlineCalendar.distance(today, dueDay);
+                        if (diffDays === null) continue;
 
-                    const daysBefore = s.notif_days_before || 14;
+                        const daysBefore = s.notif_days_before || 14;
 
-                    // Scadenze già passate: stop
-                    if (diffDays < 0) continue;
-                    // Fuori dalla finestra: troppo presto
-                    if (diffDays > daysBefore) continue;
+                        // Scadenze già passate: stop
+                        if (diffDays < 0) continue;
+                        // Fuori dalla finestra: troppo presto
+                        if (diffDays > daysBefore) continue;
 
-                    // Il canale Push usa un registro separato e non interferisce con le email.
-                    try {
-                        await sendDeadlinePush(db, uid, sDoc.id, s, diffDays);
-                    } catch (pushErr) {
-                        console.error(`[PUSH FAILED] ${sDoc.id}:`, pushErr.message);
+                        // Il canale Push usa un registro separato e non interferisce con le email.
+                        try {
+                            await sendDeadlinePush(db, uid, sDoc.id, s, diffDays);
+                        } catch (pushErr) {
+                            if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(pushErr?.code || pushErr?.message))) throw pushErr;
+                            console.error(`[PUSH FAILED] ${sDoc.id}:`, pushErr.message);
+                        }
+
+                        try {
+                            await sendRecipientDeadlinePushes(db, uid, sDoc.id, s, diffDays);
+                        } catch (pushErr) {
+                            if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(pushErr?.code || pushErr?.message))) throw pushErr;
+                            console.error(`[RECIPIENT PUSH FAILED] ${sDoc.id}:`, pushErr.message);
+                        }
+
+                        if (!deadlineRecipients(s).some((recipient) => recipient.sendEmail)) continue;
+
+                        // Each recipient owns its cadence; a global partial-success
+                        // marker must never suppress another recipient's retry.
+
+                        try {
+                            await sendScadenzaEmail(transporter, gmailUser, s, diffDays, sDoc.ref);
+                        } catch (emailErr) {
+                            if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(emailErr?.code || emailErr?.message))) throw emailErr;
+                            console.error(`[EMAIL FAILED] ${sDoc.id}:`, emailErr.message);
+                        }
                     }
-
-                    try {
-                        await sendRecipientDeadlinePushes(db, uid, sDoc.id, s, diffDays);
-                    } catch (pushErr) {
-                        console.error(`[RECIPIENT PUSH FAILED] ${sDoc.id}:`, pushErr.message);
-                    }
-
-                    if (!deadlineRecipients(s).some((recipient) => recipient.sendEmail)) continue;
-
-                    // Each recipient owns its cadence; a global partial-success
-                    // marker must never suppress another recipient's retry.
-
-                    try {
-                        await sendScadenzaEmail(transporter, gmailUser, s, diffDays, sDoc.ref);
-                    } catch (emailErr) {
-                        console.error(`[EMAIL FAILED] ${sDoc.id}:`, emailErr.message);
-                    }
+                } catch (error) {
+                    if (!/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(error?.code || error?.message))) throw error;
+                    deferredFenceError ||= error;
                 }
             }
+            // Finish unrelated owners, but never report deferred work as complete.
+            if (deferredFenceError) throw deferredFenceError;
 
             console.log("[SCHEDULER] Controllo completato.");
         } catch (err) {
+            if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(err?.code || err?.message))) throw err;
             console.error("[CRITICAL ERROR]", err.message);
         }
     }
@@ -1949,7 +1984,7 @@ exports.onScadenzaCreated = onDocumentCreated(
     {
         document: "users/{uid}/scadenze/{scadenzaId}",
         secrets: [GMAIL_USER, GMAIL_APP_PASSWORD],
-        region: "europe-west1",
+        region: "europe-west1", retry: true,
         memory: "256MiB",
         timeoutSeconds: 60,
     },
@@ -1962,6 +1997,7 @@ exports.onScadenzaCreated = onDocumentCreated(
         try {
             await syncReceivedDeadlines(admin.firestore(), event.params.uid, event.params.scadenzaId, s);
         } catch (error) {
+            if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(error?.code || error?.message))) throw error;
             console.error(`[RECEIVED DEADLINE SYNC FAILED] ${event.params.scadenzaId}:`, error.message);
         }
 
@@ -1984,6 +2020,7 @@ exports.onScadenzaCreated = onDocumentCreated(
                 forceImmediate: true
             });
         } catch (pushErr) {
+            if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(pushErr?.code || pushErr?.message))) throw pushErr;
             console.error(`[TRIGGER PUSH FAILED] ${event.params.scadenzaId}:`, pushErr.message);
         }
 
@@ -1992,6 +2029,7 @@ exports.onScadenzaCreated = onDocumentCreated(
                 forceImmediate: true
             });
         } catch (pushErr) {
+            if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(pushErr?.code || pushErr?.message))) throw pushErr;
             console.error(`[TRIGGER RECIPIENT PUSH FAILED] ${event.params.scadenzaId}:`, pushErr.message);
         }
 
@@ -2007,6 +2045,7 @@ exports.onScadenzaCreated = onDocumentCreated(
             await sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef);
             console.log(`[TRIGGER] Email immediata inviata per scadenza ${event.params.scadenzaId}`);
         } catch (err) {
+            if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(err?.code || err?.message))) throw err;
             console.error(`[TRIGGER EMAIL FAILED]:`, err.message);
         }
     }
@@ -2016,7 +2055,7 @@ exports.onScadenzaUpdated = onDocumentUpdated(
     {
         document: "users/{uid}/scadenze/{scadenzaId}",
         secrets: [GMAIL_USER, GMAIL_APP_PASSWORD],
-        region: "europe-west1",
+        region: "europe-west1", retry: true,
         memory: "256MiB",
         timeoutSeconds: 60,
     },
@@ -2028,6 +2067,7 @@ exports.onScadenzaUpdated = onDocumentUpdated(
                 admin.firestore(), event.params.uid, event.params.scadenzaId, after, before
             );
         } catch (error) {
+            if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(error?.code || error?.message))) throw error;
             console.error(`[RECEIVED DEADLINE SYNC FAILED] ${event.params.scadenzaId}:`, error.message);
         }
         const completedNow = !before.completed && after.completed === true;
@@ -2038,19 +2078,19 @@ exports.onScadenzaUpdated = onDocumentUpdated(
         const notifications = await db.collection("users").doc(event.params.uid)
             .collection("deadlineNotifications")
             .where("deadlineId", "==", event.params.scadenzaId).get();
-        const batch = db.batch();
-        notifications.docs.forEach((item) => batch.set(item.ref, {
-            status: "resolved",
-            resolvedAt: admin.firestore.FieldValue.serverTimestamp()
-        }, { merge: true }));
-        if (dueDateChanged) {
-            batch.update(event.data.after.ref, {
-                lastPushNotifiedAt: admin.firestore.FieldValue.delete(),
-                lastRecipientPushNotifiedAt: admin.firestore.FieldValue.delete(),
-                lastNotifiedAt: admin.firestore.FieldValue.delete()
-            });
-        }
-        await batch.commit();
+        await fencedUserWrite(db, [event.params.uid], batch => {
+            notifications.docs.forEach((item) => batch.set(item.ref, {
+                status: "resolved",
+                resolvedAt: admin.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }));
+            if (dueDateChanged) {
+                batch.update(event.data.after.ref, {
+                    lastPushNotifiedAt: admin.firestore.FieldValue.delete(),
+                    lastRecipientPushNotifiedAt: admin.firestore.FieldValue.delete(),
+                    lastNotifiedAt: admin.firestore.FieldValue.delete()
+                });
+            }
+        });
 
         // Una nuova data dentro la finestra di preavviso equivale, per la
         // consegna, alla creazione di una nuova scadenza: non attendere il
@@ -2075,6 +2115,7 @@ exports.onScadenzaUpdated = onDocumentUpdated(
                 forceImmediate: true
             });
         } catch (pushErr) {
+            if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(pushErr?.code || pushErr?.message))) throw pushErr;
             console.error(`[UPDATE PUSH FAILED] ${event.params.scadenzaId}:`, pushErr.message);
         }
         try {
@@ -2082,6 +2123,7 @@ exports.onScadenzaUpdated = onDocumentUpdated(
                 forceImmediate: true
             });
         } catch (pushErr) {
+            if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(pushErr?.code || pushErr?.message))) throw pushErr;
             console.error(`[UPDATE RECIPIENT PUSH FAILED] ${event.params.scadenzaId}:`, pushErr.message);
         }
         if (!deadlineRecipients(deliveryData).some((recipient) => recipient.sendEmail)) return;
@@ -2093,6 +2135,7 @@ exports.onScadenzaUpdated = onDocumentUpdated(
             await sendScadenzaEmail(transporter, gmailUser, deliveryData, diffDays, event.data.after.ref);
             console.log(`[UPDATE] Email immediata inviata per scadenza ${event.params.scadenzaId}`);
         } catch (emailErr) {
+            if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(emailErr?.code || emailErr?.message))) throw emailErr;
             console.error(`[UPDATE EMAIL FAILED] ${event.params.scadenzaId}:`, emailErr.message);
         }
     }
@@ -2101,7 +2144,7 @@ exports.onScadenzaUpdated = onDocumentUpdated(
 exports.onScadenzaDeleted = onDocumentDeleted(
     {
         document: "users/{uid}/scadenze/{scadenzaId}",
-        region: "europe-west1",
+        region: "europe-west1", retry: true,
         memory: "256MiB",
         timeoutSeconds: 60,
     },
@@ -2111,6 +2154,7 @@ exports.onScadenzaDeleted = onDocumentDeleted(
                 admin.firestore(), event.params.uid, event.params.scadenzaId, event.data.data()
             );
         } catch (error) {
+            if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(error?.code || error?.message))) throw error;
             console.error(`[RECEIVED DEADLINE CLEANUP FAILED] ${event.params.scadenzaId}:`, error.message);
         }
     }
@@ -2160,13 +2204,6 @@ const AUDIT_RETENTION_COARSE_CUTOFF_MS = 700 * 24 * 60 * 60 * 1000;
 // `createdAt` per le due che non scrivono `at` (la politica la applica il
 // classificatore, non la query).
 const AUDIT_RETENTION_DATE_FIELDS = Object.freeze(["at", "createdAt"]);
-const FIREBASE_FAILED_PRECONDITION = 9;
-
-function isPreconditionFailure(error) {
-    const code = error?.code;
-    return code === FIREBASE_FAILED_PRECONDITION || code === "failed-precondition" ||
-        /FAILED_PRECONDITION|PRECONDITION/i.test(String(error?.message || ""));
-}
 
 function usableCursor(cursor) {
     return Boolean(cursor) && typeof cursor.path === "string" && cursor.path.length > 0 &&
@@ -2266,22 +2303,12 @@ async function collectExpiredAuditEvents(db, cutoff, {
 // rieseguirlo più volte su conflitto, e un contatore esterno sommerebbe
 // cancellazioni solo tentate. Il callback **restituisce** i percorsi cancellati
 // e `runTransaction` risolve con il valore del tentativo che ha committato.
-async function deleteAuditBatchWithConfirmation(db, batch, now, updateTimes) {
+async function deleteAuditBatchWithConfirmation(db, batch, now) {
     const references = batch.paths.map(path => db.doc(path));
-    const versions = batch.paths.map(path => updateTimes.get(path));
-    if (versions.every(version => version !== undefined)) {
-        const writer = db.batch();
-        references.forEach((reference, index) => writer.delete(reference, {lastUpdateTime: versions[index]}));
-        try {
-            await writer.commit();
-            return batch.paths.length;
-        } catch (error) {
-            if (!isPreconditionFailure(error)) throw error;
-            // Versione cambiata o documento sparito: si passa alla conferma
-            // atomica, senza dichiarare cancellato ciò che non lo è.
-        }
-    }
     const committed = await db.runTransaction(async (transaction) => {
+        for (const uid of new Set(batch.paths.map(path => path.split('/')[1]))) {
+            await assertTransactionGlobalPurgeUnlocked(transaction, db, uid);
+        }
         const snapshots = await transaction.getAll(...references);
         const deleted = [];
         for (const snapshot of snapshots) {
@@ -2307,7 +2334,6 @@ async function runAuditRetentionJob(db, {
     const previousCursors = await readAuditRetentionCursors(db);
     const {entries, rejected, truncated, scanned, cursors} =
         await collectExpiredAuditEvents(db, cutoff, {pageSize, maxScan, cursors: previousCursors});
-    const updateTimes = new Map(entries.map(entry => [entry.path, entry.updateTime]));
     const byOwner = new Map();
     for (const entry of entries) {
         if (!byOwner.has(entry.uid)) byOwner.set(entry.uid, []);
@@ -2323,6 +2349,8 @@ async function runAuditRetentionJob(db, {
     // rilegge la stessa finestra e nessun evento viene perso.
     let windowClean = true;
     for (const [uid, events] of byOwner) {
+        try { await fencedUserWrite(db, [uid], () => true); }
+        catch { status = 'partial'; windowClean = false; continue; }
         if (counters.batches >= maxBatches) { status = "interrupted"; windowClean = false; break; }
         let ownerBatches = 0;
         for (let offset = 0; offset < events.length; offset += MAX_EVENTS_PER_RUN) {
@@ -2332,6 +2360,7 @@ async function runAuditRetentionJob(db, {
             try {
                 plan = planAuditRetention({uid, events: events.slice(offset, offset + MAX_EVENTS_PER_RUN), now, batchSize});
             } catch (error) {
+                if (/^(RECOVERY_FENCE_|PURGE_LOCK_)/.test(String(error?.code || error?.message))) throw error;
                 // Documenti letti ma non valutati: il run **non** è completo e lo
                 // stato lo dichiara, invece di proseguire come se nulla fosse.
                 counters.planErrors++;
@@ -2350,7 +2379,7 @@ async function runAuditRetentionJob(db, {
             const report = await runAuditRetention({
                 plan: {...plan, batches: allowed},
                 deleteBatch: async (batch) => {
-                    counters.deleted += await deleteAuditBatchWithConfirmation(db, batch, now, updateTimes);
+                    counters.deleted += await deleteAuditBatchWithConfirmation(db, batch, now);
                 }
             });
             counters.batches += report.completed;

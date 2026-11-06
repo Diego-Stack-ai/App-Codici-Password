@@ -3,7 +3,7 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     function isOwner(userId) {
-      return request.auth != null && request.auth.uid == userId;
+      return request.auth != null && request.auth.uid == userId && isRecoveryUnlocked(userId);
     }
 
     function hasVerifiedEmail() {
@@ -14,20 +14,40 @@ service firebase.storage {
     }
 
     function isBoundGuest(account) {
-      return hasVerifiedEmail() &&
+      return hasVerifiedEmail() && isRecoveryUnlocked(request.auth.uid) &&
         request.auth.uid in account.data.get('sharedWithUids', []) &&
         account.data.get('sharedWithEmailByUid', {}).get(request.auth.uid, '').lower() ==
           request.auth.token.email.lower();
     }
 
-    function isGlobalPurgeUnlocked(userId) {
-      let path = /databases/(default)/documents/archivePurgeLocks/$(userId);
+    function isRecoveryUnlocked(userId) {
+      let path = /databases/(default)/documents/vaultRecoveryLocks/$(userId);
       let lock = firestore.get(path);
       return !firestore.exists(path) || (
         lock.data.get('schemaVersion', 0) == 1 &&
         lock.data.get('ownerUid', '') == userId &&
-        lock.data.get('status', '') == 'released'
+        lock.data.get('status', '') == 'released' &&
+        lock.data.get('operationId', '') is string &&
+        lock.data.get('operationId', '').matches('^[A-Za-z0-9._:-]{1,160}$') &&
+        lock.data.get('planDigest', '') is string &&
+        lock.data.get('planDigest', '').matches('^[a-f0-9]{64}$') &&
+        lock.data.get('digest', '') is string &&
+        lock.data.get('digest', '').matches('^[a-f0-9]{64}$') &&
+        userId.matches('^[A-Za-z0-9._:-]{1,160}$') &&
+        lock.data.get('digest', '') == hashing.sha256(
+          '[1,"' + userId + '","' + lock.data.get('operationId', '') + '","' +
+          lock.data.get('planDigest', '') + '"]'
+        ).toHexString().lower()
       );
+    }
+    function isGlobalPurgeUnlocked(userId) {
+      let path = /databases/(default)/documents/archivePurgeLocks/$(userId);
+      let lock = firestore.get(path);
+      return isRecoveryUnlocked(userId) && (!firestore.exists(path) || (
+        lock.data.get('schemaVersion', 0) == 1 &&
+        lock.data.get('ownerUid', '') == userId &&
+        lock.data.get('status', '') == 'released'
+      ));
     }
 
     function isAllowedUpload() {
@@ -47,14 +67,14 @@ service firebase.storage {
     function isAcceptedPrivateAccountGuest(userId, accountId) {
       let path = /databases/(default)/documents/users/$(userId)/accounts/$(accountId);
       let account = firestore.get(path);
-      return firestore.exists(path) && account.data.get('isArchived', false) == false &&
+      return isRecoveryUnlocked(userId) && firestore.exists(path) && account.data.get('isArchived', false) == false &&
         isBoundGuest(account);
     }
 
     function isAcceptedCompanyAccountGuest(userId, companyId, accountId) {
       let path = /databases/(default)/documents/users/$(userId)/aziende/$(companyId)/accounts/$(accountId);
       let account = firestore.get(path);
-      return firestore.exists(path) && account.data.get('isArchived', false) == false &&
+      return isRecoveryUnlocked(userId) && firestore.exists(path) && account.data.get('isArchived', false) == false &&
         isBoundGuest(account);
     }
 
@@ -69,11 +89,11 @@ service firebase.storage {
     // condiviso. La decifratura richiede inoltre la sua busta personale salvata
     // nei metadati Firestore; la revoca dell'ACL blocca subito il download.
     match /users/{userId}/accounts/{accountId}/attachments/{allPaths=**} {
-      allow read: if isOwner(userId) || isAcceptedPrivateAccountGuest(userId, accountId);
+      allow read: if isRecoveryUnlocked(userId) && (isOwner(userId) || isAcceptedPrivateAccountGuest(userId, accountId));
     }
 
     match /users/{userId}/aziende/{companyId}/accounts/{accountId}/attachments/{allPaths=**} {
-      allow read: if isOwner(userId) || isAcceptedCompanyAccountGuest(userId, companyId, accountId);
+      allow read: if isRecoveryUnlocked(userId) && (isOwner(userId) || isAcceptedCompanyAccountGuest(userId, companyId, accountId));
     }
 
     // Namespace server-only per gli allegati cifrati dei documenti personali.

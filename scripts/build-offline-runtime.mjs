@@ -8,6 +8,24 @@ await import('./build-company-pdf.mjs');
 const publicDir = path.join(root, 'Frontend', 'public');
 const jsDir = path.join(publicDir, 'assets', 'js');
 const vendorDir = path.join(jsDir, 'vendor');
+
+// ICO supports an unchanged PNG payload. Reuse the app artwork rather than
+// introducing a second icon design or a platform-dependent image conversion.
+const faviconPng = await readFile(path.join(publicDir, 'assets', 'images', 'app-icon-192.png'));
+if (faviconPng.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a' ||
+    faviconPng.readUInt32BE(16) !== 192 || faviconPng.readUInt32BE(20) !== 192) {
+  throw new Error('FAVICON_SOURCE_INVALID');
+}
+const faviconHeader = Buffer.alloc(22);
+faviconHeader.writeUInt16LE(1, 2);
+faviconHeader.writeUInt16LE(1, 4);
+faviconHeader[6] = 192;
+faviconHeader[7] = 192;
+faviconHeader.writeUInt16LE(1, 10);
+faviconHeader.writeUInt16LE(32, 12);
+faviconHeader.writeUInt32LE(faviconPng.length, 14);
+faviconHeader.writeUInt32LE(22, 18);
+await writeFile(path.join(publicDir, 'favicon.ico'), Buffer.concat([faviconHeader, faviconPng]));
 const packageByModule = {
   'firebase-app': 'firebase/app',
   'firebase-app-check': 'firebase/app-check',
@@ -112,7 +130,7 @@ await build({
   legalComments: 'none'
 });
 
-const cacheableExtensions = new Set(['.html', '.js', '.mjs', '.css', '.json', '.png', '.jpg', '.jpeg', '.svg', '.webp', '.woff2', '.ttf']);
+const cacheableExtensions = new Set(['.html', '.js', '.mjs', '.css', '.json', '.ico', '.png', '.jpg', '.jpeg', '.svg', '.webp', '.woff2', '.ttf']);
 const onlineOnlyDiagnostics = new Set([
   'release-manifest.json',
   'prova.html',

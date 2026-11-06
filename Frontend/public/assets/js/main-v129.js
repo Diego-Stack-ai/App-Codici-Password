@@ -7,6 +7,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
 
 import { LOG, LOG_ERROR, LOG_WARN } from './logger.js';
 import { authSessionFence } from './auth-session-fence.js';
+import {isCompleteRecoveryRoute, hasCompleteRecoveryIntent, COMPLETE_RECOVERY_LOGIN_PATH} from './app-env.js';
 
 
 console.log      = (...args) => { try { LOG(...args);       } catch (e) {} };
@@ -27,16 +28,16 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.259';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.260';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
-import { doc, collection, query, where, limit, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, collection, query, where, limit, updateDoc, onSnapshot } from "/assets/js/vendor/firebase-runtime.js";
 import { showToast, showConfirmModal, initLockedUX } from './ui-core-v129.js';
 import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage, getLocalQaLanguageOverride, observeTranslatedSubtrees } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
-import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.259&push=20261022a&ai=20261019b&deadline-share=20260908a&touch=20261017b';
+
+import * as Pages from './pages-init.js?v=1.2.260&push=20261022a&ai=20261019b&deadline-share=20260908a&touch=20261017b';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric, captureNavigationMetric } from './performance-metrics.js';
@@ -44,7 +45,7 @@ import { startMetric, endMetric, captureNavigationMetric } from './performance-m
 // Sentinella bootstrap \u2014 sostituisce window.__V7_BOOTSTRAPPED__
 let _v7Bootstrapped = false;
 
-initInactivityTimer();
+if (!hasCompleteRecoveryIntent(window.location)) initInactivityTimer();
 
 function getCurrentPage() {
     const path = window.location.pathname;
@@ -91,7 +92,7 @@ function getCurrentPage() {
 document.addEventListener('DOMContentLoaded', async () => {
     startMetric('private-page-bootstrap');
     captureNavigationMetric(getCurrentPage());
-    initOfflineStatus();
+    if (!isCompleteRecoveryRoute(window.location)) initOfflineStatus();
     if (_v7Bootstrapped) {
         console.warn("⚠️ Rilevato tentativo di doppio bootstrap. Blocco sentinella attivo.");
         return;
@@ -145,6 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     let inviteUnsubscribe = null;
+    let completeRecoveryMount = null;
 
     // --- N1: avvisi di revoca ---
     let n1CallbackEpoch = 0;
@@ -164,6 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         stopN1ShareRevokedNotices();
     });
     window.addEventListener('private-auth-blocked', () => {
+        completeRecoveryMount?.dispose(); completeRecoveryMount = null;
         ++n1CallbackEpoch;
         stopN1ShareRevokedNotices();
     });
@@ -239,6 +242,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- fine N1 avvisi di revoca ---
 
     onAuthStateChanged(auth, async (user) => {
+        completeRecoveryMount?.dispose(); completeRecoveryMount = null;
         const n1Epoch = ++n1CallbackEpoch;
         stopN1ShareRevokedNotices();
         const gate = window.privateAuthGate;
@@ -246,7 +250,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         try { fenceTicket = await authSessionFence.readPermit(); }
         catch { gate?.reject('error'); return; }
         if (n1Epoch !== n1CallbackEpoch) return;
-        if (!fenceTicket) { gate?.reject(); return; }
+        if (!fenceTicket) {
+            if (isCompleteRecoveryRoute(window.location)) { gate?.block(); window.location.replace(COMPLETE_RECOVERY_LOGIN_PATH); return; }
+            gate?.reject(); return;
+        }
         const authAttempt = gate?.begin(user?.uid);
         if (gate && authAttempt === null) { inviteUnsubscribe?.(); return; }
         if (user) {
@@ -262,7 +269,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (auth.currentUser?.uid !== user.uid) return;
                     if (!auth.currentUser?.emailVerified) {
                         gate?.block();
-                        window.location.replace('/login.html?verifyEmail=1');
+                        window.location.replace(hasCompleteRecoveryIntent(window.location) ? COMPLETE_RECOVERY_LOGIN_PATH + '&verifyEmail=1' : '/login.html?verifyEmail=1');
                         return;
                     }
                     if (navigator.onLine) {
@@ -273,6 +280,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (isPrivatePage && !await authSessionFence.isCurrent(fenceTicket)) { gate?.reject(); return; }
                 if (isPrivatePage && !gate?.acceptIdentity(authAttempt, auth.currentUser)) return;
                 if (isPrivatePage && navigator.onLine) firebaseRuntime.enableAppCheck?.();
+
+                if (isPrivatePage && isCompleteRecoveryRoute(window.location)) {
+                    const current = () => gate.active(authAttempt) && auth.currentUser?.uid === user.uid;
+                    const container = document.querySelector('.base-main .page-container');
+                    if (!container || !current()) return;
+                    container.replaceChildren(createElement('p', {role: 'status', textContent: t('recovery_loading')}));
+                    const {startCompleteRecoveryPage} = await import('./modules/settings/complete-recovery-entry.js');
+                    if (!current()) return;
+                    completeRecoveryMount = startCompleteRecoveryPage({user, isActive: current});
+                    if (!current()) { completeRecoveryMount?.dispose(); completeRecoveryMount = null; return; }
+                    document.body.classList.add('revealed');
+                    endMetric('private-page-bootstrap', {page: 'complete-recovery'});
+                    return;
+                }
 
                 const securityModulesPromise = isPrivatePage
                     ? Promise.all([
@@ -399,7 +420,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     try {
                         const trigger = document.getElementById('search-status');
                         const includeCompanies = getSyncedCompanyAreaPreference(userDoc.data() || {}, user.uid);
-                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.259');
+                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.260');
                         await initVaultAssistant(user, { includeCompanies });
                         trigger?.classList.remove('hidden');
                     } catch (error) {
@@ -466,6 +487,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error("Global Check Error:", error);
             }
         } else {
+            if (isCompleteRecoveryRoute(window.location)) { gate?.block(); window.location.replace(COMPLETE_RECOVERY_LOGIN_PATH); return; }
             void import('./modules/data/private-account-offline-coordinator.js')
                 .then(({stopPrivateAccountOfflineCoordinator}) => stopPrivateAccountOfflineCoordinator())
                 .catch(() => {});
@@ -517,137 +539,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             ])
         ]);
         document.body.appendChild(modal);
-    }
-
-    /**
-     * NOTIFICATION SYSTEM (V7.0 - Results with OK Confirmation)
-     */
-    function showNotificationModal(notifId, data) {
-        if (document.getElementById(`notif-modal-${notifId}`)) return;
-
-        const isAccepted = data.title.toLowerCase().includes('accettato');
-        const accentClass = isAccepted ? 'text-green-400' : 'text-red-400';
-        const icon = isAccepted ? 'check_circle' : 'person_remove';
-
-        const modal = createElement('div', { id: `notif-modal-${notifId}`, className: 'modal-overlay active' }, [
-            createElement('div', { className: 'modal-box pb-8' }, [
-                createElement('div', { className: 'flex justify-center mb-4' }, [
-                    createElement('span', { className: `material-symbols-outlined text-4xl ${accentClass}`, textContent: icon })
-                ]),
-                createElement('h3', { className: 'modal-title text-center mb-1', textContent: data.title }),
-                createElement('div', { className: 'flex justify-center mb-6' }, [
-                    createElement('div', { className: 'px-4 py-1 rounded-full bg-white/5 border border-white/10' }, [
-                        createElement('span', { className: 'text-[11px] font-black text-white/50 uppercase tracking-widest', textContent: data.accountName || 'Account' })
-                    ])
-                ]),
-                createElement('p', { className: 'modal-text text-center text-white/70 mb-8 px-4 leading-relaxed', textContent: data.message }),
-                createElement('div', { className: 'modal-actions' }, [
-                    createElement('button', {
-                        className: 'w-full p-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black uppercase text-[10px] tracking-widest shadow-lg shadow-purple-500/25 hover:scale-[1.02] transition-all active:scale-95',
-                        textContent: 'HO CAPITO (OK)',
-                        onclick: async () => {
-                            // Al click su OK, eseguiamo la bonifica e chiudiamo
-                            await autoHealAccountFlags(data, notifId);
-                            document.getElementById(`notif-modal-${notifId}`).remove();
-                        }
-                    })
-                ])
-            ])
-        ]);
-        document.body.appendChild(modal);
-    }
-
-    /**
-     * REJECTION SYSTEM (Global Notifier) - HARDENING V7.0
-     */
-    function showRejectionModal(inviteId, data) {
-        if (document.getElementById(`reject-modal-${inviteId}`)) return;
-
-        const modal = createElement('div', { id: `reject-modal-${inviteId}`, className: 'modal-overlay active' }, [
-            createElement('div', { className: 'modal-box pb-8' }, [
-                createElement('div', { className: 'flex justify-center mb-4' }, [
-                    createElement('span', { className: 'material-symbols-outlined text-4xl text-red-400 notranslate', textContent: 'person_remove' })
-                ]),
-                createElement('h3', { className: 'modal-title text-center', textContent: 'Invito Rifiutato' }),
-                createElement('p', { className: 'modal-text text-center text-white/60 mb-6', textContent: `${data.recipientEmail} ha declinato la condivisione per: ${data.accountName}` }),
-                createElement('div', { className: 'modal-actions grid grid-cols-2 gap-4 mt-2' }, [
-                    createElement('button', {
-                        className: 'w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white/60 font-black uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all active:scale-95',
-                        textContent: t('deadline_archive_action'),
-                        onclick: async () => {
-                            await updateDoc(doc(db, "invites", inviteId), { senderNotified: true });
-                            modal.remove();
-                        }
-                    }),
-                    createElement('button', {
-                        className: 'w-full p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 font-black uppercase text-[10px] tracking-widest hover:bg-red-500/20 transition-all active:scale-95',
-                        textContent: t('delete'),
-                        onclick: async () => {
-                            await deleteDoc(doc(db, "invites", inviteId));
-                            modal.remove();
-                        }
-                    })
-                ])
-            ])
-        ]);
-        document.body.appendChild(modal);
-    }
-
-    async function autoHealAccountFlags(notifData, notifId) {
-        if (!notifData.accountId) {
-            // Se non c'è ID account, segniamo solo come letta
-            if (notifId) await updateDoc(doc(db, "users", auth.currentUser.uid, "notifications", notifId), { read: true });
-            return;
-        }
-
-        const ownerId = auth.currentUser.uid;
-        const accId = notifData.accountId;
-        const azId = notifData.aziendaId;
-
-        const accountPath = azId
-            ? `users/${ownerId}/aziende/${azId}/accounts/${accId}`
-            : `users/${ownerId}/accounts/${accId}`;
-
-        const accountRef = doc(db, accountPath);
-
-        try {
-            await runTransaction(db, async (transaction) => {
-                const accSnap = await transaction.get(accountRef);
-                if (!accSnap.exists()) return;
-
-                const data = accSnap.data();
-                const sharedWith = data.sharedWith || {};
-
-                const hasActive = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
-                const newVisibility = hasActive ? "shared" : "private";
-
-                let newType = data.type;
-                const isMemoLike = (data.type === 'memo' || data.type === 'memorandum');
-
-                if (newVisibility === 'private' && isMemoLike && data.isExplicitMemo !== true) {
-                    LOG(`[V5.4-CONFIRM] Reverting shared-memo to account type after owner OK.`);
-                    newType = 'account';
-                }
-
-                // Aggiorna Account
-                transaction.update(accountRef, {
-                    visibility: newVisibility,
-                    type: newType,
-                    updatedAt: new Date().toISOString()
-                });
-
-                // Segna notifica come letta
-                if (notifId) {
-                    const notifRef = doc(db, "users", ownerId, "notifications", notifId);
-                    transaction.update(notifRef, { read: true });
-                }
-            });
-            showToast("Presa d'atto confermata", "success");
-        } catch (e) {
-            console.error("[V5.4-CONFIRM] Healing/Read update failed:", e.message);
-            // Fallback: segna almeno la notifica come letta se l'account non esiste più
-            if (notifId) await updateDoc(doc(db, "users", ownerId, "notifications", notifId), { read: true });
-        }
     }
 
     async function handleInviteResponse(inviteId, inviteData, status) {
@@ -726,7 +617,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    initComponents();
+    if (!isCompleteRecoveryRoute(window.location)) initComponents();
     applyGlobalTranslations();
     observeTranslatedSubtrees();
     setTimeout(() => document.body?.classList.add('revealed'), 100);

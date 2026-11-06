@@ -62,7 +62,7 @@ function fixture({missing = false, beforeFinal, failAfterDelete = false, attachm
       writes.push(...staged);
       return result;
     }};
-  const context = vm.createContext({...legacyPolicy, ...receipts, ...lockApi, exports: {}, HttpsError, onCall: (_options, run) => run,
+  const context = vm.createContext({...require('../archive-purge-global-lock'), ...require('../vault-recovery-fence'), ...legacyPolicy, ...receipts, ...lockApi, exports: {}, HttpsError, onCall: (_options, run) => run,
     getFirestore: () => store,
     getStorage: () => { counts.storage++; return {bucket: () => ({file: path => ({
       delete: async options => {

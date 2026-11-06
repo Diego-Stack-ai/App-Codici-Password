@@ -64,7 +64,7 @@ function readDictionaries() {
   const dictionaries = {
     it: fs.existsSync(italianFile) ? dictionaryKeys(fs.readFileSync(italianFile, 'utf8')) : []
   };
-  const domainSources = ['access.js', 'settings.js', 'deadline-rules.js', 'profile.js', 'recipients.js', 'dynamic-ui.js']
+  const domainSources = ['access.js', 'settings.js', 'recovery.js', 'deadline-rules.js', 'profile.js', 'recipients.js', 'dynamic-ui.js']
     .map(file => fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'translations', file), 'utf8'));
   for (const language of declaredLanguages.filter(language => language !== 'it')) {
     const file = path.join(publicRoot, 'assets', 'js', 'translations', `${language}.js`);

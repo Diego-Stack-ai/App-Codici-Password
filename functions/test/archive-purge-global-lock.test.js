@@ -77,7 +77,7 @@ test('adapter Admin legge il lock nella stessa transazione del writer', async ()
     return {exists: false, data: () => null};
   }};
   assert.equal(await assertTransactionGlobalPurgeUnlocked(transaction, db, 'owner'), true);
-  assert.deepEqual(reads, ['archivePurgeLocks/owner']);
+  assert.deepEqual(reads, ['archivePurgeLocks/owner', 'vaultRecoveryLocks/owner']);
   const active = acquireGlobalPurgeLock(null, binding()).record;
   transaction.get = async () => ({exists: true, data: () => active});
   await assert.rejects(assertTransactionGlobalPurgeUnlocked(transaction, db, 'owner'), /PURGE_LOCK_ACTIVE/);

@@ -15,15 +15,15 @@ class Clock extends Date {
 const days = offset => new Date(2026, 8, 26 + offset, 12).toISOString();
 const record = (id, offset, patch = {}) => ({id, dueDate: days(offset), completed: false,
   recipients: [{email: "synthetic@example.invalid", sendEmail: true}], ...patch});
-function harness(records = [], failure = "", now = NOW) {
+function harness(records = [], failure = "", now = NOW, owners = ["owner"]) {
   const calls = [], queries = [], errors = [];
   const ledgerFixture = require("./recipient-ledger-fixture")();
   let config;
   const db = {collection(name) {
     if (name === "recipientDeliveryLedger") return ledgerFixture.db.collection(name);
     assert.equal(name, "users");
-    return {async get() {return {docs: [{id: "owner"}]};}, doc(uid) {
-      assert.equal(uid, "owner");
+    return {async get() {return {docs: owners.map(id => ({id}))};}, doc(uid) {
+      assert.ok(owners.includes(uid));
       return {collection(collectionName) {
         assert.equal(collectionName, "scadenze");
         return {where(field, op, value) {
@@ -42,7 +42,8 @@ function harness(records = [], failure = "", now = NOW) {
     GMAIL_USER: {value: () => "synthetic@example.invalid"}, GMAIL_APP_PASSWORD: {value: () => "synthetic"},
     createTransporter: () => ({}), deadlineRecipients: s => s.recipients,
     sendDeadlinePush: async (_db, uid, id, _s, diff) => {
-      calls.push(["push", id, diff]); assert.equal(uid, "owner");
+      calls.push(["push", id, diff]); assert.ok(owners.includes(uid));
+      if (typeof failure === "function") {const error = failure(uid); if (error) throw error;}
       if (failure === "push") throw new Error("synthetic");
     },
     sendRecipientDeadlinePushes: async (_db, _uid, id, _s, diff) => {
@@ -125,4 +126,11 @@ test("scheduler counts autumn days and spring frequency as civil days", async ()
   const spring = harness([record("mature", 0, {dueDate: "2026-04-02", lastNotifiedAt: "2026-03-23", notif_frequency: 7})], "", Date.parse("2026-03-30T07:00:00Z"));
   await spring.run();
   assert.ok(spring.calls.some(call => call[0] === "email"));
+});
+
+test('one fenced owner defers its channels while unrelated owners finish before scheduler reports deferral', async () => {
+  const h = harness([record('due', 0)], uid => uid === 'owner' ? Object.assign(Error('RECOVERY_FENCE_ACTIVE'),
+    {code: 'RECOVERY_FENCE_ACTIVE'}) : null, NOW, ['owner', 'other']);
+  await assert.rejects(h.run(), /RECOVERY_FENCE_ACTIVE/);
+  assert.deepEqual(h.calls.map(call => call[0]), ['push', 'push', 'recipient', 'email']);
 });

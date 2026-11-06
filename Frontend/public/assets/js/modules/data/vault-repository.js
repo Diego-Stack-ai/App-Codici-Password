@@ -1,7 +1,7 @@
 import {
     getDocServerConfirmed, getDocsServerConfirmed, getDocSmart, getDocsSmart
 } from '/assets/js/offline-firestore.js';
-import {db} from '../../firebase-config.js?v=1.2.259';
+import {db} from '../../firebase-config.js?v=1.2.260';
 import {collection, doc, limit, orderBy, query, where} from '/assets/js/vendor/firebase-runtime.js';
 import {coalesceRead} from './request-coordinator.js';
 
@@ -199,6 +199,12 @@ export const getUserProfileConfirmed = uid => readConfirmedRecord(doc(db, 'users
 // M8: fotografia server-confermata dei soli domini proprietari ammessi dal
 // contratto backup. Non usa cache perché un file incompleto sembrerebbe valido.
 export const getBackupProfile = uid => readConfirmedRecord(doc(db, 'users', uid));
+// Recovery-only confirmed readers. The content-only/portable collector stays unchanged.
+export const getBackupSecurity = uid => readConfirmedRecord(doc(db, 'users', uid, 'settings', 'security'));
+export const listBackupProfileDocumentAttachments = uid => readConfirmedRecords(
+    collection(db, 'users', uid, 'profileDocumentAttachments'));
+export const getBackupSharingPublicIdentity = uid => readConfirmedRecord(doc(db, 'cryptoPublicKeys', uid));
+export const getBackupSharingPrivateIdentity = uid => readConfirmedRecord(doc(db, 'users', uid, 'cryptoIdentity', 'current'));
 export const listBackupSettings = uid => readConfirmedRecords(collection(db, 'users', uid, 'settings'));
 export const listBackupPrivateAccounts = uid => readConfirmedRecords(collection(db, 'users', uid, 'accounts'));
 export const listBackupCompanies = uid => readConfirmedRecords(collection(db, 'users', uid, 'aziende'));

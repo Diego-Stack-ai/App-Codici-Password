@@ -45,9 +45,9 @@ function harness({devices = {[devicePath]: active}, initial = {}, failure, share
       .map(([key, data]) => ({id: key.split("/").pop(), data: () => data, ref: ref(key)}))};}};
   }});
   let transactionTail = Promise.resolve();
-  const db = {collection, runTransaction(fn) {
+  const db = {doc: ref, collection, runTransaction(fn) {
     const next = transactionTail.then(() => fn({get: item => item.get(),
-      set: (item, value, options) => item.set(value, options), delete: item => item.delete()}));
+      set: (item, value, options) => item.set(value, options), update: (item, value) => item.update(value), delete: item => item.delete()}));
     transactionTail = next.catch(() => {});
     return next;
   }};
@@ -55,7 +55,7 @@ function harness({devices = {[devicePath]: active}, initial = {}, failure, share
     constructor(...args) {super(...(args.length ? args : [now]));}
     static now() {return now;}
   }
-  const context = {recipientDeliveryLedger: ledger, deadlineCalendar: require("../deadline-calendar"), Date: ScenarioClock, crypto, console: {log() {}, error() {}},
+  const context = {...require('../archive-purge-global-lock'), ...require('../vault-recovery-fence'), recipientDeliveryLedger: ledger, deadlineCalendar: require("../deadline-calendar"), Date: ScenarioClock, crypto, console: {log() {}, error() {}},
     verifiedUserByEmail: async (auth, email) => {
       const user = await auth.getUserByEmail(email);
       return user.emailVerified === true ? user : null;

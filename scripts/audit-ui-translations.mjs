@@ -35,6 +35,7 @@ const accessCatalogs = loadNamedCatalog('access.js', 'accessCatalogs');
 const recipientCatalogs = loadNamedCatalog('recipients.js', 'recipientCatalogs');
 const profileCatalogs = loadNamedCatalog('profile.js', 'profileCatalogs');
 const settingsCatalogs = loadNamedCatalog('settings.js', 'settingsCatalogs');
+const recoveryCatalogs = loadNamedCatalog('recovery.js', 'recoveryCatalogs');
 const deadlineRulesCatalogs = loadNamedCatalog('deadline-rules.js', 'deadlineRulesCatalogs');
 const dynamicUiCatalogs = loadNamedCatalog('dynamic-ui.js', 'dynamicUiCatalogs');
 const RUNTIME_RELATIONS = new Set([
@@ -50,7 +51,7 @@ const GUIDE_RELATIONS = new Set(['ui_guide_title', 'ui_guide_purpose', 'ui_guide
 const DECLARATIVE_RELATIONS = new Set([...RUNTIME_RELATIONS].filter(relation => relation.startsWith('ui_translates')));
 const PAGE_RUNTIME_RELATIONS = new Set([...DECLARATIVE_RELATIONS, 'ui_flow_translates_with']);
 const BASE_CATALOGS = { it, en, es, fr, de, zh, hi, pt };
-const DOMAIN_CATALOGS = [accessCatalogs, recipientCatalogs, profileCatalogs, settingsCatalogs, deadlineRulesCatalogs, dynamicUiCatalogs];
+const DOMAIN_CATALOGS = [accessCatalogs, recipientCatalogs, profileCatalogs, settingsCatalogs, recoveryCatalogs, deadlineRulesCatalogs, dynamicUiCatalogs];
 
 const keyFromTarget = target => target.startsWith('ui:i18n:') ? target.slice('ui:i18n:'.length) : null;
 const uniqueSorted = values => [...new Set(values)].sort();
@@ -72,10 +73,11 @@ function countBy(items, keyOf) {
 }
 
 function pageDomainCatalog(page, language) {
-  if (/^(?:login|registrati|reset_password|imposta_nuova_password|contatto_condiviso)\.html$/i.test(page)) return accessCatalogs[language] || {};
+  if (/^login\.html$/i.test(page)) return {...(accessCatalogs[language] || {}), ...(recoveryCatalogs[language] || {})};
+  if (/^(?:registrati|reset_password|imposta_nuova_password|contatto_condiviso)\.html$/i.test(page)) return accessCatalogs[language] || {};
   if (/^gestione_destinatari\.html$/i.test(page)) return recipientCatalogs[language] || {};
   if (/^(?:profilo_privato|dati_azienda)\.html$/i.test(page)) return profileCatalogs[language] || {};
-  if (/^impostazioni\.html$/i.test(page)) return settingsCatalogs[language] || {};
+  if (/^impostazioni\.html$/i.test(page)) return {...(settingsCatalogs[language] || {}), ...(recoveryCatalogs[language] || {})};
   if (/^(?:regole_scadenze|configurazione_automezzi|aggiungi_scadenza)\.html$/i.test(page)) return deadlineRulesCatalogs[language] || {};
   return {};
 }

@@ -30,6 +30,7 @@ const {HttpsError} = requireFunctions('firebase-functions/v2/https');
 const policy = requireFunctions('./archive-purge-service.js');
 const purgeReceipts = requireFunctions('./archive-purge-receipt.js');
 const purgeLock = requireFunctions('./archive-purge-global-lock.js');
+const {assertTransactionVaultRecoveryUnlocked} = requireFunctions('./vault-recovery-fence.js');
 const restoreService = requireFunctions('./backup-restore-service.js');
 const restoreReceipts = requireFunctions('./backup-restore-receipt.js');
 const restorePreview = requireFunctions('./backup-restore-preview.js');
@@ -71,7 +72,7 @@ const purge = new Function('exports', 'HttpsError', 'FieldValue', 'console', 'is
     'assertNoExternalAccountReferences',
     'createArchivePurgeBinding', 'verifyArchivePurgeReceipt', 'onCall', 'getFirestore', 'getStorage',
     'createGlobalPurgeLockBinding', 'globalPurgeLockRef', 'acquireGlobalPurgeLock',
-    'assertGlobalPurgeLockHeld', 'releaseGlobalPurgeLock',
+    'assertGlobalPurgeLockHeld', 'releaseGlobalPurgeLock', 'assertTransactionVaultRecoveryUnlocked',
     `${ownerGuardSlice}\n${purgeSlice}\nreturn exports.purgeArchivedAccount;`)({}, HttpsError, FieldValue,
     {log() {}, warn() {}, error() {}}, () => false, policy.accountPath, policy.attachmentStoragePaths, policy.isSafeAttachmentPath, policy.purgeDecision,
     policy.planProfileReferenceCleanup, policy.validatePurgeCommand,
@@ -80,7 +81,7 @@ const purge = new Function('exports', 'HttpsError', 'FieldValue', 'console', 'is
     () => {}, purgeReceipts.createArchivePurgeBinding,
     purgeReceipts.verifyArchivePurgeReceipt, (_options, run) => run, () => purgeStore, () => ({bucket: () => bucket}),
     purgeLock.createGlobalPurgeLockBinding, purgeLock.globalPurgeLockRef, purgeLock.acquireGlobalPurgeLock,
-    purgeLock.assertGlobalPurgeLockHeld, purgeLock.releaseGlobalPurgeLock);
+    purgeLock.assertGlobalPurgeLockHeld, purgeLock.releaseGlobalPurgeLock, assertTransactionVaultRecoveryUnlocked);
 
 const restoreChunk = new Function('exports', 'HttpsError', 'Timestamp', 'FieldValue', 'console',
     'buildRestorePreview', 'staleRestoreIndexes', 'decodeFirestoreValue', 'restoreChunkDecision',

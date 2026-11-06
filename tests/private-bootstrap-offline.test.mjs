@@ -5,6 +5,9 @@ import vm from 'node:vm';
 
 // Execute the real private-page gate, before Firestore/Vault/page initialization.
 const source = await readFile(new URL('../Frontend/public/assets/js/main-v129.js', import.meta.url), 'utf8');
+const configSource = (await readFile(new URL('../Frontend/public/assets/js/app-env.js', import.meta.url), 'utf8'))
+    .replace(/^export const APP_ENV =.*\r?\n/m, '');
+const recoveryRoutes = await import(`data:text/javascript;base64,${Buffer.from(configSource).toString('base64')}`);
 const start = source.indexOf('const publicPages =');
 const end = source.indexOf('if (isPrivatePage && navigator.onLine) firebaseRuntime.enableAppCheck', start);
 assert.ok(start >= 0 && end > start);
@@ -23,9 +26,9 @@ function fixture({online = false, verified = true, tokenVerified = true, refresh
         if (!online) throw new Error('auth/network-request-failed');
     }};
     const auth = {currentUser: user};
-    const context = vm.createContext({gate: {block() {}, reject:()=>redirects.push('/login.html'), acceptIdentity: () => true},
+    const context = vm.createContext({...recoveryRoutes, gate: {block() {}, reject:()=>redirects.push('/login.html'), acceptIdentity: () => true},
         authSessionFence: {isCurrent:async()=>fenceCurrent}, fenceTicket: {}, authAttempt: 1, user, auth, navigator: {onLine: online}, currentPage: page, state,
-        window: {location: {replace: url => redirects.push(url)}}});
+        window: {location: {pathname: `/${page}.html`, search: '', replace: url => redirects.push(url)}}});
     const run = vm.runInContext(`(async () => { ${source.slice(start, end)} state.initialized++; })`, context);
     return {run, state, redirects, auth};
 }

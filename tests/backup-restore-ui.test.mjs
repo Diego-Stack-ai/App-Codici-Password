@@ -3,14 +3,17 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 import {testTranslate} from './helpers/test-translator.mjs';
+const recoverySource=await readFile(new URL('../Frontend/public/assets/js/translations/recovery.js',import.meta.url),'utf8');
+const {recoveryCatalogs}=await import(`data:text/javascript;base64,${Buffer.from(recoverySource).toString('base64')}`);
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/settings/impostazioni.js', import.meta.url), 'utf8');
 const ui = source.slice(source.indexOf('let disposeRestoreSetup'), source.indexOf('function showRecoveryKeyOnce'))
     .replace("import('./backup-import-service.js')", 'loadImport()');
 const deferred = () => { let resolve; return {promise: new Promise(done => { resolve = done; }), resolve}; };
 const tick = () => new Promise(setImmediate);
 
-function fixture({health = false, exporting = false} = {}) {
+function fixture({health = false, exporting = false, complete = false} = {}) {
     const observers = new Set(), events = new EventTarget(), nodes = [], toasts = [], executions = [], timers = new Map();
+    const redirects=[],completeCalls=[];
     let body, activeElement, timerId = 0;
     class Node {
         constructor(tag, props = {}, children = []) {
@@ -48,20 +51,22 @@ function fixture({health = false, exporting = false} = {}) {
         releaseBackupRestore: value => { value.recoveryKey = ''; value.records = []; },
     };
     const context = vm.createContext({
-        auth, AbortController, createElement,
-        t: testTranslate, tf: testTranslate,
+        auth, AbortController, createElement, COMPLETE_RECOVERY_ENABLED: complete,
+        t: key=>recoveryCatalogs.it[key]??testTranslate(key), tf: testTranslate,
         document: {body, getElementById: id => nodes.find(node => node.id === id && node.isConnected), get activeElement() { return activeElement; }},
         onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
         showToast: (...args) => toasts.push(args), loadImport: async () => service, loadExport: async () => service,
+        loadCompleteExport:async()=>({createCompleteRecoveryExportOptions:options=>{completeCalls.push(options);return {profile:'complete-recovery',readAsset:async()=>({}),
+            promptMasterPassword:async()=>{completeCalls.push('prompt');return 'synthetic fresh export password';},dispose:()=>completeCalls.push('dispose')};}}),
         navigator: {clipboard: {writeText: async () => {}}},
         requestAnimationFrame: callback => callback(),
         setTimeout: callback => { const id = ++timerId; timers.set(id, callback); return id; }, clearTimeout: id => timers.delete(id),
-        window: {location: {reload: () => { throw new Error('unexpected reload'); }}},
+        window: {location: {replace:target=>redirects.push(target),reload: () => { throw new Error('unexpected reload'); }}},
     });
     vm.runInContext(ui, context);
     if (exporting) vm.runInContext(source.slice(source.indexOf('function showRecoveryKeyOnce'), source.indexOf('async function setupSettingsProfileQr'))
-        .replace("import('./backup-export-service.js')", 'loadExport()'), context);
+        .replace("import('./backup-export-service.js')", 'loadExport()').replace("import('./complete-recovery-entry.js')",'loadCompleteExport()'), context);
     if (health) vm.runInContext(source.slice(source.indexOf('function showCredentialHealthResults'), source.indexOf('function usageReportText'))
         .replace(/import\('\.\/credential-health-service\.js\?v=[^']+'\)/, 'loadImport()'), context);
     const confirm = value => {
@@ -69,7 +74,7 @@ function fixture({health = false, exporting = false} = {}) {
         form.querySelector('input').value = value;
         form.onsubmit({preventDefault() {}});
     };
-    return {context, body, button, nodes, observers, toasts, executions, service, plan, confirm,
+    return {context, body, button, nodes, observers, toasts, executions, service, plan, confirm,redirects,completeCalls,
         runTimers: () => { for (const [id, callback] of [...timers]) { timers.delete(id); callback(); } },
         setup: uid => exporting ? context.setupEncryptedBackup({uid}) : health ? context.setupCredentialHealth({uid}) : context.setupEncryptedRestore({uid}),
         select: () => { const input = body.children.find(node => node.type === 'file'); input.files = [{}]; return input.trigger('change'); },
@@ -89,6 +94,33 @@ test('export key is removed on lock and a stale copy button cannot access the cl
     f.lock(); await pending; await copy.click();
     assert.equal(key.value, ''); assert.equal(key.isConnected, false);
     assert.equal(copies, 0); assert.equal(f.observers.size, 0); assert.equal(f.button.disabled, false);
+});
+
+for(const choice of ['accept','cancel','lock']) test(`complete export recent-auth ${choice} preserves normal-settings routing and owns its dialog`,async()=>{
+    const f=fixture({exporting:true,complete:true});
+    f.service.exportOwnerBackup=async(_uid,options)=>{await options.promptMasterPassword();throw new Error('RECOVERY_ASSET_RECENT_AUTH_REQUIRED');};
+    f.setup('A');await f.button.click();await tick();
+    const start=f.nodes.find(node=>node.textContent===testTranslate('dyn_backup_choose')&&node.isConnected);
+    const pending=start.click();await tick();
+    assert.ok(f.nodes.some(node=>node.textContent===recoveryCatalogs.it.recovery_export_reauth&&node.isConnected));
+    const accept=f.nodes.find(node=>node.textContent===recoveryCatalogs.it.recovery_export_sign_in&&node.isConnected);
+    assert.ok(accept);assert.equal(f.redirects.length,0);assert.equal(f.completeCalls.filter(value=>value==='prompt').length,1);
+    if(choice==='accept')await accept.click();
+    else if(choice==='lock')f.lock();
+    else {const modal=f.body.children.find(node=>node.children?.some(child=>child.role==='dialog'));await modal.querySelectorAll('button').find(node=>node.textContent===testTranslate('cancel')).click();}
+    await pending;
+    assert.deepEqual(f.redirects,choice==='accept'?['/login.html?reauth=security-settings']:[]);
+    assert.equal(f.redirects.some(target=>target.includes('recovery=complete')),false);
+    await accept.click();assert.equal(f.completeCalls.filter(value=>value==='prompt').length,1);
+    assert.ok(f.completeCalls.includes('dispose'));assert.equal(f.observers.size,0);
+    assert.equal(f.nodes.some(node=>node.value==='synthetic-key'&&node.isConnected),false);
+});
+
+test('legacy export with flag false retains its original recent-auth failure behavior',async()=>{
+    const f=fixture({exporting:true});f.service.exportOwnerBackup=async()=>{throw new Error('RECOVERY_ASSET_RECENT_AUTH_REQUIRED');};
+    f.setup('A');await f.button.click();await tick();await f.nodes.find(node=>node.textContent===testTranslate('dyn_backup_choose')).click();
+    assert.equal(f.completeCalls.length,0);assert.equal(f.redirects.length,0);
+    assert.ok(f.toasts.some(([message])=>message===testTranslate('dyn_backup_incomplete')));
 });
 
 test('late export result after identity change is scrubbed without displaying its key', async () => {

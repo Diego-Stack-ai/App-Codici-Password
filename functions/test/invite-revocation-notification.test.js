@@ -54,7 +54,7 @@ test("existing foreign marker and existing notification never overwritten", asyn
 test("retry crossing expiry discards staged writes", async () => {
   const f = fixture(undefined, true);
   assert.equal((await f.run()).reason, "EVENT_TIME_EXPIRED");
-  assert.equal(f.reads, 8);
+  assert.equal(f.reads, 16);
   assert.equal(f.store.has(markerPath), false);
   assert.equal(f.store.has(notificationPath), false);
 });
@@ -88,4 +88,15 @@ test("legacy account without cycle is cycle zero, not malformed", async () => {
   assert.equal((await f.run()).action, "write");
   const invalid = fixture({[accountPath]: {...legacy, sharingCycle: null}});
   assert.equal((await invalid.run()).reason, "ACCOUNT_CYCLE_INVALID");
+});
+
+test('revocation notification remains pending when source owner or recipient is recovering', async () => {
+  const fence = require('../vault-recovery-fence');
+  for (const uid of ['owner', 'guest']) {
+    const lock = fence.acquireVaultRecoveryFence(null,
+      fence.createVaultRecoveryBinding({uid, operationId: 'recover', planDigest: 'a'.repeat(64)})).record;
+    const f = fixture({[accountPath]: account, [`vaultRecoveryLocks/${uid}`]: lock});
+    await assert.rejects(f.run(), /RECOVERY_FENCE_ACTIVE/);
+    assert.equal(f.store.has(markerPath), false); assert.equal(f.store.has(notificationPath), false);
+  }
 });

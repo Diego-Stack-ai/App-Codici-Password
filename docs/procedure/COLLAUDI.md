@@ -9,7 +9,7 @@
 - per i runner che operano su una società, richiedere un `CODEX_QA_COMPANY_ID` esplicito, sintatticamente valido e appartenente all'identità QA corrente; interrompere se manca o non coincide e non usare mai fallback verso società di un'altra identità;
 - non ruotare la chiave della Vault tecnica durante provisioning o riconciliazione ordinari;
 - se l'identità tecnica esiste ma il contenitore DPAPI manca, interrompere con `QA_CREDENTIALS_MISSING_EXISTING_VAULT`: non creare nuove credenziali, non sostituire verifier/envelope e non usare `--rotate` come recupero;
-- per riprendere, ripristinare il file DPAPI originale nello stesso profilo Windows oppure creare un nuovo utente QA separato con una nuova Vault; i dati della Vault precedente non sono recuperabili generando una nuova Master Password;
+- per riprendere, ripristinare il file DPAPI originale nello stesso profilo Windows oppure creare un nuovo utente QA separato con una nuova Vault; la sola generazione di una nuova Master Password non recupera i dati precedenti. Il recupero con file schema 3 e Recovery Key appartiene al protocollo dedicato, ancora disabilitato, e richiede i relativi gate;
 - assegnare alle fixture un prefisso o identificatore stabile di collaudo, così una seconda esecuzione aggiorna i propri record senza moltiplicarli;
 - usare domini riservati come `example.invalid`, numeri e codici chiaramente fittizi e allegati sintetici di piccole dimensioni;
 - non creare recapiti realmente raggiungibili, documenti formalmente validi, token Push, segreti MFA o credenziali riutilizzabili.

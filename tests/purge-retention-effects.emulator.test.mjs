@@ -29,6 +29,7 @@ const {HttpsError} = requireFunctions('firebase-functions/v2/https');
 const policy = requireFunctions('./archive-purge-service.js');
 const receipts = requireFunctions('./archive-purge-receipt.js');
 const purgeLock = requireFunctions('./archive-purge-global-lock.js');
+const {assertTransactionVaultRecoveryUnlocked} = requireFunctions('./vault-recovery-fence.js');
 const service = requireFunctions('./audit-retention-service.js');
 
 const source = readFileSync(new URL('../functions/index.js', import.meta.url), 'utf8');
@@ -50,7 +51,7 @@ const purgeFactory = new Function('exports', 'HttpsError', 'FieldValue', 'Timest
     'assertNoExternalAccountReferences',
     'createArchivePurgeBinding', 'verifyArchivePurgeReceipt', 'onCall', 'getFirestore', 'getStorage',
     'createGlobalPurgeLockBinding', 'globalPurgeLockRef', 'acquireGlobalPurgeLock',
-    'assertGlobalPurgeLockHeld', 'releaseGlobalPurgeLock',
+    'assertGlobalPurgeLockHeld', 'releaseGlobalPurgeLock', 'assertTransactionVaultRecoveryUnlocked',
     `${ownerGuardSlice}\n${purgeSlice}\nreturn exports.purgeArchivedAccount;`);
 const purge = purgeFactory({}, HttpsError, FieldValue, Timestamp, {log() {}, warn() {}, error() {}},
     () => false,
@@ -59,14 +60,14 @@ const purge = purgeFactory({}, HttpsError, FieldValue, Timestamp, {log() {}, war
     receipts.createArchivePurgeBinding, receipts.verifyArchivePurgeReceipt,
     (_options, run) => run, () => db, () => ({bucket: () => bucket}),
     purgeLock.createGlobalPurgeLockBinding, purgeLock.globalPurgeLockRef, purgeLock.acquireGlobalPurgeLock,
-    purgeLock.assertGlobalPurgeLockHeld, purgeLock.releaseGlobalPurgeLock);
+    purgeLock.assertGlobalPurgeLockHeld, purgeLock.releaseGlobalPurgeLock, assertTransactionVaultRecoveryUnlocked);
 
 const silentConsole = {log() {}, warn() {}, error() {}};
 const jobFactory = new Function('Timestamp', 'FieldPath', 'FieldValue', 'console', 'auditEventPath', 'classifyAuditEvent',
-    'planAuditRetention', 'runAuditRetention', 'DEFAULT_BATCH_SIZE', 'MAX_EVENTS_PER_RUN',
+    'planAuditRetention', 'runAuditRetention', 'DEFAULT_BATCH_SIZE', 'MAX_EVENTS_PER_RUN', 'fencedUserWrite', 'assertTransactionGlobalPurgeUnlocked',
     `${source.slice(jobStart, jobEnd)}\nreturn {collectExpiredAuditEvents, deleteAuditBatchWithConfirmation, runAuditRetentionJob};`);
 const job = jobFactory(Timestamp, FieldPath, FieldValue, silentConsole, service.auditEventPath, service.classifyAuditEvent,
-    service.planAuditRetention, service.runAuditRetention, service.DEFAULT_BATCH_SIZE, service.MAX_EVENTS_PER_RUN);
+    service.planAuditRetention, service.runAuditRetention, service.DEFAULT_BATCH_SIZE, service.MAX_EVENTS_PER_RUN, purgeLock.fencedUserWrite, purgeLock.assertTransactionGlobalPurgeUnlocked);
 
 const NOW = Date.parse('2026-09-21T00:00:00.000Z');
 const DAY = 24 * 60 * 60 * 1000;

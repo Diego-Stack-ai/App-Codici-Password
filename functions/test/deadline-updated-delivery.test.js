@@ -44,12 +44,18 @@ function harness({before, after, now = "2026-10-18T14:00:00Z"}) {
       };
     }
   };
+  db.doc = path => ({path});
+  db.runTransaction = async callback => {
+    const batch = db.batch();
+    const result = await callback({get: async () => ({exists: false}), set: batch.set, update: batch.update});
+    await batch.commit(); return result;
+  };
   const firestore = () => db;
   firestore.FieldValue = {
     delete: () => "deleted",
     serverTimestamp: () => "timestamp"
   };
-  const context = {
+  const context = {...require('../archive-purge-global-lock'), ...require('../vault-recovery-fence'),
     Date: Clock,
     deadlineCalendar: require("../deadline-calendar"),
     exports: {},

@@ -21,6 +21,10 @@ let _dict = {};
 async function loadPageCatalog(language) {
     if (/(?:^|\/)(?:login|registrati|reset_password|imposta_nuova_password|contatto_condiviso)(?:\.html)?$/i.test(location.pathname)) {
         const { accessCatalogs } = await import('./translations/access.js');
+        if (/(?:^|\/)login(?:\.html)?$/i.test(location.pathname)) {
+            const { recoveryCatalogs } = await import('./translations/recovery.js');
+            return {...(accessCatalogs[language] || {}), ...(recoveryCatalogs[language] || {})};
+        }
         return accessCatalogs[language] || {};
     }
     if (/(?:^|\/)gestione_destinatari(?:\.html)?$/i.test(location.pathname)) {
@@ -33,7 +37,8 @@ async function loadPageCatalog(language) {
     }
     if (/(?:^|\/)impostazioni(?:\.html)?$/i.test(location.pathname)) {
         const { settingsCatalogs } = await import('./translations/settings.js');
-        return settingsCatalogs[language] || {};
+        const { recoveryCatalogs } = await import('./translations/recovery.js');
+        return {...(settingsCatalogs[language] || {}), ...(recoveryCatalogs[language] || {})};
     }
     if (/(?:^|\/)(?:regole_scadenze|configurazione_automezzi|aggiungi_scadenza)(?:\.html)?$/i.test(location.pathname)) {
         const { deadlineRulesCatalogs } = await import('./translations/deadline-rules.js');

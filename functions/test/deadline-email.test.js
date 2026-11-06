@@ -13,7 +13,7 @@ function harness({fail = [], users = {}, lookupFailure = null, now = Date.parse(
   class Clock extends Date {constructor(...args) {super(...(args.length ? args : [now]));} static now() {return now;}}
   const ledgerFixture = require("./recipient-ledger-fixture")();
   let current;
-  const sandbox = {Date: Clock, recipientDeliveryLedger: require("../recipient-delivery-ledger"), deadlineCalendar: require("../deadline-calendar"), console: {log() {}, error: (...args) => errors.push(args.map(String).join(" "))},
+  const sandbox = {...require('../archive-purge-global-lock'), ...require('../vault-recovery-fence'), Date: Clock, recipientDeliveryLedger: require("../recipient-delivery-ledger"), deadlineCalendar: require("../deadline-calendar"), console: {log() {}, error: (...args) => errors.push(args.map(String).join(" "))},
     deadlineRecipients: s => s.recipients || [], receivedDeadlineId: () => "synthetic-share-id",
     verifiedUserByEmail: async (auth, email) => {
       const user = await auth.getUserByEmail(email);

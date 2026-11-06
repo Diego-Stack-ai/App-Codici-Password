@@ -190,11 +190,136 @@ var require_archive_purge_service = __commonJS({
   }
 });
 
+// functions/vault-recovery-fence.js
+var require_vault_recovery_fence = __commonJS({
+  "functions/vault-recovery-fence.js"(exports2, module2) {
+    var crypto2 = require("node:crypto");
+    var RECOVERY_FENCE_SCHEMA_VERSION = 1;
+    var ID = /^[A-Za-z0-9._:-]{1,160}$/;
+    var SHA256 = /^[a-f0-9]{64}$/;
+    function fail11(code) {
+      const error = new Error(code);
+      error.code = code;
+      throw error;
+    }
+    function identifier(value) {
+      if (typeof value !== "string" || !ID.test(value)) fail11("RECOVERY_FENCE_INVALID");
+      return value;
+    }
+    function vaultRecoveryFenceRef(db, uid2) {
+      if (!db || typeof db.doc !== "function") fail11("RECOVERY_FENCE_ADAPTER_INVALID");
+      return db.doc(`vaultRecoveryLocks/${identifier(uid2)}`);
+    }
+    function createVaultRecoveryBinding({ uid: uid2, operationId, planDigest } = {}) {
+      const ownerUid = identifier(uid2);
+      identifier(operationId);
+      if (typeof planDigest !== "string" || !SHA256.test(planDigest)) fail11("RECOVERY_FENCE_INVALID");
+      const digest = crypto2.createHash("sha256").update(JSON.stringify([RECOVERY_FENCE_SCHEMA_VERSION, ownerUid, operationId, planDigest])).digest("hex");
+      return /* @__PURE__ */ Object.freeze({ schemaVersion: RECOVERY_FENCE_SCHEMA_VERSION, ownerUid, operationId, planDigest, digest });
+    }
+    function normalize(value, uid2) {
+      if (!value || typeof value !== "object" || Array.isArray(value) || value.schemaVersion !== RECOVERY_FENCE_SCHEMA_VERSION || !["active", "released"].includes(value.status)) {
+        fail11("RECOVERY_FENCE_CORRUPT");
+      }
+      let binding;
+      try {
+        binding = createVaultRecoveryBinding({ uid: value.ownerUid, operationId: value.operationId, planDigest: value.planDigest });
+      } catch {
+        fail11("RECOVERY_FENCE_CORRUPT");
+      }
+      if (binding.digest !== value.digest || uid2 !== void 0 && binding.ownerUid !== uid2) fail11("RECOVERY_FENCE_CORRUPT");
+      return { ...binding, status: value.status };
+    }
+    function same(left, right) {
+      return left.digest === right.digest && left.ownerUid === right.ownerUid && left.operationId === right.operationId && left.planDigest === right.planDigest;
+    }
+    function checkedBinding(binding) {
+      return normalize({ ...binding, status: "active" });
+    }
+    function acquireVaultRecoveryFence(current, binding) {
+      const expected = checkedBinding(binding);
+      if (current == null) return { duplicate: false, record: expected };
+      const lock = normalize(current, expected.ownerUid);
+      if (lock.status === "active") {
+        if (!same(lock, expected)) fail11("RECOVERY_FENCE_BUSY");
+        return { duplicate: true, record: lock };
+      }
+      if (same(lock, expected)) fail11("RECOVERY_FENCE_REPLAY_BLOCKED");
+      return { duplicate: false, record: expected };
+    }
+    function assertVaultRecoveryUnlocked(current, uid2) {
+      if (current == null) return true;
+      if (normalize(current, uid2).status === "active") fail11("RECOVERY_FENCE_ACTIVE");
+      return true;
+    }
+    function assertVaultRecoveryFenceHeld(current, binding) {
+      const expected = checkedBinding(binding), lock = normalize(current, expected.ownerUid);
+      if (lock.status !== "active" || !same(lock, expected)) fail11("RECOVERY_FENCE_NOT_HELD");
+      return lock;
+    }
+    function releaseVaultRecoveryFence(current, binding) {
+      const expected = checkedBinding(binding), lock = normalize(current, expected.ownerUid);
+      if (!same(lock, expected)) fail11("RECOVERY_FENCE_NOT_HELD");
+      return { duplicate: lock.status === "released", record: { ...lock, status: "released" } };
+    }
+    async function assertTransactionVaultRecoveryUnlocked(transaction, db, uid2) {
+      const snapshot = await transaction.get(vaultRecoveryFenceRef(db, uid2));
+      if (!snapshot || typeof snapshot.exists !== "boolean") fail11("RECOVERY_FENCE_ADAPTER_INVALID");
+      return assertVaultRecoveryUnlocked(snapshot.exists ? snapshot.data() : null, uid2);
+    }
+    async function assertTransactionRecoveryAcquirable(transaction, db, uid2) {
+      const { assertGlobalPurgeUnlocked, globalPurgeLockRef } = require_archive_purge_global_lock();
+      const purge = await transaction.get(globalPurgeLockRef(db, uid2));
+      if (!purge || typeof purge.exists !== "boolean") fail11("RECOVERY_FENCE_ADAPTER_INVALID");
+      assertGlobalPurgeUnlocked(purge.exists ? purge.data() : null);
+      const pending = await transaction.get(db.collection("users").doc(uid2).collection("profileDocumentAttachments").where("status", "in", ["reserved", "deleting"]).limit(1));
+      if (!pending || !Number.isInteger(pending.size)) fail11("RECOVERY_FENCE_ADAPTER_INVALID");
+      if (pending.size) fail11("RECOVERY_FENCE_STORAGE_PENDING");
+    }
+    async function acquireTransactionVaultRecoveryFence(transaction, db, binding) {
+      checkedBinding(binding);
+      await assertTransactionRecoveryAcquirable(transaction, db, binding.ownerUid);
+      const ref = vaultRecoveryFenceRef(db, binding.ownerUid), snapshot = await transaction.get(ref);
+      if (!snapshot || typeof snapshot.exists !== "boolean") fail11("RECOVERY_FENCE_ADAPTER_INVALID");
+      const result = acquireVaultRecoveryFence(snapshot.exists ? snapshot.data() : null, binding);
+      if (!result.duplicate) transaction.set(ref, result.record);
+      return result;
+    }
+    async function assertTransactionVaultRecoveryFenceHeld(transaction, db, binding) {
+      const snapshot = await transaction.get(vaultRecoveryFenceRef(db, binding.ownerUid));
+      if (!snapshot || typeof snapshot.exists !== "boolean") fail11("RECOVERY_FENCE_ADAPTER_INVALID");
+      return assertVaultRecoveryFenceHeld(snapshot.exists ? snapshot.data() : null, binding);
+    }
+    async function releaseTransactionVaultRecoveryFence(transaction, db, binding) {
+      const ref = vaultRecoveryFenceRef(db, binding.ownerUid), snapshot = await transaction.get(ref);
+      if (!snapshot || typeof snapshot.exists !== "boolean") fail11("RECOVERY_FENCE_ADAPTER_INVALID");
+      const result = releaseVaultRecoveryFence(snapshot.exists ? snapshot.data() : null, binding);
+      if (!result.duplicate) transaction.set(ref, result.record);
+      return result;
+    }
+    module2.exports = {
+      RECOVERY_FENCE_SCHEMA_VERSION,
+      vaultRecoveryFenceRef,
+      createVaultRecoveryBinding,
+      acquireVaultRecoveryFence,
+      releaseVaultRecoveryFence,
+      assertVaultRecoveryUnlocked,
+      assertVaultRecoveryFenceHeld,
+      assertTransactionVaultRecoveryUnlocked,
+      assertTransactionRecoveryAcquirable,
+      acquireTransactionVaultRecoveryFence,
+      releaseTransactionVaultRecoveryFence,
+      assertTransactionVaultRecoveryFenceHeld
+    };
+  }
+});
+
 // functions/archive-purge-global-lock.js
 var require_archive_purge_global_lock = __commonJS({
   "functions/archive-purge-global-lock.js"(exports2, module2) {
     var crypto2 = require("node:crypto");
     var { accountPath } = require_archive_purge_service();
+    var { assertTransactionVaultRecoveryUnlocked } = require_vault_recovery_fence();
     var IDENTIFIER = /^[A-Za-z0-9._:-]{1,160}$/;
     var LOCK_SCHEMA_VERSION = 1;
     function fail11(code) {
@@ -275,9 +400,17 @@ var require_archive_purge_global_lock = __commonJS({
       if (!transaction || typeof transaction.get !== "function") fail11("PURGE_LOCK_ADAPTER_INVALID");
       const snapshot = await transaction.get(globalPurgeLockRef(db, uid2));
       assertGlobalPurgeUnlocked(snapshot?.exists ? snapshot.data() : null);
+      await assertTransactionVaultRecoveryUnlocked(transaction, db, uid2);
       return true;
     }
+    async function fencedUserWrite(db, uids, write) {
+      return db.runTransaction(async (transaction) => {
+        for (const uid2 of new Set(uids)) await assertTransactionGlobalPurgeUnlocked(transaction, db, uid2);
+        return write(transaction);
+      });
+    }
     module2.exports = {
+      fencedUserWrite,
       LOCK_SCHEMA_VERSION,
       acquireGlobalPurgeLock,
       assertGlobalPurgeLockHeld,
@@ -386,7 +519,6 @@ function assertProfileLinkAccount(record, uid2, selection, { destination = false
   if (record.visibility !== void 0 && record.visibility !== "private" || record.type !== void 0 && record.type !== "account" || record.acceptedCount != null && record.acceptedCount !== 0 || record.recipientEmail != null && record.recipientEmail !== "") fail();
   for (const key of ["sharedWithUids", "sharedWithEmails"]) if (record[key] != null && (!Array.isArray(record[key]) || record[key].length)) fail();
   if (record.sharedWith != null && (!object(record.sharedWith) || Object.keys(record.sharedWith).length)) fail();
-  if (record.sharedWithEmailByUid != null && (!object(record.sharedWithEmailByUid) || Object.keys(record.sharedWithEmailByUid).length)) fail();
 }
 
 // experiments/persistent-vault-shell/profile-text-contract.mjs
@@ -813,7 +945,6 @@ function minimalCreatedAccount({ uid: uid2, accountId, request, timestamp }) {
     banking: [],
     sharedWith: {},
     sharedWithUids: [],
-    sharedWithEmailByUid: {},
     acceptedCount: 0,
     schemaVersion: 1,
     revision: 0,
@@ -2666,15 +2797,18 @@ function companyProfileContacts(data) {
 function findCompanyProfileContact(data, type, id4) {
   return companyProfileContacts(data)[type === "email" ? "emails" : "phones"].find((c) => c.id === id4);
 }
-function companyContactLinkPatch(data, contact, type, link2) {
+function companyContactLinkPatch(data, contact, type, link2, { clearPassword = false } = {}) {
   if (type === "phone") return { phoneAccountLinks: { ...data.phoneAccountLinks, [contact.id]: { ...data.phoneAccountLinks?.[contact.id], ...link2 } } };
   const emails = structuredClone(data.emails || {});
   if (contact.sourceSlot === "extra") {
-    emails.extra[contact.sourceIndex] = { ...emails.extra[contact.sourceIndex], id: contact.id, ...link2 };
+    emails.extra[contact.sourceIndex] = { ...emails.extra[contact.sourceIndex], id: contact.id, ...link2, ...clearPassword ? { password: "" } : {} };
   } else {
-    emails[contact.sourceSlot] = { ...emails[contact.sourceSlot], email: contact.address, ...link2 };
+    emails[contact.sourceSlot] = { ...emails[contact.sourceSlot], email: contact.address, ...link2, ...clearPassword ? { password: "" } : {} };
   }
-  return { emails };
+  return {
+    emails,
+    ...clearPassword && contact.sourceSlot === "pec" ? { aziendaEmailPassword: "" } : {}
+  };
 }
 function companyAccountReferences(account, reference, remove = false) {
   const entries = [...account?.linkedCompanyProfileFields || [], ...account?.linkedCompanyProfileField ? [account.linkedCompanyProfileField] : []];
@@ -2785,7 +2919,9 @@ var reasons = /* @__PURE__ */ new Set([
   "COMPANY_CONTACT_ID_MISSING",
   "COMPANY_CONTACT_ID_DERIVED",
   "PURGE_LOCK_ACTIVE",
-  "PURGE_LOCK_CORRUPT"
+  "PURGE_LOCK_CORRUPT",
+  "RECOVERY_FENCE_ACTIVE",
+  "RECOVERY_FENCE_CORRUPT"
 ]);
 function createVaultAccountCallables({ db, hash, timestamp, deleteField, HttpsError }) {
   const owners = new import_node_async_hooks.AsyncLocalStorage();

@@ -1,6 +1,7 @@
 import {after, before, test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 import {
   assertFails,
   assertSucceeds,
@@ -274,4 +275,52 @@ test('M8: neppure due creazioni client concorrenti possono scrivere nel namespac
   const outcomes = await Promise.allSettled(contents.map(bytes => uploadStage(id, bytes)));
   assert.equal(outcomes.filter(result => result.status === 'fulfilled').length, 0);
   assert.equal(outcomes.filter(result => result.status === 'rejected').length, 2);
+});
+
+
+test('recovery fence blocks owner and accepted guest reads/writes including overlapping Storage grants', async () => {
+  const owner = testEnv.authenticatedContext(OWNER_UID).storage();
+  const guest = verifiedRecipientStorage();
+  const paths = [`users/${OWNER_UID}/accounts/recovery/attachments/file.pdf`,
+    `users/${OWNER_UID}/aziende/company/accounts/recovery/attachments/file.pdf`,
+    `users/${OWNER_UID}/profile-documents/document/attachments/file`,
+    `users/${OWNER_UID}/restoreObjects/recovery`, `users/${OWNER_UID}/avatar/recovery.pdf`];
+  await testEnv.withSecurityRulesDisabled(async context => {
+    for (const path of paths) await uploadBytes(ref(context.storage(), path), new Uint8Array([1]), {contentType: 'application/pdf'});
+    for (const path of [`users/${OWNER_UID}/accounts/recovery`, `users/${OWNER_UID}/aziende/company/accounts/recovery`]) {
+      await setDoc(doc(context.firestore(), path), {isArchived: false, sharedWithUids: [OTHER_UID],
+        sharedWithEmailByUid: {[OTHER_UID]: 'other@example.invalid'}});
+    }
+  });
+  for (const [status, fields] of [[null, {}], ['active', {}], ['released', {}], ['unknown', {}], ['released', {ownerUid: 'other'}]]) {
+    if (status) await testEnv.withSecurityRulesDisabled(context => setDoc(doc(context.firestore(), 'vaultRecoveryLocks', OWNER_UID),
+      {schemaVersion: 1, ownerUid: OWNER_UID, operationId: 'recover', planDigest: 'a'.repeat(64),
+        digest: createHash('sha256').update(JSON.stringify([1, OWNER_UID, 'recover', 'a'.repeat(64)])).digest('hex'), status, ...fields}));
+    const expect = (status === null || status === 'released') && !fields.ownerUid ? assertSucceeds : assertFails;
+    for (const path of paths) await expect(getBytes(ref(owner, path)));
+    await expect(getBytes(ref(guest, paths[0])));
+    await expect(getBytes(ref(guest, paths[1])));
+    const writable = ref(owner, `users/${OWNER_UID}/avatar/recovery-write-${status || 'missing'}.pdf`);
+    await testEnv.withSecurityRulesDisabled(context => uploadBytes(ref(context.storage(), writable.fullPath),
+      new Uint8Array([1]), {contentType: 'application/pdf'}));
+    await expect(updateMetadata(writable, {customMetadata: {fixture: 'updated'}}));
+    await expect(deleteObject(writable));
+    await expect(uploadBytes(writable, new Uint8Array([2]), {contentType: 'application/pdf'}));
+  }
+  await testEnv.withSecurityRulesDisabled(context => deleteDoc(doc(context.firestore(), 'vaultRecoveryLocks', OWNER_UID)));
+});
+
+test('released recovery binding digest must match canonical UID operation and plan for Storage', async () => {
+  const path = `users/${OWNER_UID}/accounts/digest/attachments/file.pdf`;
+  await testEnv.withSecurityRulesDisabled(context => uploadBytes(ref(context.storage(), path), new Uint8Array([1]), {contentType: 'application/pdf'}));
+  const binding = {schemaVersion: 1, ownerUid: OWNER_UID, operationId: 'recover', planDigest: 'a'.repeat(64),
+    digest: createHash('sha256').update(JSON.stringify([1, OWNER_UID, 'recover', 'a'.repeat(64)])).digest('hex'), status: 'released'};
+  const storage = testEnv.authenticatedContext(OWNER_UID).storage();
+  for (const fields of [{}, {digest: '0'.repeat(64)}, {operationId: 'tampered'}, {planDigest: 'c'.repeat(64)}]) {
+    await testEnv.withSecurityRulesDisabled(context => setDoc(doc(context.firestore(), 'vaultRecoveryLocks', OWNER_UID), {...binding, ...fields}));
+    const expect = Object.keys(fields).length ? assertFails : assertSucceeds;
+    await expect(getBytes(ref(storage, path)));
+    await expect(updateMetadata(ref(storage, path), {customMetadata: {fixture: 'digest'}}));
+  }
+  await testEnv.withSecurityRulesDisabled(context => deleteDoc(doc(context.firestore(), 'vaultRecoveryLocks', OWNER_UID)));
 });

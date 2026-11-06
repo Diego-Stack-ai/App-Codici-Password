@@ -22,6 +22,15 @@
         }
         window.dispatchEvent(new Event('private-auth-blocked'));
     };
+    // Classic head script: keep this bounded predicate in parity with
+    // app-env.js without waiting for an ESM import.
+    const hasFixedRecoveryIntent = () => {
+        if (!/(?:^|\/)(?:login|impostazioni)\.html$/.test(window.location?.pathname || '')) return false;
+        try {
+            const values = new URLSearchParams(window.location.search || '').getAll('recovery');
+            return values.length === 1 && values[0] === 'complete';
+        } catch { return false; }
+    };
     const reject = (reason = '') => {
         if (reason) {
             try {
@@ -36,7 +45,9 @@
         block();
         if (!redirecting) {
             redirecting = true;
-            window.location.replace('/login.html' + (reason ? '?authCheck=' + reason : ''));
+            const recovery = hasFixedRecoveryIntent();
+            const target = recovery ? '/login.html?recovery=complete' : '/login.html';
+            window.location.replace(target + (reason ? (recovery ? '&' : '?') + 'authCheck=' + encodeURIComponent(String(reason)) : ''));
         }
     };
     // Safari/PWA può impiegare più di 15 secondi a ripristinare Firebase e IndexedDB.

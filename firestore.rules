@@ -3,15 +3,35 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function isAuth() { return request.auth != null; }
-    function isOwner(userId) { return isAuth() && request.auth.uid == userId; }
-    function isGlobalPurgeUnlocked(userId) {
-      let path = /databases/$(database)/documents/archivePurgeLocks/$(userId);
+    function isOwner(userId) { return isAuth() && request.auth.uid == userId && isRecoveryUnlocked(userId); }
+    function isRecoveryUnlocked(userId) {
+      let path = /databases/$(database)/documents/vaultRecoveryLocks/$(userId);
       let lock = get(path);
       return !exists(path) || (
         lock.data.get('schemaVersion', 0) == 1 &&
         lock.data.get('ownerUid', '') == userId &&
-        lock.data.get('status', '') == 'released'
+        lock.data.get('status', '') == 'released' &&
+        lock.data.get('operationId', '') is string &&
+        lock.data.get('operationId', '').matches('^[A-Za-z0-9._:-]{1,160}$') &&
+        lock.data.get('planDigest', '') is string &&
+        lock.data.get('planDigest', '').matches('^[a-f0-9]{64}$') &&
+        lock.data.get('digest', '') is string &&
+        lock.data.get('digest', '').matches('^[a-f0-9]{64}$') &&
+        userId.matches('^[A-Za-z0-9._:-]{1,160}$') &&
+        lock.data.get('digest', '') == hashing.sha256(
+          '[1,"' + userId + '","' + lock.data.get('operationId', '') + '","' +
+          lock.data.get('planDigest', '') + '"]'
+        ).toHexString().lower()
       );
+    }
+    function isGlobalPurgeUnlocked(userId) {
+      let path = /databases/$(database)/documents/archivePurgeLocks/$(userId);
+      let lock = get(path);
+      return isRecoveryUnlocked(userId) && (!exists(path) || (
+        lock.data.get('schemaVersion', 0) == 1 &&
+        lock.data.get('ownerUid', '') == userId &&
+        lock.data.get('status', '') == 'released'
+      ));
     }
     function myEmail() {
       return hasVerifiedEmail() ? request.auth.token.email.lower() : "";
@@ -23,7 +43,7 @@ service cloud.firestore {
         request.auth.token.email.size() > 3;
     }
     function isBoundGuest(data) {
-      return hasVerifiedEmail() &&
+      return hasVerifiedEmail() && isRecoveryUnlocked(request.auth.uid) &&
         request.auth.uid in data.get('sharedWithUids', []) &&
         data.get('sharedWithEmailByUid', {}).get(request.auth.uid, '').lower() == myEmail();
     }
@@ -36,18 +56,19 @@ service cloud.firestore {
     // (match generico proprietario) e conserva l'accesso all'Archivio; inviti e
     // campi `sharedWith`/`sharedWithUids` non vengono toccati da questa condizione.
     function isGuestReadableAccount() {
-      return isAcceptedGuest() && resource.data.get('isArchived', false) == false;
+      return isAcceptedGuest() && isRecoveryUnlocked(resource.__name__[4]) &&
+        resource.data.get('isArchived', false) == false;
     }
     function isAcceptedPrivateAccountGuest(userId, accountId) {
       let path = /databases/$(database)/documents/users/$(userId)/accounts/$(accountId);
       let account = get(path);
-      return exists(path) && account.data.get('isArchived', false) == false &&
+      return isRecoveryUnlocked(userId) && exists(path) && account.data.get('isArchived', false) == false &&
         isBoundGuest(account.data);
     }
     function isAcceptedCompanyAccountGuest(userId, companyId, accountId) {
       let path = /databases/$(database)/documents/users/$(userId)/aziende/$(companyId)/accounts/$(accountId);
       let account = get(path);
-      return exists(path) && account.data.get('isArchived', false) == false &&
+      return isRecoveryUnlocked(userId) && exists(path) && account.data.get('isArchived', false) == false &&
         isBoundGuest(account.data);
     }
     function hasSafeRecipientAttachmentEnvelope() {
@@ -81,6 +102,11 @@ service cloud.firestore {
     // Fence globale M7: soltanto il backend può acquisire/rilasciare il lock.
     // Ogni writer client del proprietario deve leggere lo stesso documento;
     // lock attivo o malformato significa fail-closed.
+    match /vaultRecoveryLocks/{userId} {
+      allow get: if isAuth() && request.auth.uid == userId;
+      allow list, write: if false;
+    }
+
     match /archivePurgeLocks/{userId} {
       allow read, write: if false;
     }
@@ -215,7 +241,7 @@ service cloud.firestore {
     // autenticati. La busta privata è leggibile esclusivamente dal suo titolare;
     // entrambe sono create dal backend e non sostituibili dal client.
     match /cryptoPublicKeys/{userId} {
-      allow get: if isAuth();
+      allow get: if isAuth() && isRecoveryUnlocked(userId) && isRecoveryUnlocked(request.auth.uid);
       allow list, write: if false;
     }
 
@@ -352,7 +378,8 @@ service cloud.firestore {
             request.resource.data.get('acceptanceReceipt', null) == resource.data.get('acceptanceReceipt', null));
       }
 
-      allow get, list: if isInviteOwner() || isRecipient();
+      allow get, list: if isRecoveryUnlocked(resource.data.get('ownerId', '')) &&
+        isRecoveryUnlocked(request.auth.uid) && (isInviteOwner() || isRecipient());
       allow create: if hasVerifiedEmail() && isGlobalPurgeUnlocked(request.resource.data.get('ownerId', '')) &&
         request.resource.data.keys().hasOnly([
           'inviteId', 'recipientEmail', 'accountId', 'accountName',

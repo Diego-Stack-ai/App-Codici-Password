@@ -30,6 +30,7 @@ const {HttpsError} = requireFunctions('firebase-functions/v2/https');
 const policy = requireFunctions('./archive-purge-service.js');
 const receipts = requireFunctions('./archive-purge-receipt.js');
 const purgeLock = requireFunctions('./archive-purge-global-lock.js');
+const {assertTransactionVaultRecoveryUnlocked} = requireFunctions('./vault-recovery-fence.js');
 
 process.env.STORAGE_EMULATOR_HOST ??= `http://${process.env.FIREBASE_STORAGE_EMULATOR_HOST}`;
 
@@ -48,7 +49,7 @@ const purge = new Function('exports', 'HttpsError', 'FieldValue', 'console', 'is
     'assertNoExternalAccountReferences',
     'createArchivePurgeBinding', 'verifyArchivePurgeReceipt', 'onCall', 'getFirestore', 'getStorage',
     'createGlobalPurgeLockBinding', 'globalPurgeLockRef', 'acquireGlobalPurgeLock',
-    'assertGlobalPurgeLockHeld', 'releaseGlobalPurgeLock',
+    'assertGlobalPurgeLockHeld', 'releaseGlobalPurgeLock', 'assertTransactionVaultRecoveryUnlocked',
     `${ownerGuardSlice}\n${purgeSlice}\nreturn exports.purgeArchivedAccount;`)({}, HttpsError, FieldValue,
     {log() {}, warn() {}, error() {}}, () => false, policy.accountPath, policy.attachmentStoragePaths, policy.isSafeAttachmentPath, policy.purgeDecision,
     policy.planProfileReferenceCleanup, policy.validatePurgeCommand,
@@ -57,7 +58,7 @@ const purge = new Function('exports', 'HttpsError', 'FieldValue', 'console', 'is
     () => {}, receipts.createArchivePurgeBinding,
     receipts.verifyArchivePurgeReceipt, (_options, run) => run, () => adminDb, () => ({bucket: () => bucket}),
     purgeLock.createGlobalPurgeLockBinding, purgeLock.globalPurgeLockRef, purgeLock.acquireGlobalPurgeLock,
-    purgeLock.assertGlobalPurgeLockHeld, purgeLock.releaseGlobalPurgeLock);
+    purgeLock.assertGlobalPurgeLockHeld, purgeLock.releaseGlobalPurgeLock, assertTransactionVaultRecoveryUnlocked);
 
 const ACCOUNT_PATH = `users/${OWNER}/accounts/acc-1`;
 const WIDGET_PATH = `users/${OWNER}/accountWidgets/widget-1`;

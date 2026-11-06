@@ -27,6 +27,7 @@ const silentConsole = {log() {}, warn() {}, error() {}};
 // Stesso realm del modulo di servizio: nessun problema di Promise fra realm.
 function makeJob(overrides = {}) {
     const injected = {
+        ...require("../archive-purge-global-lock"),
         auditEventPath: service.auditEventPath,
         classifyAuditEvent: service.classifyAuditEvent,
         planAuditRetention: service.planAuditRetention,
@@ -34,7 +35,7 @@ function makeJob(overrides = {}) {
         ...overrides
     };
     const factory = new Function("Timestamp", "FieldPath", "FieldValue", "console", "auditEventPath",
-        "classifyAuditEvent", "planAuditRetention", "runAuditRetention", "DEFAULT_BATCH_SIZE", "MAX_EVENTS_PER_RUN",
+        "classifyAuditEvent", "planAuditRetention", "runAuditRetention", "DEFAULT_BATCH_SIZE", "MAX_EVENTS_PER_RUN", "assertTransactionGlobalPurgeUnlocked", "fencedUserWrite",
         `${jobSource}\nreturn {collectExpiredAuditEvents, deleteAuditBatchWithConfirmation, runAuditRetentionJob};`);
     return factory(
         {fromMillis: ms => ({seconds: Math.floor(ms / 1000), nanoseconds: 0})},
@@ -42,7 +43,7 @@ function makeJob(overrides = {}) {
         {serverTimestamp: () => ({__serverTimestamp: true})},
         silentConsole,
         injected.auditEventPath, injected.classifyAuditEvent, injected.planAuditRetention,
-        injected.runAuditRetention, service.DEFAULT_BATCH_SIZE, service.MAX_EVENTS_PER_RUN
+        injected.runAuditRetention, service.DEFAULT_BATCH_SIZE, service.MAX_EVENTS_PER_RUN, injected.assertTransactionGlobalPurgeUnlocked, injected.fencedUserWrite
     );
 }
 
@@ -70,7 +71,8 @@ function queryDb(entries, state = {}) {
         }),
         // Via rapida della cancellazione: il batch finto committa sempre.
         batch: () => ({delete() {}, commit: async () => {}}),
-        runTransaction: async () => { throw new Error("non deve essere raggiunta"); },
+        runTransaction: async callback => callback({get: async () => ({exists: false}),
+            get: async () => ({exists: false}), getAll: async (...refs) => refs.map(ref => ({exists: true, ref, data: () => entries.find(entry => entry.path === ref.path)?.data})), delete() {}}),
         state
     };
 }
@@ -92,7 +94,7 @@ test("il conteggio è quello del tentativo che committa, non la somma dei rieseg
             for (let attempt = 0; attempt < 2; attempt++) {
                 attempts++;
                 last = await callback({
-                    getAll: async (...references) => references.map(reference =>
+                    get: async () => ({exists: false}), getAll: async (...references) => references.map(reference =>
                         snapshot(reference, {action: "account-purged", at: seconds(OLD)})),
                     delete() {}
                 });
@@ -106,22 +108,15 @@ test("il conteggio è quello del tentativo che committa, non la somma dei rieseg
     assert.equal(deleted, 2, "conta i documenti cancellati dal tentativo che committa, non 4");
 });
 
-test("conferma con precondizione: nessuna transazione quando la versione è quella letta", async () => {
-    const paths = ["users/owner/auditEvents/a"];
-    let commits = 0, transactions = 0;
-    const db = {
-        doc: path => ({path}),
-        batch: () => ({
-            delete() { commits++; },
-            commit: async () => {}
-        }),
-        runTransaction: async () => { transactions++; return []; }
-    };
-    const deleted = await job.deleteAuditBatchWithConfirmation(db,
-        {index: 0, ids: ["a"], paths}, NOW, new Map([[paths[0], {seconds: 1, nanoseconds: 0}]]));
-    assert.equal(deleted, 1);
-    assert.equal(commits, 1);
-    assert.equal(transactions, 0, "la via rapida basta quando la precondizione regge");
+test("retention always reads owner fence in the deletion transaction even with updateTime", async () => {
+    const reads = [], deletes = [];
+    const db = {doc: path => ({path}), batch: () => {throw Error('UNFENCED_BATCH');},
+      runTransaction: callback => callback({get: async ref => {reads.push(ref.path); return {exists: false};},
+        getAll: async (...refs) => refs.map(ref => snapshot(ref, {action: 'account-purged', at: seconds(OLD)})),
+        delete: ref => deletes.push(ref.path)})};
+    assert.equal(await job.deleteAuditBatchWithConfirmation(db, {paths: ['users/owner/auditEvents/a']}, NOW), 1);
+    assert.deepEqual(reads, ['archivePurgeLocks/owner', 'vaultRecoveryLocks/owner']);
+    assert.deepEqual(deletes, ['users/owner/auditEvents/a']);
 });
 
 test("precondizione fallita: il ripiego riclassifica e non conta i documenti non più scaduti", async () => {
@@ -138,7 +133,7 @@ test("precondizione fallita: il ripiego riclassifica e non conta i documenti non
             fallbacks++;
             const deleted = [];
             await callback({
-                getAll: async (...references) => references.map(reference => ({
+                get: async () => ({exists: false}), getAll: async (...references) => references.map(reference => ({
                     exists: data[reference.path] !== undefined,
                     ref: reference,
                     data: () => data[reference.path]
@@ -155,16 +150,9 @@ test("precondizione fallita: il ripiego riclassifica e non conta i documenti non
     assert.equal(deleted, 1, "solo l'evento ancora scaduto è una cancellazione");
 });
 
-test("errore non di precondizione: non viene inghiottito e non diventa un falso conteggio", async () => {
-    const paths = ["users/owner/auditEvents/a"];
-    const db = {
-        doc: path => ({path}),
-        batch: () => ({delete() {}, commit: async () => { const error = new Error("UNAVAILABLE"); error.code = 14; throw error; }}),
-        runTransaction: async () => { throw new Error("non deve essere raggiunta"); }
-    };
-    await assert.rejects(job.deleteAuditBatchWithConfirmation(db,
-        {index: 0, ids: ["a"], paths}, NOW, new Map([[paths[0], {seconds: 1, nanoseconds: 0}]])),
-    /UNAVAILABLE/);
+test("unavailable transaction never becomes a successful deletion count", async () => {
+    const db = {doc: path => ({path}), runTransaction: async () => {throw Error('UNAVAILABLE');}};
+    await assert.rejects(job.deleteAuditBatchWithConfirmation(db, {paths: ['users/owner/auditEvents/a']}, NOW), /UNAVAILABLE/);
 });
 
 test("errore di pianificazione: il run è parziale e i cursori non avanzano", async () => {
@@ -193,4 +181,13 @@ test("finestra gestita: i cursori vengono salvati e il run è completo", async (
     // dall'inizio, così nessun evento può restare fuori per sempre.
     assert.equal(db.state.saved.cursors.at, null);
     assert.equal(db.state.saved.cursors.createdAt, null);
+});
+
+test('fenced owner keeps bounded audit window dirty and cursor unchanged', async () => {
+  const f = require('../vault-recovery-fence');
+  const db = queryDb([{path: 'users/owner/auditEvents/a', data: {action: 'account-purged', at: seconds(OLD)}}]);
+  db.runTransaction = callback => callback({get: async ref => ({exists: ref.path === 'vaultRecoveryLocks/owner',
+    data: () => f.acquireVaultRecoveryFence(null, f.createVaultRecoveryBinding({uid: 'owner', operationId: 'recover', planDigest: 'a'.repeat(64)})).record})});
+  const result = await job.runAuditRetentionJob(db, {now: NOW});
+  assert.equal(result.status, 'partial'); assert.equal(result.cursorsSaved, false); assert.equal(db.state.saved, undefined);
 });

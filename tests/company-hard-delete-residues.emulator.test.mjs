@@ -24,6 +24,7 @@ const {HttpsError} = requireFunctions('firebase-functions/v2/https');
 const policy = requireFunctions('./archive-purge-service.js');
 const receipts = requireFunctions('./archive-purge-receipt.js');
 const purgeLock = requireFunctions('./archive-purge-global-lock.js');
+const {assertTransactionVaultRecoveryUnlocked} = requireFunctions('./vault-recovery-fence.js');
 
 process.env.STORAGE_EMULATOR_HOST ??= `http://${process.env.FIREBASE_STORAGE_EMULATOR_HOST}`;
 
@@ -47,7 +48,7 @@ const purgeFactory = new Function('exports', 'HttpsError', 'FieldValue', 'consol
     'assertNoExternalAccountReferences',
     'createArchivePurgeBinding', 'verifyArchivePurgeReceipt', 'onCall', 'getFirestore', 'getStorage',
     'createGlobalPurgeLockBinding', 'globalPurgeLockRef', 'acquireGlobalPurgeLock',
-    'assertGlobalPurgeLockHeld', 'releaseGlobalPurgeLock',
+    'assertGlobalPurgeLockHeld', 'releaseGlobalPurgeLock', 'assertTransactionVaultRecoveryUnlocked',
     `${ownerGuardSlice}\n${purgeSlice}\nreturn exports.purgeArchivedAccount;`);
 const purge = purgeFactory({}, HttpsError, FieldValue, {log() {}, warn() {}, error() {}},
     () => false,
@@ -56,7 +57,7 @@ const purge = purgeFactory({}, HttpsError, FieldValue, {log() {}, warn() {}, err
     receipts.createArchivePurgeBinding, receipts.verifyArchivePurgeReceipt,
     (_options, run) => run, () => adminDb, () => ({bucket: () => bucket}),
     purgeLock.createGlobalPurgeLockBinding, purgeLock.globalPurgeLockRef, purgeLock.acquireGlobalPurgeLock,
-    purgeLock.assertGlobalPurgeLockHeld, purgeLock.releaseGlobalPurgeLock);
+    purgeLock.assertGlobalPurgeLockHeld, purgeLock.releaseGlobalPurgeLock, assertTransactionVaultRecoveryUnlocked);
 
 // Client: stesso codice di produzione usato dall'app, con i veri SDK web.
 async function deleteCompany(uid, companyId) {
