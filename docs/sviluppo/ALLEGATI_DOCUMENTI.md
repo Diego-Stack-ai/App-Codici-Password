@@ -1,5 +1,9 @@
 # Allegati documenti
 
+## Budget dei lock nelle Rules Storage — candidata locale 08/11/2026
+
+Le mutazioni Storage del proprietario mantengono il vincolo UID, il recovery fence, il blocco purge e le verifiche di dimensione/MIME/marcatore cifrato. La candidata legge ciascun lock con un solo `firestore.get`: documento assente oppure rilascio valido consentono di proseguire; lock attivo, malformato o errore di lookup negano l'accesso. Il controllo recovery resta in `isOwner`; il helper purge non lo ripete e tutti i suoi callsite restano preceduti da `isOwner`. Il budget è quindi di due lookup per mutazione, senza dipendere dal caching di `get` ed `exists`. Il limite produttivo è documentato da [Firebase](https://firebase.google.com/docs/rules/rules-behavior#security_rule_limits_1). Esiti, divario dell'emulatore e verifica produttiva ancora necessaria sono nei [COLLAUDI](../evidenze/COLLAUDI.md#upload-storage-403-2026-11-08).
+
 ## Raccordo con l'Archivio portabile — candidata locale 24/10/2026
 
 Il manifest di un allegato video a blocchi viene ora accettato dall'Archivio portabile come un solo file logico. La validazione richiede schema `chunked-v1`, ordine continuo, percorsi unici, IV validi, dimensione cifrata uguale alla dimensione chiara più il tag AES-GCM, blocchi intermedi della dimensione dichiarata e somma esatta pari a `originalSize`. Il limite rimane 512 MiB.

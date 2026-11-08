@@ -1,5 +1,97 @@
 # Collaudi
 
+<a id="rilascio-storage-403-1-2-262"></a>
+
+## Candidata 1.2.262 — Storage 403 e documentazione, 08/11/2026
+
+Base locale `6b400ddb38b96962ccda70bf4bd9f1fab476edb8`, sorgente della produzione 1.2.261 `eab609be3a7e9a13514562724888ea73c7af2ece`. Il delta iniziale di dieci file è preservato fuori OneDrive, insieme al bundle completo dei riferimenti e all'archivio verificato di 1.387 file del precedente worktree di sicurezza. I singoli frammenti delle ricevute 1.2.261 sono ripristinati da HEAD nei sette MD interessati, conservando le nuove note amministrative e Storage; non vengono presentati come una nuova pubblicazione. Versione e riferimenti asset sono allineati a 1.2.262 e il catalogo guida è riesaminato: la correzione Rules non modifica controlli o passi dei walkthrough.
+
+La revisione indipendente delle Rules e della matrice di sedici combinazioni non rileva ampliamenti degli accessi: restano UID, recovery fence, purge lock, formato cifrato e limiti del file. La lettura guest con tre documenti distinti è un limite separato. Lo scope backend del workflow seleziona anche 43 Functions e Firestore Rules invariati; segue Hosting sullo stesso SHA. PR, approvazioni umane, run, hash remoti e collaudo QA devono ancora essere registrati. La prova sintetica delle Rules API riportata sotto non sostituisce un upload SDK sulle Rules pubblicate.
+
+La prima suite completa si ferma su `firestore.profile-widgets.rules.test.mjs`: la fixture `received-1` viene cancellata dalla suite parallela `archive-purge-global-lock.rules.test.mjs`, che condivideva lo stesso project ID ed eseguiva `clearFirestore()` prima di ogni caso. La diagnosi indipendente conferma la collisione; alla sola suite purge-lock viene assegnato un database emulato esclusivo, preservando test e asserzioni. Firestore Rules restano identiche alla produzione. La riesecuzione completa termina con codice **0**, **3.161 test: 3.151 passati, 0 falliti, 10 skip**, raggiungendo l'ultimo gruppo `test:account-standard-emulators`; il primo esito fallito è conservato. Log finale SHA-256 `ca45a991e833dd85b1124da0629676be14020b1279c9d879adfcfd71d60ba382`.
+
+Controlli aggiuntivi: versione coerente con 266 riferimenti, documentazione con 34 MD e 705 collegamenti locali, 12/12 test documentali, `git diff --check` valido. Gitleaks sulla cronologia di tutti i riferimenti locali esamina **1.622 commit** e non rileva nuovi segreti, conservando soltanto le dodici eccezioni storiche individuali censite. Il riesame esatto dei blob conferma 109 file pubblici modificati soltanto dal bump, nessun aggiornamento di dipendenze e nessun diff in workflow, script, Functions, Firestore o configurazione Firebase. Graphify è aggiornato solo per il codice, senza estrazione semantica e senza includere i suoi artefatti nel rilascio.
+
+La lettura cloud precedente al rilascio, **08/11/2026 10:34:15 UTC**, attesta 47 Functions attive, Hosting 1.2.261 sorgente `eab609be`, Firestore hash `12957526a5ce6255ab2358c60cd83fcd6c90c45a96fab4c61599523c1e890bc7` e Storage ancora `97fb854cf4c52fe20b586d0cc183ffe88173154397f412590912dc70c0218694`. Nuove run, pubblicazione e prova QA non sono ancora eseguite.
+
+L'archivio e il bundle sono verificati. Il controllo automatico ha rifiutato due volte il ritiro dei vecchi riferimenti per assenza di consenso specifico alla cancellazione. Diego risolve scegliendo esplicitamente **«Conserva i vecchi rami e pubblica»**: restano i tre rami locali/remoti `codex/complete-recovery`, `codex/release-1.2.261-receipts`, `codex/release-security-1.2.261`, il worktree `.codex-tmp/security-closure-20261107` e il suo ramo locale. Il preflight mantiene exit **1** e tutte le segnalazioni effettive relative a questi riferimenti e a Dependabot #268; nessuna esclusione è aggiunta al controllo e nessuna cancellazione è avvenuta. Ogni ulteriore anomalia resta bloccante.
+
+La nuova lettura remota del **08/11/2026 14:00:24 UTC** conferma la stessa produzione 1.2.261, gli stessi hash Rules e 47 Functions attive. Il ramo `master` è ancora `6b400ddb`, la candidata pubblicata su GitHub è `470b1590`, e Dependabot #268 è aperta sullo SHA preservato. Queste letture non attestano ancora un deploy della 1.2.262.
+
+<a id="credenziali-agenti-2026-11-08"></a>
+
+## PAT locale limitato, revoca OAuth e app GitHub — 08/11/2026
+
+Diego autorizza il PAT **Agenti App-Codici-Password**, identificativo non segreto `22582985`, e la sostituzione delle credenziali locali. La pagina finale GitHub conferma: scadenza **6 febbraio 2027**, solo repository `Diego-Stack-ai/App-Codici-Password`, nessun permesso utente, lettura di Actions/Commit statuses/Metadata e scrittura di Contents/Pull requests. Non sono concessi Administration, Deployments, Environments, Secrets o Workflows. Il token non viene mostrato nei risultati o scritto in chiaro nei file del progetto; il trasferimento locale usa cifratura effimera e il salvataggio finale è nel keyring Windows.
+
+Verifica dei soli metadati: account attivo corretto e keyring confermati; Git usa il helper `gh auth git-credential` preceduto dal reset della catena; vecchio account GCM e slot legacy assenti. Il helper è globale per GitHub/gist, quindi gli altri repository GitHub risentono dei limiti del nuovo PAT. I GET `/actions/secrets` e `/actions/permissions` del repository restituiscono **403**. Lettura dell'identità e del remoto pubblico riuscite; non è stato eseguito un push di prova e la lettura di risorse pubbliche non certifica i permessi di scrittura. La ricevuta senza valori segreti è in `.codex-tmp/github-limited-credentials-20261108/verification.json`, esclusa da Git.
+
+Con successiva autorizzazione esplicita vengono revocati nella UI GitHub anche i grant OAuth **GitHub CLI** e **Git Credential Manager**. La lista OAuth passa da sei a quattro voci e non contiene più quelle due app. Non viene dichiarata una prova negativa con copie dei vecchi token, non conservate. Questo è distinto dalla revoca Google Firebase CLI già verificata nel passo 2. La pagina sicurezza mostra app Authenticator e GitHub Mobile configurati come metodi 2FA; nessuna lettura di password, seed o codici di recupero.
+
+Diego conserva Claude, nega Cursor e richiede poi la rimozione anche di Jules. Alla successiva scelta del perimetro conferma esplicitamente **«Mantieni tutti i repository»** per Claude: la configurazione già verificata coincide con l'ordine, senza nuove modifiche dell'installazione. Codex revoca le autorizzazioni personali di Cursor e Jules. Le conferme native di disinstallazione non sono gestibili dall'automazione; Diego le completa e Codex rilegge il provider. Stato finale verificato:
+
+- **Installed GitHub Apps:** soltanto ChatGPT Codex Connector e Claude; Cursor e Google Labs Jules assenti.
+- **Authorized GitHub Apps:** ChatGPT Codex Connector, Claude, Copilot Pull Request Reviewer e Copilot SWE Agent; Cursor e Jules assenti.
+- Nessun aumento dei permessi Cursor accettato. Nessun accesso al sito Jules o cancellazione di sue attività/archivi eseguiti.
+
+La separazione del PAT locale è completata nel perimetro concordato, non è isolamento totale: il connettore Codex conserva accesso a due repository selezionati e Claude a tutti i repository, con permessi propri inclusa scrittura dei workflow. Questi canali e la sessione browser richiedono decisioni distinte; nessuna approvazione di deploy viene inviata dagli agenti. Applicazione, workflow e Firebase restano invariati da questo lotto; nessun commit, push, merge o deploy avviato.
+
+<a id="dependabot-2026-11-08"></a>
+
+## Abilitazione Dependabot alerts e security updates — 08/11/2026
+
+Stato iniziale letto dal provider: alerts disabilitati (HTTP 404 esplicito), security updates `enabled: false`, `paused: false`, auto-merge repository `false`; nessun file `dependabot.yml`/`.yaml` nella `.github` remota. Abilitati in sequenza alerts e security updates tramite gli endpoint dedicati, senza modificare workflow o file di dipendenze.
+
+Nuove letture indipendenti confermano:
+
+- alerts **abilitati**, HTTP **204**;
+- security updates **abilitati**, `paused: false`, con `security_and_analysis.dependabot_security_updates.status: enabled`;
+- version updates **non configurati**, entrambi i nomi del file assenti nel ramo remoto `master`;
+- auto-merge **disabilitato**, nessun automatismo di merge trovato nei workflow/script esaminati.
+
+Il revisore indipendente censisce manifest e lock npm root e `functions/`; i manifest Frontend dei moduli assistant/settings contengono soltanto `type: module`. Le librerie browser sono gestite dal manifest root e i loro bundle vendorizzati richiedono ricostruzione/verifica nelle relative PR. Il rapporto tecnico senza segreti è in `.codex-tmp/dependabot-20261108/verification.json`, escluso da Git. Nessuna dipendenza aggiornata o PR unita dagli agenti, nessun deploy avviato. Il riscontro attesta la configurazione, non una scansione esaustiva né l'assenza di vulnerabilità.
+
+Al censimento successivo risultano **cinque alert aperti**, tutti transitivi del lock root classificati development: due su `@grpc/grpc-js`, uno ciascuno su `minimatch`, `qs` e `uuid`. Le versioni del lock Functions sono fuori dai rispettivi intervalli affetti; il gRPC individuato appartiene al runtime Node, non al bundle browser. L'analisi statica non dimostra sfruttamento nell'app; la classificazione development non elimina il rischio sul PC o in CI. È già aperta la [PR #268](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/268), head osservata `59733f5f`, con modifica del solo lock root, `qs` a 6.16.2, aggiornamenti Express/MCP e check docs/Gitleaks/validate riusciti. Copre il solo alert qs, non gli altri quattro. Nessun merge o aggiornamento delle dipendenze è eseguito da questo censimento.
+
+<a id="master-ruleset-2026-11-08"></a>
+
+## Check obbligatori del ruleset Protezione master — 08/11/2026
+
+Il ruleset repository `22926664`, creato l'11/09/2026, esisteva già ed era attivo. La vecchia API branch protection restituisce 404, mentre `/rules/branches/master` conferma l'applicazione del ruleset: non è stata creata una nuova protezione o un duplicato. La revisione indipendente dei workflow conferma `docs` e `Gitleaks on changed commits` su ogni `pull_request`, senza filtri di percorso o ramo e senza condizioni al job; i check reali osservati provengono da GitHub Actions (`integration_id: 15368`).
+
+Aggiornata soltanto la lista `required_status_checks`, aggiungendo i due contesti a `validate` e vincolandoli alla medesima app. Una nuova lettura del ruleset e delle regole effettive del ramo conferma tutti e tre i check. Il confronto integrale dei campi scrivibili prima/dopo verifica **nessun'altra modifica**: Active, bypass vuoto, target ramo predefinito, esclusioni vuote, blocco eliminazione e force push, PR con zero approvazioni, metodi di merge e tutte le altre opzioni conservati. Le copie tecniche senza segreti sono in `.codex-tmp/master-protection-20261108/`, escluse da Git.
+
+Nessun workflow, commit, push, token o deploy avviato. Non sono stati tentati force push, eliminazioni di ramo o merge per verificare il blocco: l'evidenza è la configurazione effettiva letta dal provider. Al termine di quel passo la separazione degli accessi restava un'attività successiva; il passo 5 è ora documentato nella ricevuta precedente.
+
+<a id="production-secrets-2026-11-08"></a>
+
+## Ambiente production e rotazione dei segreti CI — 08/11/2026
+
+Letture API iniziali: ambiente `production` esistente, revisore `Diego-Stack-ai`, auto-approvazione consentita, solo branch `master`, bypass amministratore attivo; nessun environment secret, due repository secrets (`FIREBASE_TOKEN` e `FIREBASE_SERVICE_ACCOUNT_APPCODICI_PASSWORD`), nessun workflow in corso o in coda. La revisione indipendente conferma che soltanto il job `deploy`, già legato a `production`, usa `FIREBASE_TOKEN` e non trova utilizzatori del segreto service account nei workflow/script esaminati. Master remoto è rimasto `6b400ddb38b96962ccda70bf4bd9f1fab476edb8`.
+
+Eseguiti nell'ordine richiesto:
+
+1. `can_admins_bypass` impostato a `false`; nuova lettura conferma revisore, auto-approvazione consentita e unica regola `master` di tipo `branch` conservati.
+2. Rimosso nell'account Google proprietario il collegamento **Firebase CLI**. Scambio OAuth del refresh token locale precedente respinto con HTTP 400, `invalid_grant`; stessa verifica negativa ripetuta dopo la creazione della nuova credenziale CI.
+3. Nuova autorizzazione con il flusso ufficiale del Firebase CLI installato, verifica dell'identità e del ruolo proprietario sul progetto, trasferimento del refresh token soltanto in RAM/stdin a `gh secret set --env production`. Il valore CI non viene stampato, scritto nel repository o nei rapporti, né copiato negli argomenti del processo. Metadata GitHub confermano `production/FIREBASE_TOKEN` creato il 08/11/2026.
+4. Solo dopo quel riscontro, eliminati i due repository secrets. Lettura finale: **zero repository secrets**, **un environment secret**, `FIREBASE_TOKEN`.
+5. Nuova autorizzazione separata e ripristino del login locale nel normale archivio credenziali del Firebase CLI. Un processo successivo legge con successo i metadati di `appcodici-password`.
+
+Nessun workflow, codice applicativo, Rules, dato Vault o chiave del service account Google Cloud modificato da questa operazione; nessun deploy e nessuna approvazione di deploy inviati. Il primo utilizzo del token CI sarà attestato nel prossimo rilascio autorizzato. Gli stati tecnici privi di valori segreti sono conservati in `.codex-tmp/github-production-secrets-20261108/`, esclusi da Git. Il PAT locale successivo non dispone di Deployments in scrittura; restano separati gli altri canali del revisore, descritti nella [procedura](../regole/RILASCIO.md#production-protection-2026-11-08).
+
+<a id="upload-storage-403-2026-11-08"></a>
+
+## Upload Storage negato — diagnosi e candidata locale 08/11/2026
+
+- Segnalazione: `403 Forbidden` su un upload Account privato, confermato dall'utente con un file di prova. Due prove indipendenti con l'identità QA già autorizzata e 128 byte casuali producono `storage/unauthorized`; il corpo HTTP contiene soltanto `Permission denied.`. Nessun oggetto viene creato; nessun file reale o codice di recupero viene letto o inviato dagli agenti.
+- Metadati cloud: Rules Storage online e sorgente distribuito hanno hash LF `97fb854cf4c52fe20b586d0cc183ffe88173154397f412590912dc70c0218694`; service agent Storage con ruolo `roles/firebaserules.firestoreServiceAgent` senza condizioni; App Check Storage `UNENFORCED`. Per l'UID segnalato il recovery lock è assente e il purge lock è `released`, schema 1 e proprietario corrispondente. Nessuna configurazione, lock o dato reale viene modificato.
+- Candidata: un solo `firestore.get` per lock e rimozione del richiamo recovery ridondante dal helper purge, sempre preceduto da `isOwner`. Le condizioni di rilascio e il digest recovery restano identici. Nessun allentamento di autenticazione, isolamento UID, cifratura, limiti o fence.
+- `npm run test:storage-rules`: **26/26**, nessun fallimento/skip (3 dispatcher, 18 Rules produttive e 5 prototipo). Il nuovo caso comprende 16 combinazioni recovery/purge: assente, rilasciato, attivo e malformato.
+- Verifiche aggiuntive: `test:security` **45/45** e audit statico verdi; `test:docs` **12/12**, elenco invariato di **34 Markdown** e 679 collegamenti locali validi. `git diff --check` non rileva errori di spaziatura. La revisione indipendente del delta non individua ampliamenti degli accessi; conferma che tutti i callsite purge mantengono prima il recovery fence di `isOwner`.
+- Simulatore ufficiale Rules API con source candidata e soli mock sintetici: **5/5**; lock assenti o rilasciati consentono con esattamente due lookup; lock attivi, malformati e lookup in errore negano. Hash LF candidata `bfa041c9acdf18d9bef11bc71f1c5976b15ea35225934d64fefea4f5109f94c5`. Il rapporto tecnico locale e il delta documentale preesistente sono conservati sotto `.codex-tmp/attachment-upload-20261108/`, esclusi da Git.
+
+Limiti: la risposta produttiva non rivela la condizione esatta negata. Il motore locale non applica il limite produttivo delle due letture cross-service ([segnalazione Firebase](https://github.com/firebase/firebase-tools/issues/11167)); i mock cloud non provano IAM, cache e accesso reale. La candidata elimina la dipendenza dalle consultazioni ripetute per le mutazioni owner, ma resta da pubblicare nel percorso controllato e ripetere l'upload QA prima di dichiarare risolto il `403`. Il percorso di download guest consulta tre documenti distinti (lock owner, ACL Account, lock guest): è un rilievo separato da approfondire, non risolto né attestato dal verde dell'emulatore. Nessun commit, push o deploy effettuato in questo lotto.
+
 <a id="pubblicazione-sicurezza-1-2-261"></a>
 
 ## Pubblicazione verificata 1.2.261 — 08/11/2026
