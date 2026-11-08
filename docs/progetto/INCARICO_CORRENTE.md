@@ -6,7 +6,9 @@ Dopo il riepilogo delle cinque correzioni locali e dei limiti, Diego ordina «pu
 
 Sequenza: scope backend `recovery-prerequisites-disabled` (43 Functions selezionate, Firestore Rules e Storage) e verifica, poi Hosting sul medesimo commit di `master`, con manifest e hash remoti verificati. Il nome dello scope indica i prerequisiti FULL mantenuti inerti: policy `disabled`, coorte vuota e flag client falso restano vincolanti. Nessun canary, drain, attivazione recovery, dato QA/reale, migrazione o modifica delle protezioni GitHub è autorizzato da questo rilascio.
 
-Le nuove Rules rifiutano la creazione di ID invito legacy: schede/PWA precedenti devono aggiornarsi per nuove condivisioni; letture e risposte degli inviti esistenti restano compatibili. Backend+Rules precedono Hosting per evitare che il vecchio notificatore ignori i nuovi inviti v2. Un eventuale rollback conserva questi vincoli e non riapre il namespace vulnerabile. L'esito effettivo sarà registrato in [COLLAUDI](../evidenze/COLLAUDI.md) e [STATO](STATO.md#stato-corrente).
+Le nuove Rules rifiutano la creazione di ID invito legacy: schede/PWA precedenti devono aggiornarsi per nuove condivisioni; letture e risposte degli inviti esistenti restano compatibili. Backend+Rules precedono Hosting per evitare che il vecchio notificatore ignori i nuovi inviti v2. Un eventuale rollback conserva questi vincoli e non riapre il namespace vulnerabile.
+
+Esecuzione conclusa: PR #266 integrata in `eab609be3a7e9a13514562724888ea73c7af2ece`; backend `42432143000` e Hosting `42433256107` riusciti sul medesimo sorgente. Verifica indipendente metadata/Rules/manifest/326 asset completata. Esiti in [COLLAUDI](../evidenze/COLLAUDI.md#pubblicazione-sicurezza-1-2-261) e [STATO](STATO.md#stato-corrente). Le ricevute documentali successive non sostituiscono lo SHA distribuito e non richiedono un altro deploy.
 
 ## Sicurezza e chiusura del ruolino di marcia — 07/11/2026
 

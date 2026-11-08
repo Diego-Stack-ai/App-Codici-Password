@@ -6,6 +6,8 @@ Per creare nuove condivisioni è necessario aggiornare l'app: se una vecchia sch
 
 Riesaminato il catalogo delle trenta pagine per la 1.2.261: questi interventi mantengono i target dei walkthrough e i comandi esistenti. La richiesta della Master Password al cambio pagina resta quella del contenimento multipagina, in attesa della shell persistente.
 
+La 1.2.261 è pubblicata. Le copie HTML portabili già esportate mantengono il proprio visualizzatore: per ottenere le anteprime corrette occorre esportarne una nuova dalla versione aggiornata.
+
 ## Sblocco e navigazione tra pagine
 
 Nella versione distribuita attestata il 06/11/2026 la Vault si sblocca per la pagina aperta. Cambiando pagina o ricaricando può quindi essere richiesta nuovamente la Master Password, oppure la verifica biometrica sui dispositivi già configurati e compatibili. La password dell'account e la Master Password restano distinte. Il messaggio «Verifica accesso in corso…» indica il controllo iniziale della sessione, durante il quale il contenuto privato rimane nascosto. Per la versione osservata e i limiti ancora aperti consultare [STATO](../progetto/STATO.md#stato-corrente).

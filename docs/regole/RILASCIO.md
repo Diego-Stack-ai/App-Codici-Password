@@ -1,5 +1,11 @@
 # Rilascio
 
+## Rilascio 1.2.261 — correzioni di sicurezza — 08/11/2026
+
+Conclusa la pubblicazione autorizzata di backend/Rules e Hosting sullo stesso SHA, dopo i gate completi. Per sorgente, run, hash e identificativi Hosting correnti/precedenti vale la [ricevuta canonica](../evidenze/COLLAUDI.md#pubblicazione-sicurezza-1-2-261); il blocco 1.2.260 seguente è storico.
+
+L'ordine backend/Rules prima di Hosting preserva il riconoscimento dei nuovi inviti v2. I vecchi client devono aggiornarsi per crearli; le operazioni sugli inviti legacy esistenti restano supportate. Un rollback deve conservare namespace protetto, writer/fence e lock/piani: ripristinare il vecchio Hosting reintrodurrebbe difetti client e non ripristinerebbe la creazione di inviti legacy contro le Rules nuove. Non è autorizzato un ritorno globale alle vecchie Rules/Functions per ottenere compatibilità. Le sole ricevute documentali successive non richiedono una nuova pubblicazione.
+
 ## Rilascio 1.2.260 — prerequisiti recovery disabilitati e Hosting — 06/11/2026
 
 L'ordine corrente «Pubblica», registrato nell'[incarico](../progetto/INCARICO_CORRENTE.md), autorizza per questa release i soli 43 prerequisiti Functions, Firestore Rules e Storage Rules, seguiti da Hosting sullo stesso SHA verificato. Sono state integrate le PR #263 e #264 e pubblicato **`a392b9c80e006dcce50c724cad232020194500e2`**: backend **42250314439**, confronto indipendente metadata/Rules e Hosting **42252368644** sono riusciti. La conferma CLI riguarda soltanto i quattro retry approvati; ogni altra domanda interrompe il processo, senza `--force` e senza modificare la retention degli artefatti già configurata.
