@@ -100,7 +100,10 @@ try {
     await page.evaluate(() => window.prepare('video/quicktime', 'chunked'));
     const download = page.waitForEvent('download');
     await page.getByRole('button').click();
-    assert.equal((await download).suggestedFilename(), 'fixture.bin');
+    const chunkedDownload = await download;
+    assert.equal(chunkedDownload.suggestedFilename(), 'fixture.bin');
+    assert.equal(await chunkedDownload.failure(), null, 'chunked download must finish, not only start');
+    assert.match(await readFile(await chunkedDownload.path(), 'utf8'), /Synthetic attachment/);
     assert.equal(context.pages().length, 1);
     await page.evaluate(async () => {await window.prepare('video/quicktime','chunked');window.invalidateOnChunk=true;});
     let lateDownloads=0;const onLateDownload=()=>lateDownloads++;page.on('download',onLateDownload);

@@ -29,7 +29,7 @@ const chunkedSource = (await readFile(
 )).replace("from './attachment-security.js'", `from '${securityUrl}'`);
 const chunkedSecurity = await import(`data:text/javascript;base64,${Buffer.from(chunkedSource.replace("from './attachment-content-policy.mjs'", `from '${policyUrl}'`)).toString('base64')}`);
 
-for (const phase of ['load', 'write', 'file']) test(`large attachment dispatch is revoked during ${phase}`, async () => {
+for (const phase of ['load', 'write', 'file', 'detach', 'stream-error']) test(`large attachment dispatch is blocked during ${phase}`, async () => {
   const input = new Uint8Array([1, 2, 3]), stored = [];
   const sealed = await chunkedSecurity.encryptAttachmentFileInChunks(new File('video.mov', 'video/quicktime', input.length, input), 'fixture', {
     binding: 'revocation-fixture', onChunk: async chunk => { stored.push(new Uint8Array(await chunk.blob.arrayBuffer())); return {storagePath: `fixture/${chunk.index}`}; }
@@ -38,7 +38,10 @@ for (const phase of ['load', 'write', 'file']) test(`large attachment dispatch i
   const key = await security.unwrapAttachmentFileKey(sealed.metadata, 'fixture');
   let active = true, dispatched = 0, removed = 0, aborted = 0;
   const handle = {createWritable: async () => ({write: async () => {if (phase === 'write') active = false;}, close: async () => {}, abort: async () => {aborted++;}}),
-    getFile: async () => {if (phase === 'file') active = false; return new Blob([input]);}};
+    getFile: async () => {if (phase === 'file') active = false; return phase === 'detach'
+      ? {stream() {active = false; return new Blob([input]).stream();}}
+      : phase === 'stream-error' ? {stream() {return new ReadableStream({start(controller) {controller.error(new Error('STREAM_READ_FAILED'));}});}}
+      : new Blob([input]);}};
   const directory = {getFileHandle: async () => handle, removeEntry: async () => {removed++;}};
   const saved = new Map(['navigator', 'window', 'document'].map(name => [name, Object.getOwnPropertyDescriptor(globalThis, name)]));
   Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {storage: {getDirectory: async () => ({getDirectoryHandle: async () => directory})}}});
@@ -46,8 +49,9 @@ for (const phase of ['load', 'write', 'file']) test(`large attachment dispatch i
   globalThis.document = {createElement() {dispatched++; throw Error('UNEXPECTED_DOWNLOAD');}};
   try {
     await assert.rejects(chunkedSecurity.openChunkedDecryptedAttachment({attachment, fileKeyBytes: key, isActive: () => active,
-      loadChunk: async chunk => {if (phase === 'load') active = false; return stored[chunk.index];}}), error => error.code === 'ATTACHMENT_SESSION_INVALIDATED');
-    assert.equal(dispatched, 0); assert.equal(removed, 1); assert.equal(aborted, phase === 'file' ? 0 : 1);
+      loadChunk: async chunk => {if (phase === 'load') active = false; return stored[chunk.index];}}), error => phase === 'stream-error'
+        ? error.message === 'STREAM_READ_FAILED' : error.code === 'ATTACHMENT_SESSION_INVALIDATED');
+    assert.equal(dispatched, 0); assert.equal(removed, 1); assert.equal(aborted, ['file','detach','stream-error'].includes(phase) ? 0 : 1);
   } finally {
     key.fill(0);
     for (const [name, descriptor] of saved) {if (descriptor) Object.defineProperty(globalThis, name, descriptor); else delete globalThis[name];}

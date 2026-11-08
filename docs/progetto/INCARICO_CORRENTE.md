@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## Integrazione del collaudo allegati — 08/11/2026
+
+Diego approva personalmente la pubblicazione Hosting della 1.2.263 e autorizza due nuovi utenti sintetici dedicati, con nuove Vault e DPAPI separati, da eliminare al termine delle prove. Sono esclusi QA2, dati e Vault esistenti; email e push restano spenti. Il test produttivo rileva un difetto di completamento dei download grandi, che viene corretto nel medesimo perimetro con un ramo separato e candidata 1.2.264: test dei byte effettivi, revisione indipendente, check obbligatori e nuovo rilascio solo Hosting soggetto all'approvazione personale. Nessun workflow, Rules o backend viene modificato. La distinta prova tra i due utenti resta bloccata dall'attestazione del secondo partecipante; nessun bypass e nessuna attivazione della cornice. [Evidenze](../evidenze/COLLAUDI.md#attachment-download-followup-1-2-264).
+
 <a id="vault-frame-prerequisites-2026-11-08"></a>
 
 ## Prerequisiti e prototipo di continuità Vault — 08/11/2026
