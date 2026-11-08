@@ -33,7 +33,7 @@ test('concurrent recovery requests share a persisted limit and corrupt state has
       const invoke = () => context.exports.recoverMfaWithCode(request);
       const results = await Promise.allSettled(Array.from({length: 8}, invoke));
       assert.equal(results.every(result => result.status === 'rejected'), true);
-      assert.equal(results.filter(result => result.reason.code === 'permission-denied').length, 5,
+      assert.equal(results.filter(result => result.reason.code === 'failed-precondition').length, 5,
         results.map(result => result.reason?.message).join('\n'));
       assert.equal(results.filter(result => result.reason.code === 'resource-exhausted').length, 3);
       assert.equal(calls, 5);
@@ -56,7 +56,7 @@ test('concurrent recovery requests share a persisted limit and corrupt state has
     }
   });
 
-test('concurrent use of one recovery code consumes it once and leaves no pending marker',
+test('concurrent admitted attempts preserve recovery codes and pending markers without Auth mutations',
   {skip: !allowed, timeout: 60000}, async () => {
     const app = initializeApp({projectId: 'demo-purge-fence'}, `recovery-code-${crypto.randomUUID()}`);
     const db = getFirestore(app);
@@ -67,35 +67,38 @@ test('concurrent use of one recovery code consumes it once and leaves no pending
       const code = 'ABCD-EFGH-2345-6789', uid = `synthetic-${crypto.randomUUID()}`;
       const email = `${crypto.randomUUID()}@example.invalid`, ip = '127.0.0.2';
       const recoveryRef = db.collection('mfaRecovery').doc(uid);
-      await recoveryRef.set({codeHashes: [security.recoveryCodeHash(code)], remaining: 1});
-      let factorsRemoved = false, updates = 0;
+      await recoveryRef.set({codeHashes: [security.recoveryCodeHash(code)], remaining: 1, recoveryPendingCodeHash: 'synthetic-pending'});
+      const before = await recoveryRef.get();
+      let factorsRemoved = false, updates = 0, revocations = 0, authAccess = 0;
       const auth = {
         getUser: async requested => ({uid: requested, email, multiFactor: {enrolledFactors:
           factorsRemoved ? [] : [{factorId: 'totp', uid: 'totp-factor'}]}}),
         updateUser: async () => {updates++; factorsRemoved = true;},
-        revokeRefreshTokens: async () => {},
+        revokeRefreshTokens: async () => {revocations++;},
       };
       const context = {exports: {}, crypto, ...security,
         FIREBASE_WEB_API_KEY: 'synthetic', onCall: (_options, handler) => handler,
         HttpsError: class extends Error {constructor(codeValue, message) {super(message); this.code = codeValue;}},
         fetch: async () => ({ok: true, json: async () => ({localId: uid, mfaPendingCredential: 'proof'})}),
-        admin: {firestore: Object.assign(() => db, {FieldValue}), auth: () => auth},
+        admin: {firestore: Object.assign(() => db, {FieldValue}), auth: () => {authAccess++; return auth;}},
       };
       vm.compileFunction(source.slice(start, end), Object.keys(context))(...Object.values(context));
       const request = {data: {email, password: 'synthetic', recoveryCode: code}, rawRequest: {ip}};
       const results = await Promise.allSettled([
         context.exports.recoverMfaWithCode(request), context.exports.recoverMfaWithCode(request),
       ]);
-      assert.equal(results.filter(result => result.status === 'fulfilled').length, 1);
-      assert.equal(results.filter(result => result.status === 'rejected').length, 1);
-      assert.ok(['permission-denied', 'failed-precondition'].includes(results.find(result => result.status === 'rejected').reason.code));
-      const final = (await recoveryRef.get()).data();
-      assert.deepEqual(final.codeHashes, []);
-      assert.equal(final.remaining, 0);
-      assert.equal(final.recoveryPendingCodeHash, undefined);
-      assert.equal(final.recoveryPendingAt, undefined);
-      assert.equal(final.recoveryPendingExpiresAt, undefined);
-      assert.ok(updates >= 1 && updates <= 2);
+      assert.equal(results.every(result => result.status === 'rejected'), true);
+      for (const result of results) {
+        assert.equal(result.reason.code, 'failed-precondition');
+        assert.equal(result.reason.message, 'Recupero non disponibile. Se i dati sono corretti contatta l’assistenza. Nessun codice è stato consumato.');
+        assert.equal(result.reason.details, undefined);
+      }
+      const final = await recoveryRef.get();
+      assert.deepEqual(final.data(), before.data());
+      assert.equal(final.updateTime.isEqual(before.updateTime), true);
+      assert.equal(updates, 0);
+      assert.equal(revocations, 0);
+      assert.equal(authAccess, 0);
     } finally {
       await db.terminate();
       await deleteApp(app);

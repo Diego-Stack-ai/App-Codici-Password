@@ -258,8 +258,10 @@ const recoverMfaEnd = cloudFunctions.indexOf('exports.revokeAllSessions = onCall
 assert.ok(recoverMfaStart >= 0 && recoverMfaEnd > recoverMfaStart, 'Il perimetro del recupero MFA non è verificabile');
 const recoverMfaSource = cloudFunctions.slice(recoverMfaStart, recoverMfaEnd);
 assert.match(recoverMfaSource, /mfaRecoveryAttempts[\s\S]*?nextRecoveryAttemptState/, 'Il recupero MFA non applica un limite server');
-assert.match(recoverMfaSource, /enrolledFactors\.length === 0[\s\S]*?Nessun codice è stato consumato/, 'Il recupero MFA senza fattori non termina in sicurezza');
-assert.match(recoverMfaSource, /Contatta l'assistenza: nessun codice è stato consumato/, 'Il recupero MFA con fattori non applica la policy di assistenza manuale');
+assert.match(recoverMfaSource, /failed-precondition", recoveryUnavailableMessage/, 'Il recupero MFA non usa la risposta uniforme');
+assert.match(recoverMfaSource, /Recupero non disponibile\. Se i dati sono corretti contatta l’assistenza\. Nessun codice è stato consumato\./, 'Messaggio recupero MFA non uniforme');
+assert.doesNotMatch(recoverMfaSource, /permission-denied|firstFactorAccepted|getUser\(|enrolledFactors/, 'Il recupero MFA distingue ancora esiti del primo fattore');
+assert.ok(recoverMfaSource.indexOf('resource-exhausted') < recoverMfaSource.indexOf('signInWithPassword'), 'Il limite deve precedere Auth');
 assert.doesNotMatch(recoverMfaSource, /collection\(["']mfaRecovery["']\)/, 'Il recupero MFA accede ancora ai codici dopo la verifica del fattore');
 assert.doesNotMatch(recoverMfaSource, /updateUser\(/, 'Il recupero MFA modifica ancora automaticamente i fattori Firebase');
 assert.doesNotMatch(recoverMfaSource, /revokeRefreshTokens\(/, 'Il recupero MFA revoca ancora automaticamente le sessioni');

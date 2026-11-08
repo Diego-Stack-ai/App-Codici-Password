@@ -108,7 +108,7 @@ test('recovery handler rejects corrupt attempt state before writes, Auth or code
   vm.runInNewContext(source.slice(start, end), context);
   await assert.rejects(context.exports.recoverMfaWithCode({data: {email: 'test@example.invalid',
     password: 'synthetic', recoveryCode: 'ABCD-EFGH-2345-6789'}}), error =>
-    error.code === 'failed-precondition' && error.message.includes('Nessun codice consumato') &&
+    error.code === 'failed-precondition' && error.message === 'Recupero non disponibile. Se i dati sono corretti contatta l’assistenza. Nessun codice è stato consumato.' &&
     !error.message.includes('RECOVERY_ATTEMPT_STATE'));
   assert.equal(effects, 0);
 });
@@ -146,7 +146,7 @@ test('real recovery handler persists the attempt limit and never calls Auth duri
   vm.runInNewContext(source.slice(start, end), context);
   const request = {data: {email: 'test@example.invalid', password: 'synthetic', recoveryCode: 'ABCD-EFGH-2345-6789'}};
   for (let i = 0; i < 5; i++) {
-    await assert.rejects(context.exports.recoverMfaWithCode(request), error => error.code === 'permission-denied');
+    await assert.rejects(context.exports.recoverMfaWithCode(request), error => error.code === 'failed-precondition' && error.message === 'Recupero non disponibile. Se i dati sono corretti contatta l’assistenza. Nessun codice è stato consumato.');
     assert.equal(persisted.attempts, i + 1);
   }
   await assert.rejects(context.exports.recoverMfaWithCode(request), error => error.code === 'resource-exhausted');
@@ -285,7 +285,7 @@ test.skip('storico full-replace: fattori MFA misti falliscono chiusi prima di pr
   assert.equal(updates, 0);
 });
 
-test('recovery binds the password response UID and fails closed before consuming any code', async () => {
+test('recovery uniformly refuses password-response variants before accessing any code', async () => {
   const source = fs.readFileSync(require.resolve('../index.js'), 'utf8');
   const start = source.indexOf('exports.recoverMfaWithCode = onCall(');
   const end = source.indexOf('exports.revokeAllSessions = onCall(', start);
@@ -315,7 +315,7 @@ test('recovery binds the password response UID and fails closed before consuming
     };
     vm.runInNewContext(source.slice(start, end), context);
     await assert.rejects(context.exports.recoverMfaWithCode({data: {email: 'test@example.invalid',
-      password: 'synthetic', recoveryCode: 'ABCD-EFGH-2345-6789'}}), error => error.code === 'permission-denied');
+      password: 'synthetic', recoveryCode: 'ABCD-EFGH-2345-6789'}}), error => error.code === 'failed-precondition' && error.message === 'Recupero non disponibile. Se i dati sono corretti contatta l’assistenza. Nessun codice è stato consumato.');
     assert.equal(codeAccesses, 0);
   }
 });
@@ -374,7 +374,7 @@ test('manual-support policy stops enrolled MFA before code reservation or Auth u
   vm.compileFunction(source.slice(start, end), Object.keys(context))(...Object.values(context));
   await assert.rejects(context.exports.recoverMfaWithCode({data: {email: 'test@example.invalid', password: 'synthetic',
     recoveryCode: 'ABCD-EFGH-2345-6789'}}), error => error.code === 'failed-precondition' &&
-      error.message.includes('assistenza') && error.message.includes('nessun codice'));
+      error.message === 'Recupero non disponibile. Se i dati sono corretti contatta l’assistenza. Nessun codice è stato consumato.');
   assert.equal(recoveryReads, 0);
   assert.equal(updates, 0);
 });
