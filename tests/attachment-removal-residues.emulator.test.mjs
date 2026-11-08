@@ -26,7 +26,8 @@ const sliceFunction = (source, name) => {
 
 const detailSource = await read('../Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js');
 const saveSource = strip(await read('../Frontend/public/assets/js/modules/scadenze/deadline-save-service.js'));
-const securitySource = strip(await read('../Frontend/public/assets/js/modules/shared/attachment-security.js'));
+const securitySource = strip(await read('../Frontend/public/assets/js/modules/shared/attachment-content-policy.mjs')) + '\n' +
+    strip(await read('../Frontend/public/assets/js/modules/shared/attachment-security.js'));
 const configSource = strip(await read('../Frontend/public/assets/js/modules/scadenze/deadline-config-model.js'));
 
 const PROJECT_ID = 'codici-password-attachment-removal';
