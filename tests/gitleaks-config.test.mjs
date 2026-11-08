@@ -84,7 +84,7 @@ async function removeTestDirectory(directory) {
 test('accetta soltanto la chiave Firebase web con fingerprint approvato', () => {
   const entries = PUBLIC_FIREBASE_KEY_PATHS.map(path => ({
     path,
-    source: "const config = {apiKey: '" + syntheticPublicKey + "'};"
+    source: path === 'functions/index.js' ? '// no web credential in the current backend' : "const config = {apiKey: '" + syntheticPublicKey + "'};"
   }));
   assert.equal(validatePublicFirebaseKeys(entries, syntheticHash), syntheticPublicKey);
 });
@@ -93,12 +93,26 @@ test('rifiuta una chiave Firebase web sostituita', () => {
   const changedKey = syntheticPublicKey.slice(0, -1) + 'X';
   const entries = PUBLIC_FIREBASE_KEY_PATHS.map(path => ({
     path,
-    source: "const config = {apiKey: '" + changedKey + "'};"
+    source: path === 'functions/index.js' ? '// no web credential in the current backend' : "const config = {apiKey: '" + changedKey + "'};"
   }));
   assert.throws(
     () => validatePublicFirebaseKeys(entries, syntheticHash),
     /Fingerprint/
   );
+});
+
+test('il backend corrente rifiuta anche il reinserimento della vecchia chiave pubblica', () => {
+  const entries = PUBLIC_FIREBASE_KEY_PATHS.map(path => ({path,
+    source: path === 'functions/index.js' ? '' : `const key = '${syntheticPublicKey}'` }));
+  assert.equal(validatePublicFirebaseKeys(entries, syntheticHash), syntheticPublicKey);
+  for (const key of [syntheticPublicKey, syntheticPublicKey.slice(0, -1) + 'X']) {
+    const inserted = entries.map(entry => entry.path === 'functions/index.js' ? {...entry, source: `const key = '${key}'`} : entry);
+    assert.throws(() => validatePublicFirebaseKeys(inserted, syntheticHash), /backend non deve contenere/);
+  }
+  for (const path of PUBLIC_FIREBASE_KEY_PATHS.filter(path => path !== 'functions/index.js')) {
+    assert.throws(() => validatePublicFirebaseKeys(entries.map(entry => entry.path === path ? {...entry, source: ''} : entry), syntheticHash), /attesa una sola chiave/);
+  }
+  assert.ok(buildGitleaksConfig(syntheticPublicKey).includes('functions/index\\.js'));
 });
 
 test('la allowlist richiede insieme regola, valore e percorso', () => {

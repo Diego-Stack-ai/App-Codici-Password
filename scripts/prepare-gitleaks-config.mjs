@@ -16,6 +16,8 @@ export const EXPECTED_PUBLIC_FIREBASE_KEY_SHA256 = [
 export const PUBLIC_FIREBASE_KEY_PATHS = Object.freeze([
   'Frontend/public/assets/js/push-messaging-client.js',
   'Frontend/public/firebase-messaging-sw.js',
+  // Retain the exact value/path allowance for reviewed historical commits.
+  // The current backend must contain no Firebase web key.
   'functions/index.js'
 ]);
 
@@ -69,6 +71,12 @@ export function validatePublicFirebaseKeys(entries, expectedHash = EXPECTED_PUBL
   const keys = new Set();
   for (const entry of entries) {
     const matches = entry.source.match(firebaseWebKeyPattern) ?? [];
+    if (entry.path === 'functions/index.js') {
+      if (matches.length !== 0) {
+        throw new Error('Il backend non deve contenere chiavi Firebase web. Revisione manuale obbligatoria.');
+      }
+      continue;
+    }
     if (matches.length !== 1) {
       throw new Error(entry.path + ': attesa una sola chiave Firebase web pubblica, trovate ' + matches.length + '.');
     }
