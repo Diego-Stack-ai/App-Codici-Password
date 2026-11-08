@@ -8,6 +8,8 @@ La candidata comprende le Storage Rules e i test del diniego upload, gli aggiorn
 
 Prima e dopo il backend si confrontano hash Rules e censimento/configurazioni Functions; dopo Hosting si verificano manifest e tutti gli asset pubblici. Il 403 non sarà dichiarato risolto prima dell'upload/download/cancellazione sintetici con l'identità QA delegata. Policy recovery `disabled`, coorte vuota e flag client falso restano vincolanti; nessuna migrazione, attivazione FULL o modifica a dati reali. L'eventuale logout locale Firebase dopo il rilascio resta una decisione successiva, non una revoca già eseguita. Evidenze e limiti nei [COLLAUDI](../evidenze/COLLAUDI.md#rilascio-storage-403-1-2-262).
 
+Esecuzione conclusa: PR #269 integrata in `ef7cae863756ffa0ad97a2aff2cba8c8c290ab17`; backend `42496064235` e Hosting `42505080699` riusciti sullo stesso sorgente dopo approvazione personale di Diego. Hash Rules, 47 Functions, prova SDK QA con cleanup, manifest e tutti i 326 file pubblici sono verificati. Le ricevute finali sono aggiornate tramite una PR soltanto documentale, riutilizzando il ramo di rilascio e conservando gli altri riferimenti: non cambiano il sorgente distribuito e non richiedono un altro deploy. Dipendenze e PR #268 restano escluse; nessun'altra attività residua dell'app è dichiarata conclusa da questo lotto.
+
 ## Credenziali degli agenti e rimozione delle app inutilizzate — 08/11/2026
 
 Decisione integrativa esplicita di Diego: **mantenere l'app GitHub Claude su tutti i repository**. La configurazione già verificata corrisponde alla scelta; non si applicano restrizioni alla lista dei repository né si rimuove l'app. Restano i permessi propri dell'installazione, separati dal PAT locale limitato.
