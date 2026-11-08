@@ -29,14 +29,14 @@ test('concurrent recovery requests share a persisted limit and corrupt state has
       // Use the SDK's realm: Firestore checks instanceof Promise in its callback.
       vm.compileFunction(source.slice(start, end), Object.keys(context))(...Object.values(context));
       const email = `${crypto.randomUUID()}@example.invalid`, ip = '127.0.0.1';
-      const request = {data: {email, password: 'synthetic', recoveryCode: 'ABCD-EFGH-2345-6789'}, rawRequest: {ip}};
+      const request = {data: {email, get password() {throw Error('Unexpected password read');}, recoveryCode: 'ABCD-EFGH-2345-6789'}, rawRequest: {ip}};
       const invoke = () => context.exports.recoverMfaWithCode(request);
       const results = await Promise.allSettled(Array.from({length: 8}, invoke));
       assert.equal(results.every(result => result.status === 'rejected'), true);
       assert.equal(results.filter(result => result.reason.code === 'failed-precondition').length, 5,
         results.map(result => result.reason?.message).join('\n'));
       assert.equal(results.filter(result => result.reason.code === 'resource-exhausted').length, 3);
-      assert.equal(calls, 5);
+      assert.equal(calls, 0);
       const ref = db.collection('mfaRecoveryAttempts').doc(security.recoveryAttemptId(email, ip));
       const blocked = (await ref.get()).data();
       assert.equal(blocked.attempts, 6);
@@ -49,7 +49,7 @@ test('concurrent recovery requests share a persisted limit and corrupt state has
       const corrupt = await ref.get();
       await assert.rejects(invoke(), error => error.code === 'failed-precondition');
       assert.equal((await ref.get()).updateTime.isEqual(corrupt.updateTime), true);
-      assert.equal(calls, 5);
+      assert.equal(calls, 0);
     } finally {
       await db.terminate();
       await deleteApp(app);
@@ -83,7 +83,7 @@ test('concurrent admitted attempts preserve recovery codes and pending markers w
         admin: {firestore: Object.assign(() => db, {FieldValue}), auth: () => {authAccess++; return auth;}},
       };
       vm.compileFunction(source.slice(start, end), Object.keys(context))(...Object.values(context));
-      const request = {data: {email, password: 'synthetic', recoveryCode: code}, rawRequest: {ip}};
+      const request = {data: {email, get password() {throw Error('Unexpected password read');}, recoveryCode: code}, rawRequest: {ip}};
       const results = await Promise.allSettled([
         context.exports.recoverMfaWithCode(request), context.exports.recoverMfaWithCode(request),
       ]);

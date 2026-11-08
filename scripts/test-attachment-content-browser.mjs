@@ -79,6 +79,19 @@ try {
         assert.equal(context.pages().length, 1, type);
         assert.match(await readFile(await download.path(), 'utf8'), /Synthetic attachment/);
     }
+    for (const [type, extension] of [
+        ['application/msword','doc'], ['application/vnd.openxmlformats-officedocument.wordprocessingml.document','docx'],
+        ['application/vnd.ms-excel','xls'], ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','xlsx'],
+        ['image/heic','heic'], ['image/heif','heif'], ['video/quicktime','mov']
+    ]) {
+        await page.evaluate(type => window.prepare(type, 'shared'), type);
+        const pending = page.waitForEvent('download'); await page.getByRole('button').click();
+        const result = await pending;
+        assert.equal(result.suggestedFilename(), `invoice_pdf.${extension}`);
+        assert.equal(await result.failure(), null);
+        assert.match(await readFile(await result.path(), 'utf8'), /Synthetic attachment/);
+        assert.equal(context.pages().length, 1);
+    }
     for (const type of ['application/pdf', 'image/png', 'text/plain']) {
         await page.evaluate(type => window.prepare(type, 'shared'), type);
         const pending = context.waitForEvent('page');
@@ -101,7 +114,7 @@ try {
     const download = page.waitForEvent('download');
     await page.getByRole('button').click();
     const chunkedDownload = await download;
-    assert.equal(chunkedDownload.suggestedFilename(), 'fixture.bin');
+    assert.equal(chunkedDownload.suggestedFilename(), 'fixture.mov');
     assert.equal(await chunkedDownload.failure(), null, 'chunked download must finish, not only start');
     assert.match(await readFile(await chunkedDownload.path(), 'utf8'), /Synthetic attachment/);
     assert.equal(context.pages().length, 1);
@@ -126,7 +139,7 @@ try {
         try { await image.decode(); return window.svgExecuted; } finally { image.remove(); URL.revokeObjectURL(url); }
     }), false);
     assert.deepEqual(errors, []);
-    console.log(JSON.stringify({pass:true, sharedDownloads:4, sharedOpens:3, chunkedRejected:2, chunkedDownload:true, chunkedRevocation:true, opfsCleanup:true, svgImagePassive:true, remoteFirebase:false}));
+    console.log(JSON.stringify({pass:true, sharedDownloads:11, sharedOpens:3, chunkedRejected:2, chunkedDownload:true, chunkedRevocation:true, opfsCleanup:true, svgImagePassive:true, remoteFirebase:false}));
 } finally {
     await browser.close(); await new Promise(resolve => server.close(resolve));
 }

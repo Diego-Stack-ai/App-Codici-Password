@@ -261,7 +261,8 @@ assert.match(recoverMfaSource, /mfaRecoveryAttempts[\s\S]*?nextRecoveryAttemptSt
 assert.match(recoverMfaSource, /failed-precondition", recoveryUnavailableMessage/, 'Il recupero MFA non usa la risposta uniforme');
 assert.match(recoverMfaSource, /Recupero non disponibile\. Se i dati sono corretti contatta l’assistenza\. Nessun codice è stato consumato\./, 'Messaggio recupero MFA non uniforme');
 assert.doesNotMatch(recoverMfaSource, /permission-denied|firstFactorAccepted|getUser\(|enrolledFactors/, 'Il recupero MFA distingue ancora esiti del primo fattore');
-assert.ok(recoverMfaSource.indexOf('resource-exhausted') < recoverMfaSource.indexOf('signInWithPassword'), 'Il limite deve precedere Auth');
+assert.ok(recoverMfaSource.indexOf('invalid-argument') < recoverMfaSource.indexOf('mfaRecoveryAttempts'), 'La validazione deve precedere il limite');
+assert.doesNotMatch(recoverMfaSource, /password|fetch\(|identitytoolkit|FIREBASE_WEB_API_KEY|admin\.auth\(/i, 'Il recupero MFA non deve leggere credenziali o invocare Auth');
 assert.doesNotMatch(recoverMfaSource, /collection\(["']mfaRecovery["']\)/, 'Il recupero MFA accede ancora ai codici dopo la verifica del fattore');
 assert.doesNotMatch(recoverMfaSource, /updateUser\(/, 'Il recupero MFA modifica ancora automaticamente i fattori Firebase');
 assert.doesNotMatch(recoverMfaSource, /revokeRefreshTokens\(/, 'Il recupero MFA revoca ancora automaticamente le sessioni');
@@ -321,8 +322,10 @@ assert.doesNotMatch(deployWorkflow, /assistant-local-ai|local-ai-packages|AI 2 p
 assert.match(deployWorkflow, /Recheck master and deploy Hosting only[\s\S]*?firebase\.js deploy[\s\S]*?Verify deployed manifest and critical assets[\s\S]*?Record deployed commit[\s\S]*?GITHUB_SHA[\s\S]*?GITHUB_STEP_SUMMARY/,
     'Il workflow non verifica e registra lo SHA distribuito dopo il deploy');
 assert.equal(JSON.parse(packageJson).devDependencies?.['firebase-tools'], '15.35.0', 'La Firebase CLI non è fissata a una versione');
-assert.match(loginHtml, /id="recovery-code"[^>]+autocomplete="off"/, 'Campo codice recupero assente o esposto ad autofill');
-assert.match(login, /recoverTotpAccess\(pendingEmail, password, recoveryCode\)/, 'Flusso recupero 2FA non collegato al login');
+assert.doesNotMatch(loginHtml, /id="recovery-code"|id="recovery-form-group"/, 'Il recupero manuale non deve raccogliere codici');
+assert.match(loginHtml, /<button type="button" id="btn-use-recovery-code"/, 'Assistenza 2FA assente');
+assert.match(login, /showAlertModal\(t\('auth_use_recovery'\), t\('auth_recovery_help'\)/, 'Istruzioni assistenza mancanti');
+assert.doesNotMatch(login, /recoverTotpAccess|recoverMfaWithCode|usingRecoveryCode/, 'Il login non deve inviare credenziali per il recupero manuale');
 assert.match(settingsHtml, /id="btn-revoke-all-sessions"/, 'Comando disconnessione postazioni assente');
 assert.match(settings, /await revokeAllSessions\(\)[\s\S]*?await signOut\(auth\)/, 'La revoca postazioni non termina la sessione corrente');
 assert.match(cryptoUtils, /const KEK_ITERATIONS = 600000/, 'Derivazione KEK insufficiente o non centralizzata');

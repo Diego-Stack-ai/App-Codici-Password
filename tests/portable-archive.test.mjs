@@ -122,7 +122,7 @@ function readStoredZip(bytes) {
 function previewRuntime(streamFixture, overrides = {}) {
     const bindings = new Map();
     const script = buildPortableViewerHtml().match(/<script>([\s\S]*?)<\/script>/)[1];
-    return runInNewContext(`${script}\nstreamEntry=globalThis.streamFixture;({canPreview,previewElement,readTextPreview,temporaryPreviewFile,releasePreviews});`, {
+    return runInNewContext(`${script}\nstreamEntry=globalThis.streamFixture;({decideAttachmentContent,canPreview,previewElement,readTextPreview,temporaryPreviewFile,releasePreviews});`, {
         TextEncoder, TextDecoder, crypto: webcrypto, streamFixture,
         navigator: {}, addEventListener() {},
         document: {
@@ -142,6 +142,28 @@ test('il confine condiviso di anteprima applica la stessa allowlist a tutti i co
         assert.throws(() => runtime.previewElement({type}, 'blob:synthetic', {}), /PREVIEW_UNSUPPORTED/);
     }
     assert.throws(() => runtime.previewElement({type: 'text/html'}, 'blob:synthetic', {}), /PREVIEW_UNSUPPORTED/);
+});
+
+test('il visualizzatore autonomo conserva le estensioni dei formati ammessi solo al download', () => {
+    const runtime = previewRuntime(async () => {});
+    for (const [type, name, expectedName] of [
+        ['application/msword', 'documento.doc', 'documento.doc'],
+        ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'documento.docx', 'documento.docx'],
+        ['application/vnd.ms-excel', 'foglio.xls', 'foglio.xls'],
+        ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'foglio.xlsx', 'foglio.xlsx'],
+        ['image/heic', 'foto.heic', 'foto.heic'], ['image/heif', 'foto.heif', 'foto.heif'],
+        ['video/quicktime', 'video.mov', 'video.mov'],
+        ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'fattura.pdf.exe', 'fattura_pdf.docx']
+    ]) {
+        const entry = {type, name};
+        const decision = runtime.decideAttachmentContent(entry);
+        assert.equal(decision.action, 'download', type);
+        assert.equal(decision.kind, null, type);
+        assert.equal(decision.mimeType, 'application/octet-stream', type);
+        assert.equal(decision.fileName, expectedName, name);
+        assert.equal(runtime.canPreview(entry), false, type);
+        assert.throws(() => runtime.previewElement(entry, 'blob:synthetic', {}), /PREVIEW_UNSUPPORTED/);
+    }
 });
 
 test('i contesti multimediali restano dedicati e il documento incorporato accetta soltanto PDF', () => {

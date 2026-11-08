@@ -51,6 +51,17 @@ const previewFixtures = [
     {id: 'png', name: 'immagine.png', type: 'image/png', bytes: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=', 'base64')}
 ];
 
+const downloadOnlyFixtures = [
+    {id: 'doc', name: 'documento.doc', type: 'application/msword', expectedName: 'documento.doc'},
+    {id: 'docx', name: 'documento.docx', type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', expectedName: 'documento.docx'},
+    {id: 'xls', name: 'foglio.xls', type: 'application/vnd.ms-excel', expectedName: 'foglio.xls'},
+    {id: 'xlsx', name: 'foglio.xlsx', type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', expectedName: 'foglio.xlsx'},
+    {id: 'heic', name: 'foto.heic', type: 'image/heic', expectedName: 'foto.heic'},
+    {id: 'heif', name: 'foto.heif', type: 'image/heif', expectedName: 'foto.heif'},
+    {id: 'mov', name: 'video.mov', type: 'video/quicktime', expectedName: 'video.mov'},
+    {id: 'spoof-docx', name: 'fattura.pdf.exe', type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', expectedName: 'fattura_pdf.docx'}
+].map((fixture, index) => ({...fixture, bytes: Buffer.concat([Buffer.from([0, 255, index]), Buffer.from(hostileHtml)])}));
+
 function memorySink() {
     const parts = [];
     return {
@@ -92,11 +103,11 @@ async function createArchive(records = [{
         new TextEncoder().encode('title,utente\r\nAccount sintetico,utente-sintetico\r\n'));
     await writer.addEntry({id: 'attachment:fixture', kind: 'attachment', name: 'fixture.txt', type: 'text/plain',
         recordKeys: ['private-account:::fixture']}, new TextEncoder().encode('allegato sintetico senza dati reali'));
-    for (const fixture of previewFixtures) {
+    for (const fixture of [...previewFixtures, ...downloadOnlyFixtures]) {
         await writer.addEntry({id: `attachment:${fixture.id}`, kind: 'attachment', name: fixture.name, type: fixture.type,
             recordKeys: ['private-account:::fixture']}, fixture.bytes);
     }
-    await writer.close({counts: {records: records.length, attachments: 1 + previewFixtures.length, projections: 2}});
+    await writer.close({counts: {records: records.length, attachments: 1 + previewFixtures.length + downloadOnlyFixtures.length, projections: 2}});
     return sink.bytes();
 }
 
@@ -135,6 +146,17 @@ async function downloadBytes(page, role, name, expectedName = name.replace(/^(?:
     const saved = await page.evaluate(() => window.__portableDownloads.shift());
     assert.equal(saved.name, expectedName);
     return Buffer.from(saved.bytes);
+}
+
+async function assertDownloadOnlyActions(page, {name, type, expectedName}) {
+    for (const verb of ['Visualizza', 'Riproduci']) {
+        assert.equal(await page.getByRole('button', {name: verb + ' ' + name, exact: true}).count(), 0);
+    }
+    const decision = await page.evaluate(entry => decideAttachmentContent(entry), {name, type});
+    assert.equal(decision.action, 'download');
+    assert.equal(decision.kind, null);
+    assert.equal(decision.mimeType, 'application/octet-stream');
+    assert.equal(decision.fileName, expectedName);
 }
 
 const temporary = await mkdtemp(path.join(os.tmpdir(), 'codici-password-portable-v2-'));
@@ -252,6 +274,15 @@ try {
         assert.equal(page.context().pages().length, pageCount);
         assert.equal(await page.evaluate(() => Boolean(window.__portableAttachmentExecuted)), false);
     }
+    for (const fixture of downloadOnlyFixtures) {
+        await assertDownloadOnlyActions(page, fixture);
+        const objectUrlCount = await page.evaluate(() => window.__portableObjectUrls.length);
+        const bytes = await downloadBytes(page, 'button', 'Salva sul PC ' + fixture.name, fixture.expectedName);
+        assert.deepEqual(bytes, fixture.bytes, fixture.name);
+        assert.equal(await page.evaluate(() => window.__portableObjectUrls.length), objectUrlCount);
+        assert.equal(page.context().pages().length, pageCount);
+        assert.equal(await page.evaluate(() => Boolean(window.__portableAttachmentExecuted)), false);
+    }
     await page.getByRole('button', {name: 'Visualizza testo-grande.txt', exact: true}).click();
     await page.getByText(/Anteprima limitata ai primi/).waitFor();
     const textPreview = await page.locator('.preview pre').textContent();
@@ -300,15 +331,22 @@ try {
     await page.locator('#search').fill('Account sintetico');
     await page.getByRole('button', {name: /Account privati 1/}).click();
     await page.evaluate(() => Object.defineProperty(window, 'showSaveFilePicker', {configurable: true, value: undefined}));
-    for (const [name, expected] of [['documento.html', hostileHtml], ['immagine.svg', hostileSvg]]) {
+    for (const fixture of [
+        {name: 'documento.html', type: 'text/html', expectedName: 'documento.bin', bytes: Buffer.from(hostileHtml)},
+        {name: 'immagine.svg', type: 'image/svg+xml', expectedName: 'immagine.bin', bytes: Buffer.from(hostileSvg)},
+        ...downloadOnlyFixtures
+    ]) {
+        await assertDownloadOnlyActions(page, fixture);
         const pending = page.waitForEvent('download');
-        await page.getByRole('button', {name: `Salva sul PC ${name}`, exact: true}).click();
+        await page.getByRole('button', {name: 'Salva sul PC ' + fixture.name, exact: true}).click();
         await page.getByRole('button', {name: 'Continua e salva', exact: true}).click();
         const download = await pending;
-        assert.equal(download.suggestedFilename(), name.replace(/\.[^.]+$/, '.bin'));
-        assert.equal((await readFile(await download.path())).toString('utf8'), expected);
+        assert.equal(download.suggestedFilename(), fixture.expectedName);
+        assert.equal(await download.failure(), null);
+        assert.deepEqual(await readFile(await download.path()), fixture.bytes, fixture.name);
         assert.equal(await page.evaluate(url => window.__portableObjectTypes[url], download.url()), 'application/octet-stream');
-        assert.equal(page.context().pages().length, 1);
+        assert.equal(page.context().pages().length, pageCount);
+        assert.equal(await page.evaluate(() => Boolean(window.__portableAttachmentExecuted)), false);
     }
 
     await page.getByRole('button', {name: 'Chiudi archivio', exact: true}).click();

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {decideAttachmentContent, openAttachmentContent} from '../Frontend/public/assets/js/modules/shared/attachment-content-policy.mjs';
+import {decideAttachmentContent, openAttachmentContent, isAttachmentUploadMimeAllowed} from '../Frontend/public/assets/js/modules/shared/attachment-content-policy.mjs';
 
 for (const type of ['', null, 'text/html', 'application/xhtml+xml', 'image/svg+xml', 'text/xml',
     'application/xml', 'application/unknown', 'text/html;charset=utf-8', ' IMAGE / SVG+XML ; charset=UTF-8',
@@ -83,5 +83,37 @@ test('all thumbnail readers use the shared exact policy rather than a default MI
         const source = await readFile(new URL(`../Frontend/public/assets/js/modules/${path}`, import.meta.url), 'utf8');
         assert.match(source, /decideAttachmentContent/);
         assert.doesNotMatch(source, /originalType\s*\|\|.*image\/jpeg/);
+    }
+});
+
+const downloadFormats = [
+    ['application/msword', 'doc'],
+    ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'docx'],
+    ['application/vnd.ms-excel', 'xls'],
+    ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'xlsx'],
+    ['image/heic', 'heic'], ['image/heif', 'heif'], ['video/quicktime', 'mov']
+];
+for (const [type, extension] of downloadFormats) test(`upload format remains opaque download: ${extension}`, () => {
+    const copied = Function(`return (${decideAttachmentContent.toString()})`)();
+    for (const decide of [decideAttachmentContent, copied]) {
+        const result = decide(type, 'fattura.pdf.exe');
+        assert.equal(result.action, 'download'); assert.equal(result.kind, null);
+        assert.equal(result.mimeType, 'application/octet-stream');
+        assert.equal(result.fileName, `fattura_pdf.${extension}`);
+        assert.equal(result.uploadMimeType, type);
+        assert.equal(decide(` ${type.toUpperCase()} ; charset=utf-8`, 'nome.file').fileName, `nome.${extension}`);
+    }
+    assert.equal(isAttachmentUploadMimeAllowed(type), true);
+    assert.equal(isAttachmentUploadMimeAllowed(type.toUpperCase()), true);
+    for (const alias of [` ${type}`, `${type};charset=utf-8`, type.replace('/', ' / ')]) {
+        assert.equal(isAttachmentUploadMimeAllowed(alias), false);
+    }
+});
+test('upload registry remains limited to the existing fifteen exact MIME types', () => {
+    const previewUploads = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp', 'image/gif', 'video/mp4', 'video/webm', 'text/plain'];
+    assert.equal(previewUploads.length + downloadFormats.length, 15);
+    for (const type of previewUploads) assert.equal(isAttachmentUploadMimeAllowed(type), true);
+    for (const type of ['audio/mpeg', 'audio/mp4', 'audio/ogg', 'audio/wav', 'audio/webm', 'text/html', 'image/svg+xml', 'text/xml', 'application/xml', '', null, 'application/vnd.ms-word.document.macroenabled.12']) {
+        assert.equal(isAttachmentUploadMimeAllowed(type), false);
     }
 });

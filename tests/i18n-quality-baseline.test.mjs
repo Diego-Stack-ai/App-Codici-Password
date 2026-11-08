@@ -116,7 +116,11 @@ test('le pagine di accesso e il contatto condiviso hanno un catalogo completo in
   const accessSource = await readFile(new URL('../Frontend/public/assets/js/translations/access.js', import.meta.url), 'utf8');
   const { accessCatalogs } = await import(`data:text/javascript;base64,${Buffer.from(accessSource).toString('base64')}`);
   const expectedKeys = Object.keys(accessCatalogs.it).sort();
-  assert.equal(expectedKeys.length, 59);
+  // The obsolete recovery-code label and automatic-success promise were retired.
+  assert.equal(expectedKeys.length, 57);
+  assert.ok(!expectedKeys.includes('auth_recovery_success'));
+  assert.ok(!expectedKeys.includes('auth_recovery_label'));
+  assert.ok(expectedKeys.includes('auth_recovery_help'));
   for (const language of languages) {
     assert.deepEqual(Object.keys(accessCatalogs[language]).sort(), expectedKeys, `catalogo Accesso incompleto: ${language}`);
     assert.ok(accessCatalogs[language].auth_wait_seconds.includes('{seconds}'));

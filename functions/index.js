@@ -616,7 +616,6 @@ exports.restoreBackupChunk = onCall(
 // Segreti cifrati (salvati su Google Secret Manager)
 const GMAIL_USER = defineSecret("GMAIL_USER");
 const GMAIL_APP_PASSWORD = defineSecret("GMAIL_APP_PASSWORD");
-const FIREBASE_WEB_API_KEY = "AIzaSyDDt-PacoHtUQg6Ow7-1UxvrGVZLXVYx-o";
 
 exports.createMfaRecoveryCodes = onCall(
     { region: "europe-west1", enforceAppCheck: true },
@@ -645,8 +644,7 @@ exports.recoverMfaWithCode = onCall(
     { region: "europe-west1", enforceAppCheck: true },
     async (request) => {
         const email = String(request.data?.email || "").trim().toLowerCase();
-        const password = String(request.data?.password || "");
-        if (!email || !password || normalizeRecoveryCode(request.data?.recoveryCode).length !== 16) {
+        if (!email || normalizeRecoveryCode(request.data?.recoveryCode).length !== 16) {
             throw new HttpsError("invalid-argument", "Dati di recupero non validi.");
         }
         const recoveryUnavailableMessage = "Recupero non disponibile. Se i dati sono corretti contatta l’assistenza. Nessun codice è stato consumato.";
@@ -677,17 +675,6 @@ exports.recoverMfaWithCode = onCall(
             throw new HttpsError("resource-exhausted", "Troppi tentativi. Riprova più tardi.");
         }
 
-        // Ogni tentativo ammesso attraversa lo stesso confine Auth, senza esporne l'esito.
-        try {
-            const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_WEB_API_KEY}`, {
-                method: "POST",
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify({ email, password, returnSecureToken: true })
-            });
-            await response.json();
-        } catch {
-            // Anche gli errori del provider terminano con la policy di assistenza manuale.
-        }
         throw new HttpsError("failed-precondition", recoveryUnavailableMessage);
     }
 );

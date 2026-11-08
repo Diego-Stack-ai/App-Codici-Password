@@ -1,5 +1,10 @@
 # Programma
 
+## Ordine aggiornato dalla revisione — 08/11/2026
+
+La nota autorizzata di Diego/Claude accetta S1 chiuso con la 1.2.264 verificata in produzione. La mancata attestazione del secondo partecipante resta una limitazione delle prove, non un collaudo riuscito. Il lavoro corrente è l'aggiornamento separato della PR #271: assistenza 2FA, limiti e risposte uniformi, usabilità dei download e proposta privata di pubblicazione futura. La PR non si unisce né si pubblica con questo incarico; nessun workflow viene cambiato. La cornice non viene avviata automaticamente. Prima di qualunque futuro merge: check verdi sullo stesso head e revisione di Claude; pubblicazione soltanto dalla CI e con approvazione personale. Questa voce aggiorna la priorità delle note storiche seguenti senza riscriverne gli esiti.
+
+
 ## Prerequisito della continuità Vault — 08/11/2026
 
 Aggiornamento finale del lotto: **1.2.264 pubblicata e verificata**, correzione del download grande provata sui moduli realmente online, parere conclusivo di Claude registrato nei [COLLAUDI](../evidenze/COLLAUDI.md#attachment-download-followup-1-2-264). Il criterio di condivisione completo resta aperto perché il browser del secondo partecipante non fornisce l'attestazione richiesta. Prima di riprendere la cornice servono una prova a due identità con Auth/App Check reali e la ricevuta del suo esito, senza indebolire i controlli. La preparazione 2FA #271 resta separata, da non unire o pubblicare; un suo futuro rilascio richiede un incarico CI specifico. Le due fixture di questo tentativo sono eliminate.

@@ -1,5 +1,12 @@
 # Incarico corrente
 
+## Revisione della preparazione 2FA e usabilità — 08/11/2026
+
+La nota di revisione autorizzata da Diego conferma S1 chiuso in produzione nella 1.2.264. Il distinto test completo tra due identità resta documentato come bloccato, senza trasformarlo in un PASS. L'incarico corrente aggiorna la PR [#271](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/271), ribasata sul master corrente: assistenza manuale 2FA, risposte uniformi, limiti conservati e usabilità dei download. La PR resta **in bozza, non unita e non pubblicata**. La produzione rimane alla 1.2.264; nessuna nuova versione è dichiarata distribuita.
+
+La consegna comprende una proposta privata del percorso CI futuro, da decidere con Diego: nessuna modifica applicata al workflow o ai selettori di distribuzione. Per ogni futura integrazione vale **PR → check verdi sullo stesso head → parere di Claude sul delta → merge → deploy CI → approvazione personale di Diego**. Nessun deploy dal PC, modifica Rules, chiavi, dati Vault o attivazione della cornice deriva da questo aggiornamento. Dettagli tecnici del rilievo aperto soltanto negli appunti locali esclusi da Git; elenco MD canonico sempre 34. La distinzione fra pareri locali e review formali precedenti è registrata nei [COLLAUDI](../evidenze/COLLAUDI.md#revisione-preparazione-2fa-2026-11-08).
+
+
 ## Integrazione del collaudo allegati — 08/11/2026
 
 Esecuzione registrata: PR #273 integrata in `70b9618c`, run Hosting #1010 riuscita dopo l'approvazione personale di Diego; tutti i 324 file online e il completamento dei download sono verificati, con parere conclusivo consultivo di Claude. Le due fixture autorizzate e i relativi DPAPI sono eliminate. Rimane aperta la prova condivisa bloccata dall'attestazione: la cornice resta sospesa e nessun altro utente o dato reale viene coinvolto. La PR preparatoria #271 non è unita né pubblicata. Le ricevute finali vengono integrate con una PR soltanto documentale, senza ulteriore deploy.
