@@ -1,5 +1,14 @@
 # Collaudi
 
+<a id="integrazione-revisione-pr-271-2026-11-08"></a>
+
+## Integrazione della revisione valida della PR #271 — 08/11/2026
+
+La nota di revisione fornita da Diego sullo head `3ff7d29f` è il riferimento valido per la chiusura e richiede due integrazioni prima del merge. I pareri consultivi locali di Claude Code registrati in precedenza non valgono come approvazione finale di questa nota. La candidata 1.2.265 sospende i percorsi client di generazione dei codici, compreso quello automatico dopo la configurazione, aggiorna assistenza, guida e registro linguistico; nessuna modifica al generatore server o ai codici esistenti. Prove e riscontri della consegna sono registrati sul nuovo head nella PR, distinguendo test sintetici da produzione.
+
+I due supporti CI vengono preparati separatamente dal workflow, che resta sotto il controllo personale di Diego. La patch approvata esige già il nuovo contratto: applicarla letteralmente ai soli supporti farebbe fallire i check prima del commit del workflow. Per rispettare l'ordine richiesto, il validatore ammette soltanto due configurazioni esatte, quella corrente e quella futura, rifiutando combinazioni ibride, selettori aggiuntivi e perdita dei gate. Il workflow completo consegnato privatamente deve poi coincidere per SHA-256 con il file committato da Diego sul medesimo branch. Seguiranno check verdi e revisione finale valida; nessun merge o rilascio è attestato da questa preparazione. Produzione invariata alla 1.2.264, documenti canonici sempre 34.
+
+
 <a id="revisione-preparazione-2fa-2026-11-08"></a>
 
 ## Preparazione 2FA e provenienza dei pareri — 08/11/2026

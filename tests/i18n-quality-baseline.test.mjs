@@ -111,6 +111,20 @@ test('la Gestione destinatari ha un catalogo completo e mantiene i segnaposto in
   assert.match(loader, /translations\/recipients\.js/);
 });
 
+test('assistenza 2FA usa il registro formale tedesco e portoghese nelle otto lingue complete', async () => {
+  const load = async name => import(`data:text/javascript;base64,${Buffer.from(await readFile(new URL(`../Frontend/public/assets/js/translations/${name}.js`, import.meta.url), 'utf8')).toString('base64')}`);
+  const {accessCatalogs} = await load('access');
+  const {settingsCatalogs} = await load('settings');
+  for (const lang of ['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt']) {
+    assert.ok(settingsCatalogs[lang].settings_recovery_codes_help?.trim(), lang);
+    assert.ok(settingsCatalogs[lang].settings_recovery_codes_desc?.trim(), lang);
+  }
+  assert.match(accessCatalogs.de.auth_recovery_help, /Wenn Sie/);
+  assert.doesNotMatch(accessCatalogs.de.auth_recovery_help, /\b(?:du|deine|hast|kontaktiere|sende)\b/);
+  assert.match(settingsCatalogs.de.settings_recovery_codes_help, /Sie/);
+  assert.doesNotMatch(accessCatalogs.pt.auth_recovery_help, /\b(?:consegues|contacta|envies)\b/);
+});
+
 test('le pagine di accesso e il contatto condiviso hanno un catalogo completo in tutte le lingue', async () => {
   const languages = ['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt'];
   const accessSource = await readFile(new URL('../Frontend/public/assets/js/translations/access.js', import.meta.url), 'utf8');

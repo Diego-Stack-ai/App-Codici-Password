@@ -326,6 +326,9 @@ assert.doesNotMatch(loginHtml, /id="recovery-code"|id="recovery-form-group"/, 'I
 assert.match(loginHtml, /<button type="button" id="btn-use-recovery-code"/, 'Assistenza 2FA assente');
 assert.match(login, /showAlertModal\(t\('auth_use_recovery'\), t\('auth_recovery_help'\)/, 'Istruzioni assistenza mancanti');
 assert.doesNotMatch(login, /recoverTotpAccess|recoverMfaWithCode|usingRecoveryCode/, 'Il login non deve inviare credenziali per il recupero manuale');
+assert.doesNotMatch(settings, /createRecoveryCodes|generateAndShowRecoveryCodes/, 'Impostazioni non deve generare codici di recupero');
+assert.match(settingsHtml, /id="btn-regenerate-recovery-codes" disabled/, 'La generazione dei codici deve restare disattivata');
+assert.match(settingsHtml, /aria-describedby="recovery-codes-unavailable-help"/, 'Il messaggio di assistenza deve essere collegato al comando disattivato');
 assert.match(settingsHtml, /id="btn-revoke-all-sessions"/, 'Comando disconnessione postazioni assente');
 assert.match(settings, /await revokeAllSessions\(\)[\s\S]*?await signOut\(auth\)/, 'La revoca postazioni non termina la sessione corrente');
 assert.match(cryptoUtils, /const KEK_ITERATIONS = 600000/, 'Derivazione KEK insufficiente o non centralizzata');

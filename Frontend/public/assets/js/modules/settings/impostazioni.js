@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.264';
+import { auth, db } from '../../firebase-config.js?v=1.2.265';
 import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, tf, getCurrentLanguage } from '../../translations.js';
@@ -11,7 +11,7 @@ import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.js';
 import { safeSetText, setChildren, createElement, clearElement } from '../../dom-utils.js';
 import { decrypt, ensureVaultKeyMaterial, clearSession, resetVault, isBiometricUnlockConfigured, changeMasterPassword } from '../core/security-manager.js';
-import { enrollTotp, unenrollTotp, getTotpEnrollment, createRecoveryCodes, revokeAllSessions } from '../core/mfa-manager.js';
+import { enrollTotp, unenrollTotp, getTotpEnrollment, revokeAllSessions } from '../core/mfa-manager.js';
 import { cacheCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
 import { clearPerformanceSamples, getPerformanceDiagnosticReport, isPerformanceDiagnosticsEnabled, setPerformanceDiagnosticsEnabled } from '../../performance-metrics.js';
 import { runAppDiagnostics } from '../../app-diagnostics.js';
@@ -66,7 +66,7 @@ export async function initImpostazioni(user) {
 function setupSharedCredentials(user) {
     document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
         try {
-            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.264');
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.265');
             await openSharedCredentialsSettings(user);
         } catch (error) {
             console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
@@ -180,7 +180,7 @@ function setupCredentialHealth(user) {
             'Analisi locale delle credenziali in corso…', current
         );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.264');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.265');
             current.check();
             const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
             current.check();
@@ -312,7 +312,7 @@ function setupAccountFieldUsage(user) {
             'Controllo locale dei campi realmente compilati in corso…'
         );
         try {
-            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.264');
+            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.265');
             const report = await inspectAccountFieldUsage(user.uid);
             working.close();
             showAccountFieldUsage(report);
@@ -1192,7 +1192,6 @@ function setupSecurityToggles(data) {
 
     if (t2fa) {
         t2fa.checked = !!getTotpEnrollment();
-        document.getElementById('btn-regenerate-recovery-codes')?.classList.toggle('hidden', !t2fa.checked);
         t2fa.addEventListener('change', async () => {
             const enable = t2fa.checked;
             t2fa.disabled = true;
@@ -1200,8 +1199,6 @@ function setupSecurityToggles(data) {
                 const completed = enable ? await enrollTotp() : await unenrollTotp();
                 t2fa.checked = completed ? enable : !enable;
                 if (completed) {
-                    document.getElementById('btn-regenerate-recovery-codes')?.classList.toggle('hidden', !enable);
-                    if (enable) await generateAndShowRecoveryCodes();
                     showToast(enable ? "2FA Authenticator attivata" : "2FA disattivata", "success");
                 }
             } catch (error) {
@@ -1273,26 +1270,6 @@ function setupSecurityToggles(data) {
         });
     }
 }
-
-async function generateAndShowRecoveryCodes() {
-    const codes = await createRecoveryCodes();
-    const modal = createElement('div', { className: 'modal-overlay active' });
-    const list = createElement('div', { className: 'recovery-code-grid' },
-        codes.map(code => createElement('code', { textContent: code }))
-    );
-    const close = () => modal.remove();
-    setChildren(modal, createElement('div', { className: 'modal-box' }, [
-        createElement('h3', { className: 'modal-title', textContent: t('settings_recovery_codes_title') }),
-        createElement('p', { className: 'modal-text', textContent: t('dyn_recovery_codes_help') }),
-        list,
-        createElement('div', { className: 'modal-actions' }, [
-            createElement('button', { className: 'btn-modal btn-primary', textContent: t('dyn_recovery_codes_saved'), onclick: close })
-        ])
-    ]));
-    document.body.appendChild(modal);
-}
-
-
 
 async function loadUserData(user) {
     try {
@@ -1453,13 +1430,6 @@ function initSettingsEvents(user) {
         } catch (error) {
             showToast(error.message || 'Cambio Master Password non riuscito.', 'error');
         }
-    });
-
-    document.getElementById('btn-regenerate-recovery-codes')?.addEventListener('click', async () => {
-        const ok = await showConfirmModal('Nuovi codici di recupero', 'I codici precedenti smetteranno subito di funzionare. Continuare?', 'Genera', 'Annulla');
-        if (!ok) return;
-        try { await generateAndShowRecoveryCodes(); }
-        catch (error) { showToast(error.message || 'Generazione codici non riuscita.', 'error'); }
     });
 
     document.getElementById('btn-revoke-all-sessions')?.addEventListener('click', async () => {

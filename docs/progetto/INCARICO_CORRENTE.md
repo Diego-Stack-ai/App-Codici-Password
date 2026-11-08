@@ -1,5 +1,14 @@
 # Incarico corrente
 
+## Integrazione richiesta dalla revisione valida della PR #271 — 08/11/2026
+
+La nota di revisione fornita da Diego sul precedente head `3ff7d29f` è il riferimento valido per la chiusura: codice giudicato corretto, due integrazioni richieste prima del merge. I precedenti pareri locali di Claude Code restano consultivi e non sostituiscono questa approvazione finale. Sono autorizzati la sospensione della generazione dei codici nelle Impostazioni, compreso il percorso automatico, il testo di assistenza e i controlli linguistici, la guida e i test. Nessuna modifica alla funzione server di generazione o ai codici già salvati.
+
+Candidata **1.2.265**, non pubblicata; produzione ancora **1.2.264**. Codex aggiorna sulla PR soltanto i due supporti del futuro percorso CI: planner e relativi test. Il workflow completo viene consegnato come file privato con SHA-256: **solo Diego lo committa dal sito GitHub sullo stesso branch**. Per mantenere verificabile il passaggio intermedio, i supporti riconoscono due contratti esatti e distinti, quello attuale e quello futuro approvato, senza variabili di bypass o nuove risorse selezionabili. Dopo il commit di Diego Codex confronta i byte e l'impronta e attende nuovamente i check verdi.
+
+Sequenza di chiusura: integrazioni e supporti con check verdi → workflow committato da Diego e impronta coincidente → check verdi → uscita da bozza e revisione finale di Claude → merge autorizzato → rilascio CI della sola funzione dedicata con approvazione personale → Hosting con approvazione personale → riscontro produttivo di Claude. Fino al nuovo gate di revisione la PR resta in bozza. Nessuna modifica del workflow da parte degli agenti, nessun deploy dal PC, nessun dato Vault o Rules modificato. Elenco MD invariato a 34; dettagli del rilievo aperto soltanto nel rapporto privato.
+
+
 ## Revisione della preparazione 2FA e usabilità — 08/11/2026
 
 La nota di revisione autorizzata da Diego conferma S1 chiuso in produzione nella 1.2.264. Il distinto test completo tra due identità resta documentato come bloccato, senza trasformarlo in un PASS. L'incarico corrente aggiorna la PR [#271](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/271), ribasata sul master corrente: assistenza manuale 2FA, risposte uniformi, limiti conservati e usabilità dei download. La PR resta **in bozza, non unita e non pubblicata**. La produzione rimane alla 1.2.264; nessuna nuova versione è dichiarata distribuita.

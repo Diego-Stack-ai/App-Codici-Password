@@ -2,6 +2,9 @@
 
 <a id="stato-corrente"></a>
 
+08/11/2026 — **integrazione della PR #271 richiesta dalla revisione valida, candidata 1.2.265**: sospesa la generazione client dei codici nelle Impostazioni e rivisti assistenza, registro linguistico, guida e test; server e codici esistenti invariati. Preparati i due supporti CI per il passaggio dal contratto attuale a quello approvato. Il workflow completo con impronta è consegnato privatamente a Diego per il commit dal sito. PR ancora in bozza, nessun merge o deploy; produzione **1.2.264**. Il parere conclusivo valido di Claude sul nuovo head resta successivo al commit del workflow e ai check verdi. [Mandato](INCARICO_CORRENTE.md), [evidenze](../evidenze/COLLAUDI.md#integrazione-revisione-pr-271-2026-11-08).
+
+
 08/11/2026 — **aggiornamento preparatorio della PR #271, non distribuito**: mandato per semplificare l'assistenza 2FA, conservare l'esito uniforme e i limiti e migliorare i nomi dei download. Proposta CI soltanto privata e non applicata; PR in bozza, senza merge/deploy. La nota di revisione di Diego/Claude accetta la chiusura S1 della produzione 1.2.264, mentre resta distinta la limitazione del test a due identità già registrata. Nessuna attivazione della cornice. [Mandato aggiornato](INCARICO_CORRENTE.md), [prove e provenienza dei pareri](../evidenze/COLLAUDI.md#revisione-preparazione-2fa-2026-11-08).
 
 

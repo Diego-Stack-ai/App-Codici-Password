@@ -1,5 +1,10 @@
 # Programma
 
+## Passaggio di chiusura della PR #271 — 08/11/2026
+
+La revisione fornita da Diego su `3ff7d29f` richiede due integrazioni prima del merge; i pareri locali precedenti restano consultivi. Priorità corrente: candidata 1.2.265 con assistenza coerente e generazione client sospesa, guida/test aggiornati e supporti CI intermedi verificabili. Diego carica personalmente sul branch il workflow completo consegnato con impronta; Codex ne verifica corrispondenza e check. Seguono uscita da bozza, revisione finale di Claude e soltanto allora merge/rilasci approvati, funzione dedicata prima di Hosting. La produzione resta alla 1.2.264. Questa voce aggiorna le fasi preparatorie precedenti; non avvia la cornice o altri lotti.
+
+
 ## Ordine aggiornato dalla revisione — 08/11/2026
 
 La nota autorizzata di Diego/Claude accetta S1 chiuso con la 1.2.264 verificata in produzione. La mancata attestazione del secondo partecipante resta una limitazione delle prove, non un collaudo riuscito. Il lavoro corrente è l'aggiornamento separato della PR #271: assistenza 2FA, limiti e risposte uniformi, usabilità dei download e proposta privata di pubblicazione futura. La PR non si unisce né si pubblica con questo incarico; nessun workflow viene cambiato. La cornice non viene avviata automaticamente. Prima di qualunque futuro merge: check verdi sullo stesso head e revisione di Claude; pubblicazione soltanto dalla CI e con approvazione personale. Questa voce aggiorna la priorità delle note storiche seguenti senza riscriverne gli esiti.
