@@ -1,5 +1,23 @@
 # Collaudi
 
+<a id="pubblicazione-sicurezza-1-2-261"></a>
+
+## Pubblicazione verificata 1.2.261 — 08/11/2026
+
+PR [#266](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/266), commit candidato `d313d83d0ed2d12aa308a7c4fac64ee4d2c335e2`, integrata nel sorgente distribuito **`eab609be3a7e9a13514562724888ea73c7af2ece`**. Documentazione, Gitleaks e validazione PR sono verdi; quest'ultima è la run [42431518645](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42431518645), job `128581259671`. Suite completa su PC e GitHub: **3.160 casi, 3.150 passati, 0 falliti, 10 skip dichiarati, 0 cancellati**, aggregati da 61 riepiloghi coerenti. Anche le due prove browser Ricerca e il runner portabile sono stati ripetuti sulla 1.2.261 con esito positivo. Il primo tentativo locale si era fermato sul catalogo guida ancora marcato 1.2.260; il catalogo è stato riesaminato, allineato e l'intera suite è stata rieseguita.
+
+- **Backend:** run [42432143000](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42432143000), validazione `128583173239`, deploy `128585734571`, tutti riusciti. Pubblicazione conclusa alle **02:11:08 Europe/Rome**; nessuna conferma retry richiesta (`retryConfirmationSent: false`). Il controller conserva i soli quattro retry già approvati e il controllo della cleanup policy esistente.
+- **Confronto indipendente backend**, alle **02:12:31 Europe/Rome**: censimento esatto di **47 Functions ACTIVE**, 43 hash sorgente aggiornati, quattro Functions escluse identiche al precedente censimento anche per aggiornamento/configurazione. Runtime, memoria, timeout, istanze, concorrenza, ingress, service account, policy retry, digest di ambiente e riferimenti Secret Manager sono conservati. Gli hash endpoint non sono SHA Git.
+- **Rules:** contenuto Firestore normalizzato LF uguale al sorgente, SHA256 `12957526a5ce6255ab2358c60cd83fcd6c90c45a96fab4c61599523c1e890bc7`; Storage invariato e conforme, SHA256 `97fb854cf4c52fe20b586d0cc183ffe88173154397f412590912dc70c0218694`.
+- **Hosting:** run [42433256107](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42433256107), validazione `128586569251`, deploy `128588831084`, tutti riusciti sul medesimo SHA. Deploy concluso alle **02:23:26 Europe/Rome**, verifica pubblica della CI alle **02:23:34**. Manifest schema 2, versione **1.2.261**, sorgente pulito, **326 file di payload**, SHA256 **`e79f2f1c736fd95b430d2aa4cf2261bdc73c3c82aec8b4273c722b146a55a815`**; 327 file caricati includendo il manifest.
+- **Verifica indipendente finale**, dalle **02:24:48 Europe/Rome**: release/versione/SHA e tutti i 326 asset, redirect, rewrite, cache e CSP conformi tramite il verificatore di rilascio. Functions identiche al censimento post-backend dopo Hosting; policy FULL `disabled`, coorte vuota e flag client falso confermati nel sorgente attestato.
+
+La release Hosting corrente è **1794101005467000**, versione **11355292794315f6**; il predecessore effettivo 1.2.260 è **1793982864613000**, versione **815734a047aad8c1**, rilevato prima del deploy. Gli identificativi più antichi nei checkpoint precedenti non sono il predecessore di questa pubblicazione. Nessun rollback eseguito; un eventuale ritorno non deve riaprire il namespace inviti o ripristinare il visualizzatore vulnerabile.
+
+I 147 file testuali locali con CRLF sono stati confrontati con i blob Git e riallineati ai medesimi byte LF: nessuna differenza di contenuto Git introdotta; il manifest locale coincide con quello Linux della CI. Log e snapshot di metadata sono negli artefatti locali riservati esclusi dal Git. Le ricevute documentali vengono committate dopo entrambe le run per conservare il vincolo di SHA su `master`.
+
+Limiti: nessun nuovo collaudo autenticato con utenti reali, prova Push/SMTP, canary FULL, drain, migrazione o chiusura F2/F3; restano i gate fisici e gli altri lavori del [PROGRAMMA](../progetto/PROGRAMMA.md#chiusura-e-priorita-2026-11-07). Il rilascio non implementa la shell RAM. Le copie HTML portabili esportate in precedenza mantengono il proprio codice: per ottenere l'anteprima corretta occorre esportarne una nuova dalla 1.2.261.
+
 <a id="sicurezza-candidata-2026-11-07"></a>
 
 ## Candidata locale di sicurezza — 07/11/2026

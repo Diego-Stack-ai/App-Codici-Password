@@ -1,5 +1,9 @@
 # Audit
 
+## Distribuzione delle cinque correzioni — 08/11/2026
+
+Le correzioni del lotto del 07/11 sono ora pubblicate nella **1.2.261**, sorgente `eab609be3a7e9a13514562724888ea73c7af2ece`, con pipeline backend/Rules e Hosting riuscite e confronto remoto indipendente. Le [ricevute canoniche](COLLAUDI.md#pubblicazione-sicurezza-1-2-261) conservano test, hash, sorgente e limiti. Il rapporto dello scan descrive lo snapshot iniziale e non viene riscritto per farlo apparire una nuova scansione della produzione. Restano i seguiti circoscritti e il programma di certificazione, senza estendere la conclusione a tutta l'app.
+
 <a id="sicurezza-candidata-2026-11-07"></a>
 
 ## Revisione di sicurezza e correzioni della candidata — 07/11/2026
