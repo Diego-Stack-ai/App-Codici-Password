@@ -2,7 +2,7 @@
 
 ## Aggiornamento di sicurezza 1.2.261 — 08/11/2026
 
-Per creare nuove condivisioni è necessario aggiornare l'app: se una vecchia scheda o PWA segnala un errore durante il salvataggio, conservare i dati del modulo e aggiornare prima di riprovare. Gli inviti esistenti restano consultabili e rispondibili. Nell'archivio portabile i testi HTML/XML sono mostrati come testo; per file lunghi l'anteprima è limitata e il download conserva l'originale completo. Il blocco della Vault chiude la Ricerca e richiede un nuovo sblocco prima di riutilizzarla.
+Per creare nuove condivisioni è necessario aggiornare l'app: se una vecchia scheda o PWA segnala un errore durante il salvataggio, conservare i dati del modulo e aggiornare prima di riprovare. Gli inviti esistenti restano consultabili e rispondibili. Nell’archivio portabile l’anteprima è disponibile soltanto per i formati supportati; gli altri allegati si salvano sul dispositivo. Il download conserva i byte originali e può assegnare un nome sicuro. Il blocco della Vault chiude la Ricerca e richiede un nuovo sblocco prima di riutilizzarla.
 
 Riesaminato il catalogo delle trenta pagine per la 1.2.261: questi interventi mantengono i target dei walkthrough e i comandi esistenti. La richiesta della Master Password al cambio pagina resta quella del contenimento multipagina, in attesa della shell persistente.
 

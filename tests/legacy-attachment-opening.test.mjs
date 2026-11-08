@@ -24,7 +24,8 @@ const paths = {
     incorporato: '../Frontend/public/assets/js/modules/azienda/dati-azienda-attachments.js'
 };
 const strip = text => text.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
-const securityModule = strip(await readFile(
+const policyModule = strip(await readFile(new URL('../Frontend/public/assets/js/modules/shared/attachment-content-policy.mjs', import.meta.url), 'utf8'));
+const securityModule = policyModule + '\n' + strip(await readFile(
     new URL('../Frontend/public/assets/js/modules/shared/attachment-security.js', import.meta.url), 'utf8'));
 const sources = Object.fromEntries(await Promise.all(Object.entries(paths)
     .map(async ([kind, path]) => [kind, strip(await readFile(new URL(path, import.meta.url), 'utf8'))])));

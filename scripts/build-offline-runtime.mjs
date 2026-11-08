@@ -132,10 +132,7 @@ await build({
 
 const cacheableExtensions = new Set(['.html', '.js', '.mjs', '.css', '.json', '.ico', '.png', '.jpg', '.jpeg', '.svg', '.webp', '.woff2', '.ttf']);
 const onlineOnlyDiagnostics = new Set([
-  'release-manifest.json',
-  'prova.html',
-  'assets/css/prova.css',
-  'assets/js/prova.js'
+  'release-manifest.json'
 ]);
 function isDeployExcluded(relativePath) {
   const parts = relativePath.split('/');

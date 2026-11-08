@@ -31,10 +31,7 @@ const offlineSource = await readFile(path.join(publicDir, 'offline-assets.js'), 
 const assets = JSON.parse(offlineSource.match(/=\s*(\[[\s\S]*\]);?\s*$/)?.[1] || '[]');
 const assetSet = new Set(assets);
 const onlineOnlyDiagnostics = new Set([
-  'release-manifest.json',
-  'prova.html',
-  'assets/css/prova.css',
-  'assets/js/prova.js'
+  'release-manifest.json'
 ]);
 const serviceWorker = await readFile(path.join(publicDir, 'sw.js'), 'utf8');
 const pushWorker = await readFile(path.join(publicDir, 'firebase-messaging-sw.js'), 'utf8');

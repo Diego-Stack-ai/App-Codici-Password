@@ -1,5 +1,15 @@
 # Collaudi
 
+<a id="attachment-hardening-1-2-263"></a>
+
+## Candidata Hosting 1.2.263 — gestione allegati e ritiro laboratorio, 08/11/2026
+
+Mandato preparatorio ricevuto dopo la 1.2.262; la cornice di continuità Vault resta sospesa. Inventario statico completato prima delle modifiche, con punti di apertura, anteprime, download e archivi portabili classificati. Il rapporto tecnico e i dettagli del rilievo aperto restano negli appunti locali esclusi da Git. La candidata irrobustisce la gestione degli allegati con una decisione condivisa, mantiene il formato e la validazione dei file grandi e ritira il laboratorio pubblico con i supporti dedicati. La superficie canonica resta di 30 pagine. La preparazione del recupero 2FA appartiene a un altro ramo da non unire o distribuire.
+
+Verifiche locali concluse: suite completa **3.195 casi, 3.185 passati, 0 falliti e 10 skip dichiarati**, comprendente suite allegati **109/109**, archivio portabile **21/21** e ciclo vita dei dettagli **24/24**; audit sintassi e sicurezza, canone/pagine, guida e documentazione superati. La revisione indipendente del codice non ha rilevato aggiramenti della nuova decisione; il successivo controllo di invalidazione dei file grandi è verificato con tre prove mirate e nel browser. I due banchi browser superano anche il download reale e quello progressivo, il mantenimento delle anteprime ammesse e la pulizia dei temporanei. Usano crittografia destinatario reale e dati sintetici, con servizi remoti e persistenza dell'identità sostituiti dal banco; non certificano Auth/App Check o il protocollo produttivo completo. Gitleaks sul diff candidato non rileva nuovi segreti.
+
+**Gate ancora aperti:** PR/check CI, parere di Claude sulla PR, merge e rilascio esclusivamente Hosting con approvazione personale di Diego. Seguono riscontro del manifest rispetto al sorgente di master, assenza dei file ritirati, prova sintetica in produzione e verifica finale di Claude. Nessuna pubblicazione o attivazione della cornice è attestata da questa sezione. Esiti e ricevute saranno completati sul medesimo sorgente approvato.
+
 <a id="rilascio-storage-403-1-2-262"></a>
 
 ## Pubblicazione 1.2.262 — Storage 403 e documentazione, 08/11/2026

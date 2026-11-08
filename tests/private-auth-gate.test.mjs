@@ -26,7 +26,7 @@ function fixture() {
 }
 
 test('all 22 private HTML entries are hidden and inert before JavaScript; public exceptions stay public', async () => {
-    const publicPages = new Set(['index.html','login.html','registrati.html','reset_password.html','imposta_nuova_password.html','privacy.html','termini.html','contatto_condiviso.html','prova.html']);
+    const publicPages = new Set(['index.html','login.html','registrati.html','reset_password.html','imposta_nuova_password.html','privacy.html','termini.html','contatto_condiviso.html']);
     let count = 0;
     for (const name of (await readdir(root)).filter(name => name.endsWith('.html'))) {
         const html = await readFile(new URL(name, root), 'utf8');

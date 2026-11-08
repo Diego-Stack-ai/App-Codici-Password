@@ -1,5 +1,9 @@
 # Programma
 
+## Prerequisito della continuità Vault — 08/11/2026
+
+Il nuovo prototipo di cornice per Diego segue un distinto rilascio preparatorio di sicurezza: prima pubblicazione tramite CI, verifica indipendente e ricevuta dedicata nei COLLAUDI, poi ripresa del prototipo. La correzione upload della 1.2.262 non chiude quel prerequisito. Questa precisazione aggiorna l'ordine dei prossimi lotti rispetto all'elenco del 07/11, senza riaprire i rilasci già verificati. Il mandato e i limiti correnti sono mantenuti soltanto in [INCARICO_CORRENTE](INCARICO_CORRENTE.md#vault-frame-prerequisites-2026-11-08).
+
 <a id="chiusura-e-priorita-2026-11-07"></a>
 
 ## Chiusura locale e ordine residuo — 07/11/2026

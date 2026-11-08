@@ -1,5 +1,9 @@
 # Allegati documenti
 
+## Gestione degli allegati — candidata 1.2.263, 08/11/2026
+
+La candidata applica una decisione comune a consultazione e salvataggio, comprese le anteprime e l'archivio portabile autonomo. I contenuti privi di un'anteprima ammessa vengono salvati con un nome sicuro; i byte originali e i formati crittografici restano invariati. Si conservano i limiti dei file grandi e la ricomposizione progressiva, con controllo della sessione prima dell'esposizione. Questo contratto non dichiara il nuovo comportamento già distribuito: stato e gate nei [COLLAUDI](../evidenze/COLLAUDI.md#attachment-hardening-1-2-263). I dettagli del rilievo ancora aperto restano nel rapporto locale escluso da Git.
+
 ## Budget dei lock nelle Rules Storage — pubblicato 1.2.262, 08/11/2026
 
 Le mutazioni Storage del proprietario mantengono il vincolo UID, il recovery fence, il blocco purge e le verifiche di dimensione/MIME/marcatore cifrato. Le Rules pubblicate leggono ciascun lock con un solo `firestore.get`: documento assente oppure rilascio valido consentono di proseguire; lock attivo, malformato o errore di lookup negano l'accesso. Il controllo recovery resta in `isOwner`; il helper purge non lo ripete e tutti i suoi callsite restano preceduti da `isOwner`. Il budget è quindi di due lookup per mutazione, senza dipendere dal caching di `get` ed `exists`. Il limite produttivo è documentato da [Firebase](https://firebase.google.com/docs/rules/rules-behavior#security_rule_limits_1). Diagnosi e divario dell'emulatore sono conservati nei collaudi; la [ricevuta 1.2.262](../evidenze/COLLAUDI.md#rilascio-storage-403-1-2-262) attesta hash delle Rules e prova SDK produttiva sul solo account QA con lock assenti. Questa prova non certifica la UI o il protocollo guest.

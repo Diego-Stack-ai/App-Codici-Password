@@ -17,15 +17,42 @@ globalThis.File = class File {
   }
 };
 
-const securitySource = await readFile(
+const policySource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/attachment-content-policy.mjs', import.meta.url), 'utf8');
+const policyUrl = `data:text/javascript;base64,${Buffer.from(policySource).toString('base64')}`;
+const securitySource = (await readFile(
   new URL('../Frontend/public/assets/js/modules/shared/attachment-security.js', import.meta.url), 'utf8',
-);
+)).replace("from './attachment-content-policy.mjs'", `from '${policyUrl}'`);
 const securityUrl = `data:text/javascript;base64,${Buffer.from(securitySource).toString('base64')}`;
 const security = await import(securityUrl);
 const chunkedSource = (await readFile(
   new URL('../Frontend/public/assets/js/modules/shared/chunked-attachment-security.js', import.meta.url), 'utf8',
 )).replace("from './attachment-security.js'", `from '${securityUrl}'`);
-const chunkedSecurity = await import(`data:text/javascript;base64,${Buffer.from(chunkedSource).toString('base64')}`);
+const chunkedSecurity = await import(`data:text/javascript;base64,${Buffer.from(chunkedSource.replace("from './attachment-content-policy.mjs'", `from '${policyUrl}'`)).toString('base64')}`);
+
+for (const phase of ['load', 'write', 'file']) test(`large attachment dispatch is revoked during ${phase}`, async () => {
+  const input = new Uint8Array([1, 2, 3]), stored = [];
+  const sealed = await chunkedSecurity.encryptAttachmentFileInChunks(new File('video.mov', 'video/quicktime', input.length, input), 'fixture', {
+    binding: 'revocation-fixture', onChunk: async chunk => { stored.push(new Uint8Array(await chunk.blob.arrayBuffer())); return {storagePath: `fixture/${chunk.index}`}; }
+  });
+  const attachment = {encryption: sealed.metadata, chunks: sealed.chunks};
+  const key = await security.unwrapAttachmentFileKey(sealed.metadata, 'fixture');
+  let active = true, dispatched = 0, removed = 0, aborted = 0;
+  const handle = {createWritable: async () => ({write: async () => {if (phase === 'write') active = false;}, close: async () => {}, abort: async () => {aborted++;}}),
+    getFile: async () => {if (phase === 'file') active = false; return new Blob([input]);}};
+  const directory = {getFileHandle: async () => handle, removeEntry: async () => {removed++;}};
+  const saved = new Map(['navigator', 'window', 'document'].map(name => [name, Object.getOwnPropertyDescriptor(globalThis, name)]));
+  Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {storage: {getDirectory: async () => ({getDirectoryHandle: async () => directory})}}});
+  globalThis.window = {open() {dispatched++;}};
+  globalThis.document = {createElement() {dispatched++; throw Error('UNEXPECTED_DOWNLOAD');}};
+  try {
+    await assert.rejects(chunkedSecurity.openChunkedDecryptedAttachment({attachment, fileKeyBytes: key, isActive: () => active,
+      loadChunk: async chunk => {if (phase === 'load') active = false; return stored[chunk.index];}}), error => error.code === 'ATTACHMENT_SESSION_INVALIDATED');
+    assert.equal(dispatched, 0); assert.equal(removed, 1); assert.equal(aborted, phase === 'file' ? 0 : 1);
+  } finally {
+    key.fill(0);
+    for (const [name, descriptor] of saved) {if (descriptor) Object.defineProperty(globalThis, name, descriptor); else delete globalThis[name];}
+  }
+});
 
 async function withCryptoProbe(fault, run) {
   const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'crypto');
