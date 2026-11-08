@@ -14,7 +14,9 @@ Controlli aggiuntivi: versione coerente con 266 riferimenti, documentazione con 
 
 La lettura cloud precedente al rilascio, **08/11/2026 10:34:15 UTC**, attesta 47 Functions attive, Hosting 1.2.261 sorgente `eab609be`, Firestore hash `12957526a5ce6255ab2358c60cd83fcd6c90c45a96fab4c61599523c1e890bc7` e Storage ancora `97fb854cf4c52fe20b586d0cc183ffe88173154397f412590912dc70c0218694`. Nuove run, pubblicazione e prova QA non sono ancora eseguite.
 
-L'archivio e il bundle sono verificati, ma il ritiro dei tre vecchi rami integrati e del worktree temporaneo non è ancora eseguito: il controllo automatico delle approvazioni ha richiesto un consenso specifico per questi riferimenti, distinto dall'elenco di otto rami autorizzato in precedenza. La richiesta è pendente; nessuna cancellazione è avvenuta.
+L'archivio e il bundle sono verificati. Il controllo automatico ha rifiutato due volte il ritiro dei vecchi riferimenti per assenza di consenso specifico alla cancellazione. Diego risolve scegliendo esplicitamente **«Conserva i vecchi rami e pubblica»**: restano i tre rami locali/remoti `codex/complete-recovery`, `codex/release-1.2.261-receipts`, `codex/release-security-1.2.261`, il worktree `.codex-tmp/security-closure-20261107` e il suo ramo locale. Il preflight mantiene exit **1** e tutte le segnalazioni effettive relative a questi riferimenti e a Dependabot #268; nessuna esclusione è aggiunta al controllo e nessuna cancellazione è avvenuta. Ogni ulteriore anomalia resta bloccante.
+
+La nuova lettura remota del **08/11/2026 14:00:24 UTC** conferma la stessa produzione 1.2.261, gli stessi hash Rules e 47 Functions attive. Il ramo `master` è ancora `6b400ddb`, la candidata pubblicata su GitHub è `470b1590`, e Dependabot #268 è aperta sullo SHA preservato. Queste letture non attestano ancora un deploy della 1.2.262.
 
 <a id="credenziali-agenti-2026-11-08"></a>
 
