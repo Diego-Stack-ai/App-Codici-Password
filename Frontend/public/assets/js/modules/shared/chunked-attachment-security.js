@@ -235,7 +235,11 @@ export async function openChunkedDecryptedAttachment({attachment, fileKeyBytes, 
         checkActive();
         const file = await handle.getFile();
         checkActive();
-        return openAttachmentContent(file, attachment, {revokeAfter: 10 * 60_000});
+        // A File snapshot still depends on its OPFS backing entry. Consume the
+        // stream into a browser-managed Blob before finally removes that entry.
+        const detached = await new Response(file.stream()).blob();
+        checkActive();
+        return openAttachmentContent(detached, attachment, {revokeAfter: 10 * 60_000});
     } finally {
         if (!closed && writable) await writable.abort().catch(() => {});
         await directory.removeEntry(temporaryName).catch(() => {});

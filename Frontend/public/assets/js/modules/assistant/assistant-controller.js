@@ -1,9 +1,9 @@
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
-import { auth } from '../../firebase-config.js?v=1.2.263';
+import { auth } from '../../firebase-config.js?v=1.2.264';
 import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
 import { loadVaultSearchRecords } from './vault-data-loader.js';
-import { VaultConversationEngine } from './conversation-engine.js?v=1.2.263';
-import { createAssistantUI } from './assistant-ui.js?v=1.2.263';
+import { VaultConversationEngine } from './conversation-engine.js?v=1.2.264';
+import { createAssistantUI } from './assistant-ui.js?v=1.2.264';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { getOfflineReadiness } from '../../offline-sync.js';
 import { archiveAccount } from '../settings/archive-account-service.js';
@@ -37,7 +37,7 @@ async function loadDocumentationKnowledge(language) {
 function attachStyles() {
     if (document.querySelector('link[data-vault-assistant]')) return;
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.263'; link.dataset.vaultAssistant = 'true';
+    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.264'; link.dataset.vaultAssistant = 'true';
     document.head.append(link);
 }
 
