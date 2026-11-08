@@ -1,5 +1,9 @@
 # Vault
 
+## Raccordo operativo — 08/11/2026
+
+Le revoche della Ricerca descritte nel checkpoint del 07/11 sottostante sono state distribuite nella [1.2.261](../evidenze/COLLAUDI.md#pubblicazione-sicurezza-1-2-261) e conservate nella 1.2.262. La continuità della Vault resta invece un incarico distinto: il nuovo prototipo è sospeso fino al completamento del prerequisito assegnato in [INCARICO_CORRENTE](../progetto/INCARICO_CORRENTE.md#vault-frame-prerequisites-2026-11-08). Nessuna cornice, trasmissione della chiave o attivazione per Diego è implementata o autorizzata dalla sola ricognizione preparatoria. Le descrizioni anteriori conservano il proprio contesto e non attestano lo stato produttivo corrente.
+
 ## Candidata di revoca e continuità ancora da integrare — 07/11/2026
 
 Il lotto locale di sicurezza invalida anche le copie di chiave e plaintext mantenute dalla Ricerca, comprese preparazioni/decifrature e operazioni vocali che terminano dopo il blocco. Un dialogo vecchio non riacquista autorità dopo un nuovo sblocco dello stesso UID; il comando Ricerca rimane invece disponibile per una preparazione nuova. I dettagli offline richiedono un grant esplicito del destinatario prima di mostrare dati cached, senza cancellare automaticamente la cache.

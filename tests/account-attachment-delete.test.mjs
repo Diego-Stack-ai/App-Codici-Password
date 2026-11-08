@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
+import {decideAttachmentContent} from '../Frontend/public/assets/js/modules/shared/attachment-content-policy.mjs';
 
 // M7-T15 — Cancellazione **completa** di un allegato da un Account: il percorso
 // positivo deve togliere sia l'oggetto Storage sia il riferimento nei metadati.
@@ -46,7 +47,7 @@ function fixture(kind, {objects = [], documents = [], confirm = true} = {}) {
         .filter(([path]) => path.startsWith(`${prefix}/`))
         .map(([, record]) => record);
     const context = vm.createContext({
-        db: {}, storage: {}, t: () => '', console: {warn() {}}, logError: (...args) => errors.push(args),
+        decideAttachmentContent, db: {}, storage: {}, t: () => '', console: {warn() {}}, logError: (...args) => errors.push(args),
         closeAttachmentSourcePicker() {}, selectAttachmentSource: async () => null,
         navigator: {onLine: true}, setTimeout: () => 0, clearTimeout() {},
         document: {body: {style: {}}, getElementById: id => (id === 'attachments-list' ? container : null)},

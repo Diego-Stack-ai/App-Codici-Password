@@ -1,3 +1,4 @@
+import {decideAttachmentContent} from '../Frontend/public/assets/js/modules/shared/attachment-content-policy.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -37,7 +38,7 @@ function detailFixture() {
     const span = node(); nodes['toggle-password'].querySelector = () => span;
     const container = node();
     const window = {location: {search: '?id=A', pathname: '/dettaglio_account_privato.html', href: ''}, history: {replaceState() {}}};
-    const context = vm.createContext({window, URLSearchParams, AbortController, readErrorMessage, accountModeFromRecord, auth: {currentUser: {uid: 'owner'}},
+    const context = vm.createContext({decideAttachmentContent, window, URLSearchParams, AbortController, readErrorMessage, accountModeFromRecord, auth: {currentUser: {uid: 'owner'}},
         onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
         document: {title: 'Dettaglio', body: {style: {}}, getElementById: id => nodes[id] || null,
@@ -143,7 +144,7 @@ function attachmentFixture() {
         cloneNode() { return fileInput(id); }});
     for (const id of ['input-file', 'input-gallery', 'input-camera']) nodes[id] = fileInput(id);
     nodes['source-selector-modal'] = node(); nodes['btn-cancel-source'] = node(); nodes['attachments-list'] = node();
-    const context = vm.createContext({document: {body: {style: {}}, getElementById: id => nodes[id] || null}, navigator: {onLine: true},
+    const context = vm.createContext({decideAttachmentContent, document: {body: {style: {}}, getElementById: id => nodes[id] || null}, navigator: {onLine: true},
         setTimeout: callback => { timers.set(++timerId, callback); return timerId; }, clearTimeout: id => timers.delete(id),
         closeAttachmentSourcePicker() {},
         selectAttachmentSource: async () => null,

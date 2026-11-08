@@ -145,7 +145,7 @@ Prima di un intervento verificare il codice corrente, il contratto dell'area, i 
 
 ### 2. Pagine, bootstrap e viewport
 
-Il [registro canonico](INTERFACCIA.md#fonte-docs-canonical-page-registry-md-l1) identifica la superficie applicativa. Alla v1.2.110 comprende 30 pagine: cinque di accesso, 24 interne e il ricevitore pubblico `contatto_condiviso.html`. `prova.html` è un laboratorio temporaneo escluso dal conteggio.
+Il [registro canonico](INTERFACCIA.md#fonte-docs-canonical-page-registry-md-l1) identifica la superficie applicativa. Alla v1.2.110 comprende 30 pagine: cinque di accesso, 24 interne e il ricevitore pubblico `contatto_condiviso.html`. Il laboratorio viewport temporaneo non è più previsto nel runtime pubblico.
 
 Il [contratto delle pagine](INTERFACCIA.md#fonte-docs-page-shell-contract-md-l1) disciplina struttura, scroll, safe area e viewport. Le pagine interne usano `body.base-bg`, contenitore comune, header, `.base-main`, `.page-container` e footer. Le pagine di accesso hanno un bootstrap e un layout distinti; il ricevitore pubblico del contatto non carica la shell privata.
 
@@ -286,7 +286,7 @@ Contratto M3 per distinguere le funzioni reali dai percorsi storici di compatibi
 
 - Ogni funzione visibile possiede una sola pagina HTML e un solo modulo inizializzatore canonici.
 - Nuove pagine con suffissi di versione sono vietate. Le evoluzioni modificano la pagina canonica e sono protette da Git e test.
-- Redirect storici e laboratori archiviati non appartengono al runtime; `prova.html` è la sola eccezione temporanea pubblicata qui documentata e resta esclusa dalle pagine canoniche.
+- Redirect storici e laboratori non appartengono al runtime pubblico; non sono previste eccezioni temporanee alla superficie canonica.
 
 <a id="fonte-docs-canonical-page-registry-md-compatibilità-home"></a>
 
@@ -308,9 +308,9 @@ Questi file non vengono pubblicati, memorizzati offline o inclusi negli audit de
 
 ### Laboratorio viewport temporaneo
 
-`prova.html` e `prova.css` costituiscono un banco di prova isolato, raggiungibile durante il collaudo su dispositivi reali. La pagina mostra soltanto fondale, viewport dinamico e una card neutra: non rappresenta una funzione dell'app e non appartiene alle 30 pagine canoniche.
+Il banco viewport temporaneo era separato dalle 30 pagine canoniche. Il mandato dell’08/11/2026 ne dispone la rimozione dalla pubblicazione, inclusi i supporti dedicati; il collaudo prosegue sulle pagine reali.
 
-Il laboratorio è escluso dagli audit che certificano la superficie applicativa. Quando il contratto del viewport sarà validato sulle pagine reali, dovrà essere archiviato o rimosso dalla pubblicazione senza creare alias o suffissi di versione.
+La candidata non conserva alias, supporti orfani o esclusioni speciali negli audit. L’assenza dei file dalla produzione richiede la verifica dopo il rilascio.
 
 <a id="fonte-docs-canonical-page-registry-md-domini-canonici"></a>
 
@@ -355,7 +355,7 @@ Candidata 1.2.118, codice `4a431ec3`: modificati i due dettagli Account e i rela
 
 ### Ricevitore pubblico del contatto — eccezione v1.2.110
 
-`contatto_condiviso.html` è la trentesima pagina canonica, distinta dalle cinque pagine di accesso e dalle 24 interne. Usa `body.base-bg`, il proprio `main.shared-contact-card`, `contact-card-receiver.css` e un entry point dedicato; non applica header/footer o bootstrap privato. Mostra esclusivamente il contatto condiviso dal QR e prepara il download vCard. Il laboratorio `prova.html` resta escluso.
+`contatto_condiviso.html` è la trentesima pagina canonica, distinta dalle cinque pagine di accesso e dalle 24 interne. Usa `body.base-bg`, il proprio `main.shared-contact-card`, `contact-card-receiver.css` e un entry point dedicato; non applica header/footer o bootstrap privato. Mostra esclusivamente il contatto condiviso dal QR e prepara il download vCard. Il laboratorio temporaneo è rimosso nella candidata successiva.
 
 Questo documento definisce esclusivamente la struttura delle 30 pagine canoniche. Non modifica né disciplina ombre, vetro, colori delle card, animazioni, watermark, decorazioni, modali o altri componenti sovrapposti.
 
@@ -366,7 +366,7 @@ Questo documento definisce esclusivamente la struttura delle 30 pagine canoniche
 - **Famiglia accesso:** `index.html`, `login.html`, `registrati.html`, `reset_password.html`, `imposta_nuova_password.html`.
 - **Famiglia interna:** le 24 pagine canoniche operative elencate in `CANONICAL_PAGE_REGISTRY.md`.
 - I confronti Home e i redirect storici sono conservati in `archive/home-experiments/` e non appartengono al runtime pubblico.
-- `prova.html` è un laboratorio temporaneo pubblicato per il collaudo fisico del viewport. Non è una pagina canonica, non entra nel conteggio né nel gate statico delle 30 pagine e non può introdurre eccezioni nel contratto definitivo.
+- Nessun laboratorio viewport temporaneo è previsto nella superficie pubblica della candidata; le 30 pagine canoniche restano soggette al contratto comune.
 
 <a id="fonte-docs-page-shell-contract-md-strati-comuni"></a>
 
@@ -463,7 +463,7 @@ La correzione della fascia terminale iOS deve quindi:
 
 `npm run test:page-shells` controlla classificazione e struttura statica delle 30 pagine. Il collaudo fisico descritto in `M4_VISUAL_ACCEPTANCE.md` resta obbligatorio per safe area, overscroll e ricomposizione grafica di iOS.
 
-`prova.html` serve unicamente a separare il comportamento della superficie radice da header, footer, nebbia e contenuti reali. Un esito positivo nel laboratorio non chiude il gate: la stessa soluzione deve essere riportata nel contratto comune e verificata sulle due famiglie.
+Un esito precedente nel laboratorio viewport non chiude il gate: il contratto comune deve essere verificato sulle pagine reali di entrambe le famiglie.
 
 <a id="fonte-docs-ui-design-system-contract-md-l1"></a>
 

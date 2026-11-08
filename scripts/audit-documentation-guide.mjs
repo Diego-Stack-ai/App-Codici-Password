@@ -14,7 +14,7 @@ export async function auditDocumentationGuide() {
     const release = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
     assert.equal(catalog.reviewedAppVersion, release.version, 'Riesaminare il catalogo quando cambia la base applicativa');
     assert.ok(Buffer.byteLength(source) <= 96 * 1024, 'Il catalogo D0 supera il budget di 96 KiB');
-    const canonical = (await readdir(publicRoot)).filter(name => name.endsWith('.html') && name !== 'prova.html').sort();
+    const canonical = (await readdir(publicRoot)).filter(name => name.endsWith('.html')).sort();
     assert.equal(canonical.length, 30, 'Il registro corrente deve essere rivalutato quando cambia il numero di pagine');
     assert.deepEqual(catalog.pages.map(page => page.route.slice(1)).sort(), canonical,
         'Ogni pagina canonica deve avere esattamente una guida, senza pagine di laboratorio');

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import os from 'node:os';
 import path from 'node:path';
-import {mkdtemp, rm, writeFile} from 'node:fs/promises';
+import {mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
 import {pathToFileURL} from 'node:url';
 import {webcrypto} from 'node:crypto';
 import {createRequire} from 'node:module';
@@ -128,12 +128,12 @@ async function rewriteAuthenticatedEntryCount(bytes) {
     return new TextEncoder().encode(`${lines.join('\n')}\n`);
 }
 
-async function downloadBytes(page, role, name) {
+async function downloadBytes(page, role, name, expectedName = name.replace(/^(?:Scarica |Salva sul PC )/, '')) {
     await page.getByRole(role, {name, exact: true}).click();
     await page.getByRole('button', {name: 'Continua e salva', exact: true}).click();
     await page.waitForFunction(() => window.__portableDownloads?.length > 0);
     const saved = await page.evaluate(() => window.__portableDownloads.shift());
-    assert.equal(saved.name, name.replace(/^(?:Scarica |Salva sul PC )/, ''));
+    assert.equal(saved.name, expectedName);
     return Buffer.from(saved.bytes);
 }
 
@@ -173,9 +173,10 @@ try {
         addEventListener('message', event => { if (event.data?.portableAttachmentExecuted) window.__portableAttachmentExecuted = true; });
         window.__portableObjectUrls = [];
         window.__portableRevokedUrls = [];
+        window.__portableObjectTypes = {};
         const createObjectURL = URL.createObjectURL.bind(URL), revokeObjectURL = URL.revokeObjectURL.bind(URL);
         URL.createObjectURL = source => {
-            const url = createObjectURL(source); window.__portableObjectUrls.push(url); return url;
+            const url = createObjectURL(source); window.__portableObjectUrls.push(url); window.__portableObjectTypes[url] = source.type; return url;
         };
         URL.revokeObjectURL = url => { window.__portableRevokedUrls.push(url); revokeObjectURL(url); };
         Object.defineProperty(window, 'showSaveFilePicker', {
@@ -243,19 +244,14 @@ try {
     const attachment = (await downloadBytes(page, 'button', 'Salva sul PC fixture.txt')).toString('utf8');
     assert.equal(attachment, 'allegato sintetico senza dati reali');
 
-    await page.getByRole('button', {name: 'Visualizza documento.html', exact: true}).click();
-    await page.waitForFunction(() => window.__portableAttachmentExecuted || document.querySelector('.preview pre'));
-    assert.equal(await page.evaluate(() => Boolean(window.__portableAttachmentExecuted)), false,
-        'Il documento HTML allegato non deve eseguire codice nel visualizzatore');
-    assert.equal(await page.locator('.preview pre').textContent(), hostileHtml);
-    assert.equal(await page.locator('.preview object, .preview iframe').count(), 0);
-    assert.equal((await downloadBytes(page, 'button', 'Salva sul PC documento.html')).toString('utf8'), hostileHtml);
-    assert.equal(await page.getByRole('button', {name: 'Visualizza documento.xhtml', exact: true}).count(), 0);
-    assert.equal((await downloadBytes(page, 'button', 'Salva sul PC documento.xhtml')).toString('utf8'), hostileHtml);
-    await page.getByRole('button', {name: 'Visualizza documento.xml', exact: true}).click();
-    await page.locator('.preview pre').waitFor();
-    assert.equal(await page.locator('.preview pre').textContent(), hostileHtml);
-
+    const pageCount = page.context().pages().length;
+    for (const name of ['documento.html', 'documento.xhtml', 'documento.xml', 'immagine.svg']) {
+        assert.equal(await page.getByRole('button', {name: `Visualizza ${name}`, exact: true}).count(), 0);
+        const expected = name === 'immagine.svg' ? hostileSvg : hostileHtml;
+        assert.equal((await downloadBytes(page, 'button', `Salva sul PC ${name}`, name.replace(/\.[^.]+$/, '.bin'))).toString('utf8'), expected);
+        assert.equal(page.context().pages().length, pageCount);
+        assert.equal(await page.evaluate(() => Boolean(window.__portableAttachmentExecuted)), false);
+    }
     await page.getByRole('button', {name: 'Visualizza testo-grande.txt', exact: true}).click();
     await page.getByText(/Anteprima limitata ai primi/).waitFor();
     const textPreview = await page.locator('.preview pre').textContent();
@@ -264,7 +260,7 @@ try {
     assert.ok(!textPreview.includes('FINE ORIGINALE'));
     assert.equal((await downloadBytes(page, 'button', 'Salva sul PC testo-grande.txt')).toString('utf8'), largeText);
 
-    for (const name of ['immagine.svg', 'immagine.png']) {
+    for (const name of ['immagine.png']) {
         await page.getByRole('button', {name: `Visualizza ${name}`, exact: true}).click();
         await page.locator('.preview img').waitFor();
         await page.waitForFunction(() => document.querySelector('.preview img')?.complete);
@@ -300,6 +296,21 @@ try {
     await page.getByText(/integrità AEAD verificata/).waitFor();
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
 
+    // Exercise the real Blob-download fallback as well as the streamed picker fixture.
+    await page.locator('#search').fill('Account sintetico');
+    await page.getByRole('button', {name: /Account privati 1/}).click();
+    await page.evaluate(() => Object.defineProperty(window, 'showSaveFilePicker', {configurable: true, value: undefined}));
+    for (const [name, expected] of [['documento.html', hostileHtml], ['immagine.svg', hostileSvg]]) {
+        const pending = page.waitForEvent('download');
+        await page.getByRole('button', {name: `Salva sul PC ${name}`, exact: true}).click();
+        await page.getByRole('button', {name: 'Continua e salva', exact: true}).click();
+        const download = await pending;
+        assert.equal(download.suggestedFilename(), name.replace(/\.[^.]+$/, '.bin'));
+        assert.equal((await readFile(await download.path())).toString('utf8'), expected);
+        assert.equal(await page.evaluate(url => window.__portableObjectTypes[url], download.url()), 'application/octet-stream');
+        assert.equal(page.context().pages().length, 1);
+    }
+
     await page.getByRole('button', {name: 'Chiudi archivio', exact: true}).click();
     for (const invalid of [
         tamperedPath, incompletePath, invalidCountPath, trailingPath, excessiveLinesPath, oversizedLinePath, excessiveRecordsPath
@@ -312,7 +323,7 @@ try {
     }
     assert.deepEqual(network, []);
     assert.deepEqual(errors, []);
-    console.log('Archivio portabile v2 browser: offline, tamper, limiti, HTML/XML passivi, SVG/immagini, PDF, audio, testo limitato, download e pulizia OK');
+    console.log('Archivio portabile v2 browser: offline, tamper, limiti, tipi non supportati scaricati senza navigazione, immagini, PDF, audio, testo limitato, download e pulizia OK');
 } finally {
     await browser?.close();
     await rm(temporary, {recursive: true, force: true});

@@ -22,7 +22,7 @@ test('testo e attributi traducibili fanno parte del grafo UI', () => {
   assert.ok(audit.translationAttributeEdges.text > 0);
   assert.ok(audit.translationAttributeEdges.placeholder > 0);
   assert.ok(audit.translationAttributeEdges.aria > 0);
-  assert.equal(audit.pages.length, 31);
+  assert.equal(audit.pages.length, 30);
   assert.ok(audit.summary.translatedElements > 0);
 });
 

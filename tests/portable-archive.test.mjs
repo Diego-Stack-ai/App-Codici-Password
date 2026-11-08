@@ -132,12 +132,12 @@ function previewRuntime(streamFixture, overrides = {}) {
     });
 }
 
-test('il confine condiviso di anteprima tratta i MIME di testo come contenuto passivo', () => {
+test('il confine condiviso di anteprima applica la stessa allowlist a tutti i contenuti importati', () => {
     const runtime = previewRuntime(async () => {});
-    for (const type of ['text/html', ' Text/XML ; charset=utf-8', 'image/svg+xml', 'image/png', 'video/mp4', 'audio/ogg', 'application/pdf']) {
+    for (const type of ['text/plain', 'image/png', 'video/mp4', 'audio/ogg', 'application/pdf']) {
         assert.equal(runtime.canPreview({type}), true, type);
     }
-    for (const type of ['application/xhtml+xml', 'application/xml', 'application/octet-stream', 'application/pdfx']) {
+    for (const type of ['text/html', ' Text/XML ; charset=utf-8', 'image/svg+xml', 'application/xhtml+xml', 'application/xml', 'application/octet-stream', 'application/pdfx', '']) {
         assert.equal(runtime.canPreview({type}), false, type);
         assert.throws(() => runtime.previewElement({type}, 'blob:synthetic', {}), /PREVIEW_UNSUPPORTED/);
     }
@@ -147,7 +147,7 @@ test('il confine condiviso di anteprima tratta i MIME di testo come contenuto pa
 test('i contesti multimediali restano dedicati e il documento incorporato accetta soltanto PDF', () => {
     const node = tag => ({tagName: tag.toUpperCase(), append() {}, setAttribute() {}});
     const runtime = previewRuntime(async () => {}, {document: {getElementById: () => ({}), createElement: node}});
-    for (const [type, tag] of [['image/svg+xml', 'IMG'], ['audio/ogg', 'AUDIO'], ['video/mp4', 'VIDEO'], [' Application/PDF ; version=1.7', 'OBJECT']]) {
+    for (const [type, tag] of [['image/png', 'IMG'], ['audio/ogg', 'AUDIO'], ['video/mp4', 'VIDEO'], [' Application/PDF ; version=1.7', 'OBJECT']]) {
         let rendered;
         runtime.previewElement({type, name: 'sintetico'}, 'blob:synthetic', {replaceChildren(value) { rendered = value; }}, () => false);
         assert.equal(rendered.tagName, tag);
