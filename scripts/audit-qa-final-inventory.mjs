@@ -75,7 +75,7 @@ function extractStaticFields(html) {
 
 export async function buildQaFinalInventory() {
     const catalog = JSON.parse(await readFile(catalogPath, 'utf8'));
-    const canonicalPages = (await readdir(publicRoot)).filter(name => name.endsWith('.html') && name !== 'prova.html').sort();
+    const canonicalPages = (await readdir(publicRoot)).filter(name => name.endsWith('.html')).sort();
     assert.equal(canonicalPages.length, 30, 'Riesaminare la matrice quando cambia il numero di pagine canoniche');
     assert.deepEqual(catalog.pages.map(page => `${page.pageId}.html`).sort(), canonicalPages,
         'Catalogo Ricerca e pagine canoniche non coincidono');

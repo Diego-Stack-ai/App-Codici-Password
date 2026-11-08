@@ -1530,63 +1530,62 @@ Fotografia registrata nel commit `3557eb9ae10423b35d93021385887d816d71060c`, dat
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **1267**. Duplicati byte-per-byte: **4 gruppi**.
+File censiti: **1347**. Duplicati byte-per-byte: **3 gruppi**.
 
 #### Frontend
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `Frontend/public/assets/js/modules/assistant/documentation-walkthrough.js` | JS | 8104 | 164 | Modulo dell’assistente Vault: documentation-walkthrough. |
+| `Frontend/public/assets/js/modules/shared/attachment-content-policy.mjs` | MJS | 3013 | 57 | Supporto frontend: attachment-content-policy. |
 | `Frontend/.graphifyignore` | CONFIG | 372 | 11 | File di progetto: .graphifyignore. |
-| `Frontend/public/account_azienda.html` | HTML | 4253 | 85 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
-| `Frontend/public/account_privati.html` | HTML | 4028 | 83 | Struttura della pagina account privati; comportamento demandato ai moduli. |
-| `Frontend/public/aggiungi_scadenza.html` | HTML | 30083 | 436 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
-| `Frontend/public/archivio_account.html` | HTML | 6136 | 119 | Struttura della pagina archivio account; comportamento demandato ai moduli. |
-| `Frontend/public/area_privata.html` | HTML | 6584 | 135 | Struttura della pagina area privata; comportamento demandato ai moduli. |
-| `Frontend/public/assets/css/accesso.css` | CSS | 12314 | 551 | Stili della sezione accesso. |
-| `Frontend/public/assets/css/account_azienda.css` | CSS | 11336 | 510 | Stili della sezione account azienda. |
-| `Frontend/public/assets/css/account_detail.css` | CSS | 13545 | 607 | Stili della sezione account detail. |
-| `Frontend/public/assets/css/account_form.css` | CSS | 20211 | 960 | Stili della sezione account form. |
-| `Frontend/public/assets/css/account_privati.css` | CSS | 10440 | 466 | Stili della sezione account privati. |
-| `Frontend/public/assets/css/aggiungi_scadenza.css` | CSS | 25589 | 1074 | Stili della sezione aggiungi scadenza. |
-| `Frontend/public/assets/css/archivio_account.css` | CSS | 6247 | 270 | Stili della sezione archivio account. |
-| `Frontend/public/assets/css/area_privata.css` | CSS | 12842 | 559 | Stili della sezione area privata. |
-| `Frontend/public/assets/css/attachment-source-picker.css` | CSS | 2347 | 18 | Stili della sezione attachment-source-picker. |
-| `Frontend/public/assets/css/azienda_shared.css` | CSS | 378 | 21 | Stili della sezione azienda shared. |
-| `Frontend/public/assets/css/card-camera-capture.css` | CSS | 1635 | 2 | Stili della sezione card-camera-capture. |
-| `Frontend/public/assets/css/configurazione_automezzi.css` | CSS | 12119 | 501 | Stili della sezione configurazione automezzi. |
-| `Frontend/public/assets/css/configurazione_documenti.css` | CSS | 7983 | 368 | Stili della sezione configurazione documenti. |
-| `Frontend/public/assets/css/configurazione_generali.css` | CSS | 7629 | 352 | Stili della sezione configurazione generali. |
-| `Frontend/public/assets/css/contact-card-receiver.css` | CSS | 1514 | 26 | Stili della sezione contact-card-receiver. |
-| `Frontend/public/assets/css/core.css` | CSS | 13348 | 538 | Stili della base e dei token globali. |
-| `Frontend/public/assets/css/core_fascie.css` | CSS | 9062 | 346 | Stili della sezione core fascie. |
-| `Frontend/public/assets/css/core_fonts.css` | CSS | 4599 | 136 | Stili della sezione core fonts. |
-| `Frontend/public/assets/css/core_pagine.css` | CSS | 6056 | 267 | Stili della sezione core pagine. |
-| `Frontend/public/assets/css/core_ui.css` | CSS | 26987 | 1164 | Stili della sezione core ui. |
-| `Frontend/public/assets/css/datepicker_v5.css` | CSS | 4851 | 218 | Stili della sezione datepicker v5. |
-| `Frontend/public/assets/css/dati_azienda.css` | CSS | 25869 | 881 | Stili della sezione dati azienda. |
-| `Frontend/public/assets/css/dettaglio_account_azienda.css` | CSS | 3848 | 171 | Stili della sezione dettaglio account azienda. |
-| `Frontend/public/assets/css/dettaglio_account_privato.css` | CSS | 9133 | 429 | Stili della sezione dettaglio account privato. |
-| `Frontend/public/assets/css/dettaglio_scadenza.css` | CSS | 7398 | 349 | Stili della sezione dettaglio scadenza. |
-| `Frontend/public/assets/css/documentation-guide.css` | CSS | 5083 | 213 | Stili della sezione documentation-guide. |
-| `Frontend/public/assets/css/first-configuration.css` | CSS | 1474 | 13 | Stili della sezione first-configuration. |
-| `Frontend/public/assets/css/form_azienda.css` | CSS | 17924 | 912 | Stili della sezione form azienda. |
-| `Frontend/public/assets/css/gestione_destinatari.css` | CSS | 5108 | 238 | Stili della sezione gestione destinatari. |
-| `Frontend/public/assets/css/home_page.css` | CSS | 6194 | 257 | Stili della sezione home page. |
-| `Frontend/public/assets/css/image-crop-editor.css` | CSS | 2029 | 3 | Stili della sezione image-crop-editor. |
-| `Frontend/public/assets/css/impostazioni.css` | CSS | 34875 | 1545 | Stili della sezione impostazioni. |
-| `Frontend/public/assets/css/lista_aziende.css` | CSS | 7381 | 322 | Stili della sezione lista aziende. |
-| `Frontend/public/assets/css/moduli.css` | CSS | 14566 | 483 | Stili della sezione moduli. |
-| `Frontend/public/assets/css/privacy.css` | CSS | 5181 | 242 | Stili della sezione privacy. |
-| `Frontend/public/assets/css/profile-contacts.css` | CSS | 2739 | 61 | Stili della sezione profile-contacts. |
-| `Frontend/public/assets/css/profile-document-attachments.css` | CSS | 3451 | 30 | Stili della sezione profile-document-attachments. |
-| `Frontend/public/assets/css/profile-layout.css` | CSS | 4217 | 76 | Stili della sezione profile-layout. |
-| `Frontend/public/assets/css/profilo_privato.css` | CSS | 29544 | 1234 | Stili della sezione profilo privato. |
-| `Frontend/public/assets/css/prova.css` | CSS | 2084 | 112 | Stili della sezione prova. |
-| `Frontend/public/assets/css/registrati.css` | CSS | 533 | 19 | Stili della sezione registrati. |
-| `Frontend/public/assets/css/regole_scadenze.css` | CSS | 19725 | 858 | Stili della sezione regole scadenze. |
-| `Frontend/public/assets/css/scadenze.css` | CSS | 10531 | 434 | Stili della sezione scadenze. |
-| `Frontend/public/assets/css/vault-assistant.css` | CSS | 13430 | 219 | Stili della sezione vault-assistant. |
+| `Frontend/public/account_azienda.html` | HTML | 4198 | 85 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
+| `Frontend/public/account_privati.html` | HTML | 3975 | 83 | Struttura della pagina account privati; comportamento demandato ai moduli. |
+| `Frontend/public/aggiungi_scadenza.html` | HTML | 30573 | 435 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
+| `Frontend/public/archivio_account.html` | HTML | 6018 | 119 | Struttura della pagina archivio account; comportamento demandato ai moduli. |
+| `Frontend/public/area_privata.html` | HTML | 6547 | 135 | Struttura della pagina area privata; comportamento demandato ai moduli. |
+| `Frontend/public/assets/css/accesso.css` | CSS | 11764 | 551 | Stili della sezione accesso. |
+| `Frontend/public/assets/css/account_azienda.css` | CSS | 10827 | 510 | Stili della sezione account azienda. |
+| `Frontend/public/assets/css/account_detail.css` | CSS | 12939 | 607 | Stili della sezione account detail. |
+| `Frontend/public/assets/css/account_form.css` | CSS | 19252 | 960 | Stili della sezione account form. |
+| `Frontend/public/assets/css/account_privati.css` | CSS | 9975 | 466 | Stili della sezione account privati. |
+| `Frontend/public/assets/css/aggiungi_scadenza.css` | CSS | 24516 | 1074 | Stili della sezione aggiungi scadenza. |
+| `Frontend/public/assets/css/archivio_account.css` | CSS | 5978 | 270 | Stili della sezione archivio account. |
+| `Frontend/public/assets/css/area_privata.css` | CSS | 12284 | 559 | Stili della sezione area privata. |
+| `Frontend/public/assets/css/attachment-source-picker.css` | CSS | 2330 | 18 | Stili della sezione attachment-source-picker. |
+| `Frontend/public/assets/css/azienda_shared.css` | CSS | 358 | 21 | Stili della sezione azienda shared. |
+| `Frontend/public/assets/css/card-camera-capture.css` | CSS | 1634 | 2 | Stili della sezione card-camera-capture. |
+| `Frontend/public/assets/css/configurazione_automezzi.css` | CSS | 11619 | 501 | Stili della sezione configurazione automezzi. |
+| `Frontend/public/assets/css/configurazione_documenti.css` | CSS | 7616 | 368 | Stili della sezione configurazione documenti. |
+| `Frontend/public/assets/css/configurazione_generali.css` | CSS | 7278 | 352 | Stili della sezione configurazione generali. |
+| `Frontend/public/assets/css/contact-card-receiver.css` | CSS | 1489 | 26 | Stili della sezione contact-card-receiver. |
+| `Frontend/public/assets/css/core.css` | CSS | 12854 | 543 | Stili della base e dei token globali. |
+| `Frontend/public/assets/css/core_fascie.css` | CSS | 8717 | 346 | Stili della sezione core fascie. |
+| `Frontend/public/assets/css/core_fonts.css` | CSS | 4464 | 136 | Stili della sezione core fonts. |
+| `Frontend/public/assets/css/core_pagine.css` | CSS | 5790 | 267 | Stili della sezione core pagine. |
+| `Frontend/public/assets/css/core_ui.css` | CSS | 25824 | 1164 | Stili della sezione core ui. |
+| `Frontend/public/assets/css/datepicker_v5.css` | CSS | 4634 | 218 | Stili della sezione datepicker v5. |
+| `Frontend/public/assets/css/dati_azienda.css` | CSS | 24989 | 881 | Stili della sezione dati azienda. |
+| `Frontend/public/assets/css/dettaglio_account_azienda.css` | CSS | 3678 | 171 | Stili della sezione dettaglio account azienda. |
+| `Frontend/public/assets/css/dettaglio_account_privato.css` | CSS | 8705 | 429 | Stili della sezione dettaglio account privato. |
+| `Frontend/public/assets/css/dettaglio_scadenza.css` | CSS | 7050 | 349 | Stili della sezione dettaglio scadenza. |
+| `Frontend/public/assets/css/documentation-guide.css` | CSS | 4871 | 213 | Stili della sezione documentation-guide. |
+| `Frontend/public/assets/css/first-configuration.css` | CSS | 1462 | 13 | Stili della sezione first-configuration. |
+| `Frontend/public/assets/css/form_azienda.css` | CSS | 17013 | 912 | Stili della sezione form azienda. |
+| `Frontend/public/assets/css/gestione_destinatari.css` | CSS | 4871 | 238 | Stili della sezione gestione destinatari. |
+| `Frontend/public/assets/css/home_page.css` | CSS | 5938 | 257 | Stili della sezione home page. |
+| `Frontend/public/assets/css/image-crop-editor.css` | CSS | 2027 | 3 | Stili della sezione image-crop-editor. |
+| `Frontend/public/assets/css/impostazioni.css` | CSS | 33553 | 1558 | Stili della sezione impostazioni. |
+| `Frontend/public/assets/css/lista_aziende.css` | CSS | 7060 | 322 | Stili della sezione lista aziende. |
+| `Frontend/public/assets/css/moduli.css` | CSS | 14084 | 483 | Stili della sezione moduli. |
+| `Frontend/public/assets/css/privacy.css` | CSS | 4940 | 242 | Stili della sezione privacy. |
+| `Frontend/public/assets/css/profile-contacts.css` | CSS | 2679 | 61 | Stili della sezione profile-contacts. |
+| `Frontend/public/assets/css/profile-document-attachments.css` | CSS | 3422 | 30 | Stili della sezione profile-document-attachments. |
+| `Frontend/public/assets/css/profile-layout.css` | CSS | 4142 | 76 | Stili della sezione profile-layout. |
+| `Frontend/public/assets/css/profilo_privato.css` | CSS | 28311 | 1234 | Stili della sezione profilo privato. |
+| `Frontend/public/assets/css/registrati.css` | CSS | 515 | 19 | Stili della sezione registrati. |
+| `Frontend/public/assets/css/regole_scadenze.css` | CSS | 18868 | 858 | Stili della sezione regole scadenze. |
+| `Frontend/public/assets/css/scadenze.css` | CSS | 10098 | 434 | Stili della sezione scadenze. |
+| `Frontend/public/assets/css/vault-assistant.css` | CSS | 13212 | 219 | Stili della sezione vault-assistant. |
 | `Frontend/public/assets/fonts/manrope/manrope-11.woff2` | FONT | 24836 | — | Font locale manrope-11.woff2. |
 | `Frontend/public/assets/fonts/material-symbols/material-symbols-0.woff2` | FONT | 3846876 | — | Font locale material-symbols-0.woff2. |
 | `Frontend/public/assets/images/app-icon-192.png` | PNG | 32104 | — | Asset immagine app-icon-192.png. |
@@ -1596,255 +1595,606 @@ File censiti: **1267**. Duplicati byte-per-byte: **4 gruppi**.
 | `Frontend/public/assets/images/apple-touch-icon-180.png` | PNG | 28202 | — | Asset immagine apple-touch-icon-180.png. |
 | `Frontend/public/assets/images/google-avatar.png` | PNG | 1014 | — | Asset immagine google-avatar.png. |
 | `Frontend/public/assets/images/user-avatar-5.png` | PNG | 340072 | — | Asset immagine user-avatar-5.png. |
-| `Frontend/public/assets/js/app-diagnostics.js` | JS | 4915 | 83 | Supporto frontend: app-diagnostics. |
-| `Frontend/public/assets/js/auth.js` | JS | 14110 | 337 | Registrazione, login, TOTP, logout e reset account Firebase Auth. |
-| `Frontend/public/assets/js/cleanup.js` | JS | 8121 | 196 | Supporto frontend: cleanup. |
-| `Frontend/public/assets/js/components-v129.js` | JS | 19996 | 381 | Header, footer e navigazione condivisa. |
-| `Frontend/public/assets/js/contact-card-receiver.js` | JS | 2416 | 50 | Supporto frontend: contact-card-receiver. |
-| `Frontend/public/assets/js/datepicker_v5.js` | JS | 8920 | 241 | Supporto frontend: datepicker v5. |
-| `Frontend/public/assets/js/dom-utils.js` | JS | 5246 | 135 | Creazione DOM sicura e protezione da inserimenti HTML arbitrari. |
-| `Frontend/public/assets/js/env-v126.js` | JS | 257 | 8 | Supporto frontend: env-v126. |
-| `Frontend/public/assets/js/firebase-config.js` | JS | 3033 | 76 | Singleton Firebase e cache Firestore persistente multi-tab. |
-| `Frontend/public/assets/js/footer-state.js` | JS | 571 | 19 | Supporto frontend: footer-state. |
-| `Frontend/public/assets/js/guide.js` | JS | 5188 | 111 | Supporto frontend: guide. |
-| `Frontend/public/assets/js/home-bootstrap.js` | JS | 725 | 20 | Supporto frontend: home-bootstrap. |
-| `Frontend/public/assets/js/inactivity-timer.js` | JS | 4629 | 140 | Blocco Vault dopo inattività secondo la preferenza utente. |
-| `Frontend/public/assets/js/logger.js` | JS | 663 | 18 | Supporto frontend: logger. |
-| `Frontend/public/assets/js/login-entry.js` | JS | 1182 | 27 | Bootstrap minimo della pagina di accesso. |
-| `Frontend/public/assets/js/logout-session.js` | JS | 992 | 22 | Supporto frontend: logout-session. |
-| `Frontend/public/assets/js/main-v129.js` | JS | 39936 | 728 | Bootstrap autenticato globale, router, inviti e notifiche. |
-| `Frontend/public/assets/js/modules/assistant/assistant-controller.js` | JS | 5916 | 123 | Modulo dell’assistente Vault: assistant-controller. |
-| `Frontend/public/assets/js/modules/assistant/assistant-ui.js` | JS | 22546 | 373 | Modulo dell’assistente Vault: assistant-ui. |
-| `Frontend/public/assets/js/modules/assistant/conversation-engine.js` | JS | 18247 | 363 | Modulo dell’assistente Vault: conversation-engine. |
-| `Frontend/public/assets/js/modules/assistant/documentation-catalog.json` | JSON | 59091 | 1335 | Modulo dell’assistente Vault: documentation-catalog. |
-| `Frontend/public/assets/js/modules/assistant/documentation-guide.js` | JS | 20138 | 365 | Modulo dell’assistente Vault: documentation-guide. |
-| `Frontend/public/assets/js/modules/assistant/documentation-ui-labels.js` | JS | 1666 | 31 | Modulo dell’assistente Vault: documentation-ui-labels. |
-| `Frontend/public/assets/js/modules/assistant/documentation-view.js` | JS | 9065 | 163 | Modulo dell’assistente Vault: documentation-view. |
-| `Frontend/public/assets/js/modules/assistant/package.json` | JSON | 19 | 2 | Modulo dell’assistente Vault: package. |
-| `Frontend/public/assets/js/modules/assistant/search-normalizer.js` | JS | 211 | 5 | Modulo dell’assistente Vault: search-normalizer. |
-| `Frontend/public/assets/js/modules/assistant/speech-synthesis-controller.js` | JS | 2629 | 52 | Modulo dell’assistente Vault: speech-synthesis-controller. |
-| `Frontend/public/assets/js/modules/assistant/vault-data-loader.js` | JS | 5835 | 89 | Modulo dell’assistente Vault: vault-data-loader. |
-| `Frontend/public/assets/js/modules/assistant/voice-recognition-model.js` | JS | 5805 | 114 | Modulo dell’assistente Vault: voice-recognition-model. |
-| `Frontend/public/assets/js/modules/auth/imposta_nuova_password.js` | JS | 8990 | 231 | Flusso autenticazione: imposta nuova password. |
-| `Frontend/public/assets/js/modules/auth/login.js` | JS | 14486 | 344 | Flusso autenticazione: login. |
-| `Frontend/public/assets/js/modules/auth/registrati.js` | JS | 7936 | 218 | Flusso autenticazione: registrati. |
-| `Frontend/public/assets/js/modules/auth/reset_password.js` | JS | 4408 | 134 | Flusso autenticazione: reset password. |
-| `Frontend/public/assets/js/modules/azienda/account_azienda.js` | JS | 16904 | 366 | Flusso aziende/account aziendali: account azienda. |
-| `Frontend/public/assets/js/modules/azienda/company-list-service.js` | JS | 1820 | 31 | Flusso aziende/account aziendali: company-list-service. |
-| `Frontend/public/assets/js/modules/azienda/company-profile-link.js` | JS | 6362 | 73 | Flusso aziende/account aziendali: company-profile-link. |
-| `Frontend/public/assets/js/modules/azienda/company-profile-model.js` | JS | 3266 | 49 | Flusso aziende/account aziendali: company-profile-model. |
-| `Frontend/public/assets/js/modules/azienda/company-profile-ui.js` | JS | 20459 | 244 | Flusso aziende/account aziendali: company-profile-ui. |
-| `Frontend/public/assets/js/modules/azienda/company-vcard.js` | JS | 4667 | 111 | Flusso aziende/account aziendali: company-vcard. |
-| `Frontend/public/assets/js/modules/azienda/dati-azienda-attachments.js` | JS | 3689 | 72 | Flusso aziende/account aziendali: dati-azienda-attachments. |
-| `Frontend/public/assets/js/modules/azienda/dati_azienda.js` | JS | 16013 | 372 | Flusso aziende/account aziendali: dati azienda. |
-| `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js` | JS | 19446 | 419 | Flusso aziende/account aziendali: dettaglio-azienda-attachments. |
-| `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-sharing.js` | JS | 2135 | 50 | Flusso aziende/account aziendali: dettaglio-azienda-sharing. |
-| `Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js` | JS | 25506 | 532 | Flusso aziende/account aziendali: dettaglio account azienda. |
-| `Frontend/public/assets/js/modules/azienda/form-azienda-save.js` | JS | 24323 | 416 | Flusso aziende/account aziendali: form-azienda-save. |
-| `Frontend/public/assets/js/modules/azienda/form_account_azienda.js` | JS | 40493 | 833 | Flusso aziende/account aziendali: form account azienda. |
-| `Frontend/public/assets/js/modules/azienda/lista_aziende.js` | JS | 12967 | 314 | Flusso aziende/account aziendali: lista aziende. |
-| `Frontend/public/assets/js/modules/azienda/ma_attachments.js` | JS | 2743 | 70 | Flusso aziende/account aziendali: ma attachments. |
-| `Frontend/public/assets/js/modules/azienda/ma_cards.js` | JS | 16188 | 330 | Flusso aziende/account aziendali: ma cards. |
-| `Frontend/public/assets/js/modules/azienda/ma_save.js` | JS | 14117 | 229 | Flusso aziende/account aziendali: ma save. |
-| `Frontend/public/assets/js/modules/azienda/ma_state.js` | JS | 460 | 17 | Flusso aziende/account aziendali: ma state. |
-| `Frontend/public/assets/js/modules/azienda/ma_ui.js` | JS | 8616 | 195 | Flusso aziende/account aziendali: ma ui. |
-| `Frontend/public/assets/js/modules/azienda/modifica_azienda.js` | JS | 4512 | 105 | Flusso aziende/account aziendali: modifica azienda. |
-| `Frontend/public/assets/js/modules/azienda/pdf/company-summary-browser.js` | JS | 2787 | 39 | Flusso aziende/account aziendali: company-summary-browser. |
-| `Frontend/public/assets/js/modules/azienda/pdf/company-summary-entry.js` | JS | 1176 | 20 | Flusso aziende/account aziendali: company-summary-entry. |
-| `Frontend/public/assets/js/modules/azienda/pdf/company-summary-panel.js` | JS | 3050 | 48 | Flusso aziende/account aziendali: company-summary-panel. |
-| `Frontend/public/assets/js/modules/azienda/pdf/company-summary-reader.js` | JS | 5328 | 68 | Flusso aziende/account aziendali: company-summary-reader. |
-| `Frontend/public/assets/js/modules/azienda/pdf/company-summary-view.js` | JS | 5656 | 58 | Flusso aziende/account aziendali: company-summary-view. |
-| `Frontend/public/assets/js/modules/core/crypto-utils.js` | JS | 13886 | 349 | Primitive KDF, AES-GCM, verifier e codifiche crittografiche. |
-| `Frontend/public/assets/js/modules/core/mfa-manager.js` | JS | 6345 | 147 | Enroll, rimozione, recupero e revoca sessioni TOTP. |
-| `Frontend/public/assets/js/modules/core/password-policy.js` | JS | 3229 | 76 | Supporto frontend: password-policy. |
-| `Frontend/public/assets/js/modules/core/security-manager.js` | JS | 25488 | 614 | Orchestrazione Master Password, envelope Vault e sblocco biometrico. |
-| `Frontend/public/assets/js/modules/core/sharing-identity.js` | JS | 4101 | 78 | Supporto frontend: sharing-identity. |
-| `Frontend/public/assets/js/modules/core/vault-session.js` | JS | 4303 | 101 | Sessione Vault cifrata e limitata alla scheda/browser session. |
-| `Frontend/public/assets/js/modules/core/webauthn-manager.js` | JS | 7326 | 237 | Registrazione e uso WebAuthn/PRF della credenziale locale. |
-| `Frontend/public/assets/js/modules/data/account-widget-client.js` | JS | 3037 | 74 | Supporto frontend: account-widget-client. |
-| `Frontend/public/assets/js/modules/data/offline-mutation-client-core.js` | JS | 8610 | 159 | Supporto frontend: offline-mutation-client-core. |
-| `Frontend/public/assets/js/modules/data/offline-mutation-client.js` | JS | 1660 | 27 | Supporto frontend: offline-mutation-client. |
-| `Frontend/public/assets/js/modules/data/offline-mutation-lease.js` | JS | 23768 | 409 | Supporto frontend: offline-mutation-lease. |
-| `Frontend/public/assets/js/modules/data/offline-mutation-queue.js` | JS | 23959 | 426 | Supporto frontend: offline-mutation-queue. |
-| `Frontend/public/assets/js/modules/data/offline-mutation-sync.js` | JS | 8238 | 142 | Supporto frontend: offline-mutation-sync. |
-| `Frontend/public/assets/js/modules/data/offline-mutation-upgrade.js` | JS | 8708 | 148 | Supporto frontend: offline-mutation-upgrade. |
-| `Frontend/public/assets/js/modules/data/private-account-offline-coordinator.js` | JS | 2954 | 72 | Supporto frontend: private-account-offline-coordinator. |
-| `Frontend/public/assets/js/modules/data/private-account-offline-pilot.js` | JS | 5793 | 148 | Supporto frontend: private-account-offline-pilot. |
-| `Frontend/public/assets/js/modules/data/private-account-pilot-queue.js` | JS | 1779 | 28 | Supporto frontend: private-account-pilot-queue. |
-| `Frontend/public/assets/js/modules/data/request-coordinator.js` | JS | 687 | 16 | Supporto frontend: request-coordinator. |
-| `Frontend/public/assets/js/modules/data/shared-record-reader.js` | JS | 2733 | 70 | Supporto frontend: shared-record-reader. |
-| `Frontend/public/assets/js/modules/data/shared-vault-data-client.js` | JS | 3256 | 70 | Supporto frontend: shared-vault-data-client. |
-| `Frontend/public/assets/js/modules/data/shared-vault-data-model.js` | JS | 5029 | 109 | Supporto frontend: shared-vault-data-model. |
-| `Frontend/public/assets/js/modules/data/vault-repository.js` | JS | 13785 | 229 | Supporto frontend: vault-repository. |
-| `Frontend/public/assets/js/modules/data/widget-profile-client.js` | JS | 1384 | 31 | Supporto frontend: widget-profile-client. |
-| `Frontend/public/assets/js/modules/home/home-deadline-dashboard.js` | JS | 3526 | 85 | Supporto frontend: home-deadline-dashboard. |
-| `Frontend/public/assets/js/modules/home/home-deadline-inbox.js` | JS | 8176 | 174 | Supporto frontend: home-deadline-inbox. |
-| `Frontend/public/assets/js/modules/home/home.js` | JS | 17815 | 427 | Supporto frontend: home. |
-| `Frontend/public/assets/js/modules/privato/account_privati.js` | JS | 25230 | 521 | Flusso profilo/account personali: account privati. |
-| `Frontend/public/assets/js/modules/privato/area_privata.js` | JS | 22267 | 523 | Flusso profilo/account personali: area privata. |
-| `Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js` | JS | 20978 | 445 | Flusso profilo/account personali: dettaglio-privato-attachments. |
-| `Frontend/public/assets/js/modules/privato/dettaglio-privato-sharing.js` | JS | 2022 | 51 | Flusso profilo/account personali: dettaglio-privato-sharing. |
-| `Frontend/public/assets/js/modules/privato/dettaglio_account_privato.js` | JS | 25774 | 538 | Flusso profilo/account personali: dettaglio account privato. |
-| `Frontend/public/assets/js/modules/privato/form-privato-save.js` | JS | 29162 | 505 | Flusso profilo/account personali: form-privato-save. |
-| `Frontend/public/assets/js/modules/privato/form_account_privato.js` | JS | 46367 | 910 | Flusso profilo/account personali: form account privato. |
-| `Frontend/public/assets/js/modules/privato/private-account-offline-policy.js` | JS | 1786 | 32 | Flusso profilo/account personali: private-account-offline-policy. |
-| `Frontend/public/assets/js/modules/privato/profile-document-attachments.js` | JS | 14894 | 272 | Flusso profilo/account personali: profile-document-attachments. |
-| `Frontend/public/assets/js/modules/privato/profile-document-deadline-link.js` | JS | 2503 | 44 | Flusso profilo/account personali: profile-document-deadline-link. |
-| `Frontend/public/assets/js/modules/privato/profile-document-deadline-pilot-model.js` | JS | 8318 | 157 | Flusso profilo/account personali: profile-document-deadline-pilot-model. |
-| `Frontend/public/assets/js/modules/privato/profile-document-deadline-pilot.js` | JS | 8234 | 177 | Flusso profilo/account personali: profile-document-deadline-pilot. |
-| `Frontend/public/assets/js/modules/privato/profile-model.js` | JS | 13430 | 276 | Flusso profilo/account personali: profile-model. |
-| `Frontend/public/assets/js/modules/privato/profilo-actions.js` | JS | 12280 | 244 | Flusso profilo/account personali: profilo-actions. |
-| `Frontend/public/assets/js/modules/privato/profilo-addresses-docs.js` | JS | 18933 | 328 | Flusso profilo/account personali: profilo-addresses-docs. |
-| `Frontend/public/assets/js/modules/privato/profilo-dashboard.js` | JS | 9983 | 167 | Flusso profilo/account personali: profilo-dashboard. |
-| `Frontend/public/assets/js/modules/privato/profilo-links.js` | JS | 16239 | 284 | Flusso profilo/account personali: profilo-links. |
-| `Frontend/public/assets/js/modules/privato/profilo-modal.js` | JS | 20471 | 376 | Flusso profilo/account personali: profilo-modal. |
-| `Frontend/public/assets/js/modules/privato/profilo-phones-emails.js` | JS | 20900 | 394 | Flusso profilo/account personali: profilo-phones-emails. |
-| `Frontend/public/assets/js/modules/privato/profilo-qr.js` | JS | 6005 | 136 | Flusso profilo/account personali: profilo-qr. |
-| `Frontend/public/assets/js/modules/privato/profilo-sync.js` | JS | 4991 | 113 | Flusso profilo/account personali: profilo-sync. |
-| `Frontend/public/assets/js/modules/privato/profilo-ui.js` | JS | 13172 | 269 | Flusso profilo/account personali: profilo-ui. |
-| `Frontend/public/assets/js/modules/privato/profilo-widgets.js` | JS | 15239 | 293 | Flusso profilo/account personali: profilo-widgets. |
-| `Frontend/public/assets/js/modules/privato/profilo_privato.js` | JS | 30150 | 605 | Flusso profilo/account personali: profilo privato. |
-| `Frontend/public/assets/js/modules/scadenze/aggiungi_scadenza.js` | JS | 49481 | 1076 | Flusso scadenze/configurazione: aggiungi scadenza. |
-| `Frontend/public/assets/js/modules/scadenze/configurazione_automezzi.js` | JS | 13462 | 286 | Flusso scadenze/configurazione: configurazione automezzi. |
-| `Frontend/public/assets/js/modules/scadenze/configurazione_automezzi_v2.js` | JS | 20575 | 387 | Flusso scadenze/configurazione: configurazione automezzi v2. |
-| `Frontend/public/assets/js/modules/scadenze/configurazione_documenti.js` | JS | 12899 | 275 | Flusso scadenze/configurazione: configurazione documenti. |
-| `Frontend/public/assets/js/modules/scadenze/configurazione_generali.js` | JS | 14666 | 343 | Flusso scadenze/configurazione: configurazione generali. |
-| `Frontend/public/assets/js/modules/scadenze/deadline-attachment-controller.js` | JS | 4603 | 94 | Flusso scadenze/configurazione: deadline-attachment-controller. |
-| `Frontend/public/assets/js/modules/scadenze/deadline-company-context-controller.js` | JS | 5262 | 113 | Flusso scadenze/configurazione: deadline-company-context-controller. |
-| `Frontend/public/assets/js/modules/scadenze/deadline-config-controller.js` | JS | 25247 | 518 | Flusso scadenze/configurazione: deadline-config-controller. |
-| `Frontend/public/assets/js/modules/scadenze/deadline-config-model.js` | JS | 17063 | 387 | Flusso scadenze/configurazione: deadline-config-model. |
-| `Frontend/public/assets/js/modules/scadenze/deadline-domain-model.js` | JS | 10497 | 230 | Flusso scadenze/configurazione: deadline-domain-model. |
-| `Frontend/public/assets/js/modules/scadenze/deadline-editor-return-draft.js` | JS | 1900 | 53 | Flusso scadenze/configurazione: deadline-editor-return-draft. |
-| `Frontend/public/assets/js/modules/scadenze/deadline-form-model.js` | JS | 8636 | 196 | Flusso scadenze/configurazione: deadline-form-model. |
-| `Frontend/public/assets/js/modules/scadenze/deadline-model.js` | JS | 10837 | 212 | Flusso scadenze/configurazione: deadline-model. |
-| `Frontend/public/assets/js/modules/scadenze/deadline-recipient-controller.js` | JS | 7725 | 139 | Flusso scadenze/configurazione: deadline-recipient-controller. |
-| `Frontend/public/assets/js/modules/scadenze/deadline-recipient-model.js` | JS | 6591 | 140 | Flusso scadenze/configurazione: deadline-recipient-model. |
-| `Frontend/public/assets/js/modules/scadenze/deadline-rules-hub.js` | JS | 24272 | 467 | Flusso scadenze/configurazione: deadline-rules-hub. |
-| `Frontend/public/assets/js/modules/scadenze/deadline-save-service.js` | JS | 14484 | 314 | Flusso scadenze/configurazione: deadline-save-service. |
-| `Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js` | JS | 25472 | 518 | Flusso scadenze/configurazione: dettaglio scadenza. |
-| `Frontend/public/assets/js/modules/scadenze/scadenze.js` | JS | 22607 | 563 | Flusso scadenze/configurazione: scadenze. |
-| `Frontend/public/assets/js/modules/settings/account-field-usage-model.js` | JS | 6787 | 110 | Impostazioni applicative: account-field-usage-model. |
-| `Frontend/public/assets/js/modules/settings/account-field-usage-service.js` | JS | 8154 | 181 | Impostazioni applicative: account-field-usage-service. |
-| `Frontend/public/assets/js/modules/settings/archive-account-model.js` | JS | 2602 | 55 | Impostazioni applicative: archive-account-model. |
-| `Frontend/public/assets/js/modules/settings/archive-account-service.js` | JS | 22388 | 449 | Impostazioni applicative: archive-account-service. |
-| `Frontend/public/assets/js/modules/settings/archivio_account.js` | JS | 21528 | 481 | Impostazioni applicative: archivio account. |
-| `Frontend/public/assets/js/modules/settings/backup-crypto.js` | JS | 5314 | 125 | Impostazioni applicative: backup-crypto. |
-| `Frontend/public/assets/js/modules/settings/backup-export-buffer.js` | JS | 2570 | 50 | Impostazioni applicative: backup-export-buffer. |
-| `Frontend/public/assets/js/modules/settings/backup-export-model.js` | JS | 4479 | 93 | Impostazioni applicative: backup-export-model. |
-| `Frontend/public/assets/js/modules/settings/backup-export-service.js` | JS | 10267 | 214 | Impostazioni applicative: backup-export-service. |
-| `Frontend/public/assets/js/modules/settings/backup-import-model.js` | JS | 10366 | 198 | Impostazioni applicative: backup-import-model. |
-| `Frontend/public/assets/js/modules/settings/backup-import-service.js` | JS | 31349 | 610 | Impostazioni applicative: backup-import-service. |
-| `Frontend/public/assets/js/modules/settings/backup-restore-v2-client.js` | JS | 3922 | 82 | Impostazioni applicative: backup-restore-v2-client. |
-| `Frontend/public/assets/js/modules/settings/credential-health-model.js` | JS | 2829 | 73 | Impostazioni applicative: credential-health-model. |
-| `Frontend/public/assets/js/modules/settings/credential-health-service.js` | JS | 6295 | 155 | Impostazioni applicative: credential-health-service. |
-| `Frontend/public/assets/js/modules/settings/first-configuration.js` | JS | 8452 | 101 | Impostazioni applicative: first-configuration. |
-| `Frontend/public/assets/js/modules/settings/impostazioni.js` | JS | 82001 | 1511 | Impostazioni applicative: impostazioni. |
-| `Frontend/public/assets/js/modules/settings/package.json` | JSON | 26 | 4 | Impostazioni applicative: package. |
-| `Frontend/public/assets/js/modules/settings/portable-archive-inventory.js` | JS | 8470 | 164 | Impostazioni applicative: portable-archive-inventory. |
-| `Frontend/public/assets/js/modules/settings/portable-archive-projections.js` | JS | 22405 | 374 | Impostazioni applicative: portable-archive-projections. |
-| `Frontend/public/assets/js/modules/settings/portable-archive-service.js` | JS | 16024 | 306 | Impostazioni applicative: portable-archive-service. |
-| `Frontend/public/assets/js/modules/settings/portable-archive-stream.js` | JS | 30519 | 535 | Impostazioni applicative: portable-archive-stream. |
-| `Frontend/public/assets/js/modules/settings/portable-archive-viewer.js` | JS | 49958 | 92 | Impostazioni applicative: portable-archive-viewer. |
-| `Frontend/public/assets/js/modules/settings/push-settings-controller.js` | JS | 3501 | 94 | Impostazioni applicative: push-settings-controller. |
-| `Frontend/public/assets/js/modules/settings/shared-credentials-controller.js` | JS | 17327 | 320 | Impostazioni applicative: shared-credentials-controller. |
-| `Frontend/public/assets/js/modules/shared/account-avatar.js` | JS | 527 | 19 | Supporto frontend: account-avatar. |
-| `Frontend/public/assets/js/modules/shared/account-banking-view.js` | JS | 7963 | 167 | Supporto frontend: account-banking-view. |
-| `Frontend/public/assets/js/modules/shared/account-embedded-widgets.js` | JS | 41614 | 737 | Supporto frontend: account-embedded-widgets. |
+| `Frontend/public/assets/js/app-diagnostics.js` | JS | 4831 | 83 | Supporto frontend: app-diagnostics. |
+| `Frontend/public/assets/js/app-env.js` | JS | 1503 | 27 | Supporto frontend: app-env. |
+| `Frontend/public/assets/js/auth-session-fence.js` | JS | 6751 | 151 | Blocco logout condiviso con transazioni e ammissione dopo login esplicito. |
+| `Frontend/public/assets/js/auth.js` | JS | 16251 | 369 | Registrazione, login, TOTP, logout e reset account Firebase Auth. |
+| `Frontend/public/assets/js/cleanup.js` | JS | 7927 | 196 | Supporto frontend: cleanup. |
+| `Frontend/public/assets/js/components-v129.js` | JS | 19612 | 381 | Header, footer e navigazione condivisa. |
+| `Frontend/public/assets/js/contact-card-receiver.js` | JS | 2967 | 64 | Supporto frontend: contact-card-receiver. |
+| `Frontend/public/assets/js/datepicker_v5.js` | JS | 8812 | 243 | Supporto frontend: datepicker v5. |
+| `Frontend/public/assets/js/dom-utils.js` | JS | 5112 | 135 | Creazione DOM sicura e protezione da inserimenti HTML arbitrari. |
+| `Frontend/public/assets/js/env-v126.js` | JS | 210 | 6 | Supporto frontend: env-v126. |
+| `Frontend/public/assets/js/firebase-config.js` | JS | 2958 | 76 | Singleton Firebase e cache Firestore persistente multi-tab. |
+| `Frontend/public/assets/js/footer-state.js` | JS | 553 | 19 | Supporto frontend: footer-state. |
+| `Frontend/public/assets/js/guide.js` | JS | 5056 | 111 | Supporto frontend: guide. |
+| `Frontend/public/assets/js/home-bootstrap.js` | JS | 706 | 20 | Supporto frontend: home-bootstrap. |
+| `Frontend/public/assets/js/inactivity-timer.js` | JS | 4480 | 140 | Blocco Vault dopo inattività secondo la preferenza utente. |
+| `Frontend/public/assets/js/logger.js` | JS | 646 | 18 | Supporto frontend: logger. |
+| `Frontend/public/assets/js/login-entry.js` | JS | 1156 | 27 | Bootstrap minimo della pagina di accesso. |
+| `Frontend/public/assets/js/logout-session.js` | JS | 1178 | 25 | Supporto frontend: logout-session. |
+| `Frontend/public/assets/js/main-v129.js` | JS | 34547 | 627 | Bootstrap autenticato globale, router, inviti e notifiche. |
+| `Frontend/public/assets/js/modules/assistant/assistant-controller.js` | JS | 8714 | 186 | Modulo dell’assistente Vault: assistant-controller. |
+| `Frontend/public/assets/js/modules/assistant/assistant-ui.js` | JS | 24638 | 431 | Modulo dell’assistente Vault: assistant-ui. |
+| `Frontend/public/assets/js/modules/assistant/conversation-engine.js` | JS | 17885 | 363 | Modulo dell’assistente Vault: conversation-engine. |
+| `Frontend/public/assets/js/modules/assistant/documentation-catalog.json` | JSON | 57667 | 1335 | Modulo dell’assistente Vault: documentation-catalog. |
+| `Frontend/public/assets/js/modules/assistant/documentation-guide.js` | JS | 19774 | 365 | Modulo dell’assistente Vault: documentation-guide. |
+| `Frontend/public/assets/js/modules/assistant/documentation-ui-labels.js` | JS | 1636 | 31 | Modulo dell’assistente Vault: documentation-ui-labels. |
+| `Frontend/public/assets/js/modules/assistant/documentation-view.js` | JS | 8903 | 163 | Modulo dell’assistente Vault: documentation-view. |
+| `Frontend/public/assets/js/modules/assistant/documentation-walkthrough.js` | JS | 8104 | 164 | Modulo dell’assistente Vault: documentation-walkthrough. |
+| `Frontend/public/assets/js/modules/assistant/package.json` | JSON | 18 | 2 | Modulo dell’assistente Vault: package. |
+| `Frontend/public/assets/js/modules/assistant/search-normalizer.js` | JS | 207 | 5 | Modulo dell’assistente Vault: search-normalizer. |
+| `Frontend/public/assets/js/modules/assistant/speech-synthesis-controller.js` | JS | 2578 | 52 | Modulo dell’assistente Vault: speech-synthesis-controller. |
+| `Frontend/public/assets/js/modules/assistant/vault-data-loader.js` | JS | 5747 | 89 | Modulo dell’assistente Vault: vault-data-loader. |
+| `Frontend/public/assets/js/modules/assistant/voice-recognition-model.js` | JS | 5692 | 114 | Modulo dell’assistente Vault: voice-recognition-model. |
+| `Frontend/public/assets/js/modules/auth/imposta_nuova_password.js` | JS | 9296 | 245 | Flusso autenticazione: imposta nuova password. |
+| `Frontend/public/assets/js/modules/auth/login.js` | JS | 14393 | 349 | Flusso autenticazione: login. |
+| `Frontend/public/assets/js/modules/auth/registrati.js` | JS | 7666 | 218 | Flusso autenticazione: registrati. |
+| `Frontend/public/assets/js/modules/auth/reset_password.js` | JS | 4267 | 134 | Flusso autenticazione: reset password. |
+| `Frontend/public/assets/js/modules/azienda/account_azienda.js` | JS | 16534 | 366 | Flusso aziende/account aziendali: account azienda. |
+| `Frontend/public/assets/js/modules/azienda/company-list-service.js` | JS | 1790 | 31 | Flusso aziende/account aziendali: company-list-service. |
+| `Frontend/public/assets/js/modules/azienda/company-profile-link.js` | JS | 6290 | 73 | Flusso aziende/account aziendali: company-profile-link. |
+| `Frontend/public/assets/js/modules/azienda/company-profile-model.js` | JS | 3218 | 49 | Flusso aziende/account aziendali: company-profile-model. |
+| `Frontend/public/assets/js/modules/azienda/company-profile-ui.js` | JS | 20484 | 248 | Flusso aziende/account aziendali: company-profile-ui. |
+| `Frontend/public/assets/js/modules/azienda/company-vcard.js` | JS | 4557 | 111 | Flusso aziende/account aziendali: company-vcard. |
+| `Frontend/public/assets/js/modules/azienda/dati-azienda-attachments.js` | JS | 3618 | 72 | Flusso aziende/account aziendali: dati-azienda-attachments. |
+| `Frontend/public/assets/js/modules/azienda/dati_azienda.js` | JS | 15664 | 372 | Flusso aziende/account aziendali: dati azienda. |
+| `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js` | JS | 19169 | 421 | Flusso aziende/account aziendali: dettaglio-azienda-attachments. |
+| `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-sharing.js` | JS | 2086 | 50 | Flusso aziende/account aziendali: dettaglio-azienda-sharing. |
+| `Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js` | JS | 25491 | 541 | Flusso aziende/account aziendali: dettaglio account azienda. |
+| `Frontend/public/assets/js/modules/azienda/form-azienda-save.js` | JS | 25397 | 439 | Flusso aziende/account aziendali: form-azienda-save. |
+| `Frontend/public/assets/js/modules/azienda/form_account_azienda.js` | JS | 39716 | 833 | Flusso aziende/account aziendali: form account azienda. |
+| `Frontend/public/assets/js/modules/azienda/lista_aziende.js` | JS | 12654 | 314 | Flusso aziende/account aziendali: lista aziende. |
+| `Frontend/public/assets/js/modules/azienda/ma_attachments.js` | JS | 2674 | 70 | Flusso aziende/account aziendali: ma attachments. |
+| `Frontend/public/assets/js/modules/azienda/ma_cards.js` | JS | 15893 | 330 | Flusso aziende/account aziendali: ma cards. |
+| `Frontend/public/assets/js/modules/azienda/ma_save.js` | JS | 13889 | 229 | Flusso aziende/account aziendali: ma save. |
+| `Frontend/public/assets/js/modules/azienda/ma_state.js` | JS | 444 | 17 | Flusso aziende/account aziendali: ma state. |
+| `Frontend/public/assets/js/modules/azienda/ma_ui.js` | JS | 8422 | 195 | Flusso aziende/account aziendali: ma ui. |
+| `Frontend/public/assets/js/modules/azienda/modifica_azienda.js` | JS | 4408 | 105 | Flusso aziende/account aziendali: modifica azienda. |
+| `Frontend/public/assets/js/modules/azienda/pdf/company-summary-browser.js` | JS | 2749 | 39 | Flusso aziende/account aziendali: company-summary-browser. |
+| `Frontend/public/assets/js/modules/azienda/pdf/company-summary-entry.js` | JS | 1157 | 20 | Flusso aziende/account aziendali: company-summary-entry. |
+| `Frontend/public/assets/js/modules/azienda/pdf/company-summary-panel.js` | JS | 3003 | 48 | Flusso aziende/account aziendali: company-summary-panel. |
+| `Frontend/public/assets/js/modules/azienda/pdf/company-summary-reader.js` | JS | 5261 | 68 | Flusso aziende/account aziendali: company-summary-reader. |
+| `Frontend/public/assets/js/modules/azienda/pdf/company-summary-view.js` | JS | 5599 | 58 | Flusso aziende/account aziendali: company-summary-view. |
+| `Frontend/public/assets/js/modules/core/crypto-utils.js` | JS | 13538 | 349 | Primitive KDF, AES-GCM, verifier e codifiche crittografiche. |
+| `Frontend/public/assets/js/modules/core/mfa-manager.js` | JS | 6244 | 148 | Enroll, rimozione, recupero e revoca sessioni TOTP. |
+| `Frontend/public/assets/js/modules/core/password-policy.js` | JS | 3154 | 76 | Supporto frontend: password-policy. |
+| `Frontend/public/assets/js/modules/core/security-manager.js` | JS | 25046 | 617 | Orchestrazione Master Password, envelope Vault e sblocco biometrico. |
+| `Frontend/public/assets/js/modules/core/sharing-identity.js` | JS | 4024 | 78 | Supporto frontend: sharing-identity. |
+| `Frontend/public/assets/js/modules/core/vault-session.js` | JS | 4279 | 109 | Sessione Vault cifrata solo in RAM nel documento; nessun ripristino da storage tra pagine. |
+| `Frontend/public/assets/js/modules/core/webauthn-manager.js` | JS | 7090 | 237 | Registrazione e uso WebAuthn/PRF della credenziale locale. |
+| `Frontend/public/assets/js/modules/data/account-widget-client.js` | JS | 2964 | 74 | Supporto frontend: account-widget-client. |
+| `Frontend/public/assets/js/modules/data/offline-mutation-client-core.js` | JS | 8452 | 159 | Supporto frontend: offline-mutation-client-core. |
+| `Frontend/public/assets/js/modules/data/offline-mutation-client.js` | JS | 1634 | 27 | Supporto frontend: offline-mutation-client. |
+| `Frontend/public/assets/js/modules/data/offline-mutation-lease.js` | JS | 23360 | 409 | Supporto frontend: offline-mutation-lease. |
+| `Frontend/public/assets/js/modules/data/offline-mutation-queue.js` | JS | 23534 | 426 | Supporto frontend: offline-mutation-queue. |
+| `Frontend/public/assets/js/modules/data/offline-mutation-sync.js` | JS | 8097 | 142 | Supporto frontend: offline-mutation-sync. |
+| `Frontend/public/assets/js/modules/data/offline-mutation-upgrade.js` | JS | 8561 | 148 | Supporto frontend: offline-mutation-upgrade. |
+| `Frontend/public/assets/js/modules/data/private-account-offline-coordinator.js` | JS | 2883 | 72 | Supporto frontend: private-account-offline-coordinator. |
+| `Frontend/public/assets/js/modules/data/private-account-offline-pilot.js` | JS | 5646 | 148 | Supporto frontend: private-account-offline-pilot. |
+| `Frontend/public/assets/js/modules/data/private-account-pilot-queue.js` | JS | 1752 | 28 | Supporto frontend: private-account-pilot-queue. |
+| `Frontend/public/assets/js/modules/data/request-coordinator.js` | JS | 672 | 16 | Supporto frontend: request-coordinator. |
+| `Frontend/public/assets/js/modules/data/shared-record-reader.js` | JS | 2664 | 70 | Supporto frontend: shared-record-reader. |
+| `Frontend/public/assets/js/modules/data/shared-vault-data-client.js` | JS | 3187 | 70 | Supporto frontend: shared-vault-data-client. |
+| `Frontend/public/assets/js/modules/data/shared-vault-data-model.js` | JS | 4921 | 109 | Supporto frontend: shared-vault-data-model. |
+| `Frontend/public/assets/js/modules/data/vault-repository.js` | JS | 14432 | 240 | Supporto frontend: vault-repository. |
+| `Frontend/public/assets/js/modules/data/widget-profile-client.js` | JS | 1354 | 31 | Supporto frontend: widget-profile-client. |
+| `Frontend/public/assets/js/modules/home/home-deadline-dashboard.js` | JS | 3442 | 85 | Supporto frontend: home-deadline-dashboard. |
+| `Frontend/public/assets/js/modules/home/home-deadline-inbox.js` | JS | 8003 | 174 | Supporto frontend: home-deadline-inbox. |
+| `Frontend/public/assets/js/modules/home/home.js` | JS | 17389 | 427 | Supporto frontend: home. |
+| `Frontend/public/assets/js/modules/privato/account_privati.js` | JS | 24710 | 521 | Flusso profilo/account personali: account privati. |
+| `Frontend/public/assets/js/modules/privato/area_privata.js` | JS | 21745 | 523 | Flusso profilo/account personali: area privata. |
+| `Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js` | JS | 20684 | 447 | Flusso profilo/account personali: dettaglio-privato-attachments. |
+| `Frontend/public/assets/js/modules/privato/dettaglio-privato-sharing.js` | JS | 1972 | 51 | Flusso profilo/account personali: dettaglio-privato-sharing. |
+| `Frontend/public/assets/js/modules/privato/dettaglio_account_privato.js` | JS | 25731 | 547 | Flusso profilo/account personali: dettaglio account privato. |
+| `Frontend/public/assets/js/modules/privato/form-privato-save.js` | JS | 30074 | 528 | Flusso profilo/account personali: form-privato-save. |
+| `Frontend/public/assets/js/modules/privato/form_account_privato.js` | JS | 45036 | 910 | Flusso profilo/account personali: form account privato. |
+| `Frontend/public/assets/js/modules/privato/private-account-offline-policy.js` | JS | 1755 | 32 | Flusso profilo/account personali: private-account-offline-policy. |
+| `Frontend/public/assets/js/modules/privato/profile-document-attachments.js` | JS | 14711 | 273 | Flusso profilo/account personali: profile-document-attachments. |
+| `Frontend/public/assets/js/modules/privato/profile-document-deadline-link.js` | JS | 2460 | 44 | Flusso profilo/account personali: profile-document-deadline-link. |
+| `Frontend/public/assets/js/modules/privato/profile-document-deadline-pilot-model.js` | JS | 8162 | 157 | Flusso profilo/account personali: profile-document-deadline-pilot-model. |
+| `Frontend/public/assets/js/modules/privato/profile-document-deadline-pilot.js` | JS | 8058 | 177 | Flusso profilo/account personali: profile-document-deadline-pilot. |
+| `Frontend/public/assets/js/modules/privato/profile-model.js` | JS | 13155 | 276 | Flusso profilo/account personali: profile-model. |
+| `Frontend/public/assets/js/modules/privato/profilo-actions.js` | JS | 12037 | 244 | Flusso profilo/account personali: profilo-actions. |
+| `Frontend/public/assets/js/modules/privato/profilo-addresses-docs.js` | JS | 18643 | 328 | Flusso profilo/account personali: profilo-addresses-docs. |
+| `Frontend/public/assets/js/modules/privato/profilo-dashboard.js` | JS | 10007 | 172 | Flusso profilo/account personali: profilo-dashboard. |
+| `Frontend/public/assets/js/modules/privato/profilo-links.js` | JS | 15956 | 284 | Flusso profilo/account personali: profilo-links. |
+| `Frontend/public/assets/js/modules/privato/profilo-modal.js` | JS | 20098 | 376 | Flusso profilo/account personali: profilo-modal. |
+| `Frontend/public/assets/js/modules/privato/profilo-phones-emails.js` | JS | 20602 | 394 | Flusso profilo/account personali: profilo-phones-emails. |
+| `Frontend/public/assets/js/modules/privato/profilo-qr.js` | JS | 5915 | 137 | Flusso profilo/account personali: profilo-qr. |
+| `Frontend/public/assets/js/modules/privato/profilo-sync.js` | JS | 4879 | 113 | Flusso profilo/account personali: profilo-sync. |
+| `Frontend/public/assets/js/modules/privato/profilo-ui.js` | JS | 12904 | 269 | Flusso profilo/account personali: profilo-ui. |
+| `Frontend/public/assets/js/modules/privato/profilo-widgets.js` | JS | 15001 | 294 | Flusso profilo/account personali: profilo-widgets. |
+| `Frontend/public/assets/js/modules/privato/profilo_privato.js` | JS | 29546 | 605 | Flusso profilo/account personali: profilo privato. |
+| `Frontend/public/assets/js/modules/scadenze/aggiungi_scadenza.js` | JS | 48668 | 1080 | Flusso scadenze/configurazione: aggiungi scadenza. |
+| `Frontend/public/assets/js/modules/scadenze/configurazione_automezzi.js` | JS | 13177 | 286 | Flusso scadenze/configurazione: configurazione automezzi. |
+| `Frontend/public/assets/js/modules/scadenze/configurazione_automezzi_v2.js` | JS | 20189 | 387 | Flusso scadenze/configurazione: configurazione automezzi v2. |
+| `Frontend/public/assets/js/modules/scadenze/configurazione_documenti.js` | JS | 12625 | 275 | Flusso scadenze/configurazione: configurazione documenti. |
+| `Frontend/public/assets/js/modules/scadenze/configurazione_generali.js` | JS | 14324 | 343 | Flusso scadenze/configurazione: configurazione generali. |
+| `Frontend/public/assets/js/modules/scadenze/deadline-attachment-controller.js` | JS | 4714 | 97 | Flusso scadenze/configurazione: deadline-attachment-controller. |
+| `Frontend/public/assets/js/modules/scadenze/deadline-company-context-controller.js` | JS | 5150 | 113 | Flusso scadenze/configurazione: deadline-company-context-controller. |
+| `Frontend/public/assets/js/modules/scadenze/deadline-config-controller.js` | JS | 24730 | 518 | Flusso scadenze/configurazione: deadline-config-controller. |
+| `Frontend/public/assets/js/modules/scadenze/deadline-config-model.js` | JS | 16677 | 387 | Flusso scadenze/configurazione: deadline-config-model. |
+| `Frontend/public/assets/js/modules/scadenze/deadline-domain-model.js` | JS | 10268 | 230 | Flusso scadenze/configurazione: deadline-domain-model. |
+| `Frontend/public/assets/js/modules/scadenze/deadline-editor-return-draft.js` | JS | 1848 | 53 | Flusso scadenze/configurazione: deadline-editor-return-draft. |
+| `Frontend/public/assets/js/modules/scadenze/deadline-form-model.js` | JS | 8441 | 196 | Flusso scadenze/configurazione: deadline-form-model. |
+| `Frontend/public/assets/js/modules/scadenze/deadline-model.js` | JS | 10626 | 212 | Flusso scadenze/configurazione: deadline-model. |
+| `Frontend/public/assets/js/modules/scadenze/deadline-recipient-controller.js` | JS | 7671 | 141 | Flusso scadenze/configurazione: deadline-recipient-controller. |
+| `Frontend/public/assets/js/modules/scadenze/deadline-recipient-model.js` | JS | 6452 | 140 | Flusso scadenze/configurazione: deadline-recipient-model. |
+| `Frontend/public/assets/js/modules/scadenze/deadline-rules-hub.js` | JS | 23806 | 467 | Flusso scadenze/configurazione: deadline-rules-hub. |
+| `Frontend/public/assets/js/modules/scadenze/deadline-save-service.js` | JS | 14171 | 314 | Flusso scadenze/configurazione: deadline-save-service. |
+| `Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js` | JS | 24955 | 518 | Flusso scadenze/configurazione: dettaglio scadenza. |
+| `Frontend/public/assets/js/modules/scadenze/scadenze.js` | JS | 22045 | 563 | Flusso scadenze/configurazione: scadenze. |
+| `Frontend/public/assets/js/modules/settings/account-field-usage-model.js` | JS | 6678 | 110 | Impostazioni applicative: account-field-usage-model. |
+| `Frontend/public/assets/js/modules/settings/account-field-usage-service.js` | JS | 7974 | 181 | Impostazioni applicative: account-field-usage-service. |
+| `Frontend/public/assets/js/modules/settings/archive-account-model.js` | JS | 2548 | 55 | Impostazioni applicative: archive-account-model. |
+| `Frontend/public/assets/js/modules/settings/archive-account-service.js` | JS | 22693 | 452 | Impostazioni applicative: archive-account-service. |
+| `Frontend/public/assets/js/modules/settings/archivio_account.js` | JS | 21048 | 481 | Impostazioni applicative: archivio account. |
+| `Frontend/public/assets/js/modules/settings/backup-crypto.js` | JS | 6781 | 147 | Impostazioni applicative: backup-crypto. |
+| `Frontend/public/assets/js/modules/settings/backup-export-buffer.js` | JS | 2521 | 50 | Impostazioni applicative: backup-export-buffer. |
+| `Frontend/public/assets/js/modules/settings/backup-export-model.js` | JS | 4387 | 93 | Impostazioni applicative: backup-export-model. |
+| `Frontend/public/assets/js/modules/settings/backup-export-service.js` | JS | 11892 | 242 | Impostazioni applicative: backup-export-service. |
+| `Frontend/public/assets/js/modules/settings/backup-import-model.js` | JS | 10169 | 198 | Impostazioni applicative: backup-import-model. |
+| `Frontend/public/assets/js/modules/settings/backup-import-service.js` | JS | 31679 | 629 | Impostazioni applicative: backup-import-service. |
+| `Frontend/public/assets/js/modules/settings/backup-restore-v2-client.js` | JS | 3841 | 82 | Impostazioni applicative: backup-restore-v2-client. |
+| `Frontend/public/assets/js/modules/settings/complete-recovery-client.js` | JS | 9621 | 146 | Impostazioni applicative: complete-recovery-client. |
+| `Frontend/public/assets/js/modules/settings/complete-recovery-config.js` | JS | 224 | 2 | Impostazioni applicative: complete-recovery-config. |
+| `Frontend/public/assets/js/modules/settings/complete-recovery-entry.js` | JS | 4668 | 74 | Impostazioni applicative: complete-recovery-entry. |
+| `Frontend/public/assets/js/modules/settings/complete-recovery-locator.js` | JS | 1823 | 33 | Impostazioni applicative: complete-recovery-locator. |
+| `Frontend/public/assets/js/modules/settings/complete-recovery-ui.js` | JS | 17631 | 235 | Impostazioni applicative: complete-recovery-ui. |
+| `Frontend/public/assets/js/modules/settings/credential-health-model.js` | JS | 2757 | 73 | Impostazioni applicative: credential-health-model. |
+| `Frontend/public/assets/js/modules/settings/credential-health-service.js` | JS | 6141 | 155 | Impostazioni applicative: credential-health-service. |
+| `Frontend/public/assets/js/modules/settings/first-configuration.js` | JS | 8352 | 101 | Impostazioni applicative: first-configuration. |
+| `Frontend/public/assets/js/modules/settings/full-recovery-model.js` | JS | 18674 | 260 | Impostazioni applicative: full-recovery-model. |
+| `Frontend/public/assets/js/modules/settings/full-recovery-service.js` | JS | 27013 | 389 | Impostazioni applicative: full-recovery-service. |
+| `Frontend/public/assets/js/modules/settings/impostazioni.js` | JS | 82836 | 1570 | Impostazioni applicative: impostazioni. |
+| `Frontend/public/assets/js/modules/settings/package.json` | JSON | 23 | 4 | Impostazioni applicative: package. |
+| `Frontend/public/assets/js/modules/settings/portable-archive-inventory.js` | JS | 8307 | 164 | Impostazioni applicative: portable-archive-inventory. |
+| `Frontend/public/assets/js/modules/settings/portable-archive-projections.js` | JS | 22032 | 374 | Impostazioni applicative: portable-archive-projections. |
+| `Frontend/public/assets/js/modules/settings/portable-archive-service.js` | JS | 15719 | 306 | Impostazioni applicative: portable-archive-service. |
+| `Frontend/public/assets/js/modules/settings/portable-archive-stream.js` | JS | 29985 | 535 | Impostazioni applicative: portable-archive-stream. |
+| `Frontend/public/assets/js/modules/settings/portable-archive-viewer.js` | JS | 51724 | 97 | Impostazioni applicative: portable-archive-viewer. |
+| `Frontend/public/assets/js/modules/settings/push-settings-controller.js` | JS | 3408 | 94 | Impostazioni applicative: push-settings-controller. |
+| `Frontend/public/assets/js/modules/settings/recovery-asset-reader.js` | JS | 7199 | 112 | Impostazioni applicative: recovery-asset-reader. |
+| `Frontend/public/assets/js/modules/settings/recovery-transport-limits.js` | JS | 1737 | 31 | Impostazioni applicative: recovery-transport-limits. |
+| `Frontend/public/assets/js/modules/settings/shared-credentials-controller.js` | JS | 17057 | 321 | Impostazioni applicative: shared-credentials-controller. |
+| `Frontend/public/assets/js/modules/shared/account-avatar.js` | JS | 509 | 19 | Supporto frontend: account-avatar. |
+| `Frontend/public/assets/js/modules/shared/account-banking-view.js` | JS | 7797 | 167 | Supporto frontend: account-banking-view. |
+| `Frontend/public/assets/js/modules/shared/account-embedded-widgets.js` | JS | 40652 | 738 | Supporto frontend: account-embedded-widgets. |
 | `Frontend/public/assets/js/modules/shared/account-list-sort.js` | JS | 2157 | 45 | Supporto frontend: account-list-sort. |
-| `Frontend/public/assets/js/modules/shared/account-list-view.js` | JS | 10218 | 203 | Supporto frontend: account-list-view. |
-| `Frontend/public/assets/js/modules/shared/account-mode-model.js` | JS | 6725 | 160 | Supporto frontend: account-mode-model. |
-| `Frontend/public/assets/js/modules/shared/account-note-editor.js` | JS | 8907 | 142 | Supporto frontend: account-note-editor. |
-| `Frontend/public/assets/js/modules/shared/account-shared-credentials.js` | JS | 18788 | 316 | Supporto frontend: account-shared-credentials. |
-| `Frontend/public/assets/js/modules/shared/account-widget-lifecycle.js` | JS | 7220 | 134 | Supporto frontend: account-widget-lifecycle. |
-| `Frontend/public/assets/js/modules/shared/attachment-security.js` | JS | 8645 | 213 | Validazione e cifratura degli allegati prima di Storage. |
-| `Frontend/public/assets/js/modules/shared/attachment-source-picker.js` | JS | 6890 | 163 | Supporto frontend: attachment-source-picker. |
-| `Frontend/public/assets/js/modules/shared/banking-model.js` | JS | 3817 | 103 | Supporto frontend: banking-model. |
-| `Frontend/public/assets/js/modules/shared/banking-renderer.js` | JS | 11871 | 219 | Renderer condiviso per conti bancari e carte. |
-| `Frontend/public/assets/js/modules/shared/card-attachment-capture.js` | JS | 2592 | 58 | Supporto frontend: card-attachment-capture. |
-| `Frontend/public/assets/js/modules/shared/card-camera-capture.js` | JS | 10751 | 147 | Supporto frontend: card-camera-capture. |
-| `Frontend/public/assets/js/modules/shared/card-secret.js` | JS | 706 | 17 | Supporto frontend: card-secret. |
-| `Frontend/public/assets/js/modules/shared/chunked-attachment-security.js` | JS | 10462 | 228 | Supporto frontend: chunked-attachment-security. |
-| `Frontend/public/assets/js/modules/shared/company-area-preference.js` | JS | 840 | 24 | Supporto frontend: company-area-preference. |
-| `Frontend/public/assets/js/modules/shared/contact-card-model.js` | JS | 4264 | 71 | Supporto frontend: contact-card-model. |
-| `Frontend/public/assets/js/modules/shared/contact-card-photo.js` | JS | 1669 | 34 | Supporto frontend: contact-card-photo. |
-| `Frontend/public/assets/js/modules/shared/credential-decrypt-guard.js` | JS | 2524 | 62 | Supporto frontend: credential-decrypt-guard. |
-| `Frontend/public/assets/js/modules/shared/detail-account-mode.js` | JS | 1594 | 31 | Supporto frontend: detail-account-mode. |
-| `Frontend/public/assets/js/modules/shared/gestione-destinatari.js` | JS | 12955 | 264 | Supporto frontend: gestione-destinatari. |
-| `Frontend/public/assets/js/modules/shared/image-crop-editor.js` | JS | 19320 | 262 | Supporto frontend: image-crop-editor. |
-| `Frontend/public/assets/js/modules/shared/profile-account-management.js` | JS | 6842 | 87 | Supporto frontend: profile-account-management. |
-| `Frontend/public/assets/js/modules/shared/push-manager.js` | JS | 18038 | 376 | Registrazione dispositivo FCM e preferenze push per ambito. |
-| `Frontend/public/assets/js/modules/shared/qr_code_utils-v2.js` | JS | 7725 | 155 | Supporto frontend: qr code utils-v2. |
-| `Frontend/public/assets/js/modules/shared/qr_code_utils.js` | JS | 6290 | 141 | Caricamento QR e generazione vCard. |
-| `Frontend/public/assets/js/modules/shared/read-error-message.js` | JS | 526 | 9 | Supporto frontend: read-error-message. |
-| `Frontend/public/assets/js/modules/shared/record-sharing-crypto.js` | JS | 9089 | 185 | Supporto frontend: record-sharing-crypto. |
-| `Frontend/public/assets/js/modules/shared/shared-attachment-access.js` | JS | 4852 | 103 | Supporto frontend: shared-attachment-access. |
-| `Frontend/public/assets/js/modules/shared/sharing-identity-service.js` | JS | 1999 | 47 | Supporto frontend: sharing-identity-service. |
-| `Frontend/public/assets/js/modules/shared/ui-state-view.js` | JS | 1334 | 45 | Supporto frontend: ui-state-view. |
-| `Frontend/public/assets/js/modules/shared/widget-profile-model.js` | JS | 3656 | 78 | Supporto frontend: widget-profile-model. |
-| `Frontend/public/assets/js/offline-firestore.js` | JS | 2035 | 58 | Supporto frontend: offline-firestore. |
-| `Frontend/public/assets/js/offline-status.js` | JS | 813 | 23 | Supporto frontend: offline-status. |
-| `Frontend/public/assets/js/offline-sync.js` | JS | 5161 | 132 | Supporto frontend: offline-sync. |
-| `Frontend/public/assets/js/pages-init.js` | JS | 5865 | 154 | Router con import dinamici dei moduli pagina. |
-| `Frontend/public/assets/js/performance-metrics.js` | JS | 4160 | 111 | Supporto frontend: performance-metrics. |
-| `Frontend/public/assets/js/private-auth-gate.js` | JS | 3283 | 71 | Supporto frontend: private-auth-gate. |
-| `Frontend/public/assets/js/prova.js` | JS | 958 | 23 | Supporto frontend: prova. |
-| `Frontend/public/assets/js/push-messaging-client.js` | JS | 1160 | 35 | Supporto frontend: push-messaging-client. |
-| `Frontend/public/assets/js/swipe-list-v6.js` | JS | 8978 | 253 | Supporto frontend: swipe-list-v6. |
-| `Frontend/public/assets/js/theme-init.js` | JS | 2466 | 58 | Applica il tema prima del rendering per evitare lampeggiamenti. |
-| `Frontend/public/assets/js/translations.js` | JS | 6014 | 142 | Dizionario italiano e caricamento differito delle altre lingue. |
-| `Frontend/public/assets/js/translations/de.js` | JS | 12954 | 210 | Dizionario differito per la lingua de. |
-| `Frontend/public/assets/js/translations/deadline-rules.js` | JS | 53652 | 219 | Dizionario differito per la lingua deadline-rules. |
-| `Frontend/public/assets/js/translations/en.js` | JS | 30715 | 564 | Dizionario differito per la lingua en. |
-| `Frontend/public/assets/js/translations/es.js` | JS | 18732 | 313 | Dizionario differito per la lingua es. |
-| `Frontend/public/assets/js/translations/fr.js` | JS | 13416 | 210 | Dizionario differito per la lingua fr. |
-| `Frontend/public/assets/js/translations/hi.js` | JS | 20421 | 209 | Dizionario differito per la lingua hi. |
-| `Frontend/public/assets/js/translations/it.js` | JS | 31712 | 563 | Dizionario differito per la lingua it. |
-| `Frontend/public/assets/js/translations/observer.js` | JS | 577 | 17 | Dizionario differito per la lingua observer. |
-| `Frontend/public/assets/js/translations/onboarding.js` | JS | 12766 | 31 | Dizionario differito per la lingua onboarding. |
-| `Frontend/public/assets/js/translations/pt.js` | JS | 12630 | 209 | Dizionario differito per la lingua pt. |
-| `Frontend/public/assets/js/translations/settings.js` | JS | 46315 | 175 | Dizionario differito per la lingua settings. |
-| `Frontend/public/assets/js/translations/zh.js` | JS | 11697 | 209 | Dizionario differito per la lingua zh. |
-| `Frontend/public/assets/js/ui-components.js` | JS | 4122 | 101 | Supporto frontend: ui-components. |
-| `Frontend/public/assets/js/ui-core-v129.js` | JS | 19889 | 457 | Toast, modali, input protetti e componenti UI globali. |
-| `Frontend/public/assets/js/utils.js` | JS | 2697 | 78 | Supporto frontend: utils. |
+| `Frontend/public/assets/js/modules/shared/account-list-view.js` | JS | 10016 | 203 | Supporto frontend: account-list-view. |
+| `Frontend/public/assets/js/modules/shared/account-mode-model.js` | JS | 6566 | 160 | Supporto frontend: account-mode-model. |
+| `Frontend/public/assets/js/modules/shared/account-note-editor.js` | JS | 8811 | 143 | Supporto frontend: account-note-editor. |
+| `Frontend/public/assets/js/modules/shared/account-shared-credentials.js` | JS | 18545 | 321 | Supporto frontend: account-shared-credentials. |
+| `Frontend/public/assets/js/modules/shared/account-widget-lifecycle.js` | JS | 7130 | 135 | Supporto frontend: account-widget-lifecycle. |
+| `Frontend/public/assets/js/modules/shared/attachment-security.js` | JS | 8209 | 211 | Validazione e cifratura degli allegati prima di Storage. |
+| `Frontend/public/assets/js/modules/shared/attachment-source-picker.js` | JS | 6777 | 165 | Supporto frontend: attachment-source-picker. |
+| `Frontend/public/assets/js/modules/shared/banking-model.js` | JS | 3715 | 103 | Supporto frontend: banking-model. |
+| `Frontend/public/assets/js/modules/shared/banking-renderer.js` | JS | 11653 | 219 | Renderer condiviso per conti bancari e carte. |
+| `Frontend/public/assets/js/modules/shared/cached-account-access.js` | JS | 1140 | 20 | Supporto frontend: cached-account-access. |
+| `Frontend/public/assets/js/modules/shared/card-attachment-capture.js` | JS | 2535 | 58 | Supporto frontend: card-attachment-capture. |
+| `Frontend/public/assets/js/modules/shared/card-camera-capture.js` | JS | 10649 | 149 | Supporto frontend: card-camera-capture. |
+| `Frontend/public/assets/js/modules/shared/card-secret.js` | JS | 690 | 17 | Supporto frontend: card-secret. |
+| `Frontend/public/assets/js/modules/shared/chunked-attachment-security.js` | JS | 10018 | 225 | Supporto frontend: chunked-attachment-security. |
+| `Frontend/public/assets/js/modules/shared/company-area-preference.js` | JS | 817 | 24 | Supporto frontend: company-area-preference. |
+| `Frontend/public/assets/js/modules/shared/contact-card-model.js` | JS | 4595 | 77 | Supporto frontend: contact-card-model. |
+| `Frontend/public/assets/js/modules/shared/contact-card-photo.js` | JS | 1636 | 34 | Supporto frontend: contact-card-photo. |
+| `Frontend/public/assets/js/modules/shared/credential-decrypt-guard.js` | JS | 2463 | 62 | Supporto frontend: credential-decrypt-guard. |
+| `Frontend/public/assets/js/modules/shared/detail-account-mode.js` | JS | 1564 | 31 | Supporto frontend: detail-account-mode. |
+| `Frontend/public/assets/js/modules/shared/gestione-destinatari.js` | JS | 12974 | 268 | Supporto frontend: gestione-destinatari. |
+| `Frontend/public/assets/js/modules/shared/image-crop-editor.js` | JS | 19091 | 264 | Supporto frontend: image-crop-editor. |
+| `Frontend/public/assets/js/modules/shared/profile-account-management.js` | JS | 6756 | 87 | Supporto frontend: profile-account-management. |
+| `Frontend/public/assets/js/modules/shared/push-manager.js` | JS | 17663 | 376 | Registrazione dispositivo FCM e preferenze push per ambito. |
+| `Frontend/public/assets/js/modules/shared/qr_code_utils-v2.js` | JS | 7571 | 155 | Supporto frontend: qr code utils-v2. |
+| `Frontend/public/assets/js/modules/shared/qr_code_utils.js` | JS | 6150 | 141 | Caricamento QR e generazione vCard. |
+| `Frontend/public/assets/js/modules/shared/read-error-message.js` | JS | 518 | 9 | Supporto frontend: read-error-message. |
+| `Frontend/public/assets/js/modules/shared/record-sharing-crypto.js` | JS | 8905 | 185 | Supporto frontend: record-sharing-crypto. |
+| `Frontend/public/assets/js/modules/shared/shared-attachment-access.js` | JS | 4750 | 103 | Supporto frontend: shared-attachment-access. |
+| `Frontend/public/assets/js/modules/shared/sharing-identity-service.js` | JS | 1953 | 47 | Supporto frontend: sharing-identity-service. |
+| `Frontend/public/assets/js/modules/shared/ui-state-view.js` | JS | 1290 | 45 | Supporto frontend: ui-state-view. |
+| `Frontend/public/assets/js/modules/shared/widget-profile-model.js` | JS | 3579 | 78 | Supporto frontend: widget-profile-model. |
+| `Frontend/public/assets/js/offline-firestore.js` | JS | 1978 | 58 | Supporto frontend: offline-firestore. |
+| `Frontend/public/assets/js/offline-status.js` | JS | 791 | 23 | Supporto frontend: offline-status. |
+| `Frontend/public/assets/js/offline-sync.js` | JS | 5030 | 132 | Supporto frontend: offline-sync. |
+| `Frontend/public/assets/js/pages-init.js` | JS | 5712 | 154 | Router con import dinamici dei moduli pagina. |
+| `Frontend/public/assets/js/performance-metrics.js` | JS | 4050 | 111 | Supporto frontend: performance-metrics. |
+| `Frontend/public/assets/js/private-auth-gate.js` | JS | 4255 | 88 | Supporto frontend: private-auth-gate. |
+| `Frontend/public/assets/js/push-messaging-client.js` | JS | 1099 | 35 | Supporto frontend: push-messaging-client. |
+| `Frontend/public/assets/js/swipe-list-v6.js` | JS | 8726 | 253 | Supporto frontend: swipe-list-v6. |
+| `Frontend/public/assets/js/theme-init.js` | JS | 2409 | 58 | Applica il tema prima del rendering per evitare lampeggiamenti. |
+| `Frontend/public/assets/js/translations.js` | JS | 7842 | 182 | Dizionario italiano e caricamento differito delle altre lingue. |
+| `Frontend/public/assets/js/translations/access.js` | JS | 34530 | 66 | Dizionario differito per la lingua access. |
+| `Frontend/public/assets/js/translations/de.js` | JS | 41618 | 699 | Dizionario differito per la lingua de. |
+| `Frontend/public/assets/js/translations/deadline-rules.js` | JS | 86994 | 556 | Dizionario differito per la lingua deadline-rules. |
+| `Frontend/public/assets/js/translations/dynamic-ui.js` | JS | 91428 | 521 | Dizionario differito per la lingua dynamic-ui. |
+| `Frontend/public/assets/js/translations/en.js` | JS | 37368 | 695 | Dizionario differito per la lingua en. |
+| `Frontend/public/assets/js/translations/es.js` | JS | 42260 | 699 | Dizionario differito per la lingua es. |
+| `Frontend/public/assets/js/translations/fr.js` | JS | 43358 | 699 | Dizionario differito per la lingua fr. |
+| `Frontend/public/assets/js/translations/hi.js` | JS | 64529 | 698 | Dizionario differito per la lingua hi. |
+| `Frontend/public/assets/js/translations/it.js` | JS | 38448 | 696 | Dizionario differito per la lingua it. |
+| `Frontend/public/assets/js/translations/observer.js` | JS | 561 | 17 | Dizionario differito per la lingua observer. |
+| `Frontend/public/assets/js/translations/onboarding.js` | JS | 12736 | 31 | Dizionario differito per la lingua onboarding. |
+| `Frontend/public/assets/js/translations/profile.js` | JS | 29419 | 58 | Dizionario differito per la lingua profile. |
+| `Frontend/public/assets/js/translations/pt.js` | JS | 41070 | 699 | Dizionario differito per la lingua pt. |
+| `Frontend/public/assets/js/translations/recipients.js` | JS | 24713 | 378 | Dizionario differito per la lingua recipients. |
+| `Frontend/public/assets/js/translations/recovery.js` | JS | 44411 | 426 | Dizionario differito per la lingua recovery. |
+| `Frontend/public/assets/js/translations/settings.js` | JS | 48238 | 221 | Dizionario differito per la lingua settings. |
+| `Frontend/public/assets/js/translations/zh.js` | JS | 36518 | 698 | Dizionario differito per la lingua zh. |
+| `Frontend/public/assets/js/ui-components.js` | JS | 4062 | 102 | Supporto frontend: ui-components. |
+| `Frontend/public/assets/js/ui-core-v129.js` | JS | 19431 | 457 | Toast, modali, input protetti e componenti UI globali. |
+| `Frontend/public/assets/js/utils.js` | JS | 3669 | 91 | Supporto frontend: utils. |
 | `Frontend/public/assets/js/vendor/company-summary-pdf.js` | JS | 1375740 | 3 | Supporto frontend: company-summary-pdf. |
 | `Frontend/public/assets/js/vendor/company-summary-pdf.js.LEGAL.txt` | TXT | 882 | 18 | Supporto frontend: company-summary-pdf.js.LEGAL. |
-| `Frontend/public/assets/js/vendor/firebase-runtime.js` | JS | 724606 | 70 | Supporto frontend: firebase-runtime. |
+| `Frontend/public/assets/js/vendor/firebase-runtime.js` | JS | 731011 | 69 | Supporto frontend: firebase-runtime. |
 | `Frontend/public/assets/js/vendor/firebase-sw-runtime.js` | JS | 80549 | 8 | Supporto frontend: firebase-sw-runtime. |
 | `Frontend/public/assets/js/vendor/qrcode.min.js` | JS | 19927 | 1 | Supporto frontend: qrcode.min. |
-| `Frontend/public/assets/pdf/LICENSE_LIBERATION` | CONFIG | 4511 | 102 | File di progetto: LICENSE LIBERATION. |
+| `Frontend/public/assets/pdf/LICENSE_LIBERATION` | CONFIG | 4410 | 102 | File di progetto: LICENSE LIBERATION. |
 | `Frontend/public/assets/pdf/LiberationSans-Bold.ttf` | TTF | 137052 | 1082 | File di progetto: LiberationSans-Bold. |
 | `Frontend/public/assets/pdf/LiberationSans-Regular.ttf` | TTF | 139512 | 906 | File di progetto: LiberationSans-Regular. |
-| `Frontend/public/configurazione_automezzi.html` | HTML | 4199 | 87 | Struttura della pagina configurazione automezzi; comportamento demandato ai moduli. |
-| `Frontend/public/configurazione_documenti.html` | HTML | 8684 | 160 | Struttura della pagina configurazione documenti; comportamento demandato ai moduli. |
-| `Frontend/public/configurazione_generali.html` | HTML | 6969 | 134 | Struttura della pagina configurazione generali; comportamento demandato ai moduli. |
-| `Frontend/public/contatto_condiviso.html` | HTML | 1508 | 29 | Struttura della pagina contatto condiviso; comportamento demandato ai moduli. |
-| `Frontend/public/dati_azienda.html` | HTML | 21512 | 323 | Struttura della pagina dati azienda; comportamento demandato ai moduli. |
-| `Frontend/public/dettaglio_account_azienda.html` | HTML | 26988 | 383 | Struttura della pagina dettaglio account azienda; comportamento demandato ai moduli. |
-| `Frontend/public/dettaglio_account_privato.html` | HTML | 23816 | 348 | Struttura della pagina dettaglio account privato; comportamento demandato ai moduli. |
-| `Frontend/public/dettaglio_scadenza.html` | HTML | 9249 | 177 | Struttura della pagina dettaglio scadenza; comportamento demandato ai moduli. |
-| `Frontend/public/firebase-messaging-sw.js` | JS | 2874 | 60 | File di progetto: firebase-messaging-sw. |
-| `Frontend/public/form_account_azienda.html` | HTML | 23500 | 338 | Struttura della pagina form account azienda; comportamento demandato ai moduli. |
-| `Frontend/public/form_account_privato.html` | HTML | 21743 | 318 | Struttura della pagina form account privato; comportamento demandato ai moduli. |
-| `Frontend/public/gestione_destinatari.html` | HTML | 5763 | 86 | Struttura della pagina gestione destinatari; comportamento demandato ai moduli. |
-| `Frontend/public/home_page.html` | HTML | 4493 | 101 | Struttura della pagina home page; comportamento demandato ai moduli. |
-| `Frontend/public/imposta_nuova_password.html` | HTML | 6263 | 132 | Struttura della pagina imposta nuova password; comportamento demandato ai moduli. |
-| `Frontend/public/impostazioni.html` | HTML | 39328 | 559 | Struttura della pagina impostazioni; comportamento demandato ai moduli. |
-| `Frontend/public/index.html` | HTML | 801 | 19 | Struttura della pagina index; comportamento demandato ai moduli. |
-| `Frontend/public/lista_aziende.html` | HTML | 3036 | 66 | Struttura della pagina lista aziende; comportamento demandato ai moduli. |
-| `Frontend/public/login-v115.html` | HTML | 8382 | 166 | Struttura della pagina login-v115; comportamento demandato ai moduli. |
-| `Frontend/public/manifest.json` | JSON | 909 | 33 | Manifest PWA, icone, nome, scope e pagina iniziale. |
-| `Frontend/public/modifica_azienda.html` | HTML | 68254 | 823 | Struttura della pagina modifica azienda; comportamento demandato ai moduli. |
-| `Frontend/public/offline-assets.js` | JS | 13661 | 305 | File di progetto: offline-assets. |
-| `Frontend/public/privacy.html` | HTML | 14159 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
-| `Frontend/public/profilo_privato.html` | HTML | 16295 | 261 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
-| `Frontend/public/prova.html` | HTML | 1396 | 31 | Struttura della pagina prova; comportamento demandato ai moduli. |
-| `Frontend/public/registrati.html` | HTML | 7555 | 148 | Struttura della pagina registrati; comportamento demandato ai moduli. |
-| `Frontend/public/regole_scadenze.html` | HTML | 15168 | 143 | Struttura della pagina regole scadenze; comportamento demandato ai moduli. |
-| `Frontend/public/reset_password.html` | HTML | 4249 | 107 | Struttura della pagina reset password; comportamento demandato ai moduli. |
-| `Frontend/public/scadenze.html` | HTML | 6255 | 116 | Struttura della pagina scadenze; comportamento demandato ai moduli. |
-| `Frontend/public/sw.js` | JS | 3633 | 90 | Service worker: shell offline, cache runtime, push in background e deep link. |
-| `Frontend/public/termini.html` | HTML | 11877 | 226 | Struttura della pagina termini; comportamento demandato ai moduli. |
+| `Frontend/public/configurazione_automezzi.html` | HTML | 4113 | 87 | Struttura della pagina configurazione automezzi; comportamento demandato ai moduli. |
+| `Frontend/public/configurazione_documenti.html` | HTML | 8525 | 160 | Struttura della pagina configurazione documenti; comportamento demandato ai moduli. |
+| `Frontend/public/configurazione_generali.html` | HTML | 6836 | 134 | Struttura della pagina configurazione generali; comportamento demandato ai moduli. |
+| `Frontend/public/contatto_condiviso.html` | HTML | 1799 | 29 | Struttura della pagina contatto condiviso; comportamento demandato ai moduli. |
+| `Frontend/public/dati_azienda.html` | HTML | 21725 | 323 | Struttura della pagina dati azienda; comportamento demandato ai moduli. |
+| `Frontend/public/dettaglio_account_azienda.html` | HTML | 27192 | 383 | Struttura della pagina dettaglio account azienda; comportamento demandato ai moduli. |
+| `Frontend/public/dettaglio_account_privato.html` | HTML | 24037 | 348 | Struttura della pagina dettaglio account privato; comportamento demandato ai moduli. |
+| `Frontend/public/dettaglio_scadenza.html` | HTML | 9181 | 177 | Struttura della pagina dettaglio scadenza; comportamento demandato ai moduli. |
+| `Frontend/public/favicon.ico` | ICO | 32126 | 153 | File di progetto: favicon. |
+| `Frontend/public/firebase-messaging-sw.js` | JS | 2815 | 60 | File di progetto: firebase-messaging-sw. |
+| `Frontend/public/form_account_azienda.html` | HTML | 23744 | 338 | Struttura della pagina form account azienda; comportamento demandato ai moduli. |
+| `Frontend/public/form_account_privato.html` | HTML | 21932 | 318 | Struttura della pagina form account privato; comportamento demandato ai moduli. |
+| `Frontend/public/gestione_destinatari.html` | HTML | 6267 | 86 | Struttura della pagina gestione destinatari; comportamento demandato ai moduli. |
+| `Frontend/public/home_page.html` | HTML | 4459 | 101 | Struttura della pagina home page; comportamento demandato ai moduli. |
+| `Frontend/public/imposta_nuova_password.html` | HTML | 6527 | 132 | Struttura della pagina imposta nuova password; comportamento demandato ai moduli. |
+| `Frontend/public/impostazioni.html` | HTML | 38820 | 559 | Struttura della pagina impostazioni; comportamento demandato ai moduli. |
+| `Frontend/public/index.html` | HTML | 794 | 19 | Struttura della pagina index; comportamento demandato ai moduli. |
+| `Frontend/public/lista_aziende.html` | HTML | 2971 | 66 | Struttura della pagina lista aziende; comportamento demandato ai moduli. |
+| `Frontend/public/login.html` | HTML | 8691 | 166 | Struttura della pagina login; comportamento demandato ai moduli. |
+| `Frontend/public/manifest.json` | JSON | 872 | 33 | Manifest PWA, icone, nome, scope e pagina iniziale. |
+| `Frontend/public/modifica_azienda.html` | HTML | 69162 | 823 | Struttura della pagina modifica azienda; comportamento demandato ai moduli. |
+| `Frontend/public/offline-assets.js` | JS | 14578 | 324 | File di progetto: offline-assets. |
+| `Frontend/public/privacy.html` | HTML | 13898 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
+| `Frontend/public/profilo_privato.html` | HTML | 16365 | 261 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
+| `Frontend/public/registrati.html` | HTML | 7807 | 148 | Struttura della pagina registrati; comportamento demandato ai moduli. |
+| `Frontend/public/regole_scadenze.html` | HTML | 15135 | 143 | Struttura della pagina regole scadenze; comportamento demandato ai moduli. |
+| `Frontend/public/reset_password.html` | HTML | 4253 | 107 | Struttura della pagina reset password; comportamento demandato ai moduli. |
+| `Frontend/public/scadenze.html` | HTML | 6140 | 116 | Struttura della pagina scadenze; comportamento demandato ai moduli. |
+| `Frontend/public/sw.js` | JS | 3860 | 98 | Service worker: shell offline, cache runtime, push in background e deep link. |
+| `Frontend/public/termini.html` | HTML | 11652 | 226 | Struttura della pagina termini; comportamento demandato ai moduli. |
+
+#### scripts
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `scripts/test-attachment-content-browser.mjs` | MJS | 8167 | 114 | Strumento manutenzione/test: test-attachment-content-browser. |
+| `scripts/audit-canonical-pages.mjs` | MJS | 1106 | 28 | Strumento manutenzione/test: audit-canonical-pages. |
+| `scripts/audit-data-access.mjs` | MJS | 6408 | 93 | Strumento manutenzione/test: audit-data-access. |
+| `scripts/audit-docs.mjs` | MJS | 8071 | 157 | Strumento manutenzione/test: audit-docs. |
+| `scripts/audit-documentation-guide.mjs` | MJS | 5627 | 72 | Strumento manutenzione/test: audit-documentation-guide. |
+| `scripts/audit-firestore-legacy-email-metadata.mjs` | MJS | 1947 | 44 | Strumento manutenzione/test: audit-firestore-legacy-email-metadata. |
+| `scripts/audit-git-state.mjs` | MJS | 6899 | 137 | Strumento manutenzione/test: audit-git-state. |
+| `scripts/audit-html-purity.mjs` | MJS | 2726 | 69 | Strumento manutenzione/test: audit-html-purity. |
+| `scripts/audit-i18n-corpus.mjs` | MJS | 19786 | 325 | Strumento manutenzione/test: audit-i18n-corpus. |
+| `scripts/audit-i18n-quality.mjs` | MJS | 13800 | 262 | Strumento manutenzione/test: audit-i18n-quality. |
+| `scripts/audit-js-syntax.mjs` | MJS | 1237 | 38 | Strumento manutenzione/test: audit-js-syntax. |
+| `scripts/audit-lightweight-features.mjs` | MJS | 2194 | 46 | Strumento manutenzione/test: audit-lightweight-features. |
+| `scripts/audit-navigation-flows.mjs` | MJS | 14721 | 173 | Strumento manutenzione/test: audit-navigation-flows. |
+| `scripts/audit-offline-shell.mjs` | MJS | 4129 | 83 | Strumento manutenzione/test: audit-offline-shell. |
+| `scripts/audit-page-performance.mjs` | MJS | 8307 | 150 | Strumento manutenzione/test: audit-page-performance. |
+| `scripts/audit-page-shells.mjs` | MJS | 7734 | 166 | Strumento manutenzione/test: audit-page-shells. |
+| `scripts/audit-project-inventory.mjs` | MJS | 8558 | 129 | Strumento manutenzione/test: audit-project-inventory. |
+| `scripts/audit-qa-final-inventory.mjs` | MJS | 9467 | 144 | Strumento manutenzione/test: audit-qa-final-inventory. |
+| `scripts/audit-release-hardening.mjs` | MJS | 7432 | 113 | Strumento manutenzione/test: audit-release-hardening. |
+| `scripts/audit-security-flows.mjs` | MJS | 39038 | 341 | Strumento manutenzione/test: audit-security-flows. |
+| `scripts/audit-static-references.mjs` | MJS | 2972 | 66 | Strumento manutenzione/test: audit-static-references. |
+| `scripts/audit-ui-foundations.mjs` | MJS | 10464 | 140 | Strumento manutenzione/test: audit-ui-foundations. |
+| `scripts/audit-ui-topology.mjs` | MJS | 2352 | 49 | Strumento manutenzione/test: audit-ui-topology. |
+| `scripts/audit-ui-translations.mjs` | MJS | 13772 | 256 | Strumento manutenzione/test: audit-ui-translations. |
+| `scripts/audit-vault-integration.mjs` | MJS | 2506 | 33 | Strumento manutenzione/test: audit-vault-integration. |
+| `scripts/audit-vault-key-terminology.mjs` | MJS | 2059 | 34 | Strumento manutenzione/test: audit-vault-key-terminology. |
+| `scripts/backfill-shared-email-bindings.mjs` | MJS | 3987 | 106 | Strumento manutenzione/test: backfill-shared-email-bindings. |
+| `scripts/build-card-importer-prototype.mjs` | MJS | 561 | 17 | Strumento manutenzione/test: build-card-importer-prototype. |
+| `scripts/build-company-pdf.mjs` | MJS | 676 | 9 | Strumento manutenzione/test: build-company-pdf. |
+| `scripts/build-offline-runtime.mjs` | MJS | 6774 | 161 | Strumento manutenzione/test: build-offline-runtime. |
+| `scripts/build-ui-topology.mjs` | MJS | 36942 | 745 | Strumento manutenzione/test: build-ui-topology. |
+| `scripts/build-vault-account-backend.mjs` | MJS | 1078 | 21 | Strumento manutenzione/test: build-vault-account-backend. |
+| `scripts/bump-version.mjs` | MJS | 5644 | 144 | Strumento manutenzione/test: bump-version. |
+| `scripts/deploy-recovery-prerequisites.mjs` | MJS | 8706 | 143 | Strumento manutenzione/test: deploy-recovery-prerequisites. |
+| `scripts/docs-manifest.json` | JSON | 1571 | 49 | Strumento manutenzione/test: docs-manifest. |
+| `scripts/docs-source-map.json` | JSON | 53876 | 1257 | Strumento manutenzione/test: docs-source-map. |
+| `scripts/functions-emulator-targets.mjs` | MJS | 905 | 19 | Strumento manutenzione/test: functions-emulator-targets. |
+| `scripts/functions-emulator.synthetic.env` | ENV | 85 | 3 | Strumento manutenzione/test: functions-emulator.synthetic. |
+| `scripts/gcs-generation-gate.mjs` | MJS | 4564 | 100 | Strumento manutenzione/test: gcs-generation-gate. |
+| `scripts/i18n-quality-baseline.json` | JSON | 2920 | 143 | Strumento manutenzione/test: i18n-quality-baseline. |
+| `scripts/lib/generated-doc-section.mjs` | MJS | 2105 | 48 | Strumento manutenzione/test: generated-doc-section. |
+| `scripts/lib/legacy-email-audit-model.mjs` | MJS | 3871 | 66 | Strumento manutenzione/test: legacy-email-audit-model. |
+| `scripts/lib/qa-credentials.mjs` | MJS | 6427 | 132 | Strumento manutenzione/test: qa-credentials. |
+| `scripts/migrate-offline-firestore-reads.mjs` | MJS | 2005 | 47 | Strumento manutenzione/test: migrate-offline-firestore-reads. |
+| `scripts/normalize-responsive-foundations.mjs` | MJS | 1747 | 33 | Strumento manutenzione/test: normalize-responsive-foundations. |
+| `scripts/page-performance-budget.json` | JSON | 1143 | 27 | Strumento manutenzione/test: page-performance-budget. |
+| `scripts/pdf/company-summary-pdf.mjs` | MJS | 10881 | 152 | Strumento manutenzione/test: company-summary-pdf. |
+| `scripts/plan-recovery-canary.mjs` | MJS | 10157 | 116 | Strumento manutenzione/test: plan-recovery-canary. |
+| `scripts/populate-qa-accounts-browser.mjs` | MJS | 42275 | 699 | Strumento manutenzione/test: populate-qa-accounts-browser. |
+| `scripts/populate-qa-company-browser.mjs` | MJS | 20709 | 387 | Strumento manutenzione/test: populate-qa-company-browser. |
+| `scripts/populate-qa-deadlines-browser.mjs` | MJS | 38275 | 677 | Strumento manutenzione/test: populate-qa-deadlines-browser. |
+| `scripts/populate-qa-profile-browser.mjs` | MJS | 27218 | 467 | Strumento manutenzione/test: populate-qa-profile-browser. |
+| `scripts/populate-qa-profile-links-browser.mjs` | MJS | 16605 | 289 | Strumento manutenzione/test: populate-qa-profile-links-browser. |
+| `scripts/prepare-gitleaks-config.mjs` | MJS | 6093 | 143 | Strumento manutenzione/test: prepare-gitleaks-config. |
+| `scripts/provision-qa-user.mjs` | MJS | 9104 | 198 | Strumento manutenzione/test: provision-qa-user. |
+| `scripts/release-manifest.mjs` | MJS | 12971 | 348 | Strumento manutenzione/test: release-manifest. |
+| `scripts/reminder-emulator-entry.mjs` | MJS | 3425 | 45 | Strumento manutenzione/test: reminder-emulator-entry. |
+| `scripts/run-account-attachment-delete-emulators.mjs` | MJS | 1481 | 37 | Strumento manutenzione/test: run-account-attachment-delete-emulators. |
+| `scripts/run-attachment-removal-emulators.mjs` | MJS | 1322 | 35 | Strumento manutenzione/test: run-attachment-removal-emulators. |
+| `scripts/run-audit-retention-emulators.mjs` | MJS | 1178 | 27 | Strumento manutenzione/test: run-audit-retention-emulators. |
+| `scripts/run-avatar-residues-emulators.mjs` | MJS | 1375 | 36 | Strumento manutenzione/test: run-avatar-residues-emulators. |
+| `scripts/run-backup-restore-v2-emulators.mjs` | MJS | 874 | 17 | Strumento manutenzione/test: run-backup-restore-v2-emulators. |
+| `scripts/run-company-hard-delete-emulators.mjs` | MJS | 1321 | 35 | Strumento manutenzione/test: run-company-hard-delete-emulators. |
+| `scripts/run-firestore-rules-tests.mjs` | MJS | 1699 | 35 | Strumento manutenzione/test: run-firestore-rules-tests. |
+| `scripts/run-full-recovery-emulators.mjs` | MJS | 2554 | 23 | Strumento manutenzione/test: run-full-recovery-emulators. |
+| `scripts/run-functions-emulator-local.mjs` | MJS | 3019 | 44 | Strumento manutenzione/test: run-functions-emulator-local. |
+| `scripts/run-interrupted-restore-emulators.mjs` | MJS | 1319 | 35 | Strumento manutenzione/test: run-interrupted-restore-emulators. |
+| `scripts/run-purge-retention-emulators.mjs` | MJS | 1447 | 37 | Strumento manutenzione/test: run-purge-retention-emulators. |
+| `scripts/run-purged-account-restore-emulators.mjs` | MJS | 1322 | 35 | Strumento manutenzione/test: run-purged-account-restore-emulators. |
+| `scripts/run-restore-collisions-emulators.mjs` | MJS | 1317 | 35 | Strumento manutenzione/test: run-restore-collisions-emulators. |
+| `scripts/run-restore-retry-emulators.mjs` | MJS | 1308 | 35 | Strumento manutenzione/test: run-restore-retry-emulators. |
+| `scripts/run-restore-stale-emulators.mjs` | MJS | 1296 | 35 | Strumento manutenzione/test: run-restore-stale-emulators. |
+| `scripts/run-shared-copies-purge-emulators.mjs` | MJS | 1304 | 35 | Strumento manutenzione/test: run-shared-copies-purge-emulators. |
+| `scripts/run-storage-rules-tests.mjs` | MJS | 1967 | 45 | Strumento manutenzione/test: run-storage-rules-tests. |
+| `scripts/run-vault-session-emulators.mjs` | MJS | 5452 | 48 | Strumento manutenzione/test: run-vault-session-emulators. |
+| `scripts/serve-deadline-reminder-probe.mjs` | MJS | 4968 | 51 | Strumento manutenzione/test: serve-deadline-reminder-probe. |
+| `scripts/serve-reminder-emulators.mjs` | MJS | 9238 | 84 | Strumento manutenzione/test: serve-reminder-emulators. |
+| `scripts/setup-linux-cloud.sh` | SH | 7927 | 156 | Strumento manutenzione/test: setup-linux-cloud. |
+| `scripts/split-translations.mjs` | MJS | 1323 | 34 | Strumento manutenzione/test: split-translations. |
+| `scripts/storage-emulator-loopback-dispatcher.cjs` | CJS | 1571 | 57 | Strumento manutenzione/test: storage-emulator-loopback-dispatcher. |
+| `scripts/test-access-i18n-browser.mjs` | MJS | 5667 | 104 | Strumento manutenzione/test: test-access-i18n-browser. |
+| `scripts/test-auth-hardening-browser.mjs` | MJS | 6648 | 90 | Strumento manutenzione/test: test-auth-hardening-browser. |
+| `scripts/test-company-summary-browser.mjs` | MJS | 5074 | 43 | Strumento manutenzione/test: test-company-summary-browser. |
+| `scripts/test-documentation-guide-browser.mjs` | MJS | 19174 | 231 | Strumento manutenzione/test: test-documentation-guide-browser. |
+| `scripts/test-functions-emulator.mjs` | MJS | 2489 | 58 | Strumento manutenzione/test: test-functions-emulator. |
+| `scripts/test-mfa-session-emulator.mjs` | MJS | 2145 | 36 | Strumento manutenzione/test: test-mfa-session-emulator. |
+| `scripts/test-portable-archive-browser.mjs` | MJS | 20493 | 315 | Strumento manutenzione/test: test-portable-archive-browser. |
+| `scripts/test-portable-archive-capacity.mjs` | MJS | 4728 | 92 | Strumento manutenzione/test: test-portable-archive-capacity. |
+| `scripts/test-private-auth-browser.mjs` | MJS | 9050 | 140 | Strumento manutenzione/test: test-private-auth-browser. |
+| `scripts/test-qa-p0-safe-browser.mjs` | MJS | 34335 | 649 | Strumento manutenzione/test: test-qa-p0-safe-browser. |
+| `scripts/test-qa-page-matrix-browser.mjs` | MJS | 24662 | 404 | Strumento manutenzione/test: test-qa-page-matrix-browser. |
+| `scripts/test-qa-release-browser.mjs` | MJS | 7120 | 122 | Strumento manutenzione/test: test-qa-release-browser. |
+| `scripts/test-vault-account-functions-emulator.mjs` | MJS | 26689 | 325 | Strumento manutenzione/test: test-vault-account-functions-emulator. |
+| `scripts/test-vault-assistant.mjs` | MJS | 10426 | 143 | Strumento manutenzione/test: test-vault-assistant. |
+| `scripts/ui-quality-baseline.json` | JSON | 128 | 7 | Strumento manutenzione/test: ui-quality-baseline. |
+| `scripts/ui-topology-contract.json` | JSON | 4499 | 115 | Strumento manutenzione/test: ui-topology-contract. |
+| `scripts/verify-historical-credential-status.mjs` | MJS | 3512 | 84 | Strumento manutenzione/test: verify-historical-credential-status. |
+| `scripts/verify-map-fingerprints.mjs` | MJS | 6951 | 109 | Strumento manutenzione/test: verify-map-fingerprints. |
+
+#### tests
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `tests/attachment-content-policy.test.mjs` | MJS | 5333 | 88 | Test automatico: attachment-content-policy.test. |
+| `tests/account-archive-paths.test.mjs` | MJS | 6248 | 91 | Test automatico: account-archive-paths.test. |
+| `tests/account-attachment-delete.emulator.test.mjs` | MJS | 9008 | 156 | Test automatico: account-attachment-delete.emulator.test. |
+| `tests/account-attachment-delete.test.mjs` | MJS | 11860 | 188 | Test automatico: account-attachment-delete.test. |
+| `tests/account-detail-compact.test.mjs` | MJS | 10269 | 157 | Test automatico: account-detail-compact.test. |
+| `tests/account-field-usage-model.test.mjs` | MJS | 3145 | 70 | Test automatico: account-field-usage-model.test. |
+| `tests/account-lazy-save.test.mjs` | MJS | 2711 | 55 | Test automatico: account-lazy-save.test. |
+| `tests/account-list-sort.test.mjs` | MJS | 2040 | 41 | Test automatico: account-list-sort.test. |
+| `tests/account-loaddata-full-context.test.mjs` | MJS | 14993 | 229 | Test automatico: account-loaddata-full-context.test. |
+| `tests/account-mode-form-ui.test.mjs` | MJS | 2968 | 64 | Test automatico: account-mode-form-ui.test. |
+| `tests/account-mode-model.test.mjs` | MJS | 4580 | 100 | Test automatico: account-mode-model.test. |
+| `tests/account-note-editor.test.mjs` | MJS | 10883 | 163 | Test automatico: account-note-editor.test. |
+| `tests/account-page-lifecycle.test.mjs` | MJS | 29529 | 479 | Test automatico: account-page-lifecycle.test. |
+| `tests/account-save-context-blocks-writes.test.mjs` | MJS | 14095 | 183 | Test automatico: account-save-context-blocks-writes.test. |
+| `tests/account-save-revalidates-after-reads.test.mjs` | MJS | 11103 | 149 | Test automatico: account-save-revalidates-after-reads.test. |
+| `tests/account-sharing-recipient-preferences.test.mjs` | MJS | 3083 | 54 | Test automatico: account-sharing-recipient-preferences.test. |
+| `tests/account-widget-lifecycle.test.mjs` | MJS | 16439 | 157 | Test automatico: account-widget-lifecycle.test. |
+| `tests/account-widget-session.test.mjs` | MJS | 2312 | 31 | Test automatico: account-widget-session.test. |
+| `tests/account-widget-ui.test.mjs` | MJS | 4302 | 80 | Test automatico: account-widget-ui.test. |
+| `tests/app-diagnostics.test.mjs` | MJS | 3380 | 76 | Test automatico: app-diagnostics.test. |
+| `tests/archive-account-model.test.mjs` | MJS | 758 | 16 | Test automatico: archive-account-model.test. |
+| `tests/archive-guest-suspension.rules.test.mjs` | MJS | 14560 | 249 | Test automatico: archive-guest-suspension.rules.test. |
+| `tests/archive-list-filter.test.mjs` | MJS | 12720 | 212 | Test automatico: archive-list-filter.test. |
+| `tests/archive-purge-global-lock.rules.test.mjs` | MJS | 8098 | 137 | Test automatico: archive-purge-global-lock.rules.test. |
+| `tests/archive-recipients.test.mjs` | MJS | 5667 | 101 | Test automatico: archive-recipients.test. |
+| `tests/archive-session.test.mjs` | MJS | 48609 | 751 | Test automatico: archive-session.test. |
+| `tests/assistant-deadline-search.test.mjs` | MJS | 3860 | 77 | Test automatico: assistant-deadline-search.test. |
+| `tests/assistant-session-lifecycle.test.mjs` | MJS | 6810 | 111 | Test automatico: assistant-session-lifecycle.test. |
+| `tests/assistant-ui-lifecycle.browser.test.mjs` | MJS | 8038 | 125 | Test automatico: assistant-ui-lifecycle.browser.test. |
+| `tests/attachment-removal-residues.emulator.test.mjs` | MJS | 8925 | 146 | Test automatico: attachment-removal-residues.emulator.test. |
+| `tests/attachment-removal-residues.test.mjs` | MJS | 11554 | 180 | Test automatico: attachment-removal-residues.test. |
+| `tests/attachment-security.test.mjs` | MJS | 11942 | 242 | Test automatico: attachment-security.test. |
+| `tests/audit-events.rules.test.mjs` | MJS | 5213 | 96 | Test automatico: audit-events.rules.test. |
+| `tests/audit-retention.emulator.test.mjs` | MJS | 19774 | 332 | Test automatico: audit-retention.emulator.test. |
+| `tests/auth-login-fence.test.mjs` | MJS | 4147 | 61 | Test automatico: auth-login-fence.test. |
+| `tests/auth-password-fence.test.mjs` | MJS | 2039 | 30 | Test automatico: auth-password-fence.test. |
+| `tests/auth-session-fence.test.mjs` | MJS | 4745 | 95 | Test automatico: auth-session-fence.test. |
+| `tests/avatar-change-residues.emulator.test.mjs` | MJS | 7457 | 128 | Test automatico: avatar-change-residues.emulator.test. |
+| `tests/avatar-change-residues.test.mjs` | MJS | 13322 | 250 | Test automatico: avatar-change-residues.test. |
+| `tests/backup-crypto-runtime.test.mjs` | MJS | 2716 | 43 | Test automatico: backup-crypto-runtime.test. |
+| `tests/backup-export-model.test.mjs` | MJS | 3045 | 56 | Test automatico: backup-export-model.test. |
+| `tests/backup-export-session.test.mjs` | MJS | 10618 | 161 | Test automatico: backup-export-session.test. |
+| `tests/backup-header-cleartext.test.mjs` | MJS | 10245 | 161 | Test automatico: backup-header-cleartext.test. |
+| `tests/backup-import-model.test.mjs` | MJS | 8122 | 133 | Test automatico: backup-import-model.test. |
+| `tests/backup-restore-session.test.mjs` | MJS | 50829 | 809 | Test automatico: backup-restore-session.test. |
+| `tests/backup-restore-ui.test.mjs` | MJS | 24407 | 341 | Test automatico: backup-restore-ui.test. |
+| `tests/backup-restore-v2-client.test.mjs` | MJS | 3440 | 56 | Test automatico: backup-restore-v2-client.test. |
+| `tests/backup-restore-v2-plan.emulator.test.mjs` | MJS | 2974 | 52 | Test automatico: backup-restore-v2-plan.emulator.test. |
+| `tests/banking-form-roundtrip.test.mjs` | MJS | 3571 | 50 | Test automatico: banking-form-roundtrip.test. |
+| `tests/banking-model.test.mjs` | MJS | 2985 | 68 | Test automatico: banking-model.test. |
+| `tests/banking-widget-hosts.test.mjs` | MJS | 6898 | 106 | Test automatico: banking-widget-hosts.test. |
+| `tests/banking-widget-placement.test.mjs` | MJS | 12914 | 151 | Test automatico: banking-widget-placement.test. |
+| `tests/cached-account-access.test.mjs` | MJS | 1612 | 25 | Test automatico: cached-account-access.test. |
+| `tests/card-attachment-capture.test.mjs` | MJS | 2172 | 39 | Test automatico: card-attachment-capture.test. |
+| `tests/company-account-detail-lifecycle.test.mjs` | MJS | 13629 | 127 | Test automatico: company-account-detail-lifecycle.test. |
+| `tests/company-archive-conflict.test.mjs` | MJS | 6144 | 114 | Test automatico: company-archive-conflict.test. |
+| `tests/company-delete-guard.test.mjs` | MJS | 3035 | 50 | Test automatico: company-delete-guard.test. |
+| `tests/company-delete-ui-guard.test.mjs` | MJS | 3101 | 47 | Test automatico: company-delete-ui-guard.test. |
+| `tests/company-detail-freshness.test.mjs` | MJS | 7249 | 105 | Test automatico: company-detail-freshness.test. |
+| `tests/company-detail-readonly.test.mjs` | MJS | 10947 | 168 | Test automatico: company-detail-readonly.test. |
+| `tests/company-form-archive-mount.test.mjs` | MJS | 15012 | 253 | Test automatico: company-form-archive-mount.test. |
+| `tests/company-form-freshness.test.mjs` | MJS | 5063 | 69 | Test automatico: company-form-freshness.test. |
+| `tests/company-hard-delete-residues.emulator.test.mjs` | MJS | 13661 | 208 | Test automatico: company-hard-delete-residues.emulator.test. |
+| `tests/company-hard-delete-residues.test.mjs` | MJS | 6824 | 103 | Test automatico: company-hard-delete-residues.test. |
+| `tests/company-parent.rules.test.mjs` | MJS | 2815 | 43 | Test automatico: company-parent.rules.test. |
+| `tests/company-profile.test.mjs` | MJS | 9221 | 91 | Test automatico: company-profile.test. |
+| `tests/company-sharing-readonly-render.test.mjs` | MJS | 3663 | 71 | Test automatico: company-sharing-readonly-render.test. |
+| `tests/company-summary-browser.test.mjs` | MJS | 2220 | 29 | Test automatico: company-summary-browser.test. |
+| `tests/company-summary-hook.test.mjs` | MJS | 4075 | 66 | Test automatico: company-summary-hook.test. |
+| `tests/company-summary-loader.mjs` | MJS | 834 | 16 | Test automatico: company-summary-loader. |
+| `tests/company-summary-panel.test.mjs` | MJS | 2881 | 36 | Test automatico: company-summary-panel.test. |
+| `tests/company-summary-pdf.test.mjs` | MJS | 3940 | 46 | Test automatico: company-summary-pdf.test. |
+| `tests/company-summary-reader.test.mjs` | MJS | 3493 | 43 | Test automatico: company-summary-reader.test. |
+| `tests/company-summary-view.test.mjs` | MJS | 2558 | 35 | Test automatico: company-summary-view.test. |
+| `tests/complete-recovery-client.test.mjs` | MJS | 16922 | 257 | Test automatico: complete-recovery-client.test. |
+| `tests/complete-recovery-production-transport.test.mjs` | MJS | 4747 | 65 | Test automatico: complete-recovery-production-transport.test. |
+| `tests/complete-recovery-route.test.mjs` | MJS | 12595 | 156 | Test automatico: complete-recovery-route.test. |
+| `tests/complete-recovery-safety.test.mjs` | MJS | 5970 | 85 | Test automatico: complete-recovery-safety.test. |
+| `tests/complete-recovery-ui.browser.test.mjs` | MJS | 8286 | 103 | Test automatico: complete-recovery-ui.browser.test. |
+| `tests/complete-recovery-ui.test.mjs` | MJS | 29473 | 368 | Test automatico: complete-recovery-ui.test. |
+| `tests/consultation-copies.test.mjs` | MJS | 14246 | 232 | Test automatico: consultation-copies.test. |
+| `tests/contact-card-photo.test.mjs` | MJS | 7931 | 115 | Test automatico: contact-card-photo.test. |
+| `tests/credential-decrypt-guard.test.mjs` | MJS | 4859 | 102 | Test automatico: credential-decrypt-guard.test. |
+| `tests/credential-health-runtime.test.mjs` | MJS | 3287 | 68 | Test automatico: credential-health-runtime.test. |
+| `tests/credential-health-session.test.mjs` | MJS | 4255 | 63 | Test automatico: credential-health-session.test. |
+| `tests/crypto-utils.test.mjs` | MJS | 8054 | 135 | Test automatico: crypto-utils.test. |
+| `tests/deadline-config-model.test.mjs` | MJS | 17764 | 369 | Test automatico: deadline-config-model.test. |
+| `tests/deadline-contact-select-contrast.test.mjs` | MJS | 718 | 15 | Test automatico: deadline-contact-select-contrast.test. |
+| `tests/deadline-detail-lifecycle.test.mjs` | MJS | 23311 | 307 | Test automatico: deadline-detail-lifecycle.test. |
+| `tests/deadline-domain-model.test.mjs` | MJS | 11076 | 200 | Test automatico: deadline-domain-model.test. |
+| `tests/deadline-form-model.test.mjs` | MJS | 3083 | 78 | Test automatico: deadline-form-model.test. |
+| `tests/deadline-list-calendar.test.mjs` | MJS | 9903 | 138 | Test automatico: deadline-list-calendar.test. |
+| `tests/deadline-model.test.mjs` | MJS | 7993 | 145 | Test automatico: deadline-model.test. |
+| `tests/deadline-profile-document-editor.test.mjs` | MJS | 3162 | 50 | Test automatico: deadline-profile-document-editor.test. |
+| `tests/deadline-recipient-model.test.mjs` | MJS | 6620 | 124 | Test automatico: deadline-recipient-model.test. |
+| `tests/deadline-recipient-settings-return.test.mjs` | MJS | 5083 | 92 | Test automatico: deadline-recipient-settings-return.test. |
+| `tests/deadline-reminders.test.mjs` | MJS | 12503 | 177 | Test automatico: deadline-reminders.test. |
+| `tests/deadline-rules-hub.test.mjs` | MJS | 11940 | 189 | Test automatico: deadline-rules-hub.test. |
+| `tests/deadline-unified-form.test.mjs` | MJS | 3532 | 58 | Test automatico: deadline-unified-form.test. |
+| `tests/deploy-recovery-prerequisites.test.mjs` | MJS | 9325 | 116 | Test automatico: deploy-recovery-prerequisites.test. |
+| `tests/detail-account-mode-reinvite.test.mjs` | MJS | 2885 | 53 | Test automatico: detail-account-mode-reinvite.test. |
+| `tests/detail-sharing-revocation-cycle.test.mjs` | MJS | 1178 | 24 | Test automatico: detail-sharing-revocation-cycle.test. |
+| `tests/device-cache-residues.test.mjs` | MJS | 20585 | 355 | Test automatico: device-cache-residues.test. |
+| `tests/docs-governance.test.mjs` | MJS | 7423 | 141 | Test automatico: docs-governance.test. |
+| `tests/docs-source-map.test.mjs` | MJS | 5784 | 101 | Test automatico: docs-source-map.test. |
+| `tests/documentation-guide.test.mjs` | MJS | 9290 | 170 | Test automatico: documentation-guide.test. |
+| `tests/firestore.profile-widgets.rules.test.mjs` | MJS | 8217 | 172 | Test automatico: firestore.profile-widgets.rules.test. |
+| `tests/fixtures/maturity-dataset.json` | JSON | 2269 | 90 | Test automatico: maturity-dataset. |
+| `tests/full-recovery-publisher.emulator.test.mjs` | MJS | 66248 | 499 | Test automatico: full-recovery-publisher.emulator.test. |
+| `tests/full-recovery-runtime.test.mjs` | MJS | 34565 | 437 | Test automatico: full-recovery-runtime.test. |
+| `tests/functions-emulator-targets.test.mjs` | MJS | 1494 | 22 | Test automatico: functions-emulator-targets.test. |
+| `tests/functions-local-runner-arguments.test.mjs` | MJS | 820 | 16 | Test automatico: functions-local-runner-arguments.test. |
+| `tests/gcs-generation-gate.test.mjs` | MJS | 1168 | 21 | Test automatico: gcs-generation-gate.test. |
+| `tests/git-state-governance.test.mjs` | MJS | 3389 | 69 | Test automatico: git-state-governance.test. |
+| `tests/gitleaks-config.test.mjs` | MJS | 13898 | 311 | Test automatico: gitleaks-config.test. |
+| `tests/guest-invite-suspension.test.mjs` | MJS | 4971 | 82 | Test automatico: guest-invite-suspension.test. |
+| `tests/header-navigation.test.mjs` | MJS | 756 | 18 | Test automatico: header-navigation.test. |
+| `tests/helpers/test-translator.mjs` | MJS | 1046 | 22 | Test automatico: test-translator. |
+| `tests/history-recovery.rules.test.mjs` | MJS | 2371 | 30 | Test automatico: history-recovery.rules.test. |
+| `tests/home-footer-quick-actions.test.mjs` | MJS | 1869 | 30 | Test automatico: home-footer-quick-actions.test. |
+| `tests/i18n-quality-baseline.test.mjs` | MJS | 7932 | 141 | Test automatico: i18n-quality-baseline.test. |
+| `tests/image-crop-editor.test.mjs` | MJS | 9265 | 169 | Test automatico: image-crop-editor.test. |
+| `tests/input-autofill.test.mjs` | MJS | 4244 | 69 | Test automatico: input-autofill.test. |
+| `tests/interrupted-restore-orphan-refs.emulator.test.mjs` | MJS | 11832 | 172 | Test automatico: interrupted-restore-orphan-refs.emulator.test. |
+| `tests/invite-audit-ref.rules.test.mjs` | MJS | 20772 | 351 | Test automatico: invite-audit-ref.rules.test. |
+| `tests/invite-namespace.rules.test.mjs` | MJS | 7381 | 119 | Test automatico: invite-namespace.rules.test. |
+| `tests/language-first-configuration.test.mjs` | MJS | 6629 | 110 | Test automatico: language-first-configuration.test. |
+| `tests/legacy-attachment-opening.test.mjs` | MJS | 19252 | 329 | Test automatico: legacy-attachment-opening.test. |
+| `tests/legacy-email-audit-model.test.mjs` | MJS | 1989 | 41 | Test automatico: legacy-email-audit-model.test. |
+| `tests/material-symbols-translation.test.mjs` | MJS | 2886 | 60 | Test automatico: material-symbols-translation.test. |
+| `tests/maturity-dataset.test.mjs` | MJS | 1944 | 40 | Test automatico: maturity-dataset.test. |
+| `tests/mfa-enrollment-dialog.test.mjs` | MJS | 9481 | 143 | Test automatico: mfa-enrollment-dialog.test. |
+| `tests/mixed-current.test.mjs` | MJS | 15273 | 219 | Test automatico: mixed-current.test. |
+| `tests/new-account-shared-link.test.mjs` | MJS | 3454 | 39 | Test automatico: new-account-shared-link.test. |
+| `tests/notification-rules.rules.test.mjs` | MJS | 4876 | 81 | Test automatico: notification-rules.rules.test. |
+| `tests/offline-account-widgets.test.mjs` | MJS | 6792 | 61 | Test automatico: offline-account-widgets.test. |
+| `tests/offline-mutation-client.test.mjs` | MJS | 18420 | 298 | Test automatico: offline-mutation-client.test. |
+| `tests/offline-mutation-lease.test.mjs` | MJS | 35436 | 516 | Test automatico: offline-mutation-lease.test. |
+| `tests/offline-mutation-queue.test.mjs` | MJS | 41336 | 657 | Test automatico: offline-mutation-queue.test. |
+| `tests/offline-mutation-sync.test.mjs` | MJS | 14631 | 233 | Test automatico: offline-mutation-sync.test. |
+| `tests/offline-profile-readiness.test.mjs` | MJS | 5413 | 97 | Test automatico: offline-profile-readiness.test. |
+| `tests/offline-sync.rules.test.mjs` | MJS | 2144 | 42 | Test automatico: offline-sync.rules.test. |
+| `tests/pilot-lease-worker.test.mjs` | MJS | 21614 | 302 | Test automatico: pilot-lease-worker.test. |
+| `tests/portable-archive.test.mjs` | MJS | 41058 | 735 | Test automatico: portable-archive.test. |
+| `tests/private-account-detail-lifecycle.test.mjs` | MJS | 18156 | 239 | Test automatico: private-account-detail-lifecycle.test. |
+| `tests/private-account-offline-coordinator.test.mjs` | MJS | 2759 | 52 | Test automatico: private-account-offline-coordinator.test. |
+| `tests/private-account-offline-pilot.test.mjs` | MJS | 8833 | 125 | Test automatico: private-account-offline-pilot.test. |
+| `tests/private-account-offline-policy.test.mjs` | MJS | 1352 | 23 | Test automatico: private-account-offline-policy.test. |
+| `tests/private-account-recovery.test.mjs` | MJS | 12700 | 138 | Test automatico: private-account-recovery.test. |
+| `tests/private-auth-gate.test.mjs` | MJS | 8276 | 137 | Test automatico: private-auth-gate.test. |
+| `tests/private-bootstrap-offline.test.mjs` | MJS | 4442 | 70 | Test automatico: private-bootstrap-offline.test. |
+| `tests/private-detail-legacy-id.test.mjs` | MJS | 20029 | 298 | Test automatico: private-detail-legacy-id.test. |
+| `tests/private-form-lazy-banking.test.mjs` | MJS | 2846 | 22 | Test automatico: private-form-lazy-banking.test. |
+| `tests/profile-account-management.test.mjs` | MJS | 6220 | 41 | Test automatico: profile-account-management.test. |
+| `tests/profile-contact-link.test.mjs` | MJS | 35816 | 464 | Test automatico: profile-contact-link.test. |
+| `tests/profile-deadline-link-model.test.mjs` | MJS | 4081 | 79 | Test automatico: profile-deadline-link-model.test. |
+| `tests/profile-document-attachments-production.test.mjs` | MJS | 9412 | 143 | Test automatico: profile-document-attachments-production.test. |
+| `tests/profile-document-deadline-pilot-integration.test.mjs` | MJS | 9041 | 145 | Test automatico: profile-document-deadline-pilot-integration.test. |
+| `tests/profile-document-deadline-pilot.test.mjs` | MJS | 7345 | 112 | Test automatico: profile-document-deadline-pilot.test. |
+| `tests/profile-label-management.test.mjs` | MJS | 1288 | 24 | Test automatico: profile-label-management.test. |
+| `tests/profile-lazy-editor.test.mjs` | MJS | 3576 | 79 | Test automatico: profile-lazy-editor.test. |
+| `tests/profile-legacy-email-recovery.test.mjs` | MJS | 1871 | 42 | Test automatico: profile-legacy-email-recovery.test. |
+| `tests/profile-model.test.mjs` | MJS | 6783 | 113 | Test automatico: profile-model.test. |
+| `tests/profile-widget-zone.test.mjs` | MJS | 769 | 17 | Test automatico: profile-widget-zone.test. |
+| `tests/purge-retention-effects.emulator.test.mjs` | MJS | 19459 | 303 | Test automatico: purge-retention-effects.emulator.test. |
+| `tests/purged-account-restore.emulator.test.mjs` | MJS | 22691 | 331 | Test automatico: purged-account-restore.emulator.test. |
+| `tests/push-registration-recovery.test.mjs` | MJS | 3277 | 51 | Test automatico: push-registration-recovery.test. |
+| `tests/qa-automation.test.mjs` | MJS | 13812 | 225 | Test automatico: qa-automation.test. |
+| `tests/qa-final-inventory.test.mjs` | MJS | 1300 | 28 | Test automatico: qa-final-inventory.test. |
+| `tests/record-sharing-crypto-runtime.test.mjs` | MJS | 3424 | 54 | Test automatico: record-sharing-crypto-runtime.test. |
+| `tests/recovery-asset-reader.test.mjs` | MJS | 12505 | 189 | Test automatico: recovery-asset-reader.test. |
+| `tests/recovery-canary-plan.test.mjs` | MJS | 3712 | 43 | Test automatico: recovery-canary-plan.test. |
+| `tests/recovery-transport-limits.test.mjs` | MJS | 4086 | 61 | Test automatico: recovery-transport-limits.test. |
+| `tests/release-manifest.test.mjs` | MJS | 8606 | 176 | Test automatico: release-manifest.test. |
+| `tests/repository-record-identity.test.mjs` | MJS | 5191 | 86 | Test automatico: repository-record-identity.test. |
+| `tests/request-coordinator.test.mjs` | MJS | 1647 | 37 | Test automatico: request-coordinator.test. |
+| `tests/restore-multiple-collisions.emulator.test.mjs` | MJS | 16790 | 267 | Test automatico: restore-multiple-collisions.emulator.test. |
+| `tests/restore-retry-new-session.emulator.test.mjs` | MJS | 17766 | 273 | Test automatico: restore-retry-new-session.emulator.test. |
+| `tests/restore-stale-preview.emulator.test.mjs` | MJS | 16643 | 250 | Test automatico: restore-stale-preview.emulator.test. |
+| `tests/setup-linux-cloud.test.mjs` | MJS | 5095 | 92 | Test automatico: setup-linux-cloud.test. |
+| `tests/share-revocation-paths.test.mjs` | MJS | 7000 | 108 | Test automatico: share-revocation-paths.test. |
+| `tests/share-revoked-notice.test.mjs` | MJS | 7227 | 114 | Test automatico: share-revoked-notice.test. |
+| `tests/shared-access-ui.test.mjs` | MJS | 1708 | 35 | Test automatico: shared-access-ui.test. |
+| `tests/shared-attachment-access.test.mjs` | MJS | 3961 | 82 | Test automatico: shared-attachment-access.test. |
+| `tests/shared-copies-purge.emulator.test.mjs` | MJS | 11234 | 179 | Test automatico: shared-copies-purge.emulator.test. |
+| `tests/shared-copies-purge.test.mjs` | MJS | 7650 | 112 | Test automatico: shared-copies-purge.test. |
+| `tests/shared-credential-editor.test.mjs` | MJS | 3669 | 22 | Test automatico: shared-credential-editor.test. |
+| `tests/shared-credential-update-session.test.mjs` | MJS | 4043 | 79 | Test automatico: shared-credential-update-session.test. |
+| `tests/shared-receipt-boundary.emulator.test.mjs` | MJS | 1600 | 27 | Test automatico: shared-receipt-boundary.emulator.test. |
+| `tests/shared-record-reader.test.mjs` | MJS | 3452 | 77 | Test automatico: shared-record-reader.test. |
+| `tests/shared-regrant-after-restore.test.mjs` | MJS | 14390 | 220 | Test automatico: shared-regrant-after-restore.test. |
+| `tests/shared-vault-data-model.test.mjs` | MJS | 4401 | 87 | Test automatico: shared-vault-data-model.test. |
+| `tests/sharing-identity.test.mjs` | MJS | 1748 | 24 | Test automatico: sharing-identity.test. |
+| `tests/sharing-prototype.rules.test.mjs` | MJS | 4524 | 94 | Test automatico: sharing-prototype.rules.test. |
+| `tests/sharing-prototype.storage.rules.test.mjs` | MJS | 4084 | 109 | Test automatico: sharing-prototype.storage.rules.test. |
+| `tests/sharing-revocation.rules.test.mjs` | MJS | 10859 | 200 | Test automatico: sharing-revocation.rules.test. |
+| `tests/sharing-two-device.test.mjs` | MJS | 4391 | 96 | Test automatico: sharing-two-device.test. |
+| `tests/speech-synthesis-controller.test.mjs` | MJS | 3317 | 88 | Test automatico: speech-synthesis-controller.test. |
+| `tests/static-reference-imports.test.mjs` | MJS | 1211 | 23 | Test automatico: static-reference-imports.test. |
+| `tests/storage-emulator-loopback-dispatcher.test.mjs` | MJS | 2417 | 58 | Test automatico: storage-emulator-loopback-dispatcher.test. |
+| `tests/storage.rules.test.mjs` | MJS | 19759 | 366 | Test automatico: storage.rules.test. |
+| `tests/swipe-lifecycle.test.mjs` | MJS | 13175 | 248 | Test automatico: swipe-lifecycle.test. |
+| `tests/theme-palette.test.mjs` | MJS | 5662 | 98 | Test automatico: theme-palette.test. |
+| `tests/ui-topology.test.mjs` | MJS | 5644 | 92 | Test automatico: ui-topology.test. |
+| `tests/ui-translations.test.mjs` | MJS | 2442 | 53 | Test automatico: ui-translations.test. |
+| `tests/vault-logout.test.mjs` | MJS | 4843 | 95 | Test automatico: vault-logout.test. |
+| `tests/vault-session-races.test.mjs` | MJS | 11253 | 251 | Test automatico: vault-session-races.test. |
+| `tests/vault-session.test.mjs` | MJS | 4906 | 94 | Test automatico: vault-session.test. |
+| `tests/voice-recognition-model.test.mjs` | MJS | 5067 | 112 | Test automatico: voice-recognition-model.test. |
+| `tests/widget-profile-model.test.mjs` | MJS | 4695 | 78 | Test automatico: widget-profile-model.test. |
+| `tests/widget-profile.rules.test.mjs` | MJS | 2217 | 48 | Test automatico: widget-profile.rules.test. |
+
+#### .agents
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.agents/skills/token-saver/SKILL.md` | MD | 4170 | 71 | Documentazione: SKILL. |
+| `.agents/skills/token-saver/agents/openai.yaml` | YAML | 109 | 4 | File di progetto: openai. |
+| `.agents/skills/token-saver/scripts/bootstrap_cloud.py` | PY | 5754 | 155 | File di progetto: bootstrap cloud. |
+| `.agents/skills/token-saver/scripts/project_graph.py` | PY | 6627 | 201 | File di progetto: project graph. |
+
+#### .codex
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.codex/setup-token-saver-cloud.sh` | SH | 221 | 7 | File di progetto: setup-token-saver-cloud. |
 
 #### .firebaserc
 
@@ -1856,21 +2206,34 @@ File censiti: **1267**. Duplicati byte-per-byte: **4 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `.gitattributes` | CONFIG | 560 | 11 | File di progetto: .gitattributes. |
+| `.gitattributes` | CONFIG | 975 | 26 | File di progetto: .gitattributes. |
 
 #### .github
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `.github/copilot-instructions.md` | MD | 1622 | 12 | Documentazione: copilot-instructions. |
-| `.github/workflows/docs.yml` | YML | 1323 | 38 | File di progetto: docs. |
-| `.github/workflows/firebase-deploy.yml` | YML | 4649 | 144 | File di progetto: firebase-deploy. |
+| `.github/copilot-instructions.md` | MD | 1662 | 12 | Documentazione: copilot-instructions. |
+| `.github/workflows/docs.yml` | YML | 1380 | 38 | File di progetto: docs. |
+| `.github/workflows/firebase-deploy.yml` | YML | 9304 | 251 | File di progetto: firebase-deploy. |
+| `.github/workflows/secret-scan.yml` | YML | 905 | 32 | File di progetto: secret-scan. |
 
 #### .gitignore
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `.gitignore` | CONFIG | 1866 | 94 | Esclusioni Git per file generati o locali. |
+| `.gitignore` | CONFIG | 1905 | 95 | Esclusioni Git per file generati o locali. |
+
+#### .gitleaksignore
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.gitleaksignore` | CONFIG | 1513 | 17 | File di progetto: .gitleaksignore. |
+
+#### .graphifyignore
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.graphifyignore` | CONFIG | 59 | 5 | File di progetto: .graphifyignore. |
 
 #### .vscode
 
@@ -1878,6 +2241,18 @@ File censiti: **1267**. Duplicati byte-per-byte: **4 gruppi**.
 |---|---:|---:|---:|---|
 | `.vscode/launch.json` | JSON | 286 | 13 | File di progetto: launch. |
 | `.vscode/settings.json` | JSON | 42 | 3 | File di progetto: settings. |
+
+#### AGENTS.md
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `AGENTS.md` | MD | 910 | 12 | Documentazione: AGENTS. |
+
+#### SECURITY.md
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `SECURITY.md` | MD | 2277 | 27 | Documentazione: SECURITY. |
 
 #### archive
 
@@ -1897,35 +2272,35 @@ File censiti: **1267**. Duplicati byte-per-byte: **4 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `docs/LEGGIMI.md` | MD | 5340 | 71 | Documentazione: LEGGIMI. |
+| `docs/LEGGIMI.md` | MD | 5792 | 77 | Documentazione: LEGGIMI. |
 | `docs/domande/M10_RILASCIO.md` | MD | 13666 | 161 | Documentazione: M10 RILASCIO. |
 | `docs/domande/M6_OFFLINE.md` | MD | 9587 | 148 | Documentazione: M6 OFFLINE. |
 | `docs/domande/M7_CANCELLAZIONE.md` | MD | 34947 | 568 | Documentazione: M7 CANCELLAZIONE. |
 | `docs/domande/M8_RECUPERO.md` | MD | 18008 | 240 | Documentazione: M8 RECUPERO. |
-| `docs/evidenze/AUDIT.md` | MD | 330225 | 3222 | Documentazione: AUDIT. |
-| `docs/evidenze/COLLAUDI.md` | MD | 420201 | 2215 | Documentazione: COLLAUDI. |
+| `docs/evidenze/AUDIT.md` | MD | 339384 | 3283 | Documentazione: AUDIT. |
+| `docs/evidenze/COLLAUDI.md` | MD | 499766 | 2571 | Documentazione: COLLAUDI. |
 | `docs/procedure/AMBIENTE_DI_TEST.md` | MD | 9715 | 93 | Documentazione: AMBIENTE DI TEST. |
-| `docs/procedure/COLLAUDI.md` | MD | 37371 | 435 | Documentazione: COLLAUDI. |
+| `docs/procedure/COLLAUDI.md` | MD | 42685 | 462 | Documentazione: COLLAUDI. |
 | `docs/procedure/GESTIONE_INCIDENTI.md` | MD | 6523 | 90 | Documentazione: GESTIONE INCIDENTI. |
-| `docs/progetto/DECISIONI.md` | MD | 68211 | 501 | Documentazione: DECISIONI. |
-| `docs/progetto/INCARICO_CORRENTE.md` | MD | 372720 | 1716 | Documentazione: INCARICO CORRENTE. |
-| `docs/progetto/PROGRAMMA.md` | MD | 59493 | 845 | Documentazione: PROGRAMMA. |
-| `docs/progetto/STATO.md` | MD | 376251 | 1632 | Documentazione: STATO. |
-| `docs/regole/BACKUP.md` | MD | 29567 | 168 | Documentazione: BACKUP. |
+| `docs/progetto/DECISIONI.md` | MD | 69692 | 513 | Documentazione: DECISIONI. |
+| `docs/progetto/INCARICO_CORRENTE.md` | MD | 401466 | 1852 | Documentazione: INCARICO CORRENTE. |
+| `docs/progetto/PROGRAMMA.md` | MD | 63070 | 869 | Documentazione: PROGRAMMA. |
+| `docs/progetto/STATO.md` | MD | 413781 | 1721 | Documentazione: STATO. |
+| `docs/regole/BACKUP.md` | MD | 35767 | 188 | Documentazione: BACKUP. |
 | `docs/regole/CANCELLAZIONE.md` | MD | 31692 | 259 | Documentazione: CANCELLAZIONE. |
-| `docs/regole/CONDIVISIONE.md` | MD | 29951 | 424 | Documentazione: CONDIVISIONE. |
-| `docs/regole/DATI.md` | MD | 33077 | 283 | Documentazione: DATI. |
-| `docs/regole/INTERFACCIA.md` | MD | 59912 | 624 | Documentazione: INTERFACCIA. |
+| `docs/regole/CONDIVISIONE.md` | MD | 29961 | 426 | Documentazione: CONDIVISIONE. |
+| `docs/regole/DATI.md` | MD | 32790 | 283 | Documentazione: DATI. |
+| `docs/regole/INTERFACCIA.md` | MD | 59047 | 624 | Documentazione: INTERFACCIA. |
 | `docs/regole/OFFLINE.md` | MD | 17945 | 198 | Documentazione: OFFLINE. |
-| `docs/regole/RILASCIO.md` | MD | 76819 | 517 | Documentazione: RILASCIO. |
+| `docs/regole/RILASCIO.md` | MD | 87929 | 571 | Documentazione: RILASCIO. |
 | `docs/regole/SALUTE_CREDENZIALI.md` | MD | 6301 | 75 | Documentazione: SALUTE CREDENZIALI. |
-| `docs/regole/SICUREZZA.md` | MD | 33751 | 482 | Documentazione: SICUREZZA. |
-| `docs/regole/VAULT.md` | MD | 16182 | 204 | Documentazione: VAULT. |
-| `docs/storico/REGISTRO.md` | MD | 2306308 | 19896 | Documentazione: REGISTRO. |
-| `docs/sviluppo/ALLEGATI_DOCUMENTI.md` | MD | 43693 | 280 | Documentazione: ALLEGATI DOCUMENTI. |
-| `docs/sviluppo/ASSISTENTE_APP.md` | MD | 57917 | 468 | Documentazione: ASSISTENTE APP. |
-| `docs/sviluppo/PROFILO_E_ACCOUNT.md` | MD | 56080 | 573 | Documentazione: PROFILO E ACCOUNT. |
-| `docs/utente/GUIDA.md` | MD | 36195 | 303 | Documentazione: GUIDA. |
+| `docs/regole/SICUREZZA.md` | MD | 35286 | 494 | Documentazione: SICUREZZA. |
+| `docs/regole/VAULT.md` | MD | 18481 | 216 | Documentazione: VAULT. |
+| `docs/storico/REGISTRO.md` | MD | 2287440 | 19905 | Documentazione: REGISTRO. |
+| `docs/sviluppo/ALLEGATI_DOCUMENTI.md` | MD | 44479 | 284 | Documentazione: ALLEGATI DOCUMENTI. |
+| `docs/sviluppo/ASSISTENTE_APP.md` | MD | 59283 | 476 | Documentazione: ASSISTENTE APP. |
+| `docs/sviluppo/PROFILO_E_ACCOUNT.md` | MD | 55627 | 573 | Documentazione: PROFILO E ACCOUNT. |
+| `docs/utente/GUIDA.md` | MD | 37630 | 315 | Documentazione: GUIDA. |
 
 #### experiments
 
@@ -2447,7 +2822,7 @@ File censiti: **1267**. Duplicati byte-per-byte: **4 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `firebase.json` | JSON | 3892 | 125 | Configura Hosting, header di sicurezza, emulatori, Firestore, Storage e Functions. |
+| `firebase.json` | JSON | 4065 | 139 | Configura Hosting, header di sicurezza, emulatori, Firestore, Storage e Functions. |
 
 #### firebase.manual-preview.json
 
@@ -2477,7 +2852,7 @@ File censiti: **1267**. Duplicati byte-per-byte: **4 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `firestore.rules` | RULES | 20495 | 410 | Autorizzazioni Firestore per proprietari, condivisioni, inviti e notifiche. |
+| `firestore.rules` | RULES | 22723 | 457 | Autorizzazioni Firestore per proprietari, condivisioni, inviti e notifiche. |
 
 #### functions
 
@@ -2487,7 +2862,7 @@ File censiti: **1267**. Duplicati byte-per-byte: **4 gruppi**.
 | `functions/.graphifyignore` | CONFIG | 152 | 6 | File di progetto: .graphifyignore. |
 | `functions/account-widget-receipt.js` | JS | 2067 | 34 | File di progetto: account-widget-receipt. |
 | `functions/account-widget-service.js` | JS | 5787 | 129 | File di progetto: account-widget-service. |
-| `functions/archive-purge-global-lock.js` | JS | 4200 | 115 | File di progetto: archive-purge-global-lock. |
+| `functions/archive-purge-global-lock.js` | JS | 4616 | 125 | File di progetto: archive-purge-global-lock. |
 | `functions/archive-purge-receipt.js` | JS | 4070 | 64 | File di progetto: archive-purge-receipt. |
 | `functions/archive-purge-reference-plan.js` | JS | 8358 | 138 | File di progetto: archive-purge-reference-plan. |
 | `functions/archive-purge-service.js` | JS | 7525 | 163 | File di progetto: archive-purge-service. |
@@ -2506,47 +2881,56 @@ File censiti: **1267**. Duplicati byte-per-byte: **4 gruppi**.
 | `functions/backup-storage-rewrite.js` | JS | 4116 | 84 | File di progetto: backup-storage-rewrite. |
 | `functions/deadline-calendar.js` | JS | 1791 | 39 | File di progetto: deadline-calendar. |
 | `functions/eslint.config.js` | JS | 606 | 26 | File di progetto: eslint.config. |
+| `functions/full-recovery-adapter.js` | JS | 3146 | 35 | File di progetto: full-recovery-adapter. |
+| `functions/full-recovery-callable.js` | JS | 2376 | 36 | File di progetto: full-recovery-callable. |
+| `functions/full-recovery-errors.js` | JS | 3769 | 54 | File di progetto: full-recovery-errors. |
+| `functions/full-recovery-model.js` | JS | 23647 | 291 | File di progetto: full-recovery-model. |
+| `functions/full-recovery-policy.js` | JS | 2012 | 32 | File di progetto: full-recovery-policy. |
+| `functions/full-recovery-production.js` | JS | 3896 | 63 | File di progetto: full-recovery-production. |
+| `functions/full-recovery-runtime.js` | JS | 41240 | 491 | File di progetto: full-recovery-runtime. |
 | `functions/history-recovery-service.js` | JS | 2239 | 41 | File di progetto: history-recovery-service. |
-| `functions/index.js` | JS | 130494 | 2380 | Backend MFA recovery, inviti, email, push e scheduler delle scadenze. |
+| `functions/index.js` | JS | 132989 | 2409 | Backend MFA recovery, inviti, email, push e scheduler delle scadenze. |
 | `functions/invite-acceptance-event-time.js` | JS | 689 | 14 | File di progetto: invite-acceptance-event-time. |
 | `functions/invite-acceptance-receipt.js` | JS | 9726 | 166 | File di progetto: invite-acceptance-receipt. |
-| `functions/invite-notification-guard.js` | JS | 9062 | 190 | File di progetto: invite-notification-guard. |
-| `functions/invite-revocation-notification.js` | JS | 4502 | 80 | File di progetto: invite-revocation-notification. |
+| `functions/invite-notification-guard.js` | JS | 10781 | 208 | File di progetto: invite-notification-guard. |
+| `functions/invite-revocation-notification.js` | JS | 4851 | 85 | File di progetto: invite-revocation-notification. |
 | `functions/maturity-rollout-policy.js` | JS | 704 | 17 | File di progetto: maturity-rollout-policy. |
 | `functions/mfa-recovery-grant-lab.js` | JS | 1890 | 50 | File di progetto: mfa-recovery-grant-lab. |
 | `functions/mfa-selective-recovery-flow-lab.js` | JS | 1120 | 28 | File di progetto: mfa-selective-recovery-flow-lab. |
 | `functions/mfa-selective-withdraw-lab.js` | JS | 1696 | 47 | File di progetto: mfa-selective-withdraw-lab. |
 | `functions/mfa-server-token-bridge-lab.js` | JS | 1054 | 25 | File di progetto: mfa-server-token-bridge-lab. |
 | `functions/mutation-result-binding.js` | JS | 2990 | 49 | File di progetto: mutation-result-binding. |
+| `functions/notification-provider-budget.js` | JS | 2713 | 47 | File di progetto: notification-provider-budget. |
 | `functions/offline-sync-service.js` | JS | 1632 | 34 | File di progetto: offline-sync-service. |
-| `functions/package-lock.json` | JSON | 165585 | 4435 | Lockfile riproducibile delle dipendenze npm. |
-| `functions/package.json` | JSON | 651 | 27 | Runtime e dipendenze delle Cloud Functions. |
+| `functions/package-lock.json` | JSON | 134185 | 3688 | Lockfile riproducibile delle dipendenze npm. |
+| `functions/package.json` | JSON | 623 | 27 | Runtime e dipendenze delle Cloud Functions. |
 | `functions/private-account-mutation-service.js` | JS | 3560 | 69 | File di progetto: private-account-mutation-service. |
 | `functions/private-account-write-scope.js` | JS | 4428 | 82 | File di progetto: private-account-write-scope. |
-| `functions/profile-document-attachment-service.js` | JS | 8431 | 159 | File di progetto: profile-document-attachment-service. |
-| `functions/recipient-delivery-ledger.js` | JS | 5331 | 105 | File di progetto: recipient-delivery-ledger. |
+| `functions/profile-document-attachment-service.js` | JS | 11617 | 210 | File di progetto: profile-document-attachment-service. |
+| `functions/recipient-delivery-ledger.js` | JS | 5849 | 114 | File di progetto: recipient-delivery-ledger. |
+| `functions/recovery-asset-reader.js` | JS | 9507 | 138 | File di progetto: recovery-asset-reader. |
 | `functions/recovery-command-receipt.js` | JS | 1505 | 26 | File di progetto: recovery-command-receipt. |
 | `functions/recovery-security.js` | JS | 2823 | 70 | Generazione, hash e rate-limit dei codici MFA di recupero. |
 | `functions/reference-callables.js` | JS | 16729 | 300 | File di progetto: reference-callables. |
 | `functions/shared-attachment-service.js` | JS | 8410 | 153 | File di progetto: shared-attachment-service. |
 | `functions/shared-vault-receipt.js` | JS | 2964 | 40 | File di progetto: shared-vault-receipt. |
 | `functions/shared-vault-service.js` | JS | 9148 | 202 | File di progetto: shared-vault-service. |
-| `functions/test/account-audit-trigger.test.js` | JS | 12134 | 230 | Test automatico: account-audit-trigger.test. |
+| `functions/test/account-audit-trigger.test.js` | JS | 11987 | 230 | Test automatico: account-audit-trigger.test. |
 | `functions/test/account-widget-bank-handler.test.js` | JS | 8049 | 134 | Test automatico: account-widget-bank-handler.test. |
 | `functions/test/account-widget-receipt.emulator.test.js` | JS | 4828 | 65 | Test automatico: account-widget-receipt.emulator.test. |
 | `functions/test/account-widget-receipt.test.js` | JS | 2659 | 37 | Test automatico: account-widget-receipt.test. |
 | `functions/test/account-widget-service.test.js` | JS | 7242 | 123 | Test automatico: account-widget-service.test. |
-| `functions/test/archive-owner-handler.test.js` | JS | 4673 | 79 | Test automatico: archive-owner-handler.test. |
-| `functions/test/archive-purge-global-lock.test.js` | JS | 5374 | 101 | Test automatico: archive-purge-global-lock.test. |
+| `functions/test/archive-owner-handler.test.js` | JS | 4723 | 79 | Test automatico: archive-owner-handler.test. |
+| `functions/test/archive-purge-global-lock.test.js` | JS | 5402 | 101 | Test automatico: archive-purge-global-lock.test. |
 | `functions/test/archive-purge-receipt.test.js` | JS | 4620 | 70 | Test automatico: archive-purge-receipt.test. |
 | `functions/test/archive-purge-reference-plan.test.js` | JS | 9164 | 165 | Test automatico: archive-purge-reference-plan.test. |
 | `functions/test/archive-purge-service.test.js` | JS | 8952 | 137 | Test automatico: archive-purge-service.test. |
-| `functions/test/archive-receipt-handler.test.js` | JS | 15649 | 262 | Test automatico: archive-receipt-handler.test. |
+| `functions/test/archive-receipt-handler.test.js` | JS | 15471 | 262 | Test automatico: archive-receipt-handler.test. |
 | `functions/test/audit-event-service.test.js` | JS | 22938 | 369 | Test automatico: audit-event-service.test. |
-| `functions/test/audit-retention-job.test.js` | JS | 9497 | 197 | Test automatico: audit-retention-job.test. |
+| `functions/test/audit-retention-job.test.js` | JS | 10202 | 194 | Test automatico: audit-retention-job.test. |
 | `functions/test/audit-retention-service.test.js` | JS | 11239 | 200 | Test automatico: audit-retention-service.test. |
 | `functions/test/backup-attachment-stage.test.js` | JS | 13162 | 255 | Test automatico: backup-attachment-stage.test. |
-| `functions/test/backup-owner-handler.test.js` | JS | 5113 | 86 | Test automatico: backup-owner-handler.test. |
+| `functions/test/backup-owner-handler.test.js` | JS | 5156 | 86 | Test automatico: backup-owner-handler.test. |
 | `functions/test/backup-receipt-handler.test.js` | JS | 10123 | 166 | Test automatico: backup-receipt-handler.test. |
 | `functions/test/backup-restore-authority.test.js` | JS | 4578 | 76 | Test automatico: backup-restore-authority.test. |
 | `functions/test/backup-restore-preview.test.js` | JS | 2173 | 31 | Test automatico: backup-restore-preview.test. |
@@ -2559,55 +2943,62 @@ File censiti: **1267**. Duplicati byte-per-byte: **4 gruppi**.
 | `functions/test/backup-restore-v2-service.test.js` | JS | 1395 | 26 | Test automatico: backup-restore-v2-service.test. |
 | `functions/test/backup-storage-rewrite.test.js` | JS | 3523 | 68 | Test automatico: backup-storage-rewrite.test. |
 | `functions/test/deadline-calendar.test.js` | JS | 2474 | 42 | Test automatico: deadline-calendar.test. |
-| `functions/test/deadline-created-calendar.test.js` | JS | 5240 | 80 | Test automatico: deadline-created-calendar.test. |
-| `functions/test/deadline-email.test.js` | JS | 8509 | 153 | Test automatico: deadline-email.test. |
-| `functions/test/deadline-push-test.test.js` | JS | 4178 | 112 | Test automatico: deadline-push-test.test. |
-| `functions/test/deadline-push.test.js` | JS | 22727 | 389 | Test automatico: deadline-push.test. |
-| `functions/test/deadline-scheduler.test.js` | JS | 7003 | 129 | Test automatico: deadline-scheduler.test. |
-| `functions/test/deadline-updated-delivery.test.js` | JS | 5331 | 142 | Test automatico: deadline-updated-delivery.test. |
+| `functions/test/deadline-created-calendar.test.js` | JS | 5663 | 83 | Test automatico: deadline-created-calendar.test. |
+| `functions/test/deadline-email.test.js` | JS | 8440 | 153 | Test automatico: deadline-email.test. |
+| `functions/test/deadline-push-test.test.js` | JS | 4216 | 113 | Test automatico: deadline-push-test.test. |
+| `functions/test/deadline-push.test.js` | JS | 22477 | 389 | Test automatico: deadline-push.test. |
+| `functions/test/deadline-scheduler.test.js` | JS | 7467 | 137 | Test automatico: deadline-scheduler.test. |
+| `functions/test/deadline-updated-delivery.test.js` | JS | 5530 | 148 | Test automatico: deadline-updated-delivery.test. |
+| `functions/test/full-recovery-model.test.js` | JS | 13124 | 132 | Test automatico: full-recovery-model.test. |
+| `functions/test/full-recovery-production.test.js` | JS | 12720 | 165 | Test automatico: full-recovery-production.test. |
 | `functions/test/history-recovery-service.test.js` | JS | 1425 | 19 | Test automatico: history-recovery-service.test. |
 | `functions/test/invite-acceptance-event-time.test.js` | JS | 644 | 13 | Test automatico: invite-acceptance-event-time.test. |
 | `functions/test/invite-acceptance-receipt.test.js` | JS | 6098 | 108 | Test automatico: invite-acceptance-receipt.test. |
 | `functions/test/invite-acceptance-window.test.js` | JS | 2961 | 43 | Test automatico: invite-acceptance-window.test. |
-| `functions/test/invite-audit-trigger.test.js` | JS | 11053 | 213 | Test automatico: invite-audit-trigger.test. |
-| `functions/test/invite-notification-guard.test.js` | JS | 7327 | 146 | Test automatico: invite-notification-guard.test. |
-| `functions/test/invite-notification-log.test.js` | JS | 2182 | 47 | Test automatico: invite-notification-log.test. |
-| `functions/test/invite-revocation-cleanup.test.js` | JS | 4387 | 85 | Test automatico: invite-revocation-cleanup.test. |
+| `functions/test/invite-audit-trigger.test.js` | JS | 10923 | 213 | Test automatico: invite-audit-trigger.test. |
+| `functions/test/invite-notification-guard.test.js` | JS | 14684 | 257 | Test automatico: invite-notification-guard.test. |
+| `functions/test/invite-notification-log.test.js` | JS | 3575 | 64 | Test automatico: invite-notification-log.test. |
+| `functions/test/invite-revocation-cleanup.test.js` | JS | 4883 | 95 | Test automatico: invite-revocation-cleanup.test. |
 | `functions/test/invite-revocation-exports.test.js` | JS | 3013 | 54 | Test automatico: invite-revocation-exports.test. |
-| `functions/test/invite-revocation-notification.test.js` | JS | 4947 | 92 | Test automatico: invite-revocation-notification.test. |
+| `functions/test/invite-revocation-notification.test.js` | JS | 5477 | 103 | Test automatico: invite-revocation-notification.test. |
 | `functions/test/maturity-rollout-policy.test.js` | JS | 1169 | 37 | Test automatico: maturity-rollout-policy.test. |
 | `functions/test/mfa-recovery-grant-lab.test.js` | JS | 1900 | 45 | Test automatico: mfa-recovery-grant-lab.test. |
 | `functions/test/mfa-selective-recovery-flow-lab.test.js` | JS | 2341 | 46 | Test automatico: mfa-selective-recovery-flow-lab.test. |
 | `functions/test/mfa-selective-withdraw-lab.test.js` | JS | 1915 | 51 | Test automatico: mfa-selective-withdraw-lab.test. |
 | `functions/test/mfa-server-token-bridge-lab.test.js` | JS | 1983 | 38 | Test automatico: mfa-server-token-bridge-lab.test. |
 | `functions/test/mutation-legacy-reason.test.js` | JS | 5312 | 101 | Test automatico: mutation-legacy-reason.test. |
-| `functions/test/mutation-owner-handler.test.js` | JS | 7359 | 104 | Test automatico: mutation-owner-handler.test. |
+| `functions/test/mutation-owner-handler.test.js` | JS | 7375 | 104 | Test automatico: mutation-owner-handler.test. |
 | `functions/test/mutation-result-binding.test.js` | JS | 6270 | 93 | Test automatico: mutation-result-binding.test. |
+| `functions/test/notification-provider-budget.test.js` | JS | 6985 | 120 | Test automatico: notification-provider-budget.test. |
 | `functions/test/offline-sync-service.test.js` | JS | 1296 | 24 | Test automatico: offline-sync-service.test. |
 | `functions/test/private-account-mutation-service.test.js` | JS | 2966 | 69 | Test automatico: private-account-mutation-service.test. |
-| `functions/test/private-account-write-scope.test.js` | JS | 11202 | 168 | Test automatico: private-account-write-scope.test. |
-| `functions/test/profile-document-attachment-service.test.js` | JS | 5382 | 88 | Test automatico: profile-document-attachment-service.test. |
+| `functions/test/private-account-write-scope.test.js` | JS | 11174 | 168 | Test automatico: private-account-write-scope.test. |
+| `functions/test/profile-document-attachment-service.test.js` | JS | 15214 | 259 | Test automatico: profile-document-attachment-service.test. |
 | `functions/test/purge-external-preflight.emulator.test.js` | JS | 5647 | 86 | Test automatico: purge-external-preflight.emulator.test. |
-| `functions/test/purge-profile-cleanup-handler.test.js` | JS | 10097 | 162 | Test automatico: purge-profile-cleanup-handler.test. |
+| `functions/test/purge-profile-cleanup-handler.test.js` | JS | 10052 | 162 | Test automatico: purge-profile-cleanup-handler.test. |
 | `functions/test/purge-suspension-handler.test.js` | JS | 2283 | 36 | Test automatico: purge-suspension-handler.test. |
-| `functions/test/received-deadline-owner-handler.test.js` | JS | 5310 | 89 | Test automatico: received-deadline-owner-handler.test. |
-| `functions/test/recipient-delivery-ledger.test.js` | JS | 6571 | 125 | Test automatico: recipient-delivery-ledger.test. |
-| `functions/test/recipient-ledger-fixture.js` | JS | 1140 | 24 | Test automatico: recipient-ledger-fixture. |
+| `functions/test/received-deadline-owner-handler.test.js` | JS | 5321 | 89 | Test automatico: received-deadline-owner-handler.test. |
+| `functions/test/recipient-delivery-ledger.test.js` | JS | 6482 | 125 | Test automatico: recipient-delivery-ledger.test. |
+| `functions/test/recipient-ledger-fixture.js` | JS | 1170 | 24 | Test automatico: recipient-ledger-fixture. |
+| `functions/test/recovery-asset-reader.test.js` | JS | 13350 | 187 | Test automatico: recovery-asset-reader.test. |
 | `functions/test/recovery-attempts.emulator.test.js` | JS | 6331 | 104 | Test automatico: recovery-attempts.emulator.test. |
 | `functions/test/recovery-command-handler.test.js` | JS | 5747 | 88 | Test automatico: recovery-command-handler.test. |
+| `functions/test/recovery-fenced-writers.test.js` | JS | 4056 | 70 | Test automatico: recovery-fenced-writers.test. |
 | `functions/test/recovery-security.test.js` | JS | 24619 | 381 | Test automatico: recovery-security.test. |
-| `functions/test/respond-invitation-archived.test.js` | JS | 30406 | 521 | Test automatico: respond-invitation-archived.test. |
+| `functions/test/respond-invitation-archived.test.js` | JS | 31478 | 550 | Test automatico: respond-invitation-archived.test. |
 | `functions/test/shared-attachment-service.test.js` | JS | 7024 | 137 | Test automatico: shared-attachment-service.test. |
 | `functions/test/shared-unlink-handler.test.js` | JS | 6690 | 105 | Test automatico: shared-unlink-handler.test. |
 | `functions/test/shared-unlink.emulator.test.js` | JS | 6579 | 93 | Test automatico: shared-unlink.emulator.test. |
 | `functions/test/shared-vault-receipt.test.js` | JS | 2455 | 34 | Test automatico: shared-vault-receipt.test. |
 | `functions/test/shared-vault-service.test.js` | JS | 3625 | 79 | Test automatico: shared-vault-service.test. |
 | `functions/test/vault-account-callables.test.js` | JS | 3980 | 70 | Test automatico: vault-account-callables.test. |
+| `functions/test/vault-recovery-fence.test.js` | JS | 6978 | 107 | Test automatico: vault-recovery-fence.test. |
 | `functions/test/verified-email-identity.test.js` | JS | 1697 | 37 | Test automatico: verified-email-identity.test. |
 | `functions/test/widget-profile-migration-service.test.js` | JS | 1954 | 34 | Test automatico: widget-profile-migration-service.test. |
 | `functions/test/widget-profile-service.test.js` | JS | 2978 | 58 | Test automatico: widget-profile-service.test. |
-| `functions/vault-account-entry.mjs` | MJS | 8093 | 103 | File di progetto: vault-account-entry. |
-| `functions/vault-account-runtime.js` | JS | 164577 | 2856 | File di progetto: vault-account-runtime. |
+| `functions/vault-account-entry.mjs` | MJS | 8065 | 103 | File di progetto: vault-account-entry. |
+| `functions/vault-account-runtime.js` | JS | 169018 | 2992 | File di progetto: vault-account-runtime. |
+| `functions/vault-recovery-fence.js` | JS | 6178 | 105 | File di progetto: vault-recovery-fence. |
 | `functions/verified-email-identity.js` | JS | 775 | 27 | File di progetto: verified-email-identity. |
 | `functions/widget-profile-migration-service.js` | JS | 2695 | 70 | File di progetto: widget-profile-migration-service. |
 | `functions/widget-profile-service.js` | JS | 3863 | 91 | File di progetto: widget-profile-service. |
@@ -2617,103 +3008,13 @@ File censiti: **1267**. Duplicati byte-per-byte: **4 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package-lock.json` | JSON | 446007 | 12650 | Lockfile riproducibile delle dipendenze npm. |
+| `package-lock.json` | JSON | 438625 | 12438 | Lockfile riproducibile delle dipendenze npm. |
 
 #### package.json
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 23258 | 156 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
-
-#### scripts
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `scripts/audit-canonical-pages.mjs` | MJS | 1211 | 29 | Strumento manutenzione/test: audit-canonical-pages. |
-| `scripts/audit-data-access.mjs` | MJS | 6408 | 93 | Strumento manutenzione/test: audit-data-access. |
-| `scripts/audit-docs.mjs` | MJS | 7747 | 150 | Strumento manutenzione/test: audit-docs. |
-| `scripts/audit-documentation-guide.mjs` | MJS | 5723 | 72 | Strumento manutenzione/test: audit-documentation-guide. |
-| `scripts/audit-firestore-legacy-email-metadata.mjs` | MJS | 1947 | 44 | Strumento manutenzione/test: audit-firestore-legacy-email-metadata. |
-| `scripts/audit-git-state.mjs` | MJS | 6899 | 137 | Strumento manutenzione/test: audit-git-state. |
-| `scripts/audit-html-purity.mjs` | MJS | 2726 | 69 | Strumento manutenzione/test: audit-html-purity. |
-| `scripts/audit-i18n-corpus.mjs` | MJS | 20115 | 325 | Strumento manutenzione/test: audit-i18n-corpus. |
-| `scripts/audit-i18n-quality.mjs` | MJS | 13522 | 254 | Strumento manutenzione/test: audit-i18n-quality. |
-| `scripts/audit-js-syntax.mjs` | MJS | 1237 | 38 | Strumento manutenzione/test: audit-js-syntax. |
-| `scripts/audit-lightweight-features.mjs` | MJS | 2194 | 46 | Strumento manutenzione/test: audit-lightweight-features. |
-| `scripts/audit-navigation-flows.mjs` | MJS | 13965 | 167 | Strumento manutenzione/test: audit-navigation-flows. |
-| `scripts/audit-offline-shell.mjs` | MJS | 4307 | 85 | Strumento manutenzione/test: audit-offline-shell. |
-| `scripts/audit-page-performance.mjs` | MJS | 8505 | 150 | Strumento manutenzione/test: audit-page-performance. |
-| `scripts/audit-page-shells.mjs` | MJS | 8017 | 169 | Strumento manutenzione/test: audit-page-shells. |
-| `scripts/audit-project-inventory.mjs` | MJS | 8526 | 128 | Strumento manutenzione/test: audit-project-inventory. |
-| `scripts/audit-qa-final-inventory.mjs` | MJS | 9534 | 142 | Strumento manutenzione/test: audit-qa-final-inventory. |
-| `scripts/audit-release-hardening.mjs` | MJS | 2474 | 38 | Strumento manutenzione/test: audit-release-hardening. |
-| `scripts/audit-security-flows.mjs` | MJS | 39459 | 342 | Strumento manutenzione/test: audit-security-flows. |
-| `scripts/audit-static-references.mjs` | MJS | 2718 | 60 | Strumento manutenzione/test: audit-static-references. |
-| `scripts/audit-ui-foundations.mjs` | MJS | 10464 | 140 | Strumento manutenzione/test: audit-ui-foundations. |
-| `scripts/audit-vault-integration.mjs` | MJS | 2506 | 33 | Strumento manutenzione/test: audit-vault-integration. |
-| `scripts/audit-vault-key-terminology.mjs` | MJS | 2059 | 34 | Strumento manutenzione/test: audit-vault-key-terminology. |
-| `scripts/backfill-shared-email-bindings.mjs` | MJS | 3987 | 106 | Strumento manutenzione/test: backfill-shared-email-bindings. |
-| `scripts/build-card-importer-prototype.mjs` | MJS | 561 | 17 | Strumento manutenzione/test: build-card-importer-prototype. |
-| `scripts/build-company-pdf.mjs` | MJS | 596 | 7 | Strumento manutenzione/test: build-company-pdf. |
-| `scripts/build-offline-runtime.mjs` | MJS | 5528 | 134 | Strumento manutenzione/test: build-offline-runtime. |
-| `scripts/build-vault-account-backend.mjs` | MJS | 1078 | 21 | Strumento manutenzione/test: build-vault-account-backend. |
-| `scripts/bump-version.mjs` | MJS | 5788 | 144 | Strumento manutenzione/test: bump-version. |
-| `scripts/docs-manifest.json` | JSON | 1448 | 45 | Strumento manutenzione/test: docs-manifest. |
-| `scripts/docs-source-map.json` | JSON | 55132 | 1257 | Strumento manutenzione/test: docs-source-map. |
-| `scripts/functions-emulator-targets.mjs` | MJS | 905 | 19 | Strumento manutenzione/test: functions-emulator-targets. |
-| `scripts/functions-emulator.synthetic.env` | ENV | 85 | 3 | Strumento manutenzione/test: functions-emulator.synthetic. |
-| `scripts/gcs-generation-gate.mjs` | MJS | 4564 | 100 | Strumento manutenzione/test: gcs-generation-gate. |
-| `scripts/i18n-quality-baseline.json` | JSON | 1490 | 60 | Strumento manutenzione/test: i18n-quality-baseline. |
-| `scripts/lib/generated-doc-section.mjs` | MJS | 943 | 17 | Strumento manutenzione/test: generated-doc-section. |
-| `scripts/lib/legacy-email-audit-model.mjs` | MJS | 3871 | 66 | Strumento manutenzione/test: legacy-email-audit-model. |
-| `scripts/lib/qa-credentials.mjs` | MJS | 6427 | 132 | Strumento manutenzione/test: qa-credentials. |
-| `scripts/migrate-offline-firestore-reads.mjs` | MJS | 2005 | 47 | Strumento manutenzione/test: migrate-offline-firestore-reads. |
-| `scripts/normalize-responsive-foundations.mjs` | MJS | 1747 | 33 | Strumento manutenzione/test: normalize-responsive-foundations. |
-| `scripts/page-performance-budget.json` | JSON | 707 | 22 | Strumento manutenzione/test: page-performance-budget. |
-| `scripts/pdf/company-summary-pdf.mjs` | MJS | 10881 | 152 | Strumento manutenzione/test: company-summary-pdf. |
-| `scripts/populate-qa-accounts-browser.mjs` | MJS | 32046 | 523 | Strumento manutenzione/test: populate-qa-accounts-browser. |
-| `scripts/populate-qa-company-browser.mjs` | MJS | 18990 | 356 | Strumento manutenzione/test: populate-qa-company-browser. |
-| `scripts/populate-qa-deadlines-browser.mjs` | MJS | 37255 | 651 | Strumento manutenzione/test: populate-qa-deadlines-browser. |
-| `scripts/populate-qa-profile-browser.mjs` | MJS | 25970 | 438 | Strumento manutenzione/test: populate-qa-profile-browser. |
-| `scripts/populate-qa-profile-links-browser.mjs` | MJS | 16830 | 289 | Strumento manutenzione/test: populate-qa-profile-links-browser. |
-| `scripts/provision-qa-user.mjs` | MJS | 9104 | 198 | Strumento manutenzione/test: provision-qa-user. |
-| `scripts/reminder-emulator-entry.mjs` | MJS | 3425 | 45 | Strumento manutenzione/test: reminder-emulator-entry. |
-| `scripts/run-account-attachment-delete-emulators.mjs` | MJS | 1481 | 37 | Strumento manutenzione/test: run-account-attachment-delete-emulators. |
-| `scripts/run-attachment-removal-emulators.mjs` | MJS | 1322 | 35 | Strumento manutenzione/test: run-attachment-removal-emulators. |
-| `scripts/run-audit-retention-emulators.mjs` | MJS | 1178 | 27 | Strumento manutenzione/test: run-audit-retention-emulators. |
-| `scripts/run-avatar-residues-emulators.mjs` | MJS | 1375 | 36 | Strumento manutenzione/test: run-avatar-residues-emulators. |
-| `scripts/run-backup-restore-v2-emulators.mjs` | MJS | 874 | 17 | Strumento manutenzione/test: run-backup-restore-v2-emulators. |
-| `scripts/run-company-hard-delete-emulators.mjs` | MJS | 1321 | 35 | Strumento manutenzione/test: run-company-hard-delete-emulators. |
-| `scripts/run-firestore-rules-tests.mjs` | MJS | 1664 | 34 | Strumento manutenzione/test: run-firestore-rules-tests. |
-| `scripts/run-functions-emulator-local.mjs` | MJS | 3019 | 44 | Strumento manutenzione/test: run-functions-emulator-local. |
-| `scripts/run-interrupted-restore-emulators.mjs` | MJS | 1319 | 35 | Strumento manutenzione/test: run-interrupted-restore-emulators. |
-| `scripts/run-purge-retention-emulators.mjs` | MJS | 1447 | 37 | Strumento manutenzione/test: run-purge-retention-emulators. |
-| `scripts/run-purged-account-restore-emulators.mjs` | MJS | 1322 | 35 | Strumento manutenzione/test: run-purged-account-restore-emulators. |
-| `scripts/run-restore-collisions-emulators.mjs` | MJS | 1317 | 35 | Strumento manutenzione/test: run-restore-collisions-emulators. |
-| `scripts/run-restore-retry-emulators.mjs` | MJS | 1308 | 35 | Strumento manutenzione/test: run-restore-retry-emulators. |
-| `scripts/run-restore-stale-emulators.mjs` | MJS | 1296 | 35 | Strumento manutenzione/test: run-restore-stale-emulators. |
-| `scripts/run-shared-copies-purge-emulators.mjs` | MJS | 1304 | 35 | Strumento manutenzione/test: run-shared-copies-purge-emulators. |
-| `scripts/run-storage-rules-tests.mjs` | MJS | 1967 | 45 | Strumento manutenzione/test: run-storage-rules-tests. |
-| `scripts/run-vault-session-emulators.mjs` | MJS | 5452 | 48 | Strumento manutenzione/test: run-vault-session-emulators. |
-| `scripts/serve-deadline-reminder-probe.mjs` | MJS | 4968 | 51 | Strumento manutenzione/test: serve-deadline-reminder-probe. |
-| `scripts/serve-reminder-emulators.mjs` | MJS | 9238 | 84 | Strumento manutenzione/test: serve-reminder-emulators. |
-| `scripts/setup-linux-cloud.sh` | SH | 7927 | 156 | Strumento manutenzione/test: setup-linux-cloud. |
-| `scripts/split-translations.mjs` | MJS | 2976 | 85 | Strumento manutenzione/test: split-translations. |
-| `scripts/storage-emulator-loopback-dispatcher.cjs` | CJS | 1571 | 57 | Strumento manutenzione/test: storage-emulator-loopback-dispatcher. |
-| `scripts/test-company-summary-browser.mjs` | MJS | 5074 | 43 | Strumento manutenzione/test: test-company-summary-browser. |
-| `scripts/test-documentation-guide-browser.mjs` | MJS | 19409 | 231 | Strumento manutenzione/test: test-documentation-guide-browser. |
-| `scripts/test-functions-emulator.mjs` | MJS | 2489 | 58 | Strumento manutenzione/test: test-functions-emulator. |
-| `scripts/test-mfa-session-emulator.mjs` | MJS | 2145 | 36 | Strumento manutenzione/test: test-mfa-session-emulator. |
-| `scripts/test-portable-archive-browser.mjs` | MJS | 14091 | 223 | Strumento manutenzione/test: test-portable-archive-browser. |
-| `scripts/test-portable-archive-capacity.mjs` | MJS | 4728 | 92 | Strumento manutenzione/test: test-portable-archive-capacity. |
-| `scripts/test-private-auth-browser.mjs` | MJS | 9036 | 138 | Strumento manutenzione/test: test-private-auth-browser. |
-| `scripts/test-qa-p0-safe-browser.mjs` | MJS | 32893 | 614 | Strumento manutenzione/test: test-qa-p0-safe-browser. |
-| `scripts/test-qa-page-matrix-browser.mjs` | MJS | 10936 | 193 | Strumento manutenzione/test: test-qa-page-matrix-browser. |
-| `scripts/test-qa-release-browser.mjs` | MJS | 5724 | 101 | Strumento manutenzione/test: test-qa-release-browser. |
-| `scripts/test-vault-account-functions-emulator.mjs` | MJS | 26689 | 325 | Strumento manutenzione/test: test-vault-account-functions-emulator. |
-| `scripts/test-vault-assistant.mjs` | MJS | 10486 | 143 | Strumento manutenzione/test: test-vault-assistant. |
-| `scripts/ui-quality-baseline.json` | JSON | 128 | 7 | Strumento manutenzione/test: ui-quality-baseline. |
-| `scripts/verify-map-fingerprints.mjs` | MJS | 6951 | 109 | Strumento manutenzione/test: verify-map-fingerprints. |
+| `package.json` | JSON | 25563 | 171 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 #### storage.cors.json
 
@@ -2725,7 +3026,7 @@ File censiti: **1267**. Duplicati byte-per-byte: **4 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `storage.rules` | RULES | 5116 | 111 | Limiti, MIME e isolamento UID degli upload Firebase Storage. |
+| `storage.rules` | RULES | 6352 | 133 | Limiti, MIME e isolamento UID degli upload Firebase Storage. |
 
 #### stylelint.config.mjs
 
@@ -2733,200 +3034,8 @@ File censiti: **1267**. Duplicati byte-per-byte: **4 gruppi**.
 |---|---:|---:|---:|---|
 | `stylelint.config.mjs` | MJS | 510 | 17 | File di progetto: stylelint.config. |
 
-#### tests
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `tests/account-archive-paths.test.mjs` | MJS | 6248 | 91 | Test automatico: account-archive-paths.test. |
-| `tests/account-attachment-delete.emulator.test.mjs` | MJS | 9022 | 155 | Test automatico: account-attachment-delete.emulator.test. |
-| `tests/account-attachment-delete.test.mjs` | MJS | 11719 | 187 | Test automatico: account-attachment-delete.test. |
-| `tests/account-detail-compact.test.mjs` | MJS | 10269 | 157 | Test automatico: account-detail-compact.test. |
-| `tests/account-field-usage-model.test.mjs` | MJS | 3145 | 70 | Test automatico: account-field-usage-model.test. |
-| `tests/account-lazy-save.test.mjs` | MJS | 2711 | 55 | Test automatico: account-lazy-save.test. |
-| `tests/account-list-sort.test.mjs` | MJS | 2040 | 41 | Test automatico: account-list-sort.test. |
-| `tests/account-loaddata-full-context.test.mjs` | MJS | 14993 | 229 | Test automatico: account-loaddata-full-context.test. |
-| `tests/account-mode-form-ui.test.mjs` | MJS | 2968 | 64 | Test automatico: account-mode-form-ui.test. |
-| `tests/account-mode-model.test.mjs` | MJS | 4580 | 100 | Test automatico: account-mode-model.test. |
-| `tests/account-note-editor.test.mjs` | MJS | 10939 | 162 | Test automatico: account-note-editor.test. |
-| `tests/account-page-lifecycle.test.mjs` | MJS | 29529 | 479 | Test automatico: account-page-lifecycle.test. |
-| `tests/account-save-context-blocks-writes.test.mjs` | MJS | 14095 | 183 | Test automatico: account-save-context-blocks-writes.test. |
-| `tests/account-save-revalidates-after-reads.test.mjs` | MJS | 11103 | 149 | Test automatico: account-save-revalidates-after-reads.test. |
-| `tests/account-sharing-recipient-preferences.test.mjs` | MJS | 3083 | 54 | Test automatico: account-sharing-recipient-preferences.test. |
-| `tests/account-widget-lifecycle.test.mjs` | MJS | 16517 | 156 | Test automatico: account-widget-lifecycle.test. |
-| `tests/account-widget-session.test.mjs` | MJS | 2312 | 31 | Test automatico: account-widget-session.test. |
-| `tests/account-widget-ui.test.mjs` | MJS | 4302 | 80 | Test automatico: account-widget-ui.test. |
-| `tests/app-diagnostics.test.mjs` | MJS | 3457 | 76 | Test automatico: app-diagnostics.test. |
-| `tests/archive-account-model.test.mjs` | MJS | 758 | 16 | Test automatico: archive-account-model.test. |
-| `tests/archive-guest-suspension.rules.test.mjs` | MJS | 14558 | 244 | Test automatico: archive-guest-suspension.rules.test. |
-| `tests/archive-list-filter.test.mjs` | MJS | 12720 | 212 | Test automatico: archive-list-filter.test. |
-| `tests/archive-purge-global-lock.rules.test.mjs` | MJS | 2818 | 61 | Test automatico: archive-purge-global-lock.rules.test. |
-| `tests/archive-recipients.test.mjs` | MJS | 5667 | 101 | Test automatico: archive-recipients.test. |
-| `tests/archive-session.test.mjs` | MJS | 47845 | 736 | Test automatico: archive-session.test. |
-| `tests/assistant-deadline-search.test.mjs` | MJS | 3860 | 77 | Test automatico: assistant-deadline-search.test. |
-| `tests/attachment-removal-residues.emulator.test.mjs` | MJS | 8925 | 146 | Test automatico: attachment-removal-residues.emulator.test. |
-| `tests/attachment-removal-residues.test.mjs` | MJS | 11535 | 180 | Test automatico: attachment-removal-residues.test. |
-| `tests/attachment-security.test.mjs` | MJS | 11788 | 240 | Test automatico: attachment-security.test. |
-| `tests/audit-events.rules.test.mjs` | MJS | 5213 | 96 | Test automatico: audit-events.rules.test. |
-| `tests/audit-retention.emulator.test.mjs` | MJS | 19874 | 331 | Test automatico: audit-retention.emulator.test. |
-| `tests/avatar-change-residues.emulator.test.mjs` | MJS | 7457 | 128 | Test automatico: avatar-change-residues.emulator.test. |
-| `tests/avatar-change-residues.test.mjs` | MJS | 13322 | 250 | Test automatico: avatar-change-residues.test. |
-| `tests/backup-crypto-runtime.test.mjs` | MJS | 2716 | 43 | Test automatico: backup-crypto-runtime.test. |
-| `tests/backup-export-model.test.mjs` | MJS | 3045 | 56 | Test automatico: backup-export-model.test. |
-| `tests/backup-export-session.test.mjs` | MJS | 10618 | 161 | Test automatico: backup-export-session.test. |
-| `tests/backup-header-cleartext.test.mjs` | MJS | 10245 | 161 | Test automatico: backup-header-cleartext.test. |
-| `tests/backup-import-model.test.mjs` | MJS | 8122 | 133 | Test automatico: backup-import-model.test. |
-| `tests/backup-restore-session.test.mjs` | MJS | 50321 | 785 | Test automatico: backup-restore-session.test. |
-| `tests/backup-restore-ui.test.mjs` | MJS | 21556 | 308 | Test automatico: backup-restore-ui.test. |
-| `tests/backup-restore-v2-client.test.mjs` | MJS | 3440 | 56 | Test automatico: backup-restore-v2-client.test. |
-| `tests/backup-restore-v2-plan.emulator.test.mjs` | MJS | 2974 | 52 | Test automatico: backup-restore-v2-plan.emulator.test. |
-| `tests/banking-form-roundtrip.test.mjs` | MJS | 3571 | 50 | Test automatico: banking-form-roundtrip.test. |
-| `tests/banking-model.test.mjs` | MJS | 2985 | 68 | Test automatico: banking-model.test. |
-| `tests/banking-widget-hosts.test.mjs` | MJS | 6923 | 105 | Test automatico: banking-widget-hosts.test. |
-| `tests/banking-widget-placement.test.mjs` | MJS | 12985 | 150 | Test automatico: banking-widget-placement.test. |
-| `tests/card-attachment-capture.test.mjs` | MJS | 2172 | 39 | Test automatico: card-attachment-capture.test. |
-| `tests/company-account-detail-lifecycle.test.mjs` | MJS | 13489 | 126 | Test automatico: company-account-detail-lifecycle.test. |
-| `tests/company-archive-conflict.test.mjs` | MJS | 6144 | 114 | Test automatico: company-archive-conflict.test. |
-| `tests/company-delete-guard.test.mjs` | MJS | 3035 | 50 | Test automatico: company-delete-guard.test. |
-| `tests/company-delete-ui-guard.test.mjs` | MJS | 3101 | 47 | Test automatico: company-delete-ui-guard.test. |
-| `tests/company-detail-freshness.test.mjs` | MJS | 7249 | 105 | Test automatico: company-detail-freshness.test. |
-| `tests/company-detail-readonly.test.mjs` | MJS | 9952 | 150 | Test automatico: company-detail-readonly.test. |
-| `tests/company-form-archive-mount.test.mjs` | MJS | 15205 | 252 | Test automatico: company-form-archive-mount.test. |
-| `tests/company-form-freshness.test.mjs` | MJS | 5063 | 69 | Test automatico: company-form-freshness.test. |
-| `tests/company-hard-delete-residues.emulator.test.mjs` | MJS | 13689 | 207 | Test automatico: company-hard-delete-residues.emulator.test. |
-| `tests/company-hard-delete-residues.test.mjs` | MJS | 6824 | 103 | Test automatico: company-hard-delete-residues.test. |
-| `tests/company-parent.rules.test.mjs` | MJS | 2815 | 43 | Test automatico: company-parent.rules.test. |
-| `tests/company-profile.test.mjs` | MJS | 9221 | 91 | Test automatico: company-profile.test. |
-| `tests/company-sharing-readonly-render.test.mjs` | MJS | 3663 | 71 | Test automatico: company-sharing-readonly-render.test. |
-| `tests/company-summary-browser.test.mjs` | MJS | 2220 | 29 | Test automatico: company-summary-browser.test. |
-| `tests/company-summary-hook.test.mjs` | MJS | 3727 | 60 | Test automatico: company-summary-hook.test. |
-| `tests/company-summary-loader.mjs` | MJS | 834 | 16 | Test automatico: company-summary-loader. |
-| `tests/company-summary-panel.test.mjs` | MJS | 2881 | 36 | Test automatico: company-summary-panel.test. |
-| `tests/company-summary-pdf.test.mjs` | MJS | 3940 | 46 | Test automatico: company-summary-pdf.test. |
-| `tests/company-summary-reader.test.mjs` | MJS | 3493 | 43 | Test automatico: company-summary-reader.test. |
-| `tests/company-summary-view.test.mjs` | MJS | 2558 | 35 | Test automatico: company-summary-view.test. |
-| `tests/consultation-copies.test.mjs` | MJS | 14369 | 230 | Test automatico: consultation-copies.test. |
-| `tests/contact-card-photo.test.mjs` | MJS | 7931 | 115 | Test automatico: contact-card-photo.test. |
-| `tests/credential-decrypt-guard.test.mjs` | MJS | 4859 | 102 | Test automatico: credential-decrypt-guard.test. |
-| `tests/credential-health-runtime.test.mjs` | MJS | 3287 | 68 | Test automatico: credential-health-runtime.test. |
-| `tests/credential-health-session.test.mjs` | MJS | 4255 | 63 | Test automatico: credential-health-session.test. |
-| `tests/crypto-utils.test.mjs` | MJS | 8054 | 135 | Test automatico: crypto-utils.test. |
-| `tests/deadline-config-model.test.mjs` | MJS | 17764 | 369 | Test automatico: deadline-config-model.test. |
-| `tests/deadline-contact-select-contrast.test.mjs` | MJS | 718 | 15 | Test automatico: deadline-contact-select-contrast.test. |
-| `tests/deadline-detail-lifecycle.test.mjs` | MJS | 23311 | 307 | Test automatico: deadline-detail-lifecycle.test. |
-| `tests/deadline-domain-model.test.mjs` | MJS | 11076 | 200 | Test automatico: deadline-domain-model.test. |
-| `tests/deadline-form-model.test.mjs` | MJS | 3083 | 78 | Test automatico: deadline-form-model.test. |
-| `tests/deadline-list-calendar.test.mjs` | MJS | 9903 | 138 | Test automatico: deadline-list-calendar.test. |
-| `tests/deadline-model.test.mjs` | MJS | 7993 | 145 | Test automatico: deadline-model.test. |
-| `tests/deadline-profile-document-editor.test.mjs` | MJS | 3162 | 50 | Test automatico: deadline-profile-document-editor.test. |
-| `tests/deadline-recipient-model.test.mjs` | MJS | 6620 | 124 | Test automatico: deadline-recipient-model.test. |
-| `tests/deadline-recipient-settings-return.test.mjs` | MJS | 4838 | 89 | Test automatico: deadline-recipient-settings-return.test. |
-| `tests/deadline-reminders.test.mjs` | MJS | 12503 | 177 | Test automatico: deadline-reminders.test. |
-| `tests/deadline-rules-hub.test.mjs` | MJS | 11940 | 189 | Test automatico: deadline-rules-hub.test. |
-| `tests/deadline-unified-form.test.mjs` | MJS | 3532 | 58 | Test automatico: deadline-unified-form.test. |
-| `tests/detail-account-mode-reinvite.test.mjs` | MJS | 2885 | 53 | Test automatico: detail-account-mode-reinvite.test. |
-| `tests/detail-sharing-revocation-cycle.test.mjs` | MJS | 1192 | 23 | Test automatico: detail-sharing-revocation-cycle.test. |
-| `tests/device-cache-residues.test.mjs` | MJS | 19176 | 320 | Test automatico: device-cache-residues.test. |
-| `tests/docs-governance.test.mjs` | MJS | 7216 | 134 | Test automatico: docs-governance.test. |
-| `tests/docs-source-map.test.mjs` | MJS | 5784 | 101 | Test automatico: docs-source-map.test. |
-| `tests/documentation-guide.test.mjs` | MJS | 9417 | 170 | Test automatico: documentation-guide.test. |
-| `tests/firestore.profile-widgets.rules.test.mjs` | MJS | 8217 | 172 | Test automatico: firestore.profile-widgets.rules.test. |
-| `tests/fixtures/maturity-dataset.json` | JSON | 2269 | 90 | Test automatico: maturity-dataset. |
-| `tests/functions-emulator-targets.test.mjs` | MJS | 1494 | 22 | Test automatico: functions-emulator-targets.test. |
-| `tests/functions-local-runner-arguments.test.mjs` | MJS | 820 | 16 | Test automatico: functions-local-runner-arguments.test. |
-| `tests/gcs-generation-gate.test.mjs` | MJS | 1168 | 21 | Test automatico: gcs-generation-gate.test. |
-| `tests/git-state-governance.test.mjs` | MJS | 3389 | 69 | Test automatico: git-state-governance.test. |
-| `tests/guest-invite-suspension.test.mjs` | MJS | 4971 | 82 | Test automatico: guest-invite-suspension.test. |
-| `tests/header-navigation.test.mjs` | MJS | 756 | 18 | Test automatico: header-navigation.test. |
-| `tests/history-recovery.rules.test.mjs` | MJS | 2371 | 30 | Test automatico: history-recovery.rules.test. |
-| `tests/home-footer-quick-actions.test.mjs` | MJS | 1869 | 30 | Test automatico: home-footer-quick-actions.test. |
-| `tests/i18n-quality-baseline.test.mjs` | MJS | 2240 | 51 | Test automatico: i18n-quality-baseline.test. |
-| `tests/image-crop-editor.test.mjs` | MJS | 9244 | 165 | Test automatico: image-crop-editor.test. |
-| `tests/input-autofill.test.mjs` | MJS | 4322 | 69 | Test automatico: input-autofill.test. |
-| `tests/interrupted-restore-orphan-refs.emulator.test.mjs` | MJS | 11832 | 172 | Test automatico: interrupted-restore-orphan-refs.emulator.test. |
-| `tests/invite-audit-ref.rules.test.mjs` | MJS | 20740 | 347 | Test automatico: invite-audit-ref.rules.test. |
-| `tests/language-first-configuration.test.mjs` | MJS | 6629 | 110 | Test automatico: language-first-configuration.test. |
-| `tests/legacy-attachment-opening.test.mjs` | MJS | 19402 | 328 | Test automatico: legacy-attachment-opening.test. |
-| `tests/legacy-email-audit-model.test.mjs` | MJS | 1989 | 41 | Test automatico: legacy-email-audit-model.test. |
-| `tests/material-symbols-translation.test.mjs` | MJS | 2886 | 60 | Test automatico: material-symbols-translation.test. |
-| `tests/maturity-dataset.test.mjs` | MJS | 1944 | 40 | Test automatico: maturity-dataset.test. |
-| `tests/mfa-enrollment-dialog.test.mjs` | MJS | 9481 | 143 | Test automatico: mfa-enrollment-dialog.test. |
-| `tests/mixed-current.test.mjs` | MJS | 15273 | 219 | Test automatico: mixed-current.test. |
-| `tests/new-account-shared-link.test.mjs` | MJS | 3414 | 38 | Test automatico: new-account-shared-link.test. |
-| `tests/notification-rules.rules.test.mjs` | MJS | 4876 | 81 | Test automatico: notification-rules.rules.test. |
-| `tests/offline-account-widgets.test.mjs` | MJS | 6710 | 60 | Test automatico: offline-account-widgets.test. |
-| `tests/offline-mutation-client.test.mjs` | MJS | 18420 | 298 | Test automatico: offline-mutation-client.test. |
-| `tests/offline-mutation-lease.test.mjs` | MJS | 35436 | 516 | Test automatico: offline-mutation-lease.test. |
-| `tests/offline-mutation-queue.test.mjs` | MJS | 41336 | 657 | Test automatico: offline-mutation-queue.test. |
-| `tests/offline-mutation-sync.test.mjs` | MJS | 14631 | 233 | Test automatico: offline-mutation-sync.test. |
-| `tests/offline-profile-readiness.test.mjs` | MJS | 5413 | 97 | Test automatico: offline-profile-readiness.test. |
-| `tests/offline-sync.rules.test.mjs` | MJS | 2144 | 42 | Test automatico: offline-sync.rules.test. |
-| `tests/pilot-lease-worker.test.mjs` | MJS | 21614 | 302 | Test automatico: pilot-lease-worker.test. |
-| `tests/portable-archive.test.mjs` | MJS | 36062 | 642 | Test automatico: portable-archive.test. |
-| `tests/private-account-detail-lifecycle.test.mjs` | MJS | 18156 | 237 | Test automatico: private-account-detail-lifecycle.test. |
-| `tests/private-account-offline-coordinator.test.mjs` | MJS | 2759 | 52 | Test automatico: private-account-offline-coordinator.test. |
-| `tests/private-account-offline-pilot.test.mjs` | MJS | 8833 | 125 | Test automatico: private-account-offline-pilot.test. |
-| `tests/private-account-offline-policy.test.mjs` | MJS | 1352 | 23 | Test automatico: private-account-offline-policy.test. |
-| `tests/private-account-recovery.test.mjs` | MJS | 12736 | 137 | Test automatico: private-account-recovery.test. |
-| `tests/private-auth-gate.test.mjs` | MJS | 8445 | 137 | Test automatico: private-auth-gate.test. |
-| `tests/private-bootstrap-offline.test.mjs` | MJS | 3762 | 60 | Test automatico: private-bootstrap-offline.test. |
-| `tests/private-detail-legacy-id.test.mjs` | MJS | 18875 | 283 | Test automatico: private-detail-legacy-id.test. |
-| `tests/private-form-lazy-banking.test.mjs` | MJS | 2846 | 22 | Test automatico: private-form-lazy-banking.test. |
-| `tests/profile-account-management.test.mjs` | MJS | 6220 | 41 | Test automatico: profile-account-management.test. |
-| `tests/profile-contact-link.test.mjs` | MJS | 36190 | 462 | Test automatico: profile-contact-link.test. |
-| `tests/profile-deadline-link-model.test.mjs` | MJS | 4081 | 79 | Test automatico: profile-deadline-link-model.test. |
-| `tests/profile-document-attachments-production.test.mjs` | MJS | 9412 | 143 | Test automatico: profile-document-attachments-production.test. |
-| `tests/profile-document-deadline-pilot-integration.test.mjs` | MJS | 8786 | 142 | Test automatico: profile-document-deadline-pilot-integration.test. |
-| `tests/profile-document-deadline-pilot.test.mjs` | MJS | 7345 | 112 | Test automatico: profile-document-deadline-pilot.test. |
-| `tests/profile-label-management.test.mjs` | MJS | 1288 | 24 | Test automatico: profile-label-management.test. |
-| `tests/profile-lazy-editor.test.mjs` | MJS | 3576 | 79 | Test automatico: profile-lazy-editor.test. |
-| `tests/profile-legacy-email-recovery.test.mjs` | MJS | 1871 | 42 | Test automatico: profile-legacy-email-recovery.test. |
-| `tests/profile-model.test.mjs` | MJS | 6783 | 113 | Test automatico: profile-model.test. |
-| `tests/profile-widget-zone.test.mjs` | MJS | 769 | 17 | Test automatico: profile-widget-zone.test. |
-| `tests/purge-retention-effects.emulator.test.mjs` | MJS | 19448 | 302 | Test automatico: purge-retention-effects.emulator.test. |
-| `tests/purged-account-restore.emulator.test.mjs` | MJS | 22842 | 330 | Test automatico: purged-account-restore.emulator.test. |
-| `tests/push-registration-recovery.test.mjs` | MJS | 3277 | 51 | Test automatico: push-registration-recovery.test. |
-| `tests/qa-automation.test.mjs` | MJS | 10894 | 178 | Test automatico: qa-automation.test. |
-| `tests/qa-final-inventory.test.mjs` | MJS | 1300 | 28 | Test automatico: qa-final-inventory.test. |
-| `tests/record-sharing-crypto-runtime.test.mjs` | MJS | 3424 | 54 | Test automatico: record-sharing-crypto-runtime.test. |
-| `tests/repository-record-identity.test.mjs` | MJS | 5191 | 86 | Test automatico: repository-record-identity.test. |
-| `tests/request-coordinator.test.mjs` | MJS | 1647 | 37 | Test automatico: request-coordinator.test. |
-| `tests/restore-multiple-collisions.emulator.test.mjs` | MJS | 16790 | 267 | Test automatico: restore-multiple-collisions.emulator.test. |
-| `tests/restore-retry-new-session.emulator.test.mjs` | MJS | 17766 | 273 | Test automatico: restore-retry-new-session.emulator.test. |
-| `tests/restore-stale-preview.emulator.test.mjs` | MJS | 16643 | 250 | Test automatico: restore-stale-preview.emulator.test. |
-| `tests/setup-linux-cloud.test.mjs` | MJS | 5095 | 92 | Test automatico: setup-linux-cloud.test. |
-| `tests/share-revocation-paths.test.mjs` | MJS | 6956 | 106 | Test automatico: share-revocation-paths.test. |
-| `tests/share-revoked-notice.test.mjs` | MJS | 7227 | 114 | Test automatico: share-revoked-notice.test. |
-| `tests/shared-access-ui.test.mjs` | MJS | 1708 | 35 | Test automatico: shared-access-ui.test. |
-| `tests/shared-attachment-access.test.mjs` | MJS | 3961 | 82 | Test automatico: shared-attachment-access.test. |
-| `tests/shared-copies-purge.emulator.test.mjs` | MJS | 11233 | 178 | Test automatico: shared-copies-purge.emulator.test. |
-| `tests/shared-copies-purge.test.mjs` | MJS | 7086 | 105 | Test automatico: shared-copies-purge.test. |
-| `tests/shared-credential-editor.test.mjs` | MJS | 3612 | 21 | Test automatico: shared-credential-editor.test. |
-| `tests/shared-credential-update-session.test.mjs` | MJS | 4043 | 79 | Test automatico: shared-credential-update-session.test. |
-| `tests/shared-receipt-boundary.emulator.test.mjs` | MJS | 1600 | 27 | Test automatico: shared-receipt-boundary.emulator.test. |
-| `tests/shared-record-reader.test.mjs` | MJS | 3452 | 77 | Test automatico: shared-record-reader.test. |
-| `tests/shared-regrant-after-restore.test.mjs` | MJS | 12555 | 193 | Test automatico: shared-regrant-after-restore.test. |
-| `tests/shared-vault-data-model.test.mjs` | MJS | 4401 | 87 | Test automatico: shared-vault-data-model.test. |
-| `tests/sharing-identity.test.mjs` | MJS | 1748 | 24 | Test automatico: sharing-identity.test. |
-| `tests/sharing-prototype.rules.test.mjs` | MJS | 4524 | 94 | Test automatico: sharing-prototype.rules.test. |
-| `tests/sharing-prototype.storage.rules.test.mjs` | MJS | 4084 | 109 | Test automatico: sharing-prototype.storage.rules.test. |
-| `tests/sharing-revocation.rules.test.mjs` | MJS | 10859 | 200 | Test automatico: sharing-revocation.rules.test. |
-| `tests/sharing-two-device.test.mjs` | MJS | 4391 | 96 | Test automatico: sharing-two-device.test. |
-| `tests/speech-synthesis-controller.test.mjs` | MJS | 3317 | 88 | Test automatico: speech-synthesis-controller.test. |
-| `tests/static-reference-imports.test.mjs` | MJS | 1211 | 23 | Test automatico: static-reference-imports.test. |
-| `tests/storage-emulator-loopback-dispatcher.test.mjs` | MJS | 2417 | 58 | Test automatico: storage-emulator-loopback-dispatcher.test. |
-| `tests/storage.rules.test.mjs` | MJS | 14350 | 278 | Test automatico: storage.rules.test. |
-| `tests/swipe-lifecycle.test.mjs` | MJS | 13175 | 248 | Test automatico: swipe-lifecycle.test. |
-| `tests/theme-palette.test.mjs` | MJS | 5662 | 98 | Test automatico: theme-palette.test. |
-| `tests/vault-logout.test.mjs` | MJS | 4942 | 95 | Test automatico: vault-logout.test. |
-| `tests/vault-session-races.test.mjs` | MJS | 11488 | 251 | Test automatico: vault-session-races.test. |
-| `tests/vault-session.test.mjs` | MJS | 7595 | 145 | Test automatico: vault-session.test. |
-| `tests/voice-recognition-model.test.mjs` | MJS | 5067 | 112 | Test automatico: voice-recognition-model.test. |
-| `tests/widget-profile-model.test.mjs` | MJS | 4695 | 78 | Test automatico: widget-profile-model.test. |
-| `tests/widget-profile.rules.test.mjs` | MJS | 2217 | 48 | Test automatico: widget-profile.rules.test. |
-
 #### Duplicati esatti
 
-- `Frontend/public/assets/pdf/LICENSE_LIBERATION` = `experiments/persistent-vault-shell/assets/pdf/LICENSE_LIBERATION`
 - `Frontend/public/assets/pdf/LiberationSans-Bold.ttf` = `experiments/persistent-vault-shell/assets/pdf/LiberationSans-Bold.ttf`
 - `Frontend/public/assets/pdf/LiberationSans-Regular.ttf` = `experiments/persistent-vault-shell/assets/pdf/LiberationSans-Regular.ttf`
 - `archive/home-experiments/home-v126.html` = `archive/home-experiments/home-v127.html`
@@ -2941,23 +3050,23 @@ Baseline registrata nel commit `3401d601e0dc7473e652f841ecc256993d784ead`, datat
 
 > Generata con `npm run audit:pages`. Misura il peso locale inizialmente raggiungibile da HTML, CSS e grafo degli import JavaScript. Non misura rete Firebase, decifratura, rendering o prestazioni del dispositivo: questi valori richiedono il collaudo runtime P5.
 
-Pagine canoniche analizzate: **30**. I redirect storici sono archiviati; il laboratorio temporaneo pubblico `prova.html` è escluso dal conteggio.
+Pagine canoniche analizzate: **30**. I redirect storici sono archiviati.
 
 | Pagina | HTML | CSS | Moduli JS | Peso grezzo | Stima gzip |
 |---|---:|---:|---:|---:|---:|
 | `profilo_privato.html` | 1 | 8 | 44 | 1206.6 KB | 343.3 KB |
 | `form_account_azienda.html` | 1 | 6 | 46 | 1192.8 KB | 339.2 KB |
 | `form_account_privato.html` | 1 | 6 | 46 | 1186.5 KB | 337.5 KB |
-| `aggiungi_scadenza.html` | 1 | 7 | 40 | 1184.5 KB | 336.4 KB |
+| `aggiungi_scadenza.html` | 1 | 7 | 40 | 1184.3 KB | 336.3 KB |
 | `impostazioni.html` | 1 | 5 | 39 | 1196.0 KB | 335.1 KB |
-| `dettaglio_account_privato.html` | 1 | 7 | 47 | 1153.3 KB | 333.1 KB |
-| `dettaglio_account_azienda.html` | 1 | 7 | 47 | 1149.9 KB | 332.2 KB |
-| `dati_azienda.html` | 1 | 8 | 41 | 1124.8 KB | 325.0 KB |
+| `dettaglio_account_privato.html` | 1 | 7 | 47 | 1153.2 KB | 333.1 KB |
+| `dettaglio_account_azienda.html` | 1 | 7 | 47 | 1149.8 KB | 332.1 KB |
+| `dati_azienda.html` | 1 | 8 | 41 | 1124.5 KB | 325.0 KB |
 | `account_privati.html` | 1 | 6 | 40 | 1068.4 KB | 313.0 KB |
-| `modifica_azienda.html` | 1 | 6 | 38 | 1111.0 KB | 311.7 KB |
+| `modifica_azienda.html` | 1 | 6 | 38 | 1110.8 KB | 311.6 KB |
 | `account_azienda.html` | 1 | 6 | 40 | 1061.5 KB | 311.3 KB |
 | `archivio_account.html` | 1 | 6 | 35 | 1052.3 KB | 307.9 KB |
-| `dettaglio_scadenza.html` | 1 | 6 | 33 | 1047.2 KB | 304.5 KB |
+| `dettaglio_scadenza.html` | 1 | 6 | 33 | 1047.0 KB | 304.4 KB |
 | `area_privata.html` | 1 | 7 | 34 | 1034.5 KB | 301.9 KB |
 | `home_page.html` | 1 | 6 | 34 | 1023.3 KB | 301.5 KB |
 | `scadenze.html` | 1 | 6 | 30 | 997.3 KB | 293.8 KB |
@@ -2973,7 +3082,7 @@ Pagine canoniche analizzate: **30**. I redirect storici sono archiviati; il labo
 | `login.html` | 1 | 4 | 23 | 908.5 KB | 270.9 KB |
 | `privacy.html` | 1 | 4 | 23 | 898.0 KB | 266.6 KB |
 | `termini.html` | 1 | 4 | 23 | 895.8 KB | 266.3 KB |
-| `contatto_condiviso.html` | 1 | 3 | 7 | 44.0 KB | 14.7 KB |
+| `contatto_condiviso.html` | 1 | 3 | 7 | 43.9 KB | 14.7 KB |
 | `index.html` | 1 | 1 | 1 | 15.7 KB | 4.5 KB |
 
 #### Pagine con il maggiore carico statico
@@ -2981,10 +3090,10 @@ Pagine canoniche analizzate: **30**. I redirect storici sono archiviati; il labo
 - `profilo_privato.html`: 343.3 KB gzip stimati, 44 moduli JS e 8 fogli CSS.
 - `form_account_azienda.html`: 339.2 KB gzip stimati, 46 moduli JS e 6 fogli CSS.
 - `form_account_privato.html`: 337.5 KB gzip stimati, 46 moduli JS e 6 fogli CSS.
-- `aggiungi_scadenza.html`: 336.4 KB gzip stimati, 40 moduli JS e 7 fogli CSS.
+- `aggiungi_scadenza.html`: 336.3 KB gzip stimati, 40 moduli JS e 7 fogli CSS.
 - `impostazioni.html`: 335.1 KB gzip stimati, 39 moduli JS e 5 fogli CSS.
 - `dettaglio_account_privato.html`: 333.1 KB gzip stimati, 47 moduli JS e 7 fogli CSS.
-- `dettaglio_account_azienda.html`: 332.2 KB gzip stimati, 47 moduli JS e 7 fogli CSS.
+- `dettaglio_account_azienda.html`: 332.1 KB gzip stimati, 47 moduli JS e 7 fogli CSS.
 - `dati_azienda.html`: 325.0 KB gzip stimati, 41 moduli JS e 8 fogli CSS.
 
 #### Asset condivisi da almeno il 75% delle pagine

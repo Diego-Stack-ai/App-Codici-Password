@@ -333,7 +333,7 @@ test('isolamento: nessun file del runtime nomina il coordinatore e il modulo non
         for (const entry of await readdir(directory, {withFileTypes: true})) {
             const target = path.join(directory, entry.name);
             if (entry.isDirectory()) await walk(target);
-            else if (entry.isFile() && entry.name.endsWith('.js')) files.push(target);
+            else if (entry.isFile() && /\.(?:js|mjs)$/.test(entry.name)) files.push(target);
         }
     };
     await walk(path.join(root, 'Frontend', 'public'));
@@ -345,7 +345,11 @@ test('isolamento: nessun file del runtime nomina il coordinatore e il modulo non
     const offenders = [];
     for (const file of files) {
         const text = await readFile(file, 'utf8');
-        if (/from\s+['"][^'"]*(?:experiments|\.mjs)['"]/.test(text)) {
+        const runtimeRoot = path.join(root, 'Frontend', 'public') + path.sep;
+        const imports = [...text.matchAll(/(?:from\s+|import\s*\(\s*)['"]([^'"]+)['"]/g)].map(match => match[1]);
+        if (imports.some(specifier => specifier.includes('experiments') ||
+            (/\.mjs(?:[?#]|$)/.test(specifier) && (!specifier.startsWith('.') ||
+                !path.resolve(path.dirname(file), specifier.split(/[?#]/, 1)[0]).startsWith(runtimeRoot))))) {
             offenders.push(path.relative(root, file));
         }
     }

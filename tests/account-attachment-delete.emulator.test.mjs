@@ -1,3 +1,4 @@
+import {decideAttachmentContent} from '../Frontend/public/assets/js/modules/shared/attachment-content-policy.mjs';
 import {after, before, beforeEach, test} from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -56,7 +57,7 @@ function mount(kind, {accountId, companyId}) {
     const db = client.firestore(), storage = client.storage();
     const container = {children: [], textContent: '', appendChild(child) { this.children.push(child); }};
     const toasts = [], errors = [];
-    const context = vm.createContext({
+    const context = vm.createContext({decideAttachmentContent,
         db, storage, t: () => '', console: {warn() {}}, logError: (...args) => errors.push(args),
         closeAttachmentSourcePicker() {}, selectAttachmentSource: async () => null,
         navigator: {onLine: true}, setChildren: (node, children) => { node.children = children; },

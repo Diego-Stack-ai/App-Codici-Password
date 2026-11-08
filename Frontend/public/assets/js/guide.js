@@ -1,7 +1,7 @@
 // D0 help bootstrap: independent of authentication and the Vault.
 import { documentationLabel } from './modules/assistant/documentation-ui-labels.js';
 
-const CONTROLLER_URL = './modules/assistant/documentation-view.js?v=1.2.261';
+const CONTROLLER_URL = './modules/assistant/documentation-view.js?v=1.2.263';
 let activeHelp = null;
 
 export function initDocumentationHelp(pathname = window.location.pathname) {
@@ -19,7 +19,7 @@ export function getDocumentationPageContext(pathname) {
 }
 
 export function mountDocumentationHelp({ pageId } = {}) {
-    if (!pageId || pageId === 'prova' || pageId === 'index') return null;
+    if (!pageId || pageId === 'index') return null;
     if (activeHelp?.pageId === pageId && activeHelp.live()) return activeHelp;
     activeHelp?.destroy();
     const pageHost = document.querySelector('.page-container') || document.querySelector('.vault')
@@ -34,7 +34,7 @@ export function mountDocumentationHelp({ pageId } = {}) {
     if (!document.querySelector('link[data-documentation-style]')) {
         const stylesheet = document.createElement('link');
         stylesheet.rel = 'stylesheet';
-        stylesheet.href = '/assets/css/documentation-guide.css?v=1.2.261';
+        stylesheet.href = '/assets/css/documentation-guide.css?v=1.2.263';
         stylesheet.dataset.documentationStyle = 'true';
         document.head.append(stylesheet);
     }

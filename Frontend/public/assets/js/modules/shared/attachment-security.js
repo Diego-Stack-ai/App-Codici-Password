@@ -1,3 +1,5 @@
+import {openAttachmentContent} from './attachment-content-policy.mjs';
+
 export const MAX_ATTACHMENT_BYTES = 32 * 1024 * 1024;
 export const MAX_LARGE_VIDEO_BYTES = 512 * 1024 * 1024;
 export const ATTACHMENT_CHUNK_BYTES = 8 * 1024 * 1024;
@@ -139,11 +141,7 @@ export async function decryptAttachmentBytes(ciphertext, encryption, vaultKey) {
 }
 
 export function openDecryptedAttachment(bytes, attachment) {
-    const type = attachment.encryption?.originalType || attachment.type || 'application/octet-stream';
-    const objectUrl = URL.createObjectURL(new Blob([bytes], {type}));
-    const opened = window.open(objectUrl, '_blank', 'noopener,noreferrer');
-    if (opened) opened.opener = null;
-    setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+    return openAttachmentContent(bytes, attachment);
 }
 
 function fileExtension(file) {

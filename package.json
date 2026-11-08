@@ -12,7 +12,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.261",
+  "version": "1.2.263",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -95,9 +95,10 @@
     "test:performance-budget": "node scripts/audit-page-performance.mjs --check && node --test tests/app-diagnostics.test.mjs",
     "test:js-syntax": "node scripts/audit-js-syntax.mjs",
     "test:crypto": "node --test tests/crypto-utils.test.mjs",
-    "test:attachments": "node --test tests/attachment-security.test.mjs tests/account-attachment-delete.test.mjs tests/legacy-attachment-opening.test.mjs tests/device-cache-residues.test.mjs tests/attachment-removal-residues.test.mjs tests/company-hard-delete-residues.test.mjs tests/shared-copies-purge.test.mjs tests/image-crop-editor.test.mjs tests/card-attachment-capture.test.mjs",
+    "test:attachments": "node --test tests/attachment-content-policy.test.mjs tests/attachment-security.test.mjs tests/account-attachment-delete.test.mjs tests/legacy-attachment-opening.test.mjs tests/device-cache-residues.test.mjs tests/attachment-removal-residues.test.mjs tests/company-hard-delete-residues.test.mjs tests/shared-copies-purge.test.mjs tests/image-crop-editor.test.mjs tests/card-attachment-capture.test.mjs",
     "test:portable-archive": "node --test tests/portable-archive.test.mjs",
     "test:portable-archive-prerelease": "npm run test:portable-archive && npm run test:portable-archive-browser && npm run test:portable-archive-capacity",
+    "test:attachment-content-browser": "node scripts/test-attachment-content-browser.mjs",
     "test:portable-archive-browser": "node scripts/test-portable-archive-browser.mjs",
     "test:portable-archive-capacity": "node --expose-gc scripts/test-portable-archive-capacity.mjs",
     "test:account-attachment-delete-emulators": "node scripts/run-account-attachment-delete-emulators.mjs",

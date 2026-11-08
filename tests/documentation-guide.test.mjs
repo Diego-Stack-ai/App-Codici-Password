@@ -24,7 +24,7 @@ test('tutte le pagine e i percorsi guidati sono consultabili senza contesto pers
 test('route locali consentite; parametri personali e link esterni non entrano nella guida', () => {
     const service = createDocumentationGuide(catalog);
     assert.equal(service.resolvePageId('/form_account_privato.html?id=synthetic-record#fragment'), 'form_account_privato');
-    for (const route of ['prova', '/prova.html', '../home_page.html', '//home_page.html', 'https://example.test/home_page.html', 'javascript:home_page.html', '/unknown.html']) {
+    for (const route of ['missing-page', '/missing-page.html', '../home_page.html', '//home_page.html', 'https://example.test/home_page.html', 'javascript:home_page.html', '/unknown.html']) {
         assert.equal(service.resolvePageId(route), null);
         assert.equal(service.getPageGuide(route), null);
     }
@@ -56,8 +56,8 @@ test('snapshot e risultati immutabili non condividono oggetti modificabili con i
     const result = service.getPageGuide('index');
     assert.notEqual(result.title, 'Mutated');
     assert.throws(() => { result.steps[0].body = 'Mutated'; }, TypeError);
-    assert.throws(() => { result.relatedPageIds.push('prova'); }, TypeError);
-    assert.throws(() => { service.listJourneys()[0].pageIds.push('prova'); }, TypeError);
+    assert.throws(() => { result.relatedPageIds.push('missing-page'); }, TypeError);
+    assert.throws(() => { service.listJourneys()[0].pageIds.push('missing-page'); }, TypeError);
 });
 
 test('il grafo di conoscenza deriva solo dal catalogo pubblico e non contiene parametri o dati della vault', () => {
@@ -153,12 +153,12 @@ test('schema, riferimenti, chiavi e selettori non validi vengono respinti', () =
         value => { value.schemaVersion = 2; },
         value => { value.pages.push(structuredClone(value.pages[0])); },
         value => { value.pages[0].route = 'https://example.test'; },
-        value => { value.pages[0].relatedPageIds = ['prova']; },
+        value => { value.pages[0].relatedPageIds = ['missing-page']; },
         value => { value.pages[0].steps[0].target = 'body input'; },
         value => { value.pages[0].steps[0].bodyKey = 'guide.not.present'; },
         value => { value.pages[0].tutorialId = 'remote-video'; },
         value => { value.pages[0].userRecord = { title: 'Synthetic user title' }; },
-        value => { value.journeys[0].pageIds.push('prova'); },
+        value => { value.journeys[0].pageIds.push('missing-page'); },
         value => { value.messages.it['guide.unused'] = 'Unused'; }
     ];
     for (const change of changes) {

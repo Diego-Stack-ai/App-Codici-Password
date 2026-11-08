@@ -325,7 +325,7 @@ Schema minimo per ogni pagina:
 
 `pageId` deve provenire dallo stesso router usato dall'app ed essere passato al controller come oggetto immutabile. Le chiavi linguistiche traducono soltanto contenuti dell'app. Titoli creati dall'utente, come “Casa al mare”, restano invariati; eventuali traduzioni personali saranno campi separati e facoltativi.
 
-Il primo catalogo deve coprire le 30 pagine canoniche. `prova.html`, modali e pagine archiviate non vi entrano. Un test deve fallire quando una pagina canonica non possiede una scheda o quando una scheda cita campi/azioni inesistenti.
+Il primo catalogo deve coprire le 30 pagine canoniche. Modali e pagine archiviate non vi entrano; il laboratorio temporaneo rimosso non costituisce una pagina canonica. Un test deve fallire quando una pagina canonica non possiede una scheda o quando una scheda cita campi/azioni inesistenti.
 
 <a id="fonte-docs-agente-codex-evoluzione-md-contratto-di-accesso-ai-dati"></a>
 
