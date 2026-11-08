@@ -1,0 +1,4 @@
+# token-saver:start
+.agents/
+.codex/
+# token-saver:end

@@ -51,7 +51,13 @@ if (/\bauth\.currentUser\b/.test(privateSharing)) {
 assert.doesNotMatch(privateSharing, /runTransaction|updateDoc|deleteDoc|revokeRecipient/,
     'Il dettaglio privato contiene ancora un secondo writer della condivisione');
 for (const [name, writer] of [['privato', privateAccountSave], ['aziendale', companyAccount]]) {
-    assert.match(writer, /transaction\.delete\(doc\(db, "invites", inviteIdForGuest\(/,
+    assert.match(writer, /await listOwnedAccountInvitesConfirmed\(currentUid, targetId\)/,
+        `Il form ${name} non scopre gli inviti posseduti dell’Account`);
+    assert.match(writer, /await transaction\.get\(reference\);\s*if \(snapshot\.exists\(\) && inviteMatchesAccount\(snapshot\.data\(\),[^\n]+\)\) \{\s*ownedInvites\.push\(\{reference, data: snapshot\.data\(\)\}\)/,
+        `Il form ${name} non rivalida proprietà e risorsa prima di selezionare l’invito`);
+    assert.match(writer, /for \(const invite of ownedInvites\) \{\s*if \(invite\.reference\.id !== keepId && \(invite\.data\.cycle \?\? 0\) === cycle && sanitizeEmail\(invite\.data\.recipientEmail\) === guestKey\) \{\s*transaction\.delete\(invite\.reference\)/,
+        `Il form ${name} non limita la revoca agli inviti posseduti del destinatario e del ciclo`);
+    assert.match(writer, /if \(!requestedSanitizedKeys\.includes\(oldKey\)\) \{\s*delete finalData\.sharedWith\[oldKey\];\s*deleteGuestInvites\(oldKey, nextSharingCycle\)/,
         `Il form ${name} non revoca l’invito del destinatario rimosso`);
     assert.match(writer, /finalData\.sharedWithUids = Object\.values\(finalData\.sharedWith\)/,
         `Il form ${name} non ricalcola gli UID accettati`);

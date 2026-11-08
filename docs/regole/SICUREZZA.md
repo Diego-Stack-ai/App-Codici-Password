@@ -1,5 +1,17 @@
 # Sicurezza
 
+## Vincoli della candidata locale — 07/11/2026
+
+Le nuove create di inviti devono usare un'identità v2 vincolata a UID proprietario e risorsa completa; una semplice verifica di esistenza dell'Account non basta a impedire collisioni tra proprietari. Restano compatibili gli inviti legacy già esistenti, non la creazione di nuovi ID legacy da vecchi client. Il rilascio deve coordinare client, Rules e Functions e conservare un rollback coerente.
+
+Le anteprime portabili di testo non interpretano HTML/XML; `sandbox` applicato a un elemento `object` non costituisce isolamento. Gli invii email di inviti e scadenze condividono il budget provider transazionale. La cache offline non prova l'autorizzazione del nuovo utente: prima del rendering occorre binding UID/email verificata, con revoche note prevalenti. Ogni copia della capacità di decifrare, mostrare, copiare o dettare nella Ricerca deve decadere al blocco e al teardown anche durante un await; azzerare soltanto la chiave centrale non basta.
+
+Prove e limiti in [AUDIT](../evidenze/AUDIT.md#sicurezza-candidata-2026-11-07). I vincoli non attestano una certificazione completa né l'attivazione produttiva della candidata.
+
+## Strumenti di revisione AI e validità della procedura ECC — 07/11/2026
+
+Il controllo delle configurazioni degli agenti AI è distinto dall'audit della sicurezza applicativa. La [procedura temporanea ECC/AgentShield](../procedure/COLLAUDI.md#controllo-sicurezza-ecc-temporaneo) documenta una futura prova circoscritta, successiva alla chiusura della revisione di sicurezza corrente; non attesta installazione, esecuzione o certificazione dell'app. L'edizione del 07/11/2026 scade il **07/11/2027** e da tale data è obsoleta per uso operativo senza nuova verifica e revisione esplicita. Chi consulta questo contratto deve controllare quella scadenza e confrontare gli strumenti allora disponibili, anticipando il riesame se cambiano i presupposti tecnici. I passi e i criteri sono mantenuti soltanto nella procedura collegata.
+
 ## Modello delle minacce operativo e sorveglianza continua — 03/11/2026
 
 Il perimetro da proteggere comprende sia l'app pubblica sia il PC Windows usato per sviluppo e rilascio. Gli asset principali sono: contenuto cifrato della Vault, chiavi presenti soltanto sul dispositivo, identità Firebase, sessioni e fattori MFA, allegati, condivisioni, backup e archivi esportati, configurazione Firebase, credenziali di rilascio, repository GitHub e postazione di sviluppo. Il monitoraggio non deve leggere contenuti della Vault, Master Password, Recovery Key, token, cookie, allegati decifrati o dati personali.

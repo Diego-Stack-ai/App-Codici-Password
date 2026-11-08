@@ -21,6 +21,9 @@ const legacyInvitePath = ['invites', `legacy-1_${EMAIL_KEY}`];
 const guestInvitePath = ['invites', `${ACCOUNT}_${EMAIL_KEY}`];
 const activeCompanyPath = ['users', OWNER, 'aziende', COMPANY, 'accounts', ACCOUNT];
 const archivedCompanyPath = ['users', OWNER, 'aziende', COMPANY, 'accounts', ARCHIVED];
+const utils = await readFile(new URL('../Frontend/public/assets/js/utils.js', import.meta.url), 'utf8');
+const {inviteIdForGuest, inviteScopeForAccount} = await import('data:text/javascript;base64,' + Buffer.from(utils).toString('base64'));
+const scope = await inviteScopeForAccount(OWNER, '', ACCOUNT);
 let testEnv;
 
 const account = isArchived => ({
@@ -179,11 +182,13 @@ const invitePayload = (overrides = {}) => ({
     createdAt: '2026-01-01T00:00:00.000Z', notifyPush: false, notifyEmail: false, ...overrides
 });
 
-test('creazione invito: ciclo legacy (assente o 0) e ciclo avanzato sono ammessi al proprietario', async () => {
+test('creazione invito: tutti i cicli usano il namespace completo della risorsa', async () => {
     const db = asOwnerWithEmail();
-    await assertSucceeds(setDoc(doc(db, 'invites', 'invito-senza-ciclo'), invitePayload()));
-    await assertSucceeds(setDoc(doc(db, 'invites', 'invito-ciclo-0'), invitePayload({inviteId: 'invito-ciclo-0', cycle: 0})));
-    await assertSucceeds(setDoc(doc(db, 'invites', 'invito-ciclo-3'), invitePayload({inviteId: 'invito-ciclo-3', cycle: 3})));
+    for (const cycle of [0, 3]) {
+        const inviteId = inviteIdForGuest(scope, EMAIL_KEY, cycle);
+        await assertSucceeds(setDoc(doc(db, 'invites', inviteId), invitePayload({inviteId, cycle})));
+    }
+    await assertFails(setDoc(doc(db, 'invites', `${ACCOUNT}_${EMAIL_KEY}`), invitePayload()));
 });
 
 test('creazione invito: ciclo malformato o fuori intervallo viene negato', async () => {

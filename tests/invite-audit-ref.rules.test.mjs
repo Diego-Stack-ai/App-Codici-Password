@@ -23,7 +23,9 @@ const REF_A = '11111111-1111-4111-8111-111111111111';
 const REF_B = '22222222-2222-4222-8222-222222222222';
 const ACCEPTANCE_RECEIPT = {schemaVersion: 1, nonce: REF_A, guestUid: GUEST_UID,
     ownerUid: OWNER, accountId: ACCOUNT, kind: 'private', companyId: null, cycle: 0};
-const INVITE_ID = `${ACCOUNT}_guest_example_invalid`;
+const utils = await readFile(new URL('../Frontend/public/assets/js/utils.js', import.meta.url), 'utf8');
+const {inviteIdForGuest, inviteScopeForAccount} = await import('data:text/javascript;base64,' + Buffer.from(utils).toString('base64'));
+const INVITE_ID = inviteIdForGuest(await inviteScopeForAccount(OWNER, '', ACCOUNT), 'guest_example_invalid', 0);
 let testEnv;
 
 const asOwner = () => testEnv.authenticatedContext(OWNER, {email: OWNER_EMAIL, email_verified: true}).firestore();
@@ -72,6 +74,7 @@ before(async () => {
 });
 beforeEach(async () => {
     await testEnv.clearFirestore();
+    await testEnv.withSecurityRulesDisabled(context => setDoc(doc(context.firestore(), 'users', OWNER, 'accounts', ACCOUNT), {sharingCycle: 0}));
 });
 after(async () => {
     await testEnv.cleanup();
@@ -119,9 +122,10 @@ test('N1: legacy full replacement and explicit removal remain allowed', async ()
 
 test('creazione: auditRef valido (anche maiuscolo) e assenza legacy sono ammessi', async () => {
     const db = asOwner();
-    await assertSucceeds(setDoc(doc(db, 'invites', 'nuovo-con-ref'), invitePayload({auditRef: REF_A})));
-    await assertSucceeds(setDoc(doc(db, 'invites', 'nuovo-ref-maiuscolo'), invitePayload({auditRef: REF_A.toUpperCase()})));
-    await assertSucceeds(setDoc(doc(db, 'invites', 'nuovo-senza-ref'), invitePayload()));
+    for (const payload of [invitePayload({auditRef: REF_A}), invitePayload({auditRef: REF_A.toUpperCase()}), invitePayload()]) {
+        await assertSucceeds(setDoc(doc(db, 'invites', INVITE_ID), payload));
+        await assertSucceeds(deleteDoc(doc(db, 'invites', INVITE_ID)));
+    }
 });
 
 test('creazione: auditRef di forma non valida viene negato', async () => {
@@ -129,16 +133,16 @@ test('creazione: auditRef di forma non valida viene negato', async () => {
     const invalid = [['numero', 42], ['stringa-non-uuid', 'non-uuid'], ['corta', REF_A.slice(0, 35)],
         ['lunga', `${REF_A}a`], ['vuota', ''], ['booleano', true]];
     for (const [nome, auditRef] of invalid) {
-        await assertFails(setDoc(doc(db, 'invites', `nuovo-${nome}`), invitePayload({auditRef})),
+        await assertFails(setDoc(doc(db, 'invites', INVITE_ID), invitePayload({auditRef})),
             `auditRef ${nome} doveva essere negato`);
     }
 });
 
 test('creazione: responseAuditRef e chiavi fuori allowlist sono negati', async () => {
     const db = asOwner();
-    await assertFails(setDoc(doc(db, 'invites', 'nuovo-con-response-ref'),
+    await assertFails(setDoc(doc(db, 'invites', INVITE_ID),
         invitePayload({responseAuditRef: REF_A})));
-    await assertFails(setDoc(doc(db, 'invites', 'nuovo-con-guest-uid'),
+    await assertFails(setDoc(doc(db, 'invites', INVITE_ID),
         invitePayload({guestUid: GUEST_UID})));
 });
 

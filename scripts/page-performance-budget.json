@@ -8,11 +8,11 @@
   "absoluteStaticCeilings": {
     "maxInitialLocalGzipKb": 338,
     "maxInitialLocalGzipKbByPage": {
-      "profilo_privato.html": 343,
-      "form_account_azienda.html": 339
+      "profilo_privato.html": 344,
+      "form_account_azienda.html": 340
     },
-    "maxJsModules": 46,
-    "hardeningAllowance": "06/11/2026: un modulo condiviso per il fence logout transazionale; export Messaging locale esplicitamente distinto da App Check. Limiti pagina circoscritti, target runtime invariati.",
+    "maxJsModules": 47,
+    "hardeningAllowance": "06/11/2026: fence logout e Messaging locale. 07/11/2026: un modulo puro per il grant offline verificato; namespace inviti e revoca completa Ricerca. Misurati 343,3 KB sul profilo e 339,2 KB sul form azienda: margine circoscritto di 1 KB per queste due pagine. Tetto generale 338 KB e target runtime invariati.",
     "maxCssFiles": 8
   },
   "runtimeTargets": {

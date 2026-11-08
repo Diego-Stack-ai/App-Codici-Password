@@ -1,8 +1,20 @@
 # Programma
 
-## Ripresa dopo il rilascio verificato — 06/11/2026
+<a id="chiusura-e-priorita-2026-11-07"></a>
 
-La **1.2.259** è pubblicata tramite GitHub e attestata dal manifest pubblico del commit `16c94c24`; esito e limiti sono in [STATO](STATO.md) e [COLLAUDI](../evidenze/COLLAUDI.md). Il gate della credenziale riguarda ora il controllo provider automatico, mentre la ricostruzione dei vecchi log rimane aperta. Il lotto corrente prepara la **1.2.260 locale**, con recovery completo disabilitato, UI e publisher dedicati, fence dei writer e ripresa verificata. Il collaudo integrale locale è concluso con codice 0; restano collegamento produttivo e gate separato per attivazione e prove cloud su un banco dedicato, analisi degli avvisi del banco e verifiche fisiche. Il favicon è corretto localmente usando l’icona esistente; le terminazioni riga sono confrontate nella forma canonica CI. Solo dopo il gate recovery vengono cache cifrata e conversione legacy; la shell persistente resta separata. Le guide italiane con fallback e i testi dinamici residui restano censiti, non dichiarati completati dal rilascio.
+## Chiusura locale e ordine residuo — 07/11/2026
+
+1. **Sicurezza corrente:** le cinque correzioni di [AUDIT](../evidenze/AUDIT.md#sicurezza-candidata-2026-11-07) sono verificate e integrate in locale. Restano nuova versione, suite completa/CI, commit e rilascio tracciato con rollback. Le nuove Rules richiedono il client aggiornato per creare inviti; gli inviti legacy già esistenti restano leggibili/rispondibili. Hosting da solo non aggiorna Rules e Functions.
+2. **Continuità della Vault:** integrare la shell persistente già approvata per navigare senza ripetere la Master Password; chiavi solo RAM, revoca su blocco/logout/cambio UID e rifiuto di risultati asincroni tardivi. Il contenimento multipagina rimane temporaneo.
+3. **Recovery FULL e migrazione:** inventario revisioni/alias, drain, nuovo UID sintetico dedicato (QA2 esclusa), Auth/App Check reale, canary interruzione/ripresa/rollback; poi cache applicativa cifrata e conversione legacy riprendibile con CAS, parità offline, backup recuperabile e gestione dei vecchi writer.
+4. **Prodotto:** matrice funzionale italiana e condivisioni da entrambi i lati, tour Graphify, secondo programma ODS, lucchetti, revisione editoriale delle otto lingue e guide. I 185 fallback delle guide e i sink JavaScript candidati non equivalgono a una traduzione definitiva né a un uguale numero di bug.
+5. **Chiusura produttiva:** dispositivi reali Safari/iPhone/PWA, Push anche dopo logout/cambio account, Web Locks/fallback, memoria e backup interrotto; verifica delle configurazioni cloud effettive, audit indipendente crittografico, privacy/legale e incidente storico. Restano da approfondire il contratto AAD dei campi generici e il retry concorrente della purge sullo stesso proprietario; non sono stati dimostrati come nuovi accessi fra utenti in questa revisione.
+
+Questo ordine sostituisce le priorità dei checkpoint storici sottostanti, senza cancellarne gli esiti o autorizzare operazioni cloud. AI.2 resta chiusa e non rientra nel prodotto. La retention Archivio già decisa non viene riaperta: due anni dall'ultima archiviazione e avviso dieci giorni prima; D8 legale e le altre famiglie mantengono i loro gate.
+
+## Attività residue dopo il rilascio — revisione 07/11/2026
+
+Per versione, sorgente distribuito, ricevute e limiti del rilascio consultare [STATO](STATO.md#stato-corrente) e [COLLAUDI](../evidenze/COLLAUDI.md), senza mantenere qui un secondo rapporto di pubblicazione. I prerequisiti del recovery completo sono già distribuiti ma inerti; restano drain, gate di attivazione e canary Auth/App Check su un nuovo banco dedicato. Seguono cache applicativa cifrata e conversione legacy, mentre la shell persistente resta un lotto separato. Restano pianificate le verifiche fisiche, l'analisi degli avvisi del banco e la chiusura editoriale delle guide multilingue e dei testi dinamici. Questi obiettivi non autorizzano l'esecuzione: il perimetro corrente è soltanto quello assegnato in [INCARICO_CORRENTE](INCARICO_CORRENTE.md).
 
 ## Prossimo lotto dopo il contenimento locale — 06/11/2026
 

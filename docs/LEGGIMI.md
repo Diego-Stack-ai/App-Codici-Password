@@ -7,7 +7,7 @@
 
 ## Regole di struttura approvate da Diego
 
-L’elenco vincolante approvato da Diego comprende **32 Markdown**, come registrato in `scripts/docs-manifest.json`, inclusa `SECURITY.md`. Solo Diego può autorizzare variazioni dell’elenco o della funzione dei documenti. La struttura include storico, evidenze e istruzioni per agenti; non cresce automaticamente con anni, incarichi o suffissi v2/finale.
+L’elenco vincolante approvato da Diego comprende **34 Markdown**, come registrato in `scripts/docs-manifest.json`: i **32 già censiti**, inclusa `SECURITY.md`, e i due file tecnici `AGENTS.md` e `.agents/skills/token-saver/SKILL.md`, generati dal bootstrap token-saver richiesto e inclusi nell’elenco con approvazione del 07/11/2026. Solo Diego può autorizzare variazioni dell’elenco o della funzione dei documenti. La struttura include storico, evidenze e istruzioni per agenti; non cresce automaticamente con anni, incarichi o suffissi v2/finale. I due file tecnici sono controllati insieme agli altri e sono soggetti alle stesse autorità documentali.
 
 L’elenco vincolante è in `scripts/docs-manifest.json`. Non modificarlo, modificarne il controllo o spostare il problema in una cartella esclusa per far passare una consegna. Nessun agente crea/rinomina/elimina MD senza ordine esplicito. I contenuti si aggiornano invece nel normale incarico autorizzato, senza chiedere conferma a ogni frase.
 
@@ -69,3 +69,8 @@ DECISIONI conserva autorità, fonte e successione delle scelte; non è un espedi
 - [docs/sviluppo/ASSISTENTE_APP.md](sviluppo/ASSISTENTE_APP.md)
 - [docs/sviluppo/PROFILO_E_ACCOUNT.md](sviluppo/PROFILO_E_ACCOUNT.md)
 - [docs/utente/GUIDA.md](utente/GUIDA.md)
+
+### Istruzioni tecniche censite il 07/11/2026
+
+- [AGENTS.md](../AGENTS.md)
+- [Skill locale token-saver](../.agents/skills/token-saver/SKILL.md)

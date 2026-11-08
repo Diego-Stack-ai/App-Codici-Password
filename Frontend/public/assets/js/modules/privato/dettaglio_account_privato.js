@@ -1,10 +1,11 @@
 import { readErrorMessage } from '../shared/read-error-message.js';
+import { canReadCachedAccount } from '../shared/cached-account-access.js';
 /**
  * DETTAGLIO ACCOUNT PRIVATO (V5.9.5)
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.260';
+import { auth, db } from '../../firebase-config.js?v=1.2.261';
 import { LOG } from '../../logger.js';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
@@ -105,6 +106,7 @@ export async function initDettaglioAccountPrivato(user, options = {}) {
         active() {
             if (!disposed && (mounted !== mount || options.signal?.aborted || root?.isConnected === false ||
                 auth.currentUser?.uid !== scope.uid || (options.isActive && !options.isActive()))) mount.destroy();
+            if (!disposed && mount.cachedRecord && !canReadCachedAccount(mount.cachedRecord, auth.currentUser, scope.owner)) mount.destroy();
             return !disposed;
         },
         destroy() {
@@ -220,6 +222,13 @@ async function loadAccount(mount = mounted) {
         if (!loaded && legacyLookupAllowed) loaded = await findPrivateAccountByLegacyId(lookupOwner, lookupId);
         if (!active()) return;
         if (!loaded) { showToast(t('account_not_found'), "error"); return; }
+        if (offline && readOnly) {
+            if (!canReadCachedAccount(loaded, auth.currentUser, lookupOwner)) {
+                showToast(t('guest_authorization_unverified'), "error");
+                return;
+            }
+            mount.cachedRecord = loaded;
+        }
         loaded = {...loaded};
         const storedNote = loaded.note;
         const resolvedId = loaded.id;
@@ -311,9 +320,9 @@ async function loadAccount(mount = mounted) {
             const controller = await module[name](widgetContext);
             if (!active()) controller?.destroy();
         };
-        import('../shared/account-shared-credentials.js?v=1.2.260').then(module => initWidget(module, 'initAccountSharedCredentials'))
+        import('../shared/account-shared-credentials.js?v=1.2.261').then(module => initWidget(module, 'initAccountSharedCredentials'))
             .catch(error => { if (active()) logError('SharedCredentials', error); });
-        import('../shared/account-embedded-widgets.js?v=1.2.260').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
+        import('../shared/account-embedded-widgets.js?v=1.2.261').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
             .catch(error => { if (active()) logError('AccountWidgets', error); });
         setupActions(actionActive);
         if (readOnly) mount.banners.add(setupReadOnlyUI());

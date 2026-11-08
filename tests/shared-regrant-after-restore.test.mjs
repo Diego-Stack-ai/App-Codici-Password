@@ -18,11 +18,15 @@ const companySource = strip(await readFile(new URL('azienda/form-azienda-save.js
 // M7-R7C-1: il writer usa gli helper di ciclo/invito di `utils.js`; il banco li
 // inietta nel contesto perché gli `import` vengono rimossi dai sorgenti.
 const utilsSource = await readFile(new URL('../utils.js', modules), 'utf8');
-const {inviteIdForGuest, sanitizeEmail, sharingCycleOf} =
+const {inviteIdForGuest, inviteMatchesAccount, inviteScopeForAccount, sanitizeEmail, sharingCycleOf} =
     await import('data:text/javascript;base64,' + Buffer.from(utilsSource).toString('base64'));
 const recipientSource = await readFile(new URL('shared/account-mode-model.js', modules), 'utf8');
 const {isOwnerRecipientEmail, preferenceForRecipient} =
     await import('data:text/javascript;base64,' + Buffer.from(recipientSource).toString('base64'));
+
+const privateScope = await inviteScopeForAccount('owner', '', 'account-1');
+const companyScope = await inviteScopeForAccount('owner', 'company-1', 'account-1');
+const expectedInvite = (key, company = false, cycle = 1) => `invites/${inviteIdForGuest(company ? companyScope : privateScope, key, cycle)}`;
 
 const GUEST_KEY = 'guest_example_invalid';
 const OTHER_KEY = 'other_example_invalid';
@@ -57,14 +61,15 @@ const restoredAccount = () => ({revision: 2, updatedAt: '2026-01-01T00:00:00.000
         [OTHER_KEY]: {email: 'other@example.invalid', status: 'suspended', uid: null, suspendedAt: '2026-01-01T00:00:00.000Z'}
     }});
 
-async function fixture(accountState = restoredAccount(), company = false) {
-    const writes = [];
+async function fixture(accountState = restoredAccount(), company = false, inviteRecords = []) {
+    const writes = [], reads = [];
     const accountPath = company ? COMPANY_PATH : ACCOUNT_PATH;    const fields = {'account-name': {value: 'Account sintetico'}, 'invite-email': {value: ''},
         'flag-shared': {checked: true}, 'flag-memo': {checked: false}, 'flag-memo-shared': {checked: false}};
     const context = vm.createContext({
         auth: {currentUser: {uid: 'owner', email: 'owner@example.invalid'}}, db: {},
-        inviteIdForGuest, sanitizeEmail, sharingCycleOf, isOwnerRecipientEmail, preferenceForRecipient, structuredClone,
+        inviteIdForGuest, inviteMatchesAccount, inviteScopeForAccount, sanitizeEmail, sharingCycleOf, isOwnerRecipientEmail, preferenceForRecipient, structuredClone,
         crypto: {randomUUID: newMarker},
+        listOwnedAccountInvitesConfirmed: async () => inviteRecords.filter(invite => invite.ownerId === 'owner' && invite.accountId === 'account-1'),
         doc: (_db, ...path) => ({path: path.join('/'), id: path.at(-1)}),
         collection: (_db, ...path) => ({path: path.join('/'), id: path.at(-1)}),
         deleteField: () => ({__delete: true}), increment: value => ({__increment: value}),
@@ -72,8 +77,9 @@ async function fixture(accountState = restoredAccount(), company = false) {
             const staged = [];
             await callback({
                 get: async reference => {
-                    const data = reference.path === accountPath ? accountState : {contactEmails: []};
-                    return {exists: () => true, data: () => structuredClone(data)};
+                    reads.push(reference.path);
+                    const data = reference.path === accountPath ? accountState : reference.path.startsWith('invites/') ? inviteRecords.find(invite => `invites/${invite.id}` === reference.path) : {contactEmails: []};
+                    return {exists: () => Boolean(data), data: () => structuredClone(data)};
                 },
                 update: (reference, patch) => staged.push([reference.path, patch, 'update']),
                 set: (reference, patch) => staged.push([reference.path, patch, 'set']),
@@ -95,7 +101,7 @@ async function fixture(accountState = restoredAccount(), company = false) {
         sessionStorage: {removeItem: () => {}}, setTimeout: () => {}, console: {error: () => {}, warn: () => {}}
     });
     vm.runInContext(company ? companySource : source, context);
-    return {writes,
+    return {writes, reads,
         createdInvites: () => writes.filter(write => write[0].startsWith('invites/') && write[2] === 'set'),
         save: (invitedEmails, invitePreferences = {}) => company ? context.saveAccount({
             bankAccounts: [], invitedEmails, invitePreferences, isExplicitMemo: false, currentUid: 'owner',
@@ -116,9 +122,9 @@ test('salvataggio dopo il ripristino: le voci sospese non ricreano alcun grant',
     assert.equal(account[1].sharedWithUids.length, 0, 'nessun grant ricreato dalle voci sospese');
     assert.equal(account[1].acceptedCount, 0);
     // Solo il contatto riselezionato riceve un nuovo invito; l'altro viene rimosso.
-    assert.deepEqual(f.createdInvites().map(write => write[0]), ['invites/account-1_other_example_invalid_c1']);
+    assert.deepEqual(f.createdInvites().map(write => write[0]), [expectedInvite(OTHER_KEY)]);
     assert.deepEqual(f.writes.filter(write => write[2] === 'delete').map(write => write[0]),
-        ['invites/account-1_guest_example_invalid_c1']);
+        []);
     assert.equal(account[1].sharedWith[GUEST_KEY], undefined, 'la voce sospesa non riselezionata viene rimossa');
 });
 
@@ -127,7 +133,7 @@ test('salvataggio con l\'ospite riselezionato: nuovo invito del ciclo corrente e
     await f.save([GUEST_EMAIL]);
     const [invite] = f.createdInvites();
     assert.ok(invite, 'viene creato un nuovo invito');
-    assert.equal(invite[0], 'invites/account-1_guest_example_invalid_c1', 'ID del ciclo corrente');
+    assert.equal(invite[0], expectedInvite(GUEST_KEY), 'ID del ciclo corrente');
     assert.equal(invite[1].cycle, 1);
     assert.equal(invite[1].status, 'pending');
     // M7-AUDIT-5C: base opaca presente e payload dentro l'allowlist delle Rules.
@@ -173,14 +179,14 @@ test('azienda: un salvataggio dopo il ripristino non ricrea accessi', async () =
     assert.equal(account[1].sharedWithUids.length, 0);
     assert.equal(account[1].acceptedCount, 0);
     assert.deepEqual(f.createdInvites().map(write => write[0]),
-        ['invites/account-1_other_example_invalid_c1'], 'solo per il contatto riselezionato');
+        [expectedInvite(OTHER_KEY, true)], 'solo per il contatto riselezionato');
 });
 
 test('azienda: l\'ospite sospeso riselezionato riceve un invito del ciclo corrente', async () => {
     const f = await fixture(restoredAccount(), true);
     await f.save([GUEST_EMAIL]);
     const [invite] = f.createdInvites();
-    assert.equal(invite[0], 'invites/account-1_guest_example_invalid_c1');
+    assert.equal(invite[0], expectedInvite(GUEST_KEY, true));
     assert.equal(invite[1].cycle, 1);
     assert.equal(invite[1].aziendaId, 'company-1');
     assert.equal(invite[1].status, 'pending');
@@ -189,4 +195,25 @@ test('azienda: l\'ospite sospeso riselezionato riceve un invito del ciclo corren
     const account = f.writes.find(write => write[0] === COMPANY_PATH);
     assert.equal(account[1].sharedWithUids.length, 0, 'l\'accesso non torna prima dell\'accettazione');
     assert.equal(account[1].sharedWith[GUEST_KEY].status, 'pending');
+});
+
+
+test('reinvite skips attacker legacy squat and other company records; only owned exact legacy is replaced', async () => {
+    for (const company of [false, true]) {
+        const ownLegacyId = 'owned-legacy-instance';
+        const records = [
+            {id: `account-1_${GUEST_KEY}_c1`, ownerId: 'attacker', accountId: 'account-1', cycle: 1, recipientEmail: GUEST_EMAIL},
+            {id: 'other-company', ownerId: 'owner', accountId: 'account-1', aziendaId: 'other-company', cycle: 1, recipientEmail: GUEST_EMAIL},
+            {id: ownLegacyId, ownerId: 'owner', accountId: 'account-1', ...(company ? {aziendaId: 'company-1'} : {}),
+                cycle: 1, recipientEmail: GUEST_EMAIL, status: 'rejected'}
+        ];
+        const f = await fixture(restoredAccount(), company, records);
+        await f.save([GUEST_EMAIL]);
+        assert.equal(f.createdInvites()[0][0], expectedInvite(GUEST_KEY, company));
+        assert.ok(f.reads.includes(`invites/${ownLegacyId}`));
+        assert.ok(!f.reads.includes('invites/other-company'));
+        assert.ok(!f.reads.includes(`invites/account-1_${GUEST_KEY}_c1`));
+        assert.deepEqual(f.writes.filter(write => write[2] === 'delete').map(write => write[0]), [`invites/${ownLegacyId}`]);
+        assert.equal(f.writes.find(write => write[0] === (company ? COMPANY_PATH : ACCOUNT_PATH))[1].sharedWithUids.length, 0);
+    }
 });

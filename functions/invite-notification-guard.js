@@ -2,17 +2,11 @@
 
 const crypto = require("node:crypto");
 const {assertTransactionGlobalPurgeUnlocked} = require("./archive-purge-global-lock");
+const providerBudget = require("./notification-provider-budget");
 
 const LEDGER_COLLECTION = "inviteNotificationLedger";
-const RATE_COLLECTION = "inviteNotificationRateLimits";
-const HOUR_MS = 60 * 60 * 1000;
-const DAY_MS = 24 * HOUR_MS;
-const RETENTION_MS = 30 * 24 * HOUR_MS;
-const OWNER_LIMIT_PER_HOUR = 100;
-const RECIPIENT_LIMIT_PER_HOUR = 5;
-const OWNER_LIMIT_PER_DAY = Object.freeze({email: 100, push: 500});
-const GLOBAL_LIMIT_PER_DAY = Object.freeze({email: 400, push: 2000});
-const MAX_RATE_DOCUMENTS_PER_DAY = 3 * (GLOBAL_LIMIT_PER_DAY.email + GLOBAL_LIMIT_PER_DAY.push) + 2;
+const {RATE_COLLECTION, RETENTION_MS, OWNER_LIMIT_PER_HOUR, RECIPIENT_LIMIT_PER_HOUR,
+  OWNER_LIMIT_PER_DAY, GLOBAL_LIMIT_PER_DAY, MAX_RATE_DOCUMENTS_PER_DAY} = providerBudget;
 const CLEANUP_LIMIT_PER_COLLECTION = 10000;
 const SEGMENT = /^[A-Za-z0-9_-]{1,160}$/;
 const INVITE_ID = /^[A-Za-z0-9_-]{1,512}$/;
@@ -88,8 +82,12 @@ async function authoritativeInvite({db, auth, invite, inviteId}) {
   const path = accountPath(invite);
   const inviteCycle = cycle(invite.cycle);
   if (!recipientEmail || !path || inviteCycle === null) return null;
-  const expectedInviteId = `${invite.accountId}_${sanitizeEmail(recipientEmail)}${inviteCycle > 0 ? `_c${inviteCycle}` : ''}`;
-  if (inviteId !== expectedInviteId) return null;
+  const digest = value => crypto.createHash("sha256").update(value, "utf8").digest("hex");
+  const scope = digest(digest(invite.ownerId) + digest(invite.aziendaId || "") + digest(invite.accountId));
+  const expectedInviteId = `v2_${scope}_${sanitizeEmail(recipientEmail)}_c${inviteCycle}`;
+  const legacyInviteId = `${invite.accountId}_${sanitizeEmail(recipientEmail)}${inviteCycle > 0 ? `_c${inviteCycle}` : ''}`;
+  // Existing legacy documents remain deliverable; Rules prohibit new legacy creates.
+  if (inviteId !== expectedInviteId && inviteId !== legacyInviteId) return null;
   const recipientUid = await resolveRecipientUid(auth, recipientEmail);
   return db.runTransaction(async tx => {
     await assertParticipants(tx, db, invite.ownerId, recipientUid);
@@ -114,18 +112,10 @@ async function claim({db, inviteId, notificationInstance, ownerId, recipientUid 
       !safeSegment(ownerId) || (recipientUid !== null && (typeof recipientUid !== 'string' || !/^[A-Za-z0-9._:-]{1,160}$/.test(recipientUid))) || !normalizeEmail(recipientEmail) ||
       !["email", "push"].includes(channel)) return {status: "invalid"};
   const time = now();
-  const bucket = Math.floor(time / HOUR_MS);
-  const dayBucket = Math.floor(time / DAY_MS);
   const deliveryRef = db.collection(LEDGER_COLLECTION).doc(hash([inviteId, notificationInstance, channel]));
-  const ownerRef = db.collection(RATE_COLLECTION).doc(hash(["owner", ownerId, channel, bucket]));
-  const ownerDailyRef = db.collection(RATE_COLLECTION).doc(hash(["owner-day", ownerId, channel, dayBucket]));
-  const recipientRef = db.collection(RATE_COLLECTION).doc(hash(["recipient", recipientEmail, channel, bucket]));
-  const globalDailyRef = db.collection(RATE_COLLECTION).doc(hash(["global-day", channel, dayBucket]));
   return db.runTransaction(async tx => {
     await assertParticipants(tx, db, ownerId, recipientUid);
-    const [delivery, owner, ownerDaily, recipient, globalDaily] = await Promise.all([
-      tx.get(deliveryRef), tx.get(ownerRef), tx.get(ownerDailyRef), tx.get(recipientRef), tx.get(globalDailyRef)
-    ]);
+    const delivery = await tx.get(deliveryRef);
     if (delivery.exists) {
       const prior = delivery.data();
       // A known unsubmitted claim may resume without charging rates again.
@@ -133,22 +123,9 @@ async function claim({db, inviteId, notificationInstance, ownerId, recipientUid 
           prior.notificationInstance === notificationInstance && prior.channel === channel) return {status: 'claimed', ref: deliveryRef};
       return {status: 'duplicate'};
     }
-    const ownerCount = Number(owner.exists ? owner.data().count : 0);
-    const ownerDailyCount = Number(ownerDaily.exists ? ownerDaily.data().count : 0);
-    const recipientCount = Number(recipient.exists ? recipient.data().count : 0);
-    const globalDailyCount = Number(globalDaily.exists ? globalDaily.data().count : 0);
-    if (![ownerCount, ownerDailyCount, recipientCount, globalDailyCount]
-        .every(value => Number.isSafeInteger(value) && value >= 0)) return {status: "blocked"};
-    if (ownerCount >= OWNER_LIMIT_PER_HOUR || recipientCount >= RECIPIENT_LIMIT_PER_HOUR ||
-        ownerDailyCount >= OWNER_LIMIT_PER_DAY[channel] ||
-        globalDailyCount >= GLOBAL_LIMIT_PER_DAY[channel]) {
-      return {status: "rate-limited"};
-    }
+    const admission = await providerBudget.reserve({tx, db, ownerId, recipientEmail, channel, time});
+    if (admission.status !== "admitted") return admission;
     const expiresAt = time + RETENTION_MS;
-    tx.set(ownerRef, {kind: "owner", bucket, count: ownerCount + 1, expiresAt});
-    tx.set(ownerDailyRef, {kind: "owner-day", bucket: dayBucket, count: ownerDailyCount + 1, expiresAt});
-    tx.set(recipientRef, {kind: "recipient", bucket, count: recipientCount + 1, expiresAt});
-    tx.set(globalDailyRef, {kind: "global-day", bucket: dayBucket, count: globalDailyCount + 1, expiresAt});
     tx.set(deliveryRef, {state: "claimed", ownerId, recipientUid, notificationInstance, channel, claimedAt: time, expiresAt});
     return {status: "claimed", ref: deliveryRef};
   });

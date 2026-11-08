@@ -1,0 +1,3 @@
+interface:
+  display_name: "Token Saver"
+  short_description: "Mantiene mappe Graphify con contesto ridotto"

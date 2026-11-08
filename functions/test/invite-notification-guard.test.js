@@ -234,3 +234,23 @@ test('rechecked live invitation instance prevents sending stale trigger content'
   assert.equal((await guard.deliver(delivery(f, async () => {sends++;}))).status, 'cancelled');
   assert.equal(sends, 0);
 });
+
+
+test("v2 private/company identity agrees with browser and rejects other owner/company scope", async () => {
+  const {readFile} = require("node:fs/promises");
+  const source = await readFile(require.resolve("../../Frontend/public/assets/js/utils.js"), "utf8");
+  const {inviteIdForGuest, inviteScopeForAccount} = await import("data:text/javascript;base64," + Buffer.from(source).toString("base64"));
+  for (const company of ["", "company-a", "company-b"]) {
+    const id = inviteIdForGuest(await inviteScopeForAccount("owner", company, "same"), key, 0);
+    const data = invite("same", {inviteId: id, ...(company ? {aziendaId: company} : {})});
+    const resource = company ? `users/owner/aziende/${company}/accounts/same` : "users/owner/accounts/same";
+    const f = fixture({[resource]: account(), [`invites/${id}`]: data});
+    assert.ok(await guard.authoritativeInvite({db: f.db, auth: f.auth, invite: data, inviteId: id}));
+    for (const [owner, otherCompany] of [["other", company], ["owner", company === "company-a" ? "company-b" : "company-a"]]) {
+      const forgedId = inviteIdForGuest(await inviteScopeForAccount(owner, otherCompany, "same"), key, 0);
+      const forged = {...data, inviteId: forgedId};
+      f.records.set(`invites/${forgedId}`, forged);
+      assert.equal(await guard.authoritativeInvite({db: f.db, auth: f.auth, invite: forged, inviteId: forgedId}), null);
+    }
+  }
+});

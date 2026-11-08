@@ -1,11 +1,12 @@
+import { listOwnedAccountInvitesConfirmed } from '../data/vault-repository.js';
 import { findProfileAccountItem, patchProfileAccountItem, profileAccountReferences } from '../privato/profile-model.js';
 import { prepareCompanyProfileLink, promptCompanyProfilePasswordChoice } from '../azienda/company-profile-link.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.260';
+import { auth, db } from '../../firebase-config.js?v=1.2.261';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { inviteIdForGuest, sanitizeEmail, sharingCycleOf } from '../../utils.js';
+import { inviteIdForGuest, inviteMatchesAccount, inviteScopeForAccount, sanitizeEmail, sharingCycleOf } from '../../utils.js';
 import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { accountModeFromFlags, isOwnerRecipientEmail, preferenceForRecipient, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
 import { classifyPrivateAccountOfflineWrite } from './private-account-offline-policy.js';
@@ -332,6 +333,27 @@ export async function savePrivateAccount({
             if (sharingCycle === null) throw new Error('CICLO_DI_CONDIVISIONE_NON_VALIDO');
             const nextSharingCycle = resetExistingSharing ? sharingCycle + 1 : sharingCycle;
 
+            const inviteScope = emailsToInvite.length > 0 ? await inviteScopeForAccount(currentUid, '', targetId) : null;
+            const discoveredInvites = Object.keys(currentSharedWith).length > 0
+                ? await listOwnedAccountInvitesConfirmed(currentUid, targetId) : [];
+            const ownedInvites = [];
+            for (const invite of discoveredInvites) {
+                if (!inviteMatchesAccount(invite, currentUid, '', targetId, sharingCycle) &&
+                    !inviteMatchesAccount(invite, currentUid, '', targetId, nextSharingCycle)) continue;
+                const reference = doc(db, 'invites', invite.id);
+                const snapshot = await transaction.get(reference);
+                if (snapshot.exists() && inviteMatchesAccount(snapshot.data(), currentUid, '', targetId)) {
+                    ownedInvites.push({reference, data: snapshot.data()});
+                }
+            }
+            const deleteGuestInvites = (guestKey, cycle, keepId = '') => {
+                for (const invite of ownedInvites) {
+                    if (invite.reference.id !== keepId && (invite.data.cycle ?? 0) === cycle && sanitizeEmail(invite.data.recipientEmail) === guestKey) {
+                        transaction.delete(invite.reference);
+                    }
+                }
+            };
+
             // 2. NOW EXECUTE ALL WRITES
             assertAccountSaveAllowed(loadContext);
             if (auth.currentUser?.uid !== currentUid) {
@@ -340,7 +362,7 @@ export async function savePrivateAccount({
             let finalData = { ...data };
             if (resetExistingSharing) {
                 for (const sKey of Object.keys(currentSharedWith)) {
-                    transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, sKey, sharingCycle)));
+                    deleteGuestInvites(sKey, sharingCycle);
                 }
                 currentSharedWith = {};
                 finalData.sharingCycle = nextSharingCycle;
@@ -361,7 +383,7 @@ export async function savePrivateAccount({
             if (!isSharingActive) {
                 // Se diventa privato, distruggi tutti gli inviti pendenti pregressi (orfani)
                 for (const sKey of Object.keys(currentSharedWith)) {
-                    transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, sKey, nextSharingCycle)));
+                    deleteGuestInvites(sKey, nextSharingCycle);
 
                     // Notifica all'ospite: richiede un backend dedicato, non implementata.
                 }
@@ -380,7 +402,7 @@ export async function savePrivateAccount({
                 for (const oldKey of Object.keys(currentSharedWith)) {
                     if (!requestedSanitizedKeys.includes(oldKey)) {
                         delete finalData.sharedWith[oldKey];
-                        transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, oldKey, nextSharingCycle)));
+                        deleteGuestInvites(oldKey, nextSharingCycle);
 
                         // Notifica all'ospite: richiede un backend dedicato, non implementata.
                     }
@@ -409,9 +431,10 @@ export async function savePrivateAccount({
                             ...notificationPreference
                         };
 
+                        deleteGuestInvites(sKey, nextSharingCycle, inviteIdForGuest(inviteScope, sKey, nextSharingCycle));
                         // Crea Invito
-                        transaction.set(doc(db, "invites", inviteIdForGuest(targetId, sKey, nextSharingCycle)), {
-                            inviteId: inviteIdForGuest(targetId, sKey, nextSharingCycle),
+                        transaction.set(doc(db, "invites", inviteIdForGuest(inviteScope, sKey, nextSharingCycle)), {
+                            inviteId: inviteIdForGuest(inviteScope, sKey, nextSharingCycle),
                             // M7-AUDIT-5C: base opaca dell'istanza di invito, nuova a
                             // ogni creazione e a ogni reinvito. L'id dell'evento di
                             // registro si deriva solo da qui, mai dall'email, dalla

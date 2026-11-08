@@ -1,5 +1,62 @@
 # Audit
 
+<a id="sicurezza-candidata-2026-11-07"></a>
+
+## Revisione di sicurezza e correzioni della candidata — 07/11/2026
+
+Base statica `5cedf8b41166d8520e80f08f44f8a94cb29cb4b6`; scan gestito `525628b9-c13a-4141-b322-07bfbadfe396`. Sorgente iniziale conservato e correzioni nel worktree isolato, con letture indipendenti e Claude Code come contraddittorio consultivo. La copertura è parziale e riferita alle superfici documentate: non si dichiarano letti integralmente tutti i 1.341 file censiti. Il bundle backend è stato verificato byte per byte contro la sua catena sorgente tramite il builder in modalità `--check`.
+
+| Rilievo verificato | Correzione locale | Prova e compatibilità |
+|---|---|---|
+| Prenotazione dell'ID globale di invito da altro proprietario | Namespace v2 vincolato a UID, azienda, Account e ciclo, imposto dalle Rules; discovery limitata a inviti posseduti e rivalidata nella transazione | Squat legacy, collisioni owner/azienda e creazione atomica Account/invito nell'emulatore; lettura, risposta, aggiornamento e cancellazione legacy conservati |
+| HTML attivo nell'anteprima dell'archivio portabile | Testi passivi con `textContent`, prefisso limitato a 256 KiB dopo autenticazione, MIME/elementi dedicati e cancellazione delle anteprime superate | HTML eseguito prima della patch, poi prova browser negativa; download originale e immagini/PDF/audio restano disponibili |
+| Invii scadenze senza budget aggregato Gmail | Ammissione transazionale condivisa con gli inviti, stessi contatori/soglie e retention | Flood tra scadenze, proprietari e inviti; retry incerti consumano capacità, nessun nuovo ledger per gli ID respinti dal budget |
+| Dati cached di un altro UID mostrati offline | Binding positivo UID/email verificata e stato non archiviato, prima del rendering dei due dettagli e dopo risoluzione dell'ID fisico legacy | Regressione riprodotta prima della patch; proprietario e destinatario esplicitamente autorizzato mantengono la consultazione offline |
+| Ricerca utilizzabile oltre il blocco della Vault | Invalidazione di chiave, promessa e conversazione; generazione/UID/dialogo prima e dopo gli await; cancellazione del plaintext e revoca delle continuazioni vocali | Riprodotti riuso chiave e preparazione tardiva; browser su reveal/copy cached, risultato tardivo e microfono dopo teardown; nuovo sblocco dello stesso UID mantiene la ricerca utilizzabile |
+
+Il revisore indipendente della patch ha identificato la continuazione vocale tardiva, poi corretta e coperta da prove; non ha segnalato ulteriori percorsi supportati nei cinque ambiti. Claude ha completato il parere aggiuntivo cache/Ricerca su un pacchetto limitato, senza nuovi rilievi supportati: lettura statica, non una prova runtime o dell'intera app. La prima esecuzione aveva esaurito 24 turni senza rapporto e non viene conteggiata come esito positivo. La sua descrizione abbreviata del controllo archivio non sostituisce il confronto esplicito `false` applicato dal codice, che rifiuta anche valori malformati. I comandi realmente eseguiti sono in [COLLAUDI](COLLAUDI.md#sicurezza-candidata-2026-11-07).
+
+Limiti: nessun test con dati reali o invii provider, nessuna verifica cloud corrente, commit, push o pubblicazione. Restano condizionali le notifiche dopo logout/cambio UID (registrazione effettiva da provare; incongruenza `status: active`/allowlist Rules da riconciliare), hardening MIME dell'app principale, AAD generico, correttezza della purge concorrente, dispositivi fisici e copertura frontend periferica. V2 è un servizio di pianificazione attivo, distinto dal recovery FULL realmente disabilitato; i vecchi commenti non sono prove di hard-off. Le chiavi sono soltanto RAM; la correzione della revoca non realizza la shell persistente.
+
+<a id="revisione-documentale-2026-11-07"></a>
+
+## Revisione documentale e riconciliazione della struttura — 07/11/2026
+
+Base esaminata: `5cedf8b41166d8520e80f08f44f8a94cb29cb4b6`, con le quattro modifiche documentali ECC già presenti nel worktree. Il campo `baseline` del manifest resta invece `2900ccc0bbd83997de8e50d260b1868f33bc5e38`: identifica la provenienza storica della migrazione, distinta dalla base di questo lotto. Codex e tre revisori hanno letto integralmente tutti i 32 Markdown allora approvati, compreso `REGISTRO` fino alla riga originaria 19.895, e i due file tecnici del bootstrap. Le impronte SHA-256 dei 34 file sono rimaste identiche durante la fase in sola lettura. Claude Code locale, autenticato con l'abbonamento Pro e limitato a `Read`, `Glob` e `Grep`, ha concluso un secondo parere: lettura integrale di numerosi contratti e lettura per intervalli/intestazioni dei documenti lunghi, non una seconda rilettura integrale del corpus. Non ha modificato file. Il suo «34 tracciati» è stato rettificato: erano 32 versionati e due Markdown tecnici non versionati; il conteggio sul disco era 34.
+
+| ID | Rilievo verificato | Correzione documentale autorizzata |
+|---|---|---|
+| DOC1 | Due Markdown tecnici fuori dall'elenco chiuso di 32 | Manifest di 34 percorsi con nuova approvazione, catalogo e autorità esplicite; controllo invariato |
+| DOC2 | PROGRAMMA presenta ancora la 1.2.260 come locale | Rinvio allo stato del rilascio e distinzione tra distribuzione dei prerequisiti e attivazione |
+| DOC3 | VAULT dichiara il recovery non distribuito | Prerequisiti distribuiti ma inerti; gate di attivazione conservati |
+| DOC4 | GUIDA descrive come locali sblocco e messaggio iniziale già distribuiti | Descrizione della navigazione multipagina pubblicata e rinvio a STATO |
+| DOC5 | Guida/Profilo impongono la sola lettura della data, DATI ne consente la modifica | L'ordine del 18/10 supera quello del 17/10: correggere Guida/Profilo, conservare DATI e il writeback transazionale implementato |
+| DOC6 | INTERFACCIA ammette quattro palette contro le sette autorizzate e implementate | Elenco di sette valori, senza dichiarare eseguito il confronto visivo residuo |
+| DOC7 | Una prova verde viene descritta come autorizzazione al canary | Prerequisito tecnico distinto dall'ordine operativo |
+| DOC8 | «Non distruttivi» appare incompatibile con il cleanup QA autorizzato | Distinzione fra eliminazione di fixture sintetiche e distruzione dell'identità/chiavi QA |
+| DOC9 | L'ancora `stato-corrente` porta alla candidata 1.2.193 | Ancora all'inizio di STATO; checkpoint storico con identificatore proprio |
+| DOC10 | Inventari di basi diverse senza provenienza esplicita | Date e SHA di registrazione distinti, tabelle generate conservate |
+| DOC11 | Il doppio lettore cita il legacy anche per schema 2 «non integro» | Fallback solo per assenza riconosciuta e stati ammessi, mai per errori di formato/autorizzazione/autenticità |
+| DOC12 | INCARICO ripete rapporti di collaudo già nelle evidenze | Perimetro/autorizzazioni conservati e rapporti sostituiti da rinvii canonici |
+| DOC13 | La source-map dichiara 31 target contro i 32 già approvati | Conteggio riallineato a 34, senza modificare le 71 fonti e le loro impronte |
+| DOC14 | Il nuovo profilo recovery è inserito dentro la fonte migrata del 23/09 | Blocco corrente separato prima delle fonti, mantenendo nel testo storico Emergency Access e Vault fantasma |
+
+La prima ipotesi per DOC5 era che DATI fosse rimasto indietro: la verifica dell'ordine successivo in INCARICO, del modello Scadenze e del salvataggio transazionale l'ha esclusa. Sono inoltre esclusi dai difetti correnti i vecchi conteggi di 31 MD, gli ordini AI.2 superati e la successione documentata degli editor allegati. Le [errata T16/DS-002C](../storico/REGISTRO.md#errata-documentali-2026-11-07) e il chiarimento Annulla precisano soltanto resoconti storici. Il vecchio riepilogo VS-P0/M8 nel blocco migrato di questo file resta riferito alla sua base, non alla produzione attuale.
+
+Prima delle correzioni: audit strutturale fermo sui due file fuori elenco, 648 collegamenti locali senza errori, 12 regressioni documentali separate superate. La verifica delle impronte della mappa si fermava su `targetFiles` prima di esaminare le fonti: il risultato `0/0` non attestava né perdita né corruzione.
+
+Verifiche dopo le correzioni: `npm run test:docs` supera l'audit di **34 Markdown e 663 collegamenti locali** e tutte le **12 regressioni**, senza fallimenti o skip. Il confronto strutturale con la base `5cedf8b41166d8520e80f08f44f8a94cb29cb4b6` è verde con la nuova approvazione esplicita. `verify-map-fingerprints` verifica **71/71 impronte canoniche**, 82 segmenti e 28 destinazioni delle fonti migrate; i nuovi documenti privi di fonte storica non richiedono segmenti inventati. Restano sei avvisi sulle impronte legacy `OTHER`, già presenti e non modificati; non riguardano le impronte canoniche, tutte corrispondenti ai byte Git.
+
+I confronti puntuali confermano che nella source-map cambia soltanto `targetFiles`, nel manifest si aggiungono esattamente i due percorsi approvati, e audit, test e workflow restano invariati. Le due tabelle generate di INVENTARI e il corpo preesistente di REGISTRO sono identici; le errata sono aggiunte separate. `git diff --check` è pulito. La revisione finale di due agenti ha fatto precisare la distinzione fra collaudo pubblicato e lotti locali e fra rinvio esplicito e soggezione alle autorità. Il secondo controllo di Claude Code sulla patch fornita, senza strumenti, conclude «Nessun errore concreto rilevato nella patch»: resta un parere statico, non una verifica indipendente dei comandi, degli hash Git o di tutto il contesto fuori diff. I riferimenti residui al solo collegamento locale nel contratto BACKUP sono stati riallineati separatamente alla distribuzione già attestata.
+
+Allineata anche la [chat Claude del progetto](https://claude.ai/chat/10a135d5-c657-4c60-a7a6-471f823cd20b): ha confermato di disporre soltanto del clone `5cedf8b41166d8520e80f08f44f8a94cb29cb4b6` e di non poter leggere il worktree locale non pubblicato. Il riepilogo inviato è registrato come contesto riferito, non come sua verifica della patch. La chat e Claude Code sono interfacce/sessioni separate dello stesso servizio: il parere sul delta locale proviene da Code, non dal clone della chat.
+
+Chiusura locale del lotto confermata il 07/11/2026, su richiesta di Diego, con Codex come orchestratore e Claude come revisore consultivo in sola lettura. La riesecuzione dei controlli documentali, del confronto con la base e delle impronte conferma gli esiti sopra riportati; un ulteriore revisore indipendente non rileva impedimenti di perimetro o coerenza. Il parere finale di Claude Code conclude «nessun impedimento concreto rilevato nei file letti»: copre indice, istruzioni, manifest e le porzioni assegnate di AUDIT, STATO e INCARICO, senza rieseguire test o rileggere tutto il corpus. Il suo dubbio non bloccante sulla baseline è chiarito nel primo paragrafo. La prima richiesta si è fermata per errore DNS prima di qualsiasi lettura; il tentativo successivo è terminato correttamente, senza richieste di scrittura o permessi negati.
+
+La prova separata nella GUI locale di Claude Code ha letto i cinque file assegnati e rilevato lo stato del checkout locale: manifest a 34 percorsi, branch `master`, HEAD `5cedf8b41166d8520e80f08f44f8a94cb29cb4b6` e modifiche non committate. Le tre impronte calcolate su AGENTS, STATO e manifest coincidevano con il controllo indipendente. La prova attesta l'accesso alla cartella locale in quel momento; le chat che usano GitHub richiedono il successivo aggiornamento del repository e della conoscenza del progetto per acquisire il delta.
+
+Questo lotto modifica soltanto documentazione e metadati di governance locali. Non esegue nuovi collaudi applicativi o cloud e non certifica sicurezza, lingue complete, attivazione recovery o nuova pubblicazione.
+
 ## SEC-MON-01 — modello delle minacce e monitoraggio quotidiano — 03/11/2026
 
 È stata avviata una ricognizione repository-grounded delle superfici d'attacco dell'app pubblica e del PC Windows di sviluppo. Sono stati verificati manifest, lockfile, runtime Functions, workflow, header Hosting, Rules, callable con App Check e versioni locali della toolchain. La ricognizione non equivale a penetration test né certifica assenza di vulnerabilità; serve a delimitare asset, confini di fiducia, percorsi d'abuso e fonti da monitorare.

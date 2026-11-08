@@ -1,4 +1,5 @@
 import { readErrorMessage } from '../shared/read-error-message.js';
+import { canReadCachedAccount } from '../shared/cached-account-access.js';
 /**
  * DETTAGLIO ACCOUNT AZIENDA MODULE (V6.0 SPLIT)
  * Visualizzazione dettagliata credenziali e coordinate bancarie aziendali.
@@ -7,7 +8,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.260';
+import { auth, db } from '../../firebase-config.js?v=1.2.261';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -72,6 +73,7 @@ export async function initDettaglioAccountAzienda(user, options = {}) {
         active() {
             if (!disposed && (mounted !== mount || options.signal?.aborted || root?.isConnected === false ||
                 auth.currentUser?.uid !== scope.uid || (options.active && !options.active()))) mount.destroy();
+            if (!disposed && mount.cachedRecord && !canReadCachedAccount(mount.cachedRecord, auth.currentUser, scope.owner)) mount.destroy();
             return !disposed;
         },
         destroy() {
@@ -185,6 +187,13 @@ async function loadAccount(mount = mounted) {
         }
 
         const loaded = {...account};
+        if (offline && loadOwnerId !== loadViewerId) {
+            if (!canReadCachedAccount(account, auth.currentUser, loadOwnerId)) {
+                showToast(t('guest_authorization_unverified'), "error");
+                return;
+            }
+            mount.cachedRecord = account;
+        }
         const storedNote = loaded.note;
         if (requireServerRefresh) {
             requireServerRefresh = false;
@@ -278,7 +287,7 @@ async function loadAccount(mount = mounted) {
         if (!active()) return;
         const widgetContext = {compactView: true, uid: loadViewerId, context: 'company', accountId, companyId, readOnly: isReadOnly, active: actionActive, signal};
         for (const [path, initializer] of [['account-shared-credentials', 'initAccountSharedCredentials'], ['account-embedded-widgets', 'initAccountEmbeddedWidgets']]) {
-            import(`../shared/${path}.js?v=1.2.260`).then(async module => {
+            import(`../shared/${path}.js?v=1.2.261`).then(async module => {
                 if (!active()) return;
                 const controller = await module[initializer](widgetContext);
                 if (!active()) controller?.destroy();

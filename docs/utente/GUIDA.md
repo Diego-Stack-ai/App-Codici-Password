@@ -1,8 +1,14 @@
 # Guida
 
-## Sblocco della candidata locale
+## Aggiornamento di sicurezza 1.2.261 — 08/11/2026
 
-Nella candidata locale successiva al controllo del 06/11/2026 la Vault si sblocca per la pagina aperta. Cambiando pagina o ricaricando può quindi essere richiesta nuovamente la Master Password, oppure la verifica biometrica sui dispositivi già configurati e compatibili. La password dell'account e la Master Password restano distinte. Il messaggio «Verifica accesso in corso…» indica il controllo iniziale della sessione, durante il quale il contenuto privato rimane nascosto. Queste modifiche locali non sono ancora disponibili sul sito pubblicato; consultare [STATO](../progetto/STATO.md).
+Per creare nuove condivisioni è necessario aggiornare l'app: se una vecchia scheda o PWA segnala un errore durante il salvataggio, conservare i dati del modulo e aggiornare prima di riprovare. Gli inviti esistenti restano consultabili e rispondibili. Nell'archivio portabile i testi HTML/XML sono mostrati come testo; per file lunghi l'anteprima è limitata e il download conserva l'originale completo. Il blocco della Vault chiude la Ricerca e richiede un nuovo sblocco prima di riutilizzarla.
+
+Riesaminato il catalogo delle trenta pagine per la 1.2.261: questi interventi mantengono i target dei walkthrough e i comandi esistenti. La richiesta della Master Password al cambio pagina resta quella del contenimento multipagina, in attesa della shell persistente.
+
+## Sblocco e navigazione tra pagine
+
+Nella versione distribuita attestata il 06/11/2026 la Vault si sblocca per la pagina aperta. Cambiando pagina o ricaricando può quindi essere richiesta nuovamente la Master Password, oppure la verifica biometrica sui dispositivi già configurati e compatibili. La password dell'account e la Master Password restano distinte. Il messaggio «Verifica accesso in corso…» indica il controllo iniziale della sessione, durante il quale il contenuto privato rimane nascosto. Per la versione osservata e i limiti ancora aperti consultare [STATO](../progetto/STATO.md#stato-corrente).
 
 ## Consultare l'Archivio portatile
 
@@ -24,7 +30,7 @@ Dopo il primo accesso la Home propone di aprire le Impostazioni oppure esplorare
 
 ## Documenti personali e relative Scadenze
 
-In **Profilo → Documenti**, salva prima il Documento con una data di scadenza valida. Se non esiste ancora il collegamento, premi **Configura scadenza**: l’editor riepiloga intestatario, tipo, numero, ente di rilascio e Data di scadenza senza chiederti di sceglierli di nuovo. In italiano la data appare `GG/MM/AAAA`; per cambiarla devi modificare il Documento nel Profilo. Puoi personalizzare il testo proposto per email e notifica, impostare preavviso, frequenza e nota, gestire gli allegati, aggiungere i destinatari e scegliere separatamente per ciascuno Email, Push e **Può gestire**. Dopo il salvataggio il pulsante diventa **Apri scadenza del documento**.
+In **Profilo → Documenti**, salva prima il Documento con una data di scadenza valida. Se non esiste ancora il collegamento, premi **Configura scadenza**: l’editor riepiloga intestatario, tipo, numero, ente di rilascio e Data di scadenza senza chiederti di sceglierli di nuovo. In italiano la data appare `GG/MM/AAAA`; puoi modificarla dal Documento nel Profilo o dall’editor della Scadenza collegata. Il salvataggio dalla Scadenza aggiorna transazionalmente anche la data del Documento. Puoi personalizzare il testo proposto per email e notifica, impostare preavviso, frequenza e nota, gestire gli allegati, aggiungere i destinatari e scegliere separatamente per ciascuno Email, Push e **Può gestire**. Dopo il salvataggio il pulsante diventa **Apri scadenza del documento**.
 
 Su iPhone le notifiche Push richiedono l’app aggiunta alla schermata Home. In **Impostazioni → Notifiche scadenze**, attiva l’interruttore e usa **Invia notifica di prova su questo dispositivo**. Se Firebase comunica che la vecchia registrazione del telefono non è più valida, l’app la sostituisce conservando le preferenze e ritenta una sola volta; se anche il secondo tentativo non riesce, verifica connessione e autorizzazione alle notifiche prima di riprovare.
 

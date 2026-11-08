@@ -135,7 +135,7 @@ assert.match(controllerSource, /archiveAccount\(user\.uid, target\)/);
 assert.match(controllerSource, /if \(!await showConfirmModal\(t\('confirm_archive_title'\), archiveConfirmMessage\(target, t\)\)\) return false/);
 assert.doesNotMatch(controllerSource, /mustConfirm|requireConfirmation/);
 assert.doesNotMatch(controllerSource, /conversation\.executeIntent\(intent, query\)/);
-assert.match(controllerSource, /onAsk: query => conversation\.ask\(query\)/);
+assert.match(controllerSource, /onAsk: async query => \{\s*assertDialog\(\);\s*const answer = await conversation\.ask\(query\);\s*assertDialog\(\);/);
 assert.doesNotMatch(controllerSource, /local-ai|native-ai2|onExplain|Codex AI\.2/);
 assert.match(guideSource, /getElementById\('footer-center-actions'\)/);
 assert.match(guideSource, /documentation-button-footer/);
