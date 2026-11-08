@@ -2,6 +2,8 @@
 
 ## Integrazione del collaudo allegati — 08/11/2026
 
+Esecuzione registrata: PR #273 integrata in `70b9618c`, run Hosting #1010 riuscita dopo l'approvazione personale di Diego; tutti i 324 file online e il completamento dei download sono verificati, con parere conclusivo consultivo di Claude. Le due fixture autorizzate e i relativi DPAPI sono eliminate. Rimane aperta la prova condivisa bloccata dall'attestazione: la cornice resta sospesa e nessun altro utente o dato reale viene coinvolto. La PR preparatoria #271 non è unita né pubblicata. Le ricevute finali vengono integrate con una PR soltanto documentale, senza ulteriore deploy.
+
 Diego approva personalmente la pubblicazione Hosting della 1.2.263 e autorizza due nuovi utenti sintetici dedicati, con nuove Vault e DPAPI separati, da eliminare al termine delle prove. Sono esclusi QA2, dati e Vault esistenti; email e push restano spenti. Il test produttivo rileva un difetto di completamento dei download grandi, che viene corretto nel medesimo perimetro con un ramo separato e candidata 1.2.264: test dei byte effettivi, revisione indipendente, check obbligatori e nuovo rilascio solo Hosting soggetto all'approvazione personale. Nessun workflow, Rules o backend viene modificato. La distinta prova tra i due utenti resta bloccata dall'attestazione del secondo partecipante; nessun bypass e nessuna attivazione della cornice. [Evidenze](../evidenze/COLLAUDI.md#attachment-download-followup-1-2-264).
 
 <a id="vault-frame-prerequisites-2026-11-08"></a>

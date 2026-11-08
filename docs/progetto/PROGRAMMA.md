@@ -2,6 +2,8 @@
 
 ## Prerequisito della continuità Vault — 08/11/2026
 
+Aggiornamento finale del lotto: **1.2.264 pubblicata e verificata**, correzione del download grande provata sui moduli realmente online, parere conclusivo di Claude registrato nei [COLLAUDI](../evidenze/COLLAUDI.md#attachment-download-followup-1-2-264). Il criterio di condivisione completo resta aperto perché il browser del secondo partecipante non fornisce l'attestazione richiesta. Prima di riprendere la cornice servono una prova a due identità con Auth/App Check reali e la ricevuta del suo esito, senza indebolire i controlli. La preparazione 2FA #271 resta separata, da non unire o pubblicare; un suo futuro rilascio richiede un incarico CI specifico. Le due fixture di questo tentativo sono eliminate.
+
 Il nuovo prototipo di cornice per Diego segue un distinto rilascio preparatorio di sicurezza: prima pubblicazione tramite CI, verifica indipendente e ricevuta dedicata nei COLLAUDI, poi ripresa del prototipo. La correzione upload della 1.2.262 non chiude quel prerequisito. Questa precisazione aggiorna l'ordine dei prossimi lotti rispetto all'elenco del 07/11, senza riaprire i rilasci già verificati. Il mandato e i limiti correnti sono mantenuti soltanto in [INCARICO_CORRENTE](INCARICO_CORRENTE.md#vault-frame-prerequisites-2026-11-08).
 
 <a id="chiusura-e-priorita-2026-11-07"></a>
