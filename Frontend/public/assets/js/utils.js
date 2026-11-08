@@ -64,14 +64,27 @@ export function nextSharingCycle(record) {
   return cycle + 1;
 }
 
-/**
- * M7-R7C-1 — identità dell'invito per ciclo. Nel ciclo legacy (0) resta l'ID
- * storico `accountId_key`, così le condivisioni non ancora archiviate non
- * cambiano; dal primo ciclo successivo diventa `accountId_key_c{n}` e l'invito
- * precedente non viene sovrascritto.
- */
-export function inviteIdForGuest(accountId, guestKey, cycle) {
-  const suffix = Number.isSafeInteger(cycle) && cycle > 0 ? `_c${cycle}` : '';
-  return `${accountId}_${guestKey}${suffix}`;
+/** Scope v2: fixed-width component digests prevent ambiguous resource tuples. */
+export async function inviteScopeForAccount(ownerId, companyId, accountId) {
+  if (typeof ownerId !== 'string' || !ownerId || typeof companyId !== 'string' ||
+      typeof accountId !== 'string' || !accountId) throw new Error('INVITE_SCOPE_INVALID');
+  const sha256 = async value => Array.from(new Uint8Array(await crypto.subtle.digest(
+    'SHA-256', new TextEncoder().encode(value))), byte => byte.toString(16).padStart(2, '0')).join('');
+  return sha256((await Promise.all([ownerId, companyId, accountId].map(sha256))).join(''));
 }
 
+/** New invitations always use an owner and resource scoped namespace, including cycle zero. */
+export function inviteIdForGuest(scope, guestKey, cycle) {
+  if (!/^[a-f0-9]{64}$/.test(scope) || !/^[a-z0-9_]+$/.test(guestKey) ||
+      !Number.isSafeInteger(cycle) || cycle < 0) throw new Error('INVITE_ID_INVALID');
+  return `v2_${scope}_${guestKey}_c${cycle}`;
+}
+
+/** Revalidate discovered records before mutating them; never probe global legacy IDs. */
+export function inviteMatchesAccount(invite, ownerId, companyId, accountId, cycle) {
+  const inviteCycle = invite?.cycle === undefined ? 0 : invite.cycle;
+  return invite?.ownerId === ownerId && invite.accountId === accountId &&
+    (invite.aziendaId === undefined || invite.aziendaId === null ? '' : invite.aziendaId) === companyId &&
+    Number.isSafeInteger(inviteCycle) && inviteCycle >= 0 &&
+    (cycle === undefined || inviteCycle === cycle);
+}

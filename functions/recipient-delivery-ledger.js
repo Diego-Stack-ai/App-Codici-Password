@@ -2,6 +2,7 @@
 
 const crypto = require("node:crypto");
 const calendar = require("./deadline-calendar");
+const providerBudget = require("./notification-provider-budget");
 const COLLECTION = "recipientDeliveryLedger";
 const RETENTION_MS = 30 * 86400000;
 const LEASE_MS = 5 * 60000;
@@ -30,20 +31,28 @@ async function deliver({db, identity, frequency = 7, forceImmediate = false,
     const snap = await tx.get(ref), time = now();
     const prior = snap.exists ? snap.data() : {};
     const state = Number(prior.expiresAt || 0) > time ? prior : {};
-    if (state.state === "claimed" && state.leaseUntil > time) return false;
+    if (state.state === "claimed" && state.leaseUntil > time) return {status: "skipped"};
     const today = calendar.day(time), due = calendar.day(identity.dueDate);
     // Conservative transition from the legacy sender. A global marker does not
     // prove individual delivery; use it only as a cadence floor when no live
     // per-recipient record exists. Never import it as a successful delivery.
     const last = Number.isFinite(state.lastSentAt) ? calendar.day(state.lastSentAt) :
       Object.keys(state).length ? null : calendar.day(legacyLastSentAt);
-    if (last && (last === today || (!forceImmediate && due !== today && calendar.distance(last, today) < interval))) return false;
+    if (last && (last === today || (!forceImmediate && due !== today && calendar.distance(last, today) < interval))) return {status: "skipped"};
+    if (identity.channel === "email") {
+      // Charge each possible SMTP attempt, including uncertain retries. Cadence
+      // exemptions never bypass the shared provider budget. Admission and the
+      // delivery claim commit atomically, without persisting rejected new IDs.
+      const admission = await providerBudget.reserve({tx, db, ownerId: identity.ownerUid,
+        recipientEmail: identity.recipient, channel: "email", time});
+      if (admission.status !== "admitted") return admission;
+    }
     tx.set(ref, {state: "claimed", attemptToken: token, claimedAt: time,
       leaseUntil: time + LEASE_MS, lastSentAt: state.lastSentAt ?? null,
       expiresAt: time + RETENTION_MS});
-    return true;
+    return {status: "claimed"};
   });
-  if (!claim) return {status: "skipped"};
+  if (claim.status !== "claimed") return claim;
   const finish = async status => db.runTransaction(async tx => {
     const snap = await tx.get(ref);
     if (!snap.exists || snap.data().attemptToken !== token) return false;

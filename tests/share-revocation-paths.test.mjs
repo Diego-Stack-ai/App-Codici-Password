@@ -100,6 +100,8 @@ test('utils: il ciclo legacy è 0 e i valori malformati sono invalidi', async ()
   assert.equal(helpers.nextSharingCycle({}), 1);
   assert.equal(helpers.nextSharingCycle({sharingCycle: Number.MAX_SAFE_INTEGER}), null, 'nessun overflow');
   assert.equal(helpers.nextSharingCycle({sharingCycle: -1}), null);
-  assert.equal(helpers.inviteIdForGuest('account', 'guest_key', 0), 'account_guest_key', 'ciclo legacy: ID storico');
-  assert.equal(helpers.inviteIdForGuest('account', 'guest_key', 3), 'account_guest_key_c3');
+  const scope = await helpers.inviteScopeForAccount('owner', '', 'account');
+  assert.equal(helpers.inviteIdForGuest(scope, 'guest_key', 0), `v2_${scope}_guest_key_c0`);
+  assert.equal(helpers.inviteIdForGuest(scope, 'guest_key', 3), `v2_${scope}_guest_key_c3`);
+  assert.throws(() => helpers.inviteIdForGuest('account', 'guest_key', 0), /INVITE_ID_INVALID/);
 });

@@ -4,6 +4,7 @@ import {webcrypto} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {dirname, resolve} from 'node:path';
+import {runInNewContext} from 'node:vm';
 import {
     buildPortableProjections, buildProjectionTables, iteratePortableProjectionEntries,
     PORTABLE_PROJECTION_FORMAT, sha256Base64
@@ -118,6 +119,100 @@ function readStoredZip(bytes) {
     return entries;
 }
 
+function previewRuntime(streamFixture, overrides = {}) {
+    const bindings = new Map();
+    const script = buildPortableViewerHtml().match(/<script>([\s\S]*?)<\/script>/)[1];
+    return runInNewContext(`${script}\nstreamEntry=globalThis.streamFixture;({canPreview,previewElement,readTextPreview,temporaryPreviewFile,releasePreviews});`, {
+        TextEncoder, TextDecoder, crypto: webcrypto, streamFixture,
+        navigator: {}, addEventListener() {},
+        document: {
+            getElementById(id) { if (!bindings.has(id)) bindings.set(id, {}); return bindings.get(id); },
+            querySelectorAll() { return []; }
+        }, ...overrides
+    });
+}
+
+test('il confine condiviso di anteprima tratta i MIME di testo come contenuto passivo', () => {
+    const runtime = previewRuntime(async () => {});
+    for (const type of ['text/html', ' Text/XML ; charset=utf-8', 'image/svg+xml', 'image/png', 'video/mp4', 'audio/ogg', 'application/pdf']) {
+        assert.equal(runtime.canPreview({type}), true, type);
+    }
+    for (const type of ['application/xhtml+xml', 'application/xml', 'application/octet-stream', 'application/pdfx']) {
+        assert.equal(runtime.canPreview({type}), false, type);
+        assert.throws(() => runtime.previewElement({type}, 'blob:synthetic', {}), /PREVIEW_UNSUPPORTED/);
+    }
+    assert.throws(() => runtime.previewElement({type: 'text/html'}, 'blob:synthetic', {}), /PREVIEW_UNSUPPORTED/);
+});
+
+test('i contesti multimediali restano dedicati e il documento incorporato accetta soltanto PDF', () => {
+    const node = tag => ({tagName: tag.toUpperCase(), append() {}, setAttribute() {}});
+    const runtime = previewRuntime(async () => {}, {document: {getElementById: () => ({}), createElement: node}});
+    for (const [type, tag] of [['image/svg+xml', 'IMG'], ['audio/ogg', 'AUDIO'], ['video/mp4', 'VIDEO'], [' Application/PDF ; version=1.7', 'OBJECT']]) {
+        let rendered;
+        runtime.previewElement({type, name: 'sintetico'}, 'blob:synthetic', {replaceChildren(value) { rendered = value; }}, () => false);
+        assert.equal(rendered.tagName, tag);
+        assert.equal(rendered.data || rendered.src, 'blob:synthetic');
+        if (tag === 'OBJECT') assert.equal(rendered.type, 'application/pdf');
+        if (['AUDIO', 'VIDEO'].includes(tag)) assert.equal(rendered.controls, true);
+        assert.doesNotThrow(() => rendered.onerror(), 'Gli errori tardivi di anteprime superate non cambiano il documento');
+    }
+});
+
+test('la pulizia rimuove il temporaneo OPFS anche quando una preparazione viene superata', async () => {
+    const removed = [], writes = [], cleared = [];
+    let current = true, aborted = 0;
+    const directory = {
+        async getFileHandle() { return {
+            async createWritable() { return {async write(bytes) { writes.push([...bytes]); }, async close() {}, async abort() { aborted++; }}; },
+            async getFile() { return new Blob(['sintetico']); }
+        }; },
+        async removeEntry(name) { removed.push(name); }
+    };
+    const runtime = previewRuntime(async (entry, receive) => { await receive(new Uint8Array([1, 2])); }, {
+        navigator: {storage: {async getDirectory() { return {async getDirectoryHandle() { return directory; }, async removeEntry() {}}; }}},
+        URL: {revokeObjectURL() {}},
+        document: {getElementById: () => ({}), querySelectorAll: () => [{replaceChildren() { cleared.push(true); }, classList: {add() {}}}]}
+    });
+    await runtime.temporaryPreviewFile({size: 2}, () => current);
+    assert.equal(writes.length, 1);
+    await runtime.releasePreviews();
+    assert.equal(removed.length, 1);
+    assert.equal(cleared.length, 1);
+    current = false;
+    await assert.rejects(() => runtime.temporaryPreviewFile({size: 2}, () => current), /PREVIEW_CANCELLED/);
+    assert.equal(removed.length, 2);
+    assert.equal(aborted, 1);
+});
+
+test('anteprima testo limitata, UTF-8 progressivo e verifica fino alla fine prima della visualizzazione', async () => {
+    const chunks = [new Uint8Array([0xe2]), new Uint8Array([0x82, 0xac]), new Uint8Array(300000).fill(0x61)];
+    let visited = 0;
+    const runtime = previewRuntime(async (entry, receive) => {
+        for (const chunk of chunks) { visited++; await receive(chunk); }
+        visited++;
+    });
+    const preview = await runtime.readTextPreview({size: 300003}, () => true);
+    assert.ok(preview.text.startsWith('€a'));
+    assert.ok(preview.text.length <= 256 * 1024);
+    assert.equal(preview.truncated, true);
+    assert.equal(visited, 4, 'La lettura autentica anche i chunk oltre il prefisso visualizzato');
+
+    const short = previewRuntime(async (entry, receive) => { await receive(new TextEncoder().encode('<script>ostile()</script>')); });
+    assert.equal((await short.readTextPreview({size: 26}, () => true)).text, '<script>ostile()</script>');
+    const corrupt = previewRuntime(async (entry, receive) => { await receive(chunks[2]); throw Error('NOT_FOUND'); });
+    await assert.rejects(() => corrupt.readTextPreview({size: 300000}, () => true), /NOT_FOUND/);
+    await assert.rejects(() => runtime.readTextPreview({size: 300003}, () => false), /PREVIEW_CANCELLED/);
+    const reusableChunk = new Uint8Array(64 * 1024).fill(0x61);
+    let hugeChunks = 0;
+    const huge = previewRuntime(async (entry, receive) => {
+        for (let index = 0; index < 512; index++) { await receive(reusableChunk); hugeChunks++; }
+    });
+    const bounded = await huge.readTextPreview({size: 32 * 1024 * 1024}, () => true);
+    assert.equal(bounded.text.length, 256 * 1024);
+    assert.equal(bounded.truncated, true);
+    assert.equal(hugeChunks, 512);
+});
+
 test('il visualizzatore v2 è autonomo, offline e privo di dati incorporati', () => {
     const html = buildPortableViewerHtml({title: '<Archivio>'});
     assert.match(html, /default-src 'none'/);
@@ -148,8 +243,6 @@ test('il visualizzatore presenta un catalogo umano e relega le esportazioni tecn
     assert.match(html, /Compatibilità e problemi di visualizzazione/);
     assert.match(html, /Salva tutti gli allegati/);
     assert.match(html, /Salva sul PC/);
-    assert.match(html, /video\//);
-    assert.match(html, /audio\//);
     assert.match(html, /application\/pdf/);
     assert.match(html, /TEMP_DIRECTORY='codici-password-portable-preview-v1'/);
     assert.match(html, /removeEntry\(TEMP_DIRECTORY,\{recursive:true\}\)/);

@@ -3,7 +3,7 @@
   "hashAlgorithm": "sha256",
   "hashInput": "git-blob-bytes",
   "sourceFiles": 71,
-  "targetFiles": 31,
+  "targetFiles": 34,
   "segments": [
     {
       "source": ".github/copilot-instructions.md",

@@ -1,5 +1,26 @@
 # Collaudi
 
+<a id="sicurezza-candidata-2026-11-07"></a>
+
+## Candidata locale di sicurezza — 07/11/2026
+
+Prove eseguite sul worktree isolato, senza utenti reali, invii SMTP o modifica cloud:
+
+- Rules Firestore nell'emulatore: **94/94**, nessun fallimento/skip, inclusi namespace v2, squat storico, contesti owner/azienda, creazione atomica e compatibilità legacy.
+- `npm run test:navigation`: **198/198** e audit di navigazione/pagine canoniche verdi. L'asserzione obsoleta sulla forma del delete è stata sostituita da controlli su discovery proprietario/risorsa e revoca dei soli snapshot posseduti.
+- Cache: **56/56** sui cinque file mirati, con due regressioni fallite prima della patch e controlli positivi su proprietario e destinatario offline. Il nuovo helper ha tre prove proprie ed è incluso nel gate navigazione.
+- Ricerca: **7/7** prove controller e **2/2** prove browser del DOM reale, inclusi lock, UID, nuovo sblocco, decifratura/preparazione tardive, archiviazione e continuazioni del microfono; il gate Ricerca preesistente passa **17/17**.
+- Archivio portabile: **21/21** e runner browser verde. HTML/XML passivi, XHTML senza anteprima attiva, SVG tramite immagine, PNG/PDF/WAV, testo limitato e download completo, cancellazione/supersessione e revoca degli URL. OPFS fisico oltre 16 MiB e riproduzione video su dispositivo restano da provare.
+- Budget provider: **77/77** nella suite mirata; attacco riprodotto prima della patch con 12 scadenze/12 invii allo stesso destinatario. Fixture di concorrenza transazionale, non invii reali.
+- `npm run test:functions-security`: sintassi ed ESLint verdi, **565 casi: 555 pass, 0 fail, 10 skip** di prove emulator-specifiche non attivate da questo comando. Non si deduce che siano state eseguite.
+- `npm run test:security`: audit e **45/45**. Sintassi frontend: **230 moduli**. Il bundle backend supera `node scripts/build-vault-account-backend.mjs --check`.
+
+Un primo avvio dell'emulatore confinato non ha aperto la porta loopback; il successivo avvio locale autorizzato ha eseguito le Rules. Il controllo sintattico diretto Node/CommonJS dei file browser ESM non è applicabile: il gate Babel di progetto è quello eseguito. Functions non espone uno script `npm test`; è stato usato il gate radice `test:functions-security`.
+
+Controllo documentale: **34 Markdown, 673 collegamenti, 12/12**. Il revisore della patch e il parere statico limitato di Claude non hanno lasciato altri rilievi supportati nei rispettivi perimetri. Il gate performance ha inizialmente rilevato l'incremento dei controlli di sicurezza: è documentata un'eccezione circoscritta per un modulo puro aggiuntivo (massimo 47) e per i due limiti di pagina (profilo 344 KB, form azienda 340 KB; misurati 343,3 e 339,2 KB). Il tetto generale di 338 KB e gli obiettivi runtime restano quelli precedenti.
+
+Nessuna nuova versione o pubblicazione attestata da queste prove. La navigazione multipagina con richiesta di Master Password resta da sostituire con la shell RAM.
+
 ## Pubblicazione verificata 1.2.260 — 06/11/2026
 
 Le PR #263 e #264 portano al sorgente pubblicato **`a392b9c80e006dcce50c724cad232020194500e2`**. La PR #264, la run backend **42250314439** e la run Hosting **42252368644** hanno gate verdi; quest'ultima esegue **3.126 casi: 3.116 passati, 0 falliti, 10 skip dichiarati, nessuna cancellazione**. Hardening 32/32 e documentazione 12/12 sono inclusi. Le run manuali ricontrollano credenziale storica, scansione completa, versione, manifest e SHA di master; nessun deploy diretto dal PC.

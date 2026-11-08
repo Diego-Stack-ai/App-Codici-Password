@@ -330,9 +330,11 @@ Lo stato non viene dedotto dall'assenza di campi: è un valore esplicito, versio
 
 #### 2. Doppio lettore
 
+Precisazione documentale del 07/11/2026 sul punto ambiguo della fonte conservata: l'assenza riconosciuta del nuovo documento è distinta dal fallimento della sua validazione. Il chiarimento esplicita il vincolo già applicato dal lettore e non attiva flag o migrazioni.
+
 - risolvere un descrittore opaco del record;
 - se lo stato è `dual-read` o successivo, validare schema, grant e generazione prima di decifrare;
-- in caso di documento schema 2 assente o non integro, usare il legacy senza modificarlo;
+- soltanto in caso di documento schema 2 assente e negli stati che ammettono il fallback (`legacy`, `prepared`, `dual-read`), usare il legacy senza modificarlo; un documento presente ma non integro o con formato non riconosciuto non consente fallback;
 - non fare fallback dopo un errore di autorizzazione o autenticità: eviterebbe il controllo di revoca;
 - mostrare un errore sicuro se entrambi i formati sono presenti ma divergono.
 

@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
+const accessSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/cached-account-access.js', import.meta.url), 'utf8');
+const {canReadCachedAccount} = await import('data:text/javascript;base64,' + Buffer.from(accessSource).toString('base64'));
 const messageSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/read-error-message.js', import.meta.url), 'utf8');
 const {readErrorMessage} = await import('data:text/javascript;base64,' + Buffer.from(messageSource).toString('base64'));
 const modeSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-mode-model.js', import.meta.url), 'utf8');
@@ -13,15 +15,15 @@ const tick = () => new Promise(resolve => setImmediate(resolve));
 function deferred() { let resolve; const promise = new Promise(done => { resolve = done; }); return {promise, resolve}; }
 
 function fixture({missing = false, pending = null, directPending = null, search = '?id=legacy-alias', suspended = false,
-    denied = false, networkError = false, online = true} = {}) {
+    denied = false, networkError = false, online = true, cachedAccount = null, viewer = {email: 'guest@example.test', emailVerified: true}} = {}) {
     const calls = [], footer = {children: []};
     let failNextRead = false;
     const attachmentClasses = new Set();
     const attachmentButton = {onclick: null, classList: {add: name => attachmentClasses.add(name), remove: name => attachmentClasses.delete(name)}};
     const window = {location: {search, pathname: '/dettaglio_account_privato.html', href: ''}, history: {replaceState() {}}};
-    const physical = () => ({id: 'physical-document', nomeAccount: 'Synthetic account'});
+    const physical = () => ({id: 'physical-document', nomeAccount: 'Synthetic account', ...(cachedAccount ?? {sharedWithUids: ['owner-fixture'], sharedWithEmailByUid: {'owner-fixture': 'guest@example.test'}})});
     const createElement = (tag, props = {}, children = []) => ({tag, ...props, children});
-    const context = vm.createContext({readErrorMessage, accountModeFromRecord, window, URLSearchParams, AbortController, auth: {currentUser: null}, onAuthStateChanged: () => () => {},
+    const context = vm.createContext({canReadCachedAccount, readErrorMessage, accountModeFromRecord, window, URLSearchParams, AbortController, auth: {currentUser: null}, onAuthStateChanged: () => () => {},
         navigator: {onLine: online}, console, db: {}, LOG() {}, logError: (...args) => calls.push(['error', ...args]),
         document: {getElementById: id => id === 'footer-center-actions' ? footer : id === 'btn-add-attachment' ? attachmentButton : null,
             querySelector: () => null, querySelectorAll: () => []},
@@ -70,8 +72,21 @@ function fixture({missing = false, pending = null, directPending = null, search 
     const findEdit = () => footer.children.flatMap(node => node.children || []).find(node => node.id === 'btn-edit-footer');
     return {calls, footer, window, findEdit, attachmentButton, attachmentClasses,
         failNextRead: () => { failNextRead = true; },
-        init: (uid = 'owner-fixture') => { context.auth.currentUser = {uid}; return context.initDettaglioAccountPrivato({uid}); }};
+        init: (uid = 'owner-fixture') => { context.auth.currentUser = {uid, ...viewer}; return context.initDettaglioAccountPrivato({uid}); }};
 }
+
+test('offline cache belonging to another user is never rendered without an explicit grant to the current UID', async () => {
+    const f = fixture({search: '?id=legacy-alias&ownerId=other-owner', online: false, cachedAccount: {}});
+    await f.init(); await tick();
+    assert.equal(f.calls.some(([type]) => ['attachments-init', 'sharing-init', 'mode', 'banking', 'widgets', 'credentials'].includes(type)), false);
+});
+
+test('offline legacy grant for the same email but a different UID does not authorize the viewer', async () => {
+    const f = fixture({search: '?id=legacy-alias&ownerId=other-owner', online: false,
+        cachedAccount: {sharedWithUids: ['previous-user'], sharedWithEmailByUid: {'previous-user': 'guest@example.test'}}});
+    await f.init(); await tick();
+    assert.equal(f.calls.some(([type]) => ['attachments-init', 'sharing-init', 'mode', 'banking', 'widgets', 'credentials'].includes(type)), false);
+});
 
 test('legacy resolution binds views, edit, attachments, sharing, mode and widgets to the physical ID', async () => {
     const f = fixture(); await f.init(); await tick();

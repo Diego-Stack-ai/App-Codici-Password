@@ -1,14 +1,15 @@
-import { auth, db, functions } from '../../firebase-config.js?v=1.2.260';
+import { auth, db, functions } from '../../firebase-config.js?v=1.2.261';
 import { deleteField, doc, httpsCallable, onAuthStateChanged, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createArchiveMetadata } from './archive-account-model.js';
-import { inviteIdForGuest, nextSharingCycle, sharingCycleOf } from '../../utils.js';
+import { inviteMatchesAccount, nextSharingCycle, sharingCycleOf } from '../../utils.js';
 // Riusciti per i chiamanti che caricano questo servizio con import differito
 // (budget dei moduli statici di `form_account_azienda.html`): la pagina non deve
 // aggiungere un import statico per comporre l'avviso dei destinatari.
 export { archiveRecipients, archiveConfirmMessage } from './archive-account-model.js';
 import {
     getCompany,
+    listOwnedAccountInvitesConfirmed,
     listArchivedPrivateAccounts,
     listCompanies,
     listCompanyAccounts
@@ -216,8 +217,9 @@ export async function restoreArchivedAccount(uid, account, options = {}) {
             neutralized = cycle < 1 || !canonicalUids || grantUids.length > 0 || activeEntries || staleAcceptedCount;
             const guestKeys = Object.keys(sharedWith);
             if (guestKeys.length > ARCHIVE_RECIPIENTS_LIMIT) throw invalid('ARCHIVE_RECIPIENTS_LIMIT');
+            const discoveredInvites = neutralized && guestKeys.length > 0 ? await listOwnedAccountInvitesConfirmed(uid, target.id) : [];
             const inviteRefs = neutralized
-                ? guestKeys.map(key => doc(db, 'invites', inviteIdForGuest(target.id, key, cycle)))
+                ? discoveredInvites.filter(invite => inviteMatchesAccount(invite, uid, target.context === 'privato' ? '' : target.context, target.id, cycle)).map(invite => doc(db, 'invites', invite.id))
                 : [];
             // Tutte le letture prima di ogni scrittura (vincolo di Firestore).
             const inviteSnapshots = await Promise.all(inviteRefs.map(inviteRef => transaction.get(inviteRef)));
@@ -248,7 +250,7 @@ export async function restoreArchivedAccount(uid, account, options = {}) {
             }
             transaction.update(reference, patch);
             inviteSnapshots.forEach((inviteSnapshot, index) => {
-                if (!inviteSnapshot.exists()) return;
+                if (!inviteSnapshot.exists() || !inviteMatchesAccount(inviteSnapshot.data(), uid, target.context === 'privato' ? '' : target.context, target.id, cycle)) return;
                 neutralizedInvites++;
                 transaction.update(inviteRefs[index], {sharingState: 'suspended', suspendedAt: now});
             });
@@ -314,7 +316,8 @@ export async function archiveAccount(uid, account, options = {}) {
             const sharedWith = {...(current.sharedWith || {})};
             const guestKeys = Object.keys(sharedWith);
             if (guestKeys.length > ARCHIVE_RECIPIENTS_LIMIT) throw invalid('ARCHIVE_RECIPIENTS_LIMIT');
-            const inviteRefs = guestKeys.map(key => doc(db, 'invites', inviteIdForGuest(target.id, key, cycle)));
+            const discoveredInvites = guestKeys.length > 0 ? await listOwnedAccountInvitesConfirmed(uid, target.id) : [];
+            const inviteRefs = discoveredInvites.filter(invite => inviteMatchesAccount(invite, uid, target.context === 'privato' ? '' : target.context, target.id, cycle)).map(invite => doc(db, 'invites', invite.id));
             // Tutte le letture prima di ogni scrittura (vincolo di Firestore).
             const inviteSnapshots = await Promise.all(inviteRefs.map(inviteRef => transaction.get(inviteRef)));
             check();
@@ -347,7 +350,7 @@ export async function archiveAccount(uid, account, options = {}) {
             // Gli inviti identificabili del ciclo chiuso vengono marcati, mai
             // cancellati; quelli assenti vengono saltati.
             inviteSnapshots.forEach((inviteSnapshot, index) => {
-                if (!inviteSnapshot.exists()) return;
+                if (!inviteSnapshot.exists() || !inviteMatchesAccount(inviteSnapshot.data(), uid, target.context === 'privato' ? '' : target.context, target.id, cycle)) return;
                 suspendedInvites++;
                 transaction.update(inviteRefs[index], {sharingState: 'suspended', suspendedAt});
             });

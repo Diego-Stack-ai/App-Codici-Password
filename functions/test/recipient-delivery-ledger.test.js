@@ -46,7 +46,7 @@ test("expired lease permits uncertain retry; stale completion cannot overwrite n
   assert.equal((await h.run()).status, "sent");
   release();
   assert.equal((await first).status, "uncertain");
-  assert.equal(Array.from(h.records.values())[0].state, "sent");
+  assert.equal(h.records.get(`${ledger.COLLECTION}/${ledger.deliveryId(identity)}`).state, "sent");
 });
 test("lost DB and withdrawn eligibility cannot authorize an external send", async () => {
   const h = setup();

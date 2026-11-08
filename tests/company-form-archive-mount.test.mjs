@@ -61,6 +61,7 @@ function fixture() {
         },
         httpsCallable: () => async () => ({data: {status: 'purged'}}),
         decrypt: async value => value, decryptRequiredValue: async value => value, ensureVaultKeyMaterial: async () => 'key',
+        listOwnedAccountInvitesConfirmed: async () => [],
         listArchivedPrivateAccounts: async () => [], listCompanies: async () => [],
         listCompanyAccounts: async () => [], getCompany: async () => null,
         getCompanyAccount: async (uid, companyId, accountId) => {

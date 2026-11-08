@@ -378,18 +378,38 @@ service cloud.firestore {
             request.resource.data.get('acceptanceReceipt', null) == resource.data.get('acceptanceReceipt', null));
       }
 
+      // New documents cannot occupy another owner's or another account's namespace.
+      // Fixed-width component hashes bind private/company resources without delimiter ambiguity.
+      function isBoundInviteCreate() {
+        let data = request.resource.data;
+        let companyId = data.get('aziendaId', '');
+        let accountId = data.get('accountId', '');
+        let guestKey = data.get('recipientEmail', '').lower().replace('[^a-z0-9]', '_');
+        let scope = hashing.sha256(
+          hashing.sha256(request.auth.uid).toHexString().lower() +
+          hashing.sha256(companyId).toHexString().lower() +
+          hashing.sha256(accountId).toHexString().lower()
+        ).toHexString().lower();
+        let accountPath = companyId == ''
+          ? /databases/$(database)/documents/users/$(request.auth.uid)/accounts/$(accountId)
+          : /databases/$(database)/documents/users/$(request.auth.uid)/aziende/$(companyId)/accounts/$(accountId);
+        return companyId is string && accountId is string && accountId.size() > 0 &&
+          data.get('inviteId', '') == inviteId &&
+          inviteId == 'v2_' + scope + '_' + guestKey + '_c' + string(data.get('cycle', 0)) &&
+          existsAfter(accountPath);
+      }
+
       allow get, list: if isRecoveryUnlocked(resource.data.get('ownerId', '')) &&
         isRecoveryUnlocked(request.auth.uid) && (isInviteOwner() || isRecipient());
       allow create: if hasVerifiedEmail() && isGlobalPurgeUnlocked(request.resource.data.get('ownerId', '')) &&
+        isBoundInviteCreate() &&
         request.resource.data.keys().hasOnly([
           'inviteId', 'recipientEmail', 'accountId', 'accountName',
           'ownerId', 'senderId', 'senderEmail', 'aziendaId', 'type',
           'status', 'createdAt', 'notifyPush', 'notifyEmail', 'cycle',
-          // M7-AUDIT-5R: marcatore opaco dell'istanza, scritto dai client di
-          // M7-AUDIT-5C. **Facoltativo**: un client in cache che non lo invia
-          // continua a creare inviti (finestra legacy dichiarata); se presente
-          // deve avere forma valida, altrimenti l'id del registro non sarebbe
-          // derivabile in modo univoco.
+          // The opaque instance marker remains optional in a v2 payload.
+          // Legacy document IDs cannot be created, including by cached clients.
+          // When present the marker must be valid and unambiguous.
           'auditRef'
         ]) &&
         request.resource.data.get('ownerId', '') == request.auth.uid &&
@@ -401,7 +421,7 @@ service cloud.firestore {
         request.resource.data.get('notifyEmail', false) is bool &&
         request.resource.data.get('status', '') == 'pending' &&
         // M7-R7C-1: `cycle` è l'unico campo nuovo ammesso e deve essere un intero
-        // sicuro non negativo. L'assenza resta valida (creazioni legacy = ciclo 0).
+        // sicuro non negativo. L'assenza vale 0 nel namespace v2.
         request.resource.data.get('cycle', 0) is int &&
         request.resource.data.get('cycle', 0) >= 0 &&
         request.resource.data.get('cycle', 0) <= 9007199254740991 &&

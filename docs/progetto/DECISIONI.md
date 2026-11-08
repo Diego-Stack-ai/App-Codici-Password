@@ -1,5 +1,11 @@
 # Decisioni
 
+## 07/11/2026 — riconciliazione del manifest Markdown
+
+Diego risponde «procedi» alla proposta di correggere i disallineamenti documentali e censire **34 Markdown**: i 32 già approvati e i due file tecnici `AGENTS.md` e `.agents/skills/token-saver/SKILL.md`, creati dal bootstrap token-saver richiesto. I documenti precedenti conservano funzione e autorità; le due istruzioni tecniche sono sottoposte agli stessi controlli. Nessun file o cartella viene escluso per ottenere il passaggio dell'audit. La mappa delle 71 fonti storiche conserva baseline, segmenti e impronte originali; il numero dei documenti ammessi viene riallineato al manifest, senza inventare provenienze per i file nuovi.
+
+L'ordine riguarda la manutenzione documentale locale e le relative verifiche. Il perimetro esecutivo è nell'[incarico corrente](INCARICO_CORRENTE.md#revisione-documentale-2026-11-07); le evidenze della revisione sono in [AUDIT](../evidenze/AUDIT.md#revisione-documentale-2026-11-07).
+
 ## 06/11/2026 — recovery completo con Recovery Key
 
 Diego risponde «Sì, recupero completo con Recovery Key» alla domanda che esplicita il recupero della Vault tramite file e Recovery Key anche senza la vecchia Master Password, scegliendone poi una nuova. Chi possiede entrambi può quindi recuperare il materiale della Vault. Il nuovo profilo completo conserva questo materiale soltanto nella capsula cifrata del file e nella RAM client; non lo invia in chiaro al server né lo inserisce nell'archivio portabile o nei piani di ripresa.

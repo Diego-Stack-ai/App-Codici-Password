@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
+const accessSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/cached-account-access.js', import.meta.url), 'utf8');
+const {canReadCachedAccount} = await import('data:text/javascript;base64,' + Buffer.from(accessSource).toString('base64'));
 
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js', import.meta.url), 'utf8');
 // M7-R7C-5: la pagina usa gli helper di ciclo/invito di `utils.js` e il messaggio
@@ -13,7 +15,7 @@ const {readErrorMessage} = await import('data:text/javascript;base64,' + Buffer.
 const modeSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-mode-model.js', import.meta.url), 'utf8');
 const {accountModeFromRecord} = await import('data:text/javascript;base64,' + Buffer.from(modeSource).toString('base64'));
 const deferred = () => { let resolve; const promise = new Promise(yes => { resolve = yes; }); return {promise, resolve}; };
-function fixture({suspended = false, denied = false, networkError = false} = {}) {
+function fixture({suspended = false, denied = false, networkError = false, online = true, viewer = {email: 'guest@example.test', emailVerified: true}} = {}) {
     const writes = [], reads = [], errors = [], modules = [], classes = new Set(), suspendedReads = [];
     const footer = {children: [], classList: {
         add: value => classes.add(value),
@@ -28,8 +30,8 @@ function fixture({suspended = false, denied = false, networkError = false} = {})
     };
     let read = async () => ({nomeAccount: 'Synthetic company account'});
     const window = {location: {search: '?id=account&aziendaId=company', pathname: '/dettaglio_account_azienda.html', href: ''}, history: {replaceState() {}}};
-    const context = vm.createContext({URLSearchParams, AbortController, auth:{currentUser:null}, onAuthStateChanged:()=>()=>{}, window, navigator: {onLine: true}, console,
-        readErrorMessage, accountModeFromRecord, inviteIdForGuest, sanitizeEmail, sharingCycleOf,
+    const context = vm.createContext({URLSearchParams, AbortController, auth:{currentUser:null}, onAuthStateChanged:()=>()=>{}, window, navigator: {onLine: online}, console,
+        canReadCachedAccount, readErrorMessage, accountModeFromRecord, inviteIdForGuest, sanitizeEmail, sharingCycleOf,
         document: {getElementById: id => id === 'footer-center-actions' ? footer : find(footer.children, id),
             querySelector: () => null, querySelectorAll: () => []},
         db: {}, doc: (_db, ...path) => path.join('/'), increment: value => ({increment: value}),
@@ -59,8 +61,24 @@ function fixture({suspended = false, denied = false, networkError = false} = {})
     vm.runInContext(source.replace(/^import[\s\S]*?;\s*$/gm, '').replace('export async function', 'async function').replace(/\bimport\(/g, 'loadModule('), context);
     return {writes, reads, errors, modules, footer, classes, window, suspendedReads,
         button: () => find(footer.children, 'btn-edit-footer'),
-        read: value => { read = value; }, init: uid => {context.auth.currentUser={uid};return context.initDettaglioAccountAzienda({uid})}};
+        read: value => { read = value; }, init: uid => {context.auth.currentUser={uid, ...viewer};return context.initDettaglioAccountAzienda({uid})}};
 }
+
+test('offline company cache denies a user with no explicit UID/email grant', async () => {
+    const f = fixture({online: false}); f.window.location.search += '&ownerId=owner';
+    await f.init('guest');
+    assert.equal(f.modules.length, 0);
+    assert.equal(f.writes.length, 0);
+});
+
+test('offline company recipient keeps read-only consultation with a matching verified binding', async () => {
+    const f = fixture({online: false}); f.window.location.search += '&ownerId=owner';
+    f.read(async () => ({nomeAccount: 'Shared account', sharedWithUids: ['guest'],
+        sharedWithEmailByUid: {guest: 'guest@example.test'}, isArchived: false}));
+    await f.init('guest');
+    assert.ok(f.modules.length > 0);
+    assert.equal(f.writes.length, 0);
+});
 
 test('guest never gets an edit footer, including while fetch is pending, and submits no view write', async () => {
     const f = fixture(), pending = deferred();
@@ -80,7 +98,7 @@ test('guest deep link to a suspended company account renders nothing even with a
     f.window.location.search += '&ownerId=owner';
     f.read(async () => ({nomeAccount: 'Shared synthetic account', username: 'cached-user'}));
     await f.init('guest');
-    assert.deepEqual(f.suspendedReads, [['owner', 'account', undefined, 'company']]);
+    assert.deepEqual(f.suspendedReads, [['owner', 'account', 'guest@example.test', 'company']]);
     assert.equal(f.reads.length, 0, 'nessuna lettura dell\'Account');
     assert.equal(f.modules.length, 0, 'nessun modulo di contenuto inizializzato');
     assert.equal(f.button(), undefined);

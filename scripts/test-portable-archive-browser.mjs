@@ -13,6 +13,43 @@ import {
 const require = createRequire(import.meta.url);
 const {chromium} = require('playwright');
 const password = 'Fiume!Quarzo-83#Luna';
+const hostileHtml = '<!doctype html><html><body><p>HTML sintetico da mostrare come testo</p><script>parent.postMessage({portableAttachmentExecuted:true},"*");</script></body></html>';
+const hostileSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2" onload="parent.postMessage({portableAttachmentExecuted:true},\'*\')"><rect width="2" height="2" fill="blue"/></svg>';
+const largeText = 'Testo sintetico leggibile\n'.repeat(14000) + 'FINE ORIGINALE';
+
+function syntheticPdf() {
+    const objects = ['<</Type /Catalog /Pages 2 0 R>>', '<</Type /Pages /Kids [3 0 R] /Count 1>>',
+        '<</Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Contents 4 0 R>>', '<</Length 0>>\nstream\n\nendstream'];
+    let content = '%PDF-1.4\n';
+    const offsets = [0];
+    for (const [index, object] of objects.entries()) {
+        offsets.push(Buffer.byteLength(content)); content += `${index + 1} 0 obj\n${object}\nendobj\n`;
+    }
+    const xref = Buffer.byteLength(content);
+    content += `xref\n0 5\n0000000000 65535 f \n${offsets.slice(1).map(offset => `${String(offset).padStart(10, '0')} 00000 n \n`).join('')}`;
+    return Buffer.from(`${content}trailer\n<</Size 5 /Root 1 0 R>>\nstartxref\n${xref}\n%%EOF\n`);
+}
+
+function syntheticWave() {
+    const bytes = Buffer.alloc(44 + 800);
+    bytes.write('RIFF'); bytes.writeUInt32LE(bytes.length - 8, 4); bytes.write('WAVEfmt ', 8);
+    bytes.writeUInt32LE(16, 16); bytes.writeUInt16LE(1, 20); bytes.writeUInt16LE(1, 22);
+    bytes.writeUInt32LE(8000, 24); bytes.writeUInt32LE(8000, 28); bytes.writeUInt16LE(1, 32);
+    bytes.writeUInt16LE(8, 34); bytes.write('data', 36); bytes.writeUInt32LE(800, 40); bytes.fill(128, 44);
+    return bytes;
+}
+
+const previewFixtures = [
+    {id: 'html', name: 'documento.html', type: 'text/html', bytes: Buffer.from(hostileHtml)},
+    {id: 'svg', name: 'immagine.svg', type: 'image/svg+xml', bytes: Buffer.from(hostileSvg)},
+    {id: 'xhtml', name: 'documento.xhtml', type: 'application/xhtml+xml', bytes: Buffer.from(hostileHtml)},
+    {id: 'large-text', name: 'testo-grande.txt', type: 'text/plain', bytes: Buffer.from(largeText)},
+    {id: 'xml', name: 'documento.xml', type: ' Text/XML ; charset=utf-8', bytes: Buffer.from(hostileHtml)},
+    {id: 'pdf', name: 'documento.pdf', type: ' Application/PDF ; version=1.4', bytes: syntheticPdf()},
+    {id: 'fake-pdf', name: 'html-rinominato.pdf', type: 'application/pdf', bytes: Buffer.from(hostileHtml)},
+    {id: 'audio', name: 'silenzio.wav', type: 'audio/wav', bytes: syntheticWave()},
+    {id: 'png', name: 'immagine.png', type: 'image/png', bytes: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=', 'base64')}
+];
 
 function memorySink() {
     const parts = [];
@@ -55,7 +92,11 @@ async function createArchive(records = [{
         new TextEncoder().encode('title,utente\r\nAccount sintetico,utente-sintetico\r\n'));
     await writer.addEntry({id: 'attachment:fixture', kind: 'attachment', name: 'fixture.txt', type: 'text/plain',
         recordKeys: ['private-account:::fixture']}, new TextEncoder().encode('allegato sintetico senza dati reali'));
-    await writer.close({counts: {records: records.length, attachments: 1, projections: 2}});
+    for (const fixture of previewFixtures) {
+        await writer.addEntry({id: `attachment:${fixture.id}`, kind: 'attachment', name: fixture.name, type: fixture.type,
+            recordKeys: ['private-account:::fixture']}, fixture.bytes);
+    }
+    await writer.close({counts: {records: records.length, attachments: 1 + previewFixtures.length, projections: 2}});
     return sink.bytes();
 }
 
@@ -129,6 +170,14 @@ try {
     const page = await context.newPage();
     await page.addInitScript(() => {
         window.__portableDownloads = [];
+        addEventListener('message', event => { if (event.data?.portableAttachmentExecuted) window.__portableAttachmentExecuted = true; });
+        window.__portableObjectUrls = [];
+        window.__portableRevokedUrls = [];
+        const createObjectURL = URL.createObjectURL.bind(URL), revokeObjectURL = URL.revokeObjectURL.bind(URL);
+        URL.createObjectURL = source => {
+            const url = createObjectURL(source); window.__portableObjectUrls.push(url); return url;
+        };
+        URL.revokeObjectURL = url => { window.__portableRevokedUrls.push(url); revokeObjectURL(url); };
         Object.defineProperty(window, 'showSaveFilePicker', {
             configurable: true,
             value: async ({suggestedName}) => ({
@@ -194,8 +243,56 @@ try {
     const attachment = (await downloadBytes(page, 'button', 'Salva sul PC fixture.txt')).toString('utf8');
     assert.equal(attachment, 'allegato sintetico senza dati reali');
 
+    await page.getByRole('button', {name: 'Visualizza documento.html', exact: true}).click();
+    await page.waitForFunction(() => window.__portableAttachmentExecuted || document.querySelector('.preview pre'));
+    assert.equal(await page.evaluate(() => Boolean(window.__portableAttachmentExecuted)), false,
+        'Il documento HTML allegato non deve eseguire codice nel visualizzatore');
+    assert.equal(await page.locator('.preview pre').textContent(), hostileHtml);
+    assert.equal(await page.locator('.preview object, .preview iframe').count(), 0);
+    assert.equal((await downloadBytes(page, 'button', 'Salva sul PC documento.html')).toString('utf8'), hostileHtml);
+    assert.equal(await page.getByRole('button', {name: 'Visualizza documento.xhtml', exact: true}).count(), 0);
+    assert.equal((await downloadBytes(page, 'button', 'Salva sul PC documento.xhtml')).toString('utf8'), hostileHtml);
+    await page.getByRole('button', {name: 'Visualizza documento.xml', exact: true}).click();
+    await page.locator('.preview pre').waitFor();
+    assert.equal(await page.locator('.preview pre').textContent(), hostileHtml);
+
+    await page.getByRole('button', {name: 'Visualizza testo-grande.txt', exact: true}).click();
+    await page.getByText(/Anteprima limitata ai primi/).waitFor();
+    const textPreview = await page.locator('.preview pre').textContent();
+    assert.ok(textPreview.length <= 256 * 1024);
+    assert.ok(largeText.startsWith(textPreview));
+    assert.ok(!textPreview.includes('FINE ORIGINALE'));
+    assert.equal((await downloadBytes(page, 'button', 'Salva sul PC testo-grande.txt')).toString('utf8'), largeText);
+
+    for (const name of ['immagine.svg', 'immagine.png']) {
+        await page.getByRole('button', {name: `Visualizza ${name}`, exact: true}).click();
+        await page.locator('.preview img').waitFor();
+        await page.waitForFunction(() => document.querySelector('.preview img')?.complete);
+        assert.ok(await page.locator('.preview img').evaluate(image => image.naturalWidth > 0));
+        assert.equal(await page.evaluate(() => Boolean(window.__portableAttachmentExecuted)), false);
+    }
+    await page.getByRole('button', {name: 'Riproduci silenzio.wav', exact: true}).click();
+    await page.locator('.preview audio').waitFor();
+    await page.waitForFunction(() => document.querySelector('.preview audio')?.readyState >= 1);
+    assert.ok(await page.locator('.preview audio').evaluate(audio => audio.duration > 0));
+    for (const name of ['documento.pdf', 'html-rinominato.pdf']) {
+        await page.getByRole('button', {name: `Visualizza ${name}`, exact: true}).click();
+        await page.locator('.preview object').waitFor();
+        assert.equal(await page.locator('.preview object').getAttribute('type'), 'application/pdf');
+        await page.waitForTimeout(150);
+        assert.equal(await page.evaluate(() => Boolean(window.__portableAttachmentExecuted)), false);
+    }
+    await page.evaluate(() => {
+        document.querySelector('[aria-label="Visualizza testo-grande.txt"]').click();
+        document.querySelector('[aria-label="Visualizza immagine.png"]').click();
+    });
+    await page.locator('.preview img').waitFor();
+    assert.equal(await page.locator('.preview pre').count(), 0);
+
     await page.getByRole('button', {name: 'Chiudi archivio', exact: true}).click();
     assert.equal(await page.locator('#unlock').isVisible(), true);
+    assert.equal(await page.locator('.preview').count(), 0);
+    assert.deepEqual(await page.evaluate(() => window.__portableObjectUrls.filter(url => !window.__portableRevokedUrls.includes(url))), []);
     await page.setViewportSize({width: 390, height: 844});
     await page.locator('#archive').setInputFiles(archivePath);
     await page.locator('#password').fill(password);
@@ -215,7 +312,7 @@ try {
     }
     assert.deepEqual(network, []);
     assert.deepEqual(errors, []);
-    console.log('Archivio portabile v2 browser: offline, tamper, trailing data, entryCount, limiti, allegati, download e viewport OK');
+    console.log('Archivio portabile v2 browser: offline, tamper, limiti, HTML/XML passivi, SVG/immagini, PDF, audio, testo limitato, download e pulizia OK');
 } finally {
     await browser?.close();
     await rm(temporary, {recursive: true, force: true});

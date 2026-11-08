@@ -1,5 +1,14 @@
 # Registro
 
+<a id="errata-documentali-2026-11-07"></a>
+
+## Errata di lettura delle fonti conservate — 07/11/2026
+
+Queste note chiariscono due residui interni ai resoconti storici sottostanti. Non aggiornano il comportamento attuale, non riaprono incarichi e non sostituiscono prove o decisioni dell'epoca; i testi originali rimangono conservati anche in Git.
+
+- **M7-T16:** vale il bilancio corretto in R1, **10 classi osservate e 4 dedotte**. I successivi richiami a «tre classi dedotte» sono residui della stesura precedente. Per T-09 è osservata `scansioni/` sotto il prefisso dell'Account purgato; la sopravvivenza al purge di prefissi arbitrari fuori dall'Account resta dedotta.
+- **DS-002C, fotografia del 17/09/2026:** il pannello di laboratorio e lo scenario browser sintetico risultano già completati nel resoconto immediatamente precedente alla lista residua «Restano aperti». La loro ripetizione in quella lista è un residuo anteriore a DS-002C. Restano distinti i limiti produttivi e fisici dichiarati nel resoconto.
+
 ## 09/10/2026 — merge PR #90, deploy e verifica salvataggio 1.2.150
 
 Unita la PR #90 in `master` (`326b83a3`) dopo i check GitHub verdi; deploy Firebase Hosting riuscito e versione `1.2.150` osservata. Il rilascio versiona anche l'import lazy del controller di salvataggio privato. Sul record sintetico di collaudo due note diverse sono state salvate consecutivamente e rilette dal server nel dettaglio. Rafforzata la regressione locale: il mock ora esegue la transazione anziché arrestarsi prima del callback e controlla i due payload distinti. Nessuna modifica a Functions, Rules o dati reali.

@@ -12,7 +12,7 @@ const ui = strip(await readFile(new URL('archivio_account.js', base), 'utf8'));
 // M7-R7C-1: il servizio usa gli helper di ciclo/invito da `utils.js`; il banco li
 // inietta nel contesto perché gli `import` vengono rimossi dai sorgenti.
 const utilsSource = await readFile(new URL('../../utils.js', base), 'utf8');
-const {inviteIdForGuest, nextSharingCycle, sharingCycleOf} = await import('data:text/javascript;base64,' + Buffer.from(utilsSource).toString('base64'));
+const {inviteMatchesAccount, nextSharingCycle, sharingCycleOf} = await import('data:text/javascript;base64,' + Buffer.from(utilsSource).toString('base64'));
 const deferred = () => { let resolve; return {promise: new Promise(done => { resolve = done; }), resolve}; };
 const tick = () => new Promise(setImmediate);
 const account = (id = 'same', context = 'privato') => ({id, context, revision: 1, nomeAccount: 'Synthetic', isArchived: true});
@@ -51,7 +51,7 @@ function fixture(withUi = false) {
     let transactionRuns = 0;
     const context = vm.createContext({
         auth, db: {}, functions: {}, AbortController, crypto: {randomUUID: () => `operation-${++operationCount}`}, console: {warn() {}},
-        inviteIdForGuest, nextSharingCycle, sharingCycleOf,
+        inviteMatchesAccount, nextSharingCycle, sharingCycleOf,
         onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
         doc: (_db, ...path) => path.join('/'), deleteField: () => ({delete: true}),
@@ -71,6 +71,7 @@ function fixture(withUi = false) {
         },
         respond: async () => ({data: {status: 'purged'}}),
         httpsCallable: () => async command => { calls.push(command); return context.respond(command); },
+        listOwnedAccountInvitesConfirmed: async (uid, accountId) => [...invites.entries()].map(([path, data]) => ({...data, id: path.slice('invites/'.length)})).filter(invite => invite.ownerId === uid && invite.accountId === accountId),
         listArchivedPrivateAccounts: async () => [account()], listCompanies: async () => [],
         listCompanyAccounts: async () => [], getCompany: async () => ({ragioneSociale: 'Synthetic'}),
         ensureVaultKeyMaterial: async () => 'key', decrypt: async () => 'Synthetic username',
@@ -180,6 +181,7 @@ function restoreFixture(record = {isArchived: true, revision: 1, password: 'synt
     const f = fixture(), reads = [];
     // M7-R7C-2: il ripristino legge anche gli inviti quando deve neutralizzare.
     const invites = new Map();
+    f.context.listOwnedAccountInvitesConfirmed = async (uid, accountId) => [...invites.entries()].map(([path, data]) => ({...data, id: path.slice('invites/'.length)})).filter(invite => invite.ownerId === uid && invite.accountId === accountId);
     let server = record, afterRead = async () => {}, retry = false;
     f.context.runTransaction = async (_db, callback) => {
         for (;;) {
@@ -291,8 +293,8 @@ test('ripristino: Account legacy viene neutralizzato nella stessa transazione e 
             pending_key: {email: 'pending@example.invalid', status: 'pending', uid: null},
             rejected_key: {email: 'rejected@example.invalid', status: 'rejected', uid: null}
         }});
-    f.invites.set('invites/same_accepted_key', {status: 'accepted'});
-    f.invites.set('invites/same_pending_key', {status: 'pending'});
+    f.invites.set('invites/same_accepted_key', {ownerId: 'A', accountId: 'same', status: 'accepted'});
+    f.invites.set('invites/same_pending_key', {ownerId: 'A', accountId: 'same', status: 'pending'});
     const result = await f.context.restoreArchivedAccount('A', {...account(), revision: 3});
     assert.equal(result.neutralized, true, 'grant residui ⇒ neutralizzazione');
     assert.equal(result.sharingCycle, 1, 'il ciclo parte da zero e avanza');
@@ -662,8 +664,8 @@ test('archiviazione: revoca persistente, stato sospeso e ciclo nella stessa tran
         pending_key: {email: 'pending@example.invalid', status: 'pending', uid: null},
         rejected_key: {email: 'rejected@example.invalid', status: 'rejected', uid: null}
     }};
-    f.invites.set('invites/x_accepted_key', {status: 'accepted', guestUid: 'guest-1'});
-    f.invites.set('invites/x_pending_key', {status: 'pending'});
+    f.invites.set('invites/x_accepted_key', {ownerId: 'A', accountId: 'x', status: 'accepted', guestUid: 'guest-1'});
+    f.invites.set('invites/x_pending_key', {ownerId: 'A', accountId: 'x', status: 'pending'});
     const result = await f.context.archiveAccount('A', {id: 'x', context: 'privato', revision: 4, updatedAt: MARKER_7C});
     assert.equal(f.transactionRuns, 1, 'archiviazione e revoca in una sola transazione');
     assert.equal(result.status, 'archived');
@@ -696,7 +698,7 @@ test('archiviazione: un ciclo già avanzato usa e marca l\'invito del ciclo corr
     const f = fixture();
     f.stored = {isArchived: false, revision: 1, updatedAt: MARKER_7C, sharingCycle: 2,
         sharedWith: {k: {email: 'g@example.invalid', status: 'accepted', uid: 'u'}}};
-    f.invites.set('invites/x_k_c2', {status: 'accepted'});
+    f.invites.set('invites/x_k_c2', {ownerId: 'A', accountId: 'x', cycle: 2, status: 'accepted'});
     const result = await f.context.archiveAccount('A', {id: 'x', context: 'privato', revision: 1, updatedAt: MARKER_7C});
     assert.equal(result.sharingCycle, 3);
     assert.deepEqual(f.writes.filter(write => write[0].startsWith('invites/')).map(write => write[0]), ['invites/x_k_c2']);
@@ -732,4 +734,17 @@ test('archiviazione: già in Archivio riporta il ciclo senza scrivere', async ()
     assert.equal(result.status, 'already-archived');
     assert.equal(result.sharingCycle, 3);
     assert.equal(f.writes.length, 0);
+});
+
+
+test('archive selects complete owner/resource identity when legacy IDs overlap across companies', async () => {
+    const f = fixture();
+    f.stored = {isArchived: false, revision: 1, sharingCycle: 1, sharedWith: {k: {status: 'accepted', email: 'g@example.invalid'}}};
+    for (const [id, ownerId, aziendaId] of [['foreign', 'attacker', 'company-a'], ['private', 'A', ''],
+        ['company-b', 'A', 'company-b'], ['matching', 'A', 'company-a']]) {
+        f.invites.set(`invites/${id}`, {ownerId, accountId: 'x', aziendaId, cycle: 1, status: 'accepted'});
+    }
+    const result = await f.context.archiveAccount('A', {id: 'x', context: 'company-a', revision: 1});
+    assert.equal(result.suspendedInvites, 1);
+    assert.deepEqual(f.writes.filter(write => write[0].startsWith('invites/')).map(write => write[0]), ['invites/matching']);
 });

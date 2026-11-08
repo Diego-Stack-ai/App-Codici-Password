@@ -1,7 +1,7 @@
 import {
     getDocServerConfirmed, getDocsServerConfirmed, getDocSmart, getDocsSmart
 } from '/assets/js/offline-firestore.js';
-import {db} from '../../firebase-config.js?v=1.2.260';
+import {db} from '../../firebase-config.js?v=1.2.261';
 import {collection, doc, limit, orderBy, query, where} from '/assets/js/vendor/firebase-runtime.js';
 import {coalesceRead} from './request-coordinator.js';
 
@@ -138,6 +138,11 @@ export const listPrivateAccountAttachments = (uid, accountId, recipientUid = '')
 export const listProfileDocumentAttachments = uid =>
     readRecords(`profile-document-attachments:${uid}`,
         collection(db, 'users', uid, 'profileDocumentAttachments'));
+
+// Server ownership query discovers both legacy and v2 records without probing a global ID.
+export const listOwnedAccountInvitesConfirmed = (ownerId, accountId) => readConfirmedRecords(query(
+    collection(db, 'invites'), where('ownerId', '==', ownerId), where('accountId', '==', accountId)
+));
 
 export const getInvite = inviteId => getRecordByPath(`invites/${inviteId}`);
 // M7-R7C-4: quando l'Account è sospeso il get è negato dalle Rules; l'invito del

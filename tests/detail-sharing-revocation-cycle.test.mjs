@@ -7,7 +7,8 @@ const modules = new URL('../Frontend/public/assets/js/modules/', import.meta.url
 test('la revoca per ciclo resta nei due form writer', async () => {
     for (const file of ['privato/form-privato-save.js', 'azienda/form-azienda-save.js']) {
         const source = await readFile(new URL(file, modules), 'utf8');
-        assert.match(source, /transaction\.delete\(doc\(db, "invites", inviteIdForGuest\(targetId,/);
+        assert.match(source, /deleteGuestInvites\(/);
+        assert.match(source, /inviteMatchesAccount\(/);
         assert.match(source, /sharingCycleOf\(/);
         assert.match(source, /finalData\.sharedWithUids = Object\.values\(finalData\.sharedWith\)/);
         assert.match(source, /status === 'rejected' \|\| existingGuest\.status === 'suspended'/);
