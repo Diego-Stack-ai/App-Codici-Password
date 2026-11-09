@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="prove-grafiche-ui-2026-11-09"></a>
+
+## Prove grafiche UI parallele — 09/11/2026
+
+Dopo l'analisi visiva dell'app (sola lettura: troppi effetti sovrapposti, contrasto debole nel tema chiaro, gerarchia del testo poco chiara, dettagli che sembrano form), Diego sceglie la soluzione B, «tre direzioni diverse sulla stessa pagina», e ordina il commit sul ramo di lavoro. Sono autorizzate tre pagine di prova separate in `experiments/ui-prove/` («Rifinita», «Stile iPhone», «Scura sicura») per l'elenco degli Account privati e il relativo dettaglio, con dati inventati, tema chiaro/scuro e interazioni in memoria. Si aprono servendo la radice del repository (ad esempio `python3 -m http.server`) e visitando `/experiments/ui-prove/`.
+
+Le prove non usano login, Firebase, Vault o dati reali, non entrano in Hosting e non modificano pagine, CSS o contratti dell'app. Commit e push riguardano soltanto il ramo di lavoro `claude/awesome-keller-kt4v9t`; nessuna PR, merge, deploy o adozione di una direzione discende da questo incarico: la scelta e l'eventuale estensione all'app richiederanno un ordine separato, nel rispetto del [contratto UI](../regole/INTERFACCIA.md#fonte-docs-ui-design-system-contract-md-contratto-ui-e-design-system).
+
 ## Pubblicazione delle correzioni di sicurezza 1.2.261 — 08/11/2026
 
 Dopo il riepilogo delle cinque correzioni locali e dei limiti, Diego ordina «pubblica». Sono autorizzati nuovo versionamento, controlli completi, commit e push pubblico della candidata e della riconciliazione documentale già approvata, integrazione tramite GitHub con gate verdi e rilascio nel workflow esistente. Un solo esecutore conduce le scritture; i revisori restano consultivi in sola lettura.

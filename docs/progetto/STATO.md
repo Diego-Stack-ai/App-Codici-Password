@@ -2,6 +2,8 @@
 
 <a id="stato-corrente"></a>
 
+09/11/2026 — **prove grafiche UI** create in `experiments/ui-prove/` su [incarico](INCARICO_CORRENTE.md#prove-grafiche-ui-2026-11-09): tre direzioni per Account privati e dettaglio, con dati inventati. Laboratorio separato: runtime, Hosting e versione **1.2.261** distribuita restano invariati.
+
 08/11/2026 — **1.2.261 pubblicata e verificata**, tramite PR [#266](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/266), sorgente `eab609be3a7e9a13514562724888ea73c7af2ece`. Backend/Rules e Hosting sono riusciti sul medesimo SHA; il confronto indipendente conferma 47 Functions attive, 43 aggiornate e quattro escluse immutate, configurazioni conservate e tutti i 326 asset pubblici conformi. Suite completa locale e GitHub: 3.160 casi, 3.150 passati, zero fallimenti, dieci skip dichiarati. Le ricevute e i limiti sono in [COLLAUDI](../evidenze/COLLAUDI.md#pubblicazione-sicurezza-1-2-261), l'autorizzazione in [INCARICO_CORRENTE](INCARICO_CORRENTE.md).
 
 La pubblicazione chiude la distribuzione delle cinque correzioni del lotto. Restano da implementare shell RAM per evitare la Master Password a ogni pagina, canary FULL, cache cifrata/conversione legacy e i collaudi/prodotti residui di [PROGRAMMA](PROGRAMMA.md#chiusura-e-priorita-2026-11-07). FULL conserva policy disabilitata, coorte vuota e flag client falso. I checkpoint anteriori restano storici e non sostituiscono questa ricevuta.
