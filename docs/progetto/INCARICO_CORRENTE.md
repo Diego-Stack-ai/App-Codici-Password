@@ -4,6 +4,8 @@
 
 ## Segnalazioni visive residue dopo la 1.2.266 — 09/11/2026
 
+Diego ordina successivamente «pubblica»: è autorizzato il rilascio **1.2.267 solo Hosting CI**, dopo check e revisione del candidato, preservando l’approvazione production secondo i permessi già stabiliti. Non autorizza la cornice né certifica le prove fisiche rinviate. La PR #280 viene integrata in `f225d599`; il controllo post-merge #1038 fallisce nella preparazione geometrica di una fixture browser, prima del confronto pixel. Prima della distribuzione si stabilizza il solo test su ramo separato, senza alterare il codice applicativo; documenti e nuova revisione accompagnano la correzione. Nessun deploy della 1.2.267 è ancora attestato.
+
 Diego mostra schermate di Profilo nelle sezioni Documenti e Indirizzi: titoli/azioni traspaiono nella fascia superiore e i metadati degli allegati invadono il cestino. Il lavoro corrente prepara una correzione mirata su ramo `codex/ui-overlap-followup-20261109`, base `02292799`, con soli dati sintetici. La 1.2.266 rimane online; la candidata è **1.2.267**, non pubblicata. La cornice della PR #278 resta un lavoro distinto e non viene modificata.
 
 Perimetro: intestazione coprente delle sole pagine che importano profile-layout (Profilo e Dati azienda), conservando altezza, safe area, footer e scroller; metadati completi degli allegati Profilo su spazio separato dal comando Elimina e bersaglio tattile coerente; prove browser di compositing/reflow e bump canonico. Nessuna apertura della Vault, dei documenti o del Chrome personale di Diego, né uso di foto o dati reali nelle fixture o nel confronto con Claude. Nessuna modifica a workflow, Rules, Functions, Auth, dati, cifratura o operazioni di cancellazione.
