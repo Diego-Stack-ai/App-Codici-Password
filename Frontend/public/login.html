@@ -12,17 +12,17 @@
     <title data-t="auth_login_document_title">Codici & Password - Accedi</title>
 
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.264" />
+    <link rel="manifest" href="manifest.json?v=1.2.265" />
     <link rel="apple-touch-icon" sizes="180x180" href="./assets/images/apple-touch-icon-180.png">
 
 
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.264">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.265">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.264">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.265">
 
-    <link rel="stylesheet" href="assets/css/accesso.css?v=1.2.264">
+    <link rel="stylesheet" href="assets/css/accesso.css?v=1.2.265">
 
 </head>
 
@@ -96,18 +96,12 @@
                             maxlength="6" pattern="[0-9]{6}" class="input" placeholder="000000"
                             aria-describedby="totp-help">
                         <p id="totp-help" class="auth-help" data-t="auth_totp_help">Apri la tua app Authenticator e inserisci il codice di 6 cifre.</p>
-                        <button type="button" id="btn-use-recovery-code" class="auth-secondary-action">
-                            <span class="material-symbols-outlined notranslate" translate="no">key</span>
-                            <span data-t="auth_use_recovery">Non hai accesso all'Authenticator?</span>
-                        </button>
                     </div>
 
-                    <div class="form-group hidden" id="recovery-form-group">
-                        <label class="label" for="recovery-code" data-t="auth_recovery_label">Codice di recupero</label>
-                        <input id="recovery-code" type="text" inputmode="text" autocomplete="off"
-                            maxlength="19" class="input" placeholder="XXXX-XXXX-XXXX-XXXX" translate="no">
-                        <p class="auth-help" data-t="auth_recovery_help">Il codice è monouso. Dopo il recupero la 2FA verrà disattivata e tutte le sessioni saranno revocate.</p>
-                    </div>
+                    <button type="button" id="btn-use-recovery-code" class="auth-secondary-action">
+                        <span class="material-symbols-outlined notranslate" translate="no">help</span>
+                        <span data-t="auth_use_recovery">Assistenza per l'accesso 2FA</span>
+                    </button>
 
                     <label class="remember-device" id="remember-device-row">
                         <input id="remember-device" type="checkbox" checked>
@@ -157,7 +151,7 @@
     </div>
 
     <!-- Scripts (In fondo per performance) -->
-    <script type="module" src="assets/js/login-entry.js?v=1.2.264"></script>
+    <script type="module" src="assets/js/login-entry.js?v=1.2.265"></script>
 
 
 </body>

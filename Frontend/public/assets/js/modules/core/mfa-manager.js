@@ -1,4 +1,4 @@
-import { auth, functions, enableAppCheck } from '../../firebase-config.js?v=1.2.264';
+import { auth, functions } from '../../firebase-config.js?v=1.2.265';
 import {
     multiFactor,
     onAuthStateChanged,
@@ -131,14 +131,6 @@ export async function unenrollTotp(user = auth.currentUser) {
 export async function createRecoveryCodes() {
     const result = await httpsCallable(functions, 'createMfaRecoveryCodes')();
     return result.data?.codes || [];
-}
-
-export async function recoverTotpAccess(email, password, recoveryCode) {
-    // Il login mantiene App Check lazy per evitare regressioni all'avvio; viene
-    // attivato solo quando l'utente richiede questa funzione server sensibile.
-    enableAppCheck();
-    await httpsCallable(functions, 'recoverMfaWithCode')({ email, password, recoveryCode });
-    return true;
 }
 
 export async function revokeAllSessions() {

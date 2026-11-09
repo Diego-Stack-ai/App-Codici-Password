@@ -1,5 +1,10 @@
 # Guida
 
+## Aggiornamento preparatorio dell’assistenza 2FA — 08/11/2026
+
+Nella candidata 1.2.265 della PR #271 l’accesso offre istruzioni di assistenza quando l’Authenticator non è disponibile; il recupero automatico non viene proposto. Anche nelle Impostazioni la generazione di nuovi codici è temporaneamente disattivata e rimanda all’assistenza. I codici già salvati non vengono modificati. Non inviare password o codici all’assistenza. Questa modifica è preparata nel ramo, non ancora pubblicata: la produzione resta alla 1.2.264 fino al distinto rilascio approvato. Le descrizioni storiche del recupero più avanti nel documento non attestano la disponibilità del percorso attuale.
+
+
 ## Aggiornamento di sicurezza 1.2.261 — 08/11/2026
 
 Per creare nuove condivisioni è necessario aggiornare l'app: se una vecchia scheda o PWA segnala un errore durante il salvataggio, conservare i dati del modulo e aggiornare prima di riprovare. Gli inviti esistenti restano consultabili e rispondibili. Nell’archivio portabile l’anteprima è disponibile soltanto per i formati supportati; gli altri allegati si salvano sul dispositivo. Il download conserva i byte originali e può assegnare un nome sicuro. Il blocco della Vault chiude la Ricerca e richiede un nuovo sblocco prima di riutilizzarla.

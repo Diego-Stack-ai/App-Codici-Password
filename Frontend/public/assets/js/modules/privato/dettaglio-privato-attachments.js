@@ -3,7 +3,7 @@
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.264';
+import { db, storage } from '../../firebase-config.js?v=1.2.265';
 import {decideAttachmentContent} from '../shared/attachment-content-policy.mjs';
 import { doc, collection, addDoc, setDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";

@@ -37,7 +37,7 @@ assert.equal(revoke.response.status, 200, `Revoca locale fallita: ${JSON.stringi
 assert.equal(revoke.body?.result?.ok, true);
 
 const recoveryInvalid = await callable('recoverMfaWithCode', {
-  email: '', password: '', recoveryCode: '',
+  email: '', recoveryCode: '',
 });
 assert.equal(recoveryInvalid.body?.error?.status, 'INVALID_ARGUMENT');
 

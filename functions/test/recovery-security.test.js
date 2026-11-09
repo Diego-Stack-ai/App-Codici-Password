@@ -108,7 +108,7 @@ test('recovery handler rejects corrupt attempt state before writes, Auth or code
   vm.runInNewContext(source.slice(start, end), context);
   await assert.rejects(context.exports.recoverMfaWithCode({data: {email: 'test@example.invalid',
     password: 'synthetic', recoveryCode: 'ABCD-EFGH-2345-6789'}}), error =>
-    error.code === 'failed-precondition' && error.message.includes('Nessun codice consumato') &&
+    error.code === 'failed-precondition' && error.message === 'Recupero non disponibile. Se i dati sono corretti contatta l’assistenza. Nessun codice è stato consumato.' &&
     !error.message.includes('RECOVERY_ATTEMPT_STATE'));
   assert.equal(effects, 0);
 });
@@ -146,7 +146,7 @@ test('real recovery handler persists the attempt limit and never calls Auth duri
   vm.runInNewContext(source.slice(start, end), context);
   const request = {data: {email: 'test@example.invalid', password: 'synthetic', recoveryCode: 'ABCD-EFGH-2345-6789'}};
   for (let i = 0; i < 5; i++) {
-    await assert.rejects(context.exports.recoverMfaWithCode(request), error => error.code === 'permission-denied');
+    await assert.rejects(context.exports.recoverMfaWithCode(request), error => error.code === 'failed-precondition' && error.message === 'Recupero non disponibile. Se i dati sono corretti contatta l’assistenza. Nessun codice è stato consumato.');
     assert.equal(persisted.attempts, i + 1);
   }
   await assert.rejects(context.exports.recoverMfaWithCode(request), error => error.code === 'resource-exhausted');
@@ -157,7 +157,7 @@ test('real recovery handler persists the attempt limit and never calls Auth duri
     assert.equal(persisted.windowStartedAt, blocked.windowStartedAt);
     assert.equal(persisted.blockedUntil, blocked.blockedUntil);
   }
-  assert.equal(calls, 5);
+  assert.equal(calls, 0);
 });
 
 test.skip('storico full-replace: errore Auth conserva e prenota il codice MFA per un retry idempotente', async () => {
@@ -285,41 +285,28 @@ test.skip('storico full-replace: fattori MFA misti falliscono chiusi prima di pr
   assert.equal(updates, 0);
 });
 
-test('recovery binds the password response UID and fails closed before consuming any code', async () => {
+test('legacy recovery input ignores a password getter without any account or code lookup', async () => {
   const source = fs.readFileSync(require.resolve('../index.js'), 'utf8');
   const start = source.indexOf('exports.recoverMfaWithCode = onCall(');
   const end = source.indexOf('exports.revokeAllSessions = onCall(', start);
-  assert.ok(start >= 0 && end > start);
-  const cases = [
-    {body: {}},
-    {body: {localId: 'original'}},
-    {body: {localId: 'original', idToken: 123}},
-    {body: {localId: 'bad/path', idToken: 'proof'}},
-    {ok: false, body: {error: {message: 'MFA_REQUIRED'}, localId: 'original', mfaPendingCredential: 'proof'}},
-    {body: {localId: 'original', idToken: 'proof'}, user: {uid: 'replacement', email: 'test@example.invalid'}},
-    {body: {localId: 'original', idToken: 'proof'}, user: {uid: 'original', email: 'changed@example.invalid'}},
-    {body: {localId: 'original', mfaPendingCredential: 'proof'}, user: {uid: 'original', email: 'test@example.invalid', disabled: true}},
-  ];
-  for (const scenario of cases) {
-    let codeAccesses = 0;
-    const db = {
-      collection: name => {if (name === 'mfaRecovery') codeAccesses++; return {doc: id => ({path: `${name}/${id}`})};},
-      runTransaction: async action => action({get: async () => ({exists: false}), set: () => {}}),
-    };
-    const context = {exports: {}, crypto, recoveryAttemptId, recoveryCodeHash, normalizeRecoveryCode, nextRecoveryAttemptState,
-      FIREBASE_WEB_API_KEY: 'synthetic', onCall: (_options, handler) => handler,
-      HttpsError: class extends Error {constructor(code, message) {super(message); this.code = code;}},
-      fetch: async () => ({ok: scenario.ok !== false, json: async () => scenario.body}),
-      admin: {firestore: Object.assign(() => db, {FieldValue: {serverTimestamp: () => 123}}),
-        auth: () => ({getUser: async uid => {assert.equal(uid, 'original'); assert.ok(scenario.user); return scenario.user;}})},
-    };
-    vm.runInNewContext(source.slice(start, end), context);
-    await assert.rejects(context.exports.recoverMfaWithCode({data: {email: 'test@example.invalid',
-      password: 'synthetic', recoveryCode: 'ABCD-EFGH-2345-6789'}}), error => error.code === 'permission-denied');
-    assert.equal(codeAccesses, 0);
-  }
+  let effects = 0;
+  const db = {
+    collection: name => {assert.equal(name, 'mfaRecoveryAttempts'); return {doc: id => ({id})};},
+    runTransaction: async action => action({get: async () => ({exists: false}), set: () => {}}),
+  };
+  const context = {exports: {}, crypto, recoveryAttemptId, normalizeRecoveryCode, nextRecoveryAttemptState,
+    onCall: (_options, handler) => handler,
+    HttpsError: class extends Error {constructor(code, message) {super(message); this.code = code;}},
+    fetch: async () => {effects++; throw Error('Unexpected network');},
+    admin: {firestore: Object.assign(() => db, {FieldValue: {serverTimestamp: () => 123}}),
+      auth: () => {effects++; throw Error('Unexpected Auth');}},
+  };
+  vm.runInNewContext(source.slice(start, end), context);
+  const data = {email: 'test@example.invalid', recoveryCode: 'ABCD-EFGH-2345-6789',
+    get password() {effects++; throw Error('Unexpected password read');}};
+  await assert.rejects(context.exports.recoverMfaWithCode({data}), error => error.code === 'failed-precondition' && error.message === 'Recupero non disponibile. Se i dati sono corretti contatta l’assistenza. Nessun codice è stato consumato.');
+  assert.equal(effects, 0);
 });
-
 test.skip('storico full-replace: recovery rechecks enrollment membership and refuses a concurrently added factor', async () => {
   const source = fs.readFileSync(require.resolve('../index.js'), 'utf8');
   const start = source.indexOf('exports.recoverMfaWithCode = onCall(');
@@ -374,7 +361,7 @@ test('manual-support policy stops enrolled MFA before code reservation or Auth u
   vm.compileFunction(source.slice(start, end), Object.keys(context))(...Object.values(context));
   await assert.rejects(context.exports.recoverMfaWithCode({data: {email: 'test@example.invalid', password: 'synthetic',
     recoveryCode: 'ABCD-EFGH-2345-6789'}}), error => error.code === 'failed-precondition' &&
-      error.message.includes('assistenza') && error.message.includes('nessun codice'));
+      error.message === 'Recupero non disponibile. Se i dati sono corretti contatta l’assistenza. Nessun codice è stato consumato.');
   assert.equal(recoveryReads, 0);
   assert.equal(updates, 0);
 });

@@ -22,6 +22,7 @@ on:
         options:
           - hosting
           - recovery-prerequisites-disabled
+          - mfa-recovery-response
 
 permissions:
   contents: read
@@ -95,7 +96,7 @@ jobs:
           RELEASE_SCOPE: ${{ inputs.release_scope || 'hosting' }}
         run: |
           set -euo pipefail
-          case "$RELEASE_SCOPE" in hosting|recovery-prerequisites-disabled) ;; *) exit 1 ;; esac
+          case "$RELEASE_SCOPE" in hosting|recovery-prerequisites-disabled|mfa-recovery-response) ;; *) exit 1 ;; esac
           test "$GITHUB_REF" = "refs/heads/master"
           remote_master="$(git ls-remote origin refs/heads/master | cut -f1)"
           test -n "$remote_master"
@@ -181,7 +182,7 @@ jobs:
         run: npm ci
 
       - name: Install backend deployment dependencies
-        if: inputs.release_scope == 'recovery-prerequisites-disabled'
+        if: inputs.release_scope == 'recovery-prerequisites-disabled' || inputs.release_scope == 'mfa-recovery-response'
         run: npm ci --prefix functions
 
       - name: Prepare immutable release manifest
@@ -192,10 +193,11 @@ jobs:
       - name: Verify historical credential status before publication
         run: node scripts/verify-historical-credential-status.mjs
 
-      # Il backend richiede la scelta manuale separata e resta disabilitato.
+      # Ogni scope backend richiede una scelta manuale separata.
+      # I prerequisiti del recupero completo restano disabilitati.
       # FIREBASE_TOKEN resta temporaneamente il metodo CI esistente.
       - name: Recheck master and deploy Hosting only
-        if: inputs.release_scope != 'recovery-prerequisites-disabled'
+        if: inputs.release_scope == 'hosting'
         shell: bash
         run: |
           set -euo pipefail
@@ -219,8 +221,22 @@ jobs:
           node scripts/plan-recovery-canary.mjs >> "$GITHUB_STEP_SUMMARY"
           node scripts/deploy-recovery-prerequisites.mjs
 
+      - name: Recheck master and deploy MFA recovery response only
+        if: inputs.release_scope == 'mfa-recovery-response'
+        shell: bash
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          set -euo pipefail
+          remote_master="$(git ls-remote origin refs/heads/master | cut -f1)"
+          test -n "$remote_master"
+          test "$GITHUB_SHA" = "$remote_master"
+          node scripts/plan-recovery-canary.mjs --check
+          node scripts/build-vault-account-backend.mjs --check
+          node node_modules/firebase-tools/lib/bin/firebase.js deploy --project appcodici-password --only functions:recoverMfaWithCode --non-interactive --token "$FIREBASE_TOKEN"
+
       - name: Verify deployed manifest and critical assets
-        if: inputs.release_scope != 'recovery-prerequisites-disabled'
+        if: inputs.release_scope == 'hosting'
         run: >-
           node scripts/release-manifest.mjs
           --commit "$GITHUB_SHA"
@@ -243,6 +259,10 @@ jobs:
             echo "- Scope: \`$RELEASE_SCOPE\`"
             if [ "$RELEASE_SCOPE" = "recovery-prerequisites-disabled" ]; then
               echo "- Recovery remains disabled. Revision census, drain and a separately reviewed canary are still required."
+            fi
+            if [ "$RELEASE_SCOPE" = "mfa-recovery-response" ]; then
+              echo "- Selected resource: functions:recoverMfaWithCode only. Hosting, Rules and all other Functions are excluded."
+              echo "- Verify the callable and compare all other backend metadata before any separate Hosting release."
             fi
             if [ "$GITHUB_SHA" != "$remote_master" ]; then
               echo "- Notice: master advanced after the final pre-deploy check; the approved workflow SHA remains the deployed source."

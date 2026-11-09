@@ -1,5 +1,20 @@
 # Programma
 
+## Avanzamento del passaggio workflow — 09/11/2026
+
+Diego delega esplicitamente il solo commit del workflow approvato: completato sul branch della PR #271 con verifica dell'impronta, senza altra modifica al file. Questa delega aggiorna la precedente modalità manuale; le approvazioni production restano personali. Prossimo gate: check verdi sull'head completo di codice e ricevute, uscita da bozza e revisione finale valida di Claude. Nessun merge o pubblicazione è dedotto dai test. Seguono soltanto i rilasci CI autorizzati e le verifiche previste; candidata 1.2.265 e produzione 1.2.264 restano distinte.
+
+
+## Passaggio di chiusura della PR #271 — 08/11/2026
+
+La revisione fornita da Diego su `3ff7d29f` richiede due integrazioni prima del merge; i pareri locali precedenti restano consultivi. Priorità corrente: candidata 1.2.265 con assistenza coerente e generazione client sospesa, guida/test aggiornati e supporti CI intermedi verificabili. Diego carica personalmente sul branch il workflow completo consegnato con impronta; Codex ne verifica corrispondenza e check. Seguono uscita da bozza, revisione finale di Claude e soltanto allora merge/rilasci approvati, funzione dedicata prima di Hosting. La produzione resta alla 1.2.264. Questa voce aggiorna le fasi preparatorie precedenti; non avvia la cornice o altri lotti.
+
+
+## Ordine aggiornato dalla revisione — 08/11/2026
+
+La nota autorizzata di Diego/Claude accetta S1 chiuso con la 1.2.264 verificata in produzione. La mancata attestazione del secondo partecipante resta una limitazione delle prove, non un collaudo riuscito. Il lavoro corrente è l'aggiornamento separato della PR #271: assistenza 2FA, limiti e risposte uniformi, usabilità dei download e proposta privata di pubblicazione futura. La PR non si unisce né si pubblica con questo incarico; nessun workflow viene cambiato. La cornice non viene avviata automaticamente. Prima di qualunque futuro merge: check verdi sullo stesso head e revisione di Claude; pubblicazione soltanto dalla CI e con approvazione personale. Questa voce aggiorna la priorità delle note storiche seguenti senza riscriverne gli esiti.
+
+
 ## Prerequisito della continuità Vault — 08/11/2026
 
 Aggiornamento finale del lotto: **1.2.264 pubblicata e verificata**, correzione del download grande provata sui moduli realmente online, parere conclusivo di Claude registrato nei [COLLAUDI](../evidenze/COLLAUDI.md#attachment-download-followup-1-2-264). Il criterio di condivisione completo resta aperto perché il browser del secondo partecipante non fornisce l'attestazione richiesta. Prima di riprendere la cornice servono una prova a due identità con Auth/App Check reali e la ricevuta del suo esito, senza indebolire i controlli. La preparazione 2FA #271 resta separata, da non unire o pubblicare; un suo futuro rilascio richiede un incarico CI specifico. Le due fixture di questo tentativo sono eliminate.

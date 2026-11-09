@@ -23,7 +23,8 @@ const strip = text => text.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^expo
 const avatarModule = strip(await readFile(
     new URL('../Frontend/public/assets/js/modules/privato/profilo-ui.js', import.meta.url), 'utf8'))
     .replace("import('../shared/attachment-security.js')", 'Promise.resolve({createStorageObjectName, MAX_AVATAR_BYTES, validateAttachmentFile})');
-const securityModule = strip(await readFile(
+const policyModule = strip(await readFile(new URL('../Frontend/public/assets/js/modules/shared/attachment-content-policy.mjs', import.meta.url), 'utf8'));
+const securityModule = policyModule + '\n' + strip(await readFile(
     new URL('../Frontend/public/assets/js/modules/shared/attachment-security.js', import.meta.url), 'utf8'));
 
 function fixture({previous = null, uid = 'A'} = {}) {

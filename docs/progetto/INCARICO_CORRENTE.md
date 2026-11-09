@@ -1,5 +1,28 @@
 # Incarico corrente
 
+## Delega esplicita del solo commit workflow — 09/11/2026
+
+Diego delega direttamente a Codex il passaggio del workflow già preparato e incollato nell'editor GitHub. Questa eccezione sostituisce la precedente riserva di commit personale **soltanto per quel file e per il contenuto approvato**; non estende accessi, permessi di pubblicazione o approvazioni production. Il testo nell'editor è confrontato per intero con l'impronta consegnata prima del commit, poi verificato nuovamente dal blob remoto.
+
+Commit eseguito dal sito GitHub sul branch della PR #271: `3b6425aea9e0205b33f57eae82ba2b89dd7a9b0e`, successivo a `2af21c8c`, solo workflow. Nessuna modifica ulteriore al suo contenuto. I documenti vengono riallineati con un commit separato; seguono nuovi check sullo stesso head finale, uscita da bozza e revisione finale valida di Claude prima del merge. Restano obbligatorie le approvazioni personali di Diego per entrambi i futuri deploy CI. Nessun deploy dal PC; candidata 1.2.265, produzione ancora 1.2.264, elenco MD sempre 34. [Ricevuta](../evidenze/COLLAUDI.md#workflow-delegato-pr-271-2026-11-09).
+
+
+## Integrazione richiesta dalla revisione valida della PR #271 — 08/11/2026
+
+La nota di revisione fornita da Diego sul precedente head `3ff7d29f` è il riferimento valido per la chiusura: codice giudicato corretto, due integrazioni richieste prima del merge. I precedenti pareri locali di Claude Code restano consultivi e non sostituiscono questa approvazione finale. Sono autorizzati la sospensione della generazione dei codici nelle Impostazioni, compreso il percorso automatico, il testo di assistenza e i controlli linguistici, la guida e i test. Nessuna modifica alla funzione server di generazione o ai codici già salvati.
+
+Candidata **1.2.265**, non pubblicata; produzione ancora **1.2.264**. Codex aggiorna sulla PR soltanto i due supporti del futuro percorso CI: planner e relativi test. Il workflow completo viene consegnato come file privato con SHA-256: **solo Diego lo committa dal sito GitHub sullo stesso branch**. Per mantenere verificabile il passaggio intermedio, i supporti riconoscono due contratti esatti e distinti, quello attuale e quello futuro approvato, senza variabili di bypass o nuove risorse selezionabili. Dopo il commit di Diego Codex confronta i byte e l'impronta e attende nuovamente i check verdi.
+
+Sequenza di chiusura: integrazioni e supporti con check verdi → workflow committato da Diego e impronta coincidente → check verdi → uscita da bozza e revisione finale di Claude → merge autorizzato → rilascio CI della sola funzione dedicata con approvazione personale → Hosting con approvazione personale → riscontro produttivo di Claude. Fino al nuovo gate di revisione la PR resta in bozza. Nessuna modifica del workflow da parte degli agenti, nessun deploy dal PC, nessun dato Vault o Rules modificato. Elenco MD invariato a 34; dettagli del rilievo aperto soltanto nel rapporto privato.
+
+
+## Revisione della preparazione 2FA e usabilità — 08/11/2026
+
+La nota di revisione autorizzata da Diego conferma S1 chiuso in produzione nella 1.2.264. Il distinto test completo tra due identità resta documentato come bloccato, senza trasformarlo in un PASS. L'incarico corrente aggiorna la PR [#271](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/271), ribasata sul master corrente: assistenza manuale 2FA, risposte uniformi, limiti conservati e usabilità dei download. La PR resta **in bozza, non unita e non pubblicata**. La produzione rimane alla 1.2.264; nessuna nuova versione è dichiarata distribuita.
+
+La consegna comprende una proposta privata del percorso CI futuro, da decidere con Diego: nessuna modifica applicata al workflow o ai selettori di distribuzione. Per ogni futura integrazione vale **PR → check verdi sullo stesso head → parere di Claude sul delta → merge → deploy CI → approvazione personale di Diego**. Nessun deploy dal PC, modifica Rules, chiavi, dati Vault o attivazione della cornice deriva da questo aggiornamento. Dettagli tecnici del rilievo aperto soltanto negli appunti locali esclusi da Git; elenco MD canonico sempre 34. La distinzione fra pareri locali e review formali precedenti è registrata nei [COLLAUDI](../evidenze/COLLAUDI.md#revisione-preparazione-2fa-2026-11-08).
+
+
 ## Integrazione del collaudo allegati — 08/11/2026
 
 Esecuzione registrata: PR #273 integrata in `70b9618c`, run Hosting #1010 riuscita dopo l'approvazione personale di Diego; tutti i 324 file online e il completamento dei download sono verificati, con parere conclusivo consultivo di Claude. Le due fixture autorizzate e i relativi DPAPI sono eliminate. Rimane aperta la prova condivisa bloccata dall'attestazione: la cornice resta sospesa e nessun altro utente o dato reale viene coinvolto. La PR preparatoria #271 non è unita né pubblicata. Le ricevute finali vengono integrate con una PR soltanto documentale, senza ulteriore deploy.

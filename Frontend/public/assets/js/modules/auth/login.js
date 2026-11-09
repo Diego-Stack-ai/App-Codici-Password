@@ -7,12 +7,11 @@
 import {
     login, completeTotpLogin, checkAuthState, logout,
     resendVerificationEmail, refreshEmailVerification
-} from '../../auth.js?v=1.2.264';
-import { initComponents } from '../../components-v129.js?v=1.2.264';
+} from '../../auth.js?v=1.2.265';
+import { initComponents } from '../../components-v129.js?v=1.2.265';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showInputModal } from '../../ui-core-v129.js?v=1.2.264';
-import { recoverTotpAccess } from '../core/mfa-manager.js';
+import { showToast, showAlertModal } from '../../ui-core-v129.js?v=1.2.265';
 import { openInitialLanguageDialog, rememberUserLanguage, setLanguagePreference } from '../settings/first-configuration.js';
 import {COMPLETE_RECOVERY_ENABLED, COMPLETE_RECOVERY_LOGIN_PATH, COMPLETE_RECOVERY_PATH, hasCompleteRecoveryIntent} from '../../app-env.js';
 
@@ -145,13 +144,10 @@ function setupLoginForm() {
     let throttleTimer = null;
     let awaitingTotp = false;
     let pendingEmail = '';
-    let usingRecoveryCode = false;
 
     document.getElementById('btn-use-recovery-code')?.addEventListener('click', () => {
-        usingRecoveryCode = true;
-        document.getElementById('totp-form-group')?.classList.add('hidden');
-        document.getElementById('recovery-form-group')?.classList.remove('hidden');
-        document.getElementById('recovery-code')?.focus();
+        document.getElementById('password').value = '';
+        showAlertModal(t('auth_use_recovery'), t('auth_recovery_help'), t('close'));
     });
 
     function applyThrottle() {
@@ -189,7 +185,7 @@ function setupLoginForm() {
         const emailEl = document.getElementById('email');
         const passwordEl = document.getElementById('password');
         const email = emailEl.value.trim();
-        const password = passwordEl.value;
+        const password = awaitingTotp ? '' : passwordEl.value;
         const rememberDevice = document.getElementById('remember-device')?.checked !== false;
         const totpCode = document.getElementById('totp-code')?.value.trim() || '';
 
@@ -228,15 +224,6 @@ function setupLoginForm() {
         try {
             let result = null;
             if (awaitingTotp) {
-                if (usingRecoveryCode) {
-                    const recoveryCode = document.getElementById('recovery-code')?.value.trim() || '';
-                    await recoverTotpAccess(pendingEmail, password, recoveryCode);
-                    passwordEl.value = '';
-                    document.getElementById('recovery-code').value = '';
-                    showToast(t('auth_recovery_success'), 'success');
-                    setTimeout(() => window.location.reload(), 1800);
-                    return;
-                }
                 if (!/^\d{6}$/.test(totpCode)) {
                     throw new Error(t('auth_totp_invalid'));
                 }
@@ -250,6 +237,7 @@ function setupLoginForm() {
                     return;
                 }
                 if (result?.mfaRequired) {
+                    passwordEl.value = '';
                     awaitingTotp = true;
                     pendingEmail = email;
                     document.getElementById('totp-form-group')?.classList.remove('hidden');

@@ -111,12 +111,30 @@ test('la Gestione destinatari ha un catalogo completo e mantiene i segnaposto in
   assert.match(loader, /translations\/recipients\.js/);
 });
 
+test('assistenza 2FA usa il registro formale tedesco e portoghese nelle otto lingue complete', async () => {
+  const load = async name => import(`data:text/javascript;base64,${Buffer.from(await readFile(new URL(`../Frontend/public/assets/js/translations/${name}.js`, import.meta.url), 'utf8')).toString('base64')}`);
+  const {accessCatalogs} = await load('access');
+  const {settingsCatalogs} = await load('settings');
+  for (const lang of ['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt']) {
+    assert.ok(settingsCatalogs[lang].settings_recovery_codes_help?.trim(), lang);
+    assert.ok(settingsCatalogs[lang].settings_recovery_codes_desc?.trim(), lang);
+  }
+  assert.match(accessCatalogs.de.auth_recovery_help, /Wenn Sie/);
+  assert.doesNotMatch(accessCatalogs.de.auth_recovery_help, /\b(?:du|deine|hast|kontaktiere|sende)\b/);
+  assert.match(settingsCatalogs.de.settings_recovery_codes_help, /Sie/);
+  assert.doesNotMatch(accessCatalogs.pt.auth_recovery_help, /\b(?:consegues|contacta|envies)\b/);
+});
+
 test('le pagine di accesso e il contatto condiviso hanno un catalogo completo in tutte le lingue', async () => {
   const languages = ['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt'];
   const accessSource = await readFile(new URL('../Frontend/public/assets/js/translations/access.js', import.meta.url), 'utf8');
   const { accessCatalogs } = await import(`data:text/javascript;base64,${Buffer.from(accessSource).toString('base64')}`);
   const expectedKeys = Object.keys(accessCatalogs.it).sort();
-  assert.equal(expectedKeys.length, 59);
+  // The obsolete recovery-code label and automatic-success promise were retired.
+  assert.equal(expectedKeys.length, 57);
+  assert.ok(!expectedKeys.includes('auth_recovery_success'));
+  assert.ok(!expectedKeys.includes('auth_recovery_label'));
+  assert.ok(expectedKeys.includes('auth_recovery_help'));
   for (const language of languages) {
     assert.deepEqual(Object.keys(accessCatalogs[language]).sort(), expectedKeys, `catalogo Accesso incompleto: ${language}`);
     assert.ok(accessCatalogs[language].auth_wait_seconds.includes('{seconds}'));

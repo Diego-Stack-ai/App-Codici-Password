@@ -7,14 +7,22 @@ export function decideAttachmentContent(input, fallbackName = 'allegato') {
         : input;
     const type = typeof rawType === 'string'
         ? rawType.split(';', 1)[0].replace(/\s+/g, '').toLowerCase() : '';
+    // [preview kind, safe extension, accepted by the upload contract]. Kept inside
+    // the pure function so the standalone archive viewer uses the identical registry.
     const formats = {
-        'application/pdf': ['pdf', 'pdf'],
-        'image/png': ['image', 'png'], 'image/jpeg': ['image', 'jpg'],
-        'image/webp': ['image', 'webp'], 'image/gif': ['image', 'gif'],
-        'video/mp4': ['video', 'mp4'], 'video/webm': ['video', 'webm'],
-        'audio/mpeg': ['audio', 'mp3'], 'audio/mp4': ['audio', 'm4a'],
-        'audio/ogg': ['audio', 'ogg'], 'audio/wav': ['audio', 'wav'],
-        'audio/webm': ['audio', 'webm'], 'text/plain': ['text', 'txt']
+        'application/pdf': ['pdf', 'pdf', true],
+        'image/png': ['image', 'png', true], 'image/jpeg': ['image', 'jpg', true],
+        'image/webp': ['image', 'webp', true], 'image/gif': ['image', 'gif', true],
+        'video/mp4': ['video', 'mp4', true], 'video/webm': ['video', 'webm', true],
+        'audio/mpeg': ['audio', 'mp3', false], 'audio/mp4': ['audio', 'm4a', false],
+        'audio/ogg': ['audio', 'ogg', false], 'audio/wav': ['audio', 'wav', false],
+        'audio/webm': ['audio', 'webm', false], 'text/plain': ['text', 'txt', true],
+        'application/msword': [null, 'doc', true],
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': [null, 'docx', true],
+        'application/vnd.ms-excel': [null, 'xls', true],
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [null, 'xlsx', true],
+        'image/heic': [null, 'heic', true], 'image/heif': [null, 'heif', true],
+        'video/quicktime': [null, 'mov', true]
     };
     const format = Object.prototype.hasOwnProperty.call(formats, type) ? formats[type] : null;
     const rawName = item
@@ -27,10 +35,18 @@ export function decideAttachmentContent(input, fallbackName = 'allegato') {
     const extension = format?.[1] || 'bin';
     const base = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(stem) ? `_${stem}` : stem;
     return {
-        action: format ? 'preview' : 'download', kind: format?.[0] || null,
-        mimeType: format ? (type === 'text/plain' ? 'text/plain;charset=utf-8' : type) : 'application/octet-stream',
-        fileName: `${base}.${extension}`
+        action: format?.[0] ? 'preview' : 'download', kind: format?.[0] || null,
+        mimeType: format?.[0] ? (type === 'text/plain' ? 'text/plain;charset=utf-8' : type) : 'application/octet-stream',
+        fileName: `${base}.${extension}`,
+        uploadMimeType: format?.[2] ? type : null
     };
+}
+
+// Preserve strict upload MIME membership: display normalization must not admit
+// new upload aliases, parameters, spaces or additional preview-only audio types.
+export function isAttachmentUploadMimeAllowed(mime) {
+    const type = String(mime || '').toLowerCase();
+    return decideAttachmentContent(type).uploadMimeType === type;
 }
 
 export function openAttachmentContent(bytes, attachment, {revokeAfter = 60_000} = {}) {

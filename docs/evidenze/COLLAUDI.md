@@ -1,5 +1,32 @@
 # Collaudi
 
+<a id="workflow-delegato-pr-271-2026-11-09"></a>
+
+## Commit workflow delegato della PR #271 — 09/11/2026
+
+Dopo la richiesta di aiuto, Diego delega esplicitamente a Codex il solo commit del workflow, già incollato nel browser. Letto il contenuto completo dell'editor, l'impronta corrisponde al file approvato prima della conferma. Il [commit `3b6425ae`](https://github.com/Diego-Stack-ai/App-Codici-Password/commit/3b6425aea9e0205b33f57eae82ba2b89dd7a9b0e) è creato dal sito GitHub sul branch della PR #271, con unico parent `2af21c8c` e un solo file modificato. Il blob remoto conta 10.469 byte e conserva esattamente SHA-256 `14508cccc44463eb3160e7a2e0bf68b2d9f1aeb2b5adcff26b8a5988390e69cb`. Riscontro ripetuto indipendentemente via API; ricevuta visiva e rapporti tecnici privati esclusi da Git.
+
+Il contratto effettivo a tre scope supera planner e test dedicati 4/4, inclusi 71 casi mutazionali e i controlli di censimento/policy. I selettori del percorso precedente restano invariati e il nuovo percorso riguarda soltanto la risorsa approvata. Il commit documentale successivo non cambia il workflow: i check finali e la successiva revisione valida devono riferirsi al nuovo head completo. Nessuna approvazione di deploy, merge, Function o Hosting eseguiti in questa fase. Produzione 1.2.264, candidata 1.2.265, 34 MD canonici; la delega non comprende le approvazioni personali production.
+
+
+<a id="integrazione-revisione-pr-271-2026-11-08"></a>
+
+## Integrazione della revisione valida della PR #271 — 08/11/2026
+
+La nota di revisione fornita da Diego sullo head `3ff7d29f` è il riferimento valido per la chiusura e richiede due integrazioni prima del merge. I pareri consultivi locali di Claude Code registrati in precedenza non valgono come approvazione finale di questa nota. La candidata 1.2.265 sospende i percorsi client di generazione dei codici, compreso quello automatico dopo la configurazione, aggiorna assistenza, guida e registro linguistico; nessuna modifica al generatore server o ai codici esistenti. Prove e riscontri della consegna sono registrati sul nuovo head nella PR, distinguendo test sintetici da produzione.
+
+I due supporti CI vengono preparati separatamente dal workflow, che resta sotto il controllo personale di Diego. La patch approvata esige già il nuovo contratto: applicarla letteralmente ai soli supporti farebbe fallire i check prima del commit del workflow. Per rispettare l'ordine richiesto, il validatore ammette soltanto due configurazioni esatte, quella corrente e quella futura, rifiutando combinazioni ibride, selettori aggiuntivi e perdita dei gate. Il workflow completo consegnato privatamente deve poi coincidere per SHA-256 con il file committato da Diego sul medesimo branch. Seguiranno check verdi e revisione finale valida; nessun merge o rilascio è attestato da questa preparazione. Produzione invariata alla 1.2.264, documenti canonici sempre 34.
+
+
+<a id="revisione-preparazione-2fa-2026-11-08"></a>
+
+## Preparazione 2FA e provenienza dei pareri — 08/11/2026
+
+Aggiornamento della PR #271 in bozza dopo la nota autorizzata di revisione: risposte e assistenza manuale uniformate, limiti conservati e nomi dei download migliorati. Nessun rilascio, workflow, Rules o dato produttivo modificato. La proposta del futuro percorso CI resta un diff privato non applicato; la pubblicazione richiederà un ordine distinto e l'approvazione personale. Verifiche locali mirate concluse: Functions 566 passati, 0 falliti e 10 skip storici su 576; limite transazionale concorrente 2/2; browser assistenza 7/7; browser allegati e viewer portabile superati, con integrità dei byte e nessuna nuova anteprima per i download. I banchi UI usano import Auth sintetici, quelli remoti restano esclusi: non sono un collaudo produttivo. Documentazione verificata con 34 MD. Suite completa, CI e parere conclusivo di Claude devono riferirsi allo stesso head: i relativi esiti e la ricevuta consultiva vengono raccolti nella PR prima della consegna. La produzione resta alla 1.2.264. S1 è accettato come chiuso dalla nota autorizzata, conservando il precedente blocco del test completo a due identità come limite di copertura.
+
+**Provenienza delle revisioni precedenti:** le API GitHub non registrano review formali sulle PR #272 e #273. Esistono invece i pareri consultivi locali di Claude Code sul codice prima dei merge: #272 head `9be28c1a`, parere completato alle 19:49:14 UTC e merge alle 19:53:14 UTC; #273 head `0c0deaa2`, parere completato alle 20:44:58 UTC e merge alle 20:52:21 UTC. Contenuti dei pareri, riferimenti esaminati e confronto dei file congelati con i blob Git concordano; i tree dei merge corrispondono agli head revisionati. I tempi locali sono riscontri del filesystem, non attestazioni firmate. Non si equiparano i pareri locali a review GitHub, né alla distinta verifica successiva di Claude riportata da Diego. Le ricevute tecniche restano negli appunti locali esclusi da Git. Da questa consegna la sequenza resta esplicita: check verdi → revisione Claude sul medesimo head → eventuale merge e rilascio autorizzati.
+
+
 <a id="attachment-hardening-1-2-263"></a>
 
 ## Hosting 1.2.263 pubblicato — gestione allegati e ritiro laboratorio, 08/11/2026
@@ -425,14 +452,14 @@ La scansione redatta dell'intera cronologia copre 1.611 commit e circa 112 MB, c
 <!-- generated:pages:start -->
 #### Inventario QA finale
 
-Fonte verificata: **30 pagine canoniche**, **125 istruzioni**, **110 target guida** e **167 campi HTML statici compilabili**.
+Fonte verificata: **30 pagine canoniche**, **125 istruzioni**, **110 target guida** e **166 campi HTML statici compilabili**.
 
 > I campi creati dinamicamente dai moduli JavaScript non sono dichiarati coperti da questo inventario statico: vengono censiti e provati nel passaggio browser. BASELINE AUTOMATICA indica soltanto accesso/sblocco/Home, non il collaudo visivo completo della pagina.
 
 | Pagina | Famiglia | Campi HTML statici | Target guida | Fixture necessaria | Stato |
 |---|---|---|---|---|---|
 | `index`<br>Codici & Password | access | 0: — | 0: — | Nessuna scrittura; ingresso e inoltro verso Accesso. | **NON ESEGUITO** |
-| `login`<br>Codici & Password - Accedi | access | 5: email, password, recovery-code, remember-device, totp-code | 3: #login-form, #totp-help, #link-forgot-password | Identità QA verificata, password tecnica e Master Password DPAPI; nessun dato reale. | **BASELINE AUTOMATICA** |
+| `login`<br>Codici & Password - Accedi | access | 4: email, password, remember-device, totp-code | 3: #login-form, #totp-help, #link-forgot-password | Identità QA verificata, password tecnica e Master Password DPAPI; nessun dato reale. | **BASELINE AUTOMATICA** |
 | `registrati`<br>Codici & Password - Registrazione | access | 5: cognome, confirm-password, email, nome, password | 3: #register-form, #account-password-requirements, #register-submit-btn | Solo percorso controllato o ambiente isolato; non creare nuove identità durante il passaggio ordinario. | **NON ESEGUITO** |
 | `reset_password`<br>Codici & Password - Recupero | access | 1: email | 2: #reset-form, #reset-submit-btn | Solo controllo UI; non inviare e-mail durante il passaggio ordinario. | **NON ESEGUITO** |
 | `imposta_nuova_password`<br>Codici & Password - Nuova Password | access | 3: confirm-password, new-password, username | 2: #account-password-requirements, #new-pass-submit-btn | Solo controllo UI con collegamento sintetico dedicato quando autorizzato. | **NON ESEGUITO** |
