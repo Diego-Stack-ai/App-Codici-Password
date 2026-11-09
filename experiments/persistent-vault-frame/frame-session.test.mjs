@@ -198,6 +198,17 @@ test('cancelled, expired and previous-document confirmations authorize no action
   assert.equal((await f.send('consume', {...intent, grant: next.grant})).code, 'GRANT_DENIED');
 });
 
+test('concurrent fresh confirmations cannot exceed the eight-grant bound', async () => {
+  const wait = deferred(), f = fixture({confirmSensitive: () => wait.promise});
+  await f.send('key');
+  const attempts = Array.from({length: 9}, (_, index) => f.send('fresh', {purpose: 'backup-export', target: `vault:${index}`}));
+  await new Promise(resolve => setImmediate(resolve)); wait.resolve(true);
+  const replies = await Promise.all(attempts);
+  assert.equal(replies.filter(reply => reply.kind === 'grant').length, 8);
+  assert.equal(replies.filter(reply => reply.code === 'FRESH_CONFIRMATION_REQUIRED').length, 1);
+  assert.equal(f.session.state().grants, 8);
+});
+
 test('navigation or identity change during fresh confirmation rejects late permission', async () => {
   for (const change of [f => f.navigate(PRIVATE_FRAME_PATHS[1]), f => {f.state.epoch++;}]) {
     const wait = deferred(), f = fixture({confirmSensitive: () => wait.promise});
