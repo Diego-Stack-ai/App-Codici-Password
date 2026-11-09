@@ -4,6 +4,8 @@
 
 ## Segnalazioni visive residue dopo la 1.2.266 — 09/11/2026
 
+**Esecuzione conclusa:** l’ordine «pubblica» porta alla 1.2.267, Hosting #1041/sorgente `1bcbef73`, dopo PR #280/#281, check verdi e contraddittorio statico di Claude. Diego approva personalmente la run; Codex verifica manifest e 341 file online. Il lavoro successivo qui autorizzato integra soltanto le ricevute nei documenti esistenti tramite PR/check e revisione readonly prima del merge, senza un altro Hosting. Cornice e controllo fisico iPhone conservano i gate separati. [Ricevuta](../evidenze/COLLAUDI.md#ui-overlap-followup-2026-11-09). I paragrafi seguenti conservano la cronologia preparatoria.
+
 Diego ordina successivamente «pubblica»: è autorizzato il rilascio **1.2.267 solo Hosting CI**, dopo check e revisione del candidato, preservando l’approvazione production secondo i permessi già stabiliti. Non autorizza la cornice né certifica le prove fisiche rinviate. La PR #280 viene integrata in `f225d599`; il controllo post-merge #1038 fallisce nella preparazione geometrica di una fixture browser, prima del confronto pixel. Prima della distribuzione si stabilizza il solo test su ramo separato, senza alterare il codice applicativo; documenti e nuova revisione accompagnano la correzione. Nessun deploy della 1.2.267 è ancora attestato.
 
 Diego mostra schermate di Profilo nelle sezioni Documenti e Indirizzi: titoli/azioni traspaiono nella fascia superiore e i metadati degli allegati invadono il cestino. Il lavoro corrente prepara una correzione mirata su ramo `codex/ui-overlap-followup-20261109`, base `02292799`, con soli dati sintetici. La 1.2.266 rimane online; la candidata è **1.2.267**, non pubblicata. La cornice della PR #278 resta un lavoro distinto e non viene modificata.

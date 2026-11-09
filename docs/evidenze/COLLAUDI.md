@@ -2,7 +2,19 @@
 
 <a id="ui-overlap-followup-2026-11-09"></a>
 
-## Residui di copertura header e metadati allegati — candidata 1.2.267, 09/11/2026
+## Residui di copertura header e metadati allegati — 1.2.267 pubblicata, 09/11/2026
+
+**Pubblicazione conclusa e verificata:** [PR #280](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/280) integrata in `f225d599`; stabilizzazione separata [#281](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/281), con check verdi sull’head `37981d30`, integrata nel sorgente finale **`1bcbef73631380ec30821357641ce9695cc6e230`**. [CI #1039](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42656484505) e successivo controllo post-merge #1040 riusciti. Il precedente FAIL #1038 rimane registrato, non viene trasformato in PASS.
+
+[Hosting #1041](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42658564232) concluso con successo: validate `129303618237`, deploy `129310479394`, sullo stesso SHA di master. Suite del rilascio **3.234 casi, 3.224 passati, zero falliti/cancellati, 10 skip in 62 gruppi**. Scope **hosting**; installazione backend e i due deploy recovery/MFA sono saltati, comando CI limitato a Hosting. Nessun deploy dal PC né modifica a workflow, Rules, Functions o dati.
+
+La run ha atteso realmente production; Diego conferma «ho accettato» e la risposta API registra **approved**, utente Diego-Stack-ai, `can_admins_bypass:false`. Codex prepara il modulo e seleziona production ma non invia il clic finale: questa approvazione è personale, distinta dalla delega precedente della #1030. Il deploy termina alle **17:04:07 UTC**; il controllo remoto della CI alle 17:04:14 UTC.
+
+Confronto indipendente di Codex dalla checkout esatta e pulita: manifest locale rigenerato e verificato; `--verify-url` superato, versione **1.2.267**, sorgente **1bcbef73**, **341/341 file** identici oltre al manifest, albero pubblico SHA-256 **`f998f3112f72e555084efd5cedb8dfc11e71d6f51a8dc98b74c9590ae70f1256`**. Il verificatore controlla anche cache-control del manifest, CSP della root, indice, redirect login legacy e rewrite Home. I commit documentali successivi non cambiano lo SHA Hosting. Non è una prova di rendering fisico o di attivazione del worker su tutte le PWA.
+
+Contraddittorio di Claude sul codice UI: sessione `80bc9f99-82c0-4112-8d90-bb3d0760e8a3`, codice `33f6aec7`, già delimitato qui sotto; sulle sole ricevute successive sessione `d90cb2b7-7183-488a-bfa5-5b11320a98cd`, nessun bloccante/diniego. Sul seguito test #281, sessione **`1b4a3f1d-a442-4bc5-9c9f-31f2b243d3d7`**, head `37981d30`, lettura integrale di diff, contesto test/CSS e riepilogo di integrità: nessun bloccante né indebolimento delle asserzioni nel perimetro letto, zero dinieghi. Rapporto locale ignorato SHA-256 **`a58e3e41f9b5090d20572ee44622d738436b4d1921c5c59d94bb0a39fa6744a0`**; una miglioria diagnostica minore resta non bloccante. Queste letture statiche precedono i merge ma non sono riesecuzioni dei test né una verifica indipendente di Claude della produzione.
+
+**Limiti e seguito:** prova fisica iPhone/Safari/PWA non eseguita; nuova grafica rinviata, cornice #278 ancora laboratorio in bozza e non attivata. La richiesta Vault a ogni pagina non è risolta da questo rilascio. Ricevute aggiornate nei cinque MD esistenti; elenco canonico sempre **34**. Le sezioni seguenti conservano la preparazione e il FAIL intermedio, non indicano la versione attualmente online.
 
 **Seguito post-merge prima del rilascio:** dopo l’ordine diretto «pubblica», la PR #280 è integrata in `f225d59911776cfabbaf73b1fedc21ba7e72504c`. La [run #1038](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42654742561) fallisce nel test aziendale sulla precondizione di posizionamento del probe, prima del confronto pixel; nessun deploy eseguito. Dodici ripetizioni diagnostiche del test precedente passano localmente e non annullano il FAIL della CI. Una prima attesa di un solo frame riproduce entrambi i fallimenti: probe alto 83px ma top 20/bottom 103 nella fascia 0..85, dopo variazione iniziale da 44px.
 
