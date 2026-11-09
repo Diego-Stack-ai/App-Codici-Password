@@ -4,7 +4,7 @@
 
 ## Copertura di header e controlli degli allegati Profilo — 09/11/2026
 
-Nella candidata 1.2.267 il foglio condiviso dei due profili impone una fascia header coprente, con fondo tematico opaco e senza la maschera o il velo mobile che oltrepassava l'altezza dell'header. Cambiano soltanto Profilo e Dati azienda, gli unici importatori del foglio: footer e trattamento delle altre pagine restano quelli esistenti. Lo z-index non è la soluzione a una trasparenza; anche quando il hit test restituisce l'intestazione, il contenuto sottostante non deve alterarne i pixel. Altezza comune e safe area conservano il contratto precedente.
+Dalla 1.2.267 pubblicata con Hosting #1041, sorgente `1bcbef73`, il foglio condiviso dei due profili impone una fascia header coprente, con fondo tematico opaco e senza la maschera o il velo mobile che oltrepassava l'altezza dell'header. Cambiano soltanto Profilo e Dati azienda, gli unici importatori del foglio: footer e trattamento delle altre pagine restano quelli esistenti. Lo z-index non è la soluzione a una trasparenza; anche quando il hit test restituisce l'intestazione, il contenuto sottostante non deve alterarne i pixel. Altezza comune e safe area conservano il contratto precedente.
 
 Nelle anteprime inline dei documenti Profilo, nome/metadati e comando distruttivo occupano spazi distinti. Il nome può mantenere l'ellissi; dimensione e data devono andare a capo senza essere nascoste, uscire dalla card o passare sotto il cestino. Il comando Elimina è su una propria riga allineata a destra e usa il target minimo dell'app, senza cambiare handler, conferme o cancellazioni reali. Il testo ingrandito può aumentare l'altezza della card. Non si modifica il selettore generico degli allegati Account.
 
