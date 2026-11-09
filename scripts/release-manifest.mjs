@@ -128,7 +128,9 @@ async function readHostingContract(repoRoot = defaultRoot) {
   let routeSecurityHeaders;
   if (hosting.headers.some(rule => rule.regex)) {
     const html = (await listFiles(path.join(repoRoot, 'Frontend', 'public'))).filter(file => file.relative.endsWith('.html')).map(file => '/' + file.relative);
-    const paths = [...new Set(['/', '/home', '/login-v115.html', '/__frame_missing__.html', '/app.html/', '/profilo_privato.html/', ...html])].sort();
+    // Redirect middleware runs before file response headers. Its status and
+    // same-origin destination are attested separately below, not as a document.
+    const paths = [...new Set(['/', '/home', '/__frame_missing__.html', '/app.html/', '/profilo_privato.html/', ...html])].sort();
     routeSecurityHeaders = Object.fromEntries(paths.map(pathname => {
       const value = effectiveHostingHeaders(hosting, pathname);
       return [pathname, {cspSha256: sha256(value['content-security-policy']), xFrameOptions: value['x-frame-options'], permissionsPolicy: value['permissions-policy']}];
@@ -250,6 +252,7 @@ async function verifyRemoteOnce(baseUrl, expected) {
   });
   const legacyLocation = legacyResponse.headers.get('location') || '';
   if (legacyResponse.status !== expected.hostingContract.legacyLoginRedirect.status
+      || new URL(legacyLocation, `${root}/`).origin !== new URL(root).origin
       || new URL(legacyLocation, `${root}/`).pathname
         !== expected.hostingContract.legacyLoginRedirect.location) {
     throw new Error('Il redirect pubblico login-v115.html -> login.html non e quello atteso.');

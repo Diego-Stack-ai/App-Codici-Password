@@ -125,6 +125,7 @@ test('la verifica remota copre payload, redirect, rewrite, cache e CSP', async t
   t.after(() => rm(root, {recursive: true, force: true}));
   const manifest = await buildReleaseManifest({repoRoot: root, commit, sourceDirty: false});
   let servedCsp = fixtureCsp;
+  let redirectLocation = '/login.html';
   const payload = new Map();
   for (const asset of Object.keys(manifest.files)) {
     payload.set(asset, await readFile(path.join(publicRoot, asset.slice(1))));
@@ -139,7 +140,7 @@ test('la verifica remota copre payload, redirect, rewrite, cache e CSP', async t
     }
     if (pathname === '/login-v115.html') {
       response.statusCode = 302;
-      response.setHeader('Location', '/login.html');
+      response.setHeader('Location', redirectLocation);
       response.end();
       return;
     }
@@ -168,6 +169,9 @@ test('la verifica remota copre payload, redirect, rewrite, cache e CSP', async t
   const address = server.address();
   const baseUrl = `http://127.0.0.1:${address.port}`;
   await verifyRemote(baseUrl, manifest);
+  redirectLocation='https://foreign.invalid/login.html';
+  await assert.rejects(()=>verifyRemote(baseUrl,manifest),/redirect pubblico/);
+  redirectLocation='/login.html';
   servedCsp = `${fixtureCsp} script-src 'self' 'unsafe-eval';`;
   await assert.rejects(
     () => verifyRemote(baseUrl, manifest),
@@ -188,6 +192,7 @@ test('the release verifier rejects selective child header drift even with identi
  for(const asset of Object.keys(manifest.files))payload.set(asset,await readFile(path.join(publicRoot,asset.slice(1))));
  assert.equal(manifest.hostingContract.routeSecurityHeaders['/home_page.html'].xFrameOptions,'SAMEORIGIN');
  assert.equal(manifest.hostingContract.routeSecurityHeaders['/app.html'].xFrameOptions,'DENY');
+ assert.equal(manifest.hostingContract.routeSecurityHeaders['/login-v115.html'],undefined);
  let drift='';const server=createServer((request,response)=>{
   const pathname=new URL(request.url,'http://fixture.invalid').pathname;
   const headers=effectiveHostingHeaders(config.hosting,pathname);

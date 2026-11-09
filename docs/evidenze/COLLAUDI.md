@@ -18,6 +18,8 @@ Suite finale dedicata `npm run test:vault-frame-runtime`: **156/156 PASS**, sett
 
 Limiti: nessun permesso reale predisposto, nessuna Rules/Hosting pubblicata o anteprima Firebase attivata; produzione ancora 1.2.267. Candidata 1.2.268, raccordo compilato attivo ma ammissione negata in assenza del documento server valido. B2/C1 e Auth/App Check/PRF, fotocamera/microfono reali e i quattro dispositivi non collaudati. Attendere GO B1 di Claude prima di B2; merge/deploy e provisioning individuale solo secondo B3 e approvazione personale di Diego. Nessun avviso CORNICE CHIUSA.
 
+Seguito CI: la [#1045](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42706492117) su `e7c7c8d9a0c92363b18010626897456053e8e046` fallisce in un controllo HTTP, 155/156 test della cornice: su Linux il link legacy restituisce realmente 302, prima del middleware degli header. Il banco Windows aveva invece osservato la risposta negativa per il vecchio matcher glob. Corretto il verificatore per attestare separatamente stato/destinazione same-origin del redirect e header della pagina finale; le risposte documento conservano tutti i controlli, nessuna asserzione rimossa sui loro header. Il manifest non classifica più il 302 legacy come documento; un redirect verso sito estraneo con lo stesso percorso è rifiutato. Configurazione Hosting, Rules e runtime B1 invariati. Prove locali del seguito: HTTP/browser e manifest 11/11, intero gruppo hardening 35/35, documenti 12/12, scansione dell'indice senza nuovi segreti. L'esito fallito resta registrato; nuovo commit e nuova CI richiedono il proprio GO del revisore.
+
 <a id="cornice-a2-preparazione-2026-11-09"></a>
 
 ## Cornice A2 — candidata reale spenta, 09/11/2026
