@@ -1,5 +1,9 @@
 # Programma
 
+## Rifinitura visiva candidata 1.2.267 — 09/11/2026
+
+Prima di attribuire una chiusura completa al layout del Profilo si prepara il follow-up separato delle schermate segnalate da Diego: copertura effettiva dell'header e metadati degli allegati senza collisioni con Elimina. Versione candidata 1.2.267, produzione ancora 1.2.266; non è adozione della nuova grafica e non modifica la cornice Vault. Seguono check PR, contraddittorio di Claude e decisione di rilascio, con prove fisiche ancora distinte. [Mandato](INCARICO_CORRENTE.md#ui-overlap-followup-2026-11-09), [ricevuta](../evidenze/COLLAUDI.md#ui-overlap-followup-2026-11-09).
+
 ## Rilascio UI concluso, priorità alla cornice — 09/11/2026
 
 La **1.2.266** è pubblicata con Hosting #1030, sorgente `193f4768`, dopo il clic di Codex delegato direttamente da Diego per questa sola run. Manifest e 341 file sono verificati; anteprime ancora online, escluse dalla precache. La prova fisica iPhone resta non eseguita e il riscontro produttivo di Claude non viene dedotto dal suo precedente parere statico. [Esiti](../evidenze/COLLAUDI.md#css-profilo-pubblicazione-1-2-266).
