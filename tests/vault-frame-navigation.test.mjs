@@ -28,7 +28,7 @@ for (const target of ['/login.html', '/login.html?authCheck=timeout', '/login.ht
   '/login.html?verifyEmail=1', '/login.html?recovery=complete&verifyEmail=1', '/login.html?recovery=complete',
   '/imposta_nuova_password.html?policyUpdate=1', '/imposta_nuova_password.html',
   '/login.html?reauth=security-settings', '/login.html?reauth=sessions-revoked', '/privacy.html', '/termini.html',
-  'https://appcodici-password.web.app/profilo_privato.html?profileTab=documents#section-email'])
+  'https://appcodici-password.web.app/profilo_privato.html?profileTab=documents#documenti-view-container'])
   for (const framed of [false, true]) test(`${framed ? 'framed' : 'standalone'} navigation preserves ${target}`, () => {
     const f = fixture(framed); f.context.target = target;
     vm.runInContext('navigateDocument(target, true)', f.context);

@@ -1,5 +1,18 @@
 # Incarico corrente
 
+<a id="cornice-b1-2026-11-09"></a>
+
+## Cornice B1 — permesso server e intestazioni, candidata in revisione
+
+Il [GO A2 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6751236506) è verificato sul commit `455b41fc4f3bc86e0b9f9df48ccb9f5623309060`. La CI valida è [#1044](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42695875669), conclusa con successo sullo stesso SHA; il numero #1043 nel commento del revisore è un riferimento impreciso, non una run A2 distinta. Claude dichiara inoltre rieseguiti 116 test della cornice. Diego trasmette il GO e ordina B1 sulla PR #278.
+
+Perimetro B1: singleton server con coorte di un solo UID, senza UID personale nel repository e senza scrittura client; listener di revoca e letture server nei punti sensibili; Rules/test con emulatori; header selettivi e verifica HTTP/browser ufficiale. Si recepiscono le note A2 su uscite same-origin, fallback senza loop e anchor per route. La verifica fisica della cronologia e dei link nativi rimane in B2/C1. La candidata resta 1.2.268; produzione 1.2.267.
+
+Sono autorizzati codice, test, contratti, commit/push e avviso PASSO B1 COMMITTATO sulla stessa PR. Nessun documento o flag reale viene scritto in produzione in B1: l'assegnazione privata dell'UID, il percorso CI ristretto per le Rules e il rilascio Hosting saranno preparati in B3 dopo GO B1/B2 e approvazione personale di Diego. Non occorre una nuova Function. Nessuna modifica ai workflow, Storage Rules, credenziali o dati Vault. MD fermi a 34, solo Codex esecutore. Nessuna attivazione produttiva discende dal valore compilato della candidata: senza singleton server valido e Rules distribuite la cornice è negata.
+
+
+I checkpoint A2 seguenti precedono il GO del revisore: le loro indicazioni «soltanto A2» e «B1 vietata» sono storiche. Prevale il mandato B1 sopra, senza anticipare B2 o pubblicazione.
+
 <a id="cornice-a2-preparazione-2026-11-09"></a>
 
 ## Cornice A2 candidata in revisione — 09/11/2026
@@ -16,7 +29,7 @@ Il candidato introduce app.html, broker/trasporto produttivi e raccordo al secur
 
 Fonte: nuovo ordine diretto di Diego dopo l'allineamento della 1.2.267. Obiettivo: niente sblocco Vault a ogni cambio pagina, chiavi solo RAM, cornice attiva **solo per Diego** al termine dei gate. Nuova grafica e altri rilievi di sicurezza sono separati. La produzione attuale resta 1.2.267, senza cornice.
 
-**Passo corrente A1:** aggiornare VAULT, INTERFACCIA e DECISIONI con allowlist delle pagine, matrice selettiva degli header, camera/microfono/PRF, timer utente, background, history/direct link/push/download/stampa/logout/ricarica, limite same-origin/XSS, arresto e rollback. La preferenza background è confermata da Diego: stessa durata dell'inattività. Aggiornare soltanto gli altri documenti esistenti necessari a stato/roadmap/evidenze. Ramo `codex/vault-frame-lab-20261109`, PR #278; riallineamento a master della 1.2.267 conservando il laboratorio. Nessun A2 o cambiamento runtime nuovo in questo passo.
+**Passo A1 originario, superato dagli avanzamenti sopra:** aggiornare VAULT, INTERFACCIA e DECISIONI con allowlist delle pagine, matrice selettiva degli header, camera/microfono/PRF, timer utente, background, history/direct link/push/download/stampa/logout/ricarica, limite same-origin/XSS, arresto e rollback. La preferenza background è confermata da Diego: stessa durata dell'inattività. Aggiornare soltanto gli altri documenti esistenti necessari a stato/roadmap/evidenze. Ramo `codex/vault-frame-lab-20261109`, PR #278; riallineamento a master della 1.2.267 conservando il laboratorio. Nessun A2 o cambiamento runtime nuovo in questo passo.
 
 A2 seguirà soltanto il GO di A1: bridge reale nel boundary canonico e app.html pubblicabile ma spenti per default, ripiego invariato, test negativi e rispetto della preferenza. B1 seguirà il GO di A2: ammissione server solo UID Diego, Rules/test emulatore anonimo/estraneo/revocato e intestazioni effettive per ogni route. B2 prepara la lista per Chrome desktop, Android, Safari iPhone e PWA (dieci pagine, timer, background, logout, camera, voce, push, back/reload e download). B3 prepara merge e rilascio CI dopo i GO: Rules/Function solo se richieste da B1, poi Hosting, con approvazione personale di Diego e verifica manifest/hash. C1 raccoglie le prove fisiche eseguite da Diego, corregge solo gli esiti con lo stesso ciclo; C2 registra la chiusura in COLLAUDI/STATO e sulla PR. La matrice fisica completa è ora in C1 dopo il canary individuale B3, come nel nuovo ordine: la vecchia sequenza pre-attivazione è superata soltanto per Diego; nessuna estensione ad altri utenti o falsa attestazione dei test. Non dichiarare «CORNICE CHIUSA» prima di C2.
 

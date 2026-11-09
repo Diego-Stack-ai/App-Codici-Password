@@ -70,9 +70,9 @@ export function createFrameSession({origin, getFrameWindow, getFrameUrl, getFram
     }
     if (!allowHidden && hiddenAt !== null) throw Error('FRAME_HIDDEN');
   }
-  async function admitted(ticket) {
+  async function admitted(ticket, fresh = false) {
     let permit;
-    try { permit = await readPermit(ticket.uid); }
+    try { permit = await readPermit(ticket.uid, {fresh}); }
     catch { assertCurrent(ticket, true); lock('admission-unavailable'); throw Error('ADMISSION_DENIED'); }
     assertCurrent(ticket);
     const valid = await validateIdentity({uid: ticket.uid, epoch: ticket.identityEpoch});
@@ -139,7 +139,7 @@ export function createFrameSession({origin, getFrameWindow, getFrameUrl, getFram
       if (data.command === 'lock') { assertCurrent(ticket, true); lock('child-request'); return null; }
       assertCurrent(ticket);
       if (hiddenAt !== null) throw Error('FRAME_HIDDEN');
-      const uid = await admitted(ticket); assertCurrent(ticket);
+      const uid = await admitted(ticket, ['fresh', 'consume', 'rekey'].includes(data.command)); assertCurrent(ticket);
       if (data.command === 'preference') {
         const preference = await refreshPreference(); assertCurrent(ticket);
         const milliseconds = inactivityMilliseconds(preference);

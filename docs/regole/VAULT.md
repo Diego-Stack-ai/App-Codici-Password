@@ -1,5 +1,20 @@
 # Vault
 
+<a id="cornice-b1-permesso-2026-11-09"></a>
+
+## Cornice B1 — ammissione server candidata
+
+Il singleton root `vaultFramePolicy/current`, fuori dal sottoalbero modificabile dagli utenti, contiene soltanto schemaVersion=1, version=1, uid, enabled ed expiresAt (timestamp). La coorte è un solo UID verificato, scritto privatamente da un operatore server approvato in B3, mai nel repository. Le Rules negano ogni scrittura client, elenco, query, utente anonimo/estraneo/non verificato, formato diverso, scadenza e fence di recupero attivo o malformato. La preferenza utente, un parametro o lo storage non sono un permesso. Assenza/disabilitazione/cambio UID del singleton nega anche al destinatario precedente.
+
+Un listener server con includeMetadataChanges alimenta solo RAM. L'evento cache iniziale non autorizza e attende un evento server entro cinque secondi. Dopo l'ammissione, cache, scritture pendenti, errore, offline osservato, UID/fence diverso, cancellazione o policy non valida revocano il consenso e il contesto. I risultati tardivi non lo riattivano. Nessun heartbeat rinnova artificialmente la validità: expiresAt resta il limite imposto dal documento server; una connessione silenziosamente interrotta dipende dai segnali del trasporto Firestore, non da una garanzia di revoca istantanea. Per ingresso, ripresa visibile e operazioni sensibili si esegue inoltre getDocFromServer con richieste concorrenti coalescenti e ricontrollo UID/fence/generazione. Il controllo periodico del broker legge la RAM e non genera GET ogni dieci secondi. Questo esplicita il modello di freschezza del listener; non considera lo stato online o una cache persistente prova di autorità ([Firebase listener](https://firebase.google.com/docs/firestore/query-data/listen), [metadata cache](https://firebase.google.com/docs/firestore/manage-data/enable-offline)).
+
+Il bootstrap canonico instrada le sole route top-level ammesse prima del primo sblocco. Gli altri utenti e i dinieghi conservano il percorso standalone. Un marker monouso esclusivamente di diniego, rimosso subito dall'URL, evita che il ripiego per differenza di versione rientri automaticamente nella cornice; non è una fonte di autorizzazione. Gli anchor sono elencati per route nel codice e corrispondono a sezioni reali del DOM; frammenti sconosciuti o codificati non entrano nella cornice. La lista comprende le sezioni dei due form Account, del Profilo e dei dati/modifica azienda; restano obbligatori i tre anchor già censiti in A1.
+
+Ogni lettura fresca ha una deadline di cinque secondi: scadenza o diniego bloccano il contesto. Alla sospensione si annullano soltanto le verifiche pendenti, preservando il timeout ordinario della chiave; la ripresa deve avviare una nuova lettura server e non può riutilizzare la promessa precedente.
+
+La candidata abilita il raccordo compilato, ma non configura alcun singleton reale né pubblica Rules/Hosting: produzione invariata. Kill switch server e ripiego standalone precedono qualsiasi rollback del codice. Chiavi, prove e preferenze non vengono migrate. B1 attende revisione; le prove reali Firebase/Auth/App Check/PRF e dispositivi restano separate. Le sezioni A2 sottostanti descrivono il candidato precedente al GO, non l'interruttore compilato B1.
+
+
 <a id="cornice-a2-raccordo-2026-11-09"></a>
 
 ## Cornice A2 — raccordo disattivato candidato

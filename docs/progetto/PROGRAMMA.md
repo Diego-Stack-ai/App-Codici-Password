@@ -1,5 +1,13 @@
 # Programma
 
+<a id="cornice-b1-roadmap-2026-11-09"></a>
+
+## Cornice: dopo il GO A2, candidata B1
+
+A2 approvata da Claude su `455b41fc`, CI #1044 riuscita. B1 implementa il permesso individuale server, le Rules e i profili HTTP; nessun provisioning o deploy reale. Il passo corrente è consegnare B1 sulla PR #278 e ottenere il GO sul nuovo commit. Solo dopo: B2 lista fisica; B3 proposta del provisioning privato, CI limitata alle sole Rules necessarie e Hosting con approvazione personale; C1 prove di Diego; C2 ricevuta finale. Nessun workflow modificato in B1 e nessuna Function richiesta. Candidata 1.2.268, produzione 1.2.267. [Stato corrente](STATO.md#cornice-b1-stato-2026-11-09).
+
+I riepiloghi A1/A2 sottostanti conservano le fasi precedenti, non indicano un GO ancora mancante per A2. Gli incarichi di sicurezza e grafica restano distinti.
+
 <a id="cornice-a2-roadmap-2026-11-09"></a>
 
 ## Cornice: avanzamento dopo GO A1
@@ -13,8 +21,8 @@ A1 approvata da Claude sul commit `4f2bc0f812fa2f72c63a409d1aa5d3a120bcd136`. A2
 | Passo | Consegna | Gate prima di avanzare |
 |---|---|---|
 | A1 approvato | Contratto nei documenti Vault/UI/Decisioni e ricevuta sulla PR | GO Claude sulla PR per il commit del passo |
-| A2, corrente | app.html e bridge reali ma spenti; test negativi | GO Claude sul candidato A2 |
-| B1 | Flag server solo Diego, Rules/emulatori e header effettivi selettivi | GO Claude su B1 |
+| A2 approvato | app.html e bridge reali ma spenti; test negativi | GO Claude su 455b41fc registrato |
+| B1, corrente | Flag server solo Diego, Rules/emulatori e header effettivi selettivi | GO Claude su B1 |
 | B2 | Lista di prove fisiche desktop/Android/Safari/PWA | GO Claude su B2 |
 | B3 | Preparazione merge e CI, eventuale backend necessario poi Hosting | GO, approvazione personale Diego, verifica commit/manifest/hash |
 | C1 | Prove personali di Diego e sole correzioni emerse | Avviso → revisione → approvazione per ogni seguito |

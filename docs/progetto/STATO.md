@@ -1,5 +1,13 @@
 # Stato
 
+<a id="cornice-b1-stato-2026-11-09"></a>
+
+## Cornice B1 — candidata per revisione, produzione invariata
+
+A2 ha ricevuto il [GO di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6751236506) su `455b41fc4f3bc86e0b9f9df48ccb9f5623309060`, con CI #1044 riuscita e 116 test ripetuti dal revisore. B1 prepara singleton server individuale non scrivibile dai client, ascolto di revoca, routing canonico e intestazioni selettive verificate sul vero emulatore Hosting. Candidata sempre 1.2.268, non pubblicata; il raccordo compilato è abilitato ma senza permesso server valido resta negato. Nessun UID personale o documento server reale configurato, nessuna Rules o Hosting distribuita. [Mandato B1](INCARICO_CORRENTE.md#cornice-b1-2026-11-09), [evidenze](../evidenze/COLLAUDI.md#cornice-b1-verifiche-2026-11-09).
+
+B1 attende check sul proprio commit e GO di Claude prima di B2. Il provisioning privato del singleton e il percorso CI limitato alle sole Rules Firestore saranno proposti in B3, senza Functions aggiuntive. Merge e pubblicazione richiedono approvazione personale di Diego. Produzione ancora **1.2.267 / #1041 / `1bcbef73`**; problema Vault multipagina non ancora risolto per gli utenti. Le voci A2 sottostanti sono ricevute della fase precedente.
+
 <a id="cornice-a2-stato-2026-11-09"></a>
 
 ## Cornice A2 — candidata locale spenta
@@ -8,7 +16,7 @@ A1 approvata da Claude sulla PR #278, commit `4f2bc0f812fa2f72c63a409d1aa5d3a120
 
 <a id="stato-corrente"></a>
 
-**09/11/2026 — stato corrente:** A1 approvata da Claude sul commit `4f2bc0f812fa2f72c63a409d1aa5d3a120bcd136`; A2 implementata e verificata localmente per gruppi, candidata 1.2.268 spenta e non pubblicata. Produzione 1.2.267; restano CI e GO A2 di Claude prima di B1. Le registrazioni seguenti sono cronologia preparatoria e non riaprono A1.
+**09/11/2026 — stato corrente:** A1 e A2 approvate; B1 candidata in revisione, non pubblicata. Produzione 1.2.267, candidata 1.2.268 senza permesso server produttivo. Il [riepilogo B1](#cornice-b1-stato-2026-11-09) prevale sui checkpoint A1/A2 seguenti; B2, merge, attivazione e collaudo fisico restano da autorizzare secondo il mandato.
 
 Cronologia precedente al GO A1 — 09/11/2026: **Cornice: passo A1 preparato sulla PR #278, in attesa di revisione Claude sulla PR**. Nuovo ordine di Diego A1–C2 e scelta esplicita background = durata `lock_timeout`; definiti contratto Vault/UI, 22 pagine candidate, header per route, permessi e limiti same-origin. Nessuna integrazione reale, flag o attivazione eseguiti; A2 attende «REVISIONE CLAUDE – GO». Produzione invariata **1.2.267 / #1041 / `1bcbef73`**. [Mandato corrente](INCARICO_CORRENTE.md#cornice-a1-incarico-2026-11-09), [decisione](DECISIONI.md#cornice-ordine-2026-11-09), [evidenze](../evidenze/COLLAUDI.md#cornice-a1-contratto-2026-11-09). I precedenti pareri CLI sul laboratorio non sono il GO del nuovo passo.
 

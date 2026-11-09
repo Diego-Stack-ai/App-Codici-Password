@@ -1,5 +1,16 @@
 # Interfaccia
 
+<a id="cornice-b1-header-2026-11-09"></a>
+
+## Cornice B1 — profili HTTP candidati
+
+Si applica la matrice A1: app.html DENY/ancestors none, con self aggiunto soltanto al suo frame-src; le 22 figlie SAMEORIGIN/ancestors self; ogni altro percorso, alias, variante non ammessa e contenuto pubblico conserva DENY/ancestors none. I provider Auth/App Check esistenti restano ammessi. Il configuratore usa regex RE2 disgiunte e complemento del set finito dei 23 nomi esatti, senza lookahead o override concorrenti; query non cambiano il profilo. Le varianti con slash finale non ricevono eccezioni. Il separatore equivalente nel matcher supporta anche la normalizzazione interna dell'emulatore Windows, senza aggiungere nomi o suffissi HTTP. La matrice è verificata sulla URL richiesta prima delle rewrite ([Firebase Hosting](https://firebase.google.com/docs/hosting/full-config#headers)).
+
+Camera/microfono e WebAuthn GET/CREATE sono limitati a self sulle risposte cornice/figlie e nell'allow dell'iframe. Il resto della baseline e le altre direttive CSP restano invariati. I test HTTP controllano una sola CSP, XFO e Permissions Policy per risposta; il manifest candidato attesta e verifica i profili delle route HTML oltre alla CSP root. Test e codice non attestano header già distribuiti.
+
+Le uscite della facade sono same-origin. Un link web esterno esplicitamente premuto viene aperto fuori cornice con noopener/noreferrer; schemi non ammessi sono bloccati. tel/mailto rimangono intenzioni native del browser, con consenso/gesto effettivo da provare in C1. Privacy e termini escono al livello principale dopo revoca. Back/Forward dopo le navigazioni native dei moduli, link telefono e ritorno dal sistema operativo sono prove fisiche ancora da preparare/eseguire in B2/C1.
+
+
 <a id="cornice-a2-ui-2026-11-09"></a>
 
 ## Cornice A2 — protocollo UI preparatorio

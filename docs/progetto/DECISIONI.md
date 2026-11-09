@@ -1,5 +1,13 @@
 # Decisioni
 
+<a id="cornice-b1-decisione-2026-11-09"></a>
+
+## 09/11/2026 — B1 dopo GO A2, senza attivazione produttiva
+
+Diego trasmette il [GO Claude A2](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6751236506) sul commit `455b41fc4f3bc86e0b9f9df48ccb9f5623309060` e ordina B1. Si usa un singleton fuori dal sottoalbero delle preferenze modificabili dagli utenti: un solo destinatario server, nessuna scrittura client o UID personale nel codice. Ascolto continuo con metadati e verifiche server fresche ai confini sensibili; richieste pendenti prima del background non possono soddisfare la ripresa. Il compilato candidato può instradare nella cornice solo dopo consenso server; il documento reale assente conserva il diniego. Nessuna nuova Function, chiave o migrazione Vault.
+
+La configurazione selettiva degli header è per route e non per utente. In B1 si prova il codice con SDK/emulatori e browser sintetico; provisioning privato e rilascio CI delle Rules/Hosting sono rinviati a B3 dopo i GO previsti e approvazione personale. Il vecchio scope CI che comprende più backend non viene usato per distribuire soltanto questa Rules. Nessuna modifica workflow da questo passo; nessun deploy dal PC. Questa decisione aggiorna i checkpoint A2 preparatori seguenti, preservandone la provenienza.
+
 <a id="cornice-ordine-2026-11-09"></a>
 
 ## 09/11/2026 — ordine cornice A1–C2, revisione sulla PR e timer

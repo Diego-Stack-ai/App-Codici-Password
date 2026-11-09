@@ -94,10 +94,16 @@ export function createFrameTransport({window: win, release, enabled = false, now
         (anchor.target && anchor.target !== '_self') || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
       try {
         const url = new URL(anchor.href, win.location.href);
-        if (!['https:', 'http:'].includes(url.protocol)) return;
+        if (!['https:', 'http:'].includes(url.protocol)) {if (!['tel:', 'mailto:'].includes(url.protocol)) event.preventDefault(); return;}
+        if (url.origin !== win.location.origin) {
+          event.preventDefault();
+          if (event.isTrusted && !url.username && !url.password) win.open(url.href, '_blank', 'noopener,noreferrer');
+          return;
+        }
         if (win.parent.vaultFrameNavigation?.navigateFromChild(win, requestingDocument, url.href, false)) event.preventDefault();
       } catch { /* No navigation authority. */ }
     });
+    listen(win, 'hashchange', () => {try {win.parent.vaultFrameNavigation?.syncFromChild(win, requestingDocument);} catch {clear();}});
     for (const method of ['replaceState', 'pushState']) {
       const original = win.history[method].bind(win.history);
       const wrapper = (...args) => {

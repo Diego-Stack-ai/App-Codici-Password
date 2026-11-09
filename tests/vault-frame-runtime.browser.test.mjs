@@ -90,7 +90,7 @@ async function fixture() {
 test('real broker/transport: ten private documents use one unlock, queries/fragments and back/forward persist', async () => {
   const f = await fixture();
   try {
-    for (const path of ['/area_privata.html','/account_privati.html?type=standard','/profilo_privato.html?profileTab=documents#section-email',
+    for (const path of ['/area_privata.html','/account_privati.html?type=standard','/profilo_privato.html?profileTab=documents#documenti-view-container',
       '/lista_aziende.html','/scadenze.html?filter=urgenti','/archivio_account.html','/impostazioni.html','/regole_scadenze.html','/configurazione_documenti.html']) {
       await f.page.evaluate(target => {const frame=document.querySelector('iframe');window.vaultFrameNavigation.navigateFromChild(frame.contentWindow,frame.contentDocument,target,false);}, path);
       await f.child().waitForFunction(() => window.fixtureChild?.keys === 1);
@@ -122,7 +122,7 @@ test('foreign/unrelated messages do not revoke; release mismatch revokes and exi
     await f.child().evaluate(() => parent.postMessage({kind:'unrelated'},location.origin));
     assert.equal(await f.page.evaluate(() => window.frameOwner.session.state().unlocked), true);
     await f.child().evaluate(() => parent.postMessage({protocol:'vault-frame/v1',release:'old',kind:'hello'},location.origin));
-    await f.page.waitForURL(base + '/home_page.html');
+    await f.page.waitForURL(base + '/home_page.html?__frame_standalone_once=1');
     assert.equal(f.page.frames().length, 1);
   } finally {await f.context.close();}
 });
@@ -138,6 +138,29 @@ test('public links exit at top level after revoking key; old Document facade can
     assert.equal(f.page.frames().length, 1);
   } finally {await f.context.close();}
 });
+test('external facade exits are denied; trusted external links open outside with no opener',async()=>{
+ const f=await fixture();try{
+  assert.equal(await f.page.evaluate(()=>{const frame=document.querySelector('iframe');return window.vaultFrameNavigation.navigateFromChild(frame.contentWindow,frame.contentDocument,'https://external.invalid/',false);}),false);
+  assert.equal(await f.page.evaluate(()=>window.frameOwner.session.state().unlocked),true);
+  await f.child().evaluate(()=>{const link=document.createElement('a');link.id='external';link.href='https://external.invalid/';link.textContent='External';document.body.append(link);});
+  const opened=f.context.waitForEvent('page');await f.child().locator('#external').click();const popup=await opened;
+  await popup.waitForLoadState().catch(()=>{});assert.equal(await popup.evaluate(()=>window.opener===null),true);await popup.close();
+  assert.equal(await f.page.evaluate(()=>window.frameOwner.session.state().unlocked),true);assert.ok(f.page.url().includes('/app.html'));
+ }finally{await f.context.close();}
+});
+
+test('allowed section anchors synchronize; an unknown anchor locks without exposing the child',async()=>{
+ const f=await fixture();try{
+  await f.page.evaluate(()=>{const frame=document.querySelector('iframe');window.vaultFrameNavigation.navigateFromChild(frame.contentWindow,frame.contentDocument,'/profilo_privato.html',false);});
+  await f.child().waitForFunction(()=>window.fixtureChild?.keys===1);
+  await f.child().evaluate(()=>{location.hash='documenti-view-container';});
+  await f.page.waitForFunction(()=>new URL(location.href).searchParams.get('route').endsWith('#documenti-view-container'));
+  await f.child().evaluate(()=>{location.hash='not-approved';});
+  await f.page.waitForFunction(()=>!window.frameOwner.session.state().unlocked);
+  assert.equal(await f.page.locator('iframe').count(),0);assert.deepEqual(f.errors,[]);
+ }finally{await f.context.close();}
+});
+
 test('durable logout holds parent auth redirects until the child supplies its final reauth target', async () => {
   const f = await fixture();
   try {

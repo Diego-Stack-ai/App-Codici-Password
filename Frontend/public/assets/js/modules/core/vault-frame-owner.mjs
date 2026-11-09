@@ -1,4 +1,4 @@
-import {FRAME_PROTOCOL, privateFrameUrl, residualInsets, inactivityMilliseconds, invalidInactivityPreference} from './vault-frame-policy.mjs';
+import {FRAME_PROTOCOL, privateFrameUrl, residualInsets, inactivityMilliseconds, invalidInactivityPreference, frameStandaloneTarget} from './vault-frame-policy.mjs';
 import {createFrameSession} from './vault-frame-session.mjs';
 
 // Injectable host, used by the canonical authenticated bootstrap and browser tests.
@@ -32,8 +32,9 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
       onState({locked: true, reason});
     }
   });
-  const isOwnChild = (source, documentObject = currentDocument()) => source === iframe.contentWindow &&
-    documentObject === currentDocument() && !!documentObject && !!privateFrameUrl(currentUrl(), origin);
+  const ownsDocument = (source, documentObject = currentDocument()) => source === iframe.contentWindow &&
+    documentObject === currentDocument() && !!documentObject;
+  const isOwnChild = (source, documentObject = currentDocument()) => ownsDocument(source, documentObject) && !!privateFrameUrl(currentUrl(), origin);
   function outerUrl(url) { const outer = new URL('/app.html', origin); outer.searchParams.set('route', url.pathname + url.search + url.hash); return outer; }
   function navigate(target, replace = false) {
     const url = privateFrameUrl(target, origin);
@@ -46,9 +47,11 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
   }
   function exit(target, replace = true) {
     const url = new URL(target, origin);
-    if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password) return false;
+    if (url.origin !== origin || !['https:', 'http:'].includes(url.protocol) || url.username || url.password) return false;
     win.clearTimeout(logoutTimer); logoutHold = false;
     session.lock('exit'); iframe.remove();
+    const standalone = frameStandaloneTarget(url.href, origin);
+    if (standalone) url.search = standalone.search;
     if (replace) win.location.replace(url.href); else win.location.assign(url.href);
     return true;
   }
@@ -62,10 +65,10 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
     const value = residualInsets(measured, {width: root.clientWidth, height: root.clientHeight}, iframe.getBoundingClientRect());
     post({kind: 'insets', sequence: ++sequence, insets: value});
   }
-  async function admission() {
+  async function admission({fresh = false} = {}) {
     const before = identity(), generation = session.state().generation;
     if (!before) return false;
-    const permit = await readPermit(before.uid);
+    const permit = await readPermit(before.uid, {fresh});
     if (disposed || !await validateIdentity(before)) return false;
     const after = identity();
     return after?.uid === before.uid && after?.epoch === before.epoch &&
@@ -129,7 +132,7 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
   listen(win.document, 'visibilitychange', () => {
     mask(true); const epoch = ++visibilityEpoch;
     session.setVisibility(!win.document.hidden);
-    if (!win.document.hidden && !locked) void admission().then(ok => {
+    if (!win.document.hidden && !locked) void admission({fresh: true}).then(ok => {
       if (disposed || epoch !== visibilityEpoch) return;
       session.tick();
       if (!ok) session.lock('resume-denied');
@@ -186,14 +189,16 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
     },
     revokeFromChild(source, documentObject) {if (isOwnChild(source, documentObject)) session.lock('child-revoked');},
     syncFromChild(source, documentObject) {
-      if (!isOwnChild(source, documentObject) || locked) return;
-      route = privateFrameUrl(currentUrl(), origin); win.history.replaceState(null, '', outerUrl(route));
+      if (!ownsDocument(source, documentObject) || locked) return;
+      route = privateFrameUrl(currentUrl(), origin);
+      if (!route) {session.lock('route-denied'); return;}
+      win.history.replaceState(null, '', outerUrl(route));
     }
   });
   win.vaultFrameNavigation = facade;
   return Object.freeze({session, async start(target) {
     mask(true);
-    if (!await admission()) {session.lock('admission-denied'); return false;}
+    if (!await admission({fresh: true})) {session.lock('admission-denied'); return false;}
     const minutes = await readTimeout();
     if (disposed || locked || !await admission()) return false;
     session.setTimeouts(inactivityMilliseconds(minutes), invalidInactivityPreference(minutes));

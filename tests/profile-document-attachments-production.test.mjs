@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {effectiveHostingHeaders} from '../scripts/lib/hosting-frame-headers.mjs';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
@@ -132,8 +133,7 @@ test('regole integrate rendono metadati e oggetti server-only', async () => {
 
 test('Hosting limita fotocamera, microfono e rete locale alle origini previste', async () => {
     const hosting = JSON.parse(await read('firebase.json'));
-    const globalHeaders = hosting.hosting.headers.find(entry => entry.source === '**')?.headers || [];
-    const permissionsPolicy = globalHeaders.find(header => header.key === 'Permissions-Policy')?.value;
+    const permissionsPolicy = effectiveHostingHeaders(hosting.hosting, '/profilo_privato.html')['permissions-policy'];
     assert.match(permissionsPolicy, /(?:^|, )camera=\(self\)(?:, |$)/);
     assert.match(permissionsPolicy, /(?:^|, )microphone=\(self\)(?:, |$)/);
     assert.match(permissionsPolicy, /(?:^|, )geolocation=\(\)(?:, |$)/);

@@ -1,3 +1,4 @@
+import {createProductionFrameAdmission} from './vault-frame-admission.js';
 import {doc, onSnapshot} from '/assets/js/vendor/firebase-runtime.js';
 import {APP_VERSION} from '../../app-env.js';
 import {auth, db} from '../../firebase-config.js?v=1.2.268';
@@ -5,8 +6,6 @@ import {authSessionFence} from '../../auth-session-fence.js';
 import {getUserProfile} from '../data/vault-repository.js';
 import {createVaultFrameOwner} from './vault-frame-owner.mjs';
 
-// Deliberately closed in A2. B1 supplies the reviewed server admission boundary.
-export async function readVaultFramePermit() { return null; }
 
 let mounted = null, mountGeneration = 0;
 export async function startVaultFrame({user, securityManager, fenceTicket}) {
@@ -20,8 +19,10 @@ export async function startVaultFrame({user, securityManager, fenceTicket}) {
     ? {uid: user.uid, epoch} : null;
   let stopPreference = () => {}, preferenceEpoch = 0;
   const status = document.getElementById('frame-status'), resume = document.getElementById('frame-resume');
-  const owner = createVaultFrameOwner({window, iframe: document.getElementById('vault-frame'), release: APP_VERSION,
-    getIdentity, validateIdentity: valid, readPermit: readVaultFramePermit,
+  let owner;
+  const admission = createProductionFrameAdmission({user, fenceTicket, onDeny: () => owner?.session.lock('policy-revoked')});
+  owner = createVaultFrameOwner({window, iframe: document.getElementById('vault-frame'), release: APP_VERSION,
+    getIdentity, validateIdentity: valid, readPermit: admission.read,
     readTimeout: async () => (await getUserProfile(user.uid))?.lock_timeout,
     unlock: async (uid, {signal}) => {
       if (uid !== user.uid || !await valid({uid, epoch}) || signal.aborted) throw Error('FRAME_AUTH_DENIED');
@@ -39,8 +40,8 @@ export async function startVaultFrame({user, securityManager, fenceTicket}) {
         return !signal.aborted && await valid({uid: user.uid, epoch}) && !signal.aborted;
       } finally {signal.removeEventListener('abort', cancel);}
     }, clearMaterial: () => {if (generation === mountGeneration) securityManager.clearSession();},
-    onDispose: () => stopPreference(),
-    onState: state => {if (generation !== mountGeneration) return; if (state.locked) stopPreference(); status.hidden = !state.locked; resume.hidden = !state.locked;}
+    onDispose: () => {stopPreference(); admission.dispose();},
+    onState: state => {if (generation !== mountGeneration) return; if (state.locked) {stopPreference(); admission.dispose();} status.hidden = !state.locked; resume.hidden = !state.locked;}
   });
   mounted = owner;
   securityManager.setFrameExpiryAuthority(() => owner.session.state().expiresAt);

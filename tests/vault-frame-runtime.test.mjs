@@ -72,7 +72,7 @@ for (const reason of ['logout', 'background', 'lock', 'parent-pagehide']) test(`
 test('child document retirement retains only the parent key and revokes previous replies/grants', async () => {
   const f = fixture(), reply = await f.send('key');
   const grant = await f.send('fresh', {purpose: 'backup-export', target: 'vault'});
-  f.navigate('/profilo_privato.html?profileTab=documents#document');
+  f.navigate('/profilo_privato.html?profileTab=documents#documenti-view-container');
   assert.equal(await f.session.deliver(reply), false);
   assert.equal((await f.send('consume', {purpose: 'backup-export', target: 'vault', grant: grant.grant})).kind, 'error');
   assert.equal((await f.send('key')).material, 'SYNTHETIC-MATERIAL'); assert.equal(f.state.unlocks, 1);
@@ -148,7 +148,7 @@ for (const url of ['blob:https://fixture.invalid/x', 'data:text/html,x', 'about:
   '/profilo_privato.html?m6pilot=1', '/gestione_destinatari.html?return=https://other.invalid/',
   '/regole_scadenze.html?return=/form_account_privato.html', '/home_page.html#%00', '/%2568ome_page.html'])
   test(`route denied: ${url}`, () => assert.equal(privateFrameUrl(url, origin), null));
-for (const url of ['/home', '/profilo_privato.html?profileDocumentId=synthetic#section-email',
+for (const url of ['/home', '/profilo_privato.html?profileDocumentId=synthetic#documenti-view-container',
   '/form_account_privato.html?type=standard&linkShared=1#shared-credentials-section',
   '/regole_scadenze.html?return=aggiungi_scadenza.html%3FaccountSource%3D1',
   '/gestione_destinatari.html?return=form_account_azienda.html%3FaziendaId%3Dsynthetic',
@@ -162,8 +162,10 @@ test('insets reject coercion, CSS injection, nonfinite and oversized values', ()
   assert.deepEqual(residualInsets(valid, {width: 393, height: 852}, {left: 3, top: 40, right: 391, bottom: 822, width: 388, height: 782}),
     {top: 0, left: 0, right: 0, bottom: 0});
 });
-test('A2 production entry remains closed independently of query/storage and preserves headers/Rules scope', async () => {
+test('B1 entry uses a server-only gate, never a client UID allowlist', async () => {
   const root = new URL('../Frontend/public/assets/js/', import.meta.url);
-  assert.match(await readFile(new URL('app-env.js', root), 'utf8'), /VAULT_FRAME_ENABLED = false;/);
-  assert.match(await readFile(new URL('modules/core/vault-frame-production.js', root), 'utf8'), /readVaultFramePermit\(\) \{ return null; \}/);
+  assert.match(await readFile(new URL('app-env.js', root), 'utf8'), /VAULT_FRAME_ENABLED = true;/);
+  const adapter = await readFile(new URL('modules/core/vault-frame-admission.js', root), 'utf8');
+  assert.match(adapter, /getDocFromServer/); assert.match(adapter, /includeMetadataChanges: true/);
+  assert.doesNotMatch(adapter, /localStorage|sessionStorage/);
 });

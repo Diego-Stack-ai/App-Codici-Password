@@ -19,12 +19,28 @@ export const FRAME_ROUTES = Object.freeze({
   gestione_destinatari: ['return', 'companyKind', 'companyId', 'companyName']
 });
 
+export const FRAME_STANDALONE_QUERY = '__frame_standalone_once';
+export const FRAME_ANCHORS = Object.freeze({
+  modifica_azienda: ['section-fiscal-main','section-referente-main','section-locations-main','section-legale','section-emails-main','section-email','section-notes-main'],
+  form_account_privato: ['banking-section','shared-credentials-section','account-widgets-section'],
+  form_account_azienda: ['banking-section','shared-credentials-section','account-widgets-section'],
+  profilo_privato: ['profile-tabs','indirizzi-view-container','telefoni-view-container','email-view-container','documenti-view-container'],
+  dati_azienda: ['wrapper-email-section','referente-container','fiscal-container','allegati-container']
+});
+export function frameStandaloneTarget(target, origin) {
+  const url = privateFrameUrl(target, origin);
+  if (!url) return null;
+  url.searchParams.set(FRAME_STANDALONE_QUERY, '1'); return url;
+}
+
 export function privateFrameUrl(value, origin, nested = false) {
   try {
+    if (typeof value === 'string' && value.includes('\\')) return null;
     const url = new URL(value, origin);
     if (url.origin !== origin || !['https:', 'http:'].includes(url.protocol) || url.username || url.password || url.href.length > 4096) return null;
     if (url.pathname === '/home') url.pathname = '/home_page.html';
     const match = /^\/([a-z_]+)\.html$/.exec(url.pathname), allowed = match && FRAME_ROUTES[match[1]];
+    if (url.hash && !(FRAME_ANCHORS[match?.[1]] || []).includes(url.hash.slice(1))) return null;
     if (!allowed || /[\u0000-\u001f\u007f]/.test(decodeURIComponent(url.search + url.hash))) return null;
     for (const [key, value] of url.searchParams) {
       if (!allowed.includes(key) || url.searchParams.getAll(key).length !== 1 || value.length > 1024) return null;

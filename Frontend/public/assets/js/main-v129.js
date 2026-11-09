@@ -351,6 +351,15 @@ async function bootstrapMain() {
                     return;
                 }
 
+                if (isPrivatePage && VAULT_FRAME_ENABLED && window.parent === window) {
+                    try {
+                        const {maybeEnterVaultFrame} = await import('./modules/core/vault-frame-routing.js');
+                        if (!gate.active(authAttempt)) return;
+                        if (await maybeEnterVaultFrame({user, fenceTicket})) return;
+                    } catch { /* Unverifiable admission preserves the ordinary standalone flow. */ }
+                    if (!gate.active(authAttempt) || !await authSessionFence.isCurrent(fenceTicket)) return;
+                }
+
                 if (isPrivatePage) {
                     let vaultKeyMaterial = null;
                     try {

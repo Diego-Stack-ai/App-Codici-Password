@@ -1,5 +1,23 @@
 # Collaudi
 
+<a id="cornice-b1-verifiche-2026-11-09"></a>
+
+## Cornice B1 — verifiche candidate, 09/11/2026
+
+Prerequisito verificato: [GO Claude A2](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6751236506), commit `455b41fc4f3bc86e0b9f9df48ccb9f5623309060`. La CI effettiva è [#1044](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42695875669), sullo stesso SHA e con validate/docs/Gitleaks riusciti; il #1043 citato dal revisore è un refuso. Claude dichiara 116/116 test della cornice ripetuti. Questo è il GO di A2, non di B1.
+
+B1 sul medesimo ramo/PR #278: singleton server individuale fuori dalle preferenze utente, schema chiuso e scadenza server; scritture/list/query negate, identità verificata e fence di recupero richiesti. Adapter SDK con listener e metadati reali, stato solo RAM, letture fresche in ingresso/ripresa/azioni sensibili, deadline anche sulle letture fresche e invalidazione dei GET precedenti alla sospensione. Routing canonico prima dello sblocco, marker di solo diniego contro i loop, anchor per route e uscite esterne esplicite senza opener. Nessuna nuova Function o modifica Storage/workflow.
+
+Rules: `npm run test:firestore-rules` **107/107 PASS**, compresi 13 nuovi casi del permesso. Emulatore Firestore demo, dati e UID sintetici; il test con SDK effettivo riceve il diniego dopo disabilitazione amministrativa del documento. Anonimo, estraneo, non verificato, documento malformato/scaduto/assente, recupero attivo, scritture e query non autorizzano. Non è una verifica delle Rules già in produzione.
+
+Header: emulatore Hosting ufficiale con configurazione candidata, 35 HTML inclusi anteprime, root/alias/query e varianti negative; una sola CSP/XFO/Permissions Policy prevista per risposta. Browser Chrome effettivo: figlia same-origin ammessa, cornice incorniciata negata, sito estraneo negato. Cache matcher preesistenti conservati: il banco Windows non ne certifica l'applicazione HTTP, perché il normalizzatore dell'emulatore converte i glob in backslash. Non è una prova di difetto della cache in produzione. Nosniff e Referrer-Policy mantengono i valori originali nei profili disgiunti e sono controllati via HTTP. La verifica remota del manifest viene estesa ai profili HTML, alias e risposte negative, con un controllo negativo di deriva a payload identico.
+
+Suite finale dedicata `npm run test:vault-frame-runtime`: **156/156 PASS**, sette file (runtime 55, navigazione 30, confini 19, permesso/routing/adapter 33, browser runtime 10, browser media 4, header HTTP/browser 5). Il banco usa i moduli effettivi con identità e documenti sintetici; il listener SDK/Rules usa l'emulatore demo. Verificati timeout del GET, invalidazione della verifica precedente al background, timer di un GET superato incapace di revocare la policy nuova, UID/fence/documento cambiati durante l'attesa, uscita esterna senza opener e hash non ammesso che revoca e rimuove il figlio. `release-manifest` 6/6 e contratto Profilo 7/7; sintassi JS, assenza cicli e budget statico riusciti. Runtime offline: 61 export/337 risorse, anteprime sempre escluse. Nessuna emulazione browser equivale ai dispositivi fisici.
+
+`npm test` termina con codice 0: **3440 casi / 3430 PASS / 0 FAIL / 0 cancellati / 10 skip in 64 gruppi**. L'ultimo fix circoscritto al timer del GET superato e i due test aggiunti sono successivi all'avvio della regressione e già ricontrollati nella suite dedicata finale 156/156: il log generale non viene presentato come esecuzione monolitica del sorgente finale. La CI deve ancora verificare l'intero nuovo SHA; il suo esito resta distinto. Le correzioni del banco durante lo sviluppo e i loro tentativi falliti non vengono sommati come PASS. Le ricevute tecniche restano in .codex-tmp, escluse da Git. Mappa Graphify aggiornata solo sul codice; Gitleaks sull'indice senza nuovi segreti; nessun contenuto reale, credenziale o UID personale usato nei test. Audit documentale: 34 MD/788 collegamenti, test 12/12. Confronto con A2: configurazioni backend, definizioni cache, redirect, rewrite e baseline effettiva degli header root invariati.
+
+Limiti: nessun permesso reale predisposto, nessuna Rules/Hosting pubblicata o anteprima Firebase attivata; produzione ancora 1.2.267. Candidata 1.2.268, raccordo compilato attivo ma ammissione negata in assenza del documento server valido. B2/C1 e Auth/App Check/PRF, fotocamera/microfono reali e i quattro dispositivi non collaudati. Attendere GO B1 di Claude prima di B2; merge/deploy e provisioning individuale solo secondo B3 e approvazione personale di Diego. Nessun avviso CORNICE CHIUSA.
+
 <a id="cornice-a2-preparazione-2026-11-09"></a>
 
 ## Cornice A2 — candidata reale spenta, 09/11/2026
