@@ -1,0 +1,80 @@
+/* Direzione 3 — «Scura sicura»
+   Sul modello dei gestori di password professionali: grafite profonda, un accento indaco,
+   righe compatte con icone quadrate, titoli forti a sinistra, gerarchia data dai toni di grigio.
+   Il tema chiaro resta disponibile in versione «carta», con la stessa struttura. */
+:root {
+    --accento: #4c5fd5;
+    --su-accento: #fff;
+    --accento-tenue: rgb(76 95 213 / 12%);
+    --pericolo: #c92a2a;
+    --sfondo: #f6f6f8;
+    --superficie: #fff;
+    --superficie-2: #eef0f4;
+    --bordo: #e2e4ea;
+    --testo: #14161b;
+    --testo-tenue: #5f6573;
+    --spazio-fondo: 96px;
+    --raggio-avatar: 10px;
+    --raggio-avatar-grande: 22px;
+    --raggio-campo: 12px;
+}
+:root[data-tema="scuro"] {
+    --accento: #8b9bff;
+    --su-accento: #0d0f1a;
+    --accento-tenue: rgb(139 155 255 / 14%);
+    --pericolo: #ff8787;
+    --sfondo: #0e0f13;
+    --superficie: #171920;
+    --superficie-2: #1f222b;
+    --bordo: #2a2e3a;
+    --testo: #eceef4;
+    --testo-tenue: #9198a8;
+    --avviso-sfondo: #eceef4;
+    --avviso-testo: #0e0f13;
+}
+
+.barra-alta { background: var(--sfondo); }
+.vista-lista .barra-titolo { opacity: 0; transition: opacity 0.2s; }
+body.scorrito .vista-lista .barra-titolo { opacity: 1; }
+body.scorrito .vista-lista .barra-alta { border-bottom: 1px solid var(--bordo); }
+.vista-lista .barra-alta { grid-template-columns: 56px 1fr 56px; }
+.barra-titolo { text-align: left; padding-left: 4px; }
+.vista-dettaglio .barra-titolo { text-align: center; }
+
+.testata { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 4px 4px 14px; }
+.titolo-grande { font-size: 30px; font-weight: 800; letter-spacing: -0.03em; }
+.conteggio { font-size: 13px; font-weight: 700; color: var(--testo-tenue); padding: 2px 10px; border-radius: 999px; background: var(--superficie-2); }
+
+.ricerca { background: var(--superficie-2); border-radius: 12px; }
+.filtro { border-color: var(--bordo); background: transparent; color: var(--testo-tenue); font-weight: 700; min-height: 32px; font-size: 13px; }
+.filtro[aria-pressed="true"] { color: var(--su-accento); }
+
+.gruppo { margin-top: 18px; }
+.gruppo-titolo { font-size: 12px; font-weight: 800; color: var(--accento); padding-left: 8px; }
+.lista { display: grid; gap: 2px; }
+.riga { min-height: 60px; border-radius: 12px; padding: 8px 10px; }
+.riga:hover, .riga:active { background: var(--superficie-2); }
+.riga-titolo { font-size: 15px; }
+.riga-sottotitolo { font-size: 13px; }
+.etichetta { font-size: 11px; }
+
+/* Dettaglio: blocchi pieni su fondo scuro, nessun riquadro da form in sola lettura */
+.eroe { justify-items: start; text-align: left; grid-template-columns: auto 1fr; column-gap: 16px; align-items: center; padding: 12px 4px 20px; }
+.eroe .avatar { grid-row: span 2; }
+.eroe-titolo { font-size: 24px; letter-spacing: -0.02em; }
+.azioni-rapide { gap: 10px; }
+.azione-rapida { background: var(--accento-tenue); border-radius: 14px; font-weight: 700; }
+.sezione-titolo { font-size: 12px; font-weight: 800; color: var(--testo-tenue); padding-left: 8px; }
+.lista-campi { background: var(--superficie); border: 1px solid var(--bordo); border-radius: 16px; gap: 0; overflow: hidden; }
+.lista-campi > li + li { border-top: 1px solid var(--bordo); }
+.campo-etichetta { font-size: 12px; font-weight: 700; }
+.campo-valore { font-size: 15px; font-weight: 600; }
+.campo-input { background: var(--superficie-2); border-color: var(--bordo); }
+.campo-input:focus { border-color: var(--accento); outline: none; }
+
+.fab { border-radius: 16px; bottom: calc(84px + env(safe-area-inset-bottom)); box-shadow: 0 8px 24px rgb(0 0 0 / 30%); }
+body[data-vista="dettaglio"] .fab { display: none; }
+.barra-schede { background: var(--superficie); border-top: 1px solid var(--bordo); }
+.scheda[aria-current="page"] { position: relative; }
+.scheda[aria-current="page"] .icona { background: var(--accento-tenue); border-radius: 999px; padding: 2px 16px; }
+.avviso { bottom: calc(150px + env(safe-area-inset-bottom)); }

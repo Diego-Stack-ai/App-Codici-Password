@@ -288,6 +288,8 @@ Contratto M3 per distinguere le funzioni reali dai percorsi storici di compatibi
 - Nuove pagine con suffissi di versione sono vietate. Le evoluzioni modificano la pagina canonica e sono protette da Git e test.
 - Redirect storici e laboratori non appartengono al runtime pubblico; non sono previste eccezioni temporanee alla superficie canonica.
 
+Il [mandato esplicito del 09/11/2026](../progetto/INCARICO_CORRENTE.md#pubblicazione-prove-grafiche-2026-11-09) autorizza esclusivamente la pubblicazione separata delle quattro prove grafiche in `/ui-preview/ui-prove/`. Le 30 pagine canoniche e il loro contratto restano invariati; questa eccezione non autorizza altri laboratori o l'adozione delle proposte nell'app. Le prove utilizzano soltanto dati inventati, senza accesso ai servizi applicativi.
+
 <a id="fonte-docs-canonical-page-registry-md-compatibilità-home"></a>
 
 ### Compatibilità Home
