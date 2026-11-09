@@ -138,24 +138,56 @@ test(`${label} header occludes text and controls while scrolling`, {timeout: 120
       await page.setViewportSize(viewport);
       for (const dark of [false, true]) for (const palette of ['blue', 'lavender']) {
         await page.setContent(`<!doctype html><html class="${dark ? 'dark' : ''}" data-color-theme="${palette}"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>${await fixtureStyles(name)}</style></head><body class="${bodyClass}"><div class="base-container">${header.replace('</header>', controls + '</header>')}<main class="base-main"><div class="page-container pt-header-extra pb-footer-extra"><div class="hero-profile-header"><div style="height:220px">Profilo inventato</div></div>${nav}<section class="form-section"><div style="height:100px"></div><button id="under-header" style="display:block;height:44px;width:260px;max-width:100%;background:repeating-linear-gradient(45deg,#e00000 0 8px,#000 8px 16px);color:white;border:0;font-size:20px">SEZIONE E AZIONI</button><div style="height:1800px"></div></section></div></main><footer class="base-footer"></footer></div></body></html>`);
-        await page.evaluate(() => {
+        const geometry = await page.evaluate(async () => {
           window.fixtureClicks = {header: 0, underlying: 0};
           document.querySelector('#header-action').onclick = () => window.fixtureClicks.header++;
           document.querySelector('#under-header').onclick = () => window.fixtureClicks.underlying++;
+          await document.fonts.ready;
           const main = document.querySelector('.base-main');
           const scroller = getComputedStyle(main).overflowY === 'auto' ? main : document.scrollingElement;
+          // Only the synthetic scroller: prevent anchoring from moving the probe
+          // after its height changes, then wait for actual rendered geometry.
+          scroller.style.overflowAnchor = 'none';
+          scroller.style.scrollBehavior = 'auto';
           const bar = document.querySelector('.base-header').getBoundingClientRect();
           document.querySelector('#under-header').style.height = `${bar.height - 2}px`;
+          // Reduced motion can retain a very short height transition: a single
+          // animation frame may still report the original 44px probe.
+          const heightStarted = performance.now();
+          let heightFrames = 0;
+          while (heightFrames < 2) {
+            await new Promise(requestAnimationFrame);
+            const height = document.querySelector('#under-header').getBoundingClientRect().height;
+            heightFrames = height === bar.height - 2 ? heightFrames + 1 : 0;
+            if (heightFrames < 2 && performance.now() - heightStarted > 2000) {
+              throw new Error('synthetic probe height did not settle: ' + JSON.stringify({height, expected: bar.height - 2}));
+            }
+          }
           const probe = document.querySelector('#under-header').getBoundingClientRect();
           scroller.scrollTop += (probe.top + probe.bottom - bar.top - bar.bottom) / 2;
+          let previous = '';
+          let stableFrames = 0;
+          let result;
+          const started = performance.now();
+          do {
+            await new Promise(requestAnimationFrame);
+            const band = document.querySelector('.base-header').getBoundingClientRect();
+            const target = document.querySelector('#under-header').getBoundingClientRect();
+            result = {bar: band.toJSON(), probe: target.toJSON(), scrollTop: scroller.scrollTop,
+              scrollHeight: scroller.scrollHeight, clientHeight: scroller.clientHeight,
+              overflowY: getComputedStyle(scroller).overflowY, fontsStatus: document.fonts.status};
+            const signature = JSON.stringify(result);
+            stableFrames = signature === previous ? stableFrames + 1 : 0;
+            previous = signature;
+            if (stableFrames >= 2 && target.top >= band.top && target.bottom <= band.bottom) {
+              return {...result, stable: true};
+            }
+          } while (performance.now() - started < 2000);
+          return {...result, stable: false};
         });
-        const geometry = await page.evaluate(() => {
-          const bar = document.querySelector('.base-header').getBoundingClientRect();
-          const probe = document.querySelector('#under-header').getBoundingClientRect();
-          return {bar: bar.toJSON(), probe: probe.toJSON()};
-        });
-        assert.ok(geometry.probe.top >= geometry.bar.top && geometry.probe.bottom <= geometry.bar.bottom,
-          'put the contrasting content inside the header band before checking visibility');
+        assert.ok(geometry.stable && geometry.probe.top >= geometry.bar.top && geometry.probe.bottom <= geometry.bar.bottom,
+          'put stable contrasting content inside the header band before checking visibility: ' +
+          JSON.stringify({name, viewport, dark, palette, ...geometry}));
         const clip = {x: Math.ceil(geometry.bar.left), y: Math.ceil(geometry.bar.top),
           width: Math.floor(geometry.bar.width), height: Math.floor(geometry.bar.height)};
         const shown = await page.screenshot({clip, animations: 'disabled'});
