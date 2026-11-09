@@ -1,5 +1,15 @@
 # Incarico corrente
 
+<a id="ui-overlap-followup-2026-11-09"></a>
+
+## Segnalazioni visive residue dopo la 1.2.266 — 09/11/2026
+
+Diego mostra schermate di Profilo nelle sezioni Documenti e Indirizzi: titoli/azioni traspaiono nella fascia superiore e i metadati degli allegati invadono il cestino. Il lavoro corrente prepara una correzione mirata su ramo `codex/ui-overlap-followup-20261109`, base `02292799`, con soli dati sintetici. La 1.2.266 rimane online; la candidata è **1.2.267**, non pubblicata. La cornice della PR #278 resta un lavoro distinto e non viene modificata.
+
+Perimetro: intestazione coprente delle sole pagine che importano profile-layout (Profilo e Dati azienda), conservando altezza, safe area, footer e scroller; metadati completi degli allegati Profilo su spazio separato dal comando Elimina e bersaglio tattile coerente; prove browser di compositing/reflow e bump canonico. Nessuna apertura della Vault, dei documenti o del Chrome personale di Diego, né uso di foto o dati reali nelle fixture o nel confronto con Claude. Nessuna modifica a workflow, Rules, Functions, Auth, dati, cifratura o operazioni di cancellazione.
+
+Si prepara una PR separata con test e revisione consultiva di Claude sul diff prima di qualsiasi futuro merge. Nessun rilascio o approvazione production deriva dalla sola segnalazione o dai test: la delega della #1030 resta limitata a quella run. Il controllo fisico iPhone/Safari/PWA conserva il proprio gate. [Contratto](../regole/INTERFACCIA.md#profile-occlusion-followup-2026-11-09), [prove](../evidenze/COLLAUDI.md#ui-overlap-followup-2026-11-09).
+
 ## Delega puntuale e pubblicazione UI conclusa — 09/11/2026
 
 Diego ordina direttamente «Approva e distribuisci» per la run Hosting #1030 già pronta, sorgente `193f4768`. La delega autorizza Codex a inviare questo singolo clic dall'interfaccia GitHub e sostituisce la precedente riserva personale soltanto per questa run. Non autorizza approvazioni future, modifiche alle protezioni, altre distribuzioni o attivazione della cornice. Commento e risposta API registrano la delega puntuale.

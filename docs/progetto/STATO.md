@@ -2,6 +2,9 @@
 
 <a id="stato-corrente"></a>
 
+09/11/2026 — **Follow-up UI candidato 1.2.267, non pubblicato**, ramo `codex/ui-overlap-followup-20261109`, base `02292799`: header coprente di Profilo/Dati azienda e metadati allegati Profilo separati dal cestino. Prima della correzione i nuovi tre browser falliscono sui difetti osservati; dopo, fondazioni UI **15/15 PASS** e Stylelint riuscito. Bump canonico preparato, check della PR e parere Claude ancora da acquisire; nessuna prova fisica iPhone dichiarata. [Mandato](INCARICO_CORRENTE.md#ui-overlap-followup-2026-11-09), [ricevuta](../evidenze/COLLAUDI.md#ui-overlap-followup-2026-11-09). La produzione rimane **1.2.266**, attestata qui sotto, e la cornice è un lavoro distinto.
+
+
 09/11/2026 — **Produzione 1.2.266 pubblicata e verificata**, Hosting [#1030](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42619309846), sorgente `193f4768ff67f047a0701a3c6fbc581308e04ded`. Manifest e **341/341 hash** corrispondono; precache 321 risorse, zero anteprime, 17 anteprime ancora online. Scope solo hosting, backend saltato. Il clic è eseguito da Codex sulla delega diretta di Diego limitata a questa run, registrata nel commento e confermata via API; nessuna modifica alle protezioni. [Ricevuta](../evidenze/COLLAUDI.md#css-profilo-pubblicazione-1-2-266).
 
 **Cornice Vault ancora non attivata:** PR #278 in bozza, laboratorio sintetico distinto; non risolve ancora lo sblocco a ogni pagina nell'app online. Il controllo fisico iPhone chiaro/scuro e due palette resta rinviato e non eseguito. Nessuna nuova verifica produttiva di Claude è attribuita al precedente parere statico. I paragrafi seguenti documentano le fasi antecedenti, non lo stato corrente; i successivi commit delle ricevute non sostituiscono il sorgente Hosting.

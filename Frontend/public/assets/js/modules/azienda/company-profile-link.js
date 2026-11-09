@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.266';
+import { auth, db } from '../../firebase-config.js?v=1.2.267';
 import { doc } from '/assets/js/vendor/firebase-runtime.js';
 import { getCompany } from '../data/vault-repository.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';

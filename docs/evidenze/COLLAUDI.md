@@ -1,5 +1,19 @@
 # Collaudi
 
+<a id="ui-overlap-followup-2026-11-09"></a>
+
+## Residui di copertura header e metadati allegati — candidata 1.2.267, 09/11/2026
+
+Ramo isolato `codex/ui-overlap-followup-20261109`, base `0229279980cdb2d3524091403ad1ac785cda8e8d`. Le schermate di Diego riguardano Chrome PC; nessun dato personale, foto o contenuto Vault è importato nelle fixture o nel pacchetto per il revisore. Le precedenti prove verdi 1.2.266 verificavano posizione e hit testing delle linguette, non il compositing dell'header e non le card degli allegati: non dimostravano assenza dei due residui.
+
+Riproduzione prima della correzione, `node --test --test-name-pattern 'header occludes|attachment metadata' tests/profile-scroll.browser.test.mjs`: **tre fallimenti attesi**, header Profilo, header Dati azienda e metadati degli allegati. A 320px la stringa dimensione/data invadeva il cestino e usciva di 79px dalla propria colonna. Le due immagini dell'header con/senza contenuto contrastato sottostante differivano: hit testing corretto e sfondo delle linguette non bastavano a impedire la trasparenza.
+
+Correzione locale in due CSS: header coprente e pseudo-velo neutralizzato nel solo foglio dei due profili; footer degli allegati Profilo con metadati a larghezza piena, ritorno a capo e cestino su riga distinta/target minimo. La prima soluzione con solo ritorno a capo superava l'assenza di collisione ma spezzava male le date sulle card strette: dopo ispezione degli artefatti sintetici si separa la riga del cestino, mantenendo tutta l'informazione visibile. Nessuna modifica JavaScript funzionale o handler.
+
+`npm run test:ui-foundations`: **15/15 PASS**, zero skip (6 tema, 3 contratto colori, 6 browser). I tre browser aggiunti coprono due profili con confronto pixel della fascia header, titoli/controlli sintetici intenzionalmente sottostanti, click del comando header senza click-through; inoltre card immagine/file con nomi lunghi, dimensione e data, rettangoli del testo, contenimento e click Elimina senza apertura. Header: 320/393/1280px, chiaro/scuro e palette blu/lavanda. Allegati: 320/360/393/1280px e testo 16/24/32px. Artefatti prima/dopo solo locali in .codex-tmp e ispezionati; nessun dato reale.
+
+Stylelint globale superato. Lint eseguito con le dipendenze già presenti, senza installare o aggiornare pacchetti. Il collegamento locale temporaneo non è compatibile con la scansione MD: rimosso il solo collegamento, mantenendo il controllo documentale invariato e usando il percorso esplicito del linter. Bump canonico 1.2.266 → 1.2.267, 264 riferimenti in 104 file, worker e versione coerenti: non equivale a distribuzione. Catalogo guida riesaminato rispetto ai due profili: comandi, testi e target restano validi, incluso cestino/conferma; sola reviewedAppVersion allineata alla candidata, senza introdurre nuovi testi o certificazioni linguistiche. Restano check completi della PR, revisione di Claude sul candidato e prove fisiche; nessun parere del revisore è attribuito in anticipo. Produzione **1.2.266 / Hosting #1030 / 193f4768**, cornice non attivata, 34 MD invariati.
+
 <a id="css-profilo-pubblicazione-1-2-266"></a>
 
 ## Pubblicazione verificata UI 1.2.266 — 09/11/2026
