@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Prova 4 – Profilo: oggi e proposta</title>
+  <script src="tema-init.js"></script>
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="profilo.css">
+</head>
+<body data-modo="proposta">
+  <div class="app">
+    <section class="vista" aria-label="Profilo utente">
+      <header class="barra-alta">
+        <a class="btn-icona" href="index.html" aria-label="Torna alla scelta delle prove"><span class="icona" aria-hidden="true">arrow_back</span></a>
+        <p class="barra-titolo">Profilo</p>
+        <button class="btn-icona" type="button" data-azione="tema" aria-label="Cambia tema"><span class="icona" aria-hidden="true">brightness_auto</span></button>
+      </header>
+      <div class="comandi">
+        <div class="commutatore" role="group" aria-label="Versione da vedere">
+          <button type="button" data-modo="oggi" aria-pressed="false">Oggi</button>
+          <button type="button" data-modo="proposta" aria-pressed="true">Proposta</button>
+        </div>
+        <div class="linguette" role="tablist" aria-label="Sezioni del profilo">
+          <button type="button" role="tab" data-linguetta="contatti" aria-selected="true" aria-controls="contenuto">Contatti</button>
+          <button type="button" role="tab" data-linguetta="indirizzi" aria-selected="false" aria-controls="contenuto">Indirizzi</button>
+          <button type="button" role="tab" data-linguetta="documenti" aria-selected="false" aria-controls="contenuto">Documenti</button>
+        </div>
+      </div>
+      <div class="scorrevole" id="contenuto" role="tabpanel"></div>
+    </section>
+    <div id="visore" class="visore" role="dialog" aria-modal="true" aria-label="Foto del documento" hidden></div>
+    <div id="avviso" class="avviso" role="status" aria-live="polite"></div>
+  </div>
+  <script type="module" src="profilo.js"></script>
+</body>
+</html>
