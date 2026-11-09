@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="pubblicazione-prove-grafiche-2026-11-09"></a>
+
+## Pubblicazione isolata delle prove grafiche — 09/11/2026
+
+Diego autorizza la pubblicazione delle tre direzioni Account («Rifinita», «Stile iPhone», «Scura sicura») e della distinta prova Profilo «Oggi/Proposta», ricavate esclusivamente dai bundle Claude `e5387777` e `b9432851`. I 17 file sono confinati in `Frontend/public/ui-preview/ui-prove/`, con il necessario aggiornamento della precache; i documenti arretrati e gli altri commit del ramo Claude non vengono importati. Dati inventati, modifiche in memoria, nessun accesso a Firebase o Vault; soltanto la preferenza del tema viene conservata localmente. Le proposte non sono adottate nell'interfaccia dell'app.
+
+Le prove Account sono isolate nel commit `91084186`; il Profilo nel successivo `3f161bfd`. Ciascun commit include il proprio aggiornamento della precache, da ripristinare insieme alle risorse in caso di rollback. La registrazione del mandato è separata dai due commit dimostrativi. Solo Hosting, attraverso PR, check obbligatori, parere di Claude prima del merge e workflow CI con approvazione personale di Diego. Nessuna modifica a backend, Rules, workflow o dati reali. L'app **1.2.265**, sorgente `f2e810a7`, è già pubblicata; le prove sono ancora candidate e saranno dichiarate online soltanto dopo la verifica del relativo deploy. Le sezioni precedenti del recupero 2FA conservano la cronologia della preparazione, non lo stato corrente della produzione.
+
 ## Delega esplicita del solo commit workflow — 09/11/2026
 
 Diego delega direttamente a Codex il passaggio del workflow già preparato e incollato nell'editor GitHub. Questa eccezione sostituisce la precedente riserva di commit personale **soltanto per quel file e per il contenuto approvato**; non estende accessi, permessi di pubblicazione o approvazioni production. Il testo nell'editor è confrontato per intero con l'impronta consegnata prima del commit, poi verificato nuovamente dal blob remoto.
