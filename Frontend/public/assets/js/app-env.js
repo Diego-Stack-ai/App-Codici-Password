@@ -4,7 +4,7 @@
  * della release sono gestiti da APP_VERSION e dallo script di rilascio.
  */
 export const APP_ENV = document.documentElement.dataset.env || 'production';
-export const APP_VERSION = 'v1.2.265';
+export const APP_VERSION = 'v1.2.266';
 
 // Explicit intent always selects a safe screen, including while unavailable.
 // No storage, environment, hostname or query parameter may enable the feature.

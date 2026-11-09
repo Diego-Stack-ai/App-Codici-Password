@@ -166,7 +166,7 @@ html:not(.dark) .account-card .swipe-content {
 }
 
 .account-card:hover .swipe-content {
-    border-color: rgb(var(--accent-rgb) / );
+    border-color: rgba(var(--accent-rgb), 0.3 );
 }
 
 /* Layout */
@@ -309,8 +309,8 @@ html:not(.dark) .account-card-subtitle {
 
 .btn-mini-action.active {
     color: var(--accent);
-    background: rgb(var(--accent-rgb) / );
-    border-color: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.1 );
+    border-color: rgba(var(--accent-rgb), 0.2 );
 }
 
 .account-leave-button {

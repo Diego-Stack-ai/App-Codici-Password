@@ -1,5 +1,29 @@
 # Collaudi
 
+<a id="css-profilo-candidata-1-2-266"></a>
+
+## Integrazioni della candidata CSS/Profilo 1.2.266 — 09/11/2026
+
+Codice integrato nel commit `1126e5b6c2a31f9e668fba8a29db1660a4184f85`, [PR #277](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/277) in bozza sulla base `449c5832`. Check `validate`, `docs` e `Gitleaks on changed commits` verdi. [Run completa #1027](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42608767001), job validate riuscito in 10m57s: **3.231 casi, 3.221 passati, zero falliti, zero cancellati, 10 skip in 62 gruppi**. I tre browser passano sul runner, senza modifica del workflow o rimozione/skip dei test. Versionamento e manifest candidato superati: 341 file, merge temporaneo GitHub `b6cb9f00a9317bfa0e6a954569ebc72a1610d4ce`, impronta dell'albero pubblico `90d8706b24b70aa7263f2ddab1880ed5993e7f0b191276ed5e877d930cb6e992`. Quello SHA non è un rilascio: il job deploy è saltato. La ricevuta successiva modifica soltanto MD; nessun nuovo parere di Claude o controllo fisico è attribuito a questo esito CI.
+
+Il parere riportato da Diego sulla candidata base `449c5832` è un GO con riserve dopo lettura completa del diff; Claude non ha rieseguito gli 11 test allora registrati. Le integrazioni successive definiscono `--header-height: 85px` nelle fasce comuni, applicato a header, contenitore bilanciato e offset delle linguette, con safe area sommata una sola volta. Fondo opaco tematico comune per Profilo privato e Dati azienda; rimosso anche l'override aziendale trasparente più specifico. Spaziatura privata riallineata al token mantenendo il margine editoriale. Nessun nuovo livello globale né modifica del bootstrap.
+
+Le fixture browser leggono markup delle linguette e ordine CSS dalle due pagine reali, con rete bloccata; verificano chiaro/scuro a 393×852 e 1280×900, altezza canonica e override a 100px, scorrimento effettivo, azione intenzionalmente coperta dalla banda e cliccabilità dopo lo scorrimento. Gate fondazioni UI **12/12** (6 tema, 3 contratto colori, 3 browser), offline **16/16**, cache/residui **10/10** e Stylelint globale superati. I primi tentativi della fixture estesa non avevano coda di contenuto sufficiente per portare l'ultima azione sotto la banda; aumentata la sola altezza sintetica, senza indebolire gli assert. La build richiede le dipendenze nel worktree: collegamento locale alla cartella già presente, senza aggiornamenti npm. Non sono prove fisiche iPhone/Safari/PWA.
+
+Bump tramite `npm run version:bump -- 1.2.266`: versione, lock, riferimenti asset e cache worker coerenti. La build canonica produce **321 risorse offline**, escluse le 17 anteprime mediante politica condivisa fra generatore e audit. Test sui percorsi esclusi e sul worker reale in harness: anteprime HTML/CSS/JS, anche con query, non intercettate e nessuna scrittura cache. Le risorse pubbliche restano sul filesystem e nel perimetro Hosting; la cache HTTP del browser è distinta. La nuova cache di versione elimina quella precedente all'attivazione del worker. Nessun deploy eseguito e manifest di rilascio generato soltanto con il relativo SHA.
+
+Il ripristino delle trasparenze può cambiare l'aspetto di tutte le pagine interessate: controllo di Diego su iPhone, chiaro/scuro e almeno due palette ancora aperto. Servono inoltre check CI e nuova revisione di Claude sulla PR prima del merge. L'elenco resta di 34 MD; ricevute e catalogo distinguono candidata e produzione 1.2.265. La verifica diretta della risposta server resta non eseguita, distinta dalla lettura del codice.
+
+<a id="rilievi-css-profilo-locali-2026-11-09"></a>
+
+## Prima verifica CSS/Profilo, precedente alle integrazioni — 09/11/2026
+
+Base `449c5832`, nessuna pubblicazione. Confermate 110 dichiarazioni con alpha mancante in 25 CSS. L'analisi storica le riconduce alla modifica `d99a3960` dell'08/10; il parent `da3c6339` consente il recupero univoco di tutti i valori mediante contesto selettore/at-rule/proprietà, compresa una rinomina successiva. Sono inoltre normalizzate 55 funzioni con alpha già presente, perché le triplette del token e dei producer JavaScript contengono virgole. Risultato: 165 funzioni corrette in 27 CSS; token, valori preesistenti e JavaScript preservati. Un controllo indipendente ricostruisce le associazioni senza usare il rapporto del generatore come oracolo.
+
+Nel solo Profilo privato le linguette avevano offset di ripiego 64px, mentre l'header reale misura 85px oltre alla safe area, e sfondo trasparente. La candidata usa un selettore locale, offset coerente e fondo opaco; nessun nuovo livello globale o cambiamento delle fasce comuni. La barra Azienda non è selezionata dalla nuova regola.
+
+Regressione prima/dopo con CSS reali su fixture Chrome isolate e rete bloccata: prima si riproducono funzioni colore invalide e barra trasparente; dopo gate fondazioni UI **11/11**, compresi i test del tema, dei colori risolti e dei tre pulsanti del Profilo, lo scroll del solo contenitore centrale, l'intersezione intenzionale fra pulsante e banda delle linguette e la successiva raggiungibilità dell'azione. Stylelint, shell delle pagine e riferimenti statici superati. Il nuovo controllo Stylelint intercetta alpha mancanti e separatori incompatibili; i test coprono anche funzioni RGB seguite da URL validi. Sono prove locali Chromium, non Safari fisico, PWA o verifica autenticata dell'app completa. Claude riceve una fotografia immutabile e fornisce un parere consultivo sulla roadmap e sul banco di prova, dichiarando di non avere potuto rileggere integralmente il diff CSS. Il riscontro non costituisce revisione finale della candidata o GO al merge/deploy; nessuna verifica produttiva è attribuita al revisore.
+
 <a id="prove-grafiche-hosting-2026-11-09"></a>
 
 ## Pubblicazione separata delle quattro prove grafiche — 09/11/2026

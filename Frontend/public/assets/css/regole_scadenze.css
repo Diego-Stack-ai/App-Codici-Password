@@ -40,11 +40,11 @@
 .deadline-hub-badge,
 .deadline-concept-state {
     flex: 0 0 auto;
-    border: 1px solid rgb(var(--accent-rgb) / 0.35);
+    border: 1px solid rgba(var(--accent-rgb), 0.35);
     border-radius: 999px;
     padding: 0.4rem 0.7rem;
     color: var(--accent);
-    background: rgb(var(--accent-rgb) / 0.08);
+    background: rgba(var(--accent-rgb), 0.08);
     font-size: var(--fs-micro);
     font-weight: 800;
     letter-spacing: 0.06em;
@@ -89,16 +89,16 @@
 .deadline-domain-tab:hover,
 .deadline-domain-tab:focus-visible {
     color: var(--text-primary);
-    border-color: rgb(var(--accent-rgb) / 0.6);
-    background: rgb(var(--accent-rgb) / 0.06);
+    border-color: rgba(var(--accent-rgb), 0.6);
+    background: rgba(var(--accent-rgb), 0.06);
     transform: translateY(-1px);
 }
 
 .deadline-domain-tab.is-active {
     color: var(--text-primary);
-    border-color: rgb(var(--accent-rgb) / 0.45);
-    background: rgb(var(--accent-rgb) / 0.14);
-    box-shadow: 0 8px 20px rgb(var(--accent-rgb) / 0.12);
+    border-color: rgba(var(--accent-rgb), 0.45);
+    background: rgba(var(--accent-rgb), 0.14);
+    box-shadow: 0 8px 20px rgba(var(--accent-rgb), 0.12);
 }
 
 .deadline-domain-panel {
@@ -106,7 +106,7 @@
     padding: 1.2rem;
     border: 1px solid var(--card-border);
     border-radius: 24px;
-    background: linear-gradient(145deg, var(--card-bg), rgb(var(--accent-rgb) / 0.035));
+    background: linear-gradient(145deg, var(--card-bg), rgba(var(--accent-rgb), 0.035));
     backdrop-filter: blur(14px);
 }
 
@@ -134,9 +134,9 @@
 .deadline-operational-panel .deadline-domain-copy,
 .deadline-personal-panel .deadline-domain-copy {
     padding: 0.75rem 0.85rem;
-    border: 1px solid rgb(var(--accent-rgb) / 0.24);
+    border: 1px solid rgba(var(--accent-rgb), 0.24);
     border-radius: 14px;
-    background: rgb(var(--accent-rgb) / 0.06);
+    background: rgba(var(--accent-rgb), 0.06);
 }
 
 .deadline-operational-panel .deadline-domain-copy h3,
@@ -155,7 +155,7 @@
     color: var(--accent);
     padding: 0.7rem;
     border-radius: 16px;
-    background: rgb(var(--accent-rgb) / 0.1);
+    background: rgba(var(--accent-rgb), 0.1);
 }
 
 .deadline-domain-action {
@@ -267,7 +267,7 @@
     border: 1px solid var(--card-border);
     border-radius: 12px;
     color: var(--accent);
-    background: rgb(var(--accent-rgb) / 0.08);
+    background: rgba(var(--accent-rgb), 0.08);
     cursor: pointer;
 }
 
@@ -372,7 +372,7 @@
 .deadline-domain-audit-note {
     padding: 0.7rem 0.8rem;
     border-radius: 14px;
-    background: rgb(var(--accent-rgb) / 0.06);
+    background: rgba(var(--accent-rgb), 0.06);
 }
 
 .deadline-personal-panel {
@@ -442,7 +442,7 @@
     place-items: center;
     border-radius: 14px;
     color: var(--accent);
-    background: rgb(var(--accent-rgb) / 0.1);
+    background: rgba(var(--accent-rgb), 0.1);
 }
 
 .deadline-personal-card-chevron {
@@ -460,7 +460,7 @@
     flex-direction: column;
     gap: 0.9rem;
     padding: 0 1rem 1rem;
-    border-top: 1px solid rgb(var(--accent-rgb) / 0.12);
+    border-top: 1px solid rgba(var(--accent-rgb), 0.12);
 }
 
 .deadline-personal-card-content > :first-child {
@@ -516,7 +516,7 @@
 .deadline-personal-alert-summary {
     padding: 0.8rem;
     border-radius: 16px;
-    background: rgb(var(--accent-rgb) / 0.06);
+    background: rgba(var(--accent-rgb), 0.06);
 }
 
 .deadline-personal-alert-summary h4 {
@@ -558,10 +558,10 @@
     min-height: 44px;
     margin-top: auto;
     padding: 0.7rem 0.9rem;
-    border: 1px solid rgb(var(--accent-rgb) / 0.4);
+    border: 1px solid rgba(var(--accent-rgb), 0.4);
     border-radius: 14px;
     color: var(--accent);
-    background: rgb(var(--accent-rgb) / 0.08);
+    background: rgba(var(--accent-rgb), 0.08);
     font: inherit;
     font-weight: 750;
     cursor: pointer;
@@ -570,7 +570,7 @@
 .deadline-personal-action:hover,
 .deadline-personal-action:focus-visible {
     border-color: var(--accent);
-    background: rgb(var(--accent-rgb) / 0.14);
+    background: rgba(var(--accent-rgb), 0.14);
 }
 
 .deadline-personal-action:disabled {
@@ -676,7 +676,7 @@
     padding: 0.8rem 0.9rem;
     border-radius: 16px;
     color: var(--text-secondary);
-    background: rgb(var(--accent-rgb) / 0.06);
+    background: rgba(var(--accent-rgb), 0.06);
 }
 
 .deadline-concept-footer p { margin: 0; }
@@ -774,7 +774,7 @@
 }
 
 .icon-blue {
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.15 );
     color: var(--accent);
 }
 
@@ -828,7 +828,7 @@
     transform: translateX(-50%);
     width: 2px;
     height: 100px;
-    background: linear-gradient(to bottom, transparent, rgb(var(--accent-rgb) / ), #fff);
+    background: linear-gradient(to bottom, transparent, rgba(var(--accent-rgb), 0.8 ), #fff);
     opacity: 0;
     animation: saettaStrike 3s infinite ease-in-out;
 }

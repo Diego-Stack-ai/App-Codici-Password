@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { access, readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { isOfflineExcluded } from './offline-asset-policy.mjs';
 
 const root = path.resolve(import.meta.dirname, '..');
 const publicDir = path.join(root, 'Frontend', 'public');
@@ -42,13 +43,15 @@ for (const file of deployableFiles) {
   const relative = path.relative(publicDir, file).replaceAll('\\', '/');
   if (/\.(?:html|js|css|json|png|jpe?g|svg|webp|woff2)$/i.test(relative)
       && relative !== 'sw.js'
-      && !onlineOnlyDiagnostics.has(relative)) {
+      && !onlineOnlyDiagnostics.has(relative)
+      && !isOfflineExcluded(relative)) {
     assert.ok(assetSet.has(relative), `Risorsa statica non precaricata: ${relative}`);
   }
 }
 
 for (const asset of assets) {
   assert.ok(!isDeployExcluded(asset), `Risorsa esclusa dal deploy presente nella shell offline: ${asset}`);
+  assert.ok(!isOfflineExcluded(asset), `Anteprima inclusa nella shell offline: ${asset}`);
   await assert.doesNotReject(access(path.join(publicDir, asset)),
     `Risorsa della shell offline assente dal filesystem: ${asset}`);
 }

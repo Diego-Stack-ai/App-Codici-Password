@@ -1,6 +1,6 @@
 .profile-tabs {
     position: sticky;
-    top: calc(var(--header-height, 64px) + env(safe-area-inset-top));
+    top: calc(var(--header-height) + env(safe-area-inset-top));
     z-index: 40;
     display: flex;
     gap: 0.5rem;
@@ -9,7 +9,7 @@
     overflow-x: auto;
     border: 0;
     border-radius: 1rem;
-    background: transparent;
+    background: var(--bg-primary);
     scrollbar-width: none;
 }
 

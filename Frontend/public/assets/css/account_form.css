@@ -233,14 +233,14 @@
 
 .attachment-upload-box:hover {
     border-color: var(--accent);
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.05 );
 }
 
 .attachment-icon-badge {
     width: 48px;
     height: 48px;
     border-radius: 12px;
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.1 );
     color: var(--accent);
     display: flex;
     align-items: center;
@@ -491,7 +491,7 @@ input:checked+.base-switch::after {
 }
 
 .bg-blue-soft {
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.1 );
 }
 
 .bg-orange-soft {
