@@ -1,3 +1,4 @@
+import {confirmFrameAction} from '../core/vault-frame-client.js';
 /**
  * MA SAVE (V1.0)
  * Salvataggio, cancellazione azienda e resize immagini.
@@ -7,7 +8,7 @@
  */
 
 import { state } from './ma_state.js';
-import { db, storage } from '../../firebase-config.js?v=1.2.267';
+import { db, storage } from '../../firebase-config.js?v=1.2.268';
 import { doc, updateDoc, serverTimestamp, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteCompany, companyDeletionMessage } from './company-list-service.js';
 import { ref, uploadBytes, getDownloadURL } from "/assets/js/vendor/firebase-runtime.js";
@@ -142,6 +143,20 @@ export async function saveAzienda() {
         if (logoSrc?.startsWith('data:')) data.logo = await resizeImage(logoSrc, 400);
         const refSrc = document.getElementById('referente-photo-preview')?.src;
         if (refSrc?.startsWith('data:')) data.referentePhoto = await resizeImage(refSrc, 300);
+
+        const savedUid = state.currentUid, savedCompanyId = state.currentAziendaId;
+        const removed = [];
+        const removedItems = (before, after, scope) => {
+            const identity = (item, index) => item.id || item.storagePath || `${scope}-${index}`;
+            const remaining = new Set((after || []).map(identity));
+            (before || []).forEach((item, index) => {if (!remaining.has(identity(item, index))) removed.push({scope, id: identity(item, index)});});
+        };
+        removedItems(original.altreSedi, altreSedi, 'company-location');
+        removedItems(original.emails?.extra, data.emails?.extra, 'company-email');
+        removedItems(original.allegati, state.existingAttachments, 'company-attachment');
+        for (const key of ['pec', 'amministrazione', 'personale']) if (original.emails?.[key] && !data.emails?.[key]) removed.push({scope: 'company-email', id: key});
+        if (removed.length) await confirmFrameAction('permanent-delete', {companyId: savedCompanyId, removed});
+        if (state.currentUid !== savedUid || state.currentAziendaId !== savedCompanyId || (state.originalCompany || original) !== original) throw Error('FRAME_TARGET_CHANGED');
 
         // Upload nuovi allegati
         const newAtt = [];

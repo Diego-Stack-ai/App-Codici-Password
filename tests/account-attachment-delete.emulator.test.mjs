@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import {decideAttachmentContent} from '../Frontend/public/assets/js/modules/shared/attachment-content-policy.mjs';
 import {after, before, beforeEach, test} from 'node:test';
 import assert from 'node:assert/strict';
@@ -57,7 +58,7 @@ function mount(kind, {accountId, companyId}) {
     const db = client.firestore(), storage = client.storage();
     const container = {children: [], textContent: '', appendChild(child) { this.children.push(child); }};
     const toasts = [], errors = [];
-    const context = vm.createContext({decideAttachmentContent,
+    const context = vm.createContext(withStandaloneFrame({decideAttachmentContent,
         db, storage, t: () => '', console: {warn() {}}, logError: (...args) => errors.push(args),
         closeAttachmentSourcePicker() {}, selectAttachmentSource: async () => null,
         navigator: {onLine: true}, setChildren: (node, children) => { node.children = children; },
@@ -73,7 +74,7 @@ function mount(kind, {accountId, companyId}) {
         listCompanyAccountAttachments: async (ownerId, company, id) =>
             (await getDocs(collection(db, 'users', ownerId, 'aziende', company, 'accounts', id, 'attachments')))
                 .docs.map(entry => ({id: entry.id, ...entry.data()}))
-    });
+    }));
     if (kind === 'privato') {
         vm.runInContext(privateModule, context);
         const mountHandle = context.initPrivateAttachmentModule({ownerId: OWNER, accountId, readOnly: false});

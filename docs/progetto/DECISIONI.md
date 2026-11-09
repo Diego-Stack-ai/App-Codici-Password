@@ -12,7 +12,7 @@ Sequenza autorizzata: A1 contratto nei tre documenti canonici → A2 integrazion
 
 Alla domanda sul tempo in background Diego sceglie esplicitamente **«Usa lo stesso tempo dell'inattività»**. Entrambi derivano dalla preferenza `lock_timeout`, non dal default fisso del laboratorio. Scadenze, copie RAM e confine same-origin sono nel [contratto Vault A1](../regole/VAULT.md#cornice-a1-2026-11-09); intestazioni, permessi e transizioni in [Interfaccia A1](../regole/INTERFACCIA.md#cornice-a1-ui-2026-11-09). La matrice specifica che gli header statici sono per route e per tutti i visitatori: il flag server individuale governa l'abilitazione e il broker, non gli header.
 
-Stato di questa decisione: ordine e scelta del timer approvati da Diego; contratto A1 preparato da sottoporre a Claude, nessun GO sulla PR ancora acquisito, nessuna integrazione reale o attivazione attestata.
+Aggiornamento: A1 ha ricevuto il [GO di Claude sul commit 4f2bc0f8](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6747756706). È quindi in preparazione A2 reale ma spenta; nessun GO A2, attivazione o pubblicazione della cornice. Il raccordo aggiunge conferme sensibili e pulizia delle continuazioni; costo statico circoscritto e limiti sono dichiarati in [Interfaccia](../regole/INTERFACCIA.md#cornice-a2-ui-2026-11-09), da valutare nella revisione del candidato.
 
 
 ## 07/11/2026 — riconciliazione del manifest Markdown

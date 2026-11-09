@@ -76,6 +76,12 @@ export function createAuthSessionFence({transact = browserTransaction,
             const state = await refresh();
             return Boolean(permit && !state.denied && !pending().length && same(state, permit));
         },
+        // Only for the synchronous click following an already verified fresh proof.
+        // This does not replace readPermit/isCurrent at admission boundaries.
+        isLocallyCurrent: permit => {
+            try {return Boolean(permit && current && !current.denied && !pending().length && same(current, permit));}
+            catch {return false;}
+        },
         isLocallyAllowed: () => {
             try { return Boolean(current && !current.denied && !pending().length); }
             catch { return false; }

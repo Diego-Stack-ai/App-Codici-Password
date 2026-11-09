@@ -6,7 +6,7 @@ import {createCompanyPdfActions} from './company-summary-browser.js';
 // a Vault Key, whole company record, or generated file outside this panel.
 export function mountCompanyPdfPanel(root, companyId, dependencies) {
     const {getUser, ensureUnlocked, isUnlocked, readCompany, decryptValue, isEncryptedValue,
-        events = window, subscribeAuth, mountView = mountCompanySummaryView, createActions = createCompanyPdfActions} = dependencies;
+        events = window, subscribeAuth, nativeAction, mountView = mountCompanySummaryView, createActions = createCompanyPdfActions} = dependencies;
     const uid = getUser()?.uid, abort = new AbortController();
     let viewCleanup, actions, unsubscribe, disposed = false;
     const dispose = () => {
@@ -36,7 +36,7 @@ export function mountCompanyPdfPanel(root, companyId, dependencies) {
         try {
             checkIdentity(); await ensureUnlocked(); check();
             root.replaceChildren();
-            actions = createActions({assertActive: check});
+            actions = createActions({assertActive: check, nativeAction});
             const read = createCompanySummaryReader({context, getUser, source, isEncryptedValue});
             viewCleanup = mountView(root, context, {read, ...actions});
         } catch {

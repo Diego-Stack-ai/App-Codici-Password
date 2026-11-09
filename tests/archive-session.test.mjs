@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -40,7 +41,7 @@ class Element extends EventTarget {
 
 function fixture(withUi = false) {
     const events = new EventTarget(), observers = new Set(), calls = [], writes = [], swipes = [], toasts = [], timers = new Map();
-    const auth = {currentUser: {uid: 'A'}};
+    const auth = {currentUser: {uid: 'A'}}, submitted = deferred();
     const nodes = Object.fromEntries(['accounts-container', 'archive-filter-btn', 'archive-context-menu', 'active-context-label', 'btn-empty-trash']
         .map(id => [id, new Element('div', {id})]));
     const search = new Element('input'), body = new Element('body'), document = new EventTarget();
@@ -49,7 +50,7 @@ function fixture(withUi = false) {
     // M7-R7C-1: la transazione legge anche gli inviti identificabili del ciclo.
     const invites = new Map();
     let transactionRuns = 0;
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         auth, db: {}, functions: {}, AbortController, crypto: {randomUUID: () => `operation-${++operationCount}`}, console: {warn() {}},
         inviteMatchesAccount, nextSharingCycle, sharingCycleOf,
         onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
@@ -70,7 +71,7 @@ function fixture(withUi = false) {
             writes.push(...staged);
         },
         respond: async () => ({data: {status: 'purged'}}),
-        httpsCallable: () => async command => { calls.push(command); return context.respond(command); },
+        httpsCallable: () => async command => { calls.push(command); submitted.resolve(); return context.respond(command); },
         listOwnedAccountInvitesConfirmed: async (uid, accountId) => [...invites.entries()].map(([path, data]) => ({...data, id: path.slice('invites/'.length)})).filter(invite => invite.ownerId === uid && invite.accountId === accountId),
         listArchivedPrivateAccounts: async () => [account()], listCompanies: async () => [],
         listCompanyAccounts: async () => [], getCompany: async () => ({ragioneSociale: 'Synthetic'}),
@@ -82,11 +83,11 @@ function fixture(withUi = false) {
         createUiState: props => new Element('div', props), t: () => '', showToast: (...args) => toasts.push(args),
         SwipeList: class { constructor(selector, options) { this.options = options; swipes.push(this); } destroy() { this.destroyed = true; } },
         setTimeout: callback => { const id = timers.size + 1; timers.set(id, callback); return id; }, clearTimeout: id => timers.delete(id)
-    });
+    }));
     vm.runInContext(archiveModel, context);
     vm.runInContext(service, context);
     if (withUi) vm.runInContext(ui, context);
-    return {context, calls, writes, nodes, search, body, swipes, toasts, observers, timers, invites,
+    return {context, submitted: submitted.promise, calls, writes, nodes, search, body, swipes, toasts, observers, timers, invites,
         get transactionRuns() { return transactionRuns; },
         set stored(value) { stored = value; },
         lock: () => events.dispatchEvent(new Event('vault-session-locked')),
@@ -134,9 +135,11 @@ test('archive failed read after lock does not become a visible source error', as
 });
 
 test('purge binds captured owner and target while SDK token lookup can cross a microtask', async () => {
-    const f = fixture(), target = account('original');
+    const f = fixture(), target = account('original'), response = deferred();
+    f.context.respond = () => response.promise;
     const pending = f.context.deleteArchivedAccount('A', target);
-    target.id = 'changed'; f.changeUid('B');
+    await f.submitted;
+    target.id = 'changed'; f.changeUid('B'); response.resolve({data:{status:'purged'}});
     await assert.rejects(pending, /ARCHIVE_SESSION_INVALIDATED/);
     assert.equal(f.calls.length, 1);
     assert.equal(f.calls[0].expectedOwnerUid, 'A');
@@ -149,6 +152,7 @@ test('empty archive stops after an already submitted request when Vault locks or
     for (const event of ['lock', 'changeUid']) {
         const f = fixture(), gate = deferred(); f.context.respond = () => gate.promise;
         const pending = f.context.emptyArchivedAccounts('A', [account('one'), account('two')]);
+        await f.submitted;
         f[event]('B'); gate.resolve({data: {status: 'purged'}});
         await assert.rejects(pending, /ARCHIVE_SESSION_INVALIDATED/);
         assert.equal(f.calls.length, 1); assert.equal(f.observers.size, 0);
@@ -747,4 +751,10 @@ test('archive selects complete owner/resource identity when legacy IDs overlap a
     const result = await f.context.archiveAccount('A', {id: 'x', context: 'company-a', revision: 1});
     assert.equal(result.suspendedInvites, 1);
     assert.deepEqual(f.writes.filter(write => write[0].startsWith('invites/')).map(write => write[0]), ['invites/matching']);
+});
+
+test('identity changing before the fresh authorization resumes prevents the first purge call',async()=>{
+ const f=fixture(),confirmation=deferred();f.context.confirmFrameAction=()=>confirmation.promise;
+ const pending=f.context.deleteArchivedAccount('A',account('original'));f.changeUid('B');confirmation.resolve();
+ await assert.rejects(pending,/ARCHIVE_SESSION_INVALIDATED/);assert.equal(f.calls.length,0);
 });

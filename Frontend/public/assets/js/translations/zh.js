@@ -1,6 +1,8 @@
 // Catalogo autorevole in cinese semplificato.
 // Non rigenerare con scripts/split-translations.mjs: lo script descrive il vecchio catalogo inline.
 export default {
+    "frame_export_ready": "导出已就绪",
+    "frame_export_action_hint": "点击确认，继续处理刚刚授权的文件。",
     "deadline_swipe_archive_restore": "向右滑动以归档或恢复",
     "deadline_swipe_delete": "向左滑动以删除",
     "filter_completed": "已归档",

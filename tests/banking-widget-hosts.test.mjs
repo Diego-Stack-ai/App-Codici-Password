@@ -1,3 +1,4 @@
+import {markBankingRemoval} from '../Frontend/public/assets/js/modules/core/vault-frame-removal-plan.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -17,7 +18,7 @@ const descendants = n => [n, ...n.children.flatMap(descendants)];
 test('bank identities survive reorder and collapse, and each plus targets its own bank', async () => {
     const container = node(), calls = [], draft = node('input', {value: 'unsaved draft'});
     let sequence = 0, mounts = 0;
-    const realm = vm.createContext({crypto: {randomUUID: () => `bank-${++sequence}`},
+    const realm = vm.createContext({markBankingRemoval, crypto: {randomUUID: () => `bank-${++sequence}`},
         document: {getElementById: () => container}, createElement: node, clearElement: n => {n.children = [];},
         showConfirmModal: async () => false, t: () => ''});
     vm.runInContext(await source('banking-model.js'), realm);
@@ -50,7 +51,7 @@ test('bank identities survive reorder and collapse, and each plus targets its ow
 test('detail creates widget-only bank hosts without treating a bank identity as financial data', async () => {
     const content = node(), visibility = new Map();
     const section = {classList: {toggle: (name, value) => visibility.set(name,value)}};
-    const realm = vm.createContext({crypto: {randomUUID: () => 'field'}, createElement: node,
+    const realm = vm.createContext({markBankingRemoval, crypto: {randomUUID: () => 'field'}, createElement: node,
         document: {getElementById: id => id === 'banking-content' ? content : id === 'section-banking' ? section : null},
         clearElement: n => {n.children = [];}, setChildren: (n, children) => {n.children = children;}, t: () => ''});
     vm.runInContext(await source('banking-model.js'), realm);
@@ -67,7 +68,7 @@ test('detail creates widget-only bank hosts without treating a bank identity as 
 
 test('deleting a bank blocks only its own widgets and rechecks after confirmation', async () => {
     const container = node(), notices = []; let confirmations = 0, duringConfirmation = () => {};
-    const realm = vm.createContext({crypto: {randomUUID: () => 'unused'}, document: {getElementById: () => container},
+    const realm = vm.createContext({markBankingRemoval, crypto: {randomUUID: () => 'unused'}, document: {getElementById: () => container},
         createElement: node, clearElement: n => {n.children = [];}, t: () => '', showToast: message => notices.push(message),
         showConfirmModal: async () => {confirmations++; duringConfirmation(); return true;}});
     vm.runInContext(await source('banking-model.js'), realm);

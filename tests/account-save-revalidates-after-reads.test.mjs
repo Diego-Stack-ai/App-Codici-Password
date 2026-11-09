@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -74,7 +75,7 @@ async function privateFixture({retries = 0} = {}) {
         prepareCompanyProfileLink: () => null, decodeProfileContactValue: async value => value, pilotFixture: {},
         isAccountSaveAllowed, assertAccountSaveAllowed, DECRYPT_FAILURE_MESSAGE
     };
-    vm.createContext(sandbox); vm.runInContext(source, sandbox);
+    vm.createContext(withStandaloneFrame(sandbox)); vm.runInContext(source, sandbox);
     const save = loadContext => sandbox.savePrivateAccount({bankAccounts: [], invitedEmails: [], isExplicitMemo: false,
         currentUid: 'owner', currentDocId: 'record', isEditing: true, baseRevision: 1, profileContactLinkDraft: null,
         loadContext, isActive: () => true});
@@ -104,7 +105,7 @@ async function companyFixture({retries = 0} = {}) {
         prepareCompanyProfileLink: () => null, decryptRequiredValue: async value => value,
         isAccountSaveAllowed, assertAccountSaveAllowed, DECRYPT_FAILURE_MESSAGE
     };
-    vm.createContext(sandbox); vm.runInContext(source, sandbox);
+    vm.createContext(withStandaloneFrame(sandbox)); vm.runInContext(source, sandbox);
     const save = loadContext => sandbox.saveAccount({bankAccounts: [], invitedEmails: [], isExplicitMemo: false,
         currentUid: 'owner', currentDocId: 'record', currentAziendaId: 'azienda', isEditing: true,
         profileContactLinkDraft: null, baseUpdatedAt: '', loadContext});

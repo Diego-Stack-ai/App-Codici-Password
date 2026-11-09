@@ -1,5 +1,15 @@
 # Incarico corrente
 
+<a id="cornice-a2-preparazione-2026-11-09"></a>
+
+## Cornice A2 candidata in revisione — 09/11/2026
+
+Claude ha dato il [GO ad A1](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6747756706) sul commit `4f2bc0f812fa2f72c63a409d1aa5d3a120bcd136`. È autorizzata soltanto A2: integrazione reale pubblicabile ma spenta per tutti. Il ramo della PR #278 prepara la candidata **1.2.268**; produzione ancora **1.2.267**, nessun merge, deploy o attivazione della cornice.
+
+Il candidato introduce app.html, broker/trasporto produttivi e raccordo al security manager canonico, distinzione fra pulizia del figlio e revoca globale, timer nel padre, protocollo e release vincolati, propagazione safe area e uscite top-level. L'ammissione è doppiamente negata: switch compilato false e adapter server che restituisce null. Nessun UID personale nel repository; nessuna modifica a Rules, Functions, workflow o intestazioni in A2. B1 resta vietata fino al GO A2 sulla PR.
+
+**A2 implementata e verificata localmente per gruppi, in attesa del GO di Claude.** Raccordati i comandi sensibili censiti e le prove negative; regressioni e limiti sono nei [Collaudi](../evidenze/COLLAUDI.md#cornice-a2-preparazione-2026-11-09). La CI del nuovo SHA rimane una verifica distinta. Nessuna B1, merge o pubblicazione discende dai test locali: occorre il GO A2 sulla PR. Firebase/App Check, dispositivi fisici e comportamento dei permessi rimangono gate B1/B2/C1 distinti; nessuna prova sintetica diventa prova produttiva.
+
 <a id="cornice-a1-incarico-2026-11-09"></a>
 
 ## Ordine corrente — cornice Vault A1–C2, 09/11/2026

@@ -51,7 +51,7 @@ test('classic predicate matches configuration, rejects aliases/duplicates and sa
 
 function timerFixture(location, expired = false) {
     const observers = [], listeners = [], reads = [], touches = [], locks = [];
-    const context = vm.createContext({window: {location, addEventListener: (...args) => listeners.push(args)},
+    const context = vm.createContext({vaultFrameClient: {isChild: () => false}, window: {location, addEventListener: (...args) => listeners.push(args)},
         document: {visibilityState:'visible',addEventListener:(...args)=>listeners.push(args),removeEventListener(){}},
         auth: {}, db: {}, doc: (...args) => args,
         onAuthStateChanged: (_auth, fn) => { observers.push(fn); },

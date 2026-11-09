@@ -1,8 +1,16 @@
 # Vault
 
+<a id="cornice-a2-raccordo-2026-11-09"></a>
+
+## Cornice A2 — raccordo disattivato candidato
+
+Il contratto A1 seguente ha ricevuto GO Claude sul commit `4f2bc0f812fa2f72c63a409d1aa5d3a120bcd136`. Prescrizioni recepite nella candidata: messaggi con protocollo e versione di rilascio; differenza di versione revoca e ripiega fuori cornice, senza consegna; fence intero revision/nonce oltre all'UID, ricontrollato dopo le attese e prima della consegna; unico timer nel padre e nessun rinnovo al bootstrap del figlio. Background usa la stessa preferenza dell'inattività e cancella conferme/grant pendenti. Le copie dei figli restano RAM transitoria; il gestore canonico adotta il materiale soltanto dopo verifica di UID/fence/generazione.
+
+A2 resta spenta con due dinieghi indipendenti, senza UID Diego nel codice: B1 deve fornire l'ammissione server. I comandi sensibili censiti sono raccordati alla conferma fresca: export/backup, cambio Master Password, condivisioni/revoche e cancellazioni definitive, comprese rimozioni strutturate differite al salvataggio. Il grant è monouso, legato a scopo/target/UID/documento/generazione e scadenza; le continuazioni riverificano il fence dopo le attese. La revisione A2 di Claude deve ancora valutarne la copertura: nessuna presenza di API vale come certificazione automatica. Nel cambio Master Password le tre schermate esistenti sono annullabili alla sospensione; la conferma del padre è richiesta immediatamente prima della scrittura, poi la sessione della cornice viene revocata per rileggere il nuovo contenitore al prossimo sblocco. Il passaggio aggiuntivo è esplicito, non un ritorno alla richiesta a ogni pagina. Al blocco il figlio viene revocato sincronicamente e rimosso, distruggendo DOM e closure del documento. Solo logout e pulizia biometrica locale trattengono il contesto mascherato, già senza chiave, per completare la pulizia durevole; guardia massima 20 secondi e rimozione anche al timeout/dispose. Il comando Home non interrompe questa fase. Nessun rilascio o modifica del contratto crittografico o dei dati Vault. [Evidenze e limiti](../evidenze/COLLAUDI.md#cornice-a2-preparazione-2026-11-09).
+
 <a id="cornice-a1-2026-11-09"></a>
 
-## Cornice persistente — contratto A1 da revisionare, 09/11/2026
+## Cornice persistente — contratto A1 approvato, 09/11/2026
 
 **Stato e autorità.** Il nuovo [ordine di Diego](../progetto/DECISIONI.md#cornice-ordine-2026-11-09) autorizza la sequenza A1/A2/B1/B2/B3/C1/C2 sulla [PR #278](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278). Questo passo definisce il contratto; non implementa né attiva la cornice. Codex è l'unico esecutore, Claude è revisore consultivo in sola lettura sulla PR. Nessun passaggio ad A2 senza «REVISIONE CLAUDE – GO» riferibile ad A1 e al suo commit; nessun merge/deploy senza approvazione personale di Diego. Le note precedenti del laboratorio restano evidenze sintetiche, non prove produttive. La produzione rimane 1.2.267. Il nuovo ordine colloca la lista B2 prima del canary e le prove fisiche di Diego in C1 dopo B3: supera soltanto per questo canary individuale la precedente sequenza che pretendeva l'intera matrice fisica prima dell'attivazione. Non trasforma prove mancanti in PASS, non permette altri utenti e non elimina i gate automatizzati A2/B1, il GO o l'approvazione personale; un esito C1 negativo richiede arresto/rollback.
 

@@ -61,6 +61,7 @@ for (const fails of [false, true]) {
         const events = new EventTarget();
         const security = vm.createContext({
             window: {addEventListener: events.addEventListener.bind(events)},
+            vaultFrameClient: {isChild: () => false, onClear() {}},
             localStorage, auth: {}, onAuthStateChanged() {},
             clearVaultSession: () => vm.runInContext('clearVaultSession()', session)
         });
@@ -68,10 +69,10 @@ for (const fails of [false, true]) {
         vm.runInContext("_vaultKeyMaterial = 'synthetic-fixture'; _vaultAutoUnlock = true;", security);
         const calls = [], beforeSignOut = [];
         const window = {dispatchEvent: events.dispatchEvent.bind(events), location: {href: 'home_page.html', replace(value) { this.href = value; }}};
-        const helper = vm.createContext({window, sessionStorage, Event, setTimeout, clearTimeout, clearVaultSession: () => vm.runInContext('clearVaultSession()', session)});
+        const helper = vm.createContext({beginFrameLogout: () => null, window, document: {}, navigateDocument: (target, replace) => replace ? window.location.replace(target) : (window.location.href = target), sessionStorage, Event, setTimeout, clearTimeout, clearVaultSession: () => vm.runInContext('clearVaultSession()', session)});
         vm.runInContext(moduleBody(logoutSource), helper);
         const context = vm.createContext({
-            window, auth: {},
+            beginFrameLogout: () => null, window, auth: {},
             loadModule: async path => {
                 assert.equal(path, './logout-session.js');
                 return {logoutWithCleanup: vm.runInContext('logoutWithCleanup', helper)};

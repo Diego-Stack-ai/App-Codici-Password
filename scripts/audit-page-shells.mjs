@@ -98,8 +98,8 @@ assert.deepEqual(modeledInternalPages, [...internalPages].sort(),
 const publicPages = (await readdir(publicRoot))
   .filter(name => name.endsWith('.html'))
   .sort();
-const contractedPages = [...accessPages, ...internalPages, 'contatto_condiviso.html'].sort();
-assert.deepEqual(publicPages, contractedPages, 'Le pagine pubbliche non coincidono con le 30 pagine contrattualizzate');
+const contractedPages = [...accessPages, ...internalPages, 'contatto_condiviso.html', 'app.html'].sort();
+assert.deepEqual(publicPages, contractedPages, 'Le pagine pubbliche non coincidono con le 31 pagine contrattualizzate');
 
 const hasStylesheet = (source, name) => new RegExp(`href=["'][^"']*${name.replace('.', '\\.')}(?:\\?[^"']*)?["']`).test(source);
 const hasClass = (source, element, name) => new RegExp(`<${element}[^>]*class=["'][^"']*\\b${name}\\b`).test(source);

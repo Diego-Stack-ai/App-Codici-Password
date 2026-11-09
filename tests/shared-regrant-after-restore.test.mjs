@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -65,7 +66,7 @@ async function fixture(accountState = restoredAccount(), company = false, invite
     const writes = [], reads = [];
     const accountPath = company ? COMPANY_PATH : ACCOUNT_PATH;    const fields = {'account-name': {value: 'Account sintetico'}, 'invite-email': {value: ''},
         'flag-shared': {checked: true}, 'flag-memo': {checked: false}, 'flag-memo-shared': {checked: false}};
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         auth: {currentUser: {uid: 'owner', email: 'owner@example.invalid'}}, db: {},
         inviteIdForGuest, inviteMatchesAccount, inviteScopeForAccount, sanitizeEmail, sharingCycleOf, isOwnerRecipientEmail, preferenceForRecipient, structuredClone,
         crypto: {randomUUID: newMarker},
@@ -99,7 +100,7 @@ async function fixture(accountState = restoredAccount(), company = false, invite
         isAccountSaveAllowed, assertAccountSaveAllowed, DECRYPT_FAILURE_MESSAGE,
         document: {getElementById: id => fields[id] || null, querySelector: () => null}, navigator: {onLine: true},
         sessionStorage: {removeItem: () => {}}, setTimeout: () => {}, console: {error: () => {}, warn: () => {}}
-    });
+    }));
     vm.runInContext(company ? companySource : source, context);
     return {writes, reads,
         createdInvites: () => writes.filter(write => write[0].startsWith('invites/') && write[2] === 'set'),

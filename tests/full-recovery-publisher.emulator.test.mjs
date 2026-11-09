@@ -135,7 +135,7 @@ function currentPurgeCallable() {
 function currentDeadlineDeletion(clientDb, clientStorage) {
   const source = readFileSync(resolve(dependencyRoot, 'Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js'), 'utf8'), start = source.indexOf('async function deleteScadenza('), end = source.indexOf('\nfunction clearDeadline(', start);
   assert.ok(start >= 0 && end > start);
-  const deps = {db: clientDb, storage: clientStorage, doc: firestoreSdk.doc, deleteDoc: firestoreSdk.deleteDoc, runTransaction: firestoreSdk.runTransaction, deleteObject, ref: storageRef};
+  const deps = {confirmFrameAction: async () => undefined, db: clientDb, storage: clientStorage, doc: firestoreSdk.doc, deleteDoc: firestoreSdk.deleteDoc, runTransaction: firestoreSdk.runTransaction, deleteObject, ref: storageRef};
   return new Function(...Object.keys(deps), `${source.slice(start, end)}\nreturn deleteScadenza;`)(...Object.values(deps));
 }
 test('actual Phase A random payload publishes fresh URLs, canonical profile metadata, authority and released fence', async () => {

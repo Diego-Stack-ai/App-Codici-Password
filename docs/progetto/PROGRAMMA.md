@@ -1,13 +1,19 @@
 # Programma
 
+<a id="cornice-a2-roadmap-2026-11-09"></a>
+
+## Cornice: avanzamento dopo GO A1
+
+A1 approvata da Claude sul commit `4f2bc0f812fa2f72c63a409d1aa5d3a120bcd136`. A2 implementata e verificata localmente per gruppi: candidata 1.2.268, bridge e broker produttivi spenti, conferme sensibili censite e prove negative; restano CI sul nuovo SHA e GO A2 di Claude. Soltanto dopo tale GO può iniziare B1 (ammissione server solo Diego, Rules/emulatori e header); seguono B2, B3 con approvazione personale e C1/C2. Nessun avanzamento implicito per un test verde e nessuna nuova grafica. [Mandato](INCARICO_CORRENTE.md#cornice-a2-preparazione-2026-11-09).
+
 <a id="cornice-roadmap-2026-11-09"></a>
 
 ## Cornice — sequenza corrente con GO sulla PR #278, 09/11/2026
 
 | Passo | Consegna | Gate prima di avanzare |
 |---|---|---|
-| A1, corrente | Contratto nei documenti Vault/UI/Decisioni e ricevuta sulla PR | GO Claude sulla PR per il commit del passo |
-| A2 | app.html e bridge reali ma spenti; test negativi | GO Claude sul candidato A2 |
+| A1 approvato | Contratto nei documenti Vault/UI/Decisioni e ricevuta sulla PR | GO Claude sulla PR per il commit del passo |
+| A2, corrente | app.html e bridge reali ma spenti; test negativi | GO Claude sul candidato A2 |
 | B1 | Flag server solo Diego, Rules/emulatori e header effettivi selettivi | GO Claude su B1 |
 | B2 | Lista di prove fisiche desktop/Android/Safari/PWA | GO Claude su B2 |
 | B3 | Preparazione merge e CI, eventuale backend necessario poi Hosting | GO, approvazione personale Diego, verifica commit/manifest/hash |

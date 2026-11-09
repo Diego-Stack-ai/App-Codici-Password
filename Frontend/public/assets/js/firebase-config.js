@@ -1,3 +1,4 @@
+import {navigateDocument} from './frame-navigation.js';
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApp, getApps } from "/assets/js/vendor/firebase-runtime.js";
 import { initializeAppCheck, ReCaptchaV3Provider } from "/assets/js/vendor/firebase-runtime.js";
@@ -11,7 +12,7 @@ import { getMessaging, isSupported as isMessagingSupported } from "/assets/js/ve
 // Firebase Hosting hanno storage e credenziali browser separati.
 const CANONICAL_HOST = 'appcodici-password.web.app';
 if (window.location.hostname === 'appcodici-password.firebaseapp.com') {
-  window.location.replace(`https://${CANONICAL_HOST}${window.location.pathname}${window.location.search}${window.location.hash}`);
+  navigateDocument(`https://${CANONICAL_HOST}${window.location.pathname}${window.location.search}${window.location.hash}`, true);
 }
 
 // Your web app's Firebase configuration

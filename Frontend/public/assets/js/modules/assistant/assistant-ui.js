@@ -1,3 +1,4 @@
+import {navigateDocument} from '../../frame-navigation.js';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { t } from '../../translations.js';
 import {
@@ -165,7 +166,7 @@ export function createAssistantUI({
             card.assistantItem = item;
             card.dataset.assistantOrdinal = String(offset + index + 1);
             card.tabIndex = 0; card.setAttribute('role', 'link');
-            const navigate = () => { if (alive()) window.location.href = item.href; };
+            const navigate = () => { if (alive()) navigateDocument(item.href); };
             card.addEventListener('click', navigate);
             card.addEventListener('keydown', event => { if (event.target === card && event.key === 'Enter') navigate(); });
             const archiveBackground = element('div', 'swipe-action-bg swipe-bg-left bg-archive');
@@ -215,7 +216,7 @@ export function createAssistantUI({
         const normalized = typeof answer === 'string' ? { message:answer, items:[] } : (answer || { message:'', items:[] });
         addBubble('assistant', normalized.message || 'Non ho trovato una risposta.');
         void addResults(normalized.items || [], Number(normalized.offset) || 0);
-        if (normalized.navigateTo) window.setTimeout(() => { if (alive()) window.location.href = normalized.navigateTo; }, 450);
+        if (normalized.navigateTo) window.setTimeout(() => { if (alive()) navigateDocument(normalized.navigateTo); }, 450);
         return normalized;
     };
     const setBusy = value => {
@@ -319,7 +320,8 @@ export function createAssistantUI({
             try {
                 const microphoneAccess = await probeMicrophoneAccess({
                     permissions: navigator.permissions,
-                    mediaDevices: navigator.mediaDevices
+                    mediaDevices: navigator.mediaDevices,
+                    isActive: alive
                 });
                 if (!alive()) return;
                 if (!microphoneAccess.ok) {

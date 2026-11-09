@@ -1,9 +1,11 @@
+import {vaultFrameClient} from '../core/vault-frame-client.js';
+import {navigateDocument, beginFrameLogout} from '../../frame-navigation.js';
 /**
  * IMPOSTAZIONI MODULE (V4.6)
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.267';
+import { auth, db } from '../../firebase-config.js?v=1.2.268';
 import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, tf, getCurrentLanguage } from '../../translations.js';
@@ -66,7 +68,7 @@ export async function initImpostazioni(user) {
 function setupSharedCredentials(user) {
     document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
         try {
-            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.267');
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.268');
             await openSharedCredentialsSettings(user);
         } catch (error) {
             console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
@@ -180,7 +182,7 @@ function setupCredentialHealth(user) {
             'Analisi locale delle credenziali in corso…', current
         );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.267');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.268');
             current.check();
             const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
             current.check();
@@ -312,7 +314,7 @@ function setupAccountFieldUsage(user) {
             'Controllo locale dei campi realmente compilati in corso…'
         );
         try {
-            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.267');
+            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.268');
             const report = await inspectAccountFieldUsage(user.uid);
             working.close();
             showAccountFieldUsage(report);
@@ -821,7 +823,7 @@ function setupEncryptedBackup(user) {
             } catch (error) {
                 if (COMPLETE_RECOVERY_ENABLED && (error?.code || error?.message) === 'RECOVERY_ASSET_RECENT_AUTH_REQUIRED' && action.active()) {
                     const accepted = await showCompleteExportReauthentication(action);
-                    if (accepted && action.active()) window.location.replace('/login.html?reauth=security-settings');
+                    if (accepted && action.active()) navigateDocument('/login.html?reauth=security-settings', true);
                 } else if (action.active() && error?.name !== 'AbortError' && error?.message !== 'RECOVERY_EXPORT_CANCELLED') {
                     showToast(error?.code === 'BACKUP_EXPORT_CAPACITY_EXCEEDED'
                         ? t('dyn_backup_too_large')
@@ -962,7 +964,7 @@ function setupPortableArchive(user) {
                 working = showBackupWorking(
                     t('portable_working_title'), t('portable_working_desc'), action
                 );
-                const vaultKeyMaterial = await ensureVaultKeyMaterial({forceReload: true, promptImmediately: true});
+                const vaultKeyMaterial = await ensureVaultKeyMaterial({forceReload: !vaultFrameClient.isChild(), promptImmediately: true});
                 action.check();
                 const result = await archiveModule.exportPortableArchive(user.uid, {
                     password: archivePassword, vaultKeyMaterial, includeAttachments: includeAttachments.checked,
@@ -1176,13 +1178,14 @@ function showPendingSecurityNotice() {
 }
 
 async function requireSecurityReauthentication(message) {
+    beginFrameLogout();
     sessionStorage.setItem('codex_security_notice', message);
     clearSession();
     try {
         window.privateAuthGate?.block();
         await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
     } finally {
-        window.location.replace('login.html?reauth=security-settings');
+        navigateDocument('login.html?reauth=security-settings', true);
     }
 }
 
@@ -1349,7 +1352,7 @@ function initSettingsEvents(user) {
     };
 
     for (const [id, url] of Object.entries(navMap)) {
-        document.getElementById(id)?.addEventListener('click', () => window.location.href = url);
+        document.getElementById(id)?.addEventListener('click', () => navigateDocument(url));
     }
 
     document.getElementById('btn-account-archive')?.addEventListener('click', () => window.location.href = 'archivio_account.html');
@@ -1406,10 +1409,11 @@ function initSettingsEvents(user) {
     document.getElementById('logout-btn-settings')?.addEventListener('click', async () => {
         const ok = await showConfirmModal(t('section_security') || 'Sicurezza', "Vuoi davvero uscire dall'account?", "Esci", "Annulla");
         if (ok) {
+            beginFrameLogout();
             clearSession(); // 🔐 Pulisce vaultKeyMaterial e sessionStorage
             window.privateAuthGate?.block();
         await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
-            window.location.href = 'login.html';
+            navigateDocument('login.html');
         }
     });
 
@@ -1436,11 +1440,12 @@ function initSettingsEvents(user) {
         const ok = await showConfirmModal('Disconnetti tutte le postazioni', 'Dovrai eseguire nuovamente login e 2FA su ogni dispositivo. Continuare?', 'Disconnetti', 'Annulla');
         if (!ok) return;
         try {
+            beginFrameLogout();
             await revokeAllSessions();
             clearSession();
             window.privateAuthGate?.block();
         await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
-            window.location.replace('login.html?reauth=sessions-revoked');
+            navigateDocument('login.html?reauth=sessions-revoked', true);
         } catch (error) {
             showToast(error.message || 'Revoca delle sessioni non riuscita.', 'error');
         }

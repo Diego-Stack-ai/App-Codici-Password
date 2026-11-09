@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -24,7 +25,7 @@ test('decifratura fallita o cambio sessione lasciano modulo e copia recupero int
  for(const mode of ['decrypt','session','success']){
   const writes=[];const operation={operationId:'old',uid:'owner',record:{username:'cipher',password:'cipher'}};
   const sandbox={structuredClone,currentRevision:7,recoveryOperation:null,decodeProfileContactValue:async value=>{if(mode==='decrypt')throw Error('DECRYPT_FAILED');return value?'plain':''},document:{getElementById:()=>({set value(v){writes.push(v)}})}};
-  vm.createContext(sandbox);vm.runInContext(restoreSource,sandbox);
+  vm.createContext(withStandaloneFrame(sandbox));vm.runInContext(restoreSource,sandbox);
   const action=sandbox.restoreM6ConflictDraft(operation,'key',9,()=>mode!=='session');
   if(mode==='success'){await action;assert.ok(writes.length);assert.equal(sandbox.currentRevision,9);assert.equal(sandbox.recoveryOperation.operationId,'old');}
   else {await assert.rejects(action);assert.deepEqual(writes,[]);assert.equal(sandbox.currentRevision,7);assert.equal(sandbox.recoveryOperation,null);}
@@ -46,7 +47,7 @@ async function saveFixture(status,{recover=true,active=true,expireBeforeNavigati
   setTimeout:fn=>{if(expireBeforeNavigation)active=false;fn()},window:{location:{replace:url=>navigations.push(url)}}};
  let source=saveSource;
  source=source.replace(/^import[\s\S]*?;\r?\n/gm,'').replace('export async function','async function').replace("await import('../data/private-account-offline-pilot.js')",'pilotFixture');
- vm.createContext(sandbox);vm.runInContext(source,sandbox);
+ vm.createContext(withStandaloneFrame(sandbox));vm.runInContext(source,sandbox);
  await sandbox.savePrivateAccount({bankAccounts:[],invitedEmails:[],currentUid:'owner',currentDocId:isEditing?'record':null,isEditing,baseRevision:isEditing?1:0,
   recoveryOperation:recover?{uid:'owner',operationId:'old',recordId:'record',_reviewReason:reviewReason}:null,loadContext:createAccountLoadContext({mode:'create'}),isActive:()=>active});
  return {replaced,enqueued,handoffs,messages,navigations,alerts,button};
@@ -77,7 +78,7 @@ test('scelta locale o più tardi non elimina la coda; solo scelta server la scar
    active:()=>active,document:{getElementById:()=>button},showToast(){},showM6ConflictChoice:async()=>{if(choice==='expired')active=false;return choice==='expired'?'server':choice},
    pilot:{discardPrivateAccountPilotRecord:async()=>{discarded++;return{discarded:2,remaining:0}}},getPrivateAccountConfirmed:async()=>({type:'account',visibility:'private',revision:2}),
    canRecoverPrivateAccount,restoreM6ConflictDraft:async()=>restored++,t:testTranslate,setTimeout(){}};
-  vm.createContext(sandbox);vm.runInContext(flow,sandbox);await sandbox.resume();
+  vm.createContext(withStandaloneFrame(sandbox));vm.runInContext(flow,sandbox);await sandbox.resume();
   assert.equal(discarded,choice==='server'?1:0);assert.equal(restored,choice==='local'?1:0);assert.equal(button.disabled,choice!=='local');
  }
 });
@@ -101,13 +102,13 @@ test('unsupported review offers no local recovery and only explicit server choic
  for(const choice of ['local','server',null]){
   let discarded=0,restored=0,readServer=0;const operation={uid:'owner',operationId:'old',recordId:'record',_reviewReason:'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED',record:{type:'account'}};
   const sandbox={outcome:{status:'reconciliation-required',operation},lastState:null,currentDocId:'record',user:{uid:'owner'},vaultKeyMaterial:'key',active:()=>true,document:{getElementById:()=>({})},showToast(){},showM6ConflictChoice:async(reconcile,unsupported)=>{assert.equal(unsupported,true);return choice},pilot:{discardPrivateAccountPilotRecord:async()=>{discarded++;return{discarded:3,remaining:0}}},getPrivateAccountConfirmed:async()=>{readServer++;return{}},restoreM6ConflictDraft:async()=>restored++,t:testTranslate,setTimeout(){}};
-  vm.createContext(sandbox);vm.runInContext(flow,sandbox);await sandbox.resume();assert.equal(discarded,choice==='server'?1:0);assert.equal(restored,0);assert.equal(readServer,0);
+  vm.createContext(withStandaloneFrame(sandbox));vm.runInContext(flow,sandbox);await sandbox.resume();assert.equal(discarded,choice==='server'?1:0);assert.equal(restored,0);assert.equal(readServer,0);
  }
 });
 test('unsupported modal exposes later/server actions and states that server choice removes offline copy',async()=>{
  const source=formSource.slice(formSource.indexOf('function showM6ConflictChoice'),formSource.indexOf('async function restoreM6ConflictDraft'));const nodes=[];
  const createElement=(tag,props={},children=[])=>{const node={tag,...props,children:children.filter(Boolean),classList:{add(){},remove(){}},remove(){},addEventListener(){}};nodes.push(node);return node};
- const sandbox={createElement,setChildren(){},document:{getElementById:()=>null,body:{appendChild(){}}},setTimeout:fn=>fn()};vm.createContext(sandbox);vm.runInContext(source,sandbox);
+ const sandbox={createElement,setChildren(){},document:{getElementById:()=>null,body:{appendChild(){}}},setTimeout:fn=>fn()};vm.createContext(withStandaloneFrame(sandbox));vm.runInContext(source,sandbox);
  const result=sandbox.showM6ConflictChoice(true,true);assert.equal(nodes.some(n=>n.textContent==='Recupera locale'),false);assert.ok(nodes.some(n=>n.textContent?.includes('elimina questa copia offline')));nodes.find(n=>n.textContent==='Decidi più tardi').onclick();assert.equal(await result,null);
 });
 
@@ -133,5 +134,5 @@ test('bootstrap completion timer does not navigate after form context expires',a
  const start=formSource.indexOf('            const reconciliation =');const end=formSource.indexOf('        } catch (error)',start);
  let active=true,navigated=0;
  const sandbox={lastState:null,outcome:{completed:1},active:()=>active,showToast(){},t:testTranslate,setTimeout:fn=>{active=false;fn()},window:{location:{replace:()=>navigated++}},getPrivateAccountListDestination:()=> 'fixture'};
- vm.createContext(sandbox);vm.runInContext('async function resume(){'+formSource.slice(start,end)+'}',sandbox);await sandbox.resume();assert.equal(navigated,0);
+ vm.createContext(withStandaloneFrame(sandbox));vm.runInContext('async function resume(){'+formSource.slice(start,end)+'}',sandbox);await sandbox.resume();assert.equal(navigated,0);
 });

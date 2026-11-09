@@ -1,9 +1,10 @@
+import {vaultFrameClient} from '../core/vault-frame-client.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
-import { auth } from '../../firebase-config.js?v=1.2.267';
+import { auth } from '../../firebase-config.js?v=1.2.268';
 import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
 import { loadVaultSearchRecords } from './vault-data-loader.js';
-import { VaultConversationEngine } from './conversation-engine.js?v=1.2.267';
-import { createAssistantUI } from './assistant-ui.js?v=1.2.267';
+import { VaultConversationEngine } from './conversation-engine.js?v=1.2.268';
+import { createAssistantUI } from './assistant-ui.js?v=1.2.268';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { getOfflineReadiness } from '../../offline-sync.js';
 import { archiveAccount } from '../settings/archive-account-service.js';
@@ -37,7 +38,7 @@ async function loadDocumentationKnowledge(language) {
 function attachStyles() {
     if (document.querySelector('link[data-vault-assistant]')) return;
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.267'; link.dataset.vaultAssistant = 'true';
+    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.268'; link.dataset.vaultAssistant = 'true';
     document.head.append(link);
 }
 
@@ -171,10 +172,13 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
         invalidate();
         trigger.removeEventListener('click', open);
         window.removeEventListener('pagehide', destroy);
+        if (vaultFrameClient.isChild()) document.removeEventListener('visibilitychange', hidden);
         window.removeEventListener('vault-session-locked', invalidate);
         window.removeEventListener('private-auth-blocked', invalidate);
         unsubscribe();
     };
+    const hidden = () => {if (vaultFrameClient.isChild() && document.hidden) invalidate();};
+    if (vaultFrameClient.isChild()) document.addEventListener('visibilitychange', hidden);
     window.addEventListener('pagehide', destroy, { once: true });
     window.addEventListener('vault-session-locked', invalidate);
     window.addEventListener('private-auth-blocked', invalidate);

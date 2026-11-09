@@ -1,5 +1,9 @@
 # Guida
 
+## Cornice in preparazione — candidata 1.2.268
+
+La candidata aggiunge una pagina di servizio disattivata per la futura navigazione persistente. Non è ancora pubblicata né attiva; la produzione resta 1.2.267 e il comportamento dello sblocco non cambia. Il registro conta ora 31 pagine, inclusa questa pagina inattiva: la matrice non certifica prove sul servizio attivo o su dispositivi fisici. Le 30 guide esistenti sono state riesaminate per i target, conservati; le tre nuove frasi preparatorie sono presenti nelle otto lingue.
+
 ## Aggiornamento preparatorio dell’assistenza 2FA — 08/11/2026
 
 Nella candidata 1.2.265 della PR #271 l’accesso offre istruzioni di assistenza quando l’Authenticator non è disponibile; il recupero automatico non viene proposto. Anche nelle Impostazioni la generazione di nuovi codici è temporaneamente disattivata e rimanda all’assistenza. I codici già salvati non vengono modificati. Non inviare password o codici all’assistenza. Questa modifica è preparata nel ramo, non ancora pubblicata: la produzione resta alla 1.2.264 fino al distinto rilascio approvato. Le descrizioni storiche del recupero più avanti nel documento non attestano la disponibilità del percorso attuale.
@@ -63,6 +67,7 @@ La guida descrive come orientarsi e quali comandi usare; lo stato di implementaz
 | `registrati` | Registrazione: Crea l’account di accesso e segui la verifica dell’email. | Requisiti, conferma e verifica email | Checklist + walkthrough |
 | `reset_password` | Recupero dell’accesso: Richiedi l’email per cambiare la password di accesso. | Email di recupero e collegamento riservato | Testo |
 | `imposta_nuova_password` | Nuova password di accesso: Scegli la nuova password di accesso dal percorso autorizzato. | Requisiti e conferma password accesso | Checklist |
+| `app` | Cornice Vault preparatoria, non attiva. | Ritorno alla Home; nessuna sessione persistente disponibile | Testo preparatorio tradotto; nessun walkthrough della funzione attiva |
 | `home_page` | Home: Scegli l’area in cui lavorare e controlla i riepiloghi delle scadenze. | Aree, riepiloghi e presentazione facoltativa | Testo + walkthrough |
 | `area_privata` | Area privata: Scegli fra Account, Account condivisi, memorandum privati e memorandum condivisi. | Quattro categorie, più usati, statistiche | Testo + walkthrough |
 | `account_privati` | Account privati: Cerca e consulta gli Account della categoria scelta. | Ricerca, ordinamento, azioni e permessi | Testo + walkthrough |

@@ -1,5 +1,6 @@
+import {executeFrameNativeAction} from '../core/vault-frame-client.js';
 import { changeProfileAccount, unlinkProfileAccount } from '../shared/profile-account-management.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.267';
+import { auth, db } from '../../firebase-config.js?v=1.2.268';
 import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
 import { doc, runTransaction, deleteField, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { createElement, setChildren } from '../../dom-utils.js';
@@ -193,7 +194,7 @@ export function initCompanyProfile(data, companyId, {buildVCard, reload}) {
     const refresh=()=>{ const vcard=buildVCard({...data,qrConfig:config}); renderQRCode(preview,vcard,{width:220,height:220,colorDark:'#000000',colorLight:'#ffffff'}); const capacity=document.getElementById('company-qr-capacity'); if(capacity) { const bytes=new TextEncoder().encode(vcard).length; capacity.textContent=bytes>1200 ? formatTranslation('digital_card_capacity_warning',{bytes}) : formatTranslation('digital_card_capacity_used',{bytes}); capacity.classList.toggle('is-warning',bytes>1200); } };
     const checks=options.map(([key,label])=>createElement('label',{className:'digital-card-choice'},[createElement('input',{type:'checkbox',checked:config[key]===undefined?!['adminEmail','persEmail','telefonoAzienda'].includes(key):Boolean(config[key]),onchange:event=>{config[key]=event.target.checked;refresh();}}),text(label)]));
     const save=button(t('company_card_save_selection'),async()=>{try{save.disabled=true;await updateDoc(doc(db,'users',auth.currentUser.uid,'aziende',companyId),{qrConfig:config});showToast(t('company_card_updated'),'success');await reload();}catch{showToast(t('company_card_update_error'),'error');}finally{save.disabled=false;}});
-    const download=button(t('company_card_download_contact'),()=>{const blob=new Blob([buildVCard({...data,qrConfig:config})],{type:'text/vcard;charset=utf-8'});const url=URL.createObjectURL(blob);const a=createElement('a',{href:url,download:'contatto-azienda.vcf'});a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+    const download=button(t('company_card_download_contact'),()=>{const value=buildVCard({...data,qrConfig:config});return executeFrameNativeAction({scope:'company-vcard',companyId,snapshotBytes:new TextEncoder().encode(value)},()=>{if(auth.currentUser?.uid!==ownerUid||!qr.isConnected)throw Error('FRAME_TARGET_CHANGED');const blob=new Blob([value],{type:'text/vcard;charset=utf-8'});const url=URL.createObjectURL(blob);const a=createElement('a',{href:url,download:'contatto-azienda.vcf'});a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});});
     setChildren(qr,[createElement('div',{className:'digital-card-layout'},[
         createElement('section',{className:'form-card digital-card-preview'},[
             createElement('h2',{className:'form-section-title',textContent:t('digital_card_preview_title')}),preview,

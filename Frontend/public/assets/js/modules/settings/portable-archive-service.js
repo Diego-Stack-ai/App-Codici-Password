@@ -1,4 +1,5 @@
-import {auth, storage} from '../../firebase-config.js?v=1.2.267';
+import {confirmFrameAction} from '../core/vault-frame-client.js';
+import {auth, storage} from '../../firebase-config.js?v=1.2.268';
 import {getBytes, ref} from '/assets/js/vendor/firebase-runtime.js';
 import {decryptRequiredValue, isEncryptedValue} from '../core/crypto-utils.js';
 import {
@@ -196,6 +197,8 @@ export async function exportPortableArchive(uid, {
 } = {}) {
     if (!navigator.onLine) throw Object.assign(new Error('PORTABLE_REQUIRES_ONLINE'), {code: 'PORTABLE_REQUIRES_ONLINE'});
     if (!vaultKeyMaterial) throw Object.assign(new Error('PORTABLE_VAULT_REQUIRED'), {code: 'PORTABLE_VAULT_REQUIRED'});
+    checkSession(uid, options);
+    await confirmFrameAction('portable-export', {uid, includeAttachments});
     checkSession(uid, options);
     let records = [], storagePaths = [], projected = [], attachmentInventory = [], packageOutput, writer;
     try {

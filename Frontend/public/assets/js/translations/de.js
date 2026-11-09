@@ -2,6 +2,8 @@
 // Nicht mit scripts/split-translations.mjs neu erzeugen (veralteter historischer Generator).
 // Lingua: de — Parität mit dem italienischen Basiskatalog.
 export default {
+    "frame_export_ready": "Export bereit",
+    "frame_export_action_hint": "Wählen Sie Bestätigen, um mit der gerade autorisierten Datei fortzufahren.",
     "deadline_swipe_archive_restore": "Nach rechts wischen, um zu archivieren oder wiederherzustellen",
     "deadline_swipe_delete": "Zum Löschen nach links wischen",
     "filter_completed": "Archiviert",

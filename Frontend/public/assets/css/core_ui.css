@@ -37,7 +37,7 @@
     justify-content: center;
     opacity: 0;
     pointer-events: none;
-    padding: max(var(--space-4, 1rem), env(safe-area-inset-top)) max(var(--space-4, 1rem), env(safe-area-inset-right)) max(var(--space-4, 1rem), env(safe-area-inset-bottom)) max(var(--space-4, 1rem), env(safe-area-inset-left));
+    padding: max(var(--space-4, 1rem), var(--frame-safe-area-inset-top, env(safe-area-inset-top))) max(var(--space-4, 1rem), var(--frame-safe-area-inset-right, env(safe-area-inset-right))) max(var(--space-4, 1rem), var(--frame-safe-area-inset-bottom, env(safe-area-inset-bottom))) max(var(--space-4, 1rem), var(--frame-safe-area-inset-left, env(safe-area-inset-left)));
     transition: opacity var(--motion-normal, 0.3s) ease;
 }
 
@@ -59,7 +59,7 @@
     padding: clamp(1.5rem, 5vw, 2.5rem) clamp(1.25rem, 4vw, 2rem);
     width: min(100%, var(--modal-max, 420px));
     max-width: var(--modal-max, 420px);
-    max-height: calc(100dvh - (2 * max(var(--space-4, 1rem), env(safe-area-inset-top))));
+    max-height: calc(100dvh - (2 * max(var(--space-4, 1rem), var(--frame-safe-area-inset-top, env(safe-area-inset-top)))));
     overflow-y: auto;
     overscroll-behavior: contain;
     text-align: left;
@@ -514,7 +514,7 @@
 .home-company-quick-menu {
     position: fixed;
     left: 50%;
-    bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(96px + var(--frame-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
     transform: translateX(-50%);
     z-index: var(--z-dropdown);
     width: min(320px, calc(100vw - 24px));

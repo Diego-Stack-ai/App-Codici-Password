@@ -1,8 +1,16 @@
 # Stato
 
+<a id="cornice-a2-stato-2026-11-09"></a>
+
+## Cornice A2 — candidata locale spenta
+
+A1 approvata da Claude sulla PR #278, commit `4f2bc0f812fa2f72c63a409d1aa5d3a120bcd136`. A2 implementata e verificata localmente per gruppi sul medesimo ramo; candidata 1.2.268, produzione invariata 1.2.267. Broker reale e bridge RAM preparati, ammissione ancora negata, nessun UID personale in codice. Test sintetici e tutti i gruppi di regressione passati dopo il raccordo degli harness standalone; non sono il collaudo Firebase o dei dispositivi. Raccordati i comandi sensibili censiti; restano la CI sul nuovo SHA e il GO A2 di Claude. Nessuna B1 o pubblicazione autorizzata dal solo GO A1. [Mandato corrente](INCARICO_CORRENTE.md#cornice-a2-preparazione-2026-11-09).
+
 <a id="stato-corrente"></a>
 
-09/11/2026 — **Cornice: passo A1 preparato sulla PR #278, in attesa di revisione Claude sulla PR**. Nuovo ordine di Diego A1–C2 e scelta esplicita background = durata `lock_timeout`; definiti contratto Vault/UI, 22 pagine candidate, header per route, permessi e limiti same-origin. Nessuna integrazione reale, flag o attivazione eseguiti; A2 attende «REVISIONE CLAUDE – GO». Produzione invariata **1.2.267 / #1041 / `1bcbef73`**. [Mandato corrente](INCARICO_CORRENTE.md#cornice-a1-incarico-2026-11-09), [decisione](DECISIONI.md#cornice-ordine-2026-11-09), [evidenze](../evidenze/COLLAUDI.md#cornice-a1-contratto-2026-11-09). I precedenti pareri CLI sul laboratorio non sono il GO del nuovo passo.
+**09/11/2026 — stato corrente:** A1 approvata da Claude sul commit `4f2bc0f812fa2f72c63a409d1aa5d3a120bcd136`; A2 implementata e verificata localmente per gruppi, candidata 1.2.268 spenta e non pubblicata. Produzione 1.2.267; restano CI e GO A2 di Claude prima di B1. Le registrazioni seguenti sono cronologia preparatoria e non riaprono A1.
+
+Cronologia precedente al GO A1 — 09/11/2026: **Cornice: passo A1 preparato sulla PR #278, in attesa di revisione Claude sulla PR**. Nuovo ordine di Diego A1–C2 e scelta esplicita background = durata `lock_timeout`; definiti contratto Vault/UI, 22 pagine candidate, header per route, permessi e limiti same-origin. Nessuna integrazione reale, flag o attivazione eseguiti; A2 attende «REVISIONE CLAUDE – GO». Produzione invariata **1.2.267 / #1041 / `1bcbef73`**. [Mandato corrente](INCARICO_CORRENTE.md#cornice-a1-incarico-2026-11-09), [decisione](DECISIONI.md#cornice-ordine-2026-11-09), [evidenze](../evidenze/COLLAUDI.md#cornice-a1-contratto-2026-11-09). I precedenti pareri CLI sul laboratorio non sono il GO del nuovo passo.
 
 
 09/11/2026 — **Produzione 1.2.267 pubblicata e verificata**, [Hosting #1041](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42658564232), sorgente **`1bcbef73631380ec30821357641ce9695cc6e230`**, PR #280 e #281 integrate. Approvazione personale di Diego registrata via API, nessun bypass; solo Hosting CI. Suite del rilascio **3.224 PASS, 0 FAIL, 10 skip su 3.234 casi**; confronto indipendente **341/341 hash** e manifest riuscito. Header coprente nei due profili e metadati allegati separati dal cestino; nessuna nuova grafica adottata. [Evidenze e provenienza delle revisioni Claude](../evidenze/COLLAUDI.md#ui-overlap-followup-2026-11-09). Cornice #278 non attivata, problema Vault multipagina ancora aperto; iPhone/Safari/PWA fisici non collaudati. Le voci seguenti sono fasi antecedenti, incluse candidata e produzione 1.2.266, non lo stato corrente.

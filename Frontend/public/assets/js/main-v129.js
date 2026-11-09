@@ -1,3 +1,4 @@
+import {confirmFrameAction} from './modules/core/vault-frame-client.js';
 import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * PROTOCOLLO MASTER MAIN ENTRY POINT (V7.0) - release home v126
@@ -5,6 +6,8 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Refactor: rimozione innerHTML, uso dom-utils.js e componenti condivisi.
  */
 
+import {navigateDocument} from './frame-navigation.js';
+import {VAULT_FRAME_ENABLED} from './app-env.js';
 import { LOG, LOG_ERROR, LOG_WARN } from './logger.js';
 import { authSessionFence } from './auth-session-fence.js';
 import {isCompleteRecoveryRoute, hasCompleteRecoveryIntent, COMPLETE_RECOVERY_LOGIN_PATH} from './app-env.js';
@@ -28,7 +31,7 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.267';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.268';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, limit, updateDoc, onSnapshot } from "/assets/js/vendor/firebase-runtime.js";
@@ -37,7 +40,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage, getLocalQaLanguageOverride, observeTranslatedSubtrees } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 
-import * as Pages from './pages-init.js?v=1.2.267&push=20261022a&ai=20261019b&deadline-share=20260908a&touch=20261017b';
+import * as Pages from './pages-init.js?v=1.2.268&push=20261022a&ai=20261019b&deadline-share=20260908a&touch=20261017b';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric, captureNavigationMetric } from './performance-metrics.js';
@@ -49,6 +52,7 @@ if (!hasCompleteRecoveryIntent(window.location)) initInactivityTimer();
 
 function getCurrentPage() {
     const path = window.location.pathname;
+    if (path === '/app.html') return 'vault_frame';
 
     if (path.includes('registrati')) return 'registrati';
     if (path.includes('reset_password')) return 'reset';
@@ -89,7 +93,7 @@ function getCurrentPage() {
     return 'index';
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function bootstrapMain() {
     startMetric('private-page-bootstrap');
     captureNavigationMetric(getCurrentPage());
     if (!isCompleteRecoveryRoute(window.location)) initOfflineStatus();
@@ -251,7 +255,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         catch { gate?.reject('error'); return; }
         if (n1Epoch !== n1CallbackEpoch) return;
         if (!fenceTicket) {
-            if (isCompleteRecoveryRoute(window.location)) { gate?.block(); window.location.replace(COMPLETE_RECOVERY_LOGIN_PATH); return; }
+            if (isCompleteRecoveryRoute(window.location)) { gate?.block(); navigateDocument(COMPLETE_RECOVERY_LOGIN_PATH, true); return; }
             gate?.reject(); return;
         }
         const authAttempt = gate?.begin(user?.uid);
@@ -269,7 +273,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (auth.currentUser?.uid !== user.uid) return;
                     if (!auth.currentUser?.emailVerified) {
                         gate?.block();
-                        window.location.replace(hasCompleteRecoveryIntent(window.location) ? COMPLETE_RECOVERY_LOGIN_PATH + '&verifyEmail=1' : '/login.html?verifyEmail=1');
+                        navigateDocument(hasCompleteRecoveryIntent(window.location) ? COMPLETE_RECOVERY_LOGIN_PATH + '&verifyEmail=1' : '/login.html?verifyEmail=1', true);
                         return;
                     }
                     if (navigator.onLine) {
@@ -335,7 +339,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (isPrivatePage &&
                     (userDoc.data()?.passwordPolicyVersion || 0) < passwordPolicyVersion) {
                     showToast('Prima di continuare, aggiorna una volta la password di accesso.', 'warning');
-                    window.location.replace('imposta_nuova_password.html?policyUpdate=1');
+                    navigateDocument('imposta_nuova_password.html?policyUpdate=1', true);
+                    return;
+                }
+
+                if (currentPage === 'vault_frame') {
+                    if (!VAULT_FRAME_ENABLED) return;
+                    const {startVaultFrame} = await import('./modules/core/vault-frame-production.js');
+                    if (!gate.active(authAttempt) || !await authSessionFence.isCurrent(fenceTicket)) return;
+                    await startVaultFrame({user, securityManager: securityModules[0], fenceTicket});
                     return;
                 }
 
@@ -420,7 +432,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     try {
                         const trigger = document.getElementById('search-status');
                         const includeCompanies = getSyncedCompanyAreaPreference(userDoc.data() || {}, user.uid);
-                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.267');
+                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.268');
                         await initVaultAssistant(user, { includeCompanies });
                         trigger?.classList.remove('hidden');
                     } catch (error) {
@@ -487,7 +499,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error("Global Check Error:", error);
             }
         } else {
-            if (isCompleteRecoveryRoute(window.location)) { gate?.block(); window.location.replace(COMPLETE_RECOVERY_LOGIN_PATH); return; }
+            if (isCompleteRecoveryRoute(window.location)) { gate?.block(); navigateDocument(COMPLETE_RECOVERY_LOGIN_PATH, true); return; }
             void import('./modules/data/private-account-offline-coordinator.js')
                 .then(({stopPrivateAccountOfflineCoordinator}) => stopPrivateAccountOfflineCoordinator())
                 .catch(() => {});
@@ -499,7 +511,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     sessionStorage.setItem('pending_deadline_link', `${window.location.pathname}${window.location.search}`);
                 }
                 gate?.reject();
-                if (!gate) window.location.replace('/login.html');
+                if (!gate) navigateDocument('/login.html', true);
             }
         }
     }, () => { window.privateAuthGate?.reject('error'); });
@@ -586,6 +598,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const { httpsCallable } = await import("/assets/js/vendor/firebase-runtime.js");
             const respondToInvitation = httpsCallable(functions, 'respondToInvitation');
+            await confirmFrameAction('sharing-change', {inviteId, status});
             await respondToInvitation({ inviteId, status });
             LOG("[SHARING] Risposta invito convalidata e applicata dal server.");
 
@@ -621,6 +634,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     applyGlobalTranslations();
     observeTranslatedSubtrees();
     setTimeout(() => document.body?.classList.add('revealed'), 100);
-});
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootstrapMain, {once: true});
+else void bootstrapMain();
 
 LOG("PROTOCOLLO V7.0 MASTER Initialized");

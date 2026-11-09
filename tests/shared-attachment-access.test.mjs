@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -12,8 +13,8 @@ const source = (await readFile(new URL(
 
 function fixture() {
   const published = [], wiped = [];
-  const context = vm.createContext({
-    Object, Set,
+  const context = vm.createContext(withStandaloneFrame({
+    Object, Set, auth: {currentUser: {uid: 'owner-1'}},
     functions: {},
     httpsCallable: (_functions, name) => async payload => published.push({name, payload}),
     unwrapAttachmentFileKey: async () => new Uint8Array(32).fill(7),
@@ -38,7 +39,7 @@ function fixture() {
       assert.equal(key[0], 9);
       return new Uint8Array([1, 2, 3]);
     },
-  });
+  }));
   vm.runInContext(source, context);
   return {context, published, wiped};
 }

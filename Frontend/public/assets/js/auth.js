@@ -1,9 +1,10 @@
+import {beginFrameLogout} from './frame-navigation.js';
 import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
-import { auth, db } from './firebase-config.js?v=1.2.267';
+import { auth, db } from './firebase-config.js?v=1.2.268';
 import { LOG } from './logger.js';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail, sendEmailVerification, setPersistence, browserLocalPersistence, browserSessionPersistence, getMultiFactorResolver, TotpMultiFactorGenerator } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
-import { showToast } from './ui-core-v129.js?v=1.2.267';
+import { showToast } from './ui-core-v129.js?v=1.2.268';
 import { logError } from './utils.js';
 import { ACCOUNT_PASSWORD_POLICY_VERSION, evaluatePassword, firstPasswordPolicyError } from './modules/core/password-policy.js';
 import { authSessionFence } from './auth-session-fence.js';
@@ -234,6 +235,7 @@ async function completeTotpLogin(code, email) {
  * Logs the current user out.
  */
 async function logout() {
+    beginFrameLogout();
     pendingMfaResolver = null;
     pendingLoginPermit = null;
     window.privateAuthGate?.block();

@@ -43,9 +43,9 @@ async function deleteScadenza(userId, scadenzaId, sourceRef, active) {
     const db = client().firestore(), storage = client().storage();
     const snapshot = await getDoc(doc(db, 'users', userId, 'scadenze', scadenzaId));
     const attachments = snapshot.exists() ? snapshot.data().attachments || [] : [];
-    const factory = new Function('db', 'storage', 'deleteDoc', 'deleteObject', 'doc', 'ref', 'runTransaction', 'console',
+    const factory = new Function('confirmFrameAction', 'db', 'storage', 'deleteDoc', 'deleteObject', 'doc', 'ref', 'runTransaction', 'console',
         `${sliceFunction(detailSource, 'deleteScadenza')}\nreturn deleteScadenza;`);
-    return factory(db, storage, deleteDoc, deleteObject, doc, ref, runTransaction, {warn() {}})(userId, scadenzaId, sourceRef, attachments, active);
+    return factory(async () => undefined, db, storage, deleteDoc, deleteObject, doc, ref, runTransaction, {warn() {}})(userId, scadenzaId, sourceRef, attachments, active);
 }
 
 // `saveDeadline` reale: compone `attachments: [...existingAttachments, ...nuovi]`

@@ -58,7 +58,7 @@ html.dark .vault-assistant-result-content {
 }
 
 .vault-assistant-panel {
-    max-height: calc(100dvh - max(24px, env(safe-area-inset-top)) - max(24px, env(safe-area-inset-bottom)));
+    max-height: calc(100dvh - max(24px, var(--frame-safe-area-inset-top, env(safe-area-inset-top))) - max(24px, var(--frame-safe-area-inset-bottom, env(safe-area-inset-bottom))));
     overscroll-behavior: contain;
 }
 

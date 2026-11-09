@@ -22,7 +22,7 @@ test('testo e attributi traducibili fanno parte del grafo UI', () => {
   assert.ok(audit.translationAttributeEdges.text > 0);
   assert.ok(audit.translationAttributeEdges.placeholder > 0);
   assert.ok(audit.translationAttributeEdges.aria > 0);
-  assert.equal(audit.pages.length, 30);
+  assert.equal(audit.pages.length, 31);
   assert.ok(audit.summary.translatedElements > 0);
 });
 
@@ -30,7 +30,8 @@ test('la copertura della guida distingue traduzione diretta e fallback italiano'
   assert.equal(audit.fallbackLocale, 'it');
   assert.deepEqual(audit.missingGuideByLanguage.it, []);
   for (const language of expectedLanguages.filter(language => language !== 'it')) {
-    assert.equal(audit.missingGuideByLanguage[language].length, audit.summary.guideKeys);
+    assert.equal(audit.missingGuideByLanguage[language].length, audit.summary.guideKeys - 3);
+    assert.ok(audit.missingGuideByLanguage[language].every(key => !key.startsWith('guide.pages.app.')));
   }
   assert.equal(audit.summary.guideFallbackLanguages, 7);
 });

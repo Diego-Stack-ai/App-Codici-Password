@@ -1,5 +1,6 @@
+import {vaultFrameClient} from './modules/core/vault-frame-client.js';
 import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
-import { auth, db } from './firebase-config.js?v=1.2.267';
+import { auth, db } from './firebase-config.js?v=1.2.268';
 import { LOG } from './logger.js';
 import { getVaultSessionExpiry, touchVaultSession } from './modules/core/vault-session.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
@@ -21,6 +22,7 @@ let _lastActivityTimestamp = null; // in-memory: non manipolabile da localStorag
  * Deve essere chiamato una sola volta, preferibilmente in main.js
  */
 export function initInactivityTimer() {
+    if (vaultFrameClient.isChild() || window.location.pathname === '/app.html') return;
     if (isInitialized) return;
     isInitialized = true;
 
@@ -48,6 +50,10 @@ export function initInactivityTimer() {
  * Recupera il timeout personalizzato salvato nel profilo utente.
  */
 export async function syncTimeoutWithFirestore(uid) {
+    if (vaultFrameClient.isChild()) {
+        await vaultFrameClient.request('preference');
+        return;
+    }
     try {
         const docRef = doc(db, "users", uid);
         const snap = await getDoc(docRef);

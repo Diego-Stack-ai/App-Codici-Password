@@ -1,5 +1,23 @@
 # Collaudi
 
+<a id="cornice-a2-preparazione-2026-11-09"></a>
+
+## Cornice A2 — candidata reale spenta, 09/11/2026
+
+Fonte del passaggio: [GO Claude A1](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6747756706), riferito esattamente a `4f2bc0f812fa2f72c63a409d1aa5d3a120bcd136`; non è un GO su A2. Candidata 1.2.268 sul ramo `codex/vault-frame-lab-20261109` della PR #278, produzione ancora 1.2.267. Nessun merge, cloud, attivazione o deploy della cornice.
+
+Raccordo reale: pagina app.html, bootstrap canonico, broker/owner/trasporto e security manager; 22 route chiuse, query per route, protocollo/release, UID con intero fence revision/nonce, controllo dopo le attese, scadenze da lock_timeout, safe area prima della visibilità, history e uscite pubbliche top-level. Default doppiamente negato: switch compilato false e adapter di ammissione null, senza UID personale nel repository. Rules, Functions, firebase.json e workflow invariati.
+
+Conferme fresche nei percorsi censiti: export/backup e vCard/PDF, cambio Master Password, condivisione/revoca e pubblicazione delle nuove buste per gli allegati, cancellazioni definitive e rimozioni strutturate differite al salvataggio (banche/carte/Widget, profilo e azienda). Grant monouso legato al target, 15 secondi e limite metadati 64 KiB; nessuna credenziale nei target. Le intenzioni di rimozione delle bozze possono richiedere una conferma anche per un elemento appena aggiunto e mai salvato: limite di usabilità, senza ampliamento dei permessi. Il cambio Master mantiene le tre schermate esistenti e aggiunge la conferma del padre prima della scrittura; dopo il successo revoca la sessione della cornice. La copertura resta oggetto della revisione di Claude.
+
+Prove dedicate: `npm run test:vault-frame-runtime` **116/116**, in cinque file: runtime 55, navigazione/logout 30, confini 19, browser runtime/native 8 e browser media 4. `node --test tests/vault-session-races.test.mjs` **25/25**, incluso il gestore reale, fence pendente senza evento e cambio Master interrotto. Sono prove sintetiche: policy/broker/owner/transport/CSS e checker reali; confini Auth/Firebase simulati, Chrome desktop headless su loopback, stream canvas e file inventati. Nessun contenuto personale o Vault reale. La prova native usa il checker effettivo e un nuovo clic attendibile, compresi scadenza, lease e sospensione; fotocamera e picker scartano i risultati tardivi dopo revoca. I test archivio distinguono esplicitamente revoca prima e dopo la prima richiesta inviata, mantenendo le asserzioni sulle cancellazioni effettive.
+
+Regressione generale: verificati tutti i gruppi previsti da npm test, **3388 casi / 3378 PASS / 0 FAIL / 0 cancellati / 10 skip in 64 gruppi**. Il comando iniziale si è fermato nell'harness storico di cancellazione Scadenze perché rimuoveva gli import senza fornire il nuovo confine standalone. Corretto il solo harness, mantenute le asserzioni su retry SDK e scritture reali; ripetuti test:vault-mutation e tutti i gruppi successivi, tutti riusciti. Il conteggio usa il prefisso riuscito e la coda finale ripetuta, senza sommare i tentativi falliti e senza presentarli come un singolo npm test con exit 0. I log distinti e la sintesi effettiva sono conservati in .codex-tmp. La CI sul commit della PR deve ancora eseguire integralmente npm test. Ambiente locale Node 24.22.1; la CI prevista usa Node 22 e ha un esito distinto. I vecchi harness che rimuovono gli import ricevono un confine standalone esplicito, senza indebolire le asserzioni sui dati: non certificano la cornice. Le prove browser della cornice rimangono separate e verificano la conferma reale. Dipendenze esatte dei lockfile installate con script disabilitati, senza upgrade: il tentativo offline Functions è risultato incompleto ed è stato completato da npm pubblico. Il collegamento temporaneo iniziale a node_modules è stato rimosso; nessuna eccezione alla scansione MD.
+
+Inventari e gate: 31 HTML canonici (30 pagine e contenitore inattivo); runtime offline con 61 export e 334 risorse, anteprime UI escluse. Le due etichette dell'azione nativa e le tre frasi della nuova guida sono nelle otto lingue; il precedente debito di 185 frasi guida in italiano non è dichiarato risolto da A2. Budget statico con costo circoscritto documentato in [Interfaccia](../regole/INTERFACCIA.md#cornice-a2-ui-2026-11-09): eccezioni esplicite da rivedere con Claude, target runtime invariati. Mappa Graphify aggiornata solo sul codice, generati e ricevute tecniche in .codex-tmp esclusi da Git. Gitleaks sull'indice del candidato senza nuovi segreti; verifica finale dei documenti sul candidato prima del commit. La CI del nuovo SHA è distinta dalle precedenti run A1.
+
+Gate successivo: GO A2 di Claude sul commit segnalato nell'avviso sulla [PR #278](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278). Nessun GO attribuito ai controlli statici interni. B1 (interruttore server e header selettivi) non iniziata; B2 lista prove e C1 Auth/App Check/PRF, camera/microfono reali, Android, Safari iPhone e PWA fisici non eseguiti. Nessuna attivazione né dichiarazione CORNICE CHIUSA. Merge/deploy soltanto dopo GO e approvazione personale di Diego.
+
 <a id="cornice-a1-contratto-2026-11-09"></a>
 
 ## Cornice A1 — contratto preparato, 09/11/2026
@@ -585,7 +603,7 @@ La scansione redatta dell'intera cronologia copre 1.611 commit e circa 112 MB, c
 <!-- generated:pages:start -->
 #### Inventario QA finale
 
-Fonte verificata: **30 pagine canoniche**, **125 istruzioni**, **110 target guida** e **166 campi HTML statici compilabili**.
+Fonte verificata: **31 pagine canoniche**, **126 istruzioni**, **111 target guida** e **166 campi HTML statici compilabili**.
 
 > I campi creati dinamicamente dai moduli JavaScript non sono dichiarati coperti da questo inventario statico: vengono censiti e provati nel passaggio browser. BASELINE AUTOMATICA indica soltanto accesso/sblocco/Home, non il collaudo visivo completo della pagina.
 
@@ -621,6 +639,7 @@ Fonte verificata: **30 pagine canoniche**, **125 istruzioni**, **110 target guid
 | `contatto_condiviso`<br>Salva contatto — Codici &amp; Password | public-contact | 0: — | 3: #contact-details, #save-contact, #retry-contact | vCard/QR completamente fittizio e privo di recapiti reali. | **NON ESEGUITO** |
 | `privacy`<br>Privacy Policy - PROTOCOLLO BASE V5.0 | internal | 0: — | 0: — | Nessuna fixture; lettura, navigazione, zoom, tastiera e link. | **NON ESEGUITO** |
 | `termini`<br>Termini e Condizioni - PROTOCOLLO BASE V5.0 | internal | 0: — | 0: — | Nessuna fixture; lettura, navigazione, zoom, tastiera e link. | **NON ESEGUITO** |
+| `app`<br>Privato | internal | 0: — | 1: #frame-resume | Cornice A2 spenta: solo pagina inattiva e ritorno Home; nessuna Vault o scrittura. Browser del broker separato con identità sintetica. | **NON ESEGUITO** |
 
 #### Regole di esecuzione
 

@@ -8,12 +8,21 @@
   "absoluteStaticCeilings": {
     "maxInitialLocalGzipKb": 338,
     "maxInitialLocalGzipKbByPage": {
-      "profilo_privato.html": 344,
-      "form_account_azienda.html": 340
+      "profilo_privato.html": 348,
+      "form_account_azienda.html": 344,
+      "aggiungi_scadenza.html": 340,
+      "form_account_privato.html": 342,
+      "impostazioni.html": 339
     },
     "maxJsModules": 47,
-    "hardeningAllowance": "06/11/2026: fence logout e Messaging locale. 07/11/2026: un modulo puro per il grant offline verificato; namespace inviti e revoca completa Ricerca. Misurati 343,3 KB sul profilo e 339,2 KB sul form azienda: margine circoscritto di 1 KB per queste due pagine. Tetto generale 338 KB e target runtime invariati.",
-    "maxCssFiles": 8
+    "hardeningAllowance": "06/11/2026: fence logout e Messaging locale. 07/11/2026: un modulo puro per il grant offline verificato; namespace inviti e revoca completa Ricerca. Misurati 343,3 KB sul profilo e 339,2 KB sul form azienda: margine circoscritto di 1 KB per queste due pagine. Tetto generale 338 KB e target runtime invariati. 09/11/2026 A2: bridge, uscita coordinata e fence nelle azioni sensibili aggiungono due moduli condivisi; UI export caricata solo al comando e lifetime media consolidato nel client. Eccezioni per pagina misurate: 339,9/341,5/343,3/338,4/347,3 KB nelle cinque pagine elencate (margine <1 KB); dettagli 49 moduli, form 48. Tetti generali 338 KB/47 moduli, CSS e target runtime invariati. Costo preparatorio esplicito da rivedere con Claude; nessuna certificazione delle prestazioni fisiche.",
+    "maxCssFiles": 8,
+    "maxJsModulesByPage": {
+      "dettaglio_account_azienda.html": 49,
+      "dettaglio_account_privato.html": 49,
+      "form_account_azienda.html": 48,
+      "form_account_privato.html": 48
+    }
   },
   "runtimeTargets": {
     "status": "baseline-captured-real-devices-2026-09-06",

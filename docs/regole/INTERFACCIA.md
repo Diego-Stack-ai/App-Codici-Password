@@ -1,5 +1,19 @@
 # Interfaccia
 
+<a id="cornice-a2-ui-2026-11-09"></a>
+
+## Cornice A2 — protocollo UI preparatorio
+
+Il GO A1 permette soltanto la candidata spenta. Il padre misura gli inset residui rispetto al rettangolo reale dell'iframe; il figlio applica quattro variabili CSS solo dopo handshake valido e conferma l'applicazione prima di essere mostrato. I 35 usi esistenti di env() nei dieci CSS privati conservano il fallback originale fuori cornice. Resize/orientamento aggiornano gli inset, senza rinnovare l'attività. Nessun padding globale aggiunto; la verifica headless non certifica il notch Safari/PWA fisico.
+
+Le uscite Auth, recovery, nuova password e legali revocano prima della navigazione top-level; una callback del vecchio Document non può navigare quello successivo. Durante logout iniziato dal figlio la UI e la RAM vengono bloccate subito, mantenendo vivo il contesto per deny durevole e signOut. Il padre differisce il solo redirect: fine del cleanup e destinazione reauth specifica del chiamante, con guardia massima di 20 secondi (timeout esistenti fence 5s + SDK 10s). redirect=null resta senza navigazione finché il chiamante non sceglie la destinazione, salvo la guardia di arresto. Alla conclusione o al timeout il figlio viene rimosso; Home non ricarica il padre durante la pulizia. Nessuna nuova autorizzazione ai dati deriva da questo coordinamento.
+
+Le esportazioni vCard/PDF mantengono il gesto nativo: fuori cornice l'API resta sincrona nel clic originario; dentro, una conferma fresca prepara un secondo pulsante esplicito, valido soltanto per documento/UID/fence/visibilità e scadenza del grant. Annullamento, scadenza e revoca non eseguono l'azione. La UI di esportazione viene importata solo al comando. Fotocamera integrata e voce si arrestano in background; una selezione nativa già aperta può terminare nel sistema operativo, ma il risultato tardivo viene scartato dopo revoca. Non si promette di chiudere il picker del sistema.
+
+Budget A2 misurato, eccezioni circoscritte esplicite da sottoporre a Claude: cinque pagine richiedono 339,9 / 341,5 / 343,3 / 338,4 / 347,3 KB gzip; limiti rispettivamente 340 / 342 / 344 / 339 / 348 KB, senza aumentare il tetto generale 338 KB. Due dettagli Account ammettono 49 moduli e due form 48, a causa del bridge/uscite/fence condivisi; tetto generale 47 e otto CSS invariati. Lifetime consolidato nel client e UI export differita hanno evitato altri moduli iniziali. Sono costi statici dichiarati del nuovo contratto, non misure di latenza fisica; gli obiettivi runtime restano invariati e da provare in C1.
+
+Intestazioni e Permissions Policy rimangono immutate in A2; il contratto selettivo successivo viene applicato soltanto in B1 dopo GO. [Incarico e parti ancora aperte](../progetto/INCARICO_CORRENTE.md#cornice-a2-preparazione-2026-11-09).
+
 <a id="cornice-a1-ui-2026-11-09"></a>
 
 ## Cornice — header, permessi e navigazione A1, 09/11/2026

@@ -1,4 +1,5 @@
-import {auth, functions} from '../../firebase-config.js?v=1.2.267';
+import {confirmFrameAction} from '../core/vault-frame-client.js';
+import {auth, functions} from '../../firebase-config.js?v=1.2.268';
 import {httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
 import {encrypt, ensureVaultKeyMaterial} from '../core/security-manager.js';
 import {
@@ -64,6 +65,8 @@ export async function updateAccountWidget(widgetId, expectedRevision, data, acco
 }
 
 export async function deleteAccountWidget(widget, account) {
+    assertSession(account, auth.currentUser?.uid);
+    await confirmFrameAction('permanent-delete', {id: widget.id, revision: widget.revision, accountId: account.accountId});
     assertSession(account, auth.currentUser?.uid);
     const ids = createEmbeddedWidgetIdentifiers(widget.id);
     return send({

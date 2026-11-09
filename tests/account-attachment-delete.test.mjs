@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -46,7 +47,7 @@ function fixture(kind, {objects = [], documents = [], confirm = true} = {}) {
     const list = prefix => [...stored.entries()]
         .filter(([path]) => path.startsWith(`${prefix}/`))
         .map(([, record]) => record);
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         decideAttachmentContent, db: {}, storage: {}, t: () => '', console: {warn() {}}, logError: (...args) => errors.push(args),
         closeAttachmentSourcePicker() {}, selectAttachmentSource: async () => null,
         navigator: {onLine: true}, setTimeout: () => 0, clearTimeout() {},
@@ -72,7 +73,7 @@ function fixture(kind, {objects = [], documents = [], confirm = true} = {}) {
             list(`users/${ownerId}/accounts/${accountId}/attachments`),
         listCompanyAccountAttachments: async (ownerId, companyId, accountId) =>
             list(`users/${ownerId}/aziende/${companyId}/accounts/${accountId}/attachments`)
-    });
+    }));
     if (kind === 'privato') {
         vm.runInContext(privateModule, context);
         const mount = context.initPrivateAttachmentModule({ownerId: OWNER, accountId: 'A', readOnly: false});

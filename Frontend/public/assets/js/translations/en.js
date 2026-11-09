@@ -1,5 +1,7 @@
 // Catalogo autorevole inglese. Modificare qui e verificare con npm run test:i18n.
 export default {
+    "frame_export_ready": "Export ready",
+    "frame_export_action_hint": "Select Confirm to continue with the file you just authorized.",
     "account_archive": "Account Archive",
     "account_archive_desc": "Manage archived accounts",
     "add_short": "Add",
