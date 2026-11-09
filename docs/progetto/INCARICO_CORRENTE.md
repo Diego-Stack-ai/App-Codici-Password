@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="cornice-b2-2026-11-09"></a>
+
+## Cornice B2 — lista fisica, in revisione
+
+[GO B1 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753223333) su `0d861eb093626b9e0828848fef80c83c1b0e3aee`, CI #1047 verde (3438 PASS/0 FAIL/10 skip), sblocca soltanto B2. Preparata la [lista fisica e matrice C1](../evidenze/COLLAUDI.md#cornice-b2-lista-2026-11-09), quattro ambienti e sedici casi, tutti NE. Comprende rinnovo token del pilota dopo provisioning approvato, dieci pagine, timeout scelto/background, Auth/PRF/App Check, media, push, cronologia/link/ricarica, allegati/azioni sensibili, logout da altra scheda e criteri di arresto.
+
+Rilevato nella lettura per B2 un gap concreto: il worker push ricarica ancora il WindowClient invece di inoltrare un intento alla cornice pronta. Registrato come aperto, da correggere e rivedere prima della proposta B3; non viene rinviata al telefono la scoperta né attribuito un PASS. B2 modifica soltanto documenti e attende il proprio GO. Nessun B3, merge, provisioning, nuovo UID/claim, deploy o test fisico; produzione 1.2.267. Le sezioni B1 seguenti sono cronologia del candidato approvato, non un NO-GO ancora corrente su B1.
+
 <a id="cornice-b1-2026-11-09"></a>
 
 ## Cornice B1 — permesso server e intestazioni, candidata in revisione

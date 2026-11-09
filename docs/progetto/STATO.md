@@ -1,5 +1,13 @@
 # Stato
 
+<a id="cornice-b2-stato-2026-11-09"></a>
+
+## Cornice: B1 approvata, B2 lista candidata
+
+Claude ha dato [GO B1](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753223333) su `0d861eb093626b9e0828848fef80c83c1b0e3aee`; CI #1047 interamente riuscita, 3448 casi/3438 PASS/0 FAIL/10 skip e deploy saltato. B2 consegna [lista e matrice C1](../evidenze/COLLAUDI.md#cornice-b2-lista-2026-11-09), quattro ambienti distinti, nessuna prova fisica eseguita. Trovato un gap statico nella continuità push: il worker ricarica ancora la finestra; correzione/revisione necessarie prima della proposta B3. B2 attende GO, nessun merge o attivazione.
+
+Produzione sempre **1.2.267 / #1041 / 1bcbef73**. Candidata 1.2.268, singleton e claim reali assenti. Le ricevute B1 precedenti conservano NO-GO e correzioni, superati dal GO sullo SHA indicato; non attestano collaudi dei dispositivi o pubblicazione.
+
 <a id="cornice-b1-stato-2026-11-09"></a>
 
 ## Cornice B1 — candidata per revisione, produzione invariata
@@ -18,7 +26,7 @@ A1 approvata da Claude sulla PR #278, commit `4f2bc0f812fa2f72c63a409d1aa5d3a120
 
 <a id="stato-corrente"></a>
 
-**09/11/2026 — stato corrente:** A1 e A2 approvate; B1 candidata in revisione, non pubblicata. Produzione 1.2.267, candidata 1.2.268 senza permesso server produttivo. Il [riepilogo B1](#cornice-b1-stato-2026-11-09) prevale sui checkpoint A1/A2 seguenti; B2, merge, attivazione e collaudo fisico restano da autorizzare secondo il mandato.
+**09/11/2026 — stato corrente:** A1/A2/B1 approvate; B2 lista candidata in revisione. Produzione 1.2.267, candidata 1.2.268 senza permesso server produttivo. Il [riepilogo B2](#cornice-b2-stato-2026-11-09) prevale sui checkpoint precedenti; gap push aperto, nessun B3/merge/attivazione/collaudo fisico eseguito.
 
 Cronologia precedente al GO A1 — 09/11/2026: **Cornice: passo A1 preparato sulla PR #278, in attesa di revisione Claude sulla PR**. Nuovo ordine di Diego A1–C2 e scelta esplicita background = durata `lock_timeout`; definiti contratto Vault/UI, 22 pagine candidate, header per route, permessi e limiti same-origin. Nessuna integrazione reale, flag o attivazione eseguiti; A2 attende «REVISIONE CLAUDE – GO». Produzione invariata **1.2.267 / #1041 / `1bcbef73`**. [Mandato corrente](INCARICO_CORRENTE.md#cornice-a1-incarico-2026-11-09), [decisione](DECISIONI.md#cornice-ordine-2026-11-09), [evidenze](../evidenze/COLLAUDI.md#cornice-a1-contratto-2026-11-09). I precedenti pareri CLI sul laboratorio non sono il GO del nuovo passo.
 

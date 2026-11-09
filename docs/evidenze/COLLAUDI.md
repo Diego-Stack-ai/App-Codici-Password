@@ -1,5 +1,73 @@
 # Collaudi
 
+<a id="cornice-b2-lista-2026-11-09"></a>
+
+## Cornice B2 — lista fisica candidata, nessuna prova eseguita
+
+Prerequisito: [GO B1 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753223333) su `0d861eb093626b9e0828848fef80c83c1b0e3aee`. [CI #1047](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42711090070) riuscita, **3448 casi/3438 PASS/0 FAIL/0 cancellati/10 skip in 64 gruppi**, docs e Gitleaks verdi, deploy saltato. Checkout CI merge sintetico `02a289d907abb3870e3b9622c6e7043407b0ac11`, genitori master `039b7a6b` e head `0d861eb0`; confronto API: zero file diversi dall'head. Manifest CI 357 file, hash `6300e82c5f675064a0fbc744a0f46ca4a73e94f746570aca9c5774a9ac595c6c`. Il GO accetta il filtro del token già acquisito e l'eccezione statica dichiarata; non è merge, attivazione o prova fisica.
+
+**Gap statico noto prima di B3:** il worker notifiche corrente seleziona un WindowClient e ne chiama navigate; manca l'intento verso la cornice già pronta con conferma di ricezione. Se il client scelto è app.html, il padre viene ricaricato e perde la RAM. Il caso D11 seguente non è soltanto da provare: la continuità richiesta dal contratto non è ancora implementata. Nessun PASS dedotto dal GO B1; occorre correzione e revisione prima di proporre la pubblicazione B3. In B2 si consegna la lista e si segnala il gap, senza modificare il worker o anticipare B3/C1.
+
+### Preparazione di C1, dopo il rilascio B3 approvato
+
+Diego esegue le prove separatamente su **Chrome desktop Windows, Chrome Android, Safari iPhone e PWA installata su iPhone**. Registrare per ogni colonna modello/OS/browser/versione app/data, sorgente del rilascio approvato e presenza effettiva della cornice; Safari e PWA sono due ambienti distinti. Oggi produzione 1.2.267 e nessun permesso reale: la tabella è interamente **NE**, non eseguibile come canary già attivo. La futura versione 1.2.268 va prima verificata da manifest/worker e non dedotta dalla sola etichetta.
+
+B3 deve proporre l'assegnazione privata del singleton e del solo claim del pilota, preservando gli altri claim; il token nuovo richiede un nuovo accesso oppure un refresh esplicito. Per C1 preferire logout/login normale dopo la conferma del provisioning, così non si chiede a Diego di incollare token o eseguire comandi in console. La hint non concede ammissione: il documento server e il fence rimangono obbligatori. Nessun altro account viene abilitato o creato da B2.
+
+Annotare il valore originale di Tempo di Inattività; per i casi temporizzati scegliere prima 1 minuto, poi verificare anche 3 minuti e infine ripristinare la preferenza originale. Ogni scheda/finestra parte con RAM propria. Dopo logout o ricarica completa è corretto richiedere un nuovo sblocco; il requisito di continuità riguarda le navigazioni interne con padre vivo. Per tutte le prove usare soltanto l'account pilota, dati di prova già autorizzati e contenuti innocui; annullare editor, fotocamera e operazioni sensibili prima di qualsiasi scrittura non prevista. Non cancellare record, cambiare Master Password, revocare condivisioni o pubblicare backup per dimostrare la sola conferma.
+
+### Itinerario di dieci pagine private
+
+Sbloccare una volta e raggiungere, tramite i menu/link dell'app e senza incollare URL nella barra degli indirizzi: **Home → Area privata → lista Account privati standard → Profilo → Impostazioni → Regole scadenze → Configurazione documenti → Scadenze → Archivio Account → Destinatari**. Le destinazioni canoniche sono home_page, area_privata, account_privati, profilo_privato, impostazioni, regole_scadenze, configurazione_documenti, scadenze, archivio_account e gestione_destinatari. È consentito tornare a Home fra le tappe; contare dieci Document distinti, non dieci linguette dello stesso Profilo. Non salvare i moduli. In desktop controllare che l'indirizzo esterno rimanga app.html con destinazione applicativa; PWA senza barra: registrare la sequenza e l'assenza di nuove cerimonie Vault. Un nuovo incolla/nuova scheda/ricarica del padre non è questo test.
+
+### Casi e risultati attesi
+
+| Caso | Azione e risultato atteso |
+|---|---|
+| D01 — avvio | Nuovo accesso Firebase/2FA e token aggiornato dopo B3; pilota ammesso, uno sblocco Vault iniziale. Nessun loop, pagina bianca o errore Auth/App Check ignorato. |
+| D02 — dieci pagine | Itinerario sopra con dati leggibili e azioni disponibili; nessuna ulteriore Master Password/PRF durante le navigazioni interne prima della scadenza. |
+| D03 — sezioni e parità | Profilo Contatti/Indirizzi/Documenti/Tessera e, se usata, azienda: tab/query/anchor corretti, header e pulsanti raggiungibili, niente sovrapposizioni; lettura/copia/annullamento equivalenti allo standalone. Nessuna adozione della grafica sperimentale. |
+| D04 — cronologia | Almeno tre navigazioni interne, Indietro/Avanti browser e freccia app; una sola sequenza logica, destinazione/query/anchor giusti, nessun doppio salto o form sensibile ripristinato. |
+| D05 — ricarica/link/scheda | Ricaricare il padre riporta alla medesima destinazione validata e richiede un solo nuovo sblocco. Ricarica del solo figlio, quando il browser offre quel comando: padre vivo e chiave conservati; distinguerla dal reload dell'app. Link privato diretto e nuova scheda entrano correttamente ma con RAM e sblocco propri. Tornare indietro dopo logout non ripristina dati aperti. |
+| D06 — inattività | Con 1 minuto scelto, attendere senza toccare fino a oltre soglia: blocco e nuovo sblocco richiesto. Navigare appena prima della soglia non rinnova il tempo; interazione reale sì. Ripetere a 3 minuti per escludere un valore fisso. |
+| D07 — background | Nascondere brevemente e tornare prima delle due scadenze: verifica server prima dei dati, nessun nuovo sblocco se il padre è ancora vivo, non scaduto e senza eventi di revoca. Oltre soglia: blocco prima di mostrare dati. Annotare separatamente freeze/pagehide/BFCache e scarto OS: revocano o distruggono legittimamente RAM anche prima della soglia; non scambiarli per continuità provata. |
+| D08 — logout/fence | Logout dalla cornice e da altra scheda dello stesso browser: UI bloccata, vecchie schede e Back non riaprono dati; nuovo accesso/sblocco necessari. Nuova epoca dello stesso UID non riusa la vecchia RAM. |
+| D09 — biometria | Con PRF realmente supportato eseguire lo sblocco e una nuova conferma; annullamento/errore non sbloccano. Incompatibilità e ripiego Master Password sono registrati separatamente e non certificano PRF. |
+| D10 — camera/voce | Dal gesto previsto aprire fotocamera/scanner documenti e dettatura con contenuto innocuo; consentire/rifiutare/annullare. Stream arrestati su cambio pagina/background/blocco, risultato tardivo scartato e nessun caricamento involontario. Picker nativo distinto dalla camera integrata; annullare prima del salvataggio. |
+| D11 — notifiche | **Gap statico aperto.** Cornice pronta: notifica deve selezionare la destinazione autorizzata mantenendo il padre vivo e conservando id/received/notification validi. Senza cornice pronta: nuova sessione/destinazione corretta e sblocco se necessario. Provare notifica reale autorizzata sui dispositivi che la supportano; simulazione/helper non equivale a push fisico. |
+| D12 — allegati/export/stampa | PDF/immagine ammessi si aprono fuori cornice, altri formati restano download secondo S1; ritorno conserva il padre vivo se non scaduto. Export/vCard/PDF richiedono conferma fresca e gesto finale previsto; annullare senza esportare dati reali. Stampa fuori cornice, annullamento e ritorno corretti. |
+| D13 — azioni sensibili | A Vault aperta, export/backup, cambio Master Password, condivisione e cancellazione definitiva chiedono nuova conferma; annullare PRIMA della scrittura. Non usare operazioni distruttive su dati reali per questo collaudo. Le prove sintetiche di grant scaduti/riusati restano nelle ricevute B1. |
+| D14 — uscite | Privacy/termini/login escono al livello principale dopo revoca. Link web esterno senza opener, tel/mailto aprono il percorso nativo e il ritorno non mostra dati scaduti. Verificare anche ritorno da picker/telefono/email. |
+| D15 — rete/policy | Offline iniziale prosegue standalone senza attesa aggiuntiva del permesso. Perdita rete/policy non verificabile nella cornice: blocco e nessuna riapertura da cache. Spegnimento del singleton e riaccensione sono prove operative B3/C1 solo approvate, mai modifica client del flag. La rimozione del claim non è il kill switch. |
+| D16 — confini | Confermare le evidenze automatiche su origine estranea, URL non ammessi/blob/data, UID/fence, assenza chiavi in storage/URL/log. Il controllo fisico è distinto: non chiedere dump di chiavi o storage; qualunque materiale sensibile visibile fuori dalla vista autorizzata impone arresto. Altro account solo se già disponibile e autorizzato, altrimenti NE senza crearne uno. |
+
+### Matrice C1 da compilare da Diego
+
+`NE` = non eseguito, `PASS` = azione e risultato entrambi osservati, `FAIL` = comportamento diverso, `LIMITE` = capacità primaria non disponibile o prova incompleta da decidere con revisore/Diego. Un fallback riuscito non trasforma un LIMITE in PASS. Nessun risultato viene precompilato dalle suite automatiche.
+
+| Caso | Chrome desktop | Chrome Android | Safari iPhone | PWA iPhone |
+|---|---|---|---|---|
+| D01 | NE | NE | NE | NE |
+| D02 | NE | NE | NE | NE |
+| D03 | NE | NE | NE | NE |
+| D04 | NE | NE | NE | NE |
+| D05 | NE | NE | NE | NE |
+| D06 | NE | NE | NE | NE |
+| D07 | NE | NE | NE | NE |
+| D08 | NE | NE | NE | NE |
+| D09 | NE | NE | NE | NE |
+| D10 | NE | NE | NE | NE |
+| D11 — gap statico | NE | NE | NE | NE |
+| D12 | NE | NE | NE | NE |
+| D13 | NE | NE | NE | NE |
+| D14 | NE | NE | NE | NE |
+| D15 | NE | NE | NE | NE |
+| D16 | NE | NE | NE | NE |
+
+Per ogni esito riportare caso, ambiente/versioni, passi, risultato e ora; riferimenti o schermate solo ripuliti da dati personali/credenziali. Le ricevute tecniche sensibili restano fuori Git. Eventuali tempi misurati sono del dispositivo indicato, non promesse generali.
+
+**Arresto e chiusura:** chiave/dati non autorizzati, revoca non rispettata, contenuto navigabile nel frame o bypass coorte impongono blocco immediato del canary e revisione prima di riprendere. Ripetizione dello sblocco ad ogni pagina, perdita di route, regressioni camera/voce/push o form non utilizzabili impediscono di dichiarare il requisito concluso. Il gap D11 va corretto/rivisto prima di B3; gli altri FAIL/NE/LIMITE rimangono aperti in C1. Spegnimento d'emergenza mediante singleton disabled/rimosso; rimozione dell'instradamento Hosting solo CI approvata, mai deploy dal PC. B2 non esegue tali operazioni. C2 richiede ricevute STATO/COLLAUDI e GO sui seguiti; nessun «CORNICE CHIUSA» con prove obbligatorie mancanti.
+
 <a id="cornice-b1-verifiche-2026-11-09"></a>
 
 ## Cornice B1 — verifiche candidate, 09/11/2026

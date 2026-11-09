@@ -1,5 +1,11 @@
 # Programma
 
+<a id="cornice-b2-roadmap-2026-11-09"></a>
+
+## Cornice: GO B1, lista B2 e gap prima di B3
+
+GO B1 di Claude su `0d861eb0`, CI #1047 verde (3438 PASS/0 FAIL/10 skip). B2 prepara soltanto [lista fisica e matrice C1](../evidenze/COLLAUDI.md#cornice-b2-lista-2026-11-09); sedici casi/quattro ambienti tutti NE, con provisioning e refresh del pilota rinviati a B3 approvato. Gap statico noto nella notifica verso cornice pronta: il worker usa ancora navigate. Va corretto e rivisto prima della proposta di pubblicazione B3, senza confondere la lista con implementazione o prova fisica. Attendiamo GO B2 e prescrizioni del revisore sul gap; nessun avanzamento implicito o nuova grafica.
+
 <a id="cornice-b1-roadmap-2026-11-09"></a>
 
 ## Cornice: dopo il GO A2, candidata B1
@@ -24,8 +30,8 @@ A1 approvata da Claude sul commit `4f2bc0f812fa2f72c63a409d1aa5d3a120bcd136`. A2
 |---|---|---|
 | A1 approvato | Contratto nei documenti Vault/UI/Decisioni e ricevuta sulla PR | GO Claude sulla PR per il commit del passo |
 | A2 approvato | app.html e bridge reali ma spenti; test negativi | GO Claude su 455b41fc registrato |
-| B1, corrente | Flag server solo Diego, Rules/emulatori e header effettivi selettivi | GO Claude su B1 |
-| B2 | Lista di prove fisiche desktop/Android/Safari/PWA | GO Claude su B2 |
+| B1 approvato | Flag server solo Diego, Rules/emulatori e header effettivi selettivi | GO Claude su 0d861eb0 registrato |
+| B2, corrente | Lista di prove fisiche desktop/Android/Safari/PWA, gap push dichiarato | GO Claude su B2 e correzione del gap prima di B3 |
 | B3 | Preparazione merge e CI, eventuale backend necessario poi Hosting | GO, approvazione personale Diego, verifica commit/manifest/hash |
 | C1 | Prove personali di Diego e sole correzioni emerse | Avviso → revisione → approvazione per ogni seguito |
 | C2 | Ricevute finali e avviso «CORNICE CHIUSA» | Tutti i criteri del mandato verificati, nessun PASS per prove mancanti |
