@@ -1,5 +1,11 @@
 # Programma
 
+## Prove grafiche pubblicate e limiti residui — 09/11/2026
+
+Le quattro prove separate sono distribuite con Hosting #1024, sorgente `87909638`, mantenendo l'app 1.2.265 e le 30 pagine reali invariate. Check completi, parere statico finale di Claude e verifica pubblica sono registrati nei [COLLAUDI](../evidenze/COLLAUDI.md#prove-grafiche-hosting-2026-11-09); il solo clic di questa run è eseguito su delega esplicita di Diego, senza modificare le protezioni dei prossimi rilasci. L'adozione di uno stile o della proposta Profilo richiede una successiva decisione e un incarico distinto. Le ricevute documentali non richiedono un altro Hosting.
+
+La distinta assistenza 2FA è pubblicata e documentata nella [ricevuta 1.2.265](../evidenze/COLLAUDI.md#assistenza-2fa-rilascio-1-2-265); restano il controllo produttivo con attestazione genuina e il riscontro finale di Claude, senza dichiararli superati. Restano separati i piccoli follow-up già individuati (fixture del dialogo MFA, riferimento della guida al comando sospeso, export client non usato e successiva semplificazione del contratto CI). Nessuna attività aggiuntiva su workflow, backend o recupero deriva dalle prove grafiche. La cornice Vault conserva i propri prerequisiti e le prove fisiche ancora aperti.
+
 ## Avanzamento del passaggio workflow — 09/11/2026
 
 Diego delega esplicitamente il solo commit del workflow approvato: completato sul branch della PR #271 con verifica dell'impronta, senza altra modifica al file. Questa delega aggiorna la precedente modalità manuale; le approvazioni production restano personali. Prossimo gate: check verdi sull'head completo di codice e ricevute, uscita da bozza e revisione finale valida di Claude. Nessun merge o pubblicazione è dedotto dai test. Seguono soltanto i rilasci CI autorizzati e le verifiche previste; candidata 1.2.265 e produzione 1.2.264 restano distinte.

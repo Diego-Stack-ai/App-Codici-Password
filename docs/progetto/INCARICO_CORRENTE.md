@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Esecuzione del rilascio delle prove grafiche — 09/11/2026
+
+La PR #275 è integrata in `8790963858756d694e191a4c62fee02a9f1004dd`, conservando i due commit dimostrativi e tutti i rami precedenti. Dopo i tre check obbligatori verdi e il parere finale statico favorevole di Claude sul medesimo candidato `1d1fa16b`, Codex avvia soltanto Hosting #1024. Diego delega successivamente in chat il clic «Approve and deploy» per questa specifica run: Codex lo esegue e registra la delega nel commento di approvazione. L'eccezione riguarda esclusivamente questa run, non modifica le protezioni production né introduce un'autorizzazione generale ad approvare altri rilasci.
+
+Hosting è pubblicato e verificato; le quattro prove sono accessibili separatamente dall'app, senza adottarne la grafica nelle 30 pagine canoniche. Versione applicativa sempre **1.2.265**, manifest di 341 file corrispondente al nuovo commit; 47 Functions e Rules immutate. Le ricevute documentali successive non richiedono un altro deploy. [Esiti e limiti](../evidenze/COLLAUDI.md#prove-grafiche-hosting-2026-11-09). La distinta chiusura produttiva dell'assistenza 2FA conserva i propri limiti e il riscontro finale di Claude ancora da completare.
+
 <a id="pubblicazione-prove-grafiche-2026-11-09"></a>
 
 ## Pubblicazione isolata delle prove grafiche — 09/11/2026
