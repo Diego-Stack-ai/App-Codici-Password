@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile, readdir} from 'node:fs/promises';
+import {readFile, readdir, mkdir} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {existsSync} from 'node:fs';
@@ -114,3 +114,140 @@ test(`${label} tabs follow the shared header height and cover scrolled section a
   } finally { await browser.close(); }
 });
 }
+
+const recordVisual = async (page, name) => {
+  if (!process.env.UI_OVERLAP_ARTIFACTS) return;
+  await mkdir(process.env.UI_OVERLAP_ARTIFACTS, {recursive: true});
+  await page.screenshot({path: path.join(process.env.UI_OVERLAP_ARTIFACTS, name + '.png'), animations: 'disabled'});
+};
+
+for (const [name, label] of [['profilo_privato.html', 'private profile'], ['dati_azienda.html', 'company profile']]) {
+test(`${label} header occludes text and controls while scrolling`, {timeout: 120000}, async () => {
+  const browser = await launchBrowser();
+  try {
+    const page = await browser.newPage();
+    await page.route('**/*', route => route.abort());
+    await page.emulateMedia({reducedMotion: 'reduce'});
+    const source = await pageSource(name);
+    const nav = source.match(/<nav\b[^>]*class="[^"]*\bprofile-tabs\b[^"]*"[^>]*>[\s\S]*?<\/nav>/)?.[0];
+    const header = source.match(/<header\b[^>]*id="header-placeholder"[^>]*><\/header>/)?.[0];
+    const bodyClass = source.match(/<body\b[^>]*class="([^"]+)"/)?.[1];
+    assert.ok(nav && header);
+    const controls = '<div class="header-balanced-container"><div class="header-left"><button id="header-action" class="btn-icon-header" aria-label="Indietro sintetico">←</button></div><h1 class="header-title">Profilo sintetico</h1><div class="header-right"><button class="btn-icon-header" aria-label="Home sintetica">⌂</button></div></div>';
+    for (const viewport of [{width: 320, height: 852}, {width: 393, height: 852}, {width: 1280, height: 900}]) {
+      await page.setViewportSize(viewport);
+      for (const dark of [false, true]) for (const palette of ['blue', 'lavender']) {
+        await page.setContent(`<!doctype html><html class="${dark ? 'dark' : ''}" data-color-theme="${palette}"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>${await fixtureStyles(name)}</style></head><body class="${bodyClass}"><div class="base-container">${header.replace('</header>', controls + '</header>')}<main class="base-main"><div class="page-container pt-header-extra pb-footer-extra"><div class="hero-profile-header"><div style="height:220px">Profilo inventato</div></div>${nav}<section class="form-section"><div style="height:100px"></div><button id="under-header" style="display:block;height:44px;width:260px;max-width:100%;background:repeating-linear-gradient(45deg,#e00000 0 8px,#000 8px 16px);color:white;border:0;font-size:20px">SEZIONE E AZIONI</button><div style="height:1800px"></div></section></div></main><footer class="base-footer"></footer></div></body></html>`);
+        const geometry = await page.evaluate(async () => {
+          window.fixtureClicks = {header: 0, underlying: 0};
+          document.querySelector('#header-action').onclick = () => window.fixtureClicks.header++;
+          document.querySelector('#under-header').onclick = () => window.fixtureClicks.underlying++;
+          await document.fonts.ready;
+          const main = document.querySelector('.base-main');
+          const scroller = getComputedStyle(main).overflowY === 'auto' ? main : document.scrollingElement;
+          // Only the synthetic scroller: prevent anchoring from moving the probe
+          // after its height changes, then wait for actual rendered geometry.
+          scroller.style.overflowAnchor = 'none';
+          scroller.style.scrollBehavior = 'auto';
+          const bar = document.querySelector('.base-header').getBoundingClientRect();
+          document.querySelector('#under-header').style.height = `${bar.height - 2}px`;
+          // Reduced motion can retain a very short height transition: a single
+          // animation frame may still report the original 44px probe.
+          const heightStarted = performance.now();
+          let heightFrames = 0;
+          while (heightFrames < 2) {
+            await new Promise(requestAnimationFrame);
+            const height = document.querySelector('#under-header').getBoundingClientRect().height;
+            heightFrames = height === bar.height - 2 ? heightFrames + 1 : 0;
+            if (heightFrames < 2 && performance.now() - heightStarted > 2000) {
+              throw new Error('synthetic probe height did not settle: ' + JSON.stringify({height, expected: bar.height - 2}));
+            }
+          }
+          const probe = document.querySelector('#under-header').getBoundingClientRect();
+          scroller.scrollTop += (probe.top + probe.bottom - bar.top - bar.bottom) / 2;
+          let previous = '';
+          let stableFrames = 0;
+          let result;
+          const started = performance.now();
+          do {
+            await new Promise(requestAnimationFrame);
+            const band = document.querySelector('.base-header').getBoundingClientRect();
+            const target = document.querySelector('#under-header').getBoundingClientRect();
+            result = {bar: band.toJSON(), probe: target.toJSON(), scrollTop: scroller.scrollTop,
+              scrollHeight: scroller.scrollHeight, clientHeight: scroller.clientHeight,
+              overflowY: getComputedStyle(scroller).overflowY, fontsStatus: document.fonts.status};
+            const signature = JSON.stringify(result);
+            stableFrames = signature === previous ? stableFrames + 1 : 0;
+            previous = signature;
+            if (stableFrames >= 2 && target.top >= band.top && target.bottom <= band.bottom) {
+              return {...result, stable: true};
+            }
+          } while (performance.now() - started < 2000);
+          return {...result, stable: false};
+        });
+        assert.ok(geometry.stable && geometry.probe.top >= geometry.bar.top && geometry.probe.bottom <= geometry.bar.bottom,
+          'put stable contrasting content inside the header band before checking visibility: ' +
+          JSON.stringify({name, viewport, dark, palette, ...geometry}));
+        const clip = {x: Math.ceil(geometry.bar.left), y: Math.ceil(geometry.bar.top),
+          width: Math.floor(geometry.bar.width), height: Math.floor(geometry.bar.height)};
+        const shown = await page.screenshot({clip, animations: 'disabled'});
+        await recordVisual(page, `header-${label.replaceAll(' ', '-')}-${viewport.width}-${palette}-${dark ? 'dark' : 'light'}`);
+        await page.locator('#under-header').evaluate(button => {button.style.visibility = 'hidden';});
+        const hidden = await page.screenshot({clip, animations: 'disabled'});
+        assert.equal(shown.equals(hidden), true,
+          `${label}/${viewport.width}/${palette}/${dark}: underlying content must not change any header pixel`);
+        await page.locator('#under-header').evaluate(button => {button.style.visibility = 'visible';});
+        await page.locator('#header-action').click();
+        assert.deepEqual(await page.evaluate(() => window.fixtureClicks), {header: 1, underlying: 0});
+      }
+    }
+  } finally {await browser.close();}
+});
+}
+
+test('profile attachment metadata stays outside its delete control on narrow cards and enlarged text', {timeout: 120000}, async () => {
+  const browser = await launchBrowser();
+  try {
+    const page = await browser.newPage(); await page.route('**/*', route => route.abort());
+    await page.emulateMedia({reducedMotion: 'reduce'});
+    for (const viewport of [{width: 320, height: 852}, {width: 360, height: 852}, {width: 393, height: 852}, {width: 1280, height: 900}]) {
+      await page.setViewportSize(viewport);
+      for (const dark of [false, true]) for (const fontSize of [16, 24, 32]) {
+        const cards = [true, false].map((image, index) => `<article class="profile-document-inline-card"><button id="open-${index}" class="profile-document-inline-item ${image ? 'is-image' : 'is-file'}" aria-label="Apri allegato sintetico ${index}">${image ? '<span>Immagine inventata</span>' : '<span>PDF</span><span class="profile-document-inline-name">documento_sintetico_esteso.pdf</span>'}</button><div class="profile-document-inline-footer"><div class="profile-document-inline-meta"><span class="profile-document-inline-name">documento_sintetico_con_nome_molto_lungo.${image ? 'jpg' : 'pdf'}</span><span class="profile-document-inline-status">123.45 MB · 09/11/2026</span></div><button id="delete-${index}" type="button" class="btn-delete-attachment profile-document-inline-delete" aria-label="Elimina allegato sintetico ${index}"><span class="material-symbols-outlined">×</span></button></div></article>`).join('');
+        await page.setContent(`<!doctype html><html class="${dark ? 'dark' : ''}" style="font-size:${fontSize}px"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>${await fixtureStyles()}</style></head><body class="base-bg"><div class="base-container"><main class="base-main"><div class="page-container" style="padding-top:40px"><section class="form-card"><div class="profile-document-inline-gallery">${cards}</div></section><div style="height:100px"></div></div></main></div></body></html>`);
+        await page.evaluate(() => {
+          window.fixtureClicks = {open: 0, remove: 0};
+          document.querySelectorAll('.profile-document-inline-item').forEach(button => {button.onclick = () => window.fixtureClicks.open++;});
+          document.querySelectorAll('.profile-document-inline-delete').forEach(button => {button.onclick = event => {event.stopPropagation(); window.fixtureClicks.remove++;};});
+        });
+        await recordVisual(page, `attachments-${viewport.width}-${fontSize}-${dark ? 'dark' : 'light'}`);
+        const cardsGeometry = await page.locator('.profile-document-inline-card').evaluateAll(cards => cards.map(card => {
+          const meta = card.querySelector('.profile-document-inline-meta').getBoundingClientRect();
+          const status = card.querySelector('.profile-document-inline-status');
+          const action = card.querySelector('.profile-document-inline-delete').getBoundingClientRect();
+          const rect = card.getBoundingClientRect();
+          const range = document.createRange(); range.selectNodeContents(status);
+          const textRects = [...range.getClientRects()];
+          return {card: rect.toJSON(), action: action.toJSON(), meta: meta.toJSON(),
+            overflow: status.scrollWidth - status.clientWidth,
+            visible: getComputedStyle(status).visibility !== 'hidden' && getComputedStyle(status).display !== 'none',
+            text: textRects.map(part => part.toJSON()),
+            overlap: textRects.some(part => part.left < action.right && part.right > action.left && part.top < action.bottom && part.bottom > action.top)};
+        }));
+        for (const geometry of cardsGeometry) {
+          assert.equal(geometry.visible, true); assert.ok(geometry.text.length > 0, 'metadata must actually render');
+          assert.ok(geometry.text.every(rect => rect.width > 0 && rect.height > 0));
+          assert.ok(geometry.overflow <= 1, `metadata overflow: ${JSON.stringify({viewport, fontSize, geometry})}`);
+          assert.equal(geometry.overlap, false, 'painted metadata must not intersect Delete');
+          assert.ok(geometry.action.left >= geometry.card.left && geometry.action.right <= geometry.card.right);
+          assert.ok(geometry.action.top >= geometry.meta.bottom + 5 || geometry.action.left >= geometry.meta.right + 5,
+            'metadata and the destructive control need distinct space');
+          assert.ok(geometry.action.width >= 44 && geometry.action.height >= 44, 'preserve the app touch target');
+          assert.ok(geometry.text.every(rect => rect.right <= geometry.meta.right + 1 && rect.bottom <= geometry.card.bottom));
+        }
+        await page.locator('#delete-0').click();
+        assert.deepEqual(await page.evaluate(() => window.fixtureClicks), {open: 0, remove: 1});
+      }
+    }
+  } finally {await browser.close();}
+});

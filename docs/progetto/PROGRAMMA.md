@@ -1,5 +1,9 @@
 # Programma
 
+## Rifinitura visiva 1.2.267 pubblicata, seguito cornice — 09/11/2026
+
+Follow-up delle schermate di Diego pubblicato e verificato con Hosting #1041, sorgente `1bcbef73`: copertura header nei due profili e metadati degli allegati separati dal cestino. PR #280 e stabilizzazione test #281 integrate dopo check e revisione statica di Claude, 341 hash verificati; il FAIL intermedio resta nelle evidenze. Il controllo fisico iPhone/Safari/PWA è ancora da eseguire. La cornice #278 resta il prossimo lavoro funzionale distinto, laboratorio non attivato; la nuova grafica è rinviata. [Mandato](INCARICO_CORRENTE.md#ui-overlap-followup-2026-11-09), [ricevuta e limiti](../evidenze/COLLAUDI.md#ui-overlap-followup-2026-11-09). Le voci seguenti conservano le fasi precedenti.
+
 ## Rilascio UI concluso, priorità alla cornice — 09/11/2026
 
 La **1.2.266** è pubblicata con Hosting #1030, sorgente `193f4768`, dopo il clic di Codex delegato direttamente da Diego per questa sola run. Manifest e 341 file sono verificati; anteprime ancora online, escluse dalla precache. La prova fisica iPhone resta non eseguita e il riscontro produttivo di Claude non viene dedotto dal suo precedente parere statico. [Esiti](../evidenze/COLLAUDI.md#css-profilo-pubblicazione-1-2-266).
