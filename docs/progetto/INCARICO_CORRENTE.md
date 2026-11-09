@@ -1,5 +1,12 @@
 # Incarico corrente
 
+## Delega esplicita del solo commit workflow — 09/11/2026
+
+Diego delega direttamente a Codex il passaggio del workflow già preparato e incollato nell'editor GitHub. Questa eccezione sostituisce la precedente riserva di commit personale **soltanto per quel file e per il contenuto approvato**; non estende accessi, permessi di pubblicazione o approvazioni production. Il testo nell'editor è confrontato per intero con l'impronta consegnata prima del commit, poi verificato nuovamente dal blob remoto.
+
+Commit eseguito dal sito GitHub sul branch della PR #271: `3b6425aea9e0205b33f57eae82ba2b89dd7a9b0e`, successivo a `2af21c8c`, solo workflow. Nessuna modifica ulteriore al suo contenuto. I documenti vengono riallineati con un commit separato; seguono nuovi check sullo stesso head finale, uscita da bozza e revisione finale valida di Claude prima del merge. Restano obbligatorie le approvazioni personali di Diego per entrambi i futuri deploy CI. Nessun deploy dal PC; candidata 1.2.265, produzione ancora 1.2.264, elenco MD sempre 34. [Ricevuta](../evidenze/COLLAUDI.md#workflow-delegato-pr-271-2026-11-09).
+
+
 ## Integrazione richiesta dalla revisione valida della PR #271 — 08/11/2026
 
 La nota di revisione fornita da Diego sul precedente head `3ff7d29f` è il riferimento valido per la chiusura: codice giudicato corretto, due integrazioni richieste prima del merge. I precedenti pareri locali di Claude Code restano consultivi e non sostituiscono questa approvazione finale. Sono autorizzati la sospensione della generazione dei codici nelle Impostazioni, compreso il percorso automatico, il testo di assistenza e i controlli linguistici, la guida e i test. Nessuna modifica alla funzione server di generazione o ai codici già salvati.

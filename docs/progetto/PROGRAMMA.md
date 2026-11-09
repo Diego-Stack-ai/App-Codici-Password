@@ -1,5 +1,10 @@
 # Programma
 
+## Avanzamento del passaggio workflow — 09/11/2026
+
+Diego delega esplicitamente il solo commit del workflow approvato: completato sul branch della PR #271 con verifica dell'impronta, senza altra modifica al file. Questa delega aggiorna la precedente modalità manuale; le approvazioni production restano personali. Prossimo gate: check verdi sull'head completo di codice e ricevute, uscita da bozza e revisione finale valida di Claude. Nessun merge o pubblicazione è dedotto dai test. Seguono soltanto i rilasci CI autorizzati e le verifiche previste; candidata 1.2.265 e produzione 1.2.264 restano distinte.
+
+
 ## Passaggio di chiusura della PR #271 — 08/11/2026
 
 La revisione fornita da Diego su `3ff7d29f` richiede due integrazioni prima del merge; i pareri locali precedenti restano consultivi. Priorità corrente: candidata 1.2.265 con assistenza coerente e generazione client sospesa, guida/test aggiornati e supporti CI intermedi verificabili. Diego carica personalmente sul branch il workflow completo consegnato con impronta; Codex ne verifica corrispondenza e check. Seguono uscita da bozza, revisione finale di Claude e soltanto allora merge/rilasci approvati, funzione dedicata prima di Hosting. La produzione resta alla 1.2.264. Questa voce aggiorna le fasi preparatorie precedenti; non avvia la cornice o altri lotti.

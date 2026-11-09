@@ -1,5 +1,14 @@
 # Collaudi
 
+<a id="workflow-delegato-pr-271-2026-11-09"></a>
+
+## Commit workflow delegato della PR #271 — 09/11/2026
+
+Dopo la richiesta di aiuto, Diego delega esplicitamente a Codex il solo commit del workflow, già incollato nel browser. Letto il contenuto completo dell'editor, l'impronta corrisponde al file approvato prima della conferma. Il [commit `3b6425ae`](https://github.com/Diego-Stack-ai/App-Codici-Password/commit/3b6425aea9e0205b33f57eae82ba2b89dd7a9b0e) è creato dal sito GitHub sul branch della PR #271, con unico parent `2af21c8c` e un solo file modificato. Il blob remoto conta 10.469 byte e conserva esattamente SHA-256 `14508cccc44463eb3160e7a2e0bf68b2d9f1aeb2b5adcff26b8a5988390e69cb`. Riscontro ripetuto indipendentemente via API; ricevuta visiva e rapporti tecnici privati esclusi da Git.
+
+Il contratto effettivo a tre scope supera planner e test dedicati 4/4, inclusi 71 casi mutazionali e i controlli di censimento/policy. I selettori del percorso precedente restano invariati e il nuovo percorso riguarda soltanto la risorsa approvata. Il commit documentale successivo non cambia il workflow: i check finali e la successiva revisione valida devono riferirsi al nuovo head completo. Nessuna approvazione di deploy, merge, Function o Hosting eseguiti in questa fase. Produzione 1.2.264, candidata 1.2.265, 34 MD canonici; la delega non comprende le approvazioni personali production.
+
+
 <a id="integrazione-revisione-pr-271-2026-11-08"></a>
 
 ## Integrazione della revisione valida della PR #271 — 08/11/2026

@@ -2,6 +2,9 @@
 
 <a id="stato-corrente"></a>
 
+09/11/2026 — **workflow della PR #271 committato su delega esplicita di Diego**: `3b6425ae`, unico file modificato e impronta remota coincidente con quella approvata. Supporti CI verificati anche sul contratto futuro effettivo; documenti riallineati e nuovi check richiesti sull'head finale. Nessun merge o deploy: candidata **1.2.265**, produzione **1.2.264**. Restano la revisione finale valida di Claude e le approvazioni personali production. [Autorizzazione corrente](INCARICO_CORRENTE.md), [evidenze](../evidenze/COLLAUDI.md#workflow-delegato-pr-271-2026-11-09).
+
+
 08/11/2026 — **integrazione della PR #271 richiesta dalla revisione valida, candidata 1.2.265**: sospesa la generazione client dei codici nelle Impostazioni e rivisti assistenza, registro linguistico, guida e test; server e codici esistenti invariati. Preparati i due supporti CI per il passaggio dal contratto attuale a quello approvato. Il workflow completo con impronta è consegnato privatamente a Diego per il commit dal sito. PR ancora in bozza, nessun merge o deploy; produzione **1.2.264**. Il parere conclusivo valido di Claude sul nuovo head resta successivo al commit del workflow e ai check verdi. [Mandato](INCARICO_CORRENTE.md), [evidenze](../evidenze/COLLAUDI.md#integrazione-revisione-pr-271-2026-11-08).
 
 
