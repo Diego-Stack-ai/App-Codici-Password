@@ -8,6 +8,8 @@ A2 approvata da Claude su `455b41fc`, CI #1044 riuscita. B1 implementa il permes
 
 I riepiloghi A1/A2 sottostanti conservano le fasi precedenti, non indicano un GO ancora mancante per A2. Gli incarichi di sicurezza e grafica restano distinti.
 
+NO-GO B1 da chiudere: eliminare l'attesa aggiuntiva ai non partecipanti (token già acquisito come filtro esclusivamente negativo e uscita immediata offline), nuova CI e nuovo GO sullo SHA corretto. B3 dovrà proporre anche il solo claim Auth del pilota oltre al singleton, preservando gli altri claim; nessuna operazione Auth anticipata. La CI verde #1046 da sola non ha sbloccato B2.
+
 <a id="cornice-a2-roadmap-2026-11-09"></a>
 
 ## Cornice: avanzamento dopo GO A1

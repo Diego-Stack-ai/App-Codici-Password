@@ -20,6 +20,12 @@ export const FRAME_ROUTES = Object.freeze({
 });
 
 export const FRAME_STANDALONE_QUERY = '__frame_standalone_once';
+export function consumeFrameStandaloneMarker(win) {
+  if (win.parent !== win) return false;
+  const url = new URL(win.location.href);
+  if (!url.searchParams.has(FRAME_STANDALONE_QUERY)) return false;
+  url.searchParams.delete(FRAME_STANDALONE_QUERY); win.history.replaceState(null, '', url.href); return true;
+}
 export const FRAME_ANCHORS = Object.freeze({
   modifica_azienda: ['section-fiscal-main','section-referente-main','section-locations-main','section-legale','section-emails-main','section-email','section-notes-main'],
   form_account_privato: ['banking-section','shared-credentials-section','account-widgets-section'],

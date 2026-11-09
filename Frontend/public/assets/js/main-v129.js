@@ -8,6 +8,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
 
 import {navigateDocument} from './frame-navigation.js';
 import {VAULT_FRAME_ENABLED} from './app-env.js';
+import {consumeFrameStandaloneMarker} from './modules/core/vault-frame-policy.mjs';
 import { LOG, LOG_ERROR, LOG_WARN } from './logger.js';
 import { authSessionFence } from './auth-session-fence.js';
 import {isCompleteRecoveryRoute, hasCompleteRecoveryIntent, COMPLETE_RECOVERY_LOGIN_PATH} from './app-env.js';
@@ -265,6 +266,7 @@ async function bootstrapMain() {
             try {
                 const publicPages = ['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'];
                 const isPrivatePage = !publicPages.includes(currentPage);
+                let vaultFrameCandidateHint = false;
                 if (isPrivatePage) {
                     // Offline navigation must not require a server request before
                     // reading the cache. Firebase's restored identity must still
@@ -278,6 +280,7 @@ async function bootstrapMain() {
                     }
                     if (navigator.onLine) {
                         const token = await auth.currentUser.getIdTokenResult();
+                        vaultFrameCandidateHint = auth.currentUser?.uid === user.uid && token.claims.email_verified === true && token.claims.vault_frame_canary === true;
                         if (token.claims.email_verified !== true) await auth.currentUser.getIdToken(true);
                     }
                 }
@@ -343,6 +346,7 @@ async function bootstrapMain() {
                     return;
                 }
 
+                const frameStandaloneOnce = isPrivatePage && consumeFrameStandaloneMarker(window);
                 if (currentPage === 'vault_frame') {
                     if (!VAULT_FRAME_ENABLED) return;
                     const {startVaultFrame} = await import('./modules/core/vault-frame-production.js');
@@ -351,11 +355,11 @@ async function bootstrapMain() {
                     return;
                 }
 
-                if (isPrivatePage && VAULT_FRAME_ENABLED && window.parent === window) {
+                if (isPrivatePage && VAULT_FRAME_ENABLED && vaultFrameCandidateHint && !frameStandaloneOnce && navigator.onLine !== false && window.parent === window) {
                     try {
                         const {maybeEnterVaultFrame} = await import('./modules/core/vault-frame-routing.js');
                         if (!gate.active(authAttempt)) return;
-                        if (await maybeEnterVaultFrame({user, fenceTicket})) return;
+                        if (await maybeEnterVaultFrame({user, fenceTicket, candidateHint: vaultFrameCandidateHint})) return;
                     } catch { /* Unverifiable admission preserves the ordinary standalone flow. */ }
                     if (!gate.active(authAttempt) || !await authSessionFence.isCurrent(fenceTicket)) return;
                 }

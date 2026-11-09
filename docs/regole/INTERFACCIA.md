@@ -10,6 +10,8 @@ Camera/microfono e WebAuthn GET/CREATE sono limitati a self sulle risposte corni
 
 Le uscite della facade sono same-origin. Un link web esterno esplicitamente premuto viene aperto fuori cornice con noopener/noreferrer; schemi non ammessi sono bloccati. tel/mailto rimangono intenzioni native del browser, con consenso/gesto effettivo da provare in C1. Privacy e termini escono al livello principale dopo revoca. Back/Forward dopo le navigazioni native dei moduli, link telefono e ritorno dal sistema operativo sono prove fisiche ancora da preparare/eseguire in B2/C1.
 
+Seguito del NO-GO B1: i non partecipanti saltano l'intera verifica aggiuntiva usando l'indicazione negativa del token Auth già richiesto; offline si prosegue immediatamente standalone. Il filtro non è ammissione. Il costo statico del filtro/consumo marker è circa 0,3 KB gzip: il primo controllo rileva 340,1 KB sulla sola aggiungi_scadenza contro il suo limite 340. Eccezione candidata esplicita per quella pagina a 340,5 KB, da valutare nella revisione B1; tetto generale 338 KB, altri limiti e target runtime invariati. Questo costo evita un round trip e la possibile attesa del permesso ai non partecipanti; non è una misura di latenza fisica.
+
 
 <a id="cornice-a2-ui-2026-11-09"></a>
 

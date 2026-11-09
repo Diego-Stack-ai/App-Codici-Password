@@ -13,6 +13,8 @@ Sono autorizzati codice, test, contratti, commit/push e avviso PASSO B1 COMMITTA
 
 I checkpoint A2 seguenti precedono il GO del revisore: le loro indicazioni «soltanto A2» e «B1 vietata» sono storiche. Prevale il mandato B1 sopra, senza anticipare B2 o pubblicazione.
 
+Revisione B1: Claude ha dato [NO-GO su e7c7c8d9](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6752494603), confermato su 13fa2d45. La CI #1046 ha chiuso il difetto del verificatore redirect; rimaneva il costo della verifica per ogni utente/pagina. Il seguito riusa soltanto il token Auth già letto per saltare il routing quando manca la hint server del partecipante e nega subito offline; la hint non concede ammissione. B3 dovrà includere anche provisioning privato del solo claim Auth di Diego, preservando gli altri claim e con approvazione personale; nessuna operazione cloud anticipata. B1 rimane al gate: nuova CI e nuovo GO Claude sul commit corretto prima di B2.
+
 <a id="cornice-a2-preparazione-2026-11-09"></a>
 
 ## Cornice A2 candidata in revisione — 09/11/2026

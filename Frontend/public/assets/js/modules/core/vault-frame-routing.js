@@ -1,14 +1,14 @@
 import {auth} from '../../firebase-config.js?v=1.2.268';
 import {authSessionFence} from '../../auth-session-fence.js';
-import {privateFrameUrl, FRAME_STANDALONE_QUERY} from './vault-frame-policy.mjs';
+import {privateFrameUrl, consumeFrameStandaloneMarker} from './vault-frame-policy.mjs';
 import {createProductionFrameAdmission} from './vault-frame-admission.js';
-export async function maybeEnterVaultFrame({window: win = window, user, fenceTicket}) {
+export async function maybeEnterVaultFrame({window: win = window, user, fenceTicket, candidateHint = false}) {
   if (win.parent !== win) return false;
   const current = new URL(win.location.href);
   // This is exclusively a one-shot DENIAL. It never grants frame admission.
-  if (current.searchParams.has(FRAME_STANDALONE_QUERY)) {
-    current.searchParams.delete(FRAME_STANDALONE_QUERY); win.history.replaceState(null, '', current.href); return false;
-  }
+  if (consumeFrameStandaloneMarker(win)) return false;
+  // The hint never grants access.
+  if (candidateHint !== true || win.navigator?.onLine === false) return false;
   const target = privateFrameUrl(current.href, current.origin);
   if (!target) return false;
   const document = win.document, href = win.location.href;

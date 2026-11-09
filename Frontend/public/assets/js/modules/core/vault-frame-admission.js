@@ -3,6 +3,7 @@ import {auth, db} from '../../firebase-config.js?v=1.2.268';
 import {authSessionFence} from '../../auth-session-fence.js';
 import {FRAME_POLICY_PATH, createFramePermitWatcher} from './vault-frame-permit.mjs';
 export function createProductionFrameAdmission({user, fenceTicket, onDeny}) {
+  if (window.navigator?.onLine === false) return {read: async () => null, deny() {}, dispose() {}};
   const reference = doc(db, ...FRAME_POLICY_PATH.split('/'));
   const watcher = createFramePermitWatcher({uid: user.uid, onDeny,
     isCurrent: () => auth.currentUser?.uid === user.uid && authSessionFence.isLocallyCurrent(fenceTicket),

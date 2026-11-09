@@ -8,6 +8,8 @@ Diego trasmette il [GO Claude A2](https://github.com/Diego-Stack-ai/App-Codici-P
 
 La configurazione selettiva degli header è per route e non per utente. In B1 si prova il codice con SDK/emulatori e browser sintetico; provisioning privato e rilascio CI delle Rules/Hosting sono rinviati a B3 dopo i GO previsti e approvazione personale. Il vecchio scope CI che comprende più backend non viene usato per distribuire soltanto questa Rules. Nessuna modifica workflow da questo passo; nessun deploy dal PC. Questa decisione aggiorna i checkpoint A2 preparatori seguenti, preservandone la provenienza.
 
+Contraddittorio B1: Claude rileva che la pre-verifica su ogni pagina aggiunge ritardo anche ai non partecipanti; NO-GO mantenuto dopo CI verde. Correzione scelta: riutilizzare l'indicazione server negativa già disponibile nel token Auth canonico, senza richiesta ulteriore e senza cache positiva. Solo la hint booleana true per UID corrente permette di tentare il routing; singleton/Rules restano unica autorità, offline nessun tentativo. Il provisioning privato B3 dovrà proporre il solo claim del pilota preservando gli altri; nessuna mutazione Auth ora. Il consumo locale del marker precede il filtro, evitando residui anche senza hint. Costo statico dichiarato e gate di revisione in [Interfaccia B1](../regole/INTERFACCIA.md#cornice-b1-header-2026-11-09).
+
 <a id="cornice-ordine-2026-11-09"></a>
 
 ## 09/11/2026 — ordine cornice A1–C2, revisione sulla PR e timer

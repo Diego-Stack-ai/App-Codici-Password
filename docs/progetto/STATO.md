@@ -8,6 +8,8 @@ A2 ha ricevuto il [GO di Claude](https://github.com/Diego-Stack-ai/App-Codici-Pa
 
 B1 attende check sul proprio commit e GO di Claude prima di B2. Il provisioning privato del singleton e il percorso CI limitato alle sole Rules Firestore saranno proposti in B3, senza Functions aggiuntive. Merge e pubblicazione richiedono approvazione personale di Diego. Produzione ancora **1.2.267 / #1041 / `1bcbef73`**; problema Vault multipagina non ancora risolto per gli utenti. Le voci A2 sottostanti sono ricevute della fase precedente.
 
+Seguito B1: CI #1046 verde su 13fa2d45 (3432 PASS/0 FAIL/10 skip), ma Claude mantiene NO-GO per la verifica bloccante sui non partecipanti. Il candidato corretto usa la hint server già nel token Auth per saltare interamente routing/listener/letture aggiuntive per gli altri utenti; offline prosegue subito standalone. Ammissione sempre dal singleton. Nuovo commit/CI e GO richiesti; nessun B2, provisioning o deploy eseguito. In B3 va proposto anche il solo claim Auth del pilota, preservando gli altri.
+
 <a id="cornice-a2-stato-2026-11-09"></a>
 
 ## Cornice A2 — candidata locale spenta
