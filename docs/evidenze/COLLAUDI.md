@@ -1,5 +1,19 @@
 # Collaudi
 
+<a id="css-profilo-pubblicazione-1-2-266"></a>
+
+## Pubblicazione verificata UI 1.2.266 — 09/11/2026
+
+[PR #277](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/277) integrata nel sorgente `193f4768ff67f047a0701a3c6fbc581308e04ded`. [Run Hosting #1030](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42619309846) conclusa con successo, job deploy `129172366224`; validazione completa e controllo remoto della CI superati. Gli scope backend recovery e MFA sono SKIPPED: questa run distribuisce soltanto Hosting, non Rules o Functions. Nessun deploy dal PC.
+
+Dopo l'attesa prevista, Diego scrive direttamente in chat «Approva e distribuisci» e delega questo solo clic a Codex. L'approvazione è inviata dall'interfaccia GitHub e registrata via API con `state: approved`, utente Diego-Stack-ai e commento che identifica delega, run, scope e SHA. Non è un'approvazione premuta personalmente da Diego sul sito e non è un'autorizzazione generale per altre run. Nessuna protezione viene modificata o aggirata; il dato restituito nell'approvazione conserva `can_admins_bypass: false`. La riserva personale precedente viene aggiornata esclusivamente per questa run dal nuovo ordine diretto.
+
+Verifica indipendente di Codex dal sorgente pulito ed esatto: manifest locale rigenerato come artefatto ignorato (quello preesistente era della 1.2.265), `--check --require-clean` e `--verify-url` superati. Manifest pubblico **1.2.266**, `sourceDirty: false`, sorgente **193f4768**, **341/341 hash identici**, SHA-256 dell'albero `90d8706b24b70aa7263f2ddab1880ed5993e7f0b191276ed5e877d930cb6e992`. Verificati anche cache-control del manifest, CSP completa, indice, redirect login legacy e rewrite Home. Le ricevute documentali successive non sostituiscono lo SHA distribuito e non richiedono un nuovo Hosting.
+
+Controlli HTTP aggiuntivi alle 14:30 UTC (15:30 italiane): **321 risorse** in `offline-assets.js`, **zero anteprime** nella shell, tutte le **17 anteprime** conservate nell'albero pubblico già confrontato; worker `codex-shell-v1.2.266`. `/prova.html`, `/app.html` e `/experiments/persistent-vault-frame/app.html` rispondono **404**. Profilo, Dati azienda e login rispondono 200 con XFO DENY, CSP frame-ancestors none e nosniff. Non viene affermato che tutte le PWA abbiano già attivato il nuovo worker o eliminato le vecchie cache.
+
+La revisione statica valida precedente di Claude Code riguarda il candidato `d648a5f7`, sessione `fa260ebd-d434-4f59-bee2-3e7d075dbb2f`, senza bloccanti nel pacchetto letto; non è una nuova verifica di Claude della produzione. La prova fisica iPhone chiaro/scuro e due palette è rinviata da Diego e resta **non eseguita**. La [PR #278](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278) rimane un laboratorio sintetico in bozza, non unita né distribuita: la richiesta Vault a ogni pagina non è risolta da questo rilascio. Elenco canonico sempre 34 MD.
+
 <a id="css-profilo-candidata-1-2-266"></a>
 
 ## Integrazioni della candidata CSS/Profilo 1.2.266 — 09/11/2026
