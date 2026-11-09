@@ -2,6 +2,10 @@
 
 <a id="stato-corrente"></a>
 
+09/11/2026 — **PR #277 in bozza, candidata 1.2.266 verificata in CI, non pubblicata**. Sull'head applicativo `1126e5b6c2a31f9e668fba8a29db1660a4184f85` sono verdi `validate`, `docs` e `Gitleaks on changed commits`. La [run #1027](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42608767001) supera la suite completa: **3.231 casi, 3.221 passati, zero falliti, 10 skip in 62 gruppi**, inclusi i tre browser senza modificare l'ambiente CI. Manifest candidato di 341 file costruito e verificato sul merge temporaneo GitHub; job deploy saltato. Questa ricevuta aggiorna soltanto documenti, senza cambiare il codice appena collaudato. Restano revisione finale di Claude sul diff della [PR #277](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/277) e controllo fisico iPhone di Diego prima del merge. Produzione sempre **1.2.265 / #1024 / `87909638`**. [Ricevuta](../evidenze/COLLAUDI.md#css-profilo-candidata-1-2-266).
+
+### Preparazione precedente alla verifica CI
+
 09/11/2026 — **Candidata 1.2.266, non pubblicata**, nel ramo `codex/ui-css-profile-fixes`, base `449c5832`. Integra il GO con riserve di Claude: altezza header comune, linguette opache per Profilo privato e Dati azienda, anteprime online escluse dalla precache, bump canonico e guardia CSS con nome di progetto. Verifiche locali aggiornate: fondazioni UI **12/12**, offline **16/16**, cache/residui **10/10**, Stylelint superato. Restano check CI, revisione di Claude sul diff della PR e controllo fisico di Diego prima del merge. La produzione resta **1.2.265**, Hosting #1024, sorgente `87909638`; nuova grafica e cornice non attivate. [Mandato](INCARICO_CORRENTE.md), [ricevuta](../evidenze/COLLAUDI.md#css-profilo-candidata-1-2-266).
 
 ### Fase iniziale precedente alle integrazioni
