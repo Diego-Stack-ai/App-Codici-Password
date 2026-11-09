@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Delega puntuale e pubblicazione UI conclusa — 09/11/2026
+
+Diego ordina direttamente «Approva e distribuisci» per la run Hosting #1030 già pronta, sorgente `193f4768`. La delega autorizza Codex a inviare questo singolo clic dall'interfaccia GitHub e sostituisce la precedente riserva personale soltanto per questa run. Non autorizza approvazioni future, modifiche alle protezioni, altre distribuzioni o attivazione della cornice. Commento e risposta API registrano la delega puntuale.
+
+La 1.2.266 è distribuita e verificata: manifest e 341 hash identici al sorgente; scope solo hosting, backend saltato. Sono autorizzati aggiornamento e integrazione delle sole ricevute nei documenti esistenti tramite PR e relativi check, con revisione in sola lettura di Claude prima del merge. Nessun nuovo Hosting serve per i documenti. Il controllo fisico iPhone resta rinviato e non eseguito; la cornice è un laboratorio distinto, PR #278 in bozza, non una correzione già online. [Ricevuta e limiti](../evidenze/COLLAUDI.md#css-profilo-pubblicazione-1-2-266).
+
 ## Integrazioni richieste dal riesame CSS/Profilo — 09/11/2026
 
 Diego riporta il parere di Claude sulla candidata locale, base `449c5832`: GO con riserve, non autorizzazione al merge. Il mandato comprende candidata **1.2.266** tramite bump canonico, contratto comune dell'altezza header e linguette di Profilo privato/Dati azienda, esclusione delle sole anteprime `ui-preview/` dalla precache tramite politica condivisa fra build e audit, test estesi e nome di progetto per il controllo CSS. Le anteprime restano pubbliche; nuova grafica e cornice Vault non vengono adottate. Nessuna modifica a workflow, Rules, Functions, Auth, dati o chiavi.

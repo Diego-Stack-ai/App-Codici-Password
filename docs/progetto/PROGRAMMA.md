@@ -1,5 +1,11 @@
 # Programma
 
+## Rilascio UI concluso, priorità alla cornice — 09/11/2026
+
+La **1.2.266** è pubblicata con Hosting #1030, sorgente `193f4768`, dopo il clic di Codex delegato direttamente da Diego per questa sola run. Manifest e 341 file sono verificati; anteprime ancora online, escluse dalla precache. La prova fisica iPhone resta non eseguita e il riscontro produttivo di Claude non viene dedotto dal suo precedente parere statico. [Esiti](../evidenze/COLLAUDI.md#css-profilo-pubblicazione-1-2-266).
+
+Priorità funzionale: raccordo reale della cornice Vault, partendo dalla [PR #278 in bozza](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278), laboratorio sintetico disabilitato. I suoi test non attivano la cornice né dimostrano parità su pagine reali/Firebase/dispositivi. La nuova grafica resta rinviata. I follow-up 2FA, cloud/Workload Identity, Dependabot, recovery, lingue e offline conservano perimetri e gate distinti; non sono riaperti o distribuiti dalla sola ricevuta UI.
+
 ## Chiusura delle riserve UI prima della cornice — 09/11/2026
 
 Prima della cornice, candidata separata 1.2.266 per trasparenze, header/linguette condivisi e anteprime escluse dalla precache ma ancora online. Dopo i controlli locali seguono PR, check CI, revisione di Claude sul diff e controllo fisico di Diego su iPhone, chiaro/scuro e almeno due palette, quindi merge e solo Hosting CI con approvazione personale. Non anticipare nuova grafica o attivazione della cornice. Il parere iniziale GO con riserve non sostituisce la revisione finale del candidato aggiornato. [Mandato](INCARICO_CORRENTE.md), [evidenze](../evidenze/COLLAUDI.md#css-profilo-candidata-1-2-266).
