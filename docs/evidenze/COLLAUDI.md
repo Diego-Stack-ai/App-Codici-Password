@@ -1,5 +1,27 @@
 # Collaudi
 
+<a id="prove-grafiche-hosting-2026-11-09"></a>
+
+## Pubblicazione separata delle quattro prove grafiche — 09/11/2026
+
+La [PR #275](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/275) conserva `91084186` (tre prove Account), `3f161bfd` (Profilo) e il distinto aggiornamento del mandato. I tre check obbligatori sono verdi sull'head `1d1fa16b61e6b3432b2b2c423defe98271902933`; suite completa CI: **3.222 casi, 3.212 passati, 0 falliti, 10 skip in 62 gruppi**. Claude Code, limitato a strumenti di lettura, fornisce prima il parere statico e poi la conferma finale sul medesimo head dopo i check, senza difetti bloccanti. Non attesta prove browser o una chiusura di sicurezza complessiva.
+
+Merge `8790963858756d694e191a4c62fee02a9f1004dd`; [run Hosting #1024](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42585828782) riuscita alle **09:40:52 italiane**. L'approvazione production è eseguita da Codex soltanto dopo la nuova delega esplicita di Diego per questa run, registrata anche nel commento GitHub. Nessuna modifica ai requisiti di revisione o ai permessi; nessun deploy dal PC. I log confermano l'unico target Hosting, con entrambe le distribuzioni backend saltate.
+
+Manifest **1.2.265**, sorgente `87909638`, **341/341 hash online verificati** dal verificatore canonico; impronta dell'albero `c667e88b0d59d04514933a87641b3a67669b616c97ef35571769e627bf79df11`. Il conteggio Firebase è 342 perché include il manifest stesso. Rispetto al precedente sorgente produttivo `f2e810a7`, i 323 file pubblici esistenti diversi dalla precache sono identici: 17 nuove risorse dimostrative e un solo aggiornamento dell'indice offline. Header e contratto Hosting invariati su otto percorsi; `prova.html` risponde 404. Confronto cloud prima/dopo: **47 Functions e Rules esattamente invariate**.
+
+Verifica browser sui moduli realmente pubblicati, Chromium con viewport 393×852: apertura delle quattro prove, ricerca e filtro, dettaglio e ritorno, visibilità della password inventata, modifica del nome utente e ritorno alla fixture dopo reload, cambio del solo tema dimostrativo, sezioni Contatti/Indirizzi/Documenti e confronto Oggi/Proposta. Il cambio dello switch mantiene il focus; il visore foto è un dialogo nativo, Escape lo chiude e ripristina il focus alla miniatura. Indice a 1280×900: quattro card senza scorrimento orizzontale. Nessun errore console osservato. Dati inventati e cambi soltanto in memoria; nessun accesso a Vault, utenti reali o clipboard in lettura. **Non è una certificazione su dispositivi fisici, Safari o PWA**. Il primo tentativo locale della suite era interrotto dalla dipendenza Functions assente nel worktree; installata dal lockfile senza modificarlo, il test interessato passa 1/1 e la CI completa rimane l'evidenza integrale.
+
+Rollback: solo Profilo tramite revert completo di `3f161bfd`; tutte le prove con un unico revert del merge #275, inclusa la precache, seguito da PR/check/Hosting CI. Non rimuovere il primo bundle conservando il Profilo, che ne usa le risorse comuni. Schede già aperte e worker precedenti richiedono aggiornamento/riapertura; verificare poi i 404. I rami sono conservati. Ricevute tecniche e immagini restano locali escluse da Git; i documenti successivi non cambiano lo SHA distribuito.
+
+<a id="assistenza-2fa-rilascio-1-2-265"></a>
+
+## Ricevuta distinta dell'assistenza 2FA 1.2.265 — 09/11/2026
+
+Il precedente sorgente `f2e810a7c7674dcea1469b41fb4b646e044dd94d` deriva dalla PR #271, dopo il rapporto finale valido di Claude fornito da Diego sull'head `a8858faa`. [Run dedicata #1020](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42572798743) e [Hosting #1021](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42574533722) riuscite dopo le approvazioni personali di Diego, senza deploy locale. Suite completa CI 3.212 passati, 0 falliti e 10 skip; manifest e 324/324 hash verificati. Nella prima fase cambia soltanto la Function dedicata, con le altre 46 invariate e Rules/Hosting immutati; nella seconda rimangono identiche tutte le 47 Functions e le Rules.
+
+Probe dei componenti client realmente online: **29 controlli superati** su contenuti sintetici, inclusi nomi dei download e contenitore portabile. Il percorso a blocchi usa una piccola fixture in RAM, non un upload reale o una prova del codec. L'ingresso senza attestazione rifiuta la richiesta, ma il tentativo con attestazione genuina non ottiene un token valido: **la verifica live dell'esito interno resta bloccata, non PASS**. Nessun bypass, utente o dato Vault creato. I test browser del modulo di accesso e delle Impostazioni restano prove su fixture, non sessioni produttive autenticate. Il riscontro produttivo finale del revisore resta da completare; questa ricevuta non lo sostituisce e non avvia la cornice Vault.
+
 <a id="workflow-delegato-pr-271-2026-11-09"></a>
 
 ## Commit workflow delegato della PR #271 — 09/11/2026
