@@ -319,5 +319,17 @@ self.__OFFLINE_ASSETS = [
   "regole_scadenze.html",
   "reset_password.html",
   "scadenze.html",
-  "termini.html"
+  "termini.html",
+  "ui-preview/ui-prove/base.css",
+  "ui-preview/ui-prove/dati.js",
+  "ui-preview/ui-prove/index.html",
+  "ui-preview/ui-prove/indice.js",
+  "ui-preview/ui-prove/iphone.css",
+  "ui-preview/ui-prove/iphone.html",
+  "ui-preview/ui-prove/prova.js",
+  "ui-preview/ui-prove/rifinita.css",
+  "ui-preview/ui-prove/rifinita.html",
+  "ui-preview/ui-prove/scura.css",
+  "ui-preview/ui-prove/scura.html",
+  "ui-preview/ui-prove/tema-init.js"
 ];
