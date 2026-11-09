@@ -1,5 +1,22 @@
 # Programma
 
+<a id="cornice-roadmap-2026-11-09"></a>
+
+## Cornice — sequenza corrente con GO sulla PR #278, 09/11/2026
+
+| Passo | Consegna | Gate prima di avanzare |
+|---|---|---|
+| A1, corrente | Contratto nei documenti Vault/UI/Decisioni e ricevuta sulla PR | GO Claude sulla PR per il commit del passo |
+| A2 | app.html e bridge reali ma spenti; test negativi | GO Claude sul candidato A2 |
+| B1 | Flag server solo Diego, Rules/emulatori e header effettivi selettivi | GO Claude su B1 |
+| B2 | Lista di prove fisiche desktop/Android/Safari/PWA | GO Claude su B2 |
+| B3 | Preparazione merge e CI, eventuale backend necessario poi Hosting | GO, approvazione personale Diego, verifica commit/manifest/hash |
+| C1 | Prove personali di Diego e sole correzioni emerse | Avviso → revisione → approvazione per ogni seguito |
+| C2 | Ricevute finali e avviso «CORNICE CHIUSA» | Tutti i criteri del mandato verificati, nessun PASS per prove mancanti |
+
+[Ordine e vincoli correnti](INCARICO_CORRENTE.md#cornice-a1-incarico-2026-11-09). Rimangono distinti il laboratorio disabilitato già presente, la produzione 1.2.267 e la futura attivazione server per il solo UID designato. Nuova grafica e altri rilievi di sicurezza non sono parte di questo ordine; non vengono dichiarati chiusi dalla cornice.
+
+
 ## Rifinitura visiva 1.2.267 pubblicata, seguito cornice — 09/11/2026
 
 Follow-up delle schermate di Diego pubblicato e verificato con Hosting #1041, sorgente `1bcbef73`: copertura header nei due profili e metadati degli allegati separati dal cestino. PR #280 e stabilizzazione test #281 integrate dopo check e revisione statica di Claude, 341 hash verificati; il FAIL intermedio resta nelle evidenze. Il controllo fisico iPhone/Safari/PWA è ancora da eseguire. La cornice #278 resta il prossimo lavoro funzionale distinto, laboratorio non attivato; la nuova grafica è rinviata. [Mandato](INCARICO_CORRENTE.md#ui-overlap-followup-2026-11-09), [ricevuta e limiti](../evidenze/COLLAUDI.md#ui-overlap-followup-2026-11-09). Le voci seguenti conservano le fasi precedenti.

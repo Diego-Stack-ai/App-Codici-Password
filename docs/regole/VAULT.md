@@ -1,5 +1,74 @@
 # Vault
 
+<a id="cornice-a1-2026-11-09"></a>
+
+## Cornice persistente — contratto A1 da revisionare, 09/11/2026
+
+**Stato e autorità.** Il nuovo [ordine di Diego](../progetto/DECISIONI.md#cornice-ordine-2026-11-09) autorizza la sequenza A1/A2/B1/B2/B3/C1/C2 sulla [PR #278](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278). Questo passo definisce il contratto; non implementa né attiva la cornice. Codex è l'unico esecutore, Claude è revisore consultivo in sola lettura sulla PR. Nessun passaggio ad A2 senza «REVISIONE CLAUDE – GO» riferibile ad A1 e al suo commit; nessun merge/deploy senza approvazione personale di Diego. Le note precedenti del laboratorio restano evidenze sintetiche, non prove produttive. La produzione rimane 1.2.267. Il nuovo ordine colloca la lista B2 prima del canary e le prove fisiche di Diego in C1 dopo B3: supera soltanto per questo canary individuale la precedente sequenza che pretendeva l'intera matrice fisica prima dell'attivazione. Non trasforma prove mancanti in PASS, non permette altri utenti e non elimina i gate automatizzati A2/B1, il GO o l'approvazione personale; un esito C1 negativo richiede arresto/rollback.
+
+### Sessione, materiale e confine di fiducia
+
+`app.html` è il documento principale persistente e possiede la continuità della sessione; le pagine esistenti vengono montate come figli dello stesso sito. Le API crittografiche attuali richiedono copie transitorie del materiale nella RAM del figlio: non si promette che il solo padre possieda ogni copia. Navigare fra figli ammessi elimina la copia del documento precedente e conserva quella del padre. Ricaricare/chiudere la cornice, terminazione o congelamento del suo documento richiedono un nuovo sblocco tramite Master Password o PRF reale compatibile; non si ricrea una sessione da storage.
+
+**Le pagine della stessa origine non sono un confine di sicurezza. Una XSS nell'origine dell'app compromette la chiave, come oggi.** Allowlist, controlli dei messaggi e permesso server prevengono consegne o navigazioni non autorizzate nel flusso previsto; non isolano codice same-origin malevolo e non sostituiscono CSP, Rules, Auth, App Check o contenimento degli allegati. Non si introduce un iframe sandbox come finta separazione.
+
+KEK, Vault Key/keyring aperti e grant non compaiono in storage browser, IndexedDB, Cache Storage, Service Worker/Shared Worker, URL, history.state, DOM, log o console. La Master Password è ammessa soltanto nel valore transitorio del campo password attivo e nella RAM della cerimonia di sblocco/conferma: azzerare l'input a completamento, annullamento o blocco, senza rifletterla in attributi/markup, history, log o persistenza. History e messaggi ai worker contengono soltanto intenzioni/coordinate di navigazione non segrete; nessuna chiave fra schede. Restano i formati crittografici e i lettori esistenti: nessuna migrazione di dati deriva dalla cornice.
+
+### Allowlist produttiva chiusa
+
+Sono ammissibili esclusivamente i seguenti percorsi root canonici, ciascuno con bootstrap privato e controlli di autorizzazione invariati. La tabella censisce le query esistenti lette o generate dai collegamenti da preservare con validazione per route; non autorizza qualunque valore né trasforma la query in un permesso. Per esempio il form privato deve conservare type generato dalla lista anche se il form attuale non lo legge direttamente.
+
+| Percorsi `.html` (prefisso `/`) | Query di compatibilità |
+|---|---|
+| `home_page`, `area_privata`, `lista_aziende`, `archivio_account`, `configurazione_documenti`, `configurazione_generali` | Nessuna query operativa censita; non ammettere campi arbitrari |
+| `account_privati` | `type`, `afterWrite`, `m6refresh` |
+| `form_account_privato` | `id`, `type`, `profileContactId`, `linkShared` |
+| `dettaglio_account_privato` | `id`, `ownerId`, `afterWrite`, `m6refresh`, `linkShared` |
+| `account_azienda` | `id`, `type` |
+| `form_account_azienda` | `id`, `aziendaId`, `profileContactId`, `type`, `linkShared` |
+| `dettaglio_account_azienda` | `id`, `aziendaId`, `ownerId`, `afterWrite`, `serverRefresh`, `linkShared` |
+| `dati_azienda` | `id`, `afterWrite`, `profileTab` |
+| `modifica_azienda` | `id` |
+| `profilo_privato` | `profileTab`, `profileDocumentId`, `assistantDoc` |
+| `impostazioni` | `firstConfiguration`; `recovery=complete` escluso dalla cornice |
+| `scadenze` | `filter`, `rule` |
+| `aggiungi_scadenza` | `id`, `profileDocumentId`, `accountSource` |
+| `dettaglio_scadenza` | `id`, `received`, `notification` |
+| `regole_scadenze` | `return`, `domain` |
+| `configurazione_automezzi` | `source`, `rule`, `domain` |
+| `gestione_destinatari` | `return`, `companyKind`, `companyId`, `companyName` |
+
+Totale: **22 pagine**. A2 dovrà codificare schemi chiusi con limiti e validatori coerenti con i consumer attuali: ID opachi, enum e flag non condividono un unico regex permissivo. `accountSource`, `linkShared` e `firstConfiguration` mantengono il significato esistente del flag 1; `assistantDoc` resta indice numerico validato. Campi duplicati, valori fuori schema o non classificati non ottengono un handoff: rimangono nel percorso standalone previsto, senza loop di reindirizzamento. I diagnostici `m6pilot`/`m6lease` sono esclusi da questa ammissione. Non si inventano alias query `scope` o `returnTo`.
+
+`return` della rubrica ammette soltanto aggiungi_scadenza/form_account_privato/form_account_azienda; quello delle regole soltanto aggiungi_scadenza. Validare anche la destinazione annidata, senza ricorsione aperta o URL esterni. `ownerId`, `aziendaId` e altri riferimenti selezionano risorse autorizzate dai controlli esistenti: **non scelgono mai l'UID della Vault**. Conservare gli anchor di sezione leciti sia nello stesso documento sia all'ingresso di un nuovo documento: almeno #section-email su modifica_azienda e #shared-credentials-section nei due form Account. Restano identificatori di sezione validati per route, non contenuto da decodificare/eseguire o fonte di privilegi; non riusare il diniego indiscriminato di tutti gli hash del laboratorio.
+
+Canonicalizzare `/home` in `/home_page.html` prima del caricamento nel figlio. Niente riconoscimenti per sottostringa, path ambigui o traversal, credenziali URL, schemi diversi da HTTPS/origine canonica o corrispondenze per suffisso. Sono esclusi `/app.html` annidato, index/login/registrazione/reset/nuova password, privacy/termini/contatto condiviso, anteprime, laboratori e ogni altro percorso; inoltre allegati, PDF e viewer, URL esterni, `blob:`, `data:` e `about:`. Le dieci fixture del laboratorio non diventano implicitamente la tabella produttiva.
+
+### Ammissione e protocollo reale ancora da implementare
+
+Il ripiego ordinario resta identico per chi non è abilitato. A2 pubblicabile parte spento; B1 introduce una configurazione server dedicata, leggibile e attiva soltanto per l'UID Firebase di Diego verificato, non scrivibile dal client, neppure dal proprietario. Le preferenze del documento utente non sono il flag. Nessuna email, query, localStorage o codice client può autoabilitare la cornice. Anonimo, UID diverso, revocato, policy assente/disabled/incompatibile o risposta server non verificabile non ottengono la chiave. Non assumere che una cache Firestore costituisca un consenso server corrente.
+
+Il broker lega ogni consegna a origine esatta, proprio iframe (`event.source === iframe.contentWindow`), effettivo Document/URL ammesso, nonce nuovo per documento, UID Auth, epoca del fence e generazione del blocco. Il figlio verifica il parent atteso; il testo di un messaggio non decide da solo l'URL autorizzato. Ricontrollare tutti i vincoli prima della consegna e prima dell'uso dopo ogni await. Richieste tardive o relative al vecchio documento non riaprono la sessione. Grant monouso, scopo/bersaglio vincolati e scadenza breve verificata; il tempo non è fornito dal richiedente. Grant scaduti, riusati, di un altro UID/documento/generazione o cancellati sono negati.
+
+Il padre osserva flag/revoche e partecipa al fence di autenticazione esistente; rilegge la policy dal server prima di ammissione, ripresa e azioni sensibili. Il ritorno visibile non concede materiale mentre tale verifica è pendente. Una revoca osservata o l'impossibilità di verificare l'ammissione provoca blocco e cancellazione delle copie; risultati tardivi non possono ripristinarle. A2/B1 devono provare questo comportamento, senza fingere di aver già progettato un nuovo servizio di autorizzazione.
+
+### Inattività, background e revoca
+
+**Decisione esplicita di Diego:** il background usa la stessa durata dell'inattività. La sorgente è `lock_timeout` del profilo autenticato: opzioni attuali 1, 3, 5 e 720 minuti; assenza segue il default esistente di 3, valore legacy 0 segue il ripiego a 1. Una preferenza presente ma non numerica, non finita o non positiva usa il ripiego a 1 minuto, senza rinnovare una scadenza preesistente più vicina; i valori numerici positivi leciti seguono la preferenza effettiva, non un default fisso. Non usare i tre minuti fissi del laboratorio al posto della preferenza. Un cambio di preferenza è acquisito senza dipendere dalla navigazione; ridurre il tempo non regala una nuova finestra a una sessione già scaduta.
+
+Il padre conserva in RAM l'ultima attività e le scadenze; i messaggi del figlio non impongono timestamp. Solo interazioni effettive nel documento attivo e verificato rinnovano l'inattività, non caricamenti, polling, replaceState o risposte SDK. La navigazione non azzera automaticamente il timer. In background nessuna attività fittizia lo rinnova: si applica la scadenza più vicina fra inattività già maturata e hiddenAt + durata scelta. Al ritorno controllare scadenze e fence/flag prima di mostrare dati o consegnare chiavi, anche se i timer sono stati rallentati dal browser.
+
+Nascondere/sospendere le funzioni sensibili, fermare camera/microfono e annullare conferme/richieste pendenti all'uscita dal contesto visibile. Alla scadenza, blocco manuale, logout, cambio UID/epoca, revoca o uscita/freeze del padre: eliminare materiale del padre e del figlio, copie plaintext raggiungibili, grant e operazioni pendenti; ripristinare la schermata protetta. Invalidare prima di attendere signOut o servizi remoti. Pagehide del solo figlio durante navigazione elimina soltanto la sua copia: non è logout del padre. La pulizia non promette cancellazione forense della RAM o del sistema operativo.
+
+### Operazioni sensibili e arresto
+
+Vault aperta non equivale a conferma recente per backup/export, archivio portabile, cambio Master Password, condivisione/variazione permessi o cancellazione definitiva. Richiedere nuova biometria PRF reale oppure Master Password e un'autorizzazione monouso legata a UID/generazione/documento/scopo/bersaglio/scadenza; un normale handoff della cornice non soddisfa il requisito. Restano distinti tutti gli altri vincoli di reautenticazione Firebase/2FA già esistenti. Annullamento, errore o timeout non autorizzano l'operazione; nessuna richiesta o grant è riusata dopo blocco.
+
+Fermare l'attivazione per perdita di controllo su copie RAM o grant, mancata revoca/cambio UID, ammissione da storage o URL, file navigabile nel frame, header effettivi contraddittori, regressione Auth/App Check/PRF/media/download/back o impossibilità di ripiego senza loop. Nessuna prova mancante diventa PASS usando Master Password al posto di una PRF prima funzionante. I problemi di sicurezza aperti diversi da questo perimetro e la nuova grafica restano incarichi separati.
+
+Rollback: disabilitare prima il flag server, revocare le sessioni cornice/grant osservate e ripiegare sulle pagine ordinarie; in alternativa distribuire via CI la rimozione del solo instradamento, e se necessario le precedenti intestazioni restrittive in un pacchetto coerente. Nessun downgrade che ripersisti chiavi, nessuna modifica/cancellazione di dati Vault, nessun deploy dal PC. Rules/Function eventualmente necessarie a B1 hanno scope CI esplicito, GO e approvazione personale distinti. [Contratto UI/header e transizioni](INTERFACCIA.md#cornice-a1-ui-2026-11-09), [fasi e gate](../progetto/INCARICO_CORRENTE.md#cornice-a1-incarico-2026-11-09).
+
+
 <a id="cornice-lab-2026-11-09"></a>
 
 ## Cornice: laboratorio isolato e contratto di raccordo — 09/11/2026

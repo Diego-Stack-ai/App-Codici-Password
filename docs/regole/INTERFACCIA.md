@@ -1,5 +1,54 @@
 # Interfaccia
 
+<a id="cornice-a1-ui-2026-11-09"></a>
+
+## Cornice — header, permessi e navigazione A1, 09/11/2026
+
+Contratto candidato del solo passo A1 sulla PR #278, non configurazione già applicata. Allowlist delle 22 pagine, identità, RAM e timer sono definiti una sola volta in [VAULT](VAULT.md#cornice-a1-2026-11-09). L'app pubblicata 1.2.267 resta multipagina; la grafica nuova è rinviata.
+
+### Matrice selettiva delle intestazioni
+
+| Risposta HTML | X-Frame-Options | CSP frame-ancestors | CSP frame-src |
+|---|---|---|---|
+| `/app.html`, solo documento principale | `DENY` | `'none'` | Aggiunta di `'self'` ai tre provider già ammessi |
+| Sole 22 figlie canoniche ammesse | `SAMEORIGIN` | `'self'` | Tre provider esistenti, senza aggiungere `'self'` |
+| Login/registrazione/reset/nuova password, pubbliche, anteprime, alias e ogni percorso non classificato | `DENY` | `'none'` | Policy esistente |
+
+I provider già presenti sono `https://www.google.com`, `https://www.recaptcha.net` e `https://appcodici-password.firebaseapp.com`: conservarli per App Check/Auth. «frame-src self solo per app.html» aggiunge self soltanto alla cornice, non elimina questi provider né abilita self globalmente. Le altre direttive CSP e gli header conservano la baseline: niente script inline nuovi, wildcard, unsafe-eval o origini aggiuntive. `frame-src` controlla i documenti caricati; `frame-ancestors` chi può incorniciare la risposta, compresi gli antenati esterni ([riferimento MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/frame-ancestors)).
+
+Hosting statico sceglie per percorso, non per UID, query o presenza del riquadro: SAMEORIGIN vale per ogni visita alle route figlie, anche standalone e per altri utenti. Soltanto l'abilitazione della cornice e il broker/chiave sono riservati a Diego. `/app.html` non può essere incorniciata neppure dal sito stesso. Non descrivere gli header come un controllo individuale del flag. In particolare impostazioni.html conserva gli header della route privata anche con recovery=complete o query respinte: è il router/broker a escludere tali modalità dalla cornice, non una selezione dell'header per query.
+
+B1 deve produrre un unico insieme effettivo non contraddittorio: non affiancare una CSP permissiva al diniego globale, poiché più CSP si applicano insieme. Non affidarsi a un presunto override. Verificare risposte HTTP reali di ogni pagina, alias/rewrite `/home`, varianti di percorso non ammesse e pagine inesistenti; `/home` viene canonicalizzato prima dell'iframe, non riceve implicitamente l'eccezione. Nessun allegato/viewer blob o documento importato entra nell'allowlist. [Specifica CSP](https://w3c.github.io/webappsec-csp/#multiple-policies).
+
+### Camera, microfono e biometria
+
+Il solo iframe applicativo necessita di camera per documenti/scanner, microfono per voce/dettatura e WebAuthn GET/CREATE per sblocco e attivazione della biometria nelle Impostazioni. Il contratto di delega è `allow="camera 'self'; microphone 'self'; publickey-credentials-get 'self'; publickey-credentials-create 'self'"`. Nelle risposte pertinenti limitare tali feature a `(self)`; mantenere negati geolocalizzazione e local-network e le altre restrizioni esistenti. Nessuna delega ai frame provider o ad altre origini.
+
+L'allow non concede da solo il consenso dell'utente né supera una policy negata dal padre/figlio. Fotocamera, registrazione voce e cerimonie partono da un gesto esplicito; annullamento/blocco/navigazione/background fermano stream e risultati tardivi. Nessun accesso automatico a microfono o camera al caricamento. PRF mantiene origine canonica/RP ID, verifica utente e controllo reale delle capacità; non si simula biometria e il fallback non certifica la funzione primaria. Supporto e gesto utente di CREATE/GET e media sono gate effettivi di A2/B2/C1, soprattutto Safari/PWA ([Permissions Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy), [WebAuthn](https://www.w3.org/TR/webauthn-3/#sctn-permissions-policy)).
+
+### Contratto delle transizioni
+
+| Evento | Comportamento richiesto |
+|---|---|
+| Link privato ammesso nel figlio | Conserva path/query/anchor validati e identità della sessione padre; elimina il figlio precedente e ammette il nuovo documento |
+| Indietro/Avanti del browser | Una sola cronologia logica governata dal padre, senza duplicazione fra joint history iframe e pushState; ripristina route/query/anchor, non chiavi o form sensibili |
+| Freccia Indietro dell'app | Usa lo stesso modello; conserva il fallback gerarchico esistente quando non c'è un predecessore. Il referrer `app.html` non dimostra la pagina precedente |
+| replaceState/anchor nel medesimo documento | Sincronizza indirizzo esterno senza nuova voce, nuovo Document o rinnovo dell'inattività; conserva la pulizia dei flag afterWrite/m6refresh/serverRefresh/linkShared |
+| Link diretto o nuova scheda | Se il server ammette il solo UID designato, entra nella cornice sulla destinazione validata; ogni nuova scheda ha sessione RAM indipendente e proprio sblocco, senza prestito di chiavi fra schede |
+| Ricarica della cornice | Riparte dalla stessa route/query/anchor leciti, chiave persa e uno sblocco nuovo; nessun recupero da storage. Il reload del solo figlio non distrugge la continuità del padre |
+| Push su cornice esistente | Worker invia solo l'intento validato al padre: conserva id/received/notification e non ricarica app.html mediante navigate() indiscriminato |
+| Push senza cornice pronta o dopo login | Percorso ordinario/nuova sessione e destinazione validata conservata; non promette continuità di una sessione che non esiste |
+| Logout locale/da altra scheda, UID/epoca cambiati | Owner usa il fence canonico; indizi BroadcastChannel/storage richiedono verifica autorevole. Invalida RAM, grant e UI prima di richieste remote; stesso UID con nuova epoca non riprende la vecchia chiave |
+| Redirect Auth, password obbligatoria, recovery speciale | Uscita top-level dopo revoca; login/reset/nuova password restano protetti da DENY e non vengono caricati come figli |
+| Download/apertura allegati, PDF, archivio portabile, stampa | Fuori dalla cornice, policy S1 invariata; download/octet-stream o anteprima ammessa separata con noopener. Nessuna chiave parent al nuovo documento e nessun file navigabile scelto dal mittente nel frame |
+| Link sito esterno, mailto/tel, VCF | Usa i percorsi esterni espliciti esistenti; non li trasforma in route interne o messaggi con materiale Vault |
+| Flag spento/non verificabile, route o capacità non ammesse | Ripiego standalone previsto, senza loop o allargamento di policy; nessun'altra coorte viene attivata |
+
+La cronologia esterna resta su `/app.html` con solo la destinazione applicativa validata; A2 deve fissare una codifica unica e testarla, senza segreti in query/hash/history.state. Il browser distingue ingresso top-level e Document del figlio; non si usa una URL dichiarata dal messaggio come autorità.
+
+B2 elenca le prove fisiche e C1 le esegue Diego su Chrome desktop, Android, Safari iPhone e PWA installata: dieci pagine, timer scelto, background, fence/logout, camera documenti, voce, notifiche, cronologia/ricarica e allegati. Un'emulazione o un fallback funzionante non chiudono il collaudo della capacità primaria. Arresto e rollback nel [contratto Vault](VAULT.md#cornice-a1-2026-11-09); nessuna adozione della grafica sperimentale.
+
+
 <a id="profile-occlusion-followup-2026-11-09"></a>
 
 ## Copertura di header e controlli degli allegati Profilo — 09/11/2026

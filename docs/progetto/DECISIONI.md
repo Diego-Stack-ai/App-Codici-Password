@@ -1,5 +1,20 @@
 # Decisioni
 
+<a id="cornice-ordine-2026-11-09"></a>
+
+## 09/11/2026 — ordine cornice A1–C2, revisione sulla PR e timer
+
+Diego ordina di chiudere e pubblicare la cornice persistente attiva soltanto per il proprio account. Sicurezza aperta fuori perimetro e nuova grafica seguiranno separatamente. Codex è unico esecutore; Claude revisore consultivo readonly sulla PR #278, senza modifica di file/commit/cloud. La lavorazione continua sulla #278; un'eventuale nuova PR va collegata subito con commento sulla #278.
+
+A fine di ogni passo l'avviso sulla #278 deve iniziare «PASSO <A1/A2/B1/…> COMMITTATO – ramo: … – commit: <SHA completo> – file toccati: … – test eseguiti ed esito: … – limiti/cosa non è fatto: … – in attesa di revisione Claude». Solo una risposta sulla PR «REVISIONE CLAUDE – GO» riferibile al passo/commit sblocca il passo seguente; NO-GO richiede correzione e nuovo avviso. I pareri CLI dei laboratori precedenti non sostituiscono questo nuovo gate. Merge e deploy richiedono inoltre l'approvazione personale di Diego: nessuna delega implicita e nessun deploy dal PC. MD fermi a 34.
+
+Sequenza autorizzata: A1 contratto nei tre documenti canonici → A2 integrazione reale pubblicabile ma spenta → B1 flag server soltanto UID Diego, Rules/emulatori e header selettivi → B2 lista prove dispositivi → B3 preparazione merge e CI, eventuale Rules/Function strettamente richiesta da B1 poi Hosting → C1 prove personali e correzioni con lo stesso ciclo → C2 ricevute e avviso «CORNICE CHIUSA». L'ordine aggiorna la precedente sola preparazione sintetica. B2 prepara la lista e C1 esegue le prove dopo l'attivazione individuale B3: questa nuova sequenza sostituisce, soltanto per il canary Diego, il precedente vincolo di completare tutta la matrice fisica prima di attivarlo. Restano obbligatori i test automatizzati precedenti, GO, approvazione personale e rollback; nessuna prova mancante è dichiarata superata e non è autorizzata l'attivazione per altri utenti.
+
+Alla domanda sul tempo in background Diego sceglie esplicitamente **«Usa lo stesso tempo dell'inattività»**. Entrambi derivano dalla preferenza `lock_timeout`, non dal default fisso del laboratorio. Scadenze, copie RAM e confine same-origin sono nel [contratto Vault A1](../regole/VAULT.md#cornice-a1-2026-11-09); intestazioni, permessi e transizioni in [Interfaccia A1](../regole/INTERFACCIA.md#cornice-a1-ui-2026-11-09). La matrice specifica che gli header statici sono per route e per tutti i visitatori: il flag server individuale governa l'abilitazione e il broker, non gli header.
+
+Stato di questa decisione: ordine e scelta del timer approvati da Diego; contratto A1 preparato da sottoporre a Claude, nessun GO sulla PR ancora acquisito, nessuna integrazione reale o attivazione attestata.
+
+
 ## 07/11/2026 — riconciliazione del manifest Markdown
 
 Diego risponde «procedi» alla proposta di correggere i disallineamenti documentali e censire **34 Markdown**: i 32 già approvati e i due file tecnici `AGENTS.md` e `.agents/skills/token-saver/SKILL.md`, creati dal bootstrap token-saver richiesto. I documenti precedenti conservano funzione e autorità; le due istruzioni tecniche sono sottoposte agli stessi controlli. Nessun file o cartella viene escluso per ottenere il passaggio dell'audit. La mappa delle 71 fonti storiche conserva baseline, segmenti e impronte originali; il numero dei documenti ammessi viene riallineato al manifest, senza inventare provenienze per i file nuovi.

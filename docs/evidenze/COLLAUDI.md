@@ -1,5 +1,16 @@
 # Collaudi
 
+<a id="cornice-a1-contratto-2026-11-09"></a>
+
+## Cornice A1 — contratto preparato, 09/11/2026
+
+Nuovo ordine diretto di Diego, sequenza A1–C2 sulla PR #278; scelta esplicita del background uguale alla durata dell'inattività. Ramo `codex/vault-frame-lab-20261109` riallineato al master 1.2.267 mediante merge `7ae131b5582baf99a3741c396c5112b5a6a6a217`, senza conflitti e conservando il laboratorio. Quel merge importa solo lavoro già integrato in master; A1 aggiunge soltanto contratto/decisione e manutenzione documentale. Nessuna nuova implementazione A2, flag server, header applicati, prova di integrazione reale o pubblicazione.
+
+Ricognizione statica mirata: 22 pagine private con bootstrap, query operative e ritorni esistenti; le dieci route lab non sono allowlist produttiva. Verificati sorgenti di timeout, lifecycle RAM, fence/logout, navigazione e worker push; matrice header attuale, provider App Check/Auth, camera, voce e WebAuthn GET/CREATE. Due riscontri consultivi interni readonly hanno aiutato il censimento; Codex resta unico scrittore, e tali riscontri non sono una revisione di Claude né un GO sulla PR.
+
+A1 esplicita intestazioni statiche per route (non per UID), permesso server individuale, copie RAM transitorie nei figli e limite same-origin/XSS. I riferimenti tecnici esterni sono nei contratti; nessuna prova fisica/di compatibilità è dedotta dalla lettura. Controllo documentale locale superato: 34 MD, 777 collegamenti e 12/12 test. `npm run test:vault-contract` superato: 889/889, zero falliti/cancellati/skip in tre gruppi (29 sessione, 831 shell storica, 29 laboratorio iframe inclusi cinque browser). Il primo tentativo ristretto conta 884 PASS e cinque browser FAIL per ERR_NETWORK_ACCESS_DENIED su loopback; la ripetizione con accesso necessario, senza modificare test o runtime, supera tutti i casi. Queste sono prove dei contratti/laboratori preesistenti, non del bridge reale A2 o dei dispositivi. Risultati e SHA completo nel commento «PASSO A1 COMMITTATO» sulla PR. Claude deve rispondere sulla PR prima di A2. Stato produttivo invariato: 1.2.267, sorgente `1bcbef73`, cornice non attivata; elenco MD sempre 34.
+
+
 <a id="ui-overlap-followup-2026-11-09"></a>
 
 ## Residui di copertura header e metadati allegati — 1.2.267 pubblicata, 09/11/2026

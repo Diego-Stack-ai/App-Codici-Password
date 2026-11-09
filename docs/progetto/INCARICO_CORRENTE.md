@@ -1,5 +1,20 @@
 # Incarico corrente
 
+<a id="cornice-a1-incarico-2026-11-09"></a>
+
+## Ordine corrente — cornice Vault A1–C2, 09/11/2026
+
+Fonte: nuovo ordine diretto di Diego dopo l'allineamento della 1.2.267. Obiettivo: niente sblocco Vault a ogni cambio pagina, chiavi solo RAM, cornice attiva **solo per Diego** al termine dei gate. Nuova grafica e altri rilievi di sicurezza sono separati. La produzione attuale resta 1.2.267, senza cornice.
+
+**Passo corrente A1:** aggiornare VAULT, INTERFACCIA e DECISIONI con allowlist delle pagine, matrice selettiva degli header, camera/microfono/PRF, timer utente, background, history/direct link/push/download/stampa/logout/ricarica, limite same-origin/XSS, arresto e rollback. La preferenza background è confermata da Diego: stessa durata dell'inattività. Aggiornare soltanto gli altri documenti esistenti necessari a stato/roadmap/evidenze. Ramo `codex/vault-frame-lab-20261109`, PR #278; riallineamento a master della 1.2.267 conservando il laboratorio. Nessun A2 o cambiamento runtime nuovo in questo passo.
+
+A2 seguirà soltanto il GO di A1: bridge reale nel boundary canonico e app.html pubblicabile ma spenti per default, ripiego invariato, test negativi e rispetto della preferenza. B1 seguirà il GO di A2: ammissione server solo UID Diego, Rules/test emulatore anonimo/estraneo/revocato e intestazioni effettive per ogni route. B2 prepara la lista per Chrome desktop, Android, Safari iPhone e PWA (dieci pagine, timer, background, logout, camera, voce, push, back/reload e download). B3 prepara merge e rilascio CI dopo i GO: Rules/Function solo se richieste da B1, poi Hosting, con approvazione personale di Diego e verifica manifest/hash. C1 raccoglie le prove fisiche eseguite da Diego, corregge solo gli esiti con lo stesso ciclo; C2 registra la chiusura in COLLAUDI/STATO e sulla PR. La matrice fisica completa è ora in C1 dopo il canary individuale B3, come nel nuovo ordine: la vecchia sequenza pre-attivazione è superata soltanto per Diego; nessuna estensione ad altri utenti o falsa attestazione dei test. Non dichiarare «CORNICE CHIUSA» prima di C2.
+
+**Canale vincolante:** a ogni passo committato, commento sulla PR #278 con prefisso e campi prescritti nella [decisione](DECISIONI.md#cornice-ordine-2026-11-09). Claude è consultivo readonly e risponde sulla PR «REVISIONE CLAUDE – GO» oppure «NO-GO», con motivi; non passare al passo seguente senza GO sul candidato corrente. Nessun agente si attribuisce o pubblica al posto di Claude il GO. Una nuova PR, se necessaria, va collegata subito sulla #278. Merge/deploy anche dopo GO richiedono l'approvazione personale di Diego; le deleghe puntuali dei rilasci precedenti non si estendono a questo incarico. Solo CI, niente deploy dal PC; nessun nuovo MD oltre i 34, nessuna migrazione di dati Vault.
+
+[Contratto Vault](../regole/VAULT.md#cornice-a1-2026-11-09), [contratto UI](../regole/INTERFACCIA.md#cornice-a1-ui-2026-11-09), [evidenze A1](../evidenze/COLLAUDI.md#cornice-a1-contratto-2026-11-09). Le sezioni seguenti conservano gli incarichi precedenti, non autorizzano di saltare i gate del nuovo ordine.
+
+
 <a id="ui-overlap-followup-2026-11-09"></a>
 
 ## Segnalazioni visive residue dopo la 1.2.266 — 09/11/2026
