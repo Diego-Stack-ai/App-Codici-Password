@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Delega puntuale e pubblicazione UI conclusa — 09/11/2026
+
+Diego ordina direttamente «Approva e distribuisci» per la run Hosting #1030 già pronta, sorgente `193f4768`. La delega autorizza Codex a inviare questo singolo clic dall'interfaccia GitHub e sostituisce la precedente riserva personale soltanto per questa run. Non autorizza approvazioni future, modifiche alle protezioni, altre distribuzioni o attivazione della cornice. Commento e risposta API registrano la delega puntuale.
+
+La 1.2.266 è distribuita e verificata: manifest e 341 hash identici al sorgente; scope solo hosting, backend saltato. Sono autorizzati aggiornamento e integrazione delle sole ricevute nei documenti esistenti tramite PR e relativi check, con revisione in sola lettura di Claude prima del merge. Nessun nuovo Hosting serve per i documenti. Il controllo fisico iPhone resta rinviato e non eseguito; la cornice è un laboratorio distinto, PR #278 in bozza, non una correzione già online. [Ricevuta e limiti](../evidenze/COLLAUDI.md#css-profilo-pubblicazione-1-2-266).
+
 <a id="cornice-laboratorio-2026-11-09"></a>
 
 ## Priorità alla cornice persistente — 09/11/2026
@@ -10,9 +16,9 @@ Il mandato originario dell'Incarico 2 conserva tutti i gate prima dell'attivazio
 
 La chiave serializzata consegnata alle pagine legacy richiede una copia transitoria nella RAM del figlio: la cornice mantiene la continuità, non può essere descritta come l'unico documento che abbia mai il materiale. Nessuna persistenza è ammessa. Solo root scrive, revisori in sola lettura; nessuna modifica a pagine pubblicate, workflow, Rules, Functions, claim, utenti o dati. La consegna passa da PR separata e contraddittorio prima di qualsiasi merge; nessun rilascio o attivazione deriva dai test del laboratorio.
 
-## Pubblicazione UI distinta — 09/11/2026
+## Fase preparatoria del rilascio UI distinto — 09/11/2026
 
-Diego ordina «pubblica» per la 1.2.266 e rinvia il controllo visivo fisico, che resta non eseguito. Dopo check verdi sull'head `d648a5f7` e revisione statica finale valida di Claude, la PR #277 è unita in `193f4768ff67f047a0701a3c6fbc581308e04ded`, conservando i rami. Run Hosting #1030 avviata sul medesimo SHA, validazione completa riuscita, in attesa dell'approvazione personale di Diego. Non è ancora una pubblicazione verificata. Nessun deploy dal PC; scope solo hosting, master fermo al sorgente della run. Il lavoro cornice resta su un ramo distinto.
+Fotografia antecedente alla delega e alla pubblicazione attestata sopra: Diego ordina «pubblica» per la 1.2.266 e rinvia il controllo visivo fisico, che resta non eseguito. Dopo check verdi sull'head `d648a5f7` e revisione statica finale valida di Claude, la PR #277 è unita in `193f4768ff67f047a0701a3c6fbc581308e04ded`, conservando i rami. Run Hosting #1030 avviata sul medesimo SHA, validazione completa riuscita, in attesa dell'approvazione personale di Diego. Non è ancora una pubblicazione verificata. Nessun deploy dal PC; scope solo hosting, master fermo al sorgente della run. Il lavoro cornice resta su un ramo distinto.
 
 ## Integrazioni richieste dal riesame CSS/Profilo — 09/11/2026
 

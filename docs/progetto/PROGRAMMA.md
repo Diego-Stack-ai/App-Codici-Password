@@ -1,12 +1,18 @@
 # Programma
 
+## Rilascio UI concluso, priorità alla cornice — 09/11/2026
+
+La **1.2.266** è pubblicata con Hosting #1030, sorgente `193f4768`, dopo il clic di Codex delegato direttamente da Diego per questa sola run. Manifest e 341 file sono verificati; anteprime ancora online, escluse dalla precache. La prova fisica iPhone resta non eseguita e il riscontro produttivo di Claude non viene dedotto dal suo precedente parere statico. [Esiti](../evidenze/COLLAUDI.md#css-profilo-pubblicazione-1-2-266).
+
+Priorità funzionale: raccordo reale della cornice Vault, partendo dalla [PR #278 in bozza](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278), laboratorio sintetico disabilitato. I suoi test non attivano la cornice né dimostrano parità su pagine reali/Firebase/dispositivi. La nuova grafica resta rinviata. I follow-up 2FA, cloud/Workload Identity, Dependabot, recovery, lingue e offline conservano perimetri e gate distinti; non sono riaperti o distribuiti dalla sola ricevuta UI.
+
 <a id="cornice-avvio-2026-11-09"></a>
 
 ## Ordine operativo dopo la richiesta di Diego — 09/11/2026
 
 Priorità funzionale alla cornice persistente: laboratorio iframe sintetico e negato per default, poi raccordo reale disabilitato, revisione della PR, prove sul canary autorizzato e dispositivi, soltanto infine attivazione limitata a Diego. Nessuna richiesta Master Password dell'app online è dichiarata risolta dal laboratorio. [Mandato](INCARICO_CORRENTE.md#cornice-laboratorio-2026-11-09), [contratto e passaggi mancanti](../regole/VAULT.md#cornice-lab-2026-11-09).
 
-La distinta 1.2.266 è unita con ordine di pubblicazione: Hosting #1030 sul sorgente `193f4768`, validazione riuscita e approvazione personale ancora attesa; controllo fisico iPhone rinviato e non eseguito. La precedente sequenza che lo richiedeva prima del merge descrive il mandato antecedente a questo ordine. Master resta fermo fino alla verifica di Hosting; laboratorio e ricevute successive non cambiano lo SHA in distribuzione.
+Nella fase precedente alla pubblicazione attestata sopra, la distinta 1.2.266 è unita con ordine di pubblicazione: Hosting #1030 sul sorgente `193f4768`, validazione riuscita e approvazione personale ancora attesa; controllo fisico iPhone rinviato e non eseguito. La precedente sequenza che lo richiedeva prima del merge descrive il mandato antecedente a questo ordine. Master resta fermo fino alla verifica di Hosting; laboratorio e ricevute successive non cambiano lo SHA in distribuzione.
 
 Seguono la piccola pulizia 2FA/guida/export inutilizzato e del contratto CI intermedio, senza riaprire la PR #271 già distribuita né cambiare workflow implicitamente. I 3.231 casi della CI corrente hanno zero falliti: la vecchia segnalazione sul dialogo MFA non è un fallimento attuale dimostrato e va ricontrollata insieme all'inclusione del test nella suite. Poi inventario degli utilizzatori delle credenziali cloud prima di disattivare chiavi e percorso Workload Identity separato; Dependabot da rivalutare sugli avvisi effettivamente aperti, non sul vecchio numero cinque (#268 già integrata). Recupero 2FA effettivo, recovery completo mantenuto inerte, collaudi lingue/offline/dispositivi restano nei propri lotti. Nuova grafica rinviata; dubbi minori di sicurezza ancora da validare separatamente.
 
