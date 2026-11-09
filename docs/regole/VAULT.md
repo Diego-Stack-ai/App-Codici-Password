@@ -1,5 +1,19 @@
 # Vault
 
+<a id="cornice-lab-2026-11-09"></a>
+
+## Cornice: laboratorio isolato e contratto di raccordo — 09/11/2026
+
+Il nuovo ordine di Diego avvia la preparazione disabilitata; supera la sospensione assoluta della sola preparazione riportata nel raccordo storico del 08/11, non i gate dell'attivazione reale. `experiments/persistent-vault-frame/` è un laboratorio su loopback con pagine sintetiche e nessun adapter Firebase. La sua abilitazione locale riguarda soltanto fixture inventate, non costituisce l'interruttore dell'account e non può autorizzare l'accesso a una Vault reale.
+
+Il proprietario della continuità è il documento padre. L'adattamento alle pagine esistenti comporta copie transitorie del materiale nella RAM del figlio; blocco, logout, cambio UID/epoca e revoca devono eliminarle entrambe e invalidare le operazioni pendenti. Una navigazione normale elimina il vecchio figlio senza chiudere la sessione del padre. La semplice presenza della cornice non protegge da codice malevolo già attivo nella stessa origine.
+
+Il confine del laboratorio combina origine esatta, WindowProxy del proprio iframe, URL effettivo in allowlist, identità del Document, nonce per documento e handshake con nonce generato dal figlio. Il dato dichiarato nel messaggio non sceglie la pagina autorizzata. Niente blob/data/about, pagine pubbliche o anteprime; nessuna chiave in storage, URL, DOM o log. Le risposte vengono ricontrollate al momento della consegna. Ammissione assente, scaduta o non verificabile implica diniego e revoca; risposte tardive non possono riaprire una sessione bloccata. Le conferme sensibili del laboratorio sono sintetiche, monouso, legate a UID, generazione, scopo, bersaglio e scadenza: non autorizzano comandi reali.
+
+Prima della PR di integrazione reale mancano: bridge nel boundary canonico `security-manager`, pagina pubblicabile `app.html`, flag server dedicato e sua revoca, timer centrale configurato da `lock_timeout` e background, invalidazione coordinata con Auth/fence, conferme effettive nei comandi e header selettivi. Le normali preferenze del documento utente sono scrivibili dal proprietario e non valgono come interruttore server; un custom claim dedicato è solo una possibilità da progettare, non impostata. La CSP reale oggi nega gli antenati e non permette frame self: le eccezioni future devono lasciare login/pubbliche protette, senza policy sovrapposte contraddittorie. Gli allegati restano fuori dalla cornice secondo il contenimento già distribuito.
+
+Prima dell'attivazione: tutti i collaudi originari su Chrome desktop/Android, Safari iPhone e PWA; dieci pagine reali, blocco inattività/background/logout, login/App Check/PRF/scanner, Indietro/Avanti/reload/link/nuova scheda, separazione origini e nessuna persistenza, parità delle pagine. Le prove sintetiche non sostituiscono questi gate. Rollback mediante spegnimento del flag server o rimozione del solo instradamento Hosting; nessuna migrazione dei dati deriva dal laboratorio. [Mandato](../progetto/INCARICO_CORRENTE.md#cornice-laboratorio-2026-11-09), [ricevuta](../evidenze/COLLAUDI.md#cornice-lab-2026-11-09).
+
 ## Raccordo operativo — 08/11/2026
 
 Le revoche della Ricerca descritte nel checkpoint del 07/11 sottostante sono state distribuite nella [1.2.261](../evidenze/COLLAUDI.md#pubblicazione-sicurezza-1-2-261) e conservate nella 1.2.262. La continuità della Vault resta invece un incarico distinto: il nuovo prototipo è sospeso fino al completamento del prerequisito assegnato in [INCARICO_CORRENTE](../progetto/INCARICO_CORRENTE.md#vault-frame-prerequisites-2026-11-08). Nessuna cornice, trasmissione della chiave o attivazione per Diego è implementata o autorizzata dalla sola ricognizione preparatoria. Le descrizioni anteriori conservano il proprio contesto e non attestano lo stato produttivo corrente.

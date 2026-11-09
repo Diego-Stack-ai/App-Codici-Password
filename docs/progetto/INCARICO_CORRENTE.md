@@ -1,5 +1,19 @@
 # Incarico corrente
 
+<a id="cornice-laboratorio-2026-11-09"></a>
+
+## Priorità alla cornice persistente — 09/11/2026
+
+Diego chiede «Partiamo dalla cornice» per evitare lo sblocco a ogni pagina. È avviata la preparazione isolata, disabilitata e sintetica in `codex/vault-frame-lab-20261109`, base `193f4768`: una cornice con iframe locale, policy e prove di sessione, senza collegare la Vault reale. Non è l'attivazione del canary di Diego. Il precedente ramo `codex/vault-frame-prototype`, privo di implementazione distinta, resta conservato; il laboratorio preesistente `persistent-vault-shell` è un'altra architettura e non viene adottato implicitamente.
+
+Il mandato originario dell'Incarico 2 conserva tutti i gate prima dell'attivazione: flag verificato lato server e non scrivibile dall'utente; raccordo al security manager; revoca in entrambi i documenti, timer e nuova conferma per le operazioni sensibili; header mirati; Auth/App Check, PRF e scanner; parità e prove fisiche Chrome desktop/Android, Safari iPhone e PWA. La nota del revisore accetta S1 chiuso in produzione; la distinta prova reale fra due identità resta non attestata come riuscita. Preparare il laboratorio non trasforma questi limiti in PASS. [Piano e contratto](../regole/VAULT.md#cornice-lab-2026-11-09), [prove](../evidenze/COLLAUDI.md#cornice-lab-2026-11-09).
+
+La chiave serializzata consegnata alle pagine legacy richiede una copia transitoria nella RAM del figlio: la cornice mantiene la continuità, non può essere descritta come l'unico documento che abbia mai il materiale. Nessuna persistenza è ammessa. Solo root scrive, revisori in sola lettura; nessuna modifica a pagine pubblicate, workflow, Rules, Functions, claim, utenti o dati. La consegna passa da PR separata e contraddittorio prima di qualsiasi merge; nessun rilascio o attivazione deriva dai test del laboratorio.
+
+## Pubblicazione UI distinta — 09/11/2026
+
+Diego ordina «pubblica» per la 1.2.266 e rinvia il controllo visivo fisico, che resta non eseguito. Dopo check verdi sull'head `d648a5f7` e revisione statica finale valida di Claude, la PR #277 è unita in `193f4768ff67f047a0701a3c6fbc581308e04ded`, conservando i rami. Run Hosting #1030 avviata sul medesimo SHA, validazione completa riuscita, in attesa dell'approvazione personale di Diego. Non è ancora una pubblicazione verificata. Nessun deploy dal PC; scope solo hosting, master fermo al sorgente della run. Il lavoro cornice resta su un ramo distinto.
+
 ## Integrazioni richieste dal riesame CSS/Profilo — 09/11/2026
 
 Diego riporta il parere di Claude sulla candidata locale, base `449c5832`: GO con riserve, non autorizzazione al merge. Il mandato comprende candidata **1.2.266** tramite bump canonico, contratto comune dell'altezza header e linguette di Profilo privato/Dati azienda, esclusione delle sole anteprime `ui-preview/` dalla precache tramite politica condivisa fra build e audit, test estesi e nome di progetto per il controllo CSS. Le anteprime restano pubbliche; nuova grafica e cornice Vault non vengono adottate. Nessuna modifica a workflow, Rules, Functions, Auth, dati o chiavi.

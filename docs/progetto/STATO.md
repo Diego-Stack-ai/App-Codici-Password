@@ -2,6 +2,11 @@
 
 <a id="stato-corrente"></a>
 
+09/11/2026 — **Priorità alla cornice Vault: laboratorio sintetico locale, non attivato.** Ramo `codex/vault-frame-lab-20261109`, base `193f4768`: prima cornice con iframe, continuità RAM e diniego predefinito, senza adapter Firebase o Vault reale. Suite dedicata **28/28 PASS**, inclusi cinque browser su loopback. L'app online continua a richiedere lo sblocco per documento. Mancano raccordo reale, flag server, parità e prove dispositivi/Auth/App Check/PRF/scanner prima dell'attivazione per Diego. [Mandato](INCARICO_CORRENTE.md#cornice-laboratorio-2026-11-09), [contratto](../regole/VAULT.md#cornice-lab-2026-11-09), [prove](../evidenze/COLLAUDI.md#cornice-lab-2026-11-09).
+
+**Rilascio UI separato:** PR #277 unita dopo check e revisione statica finale di Claude; sorgente `193f4768ff67f047a0701a3c6fbc581308e04ded`. [Hosting #1030](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42619309846) ha superato la validazione e attende l'approvazione personale di Diego. Non ancora pubblicazione verificata; ultima produzione attestata **1.2.265 / #1024 / 87909638**. Diego ha ordinato il rilascio rinviando la verifica fisica iPhone, che resta non eseguita. [Ricevuta aggiornata](../evidenze/COLLAUDI.md#css-profilo-rilascio-1-2-266). Le sezioni seguenti conservano le fasi precedenti, non lo stato corrente.
+
+
 09/11/2026 — **PR #277 in bozza, candidata 1.2.266 verificata in CI, non pubblicata**. Sull'head applicativo `1126e5b6c2a31f9e668fba8a29db1660a4184f85` sono verdi `validate`, `docs` e `Gitleaks on changed commits`. La [run #1027](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42608767001) supera la suite completa: **3.231 casi, 3.221 passati, zero falliti, 10 skip in 62 gruppi**, inclusi i tre browser senza modificare l'ambiente CI. Manifest candidato di 341 file costruito e verificato sul merge temporaneo GitHub; job deploy saltato. Questa ricevuta aggiorna soltanto documenti, senza cambiare il codice appena collaudato. Restano revisione finale di Claude sul diff della [PR #277](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/277) e controllo fisico iPhone di Diego prima del merge. Produzione sempre **1.2.265 / #1024 / `87909638`**. [Ricevuta](../evidenze/COLLAUDI.md#css-profilo-candidata-1-2-266).
 
 ### Preparazione precedente alla verifica CI

@@ -1,5 +1,29 @@
 # Collaudi
 
+<a id="cornice-lab-2026-11-09"></a>
+
+## Primo laboratorio della cornice iframe — 09/11/2026
+
+Worktree `.codex-tmp/vault-frame-lab-20261109`, ramo `codex/vault-frame-lab-20261109`, base master `193f4768`. I file applicativi del laboratorio sono esclusivamente in `experiments/persistent-vault-frame/`; non esiste ancora `Frontend/public/app.html`. Il server espone soltanto file sintetici espliciti su `127.0.0.1`, senza dati, chiavi, account o richieste Firebase. Il modello nega l'ammissione per default; l'interruttore dimostrativo abilita solo fixture inventate.
+
+Comando `node --test experiments/persistent-vault-frame/*.test.mjs`: **28/28 PASS**, zero skip. Sono 22 prove del modello, una sulla copia transitoria nel child e cinque browser Chrome headless reali su loopback. Le prime prove browser nel sandbox sono fallite con rete locale negata; riesecuzione con permesso loopback riuscita, senza disabilitare sicurezza o scaricare browser. Sono stati corretti e ricontrollati anche i casi di scadenza durante sblocco/riammissione e continuazioni che terminano dopo la revoca.
+
+Browser: diniego iniziale; dieci documenti con un solo sblocco; due Indietro e due Avanti; query id/filter/profileTab conservate; reload del figlio senza nuovo sblocco e reload del padre con nuova sessione; nuova scheda senza sessione ereditata; blocco dal padre e dal figlio, logout; conferma sintetica annullata/accettata; vecchio READY ignorato dopo reload sulla stessa URL; about:blank revoca; header deny/self effettivi e tentativo di framing esterno respinto. L'assenza del materiale è controllata in storage, database/cache browser, cookie, URL, DOM e console. Origine/source/Document/nonce, concorrenza UID/epoca, timeout, background e grant monouso sono coperti anche dal modello con orologio controllato; quest'ultimo non è un test fisico del background su iPhone.
+
+Revisioni consultive degli agenti in sola lettura: modello e trasporto/handshake, percorso reale di integrazione, prove browser/cleanup. Nessun test rieseguito dai revisori; il loro parere non è una review di Claude. Il contraddittorio di Claude sul candidato resta da acquisire. Nessuna attivazione o pubblicazione della cornice, nessuna modifica alla produzione; UI 1.2.266 segue il distinto gate descritto sotto. Prove reali Firebase/Auth/App Check/PRF/scanner, parità e dispositivi ancora non eseguite. Elenco MD sempre 34.
+
+<a id="css-profilo-rilascio-1-2-266"></a>
+
+## Integrazione e avvio del rilascio UI 1.2.266 — 09/11/2026
+
+Revisione statica finale valida di Claude Code, sessione `fa260ebd-d434-4f59-bee2-3e7d075dbb2f`, sul candidato `d648a5f71fd25b41e0077fdd4a5156074302d2fd`: «APPROVABILE PER IL CODICE», nessun bloccante nel diff letto, nessun test eseguito né certificazione fisica/produttiva. Lettura completa del pacchetto focalizzato e del contesto, senza dinieghi; rapporto locale escluso da Git, SHA-256 `8f303ae284546017647c28e8c66108509552803288f275c95760b9bff379cd50`. Il tentativo precedente con percorso non accessibile non vale come revisione. [PR #277](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/277) con provenienza del parere registrata.
+
+Check finali sull'head documentale d648a5f7 tutti verdi; [#1028](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42610604705): 3.231 casi, 3.221 PASS, zero falliti/cancellati, 10 skip in 62 gruppi. Manifest candidato di 341 file e albero pubblico identico a quello collaudato nella #1027. Diego ordina la pubblicazione e rinvia il controllo visivo fisico: iPhone chiaro/scuro e due palette resta **non eseguito**, non PASS. Merge `193f4768ff67f047a0701a3c6fbc581308e04ded`, entrambi i commit e tutti i rami conservati.
+
+Preflight Git severo conservato con exit 1 per i vecchi rami e il vecchio worktree sporco congelato; non dichiarato verde né aggirato. Bundle completo di tutte le ref creato fuori OneDrive e verificato; verifica della preservazione del vecchio delta: 1.387 file archiviati invariati. Il candidato corrente e master risultavano puliti e allineati, nessun file vecchio importato.
+
+La run automatica push #1029 è riuscita e il suo job deploy è SKIPPED, come previsto dal workflow. Prima richiesta di dispatch rifiutata dalla revisione automatica per possibile sovrapposizione; attesa la conclusione e verificato via API il deploy saltato, stesso dispatch effettuato senza percorsi alternativi. [Hosting #1030](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42619309846), SHA 193f4768, scope solo hosting: validazione completa riuscita in 11m24s, **Waiting for review**, approvazione personale ancora attesa. Nessun deploy locale o backend. Ultima produzione effettivamente verificata ancora 1.2.265 / #1024 / 87909638; questa nota non dichiara la 1.2.266 online.
+
 <a id="css-profilo-candidata-1-2-266"></a>
 
 ## Integrazioni della candidata CSS/Profilo 1.2.266 — 09/11/2026
