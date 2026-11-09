@@ -5,6 +5,8 @@
 
 ## Decisioni e limiti aggiornati
 
+Nella candidata 1.2.266 le anteprime pubbliche `ui-preview/` restano raggiungibili online ma sono escluse dalla shell obbligatoria tramite la stessa politica in build e audit. Il worker intercetta soltanto i percorsi della shell: queste anteprime non vengono precaricate né inserite nella Cache API dal worker dopo una visita. Il cambio di versione della cache rimuove le precedenti copie all'attivazione; la cache HTTP del browser resta distinta. Questa esclusione non certifica l'offline completo né modifica preparazione dei dati, allegati o modello AI. [Prove](../evidenze/COLLAUDI.md#css-profilo-candidata-1-2-266).
+
 Per il nuovo Assistente, «aperta una volta» non equivale a «completa offline». È richiesto un percorso esplicito **Prepara per l'uso offline** eseguito con rete: deve enumerare il perimetro, sincronizzare i dati autorizzati, verificare la completezza, mostrare avanzamento/ultimo aggiornamento e distinguere cache vuota, incompleta o espulsa. La shell resta separata dai dati e la cache non diventa un backup.
 
 I byte degli allegati non sono automaticamente offline. Il download è opt-in per tutti, per tipo o per selezione, con stima dello spazio, preferenza solo Wi-Fi, stato per allegato, cifratura locale e comando di rimozione. Modelli AI e allegati non entrano nella precache obbligatoria. Preparazione dati, allegati offline e modello AI sono tre consensi e cicli di vita distinti.

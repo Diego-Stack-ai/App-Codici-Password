@@ -1,6 +1,7 @@
 import { build } from 'esbuild';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { isOfflineExcluded } from './offline-asset-policy.mjs';
 
 const root = process.cwd();
 // Build the lazy PDF dependency before collecting the offline static assets.
@@ -150,6 +151,7 @@ const offlineAssets = publicFiles
   // local analysis material, while dot-paths are excluded by firebase.json.
   .filter(file => !isDeployExcluded(file))
   .filter(file => !onlineOnlyDiagnostics.has(file))
+  .filter(file => !isOfflineExcluded(file))
   .sort();
 await writeFile(
   path.join(publicDir, 'offline-assets.js'),

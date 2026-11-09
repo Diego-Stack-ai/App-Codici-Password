@@ -105,6 +105,12 @@ L'Assistente base e l'eventuale AI locale presentano gli stessi componenti acces
 
 ## Integrazione corrente — palette colore
 
+Compatibilità del token: `--accent-rgb` contiene tre canali separati da virgole, come i producer JavaScript esistenti; le trasparenze che lo consumano usano `rgba(var(--accent-rgb), alpha)`, inclusi fallback nello stesso formato. L'alpha è sempre esplicito. Non mescolare quei canali con la sintassi a slash; il gate CSS ne verifica il contratto senza cambiare i colori delle palette.
+
+Nel Profilo privato e in Dati azienda la banda delle linguette rimane sotto l'header fisso e copre i contenuti che scorrono dietro di essa. Il token comune `--header-height` vale 85px esclusa la safe area; header, contenitore bilanciato e linguette condividono quella sorgente, con safe area aggiunta una sola volta all'altezza esterna. La banda usa il fondo opaco tematico `--bg-primary`; nessun nuovo ordine globale dei livelli. Scorrimento centrale e collaudo fisico conservano il contratto delle pagine. Questo ripristino non adotta il nuovo disegno delle prove grafiche.
+
+Il controllo Stylelint ha namespace di progetto `app-codici-password/valid-accent-colors`. Il distinto `--status-error-rgb` non è attualmente definito e usa un fallback con canali separati da spazi: la sintassi a slash resta valida soltanto mantenendo quel formato anche in un'eventuale futura definizione.
+
 La modalità luminosa (`chiaro`, `automatico`, `scuro`) e la palette cromatica sono preferenze indipendenti. Le palette ammesse sono `blue`, `green`, `red`, `sand`, `petrol`, `lavender` e `dusty-rose`; `blue` è il fallback per valori assenti o non validi. La preferenza locale viene applicata da `theme-init.js` prima del rendering per evitare il cambio colore visibile all’avvio. `core.css` resta l’autorità dei token d’identità; colori funzionali di successo, avviso ed errore e colori di categoria non cambiano significato con la palette. I controlli in Impostazioni devono esporre selezione visiva e stato accessibile `aria-pressed`.
 
 ## Indice delle fonti conservate

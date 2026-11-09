@@ -3,6 +3,7 @@
    ========================================================================== */
 
 :root {
+    --header-height: 85px;
     --footer-color: rgba(255, 255, 255, 0.4);
 }
 
@@ -128,7 +129,7 @@
 .base-header {
     top: 0;
     padding-top: env(safe-area-inset-top);
-    height: calc(85px + env(safe-area-inset-top));
+    height: calc(var(--header-height) + env(safe-area-inset-top));
     border-radius: 0;
     /* Effetto storico: vetro più solido al bordo e dissolvenza ampia verso il centro. */
     mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
@@ -150,7 +151,7 @@
 
 /* --- 2. BILANCIAMENTO CONTENUTI --- */
 .header-balanced-container {
-    height: 85px;
+    height: var(--header-height);
     /* Altezza fissa del contenuto utile indipendentemente dalla notch */
     display: flex;
     align-items: center;

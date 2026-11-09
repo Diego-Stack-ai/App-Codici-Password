@@ -1,5 +1,19 @@
 # Incarico corrente
 
+## Integrazioni richieste dal riesame CSS/Profilo — 09/11/2026
+
+Diego riporta il parere di Claude sulla candidata locale, base `449c5832`: GO con riserve, non autorizzazione al merge. Il mandato comprende candidata **1.2.266** tramite bump canonico, contratto comune dell'altezza header e linguette di Profilo privato/Dati azienda, esclusione delle sole anteprime `ui-preview/` dalla precache tramite politica condivisa fra build e audit, test estesi e nome di progetto per il controllo CSS. Le anteprime restano pubbliche; nuova grafica e cornice Vault non vengono adottate. Nessuna modifica a workflow, Rules, Functions, Auth, dati o chiavi.
+
+Sequenza: correzioni → PR separata → check obbligatori → nuova revisione di Claude sul diff della PR → controllo visivo di Diego su iPhone, chiaro/scuro e almeno due palette → merge → solo Hosting CI con approvazione personale di Diego → verifica produttiva di Claude. Le ombre e trasparenze ripristinate hanno effetto su più pagine: la prova desktop emulata non sostituisce il controllo fisico. Il browser test rispetta `CHROME_PATH`, usa Chromium Playwright se presente oppure Chrome installato, senza skip o installazioni silenziose. I gate della 1.2.265 restano distinti, inclusa la prova server non eseguita. Elenco MD invariato a 34.
+
+## Prima candidata CSS/Profilo, precedente al riesame — 09/11/2026
+
+Diego riporta i rilievi UI di Claude: dichiarazioni colore incomplete e sovrapposizioni nel Profilo durante lo scroll. La verifica e la candidata locale riguardano soltanto questi difetti dell'interfaccia esistente. L'adozione della quarta proposta grafica resta differita: il ramo originale Claude e i suoi due commit vengono conservati; le sole demo sono già online e non sostituiscono le pagine reali.
+
+La candidata è isolata in `codex/ui-css-profile-fixes`, sulla base `449c5832`, senza nuova versione, commit applicativo o pubblicazione. Comprende recupero delle trasparenze dalla storia, formato coerente dei colori, controllo di regressione e correzione locale delle linguette del Profilo. Nessuna modifica a dati, Auth, Vault, Rules, Functions o workflow. Le prove locali non autorizzano merge o deploy; il contraddittorio di Claude sulla candidata è richiesto in sola lettura.
+
+Diego richiama come obiettivo principale la cornice persistente `app.html`, che non è ancora implementata. La lista precedente che rimetteva in attesa la PR #271 e i deploy 1.2.265 è superata dalle ricevute: tali passaggi sono conclusi. Prima di dichiarare sbloccata l'attivazione della cornice vanno distinti S1 dichiarato chiuso, test condiviso reale ancora bloccato e criteri del mandato originario; nessuna prova non eseguita diventa PASS. Ordine aggiornato nel [PROGRAMMA](PROGRAMMA.md#priorita-cornice-e-correzioni-ui-2026-11-09).
+
 ## Esecuzione del rilascio delle prove grafiche — 09/11/2026
 
 La PR #275 è integrata in `8790963858756d694e191a4c62fee02a9f1004dd`, conservando i due commit dimostrativi e tutti i rami precedenti. Dopo i tre check obbligatori verdi e il parere finale statico favorevole di Claude sul medesimo candidato `1d1fa16b`, Codex avvia soltanto Hosting #1024. Diego delega successivamente in chat il clic «Approve and deploy» per questa specifica run: Codex lo esegue e registra la delega nel commento di approvazione. L'eccezione riguarda esclusivamente questa run, non modifica le protezioni production né introduce un'autorizzazione generale ad approvare altri rilasci.

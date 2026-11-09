@@ -185,6 +185,19 @@ function fetchEvent(fixture, {url, mode = 'no-cors', method = 'GET'}) {
     return responded;
 }
 
+test('public UI previews stay outside the service worker cache even after navigation', async () => {
+    const source = await readFile(new URL('../Frontend/public/offline-assets.js', import.meta.url), 'utf8');
+    const shell = JSON.parse(source.match(/=\s*(\[[\s\S]*\]);?\s*$/)[1]);
+    const f = serviceWorkerFixture(shell);
+    for (const [file, mode] of [['index.html', 'navigate'], ['base.css', 'no-cors'], ['profilo.js', 'no-cors']]) {
+        const url = `https://appcodici-password.web.app/ui-preview/ui-prove/${file}?v=fixture`;
+        assert.equal(fetchEvent(f, {url, mode}), null, url);
+    }
+    assert.deepEqual(f.fetched, []);
+    assert.deepEqual(f.opened, []);
+    assert.deepEqual(f.put, []);
+});
+
 test('T-23: il service worker conserva solo la shell stessa-origine, mai risposte del backend', async () => {
     const f = serviceWorkerFixture();
     // Richieste verso Firestore/Storage/Functions: cross-origin, mai intercettate.

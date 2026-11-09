@@ -1,5 +1,19 @@
 # Programma
 
+## Chiusura delle riserve UI prima della cornice — 09/11/2026
+
+Prima della cornice, candidata separata 1.2.266 per trasparenze, header/linguette condivisi e anteprime escluse dalla precache ma ancora online. Dopo i controlli locali seguono PR, check CI, revisione di Claude sul diff e controllo fisico di Diego su iPhone, chiaro/scuro e almeno due palette, quindi merge e solo Hosting CI con approvazione personale. Non anticipare nuova grafica o attivazione della cornice. Il parere iniziale GO con riserve non sostituisce la revisione finale del candidato aggiornato. [Mandato](INCARICO_CORRENTE.md), [evidenze](../evidenze/COLLAUDI.md#css-profilo-candidata-1-2-266).
+
+<a id="priorita-cornice-e-correzioni-ui-2026-11-09"></a>
+
+## Priorità della cornice e correzioni UI — 09/11/2026
+
+L'obiettivo funzionale principale resta la cornice persistente: evitare uno sblocco Vault a ogni pagina, conservando chiavi soltanto in RAM, isolamento, revoca, navigazione e conferma delle azioni sensibili. Non è ancora implementata. Le correzioni CSS/scroll sono una candidata separata dell'interfaccia attuale; l'adozione del nuovo disegno del Profilo è rinviata e i due commit originali Claude sono conservati.
+
+Ordine da seguire: contraddittorio aggiornato e distinzione dei criteri ancora non provati; piccola pulizia già individuata dopo la 1.2.265; prototipo della cornice disabilitato e successivi collaudi/attivazione limitata a Diego soltanto secondo il mandato e i suoi gate. Il test reale fra due partecipanti con Auth/App Check non è attestato come riuscito e le prove fisiche restano aperte: nessuna dichiarazione di sblocco ne deriva automaticamente. La PR #271 e i due deploy 1.2.265 sono già conclusi e non vanno ripetuti. La pulizia non autorizza modifiche ai workflow: qualsiasi intervento su quel perimetro conserva l'ordine separato richiesto.
+
+Seguono nei rispettivi incarichi credenziali cloud/Workload Identity, avvisi Dependabot, recupero 2FA effettivo, recovery completo/migrazione e chiusura dei collaudi di prodotto, lingue/offline e dispositivi. I nuovi dubbi di sicurezza riportati dal revisore vanno validati separatamente prima di considerarli difetti confermati. Le ricevute e i gate esistenti restano l'autorità; questo riordino non avvia operazioni cloud o la nuova grafica.
+
 ## Prove grafiche pubblicate e limiti residui — 09/11/2026
 
 Le quattro prove separate sono distribuite con Hosting #1024, sorgente `87909638`, mantenendo l'app 1.2.265 e le 30 pagine reali invariate. Check completi, parere statico finale di Claude e verifica pubblica sono registrati nei [COLLAUDI](../evidenze/COLLAUDI.md#prove-grafiche-hosting-2026-11-09); il solo clic di questa run è eseguito su delega esplicita di Diego, senza modificare le protezioni dei prossimi rilasci. L'adozione di uno stile o della proposta Profilo richiede una successiva decisione e un incarico distinto. Le ricevute documentali non richiedono un altro Hosting.

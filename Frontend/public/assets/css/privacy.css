@@ -98,7 +98,7 @@
 }
 
 .icon-blue {
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.12 );
     color: var(--accent);
 }
 
@@ -162,7 +162,7 @@
     flex-direction: column;
     gap: 0.15rem;
     padding-left: 0.85rem;
-    border-left: 2px solid rgb(var(--accent-rgb) / );
+    border-left: 2px solid rgba(var(--accent-rgb), 0.2 );
 }
 
 .settings-list-label {
