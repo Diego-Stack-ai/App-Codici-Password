@@ -129,6 +129,7 @@ function buildBackup() {
         storagePath: OBJECT_PATH, type: 'application/pdf', size: BYTES.length}];
     // Each SDK read owns its buffer; export may wipe it without altering the seed.
     repositories.getBytes = async () => BYTES.slice();
+    repositories.confirmFrameAction = async () => undefined; // Standalone export: no frame RPC.
     const names = Object.keys(repositories);
     const factory = new Function(...names, 'auth', 'navigator', 'window', 'onAuthStateChanged', 'addEventListener',
         'removeEventListener', 'createBackupExportBuffer', 'createBackupRecordBuffer', 'generateRecoveryKey',

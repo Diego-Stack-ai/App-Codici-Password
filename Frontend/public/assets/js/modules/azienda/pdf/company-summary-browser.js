@@ -1,7 +1,7 @@
 // Static, non-user assets may survive view changes. Generated PDFs never do.
 const fontAssets = new Map();
 export function createCompanyPdfActions({assertActive, fetchImpl = fetch, loadGenerator = () => import('/assets/js/vendor/company-summary-pdf.js'),
-    navigatorApi = navigator, documentApi = document, urlApi = URL, FileClass = File}) {
+    navigatorApi = navigator, documentApi = document, urlApi = URL, FileClass = File, nativeAction = (_bytes, action) => action()}) {
     let disposed = false; const urls = new Set();
     const check = () => {if (disposed) throw Error('VIEW_DISPOSED'); assertActive();};
     const file = bytes => new FileClass([bytes], 'scheda-azienda.pdf', {type: 'application/pdf'});
@@ -26,12 +26,14 @@ export function createCompanyPdfActions({assertActive, fetchImpl = fetch, loadGe
         canShare(bytes) {
             try {check(); return typeof navigatorApi.share === 'function' && typeof navigatorApi.canShare === 'function' && navigatorApi.canShare({files: [file(bytes)]});} catch {return false;}
         },
-        share(bytes) {check(); return navigatorApi.share({files: [file(bytes)], title: 'Scheda aziendale'});},
+        share(bytes) {check(); const output = bytes.slice(); return nativeAction(output, () => {check(); return navigatorApi.share({files: [file(output)], title: 'Scheda aziendale'});});},
         download(bytes) {
-            check(); const url = urlApi.createObjectURL(file(bytes)); urls.add(url);
+            check(); const output = bytes.slice(); return nativeAction(output, () => {
+            check(); const url = urlApi.createObjectURL(file(output)); urls.add(url);
             const anchor = documentApi.createElement('a'); anchor.href = url; anchor.download = 'scheda-azienda.pdf'; anchor.rel = 'noopener';
             try {check(); documentApi.body.append(anchor); anchor.click();}
             finally {anchor.remove(); anchor.removeAttribute('href'); setTimeout(() => revoke(url), 1000);}
+            });
         },
         dispose() {disposed = true; for (const url of [...urls]) revoke(url);}
     });

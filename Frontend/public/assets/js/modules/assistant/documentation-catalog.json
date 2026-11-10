@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "contentVersion": 11,
-  "reviewedAppVersion": "1.2.267",
+  "contentVersion": 12,
+  "reviewedAppVersion": "1.2.268",
   "fallbackLocale": "it",
   "pages": [
     {
@@ -740,17 +740,17 @@
         {
           "stepId": "step-1",
           "bodyKey": "guide.pages.configurazione_automezzi.step-1",
-            "target": "#vehicle-rule-title"
+          "target": "#vehicle-rule-title"
         },
         {
           "stepId": "step-2",
           "bodyKey": "guide.pages.configurazione_automezzi.step-2",
-            "target": "#btn-add-email-object"
+          "target": "#btn-add-email-object"
         },
         {
           "stepId": "step-3",
           "bodyKey": "guide.pages.configurazione_automezzi.step-3",
-            "target": "#btn-save-vehicle-rule"
+          "target": "#btn-save-vehicle-rule"
         }
       ],
       "relatedPageIds": [
@@ -1070,6 +1070,25 @@
         "impostazioni"
       ],
       "tutorialId": null
+    },
+    {
+      "pageId": "app",
+      "route": "/app.html",
+      "family": "internal",
+      "titleKey": "guide.pages.app.title",
+      "purposeKey": "guide.pages.app.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.app.step-1",
+          "target": "#frame-resume"
+        }
+      ],
+      "relatedPageIds": [
+        "home_page",
+        "impostazioni"
+      ],
+      "tutorialId": null
     }
   ],
   "journeys": [
@@ -1328,7 +1347,45 @@
       "guide.journeys.company-account.title": "Prima azienda e Account",
       "guide.journeys.deadline.title": "Prima Scadenza",
       "guide.journeys.sharing.title": "Condividere consapevolmente",
-      "guide.journeys.security-and-recovery.title": "Sicurezza e recupero"
+      "guide.journeys.security-and-recovery.title": "Sicurezza e recupero",
+      "guide.pages.app.title": "Cornice Vault (non attiva)",
+      "guide.pages.app.purpose": "Pagina preparatoria della navigazione persistente: la funzione non è ancora disponibile.",
+      "guide.pages.app.step-1": "Usa Home per tornare alla navigazione attuale."
+    },
+    "en": {
+      "guide.pages.app.title": "Vault frame (inactive)",
+      "guide.pages.app.purpose": "Preparation page for persistent navigation: this feature is not available yet.",
+      "guide.pages.app.step-1": "Use Home to return to the current navigation."
+    },
+    "es": {
+      "guide.pages.app.title": "Marco de la bóveda (inactivo)",
+      "guide.pages.app.purpose": "Página de preparación de la navegación persistente: esta función aún no está disponible.",
+      "guide.pages.app.step-1": "Usa Inicio para volver a la navegación actual."
+    },
+    "fr": {
+      "guide.pages.app.title": "Cadre du coffre (inactif)",
+      "guide.pages.app.purpose": "Page de préparation de la navigation persistante : cette fonction n’est pas encore disponible.",
+      "guide.pages.app.step-1": "Utilisez Accueil pour revenir à la navigation actuelle."
+    },
+    "de": {
+      "guide.pages.app.title": "Tresorrahmen (inaktiv)",
+      "guide.pages.app.purpose": "Vorbereitungsseite für die dauerhafte Navigation: Diese Funktion ist noch nicht verfügbar.",
+      "guide.pages.app.step-1": "Verwenden Sie die Startseite, um zur bisherigen Navigation zurückzukehren."
+    },
+    "pt": {
+      "guide.pages.app.title": "Estrutura do cofre (inativa)",
+      "guide.pages.app.purpose": "Página de preparação da navegação persistente: esta função ainda não está disponível.",
+      "guide.pages.app.step-1": "Use Início para voltar à navegação atual."
+    },
+    "zh": {
+      "guide.pages.app.title": "保险库框架（未启用）",
+      "guide.pages.app.purpose": "持久导航的准备页面：此功能尚不可用。",
+      "guide.pages.app.step-1": "使用主页返回当前导航。"
+    },
+    "hi": {
+      "guide.pages.app.title": "वॉल्ट फ़्रेम (निष्क्रिय)",
+      "guide.pages.app.purpose": "स्थायी नेविगेशन का तैयारी पृष्ठ: यह सुविधा अभी उपलब्ध नहीं है।",
+      "guide.pages.app.step-1": "वर्तमान नेविगेशन पर लौटने के लिए होम का उपयोग करें।"
     }
   }
 }

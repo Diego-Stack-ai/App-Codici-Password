@@ -1,3 +1,4 @@
+import {confirmFrameAction} from '../core/vault-frame-client.js';
 /**
  * DETTAGLIO ACCOUNT AZIENDA — ATTACHMENTS MODULE (V1.0)
  * Gestione allegati (upload, visualizzazione, eliminazione) per account aziendali.
@@ -5,7 +6,7 @@
  * Init: initAttachmentModule(ctx)
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.267';
+import { db, storage } from '../../firebase-config.js?v=1.2.268';
 import {decideAttachmentContent} from '../shared/attachment-content-policy.mjs';
 import { doc, collection, addDoc, setDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
@@ -401,6 +402,8 @@ async function deleteAttachment(att) {
     if (!active() || !ok) return;
 
     try {
+        await confirmFrameAction('permanent-delete', {owner, company, account, id: att.id});
+        if (!active()) return;
         const storagePaths = att?.encryption?.chunked === true && Array.isArray(att?.chunks)
             ? att.chunks.map(chunk => chunk.storagePath).filter(Boolean)
             : [att.storagePath].filter(Boolean);

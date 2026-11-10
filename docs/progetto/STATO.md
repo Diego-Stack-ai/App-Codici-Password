@@ -1,6 +1,69 @@
 # Stato
 
+<a id="cornice-b3-workflow-stato-2026-11-10"></a>
+
+## Cornice: DIAG approvata, workflow consegnato a Diego
+
+[GO Claude DIAG](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6758777089) sul commit `2d53604ee0662e49389318c31288ef58cc999d82`, CI #1051 verde secondo la ricevuta del revisore, deploy saltato. Diego autorizza la sola prima consegna B3: file completo del workflow e hash, caricamento personale sul ramo #278. Workflow tracciato ancora invariato, nessun merge, dispatch o operazione Firebase. Durata canary scelta: 7 giorni; singleton personale in console e script claim separato da rivedere prima dell'esecuzione. [Mandato corrente](INCARICO_CORRENTE.md#cornice-b3-consegna-workflow-2026-11-10).
+
+Produzione attestata ancora 1.2.267; candidata 1.2.268. C1 19 casi/quattro ambienti tutti NE. Dopo il caricamento: verifica hash e check del nuovo SHA, poi revisione finale; ogni seguito richiede l'approvazione personale di Diego. I checkpoint sotto conservano la cronologia.
+
+<a id="cornice-diag-stato-2026-11-10"></a>
+
+## Cornice: DIAG candidata, B3 attuativa sospesa
+
+Piano B3 approvato da [Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6757843877) su c79770f6, CI #1050 verde e deploy saltato. Il nuovo ordine DIAG di Diego precede la sua esecuzione: sezione Cornice e journal della scheda, spento di default, codici/campi chiusi, 200 eventi/7 giorni e nessun invio di rete. Contratti e lista aggiornati, nuovo codice da rivedere sulla #278. [Evidenze/limiti DIAG](../evidenze/COLLAUDI.md#cornice-diag-verifiche-2026-11-10).
+
+Produzione attestata **1.2.267 / #1041 / 1bcbef73**, candidata 1.2.268. Nessuna operazione Firebase, applicazione workflow, merge, dispatch, provisioning o deploy da questo lavoro. C1 ora **19 × 4 tutto NE**; ogni FAIL richiede rapporto copiato, senza trasformare il banco sintetico in prova fisica. Occorrono GO DIAG e successivi gate B3/applicazione CI/SHA finale più approvazioni personali; nessuna CORNICE CHIUSA.
+
+<a id="cornice-b3-stato-2026-11-10"></a>
+
+## Cornice: D11 approvata, B3 preparata senza esecuzione
+
+[GO Claude D11](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6757406980) su `3820afe6be11fbdb1c1c724592232c5ad36e8503`. [CI #1049](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42742698785) verde: **3490 casi/3480 PASS/0 FAIL/10 skip**, docs/Gitleaks verdi e deploy saltato. Il checkout CI era il merge sintetico bbe16f76, stessi file dell'head; non è un merge reale della PR.
+
+B3 prepara pianificatore locale, supporto verificato del futuro scope sole Rules, file completo della proposta CI e [sequenza di provisioning/rollback](../regole/RILASCIO.md#cornice-b3-piano-2026-11-10). Il workflow attivo non è modificato. Nuovo pacchetto B3 da sottoporre a check/Claude e poi a Diego; nessun merge, dispatch, lettura/scrittura Firebase, claim/singleton o deploy eseguito. UID, credenziale amministrativa utilizzabile e scadenza UTC non verificati né assegnati in questo passo.
+
+Produzione invariata **1.2.267 / #1041 / 1bcbef73631380ec30821357641ce9695cc6e230**. Candidata 1.2.268; C1 **18 × 4 tutto NE**, compresi limiti push e version skew. [Ricevuta B3](../evidenze/COLLAUDI.md#cornice-b3-preparazione-2026-11-10). I checkpoint precedenti sono storici e non attestano un nuovo rilascio.
+
+<a id="cornice-d11-stato-2026-11-10"></a>
+
+## Cornice: B2 approvata, D11 candidata prima di B3
+
+[GO Claude B2](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753602102) su `70180aaffba629d112d235d93dddd0344f7f2c75`, CI #1048 verde, deploy saltato. D11 corregge il click notifiche verso la cornice pronta con intento/ACK e navigazione del figlio; nessun navigate diretto sul padre. Aggiunte safe area e version skew alla matrice: 18 casi/quattro ambienti interamente NE. Priorità PWA iPhone e Chrome desktop, poi Safari e Android. [Evidenze e limiti](../evidenze/COLLAUDI.md#cornice-d11-verifiche-2026-11-10).
+
+D11 attende check e GO di Claude sul proprio commit; B3 richiederà inoltre approvazione personale di Diego. **Produzione invariata 1.2.267 / #1041 / 1bcbef73631380ec30821357641ce9695cc6e230**; candidata 1.2.268, singleton e claim reali assenti. Nessun merge, provisioning o pubblicazione. I checkpoint precedenti mantengono la cronologia, non riaprono A1/A2/B1/B2 già approvate.
+
+<a id="cornice-b2-stato-2026-11-09"></a>
+
+## Cornice: B1 approvata, B2 lista candidata
+
+Claude ha dato [GO B1](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753223333) su `0d861eb093626b9e0828848fef80c83c1b0e3aee`; CI #1047 interamente riuscita, 3448 casi/3438 PASS/0 FAIL/10 skip e deploy saltato. B2 consegna [lista e matrice C1](../evidenze/COLLAUDI.md#cornice-b2-lista-2026-11-09), quattro ambienti distinti, nessuna prova fisica eseguita. Trovato un gap statico nella continuità push: il worker ricarica ancora la finestra; correzione/revisione necessarie prima della proposta B3. B2 attende GO, nessun merge o attivazione.
+
+Produzione sempre **1.2.267 / #1041 / 1bcbef73**. Candidata 1.2.268, singleton e claim reali assenti. Le ricevute B1 precedenti conservano NO-GO e correzioni, superati dal GO sullo SHA indicato; non attestano collaudi dei dispositivi o pubblicazione.
+
+<a id="cornice-b1-stato-2026-11-09"></a>
+
+## Cornice B1 — candidata per revisione, produzione invariata
+
+A2 ha ricevuto il [GO di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6751236506) su `455b41fc4f3bc86e0b9f9df48ccb9f5623309060`, con CI #1044 riuscita e 116 test ripetuti dal revisore. B1 prepara singleton server individuale non scrivibile dai client, ascolto di revoca, routing canonico e intestazioni selettive verificate sul vero emulatore Hosting. Candidata sempre 1.2.268, non pubblicata; il raccordo compilato è abilitato ma senza permesso server valido resta negato. Nessun UID personale o documento server reale configurato, nessuna Rules o Hosting distribuita. [Mandato B1](INCARICO_CORRENTE.md#cornice-b1-2026-11-09), [evidenze](../evidenze/COLLAUDI.md#cornice-b1-verifiche-2026-11-09).
+
+B1 attende check sul proprio commit e GO di Claude prima di B2. Il provisioning privato del singleton e il percorso CI limitato alle sole Rules Firestore saranno proposti in B3, senza Functions aggiuntive. Merge e pubblicazione richiedono approvazione personale di Diego. Produzione ancora **1.2.267 / #1041 / `1bcbef73`**; problema Vault multipagina non ancora risolto per gli utenti. Le voci A2 sottostanti sono ricevute della fase precedente.
+
+Seguito B1: CI #1046 verde su 13fa2d45 (3432 PASS/0 FAIL/10 skip), ma Claude mantiene NO-GO per la verifica bloccante sui non partecipanti. Il candidato corretto usa la hint server già nel token Auth per saltare interamente routing/listener/letture aggiuntive per gli altri utenti; offline prosegue subito standalone. Ammissione sempre dal singleton. Nuovo commit/CI e GO richiesti; nessun B2, provisioning o deploy eseguito. In B3 va proposto anche il solo claim Auth del pilota, preservando gli altri.
+
+<a id="cornice-a2-stato-2026-11-09"></a>
+
+## Cornice A2 — candidata locale spenta
+
+A1 approvata da Claude sulla PR #278, commit `4f2bc0f812fa2f72c63a409d1aa5d3a120bcd136`. A2 implementata e verificata localmente per gruppi sul medesimo ramo; candidata 1.2.268, produzione invariata 1.2.267. Broker reale e bridge RAM preparati, ammissione ancora negata, nessun UID personale in codice. Test sintetici e tutti i gruppi di regressione passati dopo il raccordo degli harness standalone; non sono il collaudo Firebase o dei dispositivi. Raccordati i comandi sensibili censiti; restano la CI sul nuovo SHA e il GO A2 di Claude. Nessuna B1 o pubblicazione autorizzata dal solo GO A1. [Mandato corrente](INCARICO_CORRENTE.md#cornice-a2-preparazione-2026-11-09).
+
 <a id="stato-corrente"></a>
+
+**10/11/2026 — stato corrente:** DIAG approvata; consegna del workflow a Diego come singolo passo B3, poi arresto. Produzione 1.2.267, candidata 1.2.268, nessuna attivazione. Prevale il [riepilogo B3](#cornice-b3-workflow-stato-2026-11-10); C1 19 casi/quattro ambienti tutti NE.
+
+Cronologia precedente al GO A1 — 09/11/2026: **Cornice: passo A1 preparato sulla PR #278, in attesa di revisione Claude sulla PR**. Nuovo ordine di Diego A1–C2 e scelta esplicita background = durata `lock_timeout`; definiti contratto Vault/UI, 22 pagine candidate, header per route, permessi e limiti same-origin. Nessuna integrazione reale, flag o attivazione eseguiti; A2 attende «REVISIONE CLAUDE – GO». Produzione invariata **1.2.267 / #1041 / `1bcbef73`**. [Mandato corrente](INCARICO_CORRENTE.md#cornice-a1-incarico-2026-11-09), [decisione](DECISIONI.md#cornice-ordine-2026-11-09), [evidenze](../evidenze/COLLAUDI.md#cornice-a1-contratto-2026-11-09). I precedenti pareri CLI sul laboratorio non sono il GO del nuovo passo.
+
 
 09/11/2026 — **Produzione 1.2.267 pubblicata e verificata**, [Hosting #1041](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42658564232), sorgente **`1bcbef73631380ec30821357641ce9695cc6e230`**, PR #280 e #281 integrate. Approvazione personale di Diego registrata via API, nessun bypass; solo Hosting CI. Suite del rilascio **3.224 PASS, 0 FAIL, 10 skip su 3.234 casi**; confronto indipendente **341/341 hash** e manifest riuscito. Header coprente nei due profili e metadati allegati separati dal cestino; nessuna nuova grafica adottata. [Evidenze e provenienza delle revisioni Claude](../evidenze/COLLAUDI.md#ui-overlap-followup-2026-11-09). Cornice #278 non attivata, problema Vault multipagina ancora aperto; iPhone/Safari/PWA fisici non collaudati. Le voci seguenti sono fasi antecedenti, incluse candidata e produzione 1.2.266, non lo stato corrente.
 
@@ -12,6 +75,14 @@
 09/11/2026 — **Produzione 1.2.266 pubblicata e verificata**, Hosting [#1030](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42619309846), sorgente `193f4768ff67f047a0701a3c6fbc581308e04ded`. Manifest e **341/341 hash** corrispondono; precache 321 risorse, zero anteprime, 17 anteprime ancora online. Scope solo hosting, backend saltato. Il clic è eseguito da Codex sulla delega diretta di Diego limitata a questa run, registrata nel commento e confermata via API; nessuna modifica alle protezioni. [Ricevuta](../evidenze/COLLAUDI.md#css-profilo-pubblicazione-1-2-266).
 
 **Cornice Vault ancora non attivata:** PR #278 in bozza, laboratorio sintetico distinto; non risolve ancora lo sblocco a ogni pagina nell'app online. Il controllo fisico iPhone chiaro/scuro e due palette resta rinviato e non eseguito. Nessuna nuova verifica produttiva di Claude è attribuita al precedente parere statico. I paragrafi seguenti documentano le fasi antecedenti, non lo stato corrente; i successivi commit delle ricevute non sostituiscono il sorgente Hosting.
+
+
+### Laboratorio della cornice e cronologia della preparazione
+
+
+09/11/2026 — **Priorità alla cornice Vault: laboratorio sintetico locale, non attivato.** Ramo `codex/vault-frame-lab-20261109`, base `193f4768`: prima cornice con iframe, continuità RAM e diniego predefinito, senza adapter Firebase o Vault reale. Suite dedicata **29/29 PASS**, inclusi cinque browser su loopback. [PR #278 in bozza](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278), codice e test del commit `9807dfb5` verificati in [CI #1032](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42624268694), con i tre check obbligatori verdi. Suite completa: 3.260 casi, 3.250 PASS, zero falliti/cancellati, 10 skip in 63 gruppi. Parere statico consultivo di Claude acquisito sul pacchetto, senza GO al merge/deploy. La ricevuta successiva modifica soltanto questi esiti documentali; per i suoi check vale la PR. L'app online continua a richiedere lo sblocco per documento. Mancano raccordo reale, flag server, parità e prove dispositivi/Auth/App Check/PRF/scanner prima dell'attivazione per Diego. [Mandato](INCARICO_CORRENTE.md#cornice-laboratorio-2026-11-09), [contratto](../regole/VAULT.md#cornice-lab-2026-11-09), [prove](../evidenze/COLLAUDI.md#cornice-lab-2026-11-09).
+
+**Avvio UI precedente alla pubblicazione attestata sopra:** PR #277 unita dopo check e revisione statica finale di Claude; sorgente `193f4768ff67f047a0701a3c6fbc581308e04ded`. [Hosting #1030](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42619309846) ha superato la validazione e attende l'approvazione personale di Diego. Non ancora pubblicazione verificata; ultima produzione attestata **1.2.265 / #1024 / 87909638**. Diego ha ordinato il rilascio rinviando la verifica fisica iPhone, che resta non eseguita. [Ricevuta aggiornata](../evidenze/COLLAUDI.md#css-profilo-rilascio-1-2-266). Le sezioni seguenti conservano le fasi precedenti, non lo stato corrente.
 
 
 09/11/2026 — **PR #277 in bozza, candidata 1.2.266 verificata in CI, non pubblicata**. Sull'head applicativo `1126e5b6c2a31f9e668fba8a29db1660a4184f85` sono verdi `validate`, `docs` e `Gitleaks on changed commits`. La [run #1027](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42608767001) supera la suite completa: **3.231 casi, 3.221 passati, zero falliti, 10 skip in 62 gruppi**, inclusi i tre browser senza modificare l'ambiente CI. Manifest candidato di 341 file costruito e verificato sul merge temporaneo GitHub; job deploy saltato. Questa ricevuta aggiorna soltanto documenti, senza cambiare il codice appena collaudato. Restano revisione finale di Claude sul diff della [PR #277](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/277) e controllo fisico iPhone di Diego prima del merge. Produzione sempre **1.2.265 / #1024 / `87909638`**. [Ricevuta](../evidenze/COLLAUDI.md#css-profilo-candidata-1-2-266).

@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -23,7 +24,7 @@ function fixture(count = 1, attachment = false, {lineLimit, readBytes, previewLi
         JSON.stringify({kind: 'footer', entryCount: entries.length, recordCount: records.length, attachmentCount: attachment ? 1 : 0})].join('\n')]);
     const file = {get size() { return backupBlob.size; }, text: () => backupBlob.text(), stream: () => backupBlob.stream(),
         slice: (start, end) => backupBlob.slice(start, end)};
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         auth, AbortController, TextEncoder, TextDecoder, Uint8Array, crypto: {randomUUID: () => 'execution'},
         functions: {}, storage: {}, ref: (_storage, path) => path,
         localStorage: {setItem: (key, value) => localValues.set(key, value), getItem: key => localValues.get(key),
@@ -42,7 +43,7 @@ function fixture(count = 1, attachment = false, {lineLimit, readBytes, previewLi
         },
         getBytes: async () => new Uint8Array([1]),
         uploadBytes: async (path, bytes, metadata) => uploads.push([path, bytes.slice(), metadata]),
-    });
+    }));
     vm.runInContext(`(() => { ${model}\nObject.assign(globalThis,{chunkRestoreRecords,describeRestoreRecords,restoreRecordKey,validateBackupFooter,validateRestoreStoragePath}); })()`, context);
     vm.runInContext(`(() => { ${exportModel}\nObject.assign(globalThis,{collectStoragePaths}); })()`, context);
     vm.runInContext(`(() => { ${v2Client}\nObject.assign(globalThis,{clearBackupRestoreV2Locator,

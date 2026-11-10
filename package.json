@@ -12,7 +12,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.267",
+  "version": "1.2.268",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -47,7 +47,7 @@
     "test:company-pdf": "node --test tests/company-summary-*.test.mjs tests/static-reference-imports.test.mjs",
     "test:offline": "node scripts/audit-offline-shell.mjs && node --test tests/offline-asset-policy.test.mjs tests/offline-profile-readiness.test.mjs tests/offline-account-widgets.test.mjs",
     "test:security": "node scripts/audit-security-flows.mjs && node --test tests/input-autofill.test.mjs tests/private-bootstrap-offline.test.mjs tests/private-auth-gate.test.mjs tests/auth-session-fence.test.mjs tests/auth-password-fence.test.mjs tests/auth-login-fence.test.mjs",
-    "test:vault-contract": "node scripts/audit-vault-key-terminology.mjs && node --test tests/vault-session.test.mjs tests/vault-logout.test.mjs tests/vault-session-races.test.mjs && npm run test:vault-shell",
+    "test:vault-contract": "node scripts/audit-vault-key-terminology.mjs && node --test tests/vault-session.test.mjs tests/vault-logout.test.mjs tests/vault-session-races.test.mjs && npm run test:vault-shell && npm run test:vault-frame-lab && npm run test:vault-frame-runtime",
     "test:profile-utilities-editor": "node --test experiments/persistent-vault-shell/private-utilities-editor.test.mjs experiments/persistent-vault-shell/profile-account-create.test.mjs",
     "test:profile-documents-editor": "node --test experiments/persistent-vault-shell/private-documents.test.mjs experiments/persistent-vault-shell/private-documents-editor.test.mjs",
     "test:account-note-emulators": "node scripts/run-vault-session-emulators.mjs --account-note",
@@ -132,7 +132,8 @@
     "test:history-prototype": "node --test experiments/history-recovery/*.test.mjs tests/archive-account-model.test.mjs tests/archive-session.test.mjs tests/archive-list-filter.test.mjs tests/account-archive-paths.test.mjs tests/archive-recipients.test.mjs tests/company-archive-conflict.test.mjs tests/company-form-archive-mount.test.mjs",
     "test:backup-prototype": "node --test experiments/backup-recovery/*.test.mjs tests/backup-crypto-runtime.test.mjs tests/backup-header-cleartext.test.mjs tests/backup-export-model.test.mjs tests/backup-export-session.test.mjs tests/backup-import-model.test.mjs tests/backup-restore-session.test.mjs tests/backup-restore-ui.test.mjs tests/full-recovery-runtime.test.mjs tests/complete-recovery-client.test.mjs tests/recovery-asset-reader.test.mjs tests/complete-recovery-safety.test.mjs tests/complete-recovery-route.test.mjs tests/complete-recovery-ui.test.mjs tests/recovery-transport-limits.test.mjs tests/complete-recovery-production-transport.test.mjs",
     "test:credential-health-prototype": "node --test experiments/credential-health/*.test.mjs tests/credential-health-runtime.test.mjs tests/credential-health-session.test.mjs",
-    "test:release-hardening": "node scripts/audit-release-hardening.mjs && node scripts/plan-recovery-canary.mjs --check && node scripts/build-vault-account-backend.mjs --check && node --test tests/git-state-governance.test.mjs tests/release-manifest.test.mjs tests/gitleaks-config.test.mjs tests/recovery-canary-plan.test.mjs tests/deploy-recovery-prerequisites.test.mjs",
+    "plan:vault-frame-release": "node scripts/plan-vault-frame-release.mjs --check",
+    "test:release-hardening": "node scripts/audit-release-hardening.mjs && node scripts/plan-recovery-canary.mjs --check && node scripts/build-vault-account-backend.mjs --check && node --test tests/git-state-governance.test.mjs tests/release-manifest.test.mjs tests/gitleaks-config.test.mjs tests/recovery-canary-plan.test.mjs tests/deploy-recovery-prerequisites.test.mjs tests/vault-frame-release-plan.test.mjs",
     "test:settings-mfa-browser": "node --test tests/settings-mfa-disabled.browser.test.mjs",
     "test:mfa-login-browser": "node --test tests/mfa-login-assistance.browser.test.mjs",
     "test:mfa-response-emulators": "node scripts/run-mfa-response-emulators.mjs",
@@ -152,7 +153,10 @@
     "test:vault-mutation": "node scripts/run-vault-session-emulators.mjs --mutation",
     "test:account-standard-emulators": "node scripts/run-vault-session-emulators.mjs --account-standard",
     "plan:recovery-canary": "node scripts/plan-recovery-canary.mjs",
-    "test:assistant-session-browser": "node --test tests/assistant-ui-lifecycle.browser.test.mjs"
+    "test:assistant-session-browser": "node --test tests/assistant-ui-lifecycle.browser.test.mjs",
+    "test:vault-frame-lab": "node --test experiments/persistent-vault-frame/*.test.mjs",
+    "prototype:vault-frame-lab": "node experiments/persistent-vault-frame/serve.mjs",
+    "test:vault-frame-runtime": "node --test tests/vault-frame-permit.test.mjs tests/vault-frame-runtime.test.mjs tests/vault-frame-navigation.test.mjs tests/vault-frame-boundaries.test.mjs tests/vault-frame-runtime.browser.test.mjs tests/vault-frame-media.browser.test.mjs tests/vault-frame-headers.browser.test.mjs tests/vault-frame-push.test.mjs tests/vault-frame-push.browser.test.mjs tests/vault-frame-diagnostics.test.mjs tests/vault-frame-diagnostics.browser.test.mjs"
   },
   "repository": {
     "type": "git",

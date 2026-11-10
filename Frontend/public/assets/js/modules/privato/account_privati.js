@@ -1,10 +1,11 @@
+import {confirmFrameAction} from '../core/vault-frame-client.js';
 import { readErrorMessage } from '../shared/read-error-message.js';
 /**
  * ACCOUNT PRIVATI MODULE (V4.2)
  * Gestione liste account: personali, condivisi, memorandum.
  */
 
-import { db, functions } from '../../firebase-config.js?v=1.2.267';
+import { db, functions } from '../../firebase-config.js?v=1.2.268';
 import { LOG } from '../../logger.js';
 import { updateDoc, doc, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -484,6 +485,8 @@ export function mountAccountPrivati(user, options = {}) {
             if (!confirmed) { filterAndRender(); return; }
             try {
                 const respondToInvitation = httpsCallable(functions, 'respondToInvitation');
+                await confirmFrameAction('sharing-change', {inviteId: account._inviteId, status: 'rejected'});
+                if (signal.aborted) return;
                 await respondToInvitation({inviteId: account._inviteId, status: 'rejected'});
                 if (signal.aborted) return;
                 showToast(t('shared_leave_success'), 'success');

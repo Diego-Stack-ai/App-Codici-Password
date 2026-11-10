@@ -6,6 +6,7 @@ const projectRoot = resolve(import.meta.dirname, '..');
 const configRoot = resolve(projectRoot, '.codex-tmp', 'firebase-config');
 const firebaseCli = resolve(projectRoot, 'node_modules', 'firebase-tools', 'lib', 'bin', 'firebase.js');
 const testFiles = [
+  resolve(projectRoot, 'tests', 'vault-frame-policy.rules.test.mjs'),
   resolve(projectRoot, 'tests', 'notification-rules.rules.test.mjs'),
   resolve(projectRoot, 'tests', 'firestore.profile-widgets.rules.test.mjs'),
   resolve(projectRoot, 'tests', 'widget-profile.rules.test.mjs'),

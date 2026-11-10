@@ -1,4 +1,5 @@
-import {auth, functions} from '../../firebase-config.js?v=1.2.267';
+import {confirmFrameAction} from '../core/vault-frame-client.js';
+import {auth, functions} from '../../firebase-config.js?v=1.2.268';
 import {httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
 import {encrypt, ensureVaultKeyMaterial} from '../core/security-manager.js';
 import {
@@ -17,6 +18,9 @@ async function encryptedPayload(data) {
 async function send(command, uid = auth.currentUser?.uid) {
     if (!uid || auth.currentUser?.uid !== uid) throw new Error('Sessione cambiata. Riapri la modifica.');
     if (!navigator.onLine) throw new Error('Le Credenziali comuni si modificano soltanto online.');
+    await confirmFrameAction(command.action === 'delete' ? 'permanent-delete' : 'sharing-change',
+        {action: command.action, id: command.sharedDataId || command.operationId, revision: command.expectedRevision, link: command.link});
+    if (auth.currentUser?.uid !== uid) throw Error('FRAME_AUTH_DENIED');
     const response = await manageSharedVaultData({...command, expectedOwnerUid: uid});
     if (response.data?.status !== 'applied') {
         const error = new Error(response.data?.status === 'conflict'

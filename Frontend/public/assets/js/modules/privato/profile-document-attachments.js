@@ -1,3 +1,4 @@
+import {confirmFrameAction} from '../core/vault-frame-client.js';
 import {functions, db, storage} from '../../firebase-config.js';
 import {decideAttachmentContent} from '../shared/attachment-content-policy.mjs';
 import {collection, getDocsFromServer, query, where, getBytes, ref, httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
@@ -137,6 +138,7 @@ export async function renderProfileDocumentAttachmentPreviews({uid, documentItem
                 if (!await showConfirmModal('Elimina allegato', `Eliminare “${name}”? Il documento rimarrà disponibile.`)) return;
                 remove.disabled = true;
                 try {
+                    await confirmFrameAction('permanent-delete', {id: attachment.id, scope: 'profile-document-attachment'});
                     await httpsCallable(functions, 'removeProfileDocumentAttachment')({attachmentId: attachment.id});
                     showToast('Allegato eliminato.', 'success');
                     await renderProfileDocumentAttachmentPreviews(renderOptions);

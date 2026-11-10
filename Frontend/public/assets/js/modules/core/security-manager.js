@@ -1,12 +1,15 @@
+import {beginFrameCleanup, finishFrameCleanup} from '../../frame-navigation.js';
 /**
  * SECURITY MANAGER (V9.0 - Vault Verifier & PRF)
  * - Il materiale della Vault Key resta in RAM nel solo documento corrente.
  * - Sblocco biometrico usa WebAuthn PRF.
  */
 
+import {vaultFrameClient, confirmFrameAction, frameMediaLifetime} from './vault-frame-client.js';
+import {authSessionFence} from '../../auth-session-fence.js';
 import { encrypt, decrypt, isEncryptedValue, generateVaultKey, createVaultKeyring, wrapVaultKey, unwrapVaultKey, createVaultVerifier, verifyVaultVerifier } from './crypto-utils.js';
 import { showInputModal, showToast, showConfirmModal } from '../../ui-core-v129.js';
-import { db, auth } from '../../firebase-config.js?v=1.2.267';
+import { db, auth } from '../../firebase-config.js?v=1.2.268';
 import { doc, setDoc, updateDoc, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';
@@ -19,6 +22,9 @@ let _vaultAutoUnlock = false;
 let _isSoftLocked = false;
 let _unlockPromise = null;
 let _sessionGeneration = 0;
+let _frameExpiry = null, _frameFencePermit = null;
+// A2 owner uses the same manager; its only expiry authority is the broker.
+export function setFrameExpiryAuthority(readExpiry) { _frameExpiry = readExpiry; }
 
 
 function invalidatePendingUnlock() {
@@ -214,9 +220,10 @@ onAuthStateChanged(auth, (user) => {
 });
 
 export function softLock() {
+    if (vaultFrameClient.isChild()) vaultFrameClient.lock();
     invalidatePendingUnlock();
     _isSoftLocked = true;
-    _vaultKeyMaterial = null;
+    _vaultKeyMaterial = null; _frameFencePermit = null;
     _clearSessionStorage();
     globalThis.dispatchEvent?.(new Event('vault-session-locked'));
     updateGlobalState();
@@ -235,7 +242,8 @@ export function isAutoUnlockActive() {
 
 // Read-only state check: never prompt or recover a key to authorize an export.
 export function isVaultUnlocked() {
-    const expiry = getVaultSessionExpiry();
+    const expiry = _frameExpiry ? _frameExpiry() : getVaultSessionExpiry();
+    if (vaultFrameClient.isChild() && (!vaultFrameClient.isUnlocked() || !_frameFencePermit || !authSessionFence.isLocallyCurrent(_frameFencePermit))) return false;
     return Boolean(_vaultKeyMaterial && !_isSoftLocked && _currentUid &&
         auth.currentUser?.uid === _currentUid && (!expiry || Date.now() < expiry));
 }
@@ -298,6 +306,15 @@ export function isBiometricUnlockConfigured() {
 
 export async function ensureVaultKeyMaterial(options = {}) {
     const forceReload = typeof options === 'boolean' ? options : !!options.forceReload;
+    if (vaultFrameClient.isChild()) {
+        if (_vaultKeyMaterial && !forceReload && isVaultUnlocked()) return _vaultKeyMaterial;
+        if (_unlockPromise && !forceReload) return _unlockPromise;
+        const frameOperation = ensureFrameMaterial(forceReload);
+        _unlockPromise = frameOperation;
+        try {return await frameOperation;}
+        catch (error) {clearSession({notifyFrame: error?.message !== 'FRAME_HIDDEN'}); throw error;}
+        finally {if (_unlockPromise === frameOperation) _unlockPromise = null;}
+    }
     if (_vaultKeyMaterial && !isVaultUnlocked()) softLock();
     if (_vaultKeyMaterial && !forceReload) return _vaultKeyMaterial;
     if (_unlockPromise && !forceReload) return _unlockPromise;
@@ -309,6 +326,25 @@ export async function ensureVaultKeyMaterial(options = {}) {
     } finally {
         if (_unlockPromise === operation) _unlockPromise = null;
     }
+}
+
+async function ensureFrameMaterial(fresh) {
+    const uid = auth.currentUser?.uid, generation = _sessionGeneration;
+    const transportGeneration = vaultFrameClient.generation();
+    const permit = await authSessionFence.readPermit();
+    assertCurrentSession(uid, generation);
+    if (!permit) throw Error('FRAME_AUTH_DENIED');
+    const reply = await vaultFrameClient.request(fresh ? 'rekey' : 'key');
+    assertCurrentSession(uid, generation);
+    if (!await authSessionFence.isCurrent(permit)) throw Error('FRAME_AUTH_DENIED');
+    assertCurrentSession(uid, generation);
+    if (transportGeneration !== vaultFrameClient.generation() || !vaultFrameClient.isUnlocked() ||
+        reply.kind !== 'key' || typeof reply.material !== 'string' || !reply.material) throw Error('FRAME_KEY_DENIED');
+    // Transient child RAM only. No child session-save event or independent timer.
+    _frameFencePermit = permit;
+    _vaultKeyMaterial = reply.material;
+    _isSoftLocked = false; _vaultAutoUnlock = true;
+    return _vaultKeyMaterial;
 }
 
 async function ensureVaultKeyMaterialInternal(options = {}) {
@@ -356,7 +392,7 @@ async function ensureVaultKeyMaterialInternal(options = {}) {
     assertCurrent();
     const pass = await showInputModal(
         "SBLOCCO VAULT", '', msg, description,
-        { vaultSecret: true, ...(offerMasterSuggestion ? { suggestPassword: true, length: 24 } : {}) }
+        { vaultSecret: true, signal: options.signal, ...(offerMasterSuggestion ? { suggestPassword: true, length: 24 } : {}) }
     );
     assertCurrent();
 
@@ -380,7 +416,7 @@ async function ensureVaultKeyMaterialInternal(options = {}) {
                         '',
                         "Reinserisci la Master Password",
                         "Conservala in un luogo sicuro: non può essere recuperata.",
-                        { vaultSecret: true }
+                        { vaultSecret: true, signal: options.signal }
                     );
                     if (!confirmation || confirmation.normalize('NFC').trim() !== cleanPass) {
                         showToast("Le Master Password non coincidono.", "error");
@@ -422,8 +458,11 @@ async function ensureVaultKeyMaterialInternal(options = {}) {
 }
 
 export async function resetVault() {
+    if (vaultFrameClient.isChild()) await confirmFrameAction('permanent-delete', {scope: 'local-vault'});
+    const cleanupToken = vaultFrameClient.isChild() ? beginFrameCleanup('vault-reset') : null;
+    try {
     invalidatePendingUnlock();
-    _vaultKeyMaterial = null;
+    _vaultKeyMaterial = null; _frameFencePermit = null;
     _vaultAutoUnlock = false;
     _isSoftLocked = false;
     _clearSessionStorage();
@@ -444,6 +483,7 @@ export async function resetVault() {
     showToast("Accesso biometrico rimosso. La Vault richiederà la Master Password.", "info");
     setTimeout(() => window.location.reload(), 1500);
     return !syncFailed;
+    } finally {if (cleanupToken) finishFrameCleanup(cleanupToken);}
 }
 
 async function tryBiometricUnlock() {
@@ -561,19 +601,24 @@ export async function enableBiometricUnlock(pass) {
 export async function changeMasterPassword() {
     const generation = _sessionGeneration;
     const uid = auth.currentUser?.uid;
-    const assertCurrent = () => assertCurrentSession(uid, generation);
+    const lifetime = frameMediaLifetime();
+    const assertCurrent = () => {assertCurrentSession(uid, generation); if (!lifetime.valid()) throw Error('FRAME_CONFIRMATION_REQUIRED');};
+    try {
     if (!uid) throw new Error('Utente non autenticato.');
-    const oldPassword = await showInputModal('CAMBIA MASTER PASSWORD', '', 'Master Password attuale', 'Verifica la chiave attuale della Vault.', { vaultSecret: true });
+    const oldPassword = await showInputModal('CAMBIA MASTER PASSWORD', '', 'Master Password attuale', 'Verifica la chiave attuale della Vault.', { vaultSecret: true, signal: lifetime.signal });
+    assertCurrent();
     if (!oldPassword) return false;
     const cleanOld = oldPassword.normalize('NFC').trim();
     if (await verifyMasterPassword(cleanOld, uid) !== true) throw new Error('Master Password attuale errata.');
 
-    const newPassword = await showInputModal('NUOVA MASTER PASSWORD', '', 'Nuova Master Password', passwordPolicyMessage('master'), { vaultSecret: true, suggestPassword: true, length: 24, passwordType: 'master' });
+    const newPassword = await showInputModal('NUOVA MASTER PASSWORD', '', 'Nuova Master Password', passwordPolicyMessage('master'), { vaultSecret: true, suggestPassword: true, length: 24, passwordType: 'master', signal: lifetime.signal });
+    assertCurrent();
     if (!newPassword) return false;
     const cleanNew = newPassword.normalize('NFC').trim();
     if (!evaluatePassword(cleanNew, 'master').valid) throw new Error(firstPasswordPolicyError(cleanNew, 'master'));
     if (cleanNew === cleanOld) throw new Error('La nuova Master Password deve essere diversa dalla precedente.');
-    const confirmation = await showInputModal('CONFERMA MASTER PASSWORD', '', 'Reinserisci la nuova Master Password', 'Il cambio non modifica la password di login.', { vaultSecret: true });
+    const confirmation = await showInputModal('CONFERMA MASTER PASSWORD', '', 'Reinserisci la nuova Master Password', 'Il cambio non modifica la password di login.', { vaultSecret: true, signal: lifetime.signal });
+    assertCurrent();
     if (!confirmation || confirmation.normalize('NFC').trim() !== cleanNew) throw new Error('Le nuove Master Password non coincidono.');
 
     const envelope = await loadVaultEnvelope(uid);
@@ -583,26 +628,32 @@ export async function changeMasterPassword() {
     const newEnvelope = await wrapVaultKey(vaultKey, cleanNew, envelope?.keyOrigin || 'random-with-legacy-fallback');
     const verifier = await createVaultVerifier(VERIFIER_MARKER, cleanNew);
     assertCurrent();
+    await confirmFrameAction('master-change', {scope: 'vault', uid});
+    assertCurrent();
     await setDoc(doc(db, 'users', uid, 'settings', 'security'), { verifier, vaultKeyEnvelope: newEnvelope }, { merge: true });
     // Copie cifrate aggiornate anche dopo logout.
     localStorage.setItem(getVerifierStorageKey(uid), JSON.stringify(verifier));
     localStorage.setItem(getEnvelopeStorageKey(uid), JSON.stringify(newEnvelope));
     localStorage.removeItem(getStorageKey(uid));
     assertCurrent();
+    if (vaultFrameClient.isChild()) {clearSession(); return true;}
     _vaultKeyMaterial = vaultKey;
     await saveVaultSession(vaultKey, uid);
     assertCurrent();
     showToast('Master Password modificata. Riattiva la biometria su questo dispositivo.', 'success');
     return true;
+    } finally {lifetime.dispose();}
 }
 
 window.addEventListener('private-auth-blocked', () => clearSession());
-window.addEventListener('pagehide', () => clearSession());
+window.addEventListener('pagehide', () => clearSession({notifyFrame: false}));
 globalThis.document?.addEventListener('freeze', () => clearSession());
+vaultFrameClient.onClear(() => clearSession({notifyFrame: false}));
 
-export function clearSession() {
+export function clearSession({notifyFrame = true} = {}) {
+    if (notifyFrame && vaultFrameClient.isChild()) vaultFrameClient.lock();
     invalidatePendingUnlock();
-    _vaultKeyMaterial = null;
+    _vaultKeyMaterial = null; _frameFencePermit = null;
     _vaultAutoUnlock = false;
     _isSoftLocked = false;
     _clearSessionStorage();

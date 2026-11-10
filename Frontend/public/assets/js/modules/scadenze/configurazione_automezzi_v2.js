@@ -1,4 +1,5 @@
-import {db} from '../../firebase-config.js?v=1.2.267';
+import {confirmFrameAction} from '../core/vault-frame-client.js';
+import {db} from '../../firebase-config.js?v=1.2.268';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {clearElement, createElement, setChildren} from '../../dom-utils.js';
 import {showConfirmModal, showToast} from '../../ui-core-v129.js';
@@ -329,6 +330,19 @@ async function save() {
         next.deadlineTypes[ruleIndex] = withDeadlineRuleIdentity(next.deadlineTypes[ruleIndex], {
             id: nextId('rule'), domain: currentDomain
         });
+        const savedRule = currentRule(), savedUid = currentUser.uid, savedSource = sourceDefinition.settingId;
+        const previousObjects = usesVehicleCards()
+            ? deadlineRuleVehicleCards(savedRule, vehicleProjectionConfig(), composerDefaults())
+            : normalizeGenericParameters(savedRule, currentConfig);
+        const removed = [];
+        for (const item of previousObjects) {
+            const replacement = workingObjects.find(candidate => candidate.id === item.id);
+            if (!replacement) removed.push({id: item.id});
+            else for (const reference of item.references || []) if (!(replacement.references || []).some(candidate => candidate.id === reference.id))
+                removed.push({id: item.id, referenceId: reference.id});
+        }
+        if (removed.length) await confirmFrameAction('permanent-delete', {source: savedSource, ruleId: savedRule.id, removed});
+        if (currentUser?.uid !== savedUid || currentRule() !== savedRule || sourceDefinition.settingId !== savedSource) throw Error('FRAME_TARGET_CHANGED');
         await setDoc(doc(db, 'users', currentUser.uid, 'settings', sourceDefinition.settingId),
             {deadlineTypes: next.deadlineTypes}, {merge: true});
         currentConfig = next;

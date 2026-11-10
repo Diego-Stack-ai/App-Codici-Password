@@ -1,3 +1,4 @@
+import {navigateDocument} from './frame-navigation.js';
 
 import { t } from './translations.js';
 
@@ -36,7 +37,7 @@ function initGlobalDelegation() {
                     // Sanitizzazione: blocca javascript:, vbscript:, data: e schemi non-HTTP
                     const safePattern = /^(https?:\/\/|\/(?!\/)|[a-zA-Z0-9_\-./]+\.html)/;
                     if (safePattern.test(href) && !/^javascript:/i.test(href)) {
-                        window.location.href = href;
+                        navigateDocument(href);
                     }
                 }
                 break;

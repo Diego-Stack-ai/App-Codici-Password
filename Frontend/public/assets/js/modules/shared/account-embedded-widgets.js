@@ -1,3 +1,4 @@
+import {confirmFrameAction} from '../core/vault-frame-client.js';
 import {createElement, setChildren, clearElement} from '../../dom-utils.js';
 import {t} from '../../translations.js';
 import {showToast} from '../../ui-core-v129.js';
@@ -175,6 +176,9 @@ async function openEditor(widget, context, refresh) {
                 return;
             }
             const draftFields = rows.map((row, order) => ({...row.getValue(), order}));
+            const removedFields = (widget?.fields || []).filter(field => !draftFields.some(candidate => candidate.id === field.id)).map(field => field.id);
+            if (removedFields.length) await confirmFrameAction('permanent-delete', {widgetId: widget.id, revision: widget.revision, fields: removedFields});
+            if (!context.active() || closed) return;
             let profileId = widget?.profileId;
             if (!widget) {
                 const profile = await createWidgetProfile({

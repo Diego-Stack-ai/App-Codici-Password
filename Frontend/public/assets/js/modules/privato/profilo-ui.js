@@ -1,4 +1,4 @@
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.267';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.268';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';

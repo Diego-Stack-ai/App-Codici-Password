@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {getEventListeners} from 'node:events';
@@ -31,7 +32,7 @@ async function fixture(company, overrides = {}) {
     }));
     const views = [], writes = [], callables = [], toasts = [], navigations = [], confirmations = [];
     const window = {location: {search: company ? '?id=company-fixture' : '', pathname: '/fixture.html'}, history: {replaceState() {}}};
-    const context = vm.createContext({readErrorMessage, archiveRecipients, archiveConfirmMessage,
+    const context = vm.createContext(withStandaloneFrame({readErrorMessage, archiveRecipients, archiveConfirmMessage,
         accountSortMode, compareAccounts, nextAccountSortMode,
         ACCOUNT_MODE_VIEWS, accountMatchesModeView, normalizeAccountModeView, summarizeAccountModes,
         window, document: {getElementById: id => elements[id]}, URLSearchParams, AbortController, DOMException,
@@ -69,7 +70,7 @@ async function fixture(company, overrides = {}) {
         updateDoc: async (...args) => { writes.push(args); }, deleteDoc: async (...args) => { writes.push(args); },
         writeBatch: () => ({delete: (...args) => writes.push(args), update: (...args) => writes.push(args), commit: async () => {}}),
         ...overrides
-    });
+    }));
     const name = company ? 'azienda/account_azienda' : 'privato/account_privati';
     const source = await readFile(new URL(`../Frontend/public/assets/js/modules/${name}.js`, import.meta.url), 'utf8');
     vm.runInContext(source.replace(/^import[\s\S]*?;\r?$/gm, '').replace(/^export /gm, ''), context);

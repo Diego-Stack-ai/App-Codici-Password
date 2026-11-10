@@ -1,9 +1,10 @@
+import {confirmFrameAction} from '../core/vault-frame-client.js';
 /**
  * Gestione allegati del dettaglio Account privato.
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.267';
+import { db, storage } from '../../firebase-config.js?v=1.2.268';
 import {decideAttachmentContent} from '../shared/attachment-content-policy.mjs';
 import { doc, collection, addDoc, setDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
@@ -429,6 +430,8 @@ async function deleteAttachment(attachment, mount = mounted) {
     if (!mount.active() || !confirmed) return;
 
     try {
+        await confirmFrameAction('permanent-delete', {ownerId, accountId, id});
+        if (!mount.active()) return;
         const storagePaths = attachment?.encryption?.chunked === true && Array.isArray(attachment?.chunks)
             ? attachment.chunks.map(chunk => chunk.storagePath).filter(Boolean)
             : [storagePath].filter(Boolean);

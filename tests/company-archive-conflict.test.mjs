@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -33,7 +34,7 @@ const {inviteIdForGuest, nextSharingCycle, sharingCycleOf} =
 function fixture({revision = 4, updatedAt = '2026-01-01T00:00:00.000Z', isArchived = false, confirm = true} = {}) {
     const writes = [], toasts = [], errors = [], transactions = [];
     const stored = {isArchived, revision, updatedAt};
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         auth: {currentUser: {uid: 'A'}}, db: {}, functions: {},
         inviteIdForGuest, nextSharingCycle, sharingCycleOf,
         doc: (_db, ...path) => path.join('/'),
@@ -59,7 +60,7 @@ function fixture({revision = 4, updatedAt = '2026-01-01T00:00:00.000Z', isArchiv
         window: {location: {href: '', pathname: '/form_account_azienda.html', search: ''}},
         history: {back() {}}, sessionStorage: {getItem: () => null}, URLSearchParams,
         setTimeout: () => 0
-    });
+    }));
     for (const source of [model, service, formSave]) vm.runInContext(source, context);
     return {context, writes, toasts, errors, transactions,
         close: () => context.deleteAccount({

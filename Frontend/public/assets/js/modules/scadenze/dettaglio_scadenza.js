@@ -1,10 +1,11 @@
+import {confirmFrameAction} from '../core/vault-frame-client.js';
 /**
  * DETTAGLIO SCADENZA MODULE (V4.1)
  * Gestisce la visualizzazione del dettaglio di una scadenza.
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.267';
+import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.268';
 import { deleteDoc, doc, serverTimestamp, updateDoc, runTransaction, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteObject, getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
@@ -30,6 +31,7 @@ import {
 let mountedDeadline = null;
 
 async function deleteScadenza(userId, scadenzaId, sourceRef, attachments, active) {
+    await confirmFrameAction('permanent-delete', {userId, scadenzaId});
     if (!active()) return;
     const deadlineRef = doc(db, 'users', userId, 'scadenze', scadenzaId);
     const attachmentPaths = (Array.isArray(attachments) ? attachments : [])

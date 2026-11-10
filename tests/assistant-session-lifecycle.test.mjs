@@ -17,7 +17,7 @@ function fixture({keyPending = null, decryptPending = null, confirmation = true}
     const addEventListener = (type, cb) => {if (!listeners.has(type)) listeners.set(type, new Set()); listeners.get(type).add(cb);};
     const removeEventListener = (type, cb) => listeners.get(type)?.delete(cb);
     const window = {addEventListener, removeEventListener, setTimeout() {}};
-    const context = vm.createContext({window, addEventListener, removeEventListener, auth,
+    const context = vm.createContext({vaultFrameClient: {isChild: () => false}, window, addEventListener, removeEventListener, auth,
         onAuthStateChanged: (_auth, cb) => {authListener = cb; return () => {authListener = () => {};};},
         document: {querySelector: () => true, getElementById: () => trigger},
         location: {pathname: '/home_page.html'}, navigator: {onLine: true}, console,

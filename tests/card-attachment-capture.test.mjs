@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
-const source = (await readFile(new URL('../Frontend/public/assets/js/modules/shared/card-attachment-capture.js', import.meta.url), 'utf8'))
+const source = "const vaultFrameClient={isChild:()=>false};const frameMediaLifetime=()=>({signal:undefined,valid:()=>true,dispose(){}});\n" + (await readFile(new URL('../Frontend/public/assets/js/modules/shared/card-attachment-capture.js', import.meta.url), 'utf8'))
+    .replace(/^import .*;\r?\n/gm, '')
     .replace("await import('./card-camera-capture.js')", "await Promise.reject(new Error('CAMERA_NOT_SUPPORTED'))");
 const module = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 const {captureCardAttachment, consumeAttachmentInitialMode, describeCardCameraError} = module;

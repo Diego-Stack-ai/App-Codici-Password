@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -45,10 +46,10 @@ test('T-26: rimuovere una riga da `allegati` toglie il riferimento e lascia i by
     assert.equal(maSave.includes('deleteObject'), false, 'ma_save non cancella mai un oggetto allegato');
     assert.equal(maSave.includes('deleteDoc'), false, 'nessun hard-delete diretto Azienda');
     assert.match(maSave, /await deleteCompany\(/, 'eliminazione Azienda passa dal servizio protetto');
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         document: {getElementById: () => null}, console: {warn() {}}, t: value => value,
         createElement: (tag, props = {}) => ({tag, ...props}), setChildren() {}, clearElement() {}
-    });
+    }));
     vm.runInContext(`${maState}\n${maAttachments}\nglobalThis.state = state;\nglobalThis.removeAttachment = removeAttachment;`,
         context);
     const objectPath = 'users/owner/aziende_allegati/1700000000000_a.pdf';
@@ -81,12 +82,12 @@ test('T-26: rimuovere una riga da `attachments` di una Scadenza lascia i byte', 
         appendChild(child) { this.children.push(child); },
         addEventListener(type, handler) { this[type] = handler; }});
     const list = node('div');
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         document: {body: {style: {}}, getElementById: id => (id === 'attachments-list' ? list : null)},
         createElement: (tag, props = {}, children = []) => { const element = node(tag, props, children); created.push(element); return element; },
         clearElement: element => { element.children = []; },
         showConfirmModal: async () => true, t: value => value, console: {warn() {}}
-    });
+    }));
     vm.runInContext(`${deadlineController}\nglobalThis.createDeadlineAttachmentController = createDeadlineAttachmentController;`, context);
     const controller = context.createDeadlineAttachmentController();
     const objectPath = 'users/owner/scadenze/deadline-1/1700000000000_a.pdf';
@@ -114,7 +115,7 @@ function deleteFixture({linked = false} = {}) {
         {name: 'A.pdf', storagePath: 'users/owner/scadenze/deadline-1/a.pdf'}
     ]});
     states.set('users/owner', {documenti: [{id: 'doc-1', expiryReference: {deadlineId: 'deadline-1'}}]});
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         console: {warn() {}}, deleteDoc: async path => { calls.push(['deleteDoc', path]); states.delete(path); },
         doc: (_db, ...path) => path.join('/'), db: {},
         runTransaction: async (_db, callback) => callback({
@@ -124,7 +125,7 @@ function deleteFixture({linked = false} = {}) {
         }),
         storage: {}, ref: (_storage, path) => path,
         deleteObject: async path => { calls.push(['deleteObject', path]); }
-    });
+    }));
     const source = sliceFunction(deadlineDetail, 'deleteScadenza');
     vm.runInContext(`${source}\nglobalThis.deleteScadenza = deleteScadenza;`, context);
     return {context, calls, writes, states,

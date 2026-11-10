@@ -1,5 +1,91 @@
 # Incarico corrente
 
+<a id="cornice-b3-consegna-workflow-2026-11-10"></a>
+
+## B3 — consegna del workflow, arresto dopo il singolo passo
+
+Diego trasmette il [GO DIAG di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6758777089) sul commit `2d53604ee0662e49389318c31288ef58cc999d82` e ordina di procedere un passo alla volta. Passo corrente: consegnare il file completo del workflow da caricare personalmente sul ramo della PR #278, con hash verificato. Dopo la consegna Codex si ferma e attende approvazione; nessuna applicazione del workflow, merge, dispatch o operazione Firebase da questo passo.
+
+Decisioni di Diego: durata del canary **7 giorni**, distinta dalla conservazione DIAG; singleton creato da lui in console seguendo istruzioni successive; claim tramite script una tantum da preparare in un passo successivo e far rivedere a Claude prima di eseguirlo. Il Timestamp UTC effettivo sarà concordato vicino all'attivazione, senza far partire oggi la finestra. Nessuno script amministrativo eseguito o singleton creato ora. [Procedura e gate](../regole/RILASCIO.md#cornice-b3-piano-2026-11-10). I checkpoint seguenti conservano lo storico; prevale questo ordine limitato.
+
+<a id="cornice-diag-incarico-2026-11-10"></a>
+
+## DIAG prima di B3 — ordine di Diego, candidata da rivedere
+
+Diego ordina il registro locale e la sezione Cornice sulla PR #278: default spento, allowlist chiusa e soli cinque campi non identificanti, 200 eventi/7 giorni, cancellazione su logout/cambio account, copia e cancellazione senza rete; contratti SICUREZZA/INTERFACCIA e rapporto per ogni FAIL C1. Sono autorizzati implementazione, test locali, documenti esistenti, commit/push sul medesimo ramo e avviso **PASSO DIAG COMMITTATO**, poi revisione Claude. Nessuna operazione Firebase, workflow, merge, provisioning o deploy.
+
+Il [GO di Claude sul piano B3](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6757843877), commit c79770f6, resta approvazione del solo piano; DIAG cambia i byte di Hosting e deve ricevere il proprio GO prima della prosecuzione B3 e della revisione dello SHA finale. Canale amministrativo, applicazione CI, durata/scadenza e approvazioni personali non sono decisi da questo passo. Non assumere 7 giorni di canary dalla proposta del revisore; i 7 giorni del journal sono un limite diverso.
+
+Candidata sempre 1.2.268, produzione attestata 1.2.267. [Contratto dati](../regole/SICUREZZA.md#cornice-diag-sicurezza-2026-11-10), [UI e costo statico](../regole/INTERFACCIA.md#cornice-diag-ui-2026-11-10), [evidenze e lista C1](../evidenze/COLLAUDI.md#cornice-diag-verifiche-2026-11-10). La matrice aggiunge D19 DIAG: 19 casi/quattro ambienti, tutti NE. Nuova grafica e altri rilievi separati, 34 MD invariati; i checkpoint seguenti sono cronologia.
+
+<a id="cornice-b3-preparazione-2026-11-10"></a>
+
+## Cornice B3 — preparazione soltanto, in attesa di revisione
+
+Diego trasmette il [GO D11 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6757406980) su `3820afe6be11fbdb1c1c724592232c5ad36e8503` e ordina: «prepara B3 e pubblica l’avviso; non eseguire nulla sul cloud prima della revisione di Claude e della mia approvazione». CI D11 #1049 verde, deploy saltato. Il mandato abilita solo pacchetto locale, test, documenti esistenti, commit/push sul ramo codex/vault-frame-lab-20261109 e avviso PASSO B3 COMMITTATO sulla #278. Non abilita merge, modifica del workflow attivo, workflow_dispatch, approvazioni production, letture/scritture Firebase o attivazione.
+
+Il [piano canonico B3](../regole/RILASCIO.md#cornice-b3-piano-2026-11-10) propone scope CI fisso vault-frame-rules, solo Firestore Rules, poi distinta run Hosting sul medesimo SHA finale approvato. Un pianificatore non eseguibile genera il file completo della proposta in .codex-tmp; verificatore/test ne preparano il supporto, senza applicare la modifica al workflow. Provisioning privato dopo i deploy verificati: un solo UID confermato di Diego, singleton disabilitato, conservazione/verifica degli altri claim in finestra a scrittore unico, attivazione con precondizioni come ultimo passo. UID, canale amministrativo e scadenza UTC sono ancora da verificare/approvare, non scelti o scritti da B3. Nessuna nuova Function necessaria.
+
+A fine passo: avviso con SHA completo/file/test/limiti e attesa del GO B3 di Claude sul pacchetto. Applicazione CI e successivo candidato finale richiedono ordine specifico, hash uguale alla proposta, nuovi check/revisione e approvazione personale prima di merge o Firebase. Produzione 1.2.267; candidata 1.2.268, permesso reale non predisposto da questo lavoro; C1 interamente NE, nuova grafica separata e MD fermi a 34. I checkpoint D11 e precedenti conservano la cronologia; prevale questo solo incarico preparatorio.
+
+<a id="cornice-d11-2026-11-10"></a>
+
+## Cornice D11 — notifiche corrette nella candidata, revisione richiesta
+
+Diego trasmette il [GO B2 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753602102) su `70180aaffba629d112d235d93dddd0344f7f2c75`, CI #1048 verde e deploy saltato, e autorizza la correzione D11 più le integrazioni della lista. Codex rimane unico esecutore sulla PR #278. Il nuovo intento FCM aggiorna soltanto il figlio della cornice pronta, dopo validazione e ammissione fresca; ACK correlato entro 1500 ms, altrimenti ripiego openWindow. Nessun nuovo sblocco, chiave o privilegio viene trasmesso dal worker. Finestra visibile/focalizzata preferita e percorso ordinario conservato in assenza di cornice.
+
+La [lista C1](../evidenze/COLLAUDI.md#cornice-b2-lista-2026-11-09) aggiunge safe area verticale/orizzontale e version skew, con priorità PWA iPhone e Chrome desktop, poi Safari e Android. Tutti i 18 casi rimangono NE sui quattro ambienti; il version skew richiede un rilascio successivo. [Prove e limiti D11](../evidenze/COLLAUDI.md#cornice-d11-verifiche-2026-11-10): il fallback nativo di una PWA e l'aggiornamento effettivo del worker FCM sono da collaudare, distinti dalla continuità provata nel percorso ACK.
+
+Il passo corrente termina con commit/push e avviso PASSO D11 COMMITTATO sulla #278, poi attende il GO di Claude sul nuovo SHA. **Nessun B3, merge, provisioning, UID/claim, modifica Rules/Functions/workflow o deploy** da questa correzione. Produzione 1.2.267, candidata ancora 1.2.268. Le sezioni B2/B1 sotto sono checkpoint storici superati dai rispettivi GO, non richieste di ripetere quei passi.
+
+<a id="cornice-b2-2026-11-09"></a>
+
+## Cornice B2 — lista fisica, in revisione
+
+[GO B1 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753223333) su `0d861eb093626b9e0828848fef80c83c1b0e3aee`, CI #1047 verde (3438 PASS/0 FAIL/10 skip), sblocca soltanto B2. Preparata la [lista fisica e matrice C1](../evidenze/COLLAUDI.md#cornice-b2-lista-2026-11-09), quattro ambienti e sedici casi, tutti NE. Comprende rinnovo token del pilota dopo provisioning approvato, dieci pagine, timeout scelto/background, Auth/PRF/App Check, media, push, cronologia/link/ricarica, allegati/azioni sensibili, logout da altra scheda e criteri di arresto.
+
+Rilevato nella lettura per B2 un gap concreto: il worker push ricarica ancora il WindowClient invece di inoltrare un intento alla cornice pronta. Registrato come aperto, da correggere e rivedere prima della proposta B3; non viene rinviata al telefono la scoperta né attribuito un PASS. B2 modifica soltanto documenti e attende il proprio GO. Nessun B3, merge, provisioning, nuovo UID/claim, deploy o test fisico; produzione 1.2.267. Le sezioni B1 seguenti sono cronologia del candidato approvato, non un NO-GO ancora corrente su B1.
+
+<a id="cornice-b1-2026-11-09"></a>
+
+## Cornice B1 — permesso server e intestazioni, candidata in revisione
+
+Il [GO A2 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6751236506) è verificato sul commit `455b41fc4f3bc86e0b9f9df48ccb9f5623309060`. La CI valida è [#1044](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42695875669), conclusa con successo sullo stesso SHA; il numero #1043 nel commento del revisore è un riferimento impreciso, non una run A2 distinta. Claude dichiara inoltre rieseguiti 116 test della cornice. Diego trasmette il GO e ordina B1 sulla PR #278.
+
+Perimetro B1: singleton server con coorte di un solo UID, senza UID personale nel repository e senza scrittura client; listener di revoca e letture server nei punti sensibili; Rules/test con emulatori; header selettivi e verifica HTTP/browser ufficiale. Si recepiscono le note A2 su uscite same-origin, fallback senza loop e anchor per route. La verifica fisica della cronologia e dei link nativi rimane in B2/C1. La candidata resta 1.2.268; produzione 1.2.267.
+
+Sono autorizzati codice, test, contratti, commit/push e avviso PASSO B1 COMMITTATO sulla stessa PR. Nessun documento o flag reale viene scritto in produzione in B1: l'assegnazione privata dell'UID, il percorso CI ristretto per le Rules e il rilascio Hosting saranno preparati in B3 dopo GO B1/B2 e approvazione personale di Diego. Non occorre una nuova Function. Nessuna modifica ai workflow, Storage Rules, credenziali o dati Vault. MD fermi a 34, solo Codex esecutore. Nessuna attivazione produttiva discende dal valore compilato della candidata: senza singleton server valido e Rules distribuite la cornice è negata.
+
+
+I checkpoint A2 seguenti precedono il GO del revisore: le loro indicazioni «soltanto A2» e «B1 vietata» sono storiche. Prevale il mandato B1 sopra, senza anticipare B2 o pubblicazione.
+
+Revisione B1: Claude ha dato [NO-GO su e7c7c8d9](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6752494603), confermato su 13fa2d45. La CI #1046 ha chiuso il difetto del verificatore redirect; rimaneva il costo della verifica per ogni utente/pagina. Il seguito riusa soltanto il token Auth già letto per saltare il routing quando manca la hint server del partecipante e nega subito offline; la hint non concede ammissione. B3 dovrà includere anche provisioning privato del solo claim Auth di Diego, preservando gli altri claim e con approvazione personale; nessuna operazione cloud anticipata. B1 rimane al gate: nuova CI e nuovo GO Claude sul commit corretto prima di B2.
+
+<a id="cornice-a2-preparazione-2026-11-09"></a>
+
+## Cornice A2 candidata in revisione — 09/11/2026
+
+Claude ha dato il [GO ad A1](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6747756706) sul commit `4f2bc0f812fa2f72c63a409d1aa5d3a120bcd136`. È autorizzata soltanto A2: integrazione reale pubblicabile ma spenta per tutti. Il ramo della PR #278 prepara la candidata **1.2.268**; produzione ancora **1.2.267**, nessun merge, deploy o attivazione della cornice.
+
+Il candidato introduce app.html, broker/trasporto produttivi e raccordo al security manager canonico, distinzione fra pulizia del figlio e revoca globale, timer nel padre, protocollo e release vincolati, propagazione safe area e uscite top-level. L'ammissione è doppiamente negata: switch compilato false e adapter server che restituisce null. Nessun UID personale nel repository; nessuna modifica a Rules, Functions, workflow o intestazioni in A2. B1 resta vietata fino al GO A2 sulla PR.
+
+**A2 implementata e verificata localmente per gruppi, in attesa del GO di Claude.** Raccordati i comandi sensibili censiti e le prove negative; regressioni e limiti sono nei [Collaudi](../evidenze/COLLAUDI.md#cornice-a2-preparazione-2026-11-09). La CI del nuovo SHA rimane una verifica distinta. Nessuna B1, merge o pubblicazione discende dai test locali: occorre il GO A2 sulla PR. Firebase/App Check, dispositivi fisici e comportamento dei permessi rimangono gate B1/B2/C1 distinti; nessuna prova sintetica diventa prova produttiva.
+
+<a id="cornice-a1-incarico-2026-11-09"></a>
+
+## Ordine corrente — cornice Vault A1–C2, 09/11/2026
+
+Fonte: nuovo ordine diretto di Diego dopo l'allineamento della 1.2.267. Obiettivo: niente sblocco Vault a ogni cambio pagina, chiavi solo RAM, cornice attiva **solo per Diego** al termine dei gate. Nuova grafica e altri rilievi di sicurezza sono separati. La produzione attuale resta 1.2.267, senza cornice.
+
+**Passo A1 originario, superato dagli avanzamenti sopra:** aggiornare VAULT, INTERFACCIA e DECISIONI con allowlist delle pagine, matrice selettiva degli header, camera/microfono/PRF, timer utente, background, history/direct link/push/download/stampa/logout/ricarica, limite same-origin/XSS, arresto e rollback. La preferenza background è confermata da Diego: stessa durata dell'inattività. Aggiornare soltanto gli altri documenti esistenti necessari a stato/roadmap/evidenze. Ramo `codex/vault-frame-lab-20261109`, PR #278; riallineamento a master della 1.2.267 conservando il laboratorio. Nessun A2 o cambiamento runtime nuovo in questo passo.
+
+A2 seguirà soltanto il GO di A1: bridge reale nel boundary canonico e app.html pubblicabile ma spenti per default, ripiego invariato, test negativi e rispetto della preferenza. B1 seguirà il GO di A2: ammissione server solo UID Diego, Rules/test emulatore anonimo/estraneo/revocato e intestazioni effettive per ogni route. B2 prepara la lista per Chrome desktop, Android, Safari iPhone e PWA (dieci pagine, timer, background, logout, camera, voce, push, back/reload e download). B3 prepara merge e rilascio CI dopo i GO: Rules/Function solo se richieste da B1, poi Hosting, con approvazione personale di Diego e verifica manifest/hash. C1 raccoglie le prove fisiche eseguite da Diego, corregge solo gli esiti con lo stesso ciclo; C2 registra la chiusura in COLLAUDI/STATO e sulla PR. La matrice fisica completa è ora in C1 dopo il canary individuale B3, come nel nuovo ordine: la vecchia sequenza pre-attivazione è superata soltanto per Diego; nessuna estensione ad altri utenti o falsa attestazione dei test. Non dichiarare «CORNICE CHIUSA» prima di C2.
+
+**Canale vincolante:** a ogni passo committato, commento sulla PR #278 con prefisso e campi prescritti nella [decisione](DECISIONI.md#cornice-ordine-2026-11-09). Claude è consultivo readonly e risponde sulla PR «REVISIONE CLAUDE – GO» oppure «NO-GO», con motivi; non passare al passo seguente senza GO sul candidato corrente. Nessun agente si attribuisce o pubblica al posto di Claude il GO. Una nuova PR, se necessaria, va collegata subito sulla #278. Merge/deploy anche dopo GO richiedono l'approvazione personale di Diego; le deleghe puntuali dei rilasci precedenti non si estendono a questo incarico. Solo CI, niente deploy dal PC; nessun nuovo MD oltre i 34, nessuna migrazione di dati Vault.
+
+[Contratto Vault](../regole/VAULT.md#cornice-a1-2026-11-09), [contratto UI](../regole/INTERFACCIA.md#cornice-a1-ui-2026-11-09), [evidenze A1](../evidenze/COLLAUDI.md#cornice-a1-contratto-2026-11-09). Le sezioni seguenti conservano gli incarichi precedenti, non autorizzano di saltare i gate del nuovo ordine.
+
+
 <a id="ui-overlap-followup-2026-11-09"></a>
 
 ## Segnalazioni visive residue dopo la 1.2.266 — 09/11/2026
@@ -19,6 +105,20 @@ Si prepara una PR separata con test e revisione consultiva di Claude sul diff pr
 Diego ordina direttamente «Approva e distribuisci» per la run Hosting #1030 già pronta, sorgente `193f4768`. La delega autorizza Codex a inviare questo singolo clic dall'interfaccia GitHub e sostituisce la precedente riserva personale soltanto per questa run. Non autorizza approvazioni future, modifiche alle protezioni, altre distribuzioni o attivazione della cornice. Commento e risposta API registrano la delega puntuale.
 
 La 1.2.266 è distribuita e verificata: manifest e 341 hash identici al sorgente; scope solo hosting, backend saltato. Sono autorizzati aggiornamento e integrazione delle sole ricevute nei documenti esistenti tramite PR e relativi check, con revisione in sola lettura di Claude prima del merge. Nessun nuovo Hosting serve per i documenti. Il controllo fisico iPhone resta rinviato e non eseguito; la cornice è un laboratorio distinto, PR #278 in bozza, non una correzione già online. [Ricevuta e limiti](../evidenze/COLLAUDI.md#css-profilo-pubblicazione-1-2-266).
+
+<a id="cornice-laboratorio-2026-11-09"></a>
+
+## Priorità alla cornice persistente — 09/11/2026
+
+Diego chiede «Partiamo dalla cornice» per evitare lo sblocco a ogni pagina. È avviata la preparazione isolata, disabilitata e sintetica in `codex/vault-frame-lab-20261109`, base `193f4768`: una cornice con iframe locale, policy e prove di sessione, senza collegare la Vault reale. Non è l'attivazione del canary di Diego. Il precedente ramo `codex/vault-frame-prototype`, privo di implementazione distinta, resta conservato; il laboratorio preesistente `persistent-vault-shell` è un'altra architettura e non viene adottato implicitamente.
+
+Il mandato originario dell'Incarico 2 conserva tutti i gate prima dell'attivazione: flag verificato lato server e non scrivibile dall'utente; raccordo al security manager; revoca in entrambi i documenti, timer e nuova conferma per le operazioni sensibili; header mirati; Auth/App Check, PRF e scanner; parità e prove fisiche Chrome desktop/Android, Safari iPhone e PWA. La nota del revisore accetta S1 chiuso in produzione; la distinta prova reale fra due identità resta non attestata come riuscita. Preparare il laboratorio non trasforma questi limiti in PASS. [Piano e contratto](../regole/VAULT.md#cornice-lab-2026-11-09), [prove](../evidenze/COLLAUDI.md#cornice-lab-2026-11-09).
+
+La chiave serializzata consegnata alle pagine legacy richiede una copia transitoria nella RAM del figlio: la cornice mantiene la continuità, non può essere descritta come l'unico documento che abbia mai il materiale. Nessuna persistenza è ammessa. Solo root scrive, revisori in sola lettura; nessuna modifica a pagine pubblicate, workflow, Rules, Functions, claim, utenti o dati. La consegna passa da PR separata e contraddittorio prima di qualsiasi merge; nessun rilascio o attivazione deriva dai test del laboratorio.
+
+## Fase preparatoria del rilascio UI distinto — 09/11/2026
+
+Fotografia antecedente alla delega e alla pubblicazione attestata sopra: Diego ordina «pubblica» per la 1.2.266 e rinvia il controllo visivo fisico, che resta non eseguito. Dopo check verdi sull'head `d648a5f7` e revisione statica finale valida di Claude, la PR #277 è unita in `193f4768ff67f047a0701a3c6fbc581308e04ded`, conservando i rami. Run Hosting #1030 avviata sul medesimo SHA, validazione completa riuscita, in attesa dell'approvazione personale di Diego. Non è ancora una pubblicazione verificata. Nessun deploy dal PC; scope solo hosting, master fermo al sorgente della run. Il lavoro cornice resta su un ramo distinto.
 
 ## Integrazioni richieste dal riesame CSS/Profilo — 09/11/2026
 

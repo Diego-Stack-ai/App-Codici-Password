@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -53,7 +54,7 @@ async function privateFixture({eligible = true, pilotEnabled = true, mutateNoteD
         },
         isAccountSaveAllowed, assertAccountSaveAllowed, DECRYPT_FAILURE_MESSAGE
     };
-    vm.createContext(sandbox);
+    vm.createContext(withStandaloneFrame(sandbox));
     vm.runInContext(source, sandbox);
     return {counts, messages, navigations, encryptedValues, transactionWrites, button, nodes, sandbox};
 }
@@ -77,7 +78,7 @@ async function companyFixture() {
         doc: () => ({id: 'record'}), collection: () => ({id: 'record'}), t: key => key, console: {error() {}},
         isAccountSaveAllowed, assertAccountSaveAllowed, DECRYPT_FAILURE_MESSAGE
     };
-    vm.createContext(sandbox);
+    vm.createContext(withStandaloneFrame(sandbox));
     vm.runInContext(source, sandbox);
     return {counts, messages, button, sandbox};
 }

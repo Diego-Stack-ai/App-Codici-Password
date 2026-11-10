@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -50,7 +51,7 @@ function fixture({health = false, exporting = false, complete = false} = {}) {
         executeBackupRestore: async (...args) => { executions.push(args); throw Object.assign(new Error('synthetic failure'), {progress: {mayHaveApplied: true}}); },
         releaseBackupRestore: value => { value.recoveryKey = ''; value.records = []; },
     };
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         auth, AbortController, createElement, COMPLETE_RECOVERY_ENABLED: complete,
         t: key=>recoveryCatalogs.it[key]??testTranslate(key), tf: testTranslate,
         document: {body, getElementById: id => nodes.find(node => node.id === id && node.isConnected), get activeElement() { return activeElement; }},
@@ -63,7 +64,7 @@ function fixture({health = false, exporting = false, complete = false} = {}) {
         requestAnimationFrame: callback => callback(),
         setTimeout: callback => { const id = ++timerId; timers.set(id, callback); return id; }, clearTimeout: id => timers.delete(id),
         window: {location: {replace:target=>redirects.push(target),reload: () => { throw new Error('unexpected reload'); }}},
-    });
+    }));
     vm.runInContext(ui, context);
     if (exporting) vm.runInContext(source.slice(source.indexOf('function showRecoveryKeyOnce'), source.indexOf('async function setupSettingsProfileQr'))
         .replace("import('./backup-export-service.js')", 'loadExport()').replace("import('./complete-recovery-entry.js')",'loadCompleteExport()'), context);

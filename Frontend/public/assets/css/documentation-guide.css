@@ -51,7 +51,7 @@
     z-index: var(--z-modal);
     display: grid;
     place-items: center;
-    padding: max(var(--space-4), env(safe-area-inset-top)) max(var(--space-4), env(safe-area-inset-right)) max(var(--space-4), env(safe-area-inset-bottom)) max(var(--space-4), env(safe-area-inset-left));
+    padding: max(var(--space-4), var(--frame-safe-area-inset-top, env(safe-area-inset-top))) max(var(--space-4), var(--frame-safe-area-inset-right, env(safe-area-inset-right))) max(var(--space-4), var(--frame-safe-area-inset-bottom, env(safe-area-inset-bottom))) max(var(--space-4), var(--frame-safe-area-inset-left, env(safe-area-inset-left)));
     background: rgb(0 0 0 / 65%);
 }
 
@@ -168,9 +168,9 @@
 .documentation-walkthrough-panel {
     position: absolute;
     z-index: 1;
-    left: max(var(--space-3), env(safe-area-inset-left));
-    right: max(var(--space-3), env(safe-area-inset-right));
-    bottom: max(var(--space-3), env(safe-area-inset-bottom));
+    left: max(var(--space-3), var(--frame-safe-area-inset-left, env(safe-area-inset-left)));
+    right: max(var(--space-3), var(--frame-safe-area-inset-right, env(safe-area-inset-right)));
+    bottom: max(var(--space-3), var(--frame-safe-area-inset-bottom, env(safe-area-inset-bottom)));
     display: grid;
     gap: var(--space-2);
     max-width: 46rem;

@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -20,7 +21,7 @@ function fixture(route=''){
  const location={search:route,href:`https://app.test/scadenze.html${route}`};
  let replaced='';
  const history={replaceState(_state,_title,value){replaced=value;const parsed=new URL(value,location.href);location.href=parsed.href;location.search=parsed.search;}};
- const context=vm.createContext({Date:Clock,URL,URLSearchParams,auth,db:{},console,
+ const context=vm.createContext(withStandaloneFrame({Date:Clock,URL,URLSearchParams,auth,db:{},console,
   document:{...target,visibilityState:'visible',querySelector:s=>s==='#scadenze-list'?list:null,querySelectorAll:()=>[],
    getElementById:id=>id==='deadline-count'?count:id==='deadline-search'?search:null},
   window:{...target,location,history,privateAuthGate:{isReady:()=>ready}},
@@ -36,7 +37,7 @@ function fixture(route=''){
   doc:(_, ...parts)=>parts.join('/'),serverTimestamp:()=>({server:true}),
   updateDoc:async(...a)=>writes.push(['update',...a]),deleteDoc:async(...a)=>writes.push(['delete',...a]),
   showConfirmModal:async(...a)=>{confirmations.push(a);return true;},showToast(){},logError(){}
- });
+ }));
  vm.runInContext(source,context);
  const drain=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  return {context,data,auth,list,count,search,reads,writes,swipes,callbacks,timers,confirmations,

@@ -5,6 +5,7 @@ import {createServer} from 'node:http';
 import {mkdtemp, mkdir, readFile, rm, unlink, writeFile} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import {buildFrameHostingHeaders,effectiveHostingHeaders} from '../scripts/lib/hosting-frame-headers.mjs';
 import {
   buildReleaseManifest,
   hashPublicTree,
@@ -124,6 +125,7 @@ test('la verifica remota copre payload, redirect, rewrite, cache e CSP', async t
   t.after(() => rm(root, {recursive: true, force: true}));
   const manifest = await buildReleaseManifest({repoRoot: root, commit, sourceDirty: false});
   let servedCsp = fixtureCsp;
+  let redirectLocation = '/login.html';
   const payload = new Map();
   for (const asset of Object.keys(manifest.files)) {
     payload.set(asset, await readFile(path.join(publicRoot, asset.slice(1))));
@@ -138,7 +140,7 @@ test('la verifica remota copre payload, redirect, rewrite, cache e CSP', async t
     }
     if (pathname === '/login-v115.html') {
       response.statusCode = 302;
-      response.setHeader('Location', '/login.html');
+      response.setHeader('Location', redirectLocation);
       response.end();
       return;
     }
@@ -167,9 +169,41 @@ test('la verifica remota copre payload, redirect, rewrite, cache e CSP', async t
   const address = server.address();
   const baseUrl = `http://127.0.0.1:${address.port}`;
   await verifyRemote(baseUrl, manifest);
+  redirectLocation='https://foreign.invalid/login.html';
+  await assert.rejects(()=>verifyRemote(baseUrl,manifest),/redirect pubblico/);
+  redirectLocation='/login.html';
   servedCsp = `${fixtureCsp} script-src 'self' 'unsafe-eval';`;
   await assert.rejects(
     () => verifyRemote(baseUrl, manifest),
     /CSP pubblica non corrisponde/
   );
+});
+
+test('the release verifier rejects selective child header drift even with identical payload hashes',async t=>{
+ const {root,publicRoot}=await fixture();t.after(()=>rm(root,{recursive:true,force:true}));
+ const file=path.join(root,'firebase.json'),config=JSON.parse(await readFile(file,'utf8'));
+ config.hosting.headers[1].headers=[
+  {key:'Content-Security-Policy',value:fixtureCsp+" frame-src https://www.google.com;"},
+  {key:'Permissions-Policy',value:'camera=(self), microphone=(self)'},
+  {key:'X-Frame-Options',value:'DENY'}];
+ config.hosting.headers=buildFrameHostingHeaders(config.hosting);await writeFile(file,JSON.stringify(config));
+ await writeFile(path.join(publicRoot,'app.html'),'<title>Frame</title>');
+ const manifest=await buildReleaseManifest({repoRoot:root,commit,sourceDirty:false}),payload=new Map();
+ for(const asset of Object.keys(manifest.files))payload.set(asset,await readFile(path.join(publicRoot,asset.slice(1))));
+ assert.equal(manifest.hostingContract.routeSecurityHeaders['/home_page.html'].xFrameOptions,'SAMEORIGIN');
+ assert.equal(manifest.hostingContract.routeSecurityHeaders['/app.html'].xFrameOptions,'DENY');
+ assert.equal(manifest.hostingContract.routeSecurityHeaders['/login-v115.html'],undefined);
+ let drift='';const server=createServer((request,response)=>{
+  const pathname=new URL(request.url,'http://fixture.invalid').pathname;
+  const headers=effectiveHostingHeaders(config.hosting,pathname);
+  for(const [key,value]of Object.entries(headers))response.setHeader(key,value);
+  if(pathname==='/home_page.html'&&drift)response.setHeader(drift,drift==='x-frame-options'?'DENY':fixtureCsp);
+  if(pathname==='/release-manifest.json'){response.end(JSON.stringify(manifest));return;}
+  if(pathname==='/login-v115.html'){response.writeHead(302,{Location:'/login.html'});response.end();return;}
+  const bytes=payload.get(pathname==='/'?'/index.html':pathname==='/home'?'/home_page.html':pathname);
+  if(!bytes)response.statusCode=404;response.end(bytes||'missing');
+ });
+ await new Promise(done=>server.listen(0,'127.0.0.1',done));t.after(()=>new Promise(done=>server.close(done)));
+ const baseUrl='http://127.0.0.1:'+server.address().port;await verifyRemote(baseUrl,manifest);
+ for(const header of ['x-frame-options','content-security-policy']){drift=header;await assert.rejects(()=>verifyRemote(baseUrl,manifest),/Header pubblici non conformi/);}
 });

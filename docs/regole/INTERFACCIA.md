@@ -1,5 +1,107 @@
 # Interfaccia
 
+<a id="cornice-diag-ui-2026-11-10"></a>
+
+## DIAG — sezione Cornice in Impostazioni
+
+Sezione **Cornice** in Impostazioni → Diagnostica, indipendente dal controllo prestazioni. Mostra versione, cornice attiva, permesso valido osservato/scadenza, timeout locale in uso, worker notifiche pronto e ultimo motivo di blocco codificato. Il toggle **Registra eventi della cornice** governa soltanto la raccolta locale: non cambia coorte, flag server, ammissione, timeout o Vault. Stato e rapporto sono ricostruiti da campi chiusi, mai serializzando owner/worker/eccezioni.
+
+Il riepilogo del padre è passivo e disponibile soltanto al proprio Window/Document figlio ammesso; nessun nuovo GET Firestore, richiesta key/fresh/consume, sblocco o rinnovo d'attività per mostrare, copiare o cancellare. Permesso valido significa ultimo permesso osservato ancora futuro e identità/epoca locali corrispondenti, non una nuova certificazione server. Fuori cornice non si inventa un permesso: attiva/valido sono no, scadenza non disponibile. Il tempo standalone viene dal timer locale effettivo, non da una nuova lettura del profilo. L'ultimo blocco è un codice fisso osservato in RAM o nel journal consentito, non un motivo ricostruito da testi d'errore.
+
+Worker pronto richiede registrazione FCM attiva esatta e risposta al ping diagnostico locale su porta entro 800 ms, distinto dal controller sw.js e da una consegna push. Il ping non aggiorna registrazioni né avvia test remoti/notifiche. Assenza/vecchio worker/timeout = no; la consegna reale rimane C1. Report push attribuito solo al client selezionato, mai a tutte le schede. L'ACK conferma l'intento, non il rendering; fallback risolto non certifica finestra nuova.
+
+Soltanto due pulsanti nuovi: **Copia rapporto** (JSON locale esplicito negli appunti) e **Cancella**. La cancellazione lascia la raccolta accesa se già scelta, ma invalida le scritture precedenti; disattivazione elimina l'intero archivio/consenso. Storage non disponibile o clipboard negata sono mostrati senza testo d'errore libero e senza fallback di rete. Testi/ARIA in tutte le otto lingue; riepilogo aggiornato al cambio lingua. Sessione della scheda e limiti 200/7 giorni sono nel [contratto sicurezza](SICUREZZA.md#cornice-diag-sicurezza-2026-11-10).
+
+Caricamento di recorder/UI differito; soltanto piccoli hook sincroni di consenso/logout/lifecycle nel bootstrap comune. Confronto statico con c79770f6: circa **+0,97 KB gzip** sulle pagine interessate, **+1,27 KB** su Impostazioni con nuovi controlli. Eccezioni candidate per sei pagine incrementate di 1 KB rispetto al tetto precedente (aggiungi_scadenza 340,5→341,5; dettaglio privato nuovo 339); tetto generale 338 KB, moduli/CSS e target fisici invariati. Valori misurati finali circa 341,0/338,8/344,4/342,7/339,9/348,5 KB. Costo esplicito da rivedere con Claude, non una misura di prestazioni dei dispositivi. [Inventario statico](../evidenze/INVENTARI.md).
+
+<a id="cornice-d11-ui-2026-11-10"></a>
+
+## Cornice D11 — intento notifiche candidato
+
+Il worker FCM registra il gestore notificationclick prima delle librerie Firebase, così il loro gestore predefinito non ricarica la cornice ([Firebase](https://firebase.google.com/docs/cloud-messaging/web/receive-messages)). Se esiste app.html come client principale same-origin, preferisce quello focalizzato/visibile, lo focalizza e invia soltanto coordinate non segrete di navigazione su MessageChannel. Non chiama navigate sul padre, neppure su errore o timeout. Il sottoinsieme push comprende Home, lista scadenze e dettaglio con un solo id oppure received e notification opzionale, tutti normalizzati e validati; niente hash, parametri extra o URL esterni. Nessuna cornice: percorso ordinario navigate/focus e ripiego esistenti, con esclusione dei frame annidati.
+
+Il padre riceve su ServiceWorkerContainer, separato da window e dal controller offline sw.js. Verifica evento nativo/origine, script FCM esatto, identità del worker attivo nella registrazione FCM ammessa, protocollo, schema chiuso, nonce monouso, path e scadenza massima 1500 ms. Una registrazione FCM ruotata è ammessa soltanto nel suo scope canonico. Dopo le attese ricontrolla UID/epoca/fence, Document/nonce del figlio, generazione, visibilità, blocco e scadenza; ammissione server fresca obbligatoria. L'ACK correlato conferma l'adozione dell'intento e la navigazione del figlio, non il completamento del caricamento. Un ACK tardivo/riusato non naviga; il push non sblocca né rinnova l'inattività.
+
+Senza ACK valido entro il termine il worker richiede openWindow(target). **Non si garantisce una nuova finestra fisica:** Chrome Android/Windows può riusare una PWA installata ([MDN openWindow](https://developer.mozilla.org/en-US/docs/Web/API/Clients/openWindow)). Questo può distruggere la RAM della cornice nel fallback: si registra come limite C1, senza promettere continuità anche in quel caso. Il percorso ACK pronto conserva invece il padre. Pop-up/permessi e attivazione nativa restano prove fisiche; il banco browser intercetta soltanto la richiesta di fallback.
+
+All'avvio la cornice richiede update best effort delle registrazioni FCM esistenti, senza crearne una né bloccare la UI. Aggiornare sw.js non dimostra che firebase-messaging-sw.js sia già attivo: C1 deve verificare il nuovo worker FCM effettivo, anche dopo aggiornamento da versione precedente. [Lista e limiti](../evidenze/COLLAUDI.md#cornice-b2-lista-2026-11-09).
+
+<a id="cornice-b1-header-2026-11-09"></a>
+
+## Cornice B1 — profili HTTP candidati
+
+Si applica la matrice A1: app.html DENY/ancestors none, con self aggiunto soltanto al suo frame-src; le 22 figlie SAMEORIGIN/ancestors self; ogni altro percorso, alias, variante non ammessa e contenuto pubblico conserva DENY/ancestors none. I provider Auth/App Check esistenti restano ammessi. Il configuratore usa regex RE2 disgiunte e complemento del set finito dei 23 nomi esatti, senza lookahead o override concorrenti; query non cambiano il profilo. Le varianti con slash finale non ricevono eccezioni. Il separatore equivalente nel matcher supporta anche la normalizzazione interna dell'emulatore Windows, senza aggiungere nomi o suffissi HTTP. La matrice è verificata sulla URL richiesta prima delle rewrite ([Firebase Hosting](https://firebase.google.com/docs/hosting/full-config#headers)).
+
+Camera/microfono e WebAuthn GET/CREATE sono limitati a self sulle risposte cornice/figlie e nell'allow dell'iframe. Il resto della baseline e le altre direttive CSP restano invariati. I test HTTP controllano una sola CSP, XFO e Permissions Policy per risposta; il manifest candidato attesta e verifica i profili delle route HTML oltre alla CSP root. Test e codice non attestano header già distribuiti.
+
+Le uscite della facade sono same-origin. Un link web esterno esplicitamente premuto viene aperto fuori cornice con noopener/noreferrer; schemi non ammessi sono bloccati. tel/mailto rimangono intenzioni native del browser, con consenso/gesto effettivo da provare in C1. Privacy e termini escono al livello principale dopo revoca. Back/Forward dopo le navigazioni native dei moduli, link telefono e ritorno dal sistema operativo sono prove fisiche ancora da preparare/eseguire in B2/C1.
+
+Seguito del NO-GO B1: i non partecipanti saltano l'intera verifica aggiuntiva usando l'indicazione negativa del token Auth già richiesto; offline si prosegue immediatamente standalone. Il filtro non è ammissione. Il costo statico del filtro/consumo marker è circa 0,3 KB gzip: il primo controllo rileva 340,1 KB sulla sola aggiungi_scadenza contro il suo limite 340. Eccezione candidata esplicita per quella pagina a 340,5 KB, da valutare nella revisione B1; tetto generale 338 KB, altri limiti e target runtime invariati. Questo costo evita un round trip e la possibile attesa del permesso ai non partecipanti; non è una misura di latenza fisica.
+
+
+<a id="cornice-a2-ui-2026-11-09"></a>
+
+## Cornice A2 — protocollo UI preparatorio
+
+Il GO A1 permette soltanto la candidata spenta. Il padre misura gli inset residui rispetto al rettangolo reale dell'iframe; il figlio applica quattro variabili CSS solo dopo handshake valido e conferma l'applicazione prima di essere mostrato. I 35 usi esistenti di env() nei dieci CSS privati conservano il fallback originale fuori cornice. Resize/orientamento aggiornano gli inset, senza rinnovare l'attività. Nessun padding globale aggiunto; la verifica headless non certifica il notch Safari/PWA fisico.
+
+Le uscite Auth, recovery, nuova password e legali revocano prima della navigazione top-level; una callback del vecchio Document non può navigare quello successivo. Durante logout iniziato dal figlio la UI e la RAM vengono bloccate subito, mantenendo vivo il contesto per deny durevole e signOut. Il padre differisce il solo redirect: fine del cleanup e destinazione reauth specifica del chiamante, con guardia massima di 20 secondi (timeout esistenti fence 5s + SDK 10s). redirect=null resta senza navigazione finché il chiamante non sceglie la destinazione, salvo la guardia di arresto. Alla conclusione o al timeout il figlio viene rimosso; Home non ricarica il padre durante la pulizia. Nessuna nuova autorizzazione ai dati deriva da questo coordinamento.
+
+Le esportazioni vCard/PDF mantengono il gesto nativo: fuori cornice l'API resta sincrona nel clic originario; dentro, una conferma fresca prepara un secondo pulsante esplicito, valido soltanto per documento/UID/fence/visibilità e scadenza del grant. Annullamento, scadenza e revoca non eseguono l'azione. La UI di esportazione viene importata solo al comando. Fotocamera integrata e voce si arrestano in background; una selezione nativa già aperta può terminare nel sistema operativo, ma il risultato tardivo viene scartato dopo revoca. Non si promette di chiudere il picker del sistema.
+
+Budget A2 misurato, eccezioni circoscritte esplicite da sottoporre a Claude: cinque pagine richiedono 339,9 / 341,5 / 343,3 / 338,4 / 347,3 KB gzip; limiti rispettivamente 340 / 342 / 344 / 339 / 348 KB, senza aumentare il tetto generale 338 KB. Due dettagli Account ammettono 49 moduli e due form 48, a causa del bridge/uscite/fence condivisi; tetto generale 47 e otto CSS invariati. Lifetime consolidato nel client e UI export differita hanno evitato altri moduli iniziali. Sono costi statici dichiarati del nuovo contratto, non misure di latenza fisica; gli obiettivi runtime restano invariati e da provare in C1.
+
+Intestazioni e Permissions Policy rimangono immutate in A2; il contratto selettivo successivo viene applicato soltanto in B1 dopo GO. [Incarico e parti ancora aperte](../progetto/INCARICO_CORRENTE.md#cornice-a2-preparazione-2026-11-09).
+
+<a id="cornice-a1-ui-2026-11-09"></a>
+
+## Cornice — header, permessi e navigazione A1, 09/11/2026
+
+Contratto candidato del solo passo A1 sulla PR #278, non configurazione già applicata. Allowlist delle 22 pagine, identità, RAM e timer sono definiti una sola volta in [VAULT](VAULT.md#cornice-a1-2026-11-09). L'app pubblicata 1.2.267 resta multipagina; la grafica nuova è rinviata.
+
+### Matrice selettiva delle intestazioni
+
+| Risposta HTML | X-Frame-Options | CSP frame-ancestors | CSP frame-src |
+|---|---|---|---|
+| `/app.html`, solo documento principale | `DENY` | `'none'` | Aggiunta di `'self'` ai tre provider già ammessi |
+| Sole 22 figlie canoniche ammesse | `SAMEORIGIN` | `'self'` | Tre provider esistenti, senza aggiungere `'self'` |
+| Login/registrazione/reset/nuova password, pubbliche, anteprime, alias e ogni percorso non classificato | `DENY` | `'none'` | Policy esistente |
+
+I provider già presenti sono `https://www.google.com`, `https://www.recaptcha.net` e `https://appcodici-password.firebaseapp.com`: conservarli per App Check/Auth. «frame-src self solo per app.html» aggiunge self soltanto alla cornice, non elimina questi provider né abilita self globalmente. Le altre direttive CSP e gli header conservano la baseline: niente script inline nuovi, wildcard, unsafe-eval o origini aggiuntive. `frame-src` controlla i documenti caricati; `frame-ancestors` chi può incorniciare la risposta, compresi gli antenati esterni ([riferimento MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/frame-ancestors)).
+
+Hosting statico sceglie per percorso, non per UID, query o presenza del riquadro: SAMEORIGIN vale per ogni visita alle route figlie, anche standalone e per altri utenti. Soltanto l'abilitazione della cornice e il broker/chiave sono riservati a Diego. `/app.html` non può essere incorniciata neppure dal sito stesso. Non descrivere gli header come un controllo individuale del flag. In particolare impostazioni.html conserva gli header della route privata anche con recovery=complete o query respinte: è il router/broker a escludere tali modalità dalla cornice, non una selezione dell'header per query.
+
+B1 deve produrre un unico insieme effettivo non contraddittorio: non affiancare una CSP permissiva al diniego globale, poiché più CSP si applicano insieme. Non affidarsi a un presunto override. Verificare risposte HTTP reali di ogni pagina, alias/rewrite `/home`, varianti di percorso non ammesse e pagine inesistenti; `/home` viene canonicalizzato prima dell'iframe, non riceve implicitamente l'eccezione. Nessun allegato/viewer blob o documento importato entra nell'allowlist. [Specifica CSP](https://w3c.github.io/webappsec-csp/#multiple-policies).
+
+### Camera, microfono e biometria
+
+Il solo iframe applicativo necessita di camera per documenti/scanner, microfono per voce/dettatura e WebAuthn GET/CREATE per sblocco e attivazione della biometria nelle Impostazioni. Il contratto di delega è `allow="camera 'self'; microphone 'self'; publickey-credentials-get 'self'; publickey-credentials-create 'self'"`. Nelle risposte pertinenti limitare tali feature a `(self)`; mantenere negati geolocalizzazione e local-network e le altre restrizioni esistenti. Nessuna delega ai frame provider o ad altre origini.
+
+L'allow non concede da solo il consenso dell'utente né supera una policy negata dal padre/figlio. Fotocamera, registrazione voce e cerimonie partono da un gesto esplicito; annullamento/blocco/navigazione/background fermano stream e risultati tardivi. Nessun accesso automatico a microfono o camera al caricamento. PRF mantiene origine canonica/RP ID, verifica utente e controllo reale delle capacità; non si simula biometria e il fallback non certifica la funzione primaria. Supporto e gesto utente di CREATE/GET e media sono gate effettivi di A2/B2/C1, soprattutto Safari/PWA ([Permissions Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy), [WebAuthn](https://www.w3.org/TR/webauthn-3/#sctn-permissions-policy)).
+
+### Contratto delle transizioni
+
+| Evento | Comportamento richiesto |
+|---|---|
+| Link privato ammesso nel figlio | Conserva path/query/anchor validati e identità della sessione padre; elimina il figlio precedente e ammette il nuovo documento |
+| Indietro/Avanti del browser | Una sola cronologia logica governata dal padre, senza duplicazione fra joint history iframe e pushState; ripristina route/query/anchor, non chiavi o form sensibili |
+| Freccia Indietro dell'app | Usa lo stesso modello; conserva il fallback gerarchico esistente quando non c'è un predecessore. Il referrer `app.html` non dimostra la pagina precedente |
+| replaceState/anchor nel medesimo documento | Sincronizza indirizzo esterno senza nuova voce, nuovo Document o rinnovo dell'inattività; conserva la pulizia dei flag afterWrite/m6refresh/serverRefresh/linkShared |
+| Link diretto o nuova scheda | Se il server ammette il solo UID designato, entra nella cornice sulla destinazione validata; ogni nuova scheda ha sessione RAM indipendente e proprio sblocco, senza prestito di chiavi fra schede |
+| Ricarica della cornice | Riparte dalla stessa route/query/anchor leciti, chiave persa e uno sblocco nuovo; nessun recupero da storage. Il reload del solo figlio non distrugge la continuità del padre |
+| Push su cornice esistente | Worker invia solo l'intento validato al padre: conserva id/received/notification e non ricarica app.html mediante navigate() indiscriminato |
+| Push senza cornice pronta o dopo login | Percorso ordinario/nuova sessione e destinazione validata conservata; non promette continuità di una sessione che non esiste |
+| Logout locale/da altra scheda, UID/epoca cambiati | Owner usa il fence canonico; indizi BroadcastChannel/storage richiedono verifica autorevole. Invalida RAM, grant e UI prima di richieste remote; stesso UID con nuova epoca non riprende la vecchia chiave |
+| Redirect Auth, password obbligatoria, recovery speciale | Uscita top-level dopo revoca; login/reset/nuova password restano protetti da DENY e non vengono caricati come figli |
+| Download/apertura allegati, PDF, archivio portabile, stampa | Fuori dalla cornice, policy S1 invariata; download/octet-stream o anteprima ammessa separata con noopener. Nessuna chiave parent al nuovo documento e nessun file navigabile scelto dal mittente nel frame |
+| Link sito esterno, mailto/tel, VCF | Usa i percorsi esterni espliciti esistenti; non li trasforma in route interne o messaggi con materiale Vault |
+| Flag spento/non verificabile, route o capacità non ammesse | Ripiego standalone previsto, senza loop o allargamento di policy; nessun'altra coorte viene attivata |
+
+La cronologia esterna resta su `/app.html` con solo la destinazione applicativa validata; A2 deve fissare una codifica unica e testarla, senza segreti in query/hash/history.state. Il browser distingue ingresso top-level e Document del figlio; non si usa una URL dichiarata dal messaggio come autorità.
+
+B2 elenca le prove fisiche e C1 le esegue Diego su Chrome desktop, Android, Safari iPhone e PWA installata: dieci pagine, timer scelto, background, fence/logout, camera documenti, voce, notifiche, cronologia/ricarica e allegati. Un'emulazione o un fallback funzionante non chiudono il collaudo della capacità primaria. Arresto e rollback nel [contratto Vault](VAULT.md#cornice-a1-2026-11-09); nessuna adozione della grafica sperimentale.
+
+
 <a id="profile-occlusion-followup-2026-11-09"></a>
 
 ## Copertura di header e controlli degli allegati Profilo — 09/11/2026

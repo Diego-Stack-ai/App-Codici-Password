@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -36,7 +37,7 @@ function fixture({footerReady = true} = {}) {
     Object.assign(document, {getElementById: id => nodes[id] || nodes['detail-page-actions'].querySelector(`#${id}`),
         querySelector: selector => selector === '.base-container' ? container : selector === '.detail-page-label' ? label : null,
         querySelectorAll: () => nodes['detail-page-actions'].querySelectorAll('button')});
-    const context = vm.createContext({window, document, URLSearchParams, AbortController, auth: {currentUser: {uid: 'ownerA'}},
+    const context = vm.createContext(withStandaloneFrame({window, document, URLSearchParams, AbortController, auth: {currentUser: {uid: 'ownerA'}},
         onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
         getFooterReady: () => footerReady ? footer : null,
@@ -68,7 +69,7 @@ function fixture({footerReady = true} = {}) {
         decryptAttachmentBytes: async () => { calls.push(['decrypt']); return new Uint8Array([2]); },
         openDecryptedAttachment: () => opened.push('decrypted'), openExternalUrl: url => { opened.push(url); return true; },
         showToast: (...args) => toasts.push(args), console: {warn() {}}, t: () => ''
-    });
+    }));
     vm.runInContext(model, context); vm.runInContext(strip(source), context);
     return {context, nodes, window, footer, calls, writes, batches, toasts, opened, observers,
         init: () => context.initDettaglioScadenza({uid: context.auth.currentUser.uid}),

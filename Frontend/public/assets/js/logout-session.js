@@ -1,8 +1,13 @@
+import {navigateDocument, beginFrameLogout} from './frame-navigation.js';
 import { clearVaultSession } from './modules/core/vault-session.js';
 import './auth-session-fence.js';
 
+const requestingDocument = document;
+
 // Local protection precedes Firebase and survives a failed or stalled signOut.
 export async function logoutWithCleanup(signOutOperation, redirect = '/login.html') {
+    const frameLogoutToken = beginFrameLogout();
+    if (window.document && requestingDocument !== window.document) return;
     window.privateAuthGate?.block();
     window.dispatchEvent(new Event('private-auth-blocked'));
     try { clearVaultSession(); } catch { /* RAM and presentation are already locked. */ }
@@ -19,6 +24,8 @@ export async function logoutWithCleanup(signOutOperation, redirect = '/login.htm
         // Keep the local deny marker until a new explicit login succeeds.
     } finally {
         clearTimeout(timer);
-        if (redirect) window.location.replace(redirect);
+        if (window.document && requestingDocument !== window.document) return;
+        try { if (window.parent !== window) window.parent.vaultFrameNavigation?.finishLogoutFromChild(window, requestingDocument, frameLogoutToken); } catch { /* Standalone. */ }
+        if (redirect) navigateDocument(redirect, true);
     }
 }

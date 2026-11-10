@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Laboratorio cornice Vault</title><link rel="stylesheet" href="/lab.css"><script type="module" src="/parent.mjs"></script></head>
+<body><header><h1>Cornice Vault — laboratorio locale</h1><p>Dati sintetici. Nessun collegamento alla Vault o a Firebase.</p></header>
+<main><section aria-label="Controlli del laboratorio">
+<button id="enable">Abilita la sola fixture sintetica</button>
+<button id="disable">Disabilita fixture</button><button id="lock">Blocca sessione</button><button id="logout">Logout sintetico</button><button id="resume">Riapri pagina</button>
+<p id="state" role="status"></p><p>Sblocchi sintetici: <output id="unlocks">0</output>. Conferme: <output id="confirmations">0</output>.</p>
+<p>La cornice mantiene la continuità in RAM; ogni pagina riceve una copia temporanea in RAM.</p>
+</section><iframe id="private-frame" title="Pagina privata sintetica" src="about:blank"></iframe></main></body></html>

@@ -132,7 +132,8 @@ for (const row of rows) {
   const gzipKb = row.gzip / 1024;
   const gzipCeiling = ceilings.maxInitialLocalGzipKbByPage?.[row.name] ?? ceilings.maxInitialLocalGzipKb;
   if (gzipKb > gzipCeiling) violations.push(`${row.name}: ${gzipKb.toFixed(1)} KB gzip > ${gzipCeiling} KB`);
-  if (row.js.size > ceilings.maxJsModules) violations.push(`${row.name}: ${row.js.size} moduli JS > ${ceilings.maxJsModules}`);
+  const jsCeiling = ceilings.maxJsModulesByPage?.[row.name] ?? ceilings.maxJsModules;
+  if (row.js.size > jsCeiling) violations.push(`${row.name}: ${row.js.size} moduli JS > ${jsCeiling}`);
   if (row.css.size > ceilings.maxCssFiles) violations.push(`${row.name}: ${row.css.size} CSS > ${ceilings.maxCssFiles}`);
 }
 

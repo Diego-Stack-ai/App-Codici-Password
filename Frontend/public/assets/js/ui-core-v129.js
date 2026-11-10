@@ -140,8 +140,10 @@ export async function showLogoutModal() {
 /**
  * [CORE UI] CONFIRM MODAL
  */
-export async function showConfirmModal(title, message, confirmText = t('confirm') || 'Conferma', cancelText = t('cancel') || 'Annulla') {
+export async function showConfirmModal(title, message, confirmText = t('confirm') || 'Conferma', cancelText = t('cancel') || 'Annulla', options = {}) {
     return new Promise((resolve) => {
+        if (options.signal?.aborted) {resolve(false); return;}
+        let settled = false;
         const modalId = 'protocol-confirm-modal';
         let modal = document.getElementById(modalId);
         if (modal) modal.remove();
@@ -163,16 +165,21 @@ export async function showConfirmModal(title, message, confirmText = t('confirm'
 
         setTimeout(() => modal.classList.add('active'), 10);
 
-        const closeModal = (val) => {
+        const closeModal = (val, immediate = false) => {
+            if (settled) return; settled = true;
+            options.signal?.removeEventListener('abort', abort);
             modal.classList.remove('active');
-            setTimeout(() => {
-                modal.remove();
-                resolve(val);
-            }, 300);
+            const finish = () => {modal.remove(); resolve(val);};
+            if (immediate) finish(); else setTimeout(finish, 300);
         };
 
+        const abort = () => closeModal(false, true);
+        options.signal?.addEventListener('abort', abort, {once: true});
         btnCancel.addEventListener('click', () => closeModal(false));
-        btnConfirm.addEventListener('click', () => closeModal(true));
+        btnConfirm.addEventListener('click', () => {
+            if (settled || options.signal?.aborted) return;
+            try {options.onConfirm?.(); closeModal(true);} catch {closeModal(false, true);}
+        });
         modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(false); });
     });
 }
@@ -268,8 +275,15 @@ export function showInputModal(title, initialValue = '', placeholder = '', descr
             input.focus();
         });
 
-        // Listener per chiusura
+        // One completion; a frame cancellation clears the input immediately.
+        let closed = false;
+        const abort = () => closeModal(null);
         const closeModal = (val) => {
+            if (closed) return;
+            closed = true;
+            options.signal?.removeEventListener('abort', abort);
+            if (isVaultSecret) input.value = '';
+
             modal.classList.remove('active');
             setTimeout(() => {
                 if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
@@ -277,6 +291,8 @@ export function showInputModal(title, initialValue = '', placeholder = '', descr
             }, 300);
         };
 
+        options.signal?.addEventListener('abort', abort, {once: true});
+        if (options.signal?.aborted) closeModal(null);
         btnCancel.addEventListener('click', () => closeModal(null));
         btnConfirm.addEventListener('click', () => closeModal(input.value));
 
@@ -311,6 +327,7 @@ export function showInputModal(title, initialValue = '', placeholder = '', descr
         }
 
         setTimeout(() => {
+            if (closed) return;
             modal.classList.add('active');
             input.focus();
             if (initialValue && initialValue.length > 0) {

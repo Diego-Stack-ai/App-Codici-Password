@@ -522,7 +522,7 @@ test('la UI distingue esplicitamente archivio portabile e backup', async () => {
     assert.match(settingsCss, /\.portable-archive-modal\s*\{[^}]*overflow-y:\s*auto;/s);
     assert.match(settingsCss, /\.portable-archive-modal > \.modal-actions\s*\{[^}]*position:\s*sticky;[^}]*bottom:\s*0;/s);
     assert.match(settingsTranslations, /non è un backup reimportabile/);
-    assert.match(settings, /forceReload: true, promptImmediately: true/);
+    assert.match(settings, /forceReload: !vaultFrameClient\.isChild\(\), promptImmediately: true/);
     assert.match(settings, /PORTABLE_ATTACHMENT_CAPACITY_EXCEEDED/);
     assert.match(settings, /PORTABLE_ATTACHMENT_METADATA_CONFLICT/);
     assert.match(settings, /PORTABLE_CHUNK_MANIFEST_INVALID/);

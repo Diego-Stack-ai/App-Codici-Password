@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -60,14 +61,14 @@ function fixture() {
     const auth = {currentUser:{uid:'A'}};
     const data = {notifications:[notification('n21',21),notification('n7',7)], records:[structuredClone(deadline)]};
     let pending = null, fail = false, ready = true;
-    const context = vm.createContext({Date:Clock, console:{warn(){}}, auth, document,
+    const context = vm.createContext(withStandaloneFrame({Date:Clock, console:{warn(){}}, auth, document,
         window:{...eventTarget, location:{href:''}, privateAuthGate:{isReady:()=>ready}},
         setTimeout:(fn,ms)=>{const id=++nextTimer;timers.set(id,{fn,ms});return id;},clearTimeout:id=>timers.delete(id),
         requestAnimationFrame:fn=>fn(), createElement:node, clearElement:n=>n.replaceChildren(), setChildren:(n,xs)=>n.replaceChildren(...xs), t:key=>key,
         listDeadlines:async uid=>{reads.push(uid);if(pending)await pending;if(fail)throw Error('synthetic');return data.records;},
         listDeadlineNotifications:async uid=>{reads.push(uid);if(pending)await pending;if(fail)throw Error('synthetic');return data.notifications;},
         onAuthStateChanged:(_auth,fn)=>{const cb={fn,stopped:false};callbacks.push(cb);return ()=>cb.stopped=true;}
-    });
+    }));
     vm.runInContext(sources.map(strip).join('\n'), context);
     const drain = async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
     const fire = async name=>{for(const fn of [...(events.get(name)||[])])fn();await drain();};

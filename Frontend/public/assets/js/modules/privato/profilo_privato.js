@@ -1,9 +1,11 @@
+import {executeFrameNativeAction} from '../core/vault-frame-client.js';
+import {confirmFrameRemoval, confirmFrameAction} from '../core/vault-frame-client.js';
 import { readErrorMessage } from '../shared/read-error-message.js';
 const changeProfileAccount = (...args) => import('../shared/profile-account-management.js').then(module => module.changeProfileAccount(...args));
 const unlinkProfileAccount = (...args) => import('../shared/profile-account-management.js').then(module => module.unlinkProfileAccount(...args));
 /** Profilo privato: stato condiviso, inizializzazione dei moduli e caricamento progressivo. */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.267';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.268';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteField, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
@@ -22,7 +24,7 @@ import { normalizeLegacyProfile, migrateQrIndexesToIds, resolveProfileDocumentDe
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, getProfileQRPayload, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.267&touch=20261017b';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.268&touch=20261017b';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns, updateProfileLabelOptions } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
@@ -91,7 +93,7 @@ const manageDocumentAttachments = async (documentItem, {onUploaded} = {}) => {
     const uid = currentUserUid;
     const vaultKey = await ensureVaultKeyMaterial();
     if (!uid || !vaultKey || auth.currentUser?.uid !== uid) throw new Error('Sblocca il Vault per gestire gli allegati.');
-    const module = await import('./profile-document-attachments.js?v=1.2.267');
+    const module = await import('./profile-document-attachments.js?v=1.2.268');
     return module.openProfileDocumentAttachments({
         uid, documentItem, vaultKey,
         encryptName: value => encrypt(value, vaultKey),
@@ -125,7 +127,7 @@ async function refreshDocumentAttachmentPreviews() {
     if (!uid || auth.currentUser?.uid !== uid) return;
     try {
         const vaultKey = await ensureVaultKeyMaterial();
-        const module = await import('./profile-document-attachments.js?v=1.2.267');
+        const module = await import('./profile-document-attachments.js?v=1.2.268');
         if (uid !== currentUserUid || auth.currentUser?.uid !== uid) return;
         await module.renderProfileDocumentAttachmentPreviews({
             uid,
@@ -393,24 +395,22 @@ function renderAllSections() {
     focusAssistantDocument();
 }
 
-function downloadVCard() {
-    const blob = new Blob([getProfileVCard()], { type: 'text/vcard;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'profilo.vcf';
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+function saveProfileVCard(value) {
+    const url = URL.createObjectURL(new Blob([value], {type: 'text/vcard;charset=utf-8'}));
+    const link = document.createElement('a'); link.href = url; link.download = 'profilo.vcf';
+    link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-
-async function shareVCard() {
-    const file = new File([getProfileVCard()], 'profilo.vcf', { type: 'text/vcard' });
-    if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ title: 'Tessera digitale', files: [file] });
-    } else {
-        downloadVCard();
-        showToast('Condivisione non disponibile: vCard scaricata.', 'info');
-    }
+function downloadVCard() {
+    const value = getProfileVCard();
+    return executeFrameNativeAction({scope: 'profile-vcard', snapshotBytes: new TextEncoder().encode(value)}, () => saveProfileVCard(value));
+}
+function shareVCard() {
+    const value = getProfileVCard();
+    return executeFrameNativeAction({scope: 'profile-vcard-share', snapshotBytes: new TextEncoder().encode(value)}, () => {
+        const file = new File([value], 'profilo.vcf', {type: 'text/vcard'});
+        if (navigator.share && navigator.canShare?.({files: [file]})) return navigator.share({files: [file], title: 'Profilo'});
+        saveProfileVCard(value); showToast('Condivisione non disponibile: vCard scaricata.', 'info');
+    });
 }
 
 function focusAssistantDocument() {
@@ -491,6 +491,7 @@ function setupDelegation() {
 async function deleteAddress(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questo indirizzo?')) return;
     try {
+        await confirmFrameRemoval(() => userAddresses[idx], 'deleteAddress');
         const removedLinks = userAddresses[idx]?.utilities || [];
         userAddresses.splice(idx, 1);
         userAddresses = userAddresses.filter(a => a !== undefined && a !== null);
@@ -507,6 +508,7 @@ async function deleteAddress(idx) {
 async function deleteUtility(aIdx, uIdx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questa utenza?')) return;
     try {
+        await confirmFrameRemoval(() => userAddresses[aIdx]?.utilities?.[uIdx], 'deleteUtility');
         const removedLinks = [userAddresses[aIdx].utilities[uIdx]];
         userAddresses[aIdx].utilities.splice(uIdx, 1);
         userAddresses[aIdx].utilities = (userAddresses[aIdx].utilities || []).filter(u => u !== undefined && u !== null);
@@ -523,6 +525,7 @@ async function deleteUtility(aIdx, uIdx) {
 async function deletePhone(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questo numero?')) return;
     try {
+        await confirmFrameRemoval(() => contactPhones[idx], 'deletePhone');
         const linkedAccountId = contactPhones[idx]?.linkedAccountId;
         const companyId = contactPhones[idx]?.linkedAccountCompanyId;
         contactPhones.splice(idx, 1);
@@ -546,6 +549,7 @@ async function deletePhone(idx) {
 async function deleteEmail(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questa email?')) return;
     try {
+        await confirmFrameRemoval(() => contactEmails[idx], 'deleteEmail');
         const linkedAccountId = contactEmails[idx]?.linkedAccountId;
         const companyId = contactEmails[idx]?.linkedAccountCompanyId;
         contactEmails.splice(idx, 1);
@@ -569,6 +573,7 @@ async function deleteEmail(idx) {
 async function deleteDocumento(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questo documento?')) return;
     try {
+        await confirmFrameRemoval(() => userDocuments[idx], 'deleteDocumento');
         const removedLinks = [userDocuments[idx]];
         const removedDocument = userDocuments[idx];
         const linkedDeadlineId = removedDocument?.expiryReference?.deadlineId;
@@ -579,7 +584,7 @@ async function deleteDocumento(idx) {
         if (removedDocument?.pilotDeadlineReference?.deadlineId
             || removedDocument?.expiryReference?.experimentTag === 'prova-scadenze') {
             try {
-                const module = await import('./profile-document-deadline-pilot.js?v=1.2.267');
+                const module = await import('./profile-document-deadline-pilot.js?v=1.2.268');
                 await module.markRemovedProfileDocumentPilot(removedDocument);
             } catch (unlinkError) {
                 console.warn('[Documento] Pilot da verificare non aggiornato durante la rimozione:', unlinkError);

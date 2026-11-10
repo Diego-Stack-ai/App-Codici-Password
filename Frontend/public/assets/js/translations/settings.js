@@ -1,4 +1,22 @@
 const it = {
+  frame_diag_title: "Cornice",
+  frame_diag_description: "Registro locale di questa scheda, spento per impostazione predefinita. Nessun invio di rete. Disattivarlo elimina gli eventi.",
+  frame_diag_logging: "Registra eventi della cornice",
+  frame_diag_active: "Cornice attiva",
+  frame_diag_permit: "Permesso valido",
+  frame_diag_expiry: "Scadenza permesso",
+  frame_diag_idle: "Inattività in uso",
+  frame_diag_worker: "Worker notifiche pronto",
+  frame_diag_last_lock: "Ultimo blocco",
+  frame_diag_unavailable: "Non disponibile",
+  frame_diag_none: "Nessuno",
+  frame_diag_count: "{count}/200 eventi · massimo 7 giorni",
+  frame_diag_yes: "Sì",
+  frame_diag_no: "No",
+  frame_diag_copy: "Copia rapporto",
+  frame_diag_clear: "Cancella",
+  frame_diag_version: "Versione",
+
   settings_digital_card_manage: 'Gestisci Tessera digitale',
   settings_company_area_title: 'Mostra area Azienda', settings_company_area_desc: 'Nasconde o mostra l’area aziendale senza eliminare i dati',
   settings_shared_credentials_title: 'Credenziali comuni', settings_shared_credentials_desc: 'Dati protetti richiamabili da più Account',
@@ -22,6 +40,24 @@ const it = {
 };
 
 const en = {
+  frame_diag_title: "Frame",
+  frame_diag_description: "Local log for this tab, disabled by default. Nothing is sent over the network. Disabling it deletes the events.",
+  frame_diag_logging: "Record frame events",
+  frame_diag_active: "Frame active",
+  frame_diag_permit: "Authorization valid",
+  frame_diag_expiry: "Authorization expiry",
+  frame_diag_idle: "Current inactivity timeout",
+  frame_diag_worker: "Notification worker ready",
+  frame_diag_last_lock: "Last lock",
+  frame_diag_unavailable: "Unavailable",
+  frame_diag_none: "None",
+  frame_diag_count: "{count}/200 events · up to 7 days",
+  frame_diag_yes: "Yes",
+  frame_diag_no: "No",
+  frame_diag_copy: "Copy report",
+  frame_diag_clear: "Clear",
+  frame_diag_version: "Version",
+
   settings_digital_card_manage: 'Manage digital card',
   settings_company_area_title: 'Show Company area', settings_company_area_desc: 'Show or hide the company area without deleting data',
   settings_shared_credentials_title: 'Shared credentials', settings_shared_credentials_desc: 'Protected data reusable across multiple Accounts',
@@ -45,6 +81,24 @@ const en = {
 };
 
 const es = {
+  frame_diag_title: "Marco",
+  frame_diag_description: "Registro local de esta pestaña, desactivado de forma predeterminada. No se envía nada por la red. Al desactivarlo se eliminan los eventos.",
+  frame_diag_logging: "Registrar eventos del marco",
+  frame_diag_active: "Marco activo",
+  frame_diag_permit: "Permiso válido",
+  frame_diag_expiry: "Vencimiento del permiso",
+  frame_diag_idle: "Tiempo de inactividad actual",
+  frame_diag_worker: "Worker de notificaciones listo",
+  frame_diag_last_lock: "Último bloqueo",
+  frame_diag_unavailable: "No disponible",
+  frame_diag_none: "Ninguno",
+  frame_diag_count: "{count}/200 eventos · máximo 7 días",
+  frame_diag_yes: "Sí",
+  frame_diag_no: "No",
+  frame_diag_copy: "Copiar informe",
+  frame_diag_clear: "Borrar",
+  frame_diag_version: "Versión",
+
   settings_digital_card_manage: 'Gestionar tarjeta digital',
   settings_company_area_title: 'Mostrar área Empresa', settings_company_area_desc: 'Muestra u oculta el área empresarial sin eliminar datos',
   settings_shared_credentials_title: 'Credenciales compartidas', settings_shared_credentials_desc: 'Datos protegidos reutilizables en varias Cuentas',
@@ -63,22 +117,112 @@ const es = {
 };
 
 const fr = {
+  frame_diag_title: "Cadre",
+  frame_diag_description: "Journal local de cet onglet, désactivé par défaut. Aucun envoi sur le réseau. Le désactiver supprime les événements.",
+  frame_diag_logging: "Enregistrer les événements du cadre",
+  frame_diag_active: "Cadre actif",
+  frame_diag_permit: "Autorisation valide",
+  frame_diag_expiry: "Expiration de l’autorisation",
+  frame_diag_idle: "Délai d’inactivité actuel",
+  frame_diag_worker: "Worker de notifications prêt",
+  frame_diag_last_lock: "Dernier verrouillage",
+  frame_diag_unavailable: "Indisponible",
+  frame_diag_none: "Aucun",
+  frame_diag_count: "{count}/200 événements · 7 jours maximum",
+  frame_diag_yes: "Oui",
+  frame_diag_no: "Non",
+  frame_diag_copy: "Copier le rapport",
+  frame_diag_clear: "Effacer",
+  frame_diag_version: "Version",
+
   settings_digital_card_manage: 'Gérer la carte numérique', settings_company_area_title: 'Afficher l’espace Entreprise', settings_company_area_desc: 'Affiche ou masque l’espace entreprise sans supprimer les données', settings_shared_credentials_title: 'Identifiants partagés', settings_shared_credentials_desc: 'Données protégées réutilisables dans plusieurs Comptes', settings_backup_export_title: 'Sauvegarde chiffrée', settings_backup_export_desc: 'Exporte le Coffre et les pièces jointes avec une Clé de récupération distincte', settings_portable_export_title: 'Exporter l’archive portable', settings_portable_export_desc: 'Crée une copie consultable hors de l’app, protégée par un mot de passe dédié', settings_backup_restore_title: 'Restaurer la sauvegarde', settings_backup_restore_desc: 'Valide d’abord le fichier et bloque toute collision', settings_credential_health_title: 'État des identifiants', settings_credential_health_desc: 'Vérifie localement les mots de passe faibles, dupliqués ou anciens', settings_field_usage_title: 'Utilisation des champs de Compte', settings_field_usage_desc: 'Compte localement uniquement les champs réellement renseignés', settings_manage_lists_desc: 'Gérer les listes et les types', settings_totp_desc: 'Code via une app Authenticator (TOTP)', settings_recovery_codes_title: 'Codes de récupération 2FA', settings_recovery_codes_desc: "Génération temporairement indisponible", settings_recovery_codes_help: "Pour un problème de connexion 2FA, contactez l’assistance. N’envoyez ni mots de passe ni codes.", settings_master_password_title: 'Mot de passe principal du Coffre', settings_master_password_desc: 'Modifie le mot de passe principal sans changer le mot de passe de connexion', settings_inactivity_desc: 'Verrouille le Coffre après la durée choisie', settings_revoke_sessions_title: 'Déconnecter tous les appareils', settings_revoke_sessions_desc: 'Révoque les sessions Firebase sur PC, tablette et téléphone, y compris celle-ci', settings_deadline_notifications_title: 'Notifications d’échéances', settings_check_availability: 'Vérification de la disponibilité…', settings_deadline_notifications_aria: 'Notifications push des échéances', settings_test_notification: 'Envoyer une notification de test à cet appareil', settings_shared_notifications_title: 'Notifications d’invitations partagées', settings_shared_notifications_aria: 'Notifications push des invitations partagées', settings_diagnostics_heading: 'Diagnostic', settings_diagnostics_title: 'Diagnostic de l’app et des moteurs', settings_diagnostics_desc: 'Mesure la vitesse et vérifie les services essentiels et l’état des moteurs. Aucune donnée du Coffre.', settings_diagnostics_aria: 'Mesurer la vitesse de l’app', settings_run_diagnostics: 'Exécuter les contrôles de l’app', settings_refresh: 'Actualiser', settings_copy_report: 'Copier le rapport', settings_clear_measurements: 'Effacer les mesures'
 };
 
 const de = {
+  frame_diag_title: "Rahmen",
+  frame_diag_description: "Lokales Protokoll dieses Tabs, standardmäßig deaktiviert. Keine Übertragung über das Netzwerk. Beim Deaktivieren werden die Ereignisse gelöscht.",
+  frame_diag_logging: "Rahmenereignisse aufzeichnen",
+  frame_diag_active: "Rahmen aktiv",
+  frame_diag_permit: "Berechtigung gültig",
+  frame_diag_expiry: "Ablauf der Berechtigung",
+  frame_diag_idle: "Aktuelle Inaktivitätsdauer",
+  frame_diag_worker: "Benachrichtigungs-Worker bereit",
+  frame_diag_last_lock: "Letzte Sperrung",
+  frame_diag_unavailable: "Nicht verfügbar",
+  frame_diag_none: "Keine",
+  frame_diag_count: "{count}/200 Ereignisse · höchstens 7 Tage",
+  frame_diag_yes: "Ja",
+  frame_diag_no: "Nein",
+  frame_diag_copy: "Bericht kopieren",
+  frame_diag_clear: "Löschen",
+  frame_diag_version: "Version",
+
   settings_digital_card_manage: 'Digitale Karte verwalten', settings_company_area_title: 'Unternehmensbereich anzeigen', settings_company_area_desc: 'Blendet den Unternehmensbereich ein oder aus, ohne Daten zu löschen', settings_shared_credentials_title: 'Gemeinsame Zugangsdaten', settings_shared_credentials_desc: 'Geschützte Daten, die in mehreren Konten verwendet werden können', settings_backup_export_title: 'Verschlüsseltes Backup', settings_backup_export_desc: 'Tresor und Anhänge mit einem separaten Wiederherstellungsschlüssel exportieren', settings_portable_export_title: 'Portables Archiv exportieren', settings_portable_export_desc: 'Eine außerhalb der App lesbare Kopie mit eigenem Passwort erstellen', settings_backup_restore_title: 'Backup wiederherstellen', settings_backup_restore_desc: 'Datei zuerst prüfen und jede Kollision blockieren', settings_credential_health_title: 'Zustand der Zugangsdaten', settings_credential_health_desc: 'Schwache, doppelte oder alte Passwörter lokal prüfen', settings_field_usage_title: 'Nutzung der Kontofelder', settings_field_usage_desc: 'Nur tatsächlich ausgefüllte Felder lokal zählen', settings_manage_lists_desc: 'Listen und Typen verwalten', settings_totp_desc: 'Code über eine Authenticator-App (TOTP)', settings_recovery_codes_title: '2FA-Wiederherstellungscodes', settings_recovery_codes_desc: "Generierung vorübergehend nicht verfügbar", settings_recovery_codes_help: "Wenden Sie sich bei Problemen mit der 2FA-Anmeldung an den Support. Senden Sie keine Passwörter oder Codes.", settings_master_password_title: 'Tresor-Master-Passwort', settings_master_password_desc: 'Master-Passwort ändern, ohne das Anmeldepasswort zu ändern', settings_inactivity_desc: 'Tresor nach dem gewählten Zeitraum sperren', settings_revoke_sessions_title: 'Alle Geräte abmelden', settings_revoke_sessions_desc: 'Firebase-Sitzungen auf PC, Tablet und Telefon widerrufen, einschließlich dieser', settings_deadline_notifications_title: 'Fristbenachrichtigungen', settings_check_availability: 'Verfügbarkeit wird geprüft…', settings_deadline_notifications_aria: 'Push-Benachrichtigungen für Fristen', settings_test_notification: 'Testbenachrichtigung an dieses Gerät senden', settings_shared_notifications_title: 'Benachrichtigungen zu geteilten Einladungen', settings_shared_notifications_aria: 'Push-Benachrichtigungen für geteilte Einladungen', settings_diagnostics_heading: 'Diagnose', settings_diagnostics_title: 'App- und Moduldiagnose', settings_diagnostics_desc: 'Misst die Geschwindigkeit und prüft wichtige Dienste und den Modulstatus. Keine Tresordaten.', settings_diagnostics_aria: 'App-Geschwindigkeit messen', settings_run_diagnostics: 'App-Prüfungen ausführen', settings_refresh: 'Aktualisieren', settings_copy_report: 'Bericht kopieren', settings_clear_measurements: 'Messwerte löschen'
 };
 
 const zh = {
+  frame_diag_title: "框架",
+  frame_diag_description: "此标签页的本地日志，默认关闭。不会通过网络发送任何内容。关闭后会删除事件记录。",
+  frame_diag_logging: "记录框架事件",
+  frame_diag_active: "框架已启用",
+  frame_diag_permit: "权限有效",
+  frame_diag_expiry: "权限到期时间",
+  frame_diag_idle: "当前非活动超时",
+  frame_diag_worker: "通知工作线程已就绪",
+  frame_diag_last_lock: "上次锁定",
+  frame_diag_unavailable: "不可用",
+  frame_diag_none: "无",
+  frame_diag_count: "{count}/200 条事件 · 最长保留 7 天",
+  frame_diag_yes: "是",
+  frame_diag_no: "否",
+  frame_diag_copy: "复制报告",
+  frame_diag_clear: "清除",
+  frame_diag_version: "版本",
+
   settings_digital_card_manage: '管理数字卡片', settings_company_area_title: '显示企业区域', settings_company_area_desc: '显示或隐藏企业区域，不删除数据', settings_shared_credentials_title: '共享凭据', settings_shared_credentials_desc: '可供多个账户使用的受保护数据', settings_backup_export_title: '加密备份', settings_backup_export_desc: '使用独立恢复密钥导出保险库和附件', settings_portable_export_title: '导出便携归档', settings_portable_export_desc: '创建可在应用外查看且由专用密码保护的副本', settings_backup_restore_title: '恢复备份', settings_backup_restore_desc: '先验证文件并阻止任何冲突', settings_credential_health_title: '凭据安全状况', settings_credential_health_desc: '在本地检查弱密码、重复密码或旧密码', settings_field_usage_title: '账户字段使用情况', settings_field_usage_desc: '仅在本地统计实际填写的字段', settings_manage_lists_desc: '管理列表和类型', settings_totp_desc: '通过身份验证器应用获取代码（TOTP）', settings_recovery_codes_title: '2FA 恢复代码', settings_recovery_codes_desc: "暂时无法生成", settings_recovery_codes_help: "如果遇到双因素认证登录问题，请联系支持人员。请勿发送密码或代码。", settings_master_password_title: '保险库主密码', settings_master_password_desc: '更改主密码而不更改登录密码', settings_inactivity_desc: '在所选时长后锁定保险库', settings_revoke_sessions_title: '退出所有设备', settings_revoke_sessions_desc: '撤销电脑、平板和手机上的 Firebase 会话，包括当前会话', settings_deadline_notifications_title: '到期提醒', settings_check_availability: '正在检查可用性…', settings_deadline_notifications_aria: '到期事项推送通知', settings_test_notification: '向此设备发送测试通知', settings_shared_notifications_title: '共享邀请通知', settings_shared_notifications_aria: '共享邀请推送通知', settings_diagnostics_heading: '诊断', settings_diagnostics_title: '应用和引擎诊断', settings_diagnostics_desc: '测量速度并检查关键服务和引擎状态。不读取保险库数据。', settings_diagnostics_aria: '测量应用速度', settings_run_diagnostics: '运行应用检查', settings_refresh: '刷新', settings_copy_report: '复制报告', settings_clear_measurements: '清除测量结果'
 };
 
 const hi = {
+  frame_diag_title: "फ़्रेम",
+  frame_diag_description: "इस टैब का स्थानीय लॉग, जो डिफ़ॉल्ट रूप से बंद है। नेटवर्क पर कुछ नहीं भेजा जाता। इसे बंद करने पर घटनाओं के रिकॉर्ड मिट जाते हैं।",
+  frame_diag_logging: "फ़्रेम की घटनाएँ रिकॉर्ड करें",
+  frame_diag_active: "फ़्रेम सक्रिय है",
+  frame_diag_permit: "अनुमति मान्य है",
+  frame_diag_expiry: "अनुमति की समाप्ति",
+  frame_diag_idle: "वर्तमान निष्क्रियता समय सीमा",
+  frame_diag_worker: "सूचना वर्कर तैयार है",
+  frame_diag_last_lock: "पिछला लॉक",
+  frame_diag_unavailable: "उपलब्ध नहीं",
+  frame_diag_none: "कोई नहीं",
+  frame_diag_count: "{count}/200 घटनाएँ · अधिकतम 7 दिन",
+  frame_diag_yes: "हाँ",
+  frame_diag_no: "नहीं",
+  frame_diag_copy: "रिपोर्ट कॉपी करें",
+  frame_diag_clear: "मिटाएँ",
+  frame_diag_version: "संस्करण",
+
   settings_digital_card_manage: 'डिजिटल कार्ड प्रबंधित करें', settings_company_area_title: 'कंपनी क्षेत्र दिखाएँ', settings_company_area_desc: 'डेटा हटाए बिना कंपनी क्षेत्र दिखाएँ या छिपाएँ', settings_shared_credentials_title: 'साझा क्रेडेंशियल', settings_shared_credentials_desc: 'कई खातों में उपयोग योग्य सुरक्षित डेटा', settings_backup_export_title: 'एन्क्रिप्टेड बैकअप', settings_backup_export_desc: 'अलग रिकवरी कुंजी के साथ वॉल्ट और अटैचमेंट निर्यात करें', settings_portable_export_title: 'पोर्टेबल संग्रह निर्यात करें', settings_portable_export_desc: 'ऐप के बाहर पढ़ी जा सकने वाली, समर्पित पासवर्ड से सुरक्षित प्रति बनाएँ', settings_backup_restore_title: 'बैकअप पुनर्स्थापित करें', settings_backup_restore_desc: 'पहले फ़ाइल सत्यापित करें और हर टकराव रोकें', settings_credential_health_title: 'क्रेडेंशियल की स्थिति', settings_credential_health_desc: 'कमज़ोर, दोहराए गए या पुराने पासवर्ड स्थानीय रूप से जाँचें', settings_field_usage_title: 'खाता फ़ील्ड उपयोग', settings_field_usage_desc: 'केवल वास्तव में भरे गए फ़ील्ड स्थानीय रूप से गिनें', settings_manage_lists_desc: 'सूचियाँ और प्रकार प्रबंधित करें', settings_totp_desc: 'Authenticator ऐप से कोड (TOTP)', settings_recovery_codes_title: '2FA रिकवरी कोड', settings_recovery_codes_desc: "अभी कोड बनाना उपलब्ध नहीं है", settings_recovery_codes_help: "2FA लॉगिन की समस्या के लिए सहायता से संपर्क करें। पासवर्ड या कोड न भेजें।", settings_master_password_title: 'वॉल्ट मास्टर पासवर्ड', settings_master_password_desc: 'लॉगिन पासवर्ड बदले बिना मास्टर पासवर्ड बदलें', settings_inactivity_desc: 'चुनी अवधि के बाद वॉल्ट लॉक करें', settings_revoke_sessions_title: 'सभी डिवाइस से साइन आउट करें', settings_revoke_sessions_desc: 'PC, टैबलेट और फ़ोन पर Firebase सत्र रद्द करें, इस सत्र सहित', settings_deadline_notifications_title: 'समय-सीमा सूचनाएँ', settings_check_availability: 'उपलब्धता जाँची जा रही है…', settings_deadline_notifications_aria: 'समय-सीमा के लिए पुश सूचनाएँ', settings_test_notification: 'इस डिवाइस पर परीक्षण सूचना भेजें', settings_shared_notifications_title: 'साझा आमंत्रण सूचनाएँ', settings_shared_notifications_aria: 'साझा आमंत्रणों के लिए पुश सूचनाएँ', settings_diagnostics_heading: 'निदान', settings_diagnostics_title: 'ऐप और इंजन निदान', settings_diagnostics_desc: 'गति मापें और आवश्यक सेवाओं व इंजन की स्थिति जाँचें। वॉल्ट डेटा नहीं।', settings_diagnostics_aria: 'ऐप की गति मापें', settings_run_diagnostics: 'ऐप जाँच चलाएँ', settings_refresh: 'रीफ़्रेश करें', settings_copy_report: 'रिपोर्ट कॉपी करें', settings_clear_measurements: 'माप हटाएँ'
 };
 
 const pt = {
+  frame_diag_title: "Moldura",
+  frame_diag_description: "Registo local deste separador, desativado por predefinição. Nada é enviado pela rede. Desativá-lo elimina os eventos.",
+  frame_diag_logging: "Registar eventos da moldura",
+  frame_diag_active: "Moldura ativa",
+  frame_diag_permit: "Permissão válida",
+  frame_diag_expiry: "Validade da permissão",
+  frame_diag_idle: "Tempo de inatividade atual",
+  frame_diag_worker: "Worker de notificações pronto",
+  frame_diag_last_lock: "Último bloqueio",
+  frame_diag_unavailable: "Indisponível",
+  frame_diag_none: "Nenhum",
+  frame_diag_count: "{count}/200 eventos · máximo de 7 dias",
+  frame_diag_yes: "Sim",
+  frame_diag_no: "Não",
+  frame_diag_copy: "Copiar relatório",
+  frame_diag_clear: "Limpar",
+  frame_diag_version: "Versão",
+
   settings_digital_card_manage: 'Gerir cartão digital', settings_company_area_title: 'Mostrar área Empresa', settings_company_area_desc: 'Mostra ou oculta a área empresarial sem eliminar dados', settings_shared_credentials_title: 'Credenciais partilhadas', settings_shared_credentials_desc: 'Dados protegidos reutilizáveis em várias Contas', settings_backup_export_title: 'Cópia de segurança cifrada', settings_backup_export_desc: 'Exporta o Cofre e os anexos com uma Chave de recuperação separada', settings_portable_export_title: 'Exportar arquivo portátil', settings_portable_export_desc: 'Cria uma cópia consultável fora da app, protegida por uma palavra-passe dedicada', settings_backup_restore_title: 'Restaurar cópia de segurança', settings_backup_restore_desc: 'Valida primeiro o ficheiro e bloqueia qualquer colisão', settings_credential_health_title: 'Estado das credenciais', settings_credential_health_desc: 'Verifica localmente palavras-passe fracas, duplicadas ou antigas', settings_field_usage_title: 'Utilização dos campos da Conta', settings_field_usage_desc: 'Conta localmente apenas os campos realmente preenchidos', settings_manage_lists_desc: 'Gerir listas e tipos', settings_totp_desc: 'Código através de uma app Authenticator (TOTP)', settings_recovery_codes_title: 'Códigos de recuperação 2FA', settings_recovery_codes_desc: "Geração temporariamente indisponível", settings_recovery_codes_help: "Para problemas ao entrar com 2FA, contacte o suporte. Não envie palavras-passe nem códigos.", settings_master_password_title: 'Palavra-passe principal do Cofre', settings_master_password_desc: 'Altera a palavra-passe principal sem alterar a palavra-passe de acesso', settings_inactivity_desc: 'Bloqueia o Cofre após o período escolhido', settings_revoke_sessions_title: 'Terminar sessão em todos os dispositivos', settings_revoke_sessions_desc: 'Revoga sessões Firebase no PC, tablet e telefone, incluindo esta', settings_deadline_notifications_title: 'Notificações de prazos', settings_check_availability: 'A verificar disponibilidade…', settings_deadline_notifications_aria: 'Notificações push de prazos', settings_test_notification: 'Enviar uma notificação de teste para este dispositivo', settings_shared_notifications_title: 'Notificações de convites partilhados', settings_shared_notifications_aria: 'Notificações push de convites partilhados', settings_diagnostics_heading: 'Diagnóstico', settings_diagnostics_title: 'Diagnóstico da app e motores', settings_diagnostics_desc: 'Mede a velocidade e verifica serviços essenciais e o estado dos motores. Sem dados do Cofre.', settings_diagnostics_aria: 'Medir velocidade da app', settings_run_diagnostics: 'Executar verificações da app', settings_refresh: 'Atualizar', settings_copy_report: 'Copiar relatório', settings_clear_measurements: 'Apagar medições'
 };
 

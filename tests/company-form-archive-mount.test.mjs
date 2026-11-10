@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -45,7 +46,7 @@ function fixture() {
     const store = new Map(Object.entries(documents).map(([path, data]) => [path, {...data}]));
     const hidden = new Set(), pending = new Map(), writes = [], toasts = [], errors = [], transactions = [], confirmations = [];
     const windowState = Object.assign(new EventTarget(), {location: {href: '', pathname: '/form_account_azienda.html', search: '?id=acc-a&aziendaId=c1'}});
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         auth: {currentUser: {uid: 'A'}}, db: {}, functions: {},
         doc: (_db, ...path) => path.join('/'),
         deleteField: () => ({delete: true}),
@@ -83,7 +84,7 @@ function fixture() {
         document: {getElementById: () => null, querySelector: () => null, querySelectorAll: () => [], addEventListener: () => {}},
         window: windowState, history: {back() {}}, sessionStorage: {getItem: () => null},
         URLSearchParams, console: {warn() {}, error() {}}, setTimeout: () => 0
-    });
+    }));
     for (const source of [
         wrap(loadGuard, ['createAccountLoadContext', 'isAccountSaveAllowed', 'assertAccountSaveAllowed', 'DECRYPT_FAILURE_MESSAGE']),
         wrap(utils, ['sharingCycleOf', 'nextSharingCycle', 'inviteIdForGuest']),

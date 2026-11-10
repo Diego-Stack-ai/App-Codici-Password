@@ -1,3 +1,4 @@
+import {confirmFrameAction} from '../core/vault-frame-client.js';
 /**
  * AREA PRIVATA MODULE (V5.0 - Single Orchestrator Compliant)
  * Logica specifica per la dashboard privata (Counters, Top 10, Rubrica).
@@ -9,7 +10,7 @@
  * - Espone initAreaPrivata(user) come entry point unico.
  */
 
-import { db, functions } from '../../firebase-config.js?v=1.2.267';
+import { db, functions } from '../../firebase-config.js?v=1.2.268';
 import { LOG } from '../../logger.js';
 import { collection, doc, addDoc, updateDoc, writeBatch, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -338,6 +339,7 @@ async function deleteContact(uid, id) {
     // Usa showConfirmModal di ui-core (esportata)
     if (!await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg'))) return;
     try {
+        await confirmFrameAction('permanent-delete', {uid, id, scope: 'recipient'});
         const removeContact = httpsCallable(functions, 'deleteContactIfUnused');
         const result = await removeContact({ contactId: id });
         if (!result.data?.deleted) {

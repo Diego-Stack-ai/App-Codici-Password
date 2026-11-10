@@ -176,7 +176,7 @@ assert.match(privateAccountSave, /isProfileEmailPasswordTransferred\(legacyPassw
     'La rimozione della password legacy deve dipendere dalla verifica del trasferimento nella transazione Account');
 assert.doesNotMatch(profileModel.match(/buildProfileAccountLinkDraft[\s\S]+?\n\}/)?.[0] || '', /password/,
     'Il draft Profilo/Account non deve trasferire la password legacy in sessionStorage');
-assert.match(firebaseConfig, /firebaseapp\.com[\s\S]*?location\.replace[\s\S]*?CANONICAL_HOST/, 'Il dominio Firebase alternativo non viene ricondotto all origin canonico');
+assert.match(firebaseConfig, /firebaseapp\.com[\s\S]*?navigateDocument[\s\S]*?CANONICAL_HOST/, 'Il dominio Firebase alternativo non viene ricondotto all origin canonico');
 assert.match(serviceWorker, /cache\.put\(request, response\.clone\(\)\)/, 'Le pagine visitate non vengono conservate per navigazione offline');
 
 assert.doesNotMatch(firestoreRules, /visibility[^\n]+==\s*['"]shared['"]/, 'La visibilità shared concede ancora accesso generico');
