@@ -1,5 +1,9 @@
 # Decisioni
 
+## 10/11/2026 — B3 per singoli passi e canary di sette giorni
+
+Dopo il [GO DIAG](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6758777089), Diego sceglie esplicitamente **7 giorni di canary**, distinti dai 7 giorni massimi del journal. Il Timestamp UTC non è assegnato oggi: verrà concordato all'attivazione, senza rinnovi automatici. Diego carica il workflow e crea personalmente il singleton in console; Codex preparerà in un passo successivo uno script claim una tantum, da sottoporre a Claude prima dell'esecuzione. Il passo attuale termina con la consegna del workflow completo e hash, poi arresto e attesa di approvazione. Nessuna operazione cloud autorizzata da questa consegna. [Mandato](INCARICO_CORRENTE.md#cornice-b3-consegna-workflow-2026-11-10), [procedura](../regole/RILASCIO.md#cornice-b3-piano-2026-11-10). Questa decisione supera la precedente proposta non approvata di 24 ore.
+
 <a id="cornice-diag-decisione-2026-11-10"></a>
 
 ## 10/11/2026 — DIAG prima della prosecuzione B3

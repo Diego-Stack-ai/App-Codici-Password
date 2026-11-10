@@ -1,5 +1,15 @@
 # Collaudi
 
+<a id="cornice-b3-workflow-consegna-2026-11-10"></a>
+
+## Cornice B3 — ricevuta della consegna workflow, nessuna applicazione
+
+Verificato il [GO DIAG di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6758777089) sullo SHA `2d53604ee0662e49389318c31288ef58cc999d82`: il revisore attesta CI #1051 verde per validate/docs/Gitleaks e deploy saltato. Non è una ricevuta di produzione o di prove fisiche.
+
+Rigenerato localmente il file completo con `node scripts/plan-vault-frame-release.mjs --write-proposal`; `Get-FileHash -Algorithm SHA256` conferma **`f08956fc606c554a661a898bd80a9a69b7e89c4becc73db2c169aee3d8d16bb3`**, identico alla proposta revisionata. File e piano rimangono in .codex-tmp/vault-frame-b3-proposal, esclusi da Git; workflow tracciato invariato. Lo scope aggiunto seleziona soltanto Firestore Rules. La durata di 7 giorni scelta da Diego non viene applicata dal workflow; nessun permesso o claim reale configurato.
+
+Questa ricevuta registra soltanto preparazione e consegna: caricamento personale di Diego e verifica hash del blob GitHub ancora da fare; nessun merge, dispatch, deploy, lettura o scrittura Firebase. Controlli della consegna: `npm run test:docs` **12/12 PASS**, 34 MD e 829 collegamenti; `node --test tests/vault-frame-release-plan.test.mjs tests/recovery-canary-plan.test.mjs` **9/9 PASS**. Nessuna nuova regressione runtime per i soli aggiornamenti documentali. Matrice C1 19 × 4 ancora tutta NE.
+
 <a id="cornice-diag-verifiche-2026-11-10"></a>
 
 ## Cornice DIAG — candidata locale, 10/11/2026

@@ -1,5 +1,9 @@
 # Programma
 
+## Cornice: prossimo passo riservato al caricamento del workflow
+
+[DIAG approvata da Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6758777089). Diego riceve il workflow completo, lo carica sul ramo della PR #278 e conferma; Codex si ferma alla consegna. Seguiranno verifica dell'hash/check/revisione finale e approvazioni separate, non un'esecuzione automatica dell'intera B3. Canary scelto per 7 giorni; singleton di Diego in console, futuro script claim una tantum da far rivedere prima di eseguirlo. [Ordine corrente](INCARICO_CORRENTE.md#cornice-b3-consegna-workflow-2026-11-10). C1 resta 19 casi/quattro ambienti tutto NE; nuova grafica separata. I checkpoint seguenti sono storici.
+
 <a id="cornice-diag-roadmap-2026-11-10"></a>
 
 ## Cornice: consegna DIAG prima di B3

@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="cornice-b3-consegna-workflow-2026-11-10"></a>
+
+## B3 — consegna del workflow, arresto dopo il singolo passo
+
+Diego trasmette il [GO DIAG di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6758777089) sul commit `2d53604ee0662e49389318c31288ef58cc999d82` e ordina di procedere un passo alla volta. Passo corrente: consegnare il file completo del workflow da caricare personalmente sul ramo della PR #278, con hash verificato. Dopo la consegna Codex si ferma e attende approvazione; nessuna applicazione del workflow, merge, dispatch o operazione Firebase da questo passo.
+
+Decisioni di Diego: durata del canary **7 giorni**, distinta dalla conservazione DIAG; singleton creato da lui in console seguendo istruzioni successive; claim tramite script una tantum da preparare in un passo successivo e far rivedere a Claude prima di eseguirlo. Il Timestamp UTC effettivo sarà concordato vicino all'attivazione, senza far partire oggi la finestra. Nessuno script amministrativo eseguito o singleton creato ora. [Procedura e gate](../regole/RILASCIO.md#cornice-b3-piano-2026-11-10). I checkpoint seguenti conservano lo storico; prevale questo ordine limitato.
+
 <a id="cornice-diag-incarico-2026-11-10"></a>
 
 ## DIAG prima di B3 — ordine di Diego, candidata da rivedere
