@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -22,6 +23,7 @@ const utils = await sourceModule('../utils.js');
 
 // Esegue il codice applicativo reale sostituendo solo i confini browser/Firebase.
 async function loadController(path, dependencies, exports) {
+    dependencies = withStandaloneFrame(dependencies);
     const source = (await readFile(new URL(path, moduleRoot), 'utf8'))
         .replace(/import\s+(?!\()[\s\S]*?\sfrom\s*['"][^'"]+['"];?/g, '')
         .replace(/export\s+(?=(async\s+)?function|const|let)/g, '');

@@ -23,21 +23,84 @@ onScadenzaDeleted purgeExpiredAuditEvents manageFullVaultRecovery readRecoveryBa
 export const EXCLUDED_FUNCTIONS = Object.freeze(['manageBackupRestoreV2', 'createMfaRecoveryCodes', 'recoverMfaWithCode', 'revokeAllSessions'].sort());
 export function verifyRecoveryCanaryWorkflow(source) {
     const workflow = parseYaml(source), input = workflow.on?.workflow_dispatch?.inputs?.release_scope;
-    assert.deepEqual(input?.options, ['hosting', 'recovery-prerequisites-disabled']);
+    // Accept only complete historical/current contracts or the bounded B3 proposal.
+    // Removing this compatibility after Diego commits the workflow is separate work.
+    const hasMfaResponse = input?.options?.includes('mfa-recovery-response');
+    const hasFrameRules = input?.options?.includes('vault-frame-rules');
+    assert.ok(!hasFrameRules || hasMfaResponse, 'Frame Rules requires the complete current workflow contract');
+    assert.deepEqual(input?.options, ['hosting', 'recovery-prerequisites-disabled',
+        ...(hasMfaResponse ? ['mfa-recovery-response'] : []), ...(hasFrameRules ? ['vault-frame-rules'] : [])]);
     assert.equal(input.type, 'choice'); assert.equal(input.default, 'hosting'); assert.equal(input.required, true);
     const deploy = workflow.jobs?.deploy;
     assert.equal(deploy.if, "github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'");
     assert.equal(deploy.needs, 'validate'); assert.equal(deploy.environment, 'production');
     assert.equal(deploy.concurrency?.group, 'firebase-production'); assert.equal(deploy.concurrency['cancel-in-progress'], false);
-    const backend = deploy.steps.find(step => step.name === 'Recheck master and deploy disabled recovery prerequisites only');
-    const hosting = deploy.steps.find(step => step.name === 'Recheck master and deploy Hosting only');
-    assert.equal(backend?.if, "inputs.release_scope == 'recovery-prerequisites-disabled'");
-    assert.equal(hosting?.if, "inputs.release_scope != 'recovery-prerequisites-disabled'");
+    const uniqueStep = (job, name) => {
+        const matches = job?.steps?.filter(step => step.name === name) || [];
+        assert.equal(matches.length, 1, `Expected exactly one workflow step: ${name}`);
+        return matches[0];
+    };
+    const manual = uniqueStep(workflow.jobs?.validate, 'Verify manual release source');
+    assert.equal(manual.if, "github.event_name == 'workflow_dispatch'");
+    assert.equal(manual.env?.RELEASE_SCOPE, "${{ inputs.release_scope || 'hosting' }}");
+    assert.match(manual.run, hasFrameRules
+        ? /case "\$RELEASE_SCOPE" in hosting\|recovery-prerequisites-disabled\|mfa-recovery-response\|vault-frame-rules\) ;; \*\) exit 1 ;; esac/
+        : hasMfaResponse
+        ? /case "\$RELEASE_SCOPE" in hosting\|recovery-prerequisites-disabled\|mfa-recovery-response\) ;; \*\) exit 1 ;; esac/
+        : /case "\$RELEASE_SCOPE" in hosting\|recovery-prerequisites-disabled\) ;; \*\) exit 1 ;; esac/);
+    assert.match(manual.run, /test "\$GITHUB_REF" = "refs\/heads\/master"/);
+    assert.match(manual.run, /test "\$GITHUB_SHA" = "\$remote_master"/);
+    const backend = uniqueStep(deploy, 'Recheck master and deploy disabled recovery prerequisites only');
+    const hosting = uniqueStep(deploy, 'Recheck master and deploy Hosting only');
+    const manifest = uniqueStep(deploy, 'Verify deployed manifest and critical assets');
+    const mfaName = 'Recheck master and deploy MFA recovery response only';
+    const mfa = hasMfaResponse ? uniqueStep(deploy, mfaName) : null;
+    if (!hasMfaResponse) assert.equal(deploy.steps.filter(step => step.name === mfaName).length, 0);
+    const install = uniqueStep(deploy, 'Install backend deployment dependencies');
+    assert.equal(backend.if, "inputs.release_scope == 'recovery-prerequisites-disabled'");
+    assert.equal(hosting.if, hasMfaResponse ? "inputs.release_scope == 'hosting'" : "inputs.release_scope != 'recovery-prerequisites-disabled'");
+    assert.equal(manifest.if, hasMfaResponse ? "inputs.release_scope == 'hosting'" : "inputs.release_scope != 'recovery-prerequisites-disabled'");
+    if (hasMfaResponse) assert.equal(mfa.if, "inputs.release_scope == 'mfa-recovery-response'");
+    assert.equal(install.if, hasMfaResponse
+        ? "inputs.release_scope == 'recovery-prerequisites-disabled' || inputs.release_scope == 'mfa-recovery-response'"
+        : "inputs.release_scope == 'recovery-prerequisites-disabled'");
+    assert.equal(install.run, 'npm ci --prefix functions');
+    if (hasMfaResponse) assert.equal(mfa.shell, 'bash');
+    if (hasMfaResponse) assert.deepEqual(mfa.env, {FIREBASE_TOKEN: '${{ secrets.FIREBASE_TOKEN }}'});
     assert.match(backend.run, /test "\$GITHUB_SHA" = "\$remote_master"/);
     assert.match(backend.run, /node scripts\/plan-recovery-canary\.mjs --check/);
     assert.match(backend.run, /node scripts\/build-vault-account-backend\.mjs --check/);
     assert.match(backend.run, /^\s*node scripts\/deploy-recovery-prerequisites\.mjs\s*$/m);
     assert.doesNotMatch(backend.run, /--force|--only functions(?:\s|$)/);
+    // Exact commands keep this third scope separate from Hosting and the
+    // disabled recovery-prerequisite census. No caller-provided selectors.
+    if (hasMfaResponse) assert.deepEqual(mfa.run.trim().split(/\r?\n/).map(line => line.trim()), [
+        'set -euo pipefail',
+        'remote_master="$(git ls-remote origin refs/heads/master | cut -f1)"',
+        'test -n "$remote_master"',
+        'test "$GITHUB_SHA" = "$remote_master"',
+        'node scripts/plan-recovery-canary.mjs --check',
+        'node scripts/build-vault-account-backend.mjs --check',
+        'node node_modules/firebase-tools/lib/bin/firebase.js deploy --project appcodici-password --only functions:recoverMfaWithCode --non-interactive --token "$FIREBASE_TOKEN"'
+    ]);
+    const frameName = 'Recheck master and deploy Vault frame Firestore Rules only';
+    const frames = deploy.steps.filter(step => step.name === frameName);
+    assert.equal(frames.length, hasFrameRules ? 1 : 0);
+    if (hasFrameRules) {
+        const frame = frames[0];
+        assert.equal(frame.if, "inputs.release_scope == 'vault-frame-rules'");
+        assert.equal(frame.shell, 'bash');
+        assert.deepEqual(frame.env, {FIREBASE_TOKEN: '${{ secrets.FIREBASE_TOKEN }}'});
+        assert.deepEqual(frame.run.trim().split(/\r?\n/).map(line => line.trim()), [
+            'set -euo pipefail',
+            'remote_master="$(git ls-remote origin refs/heads/master | cut -f1)"',
+            'test -n "$remote_master"',
+            'test "$GITHUB_SHA" = "$remote_master"',
+            'node scripts/plan-recovery-canary.mjs --check',
+            'node scripts/plan-vault-frame-release.mjs --check',
+            'node node_modules/firebase-tools/lib/bin/firebase.js deploy --project appcodici-password --only firestore:rules --non-interactive --token "$FIREBASE_TOKEN"'
+        ]);
+    }
     return true;
 }
 export function verifyRecoveryCanaryContract({indexSource, policy, clientSource, configuration}) {
@@ -81,7 +144,10 @@ export function verifyRecoveryCanaryContract({indexSource, policy, clientSource,
 export function planRecoveryCanary() {
     const contract = verifyRecoveryCanaryContract({indexSource: read('functions/index.js'), policy: RECOVERY_PRODUCTION_POLICY,
         clientSource: read('Frontend/public/assets/js/app-env.js'), configuration: JSON.parse(read('firebase.json'))});
-    verifyRecoveryCanaryWorkflow(read('.github/workflows/firebase-deploy.yml'));
+    const workflowSource = read('.github/workflows/firebase-deploy.yml');
+    verifyRecoveryCanaryWorkflow(workflowSource);
+    const scopes = parseYaml(workflowSource).on.workflow_dispatch.inputs.release_scope.options;
+    const hasMfaResponse = scopes.includes('mfa-recovery-response'), hasFrameRules = scopes.includes('vault-frame-rules');
     const evidenceFiles = ['functions/index.js', 'functions/full-recovery-policy.js', 'functions/full-recovery-production.js',
         'functions/full-recovery-adapter.js', 'functions/full-recovery-runtime.js', 'functions/vault-recovery-fence.js',
         'functions/archive-purge-global-lock.js', 'functions/vault-account-runtime.js', 'functions/package-lock.json',
@@ -91,7 +157,9 @@ export function planRecoveryCanary() {
         stage: 'prerequisites-disabled', ...contract, excludedFunctions: EXCLUDED_FUNCTIONS,
         sourceDigests: Object.fromEntries(evidenceFiles.map(path => [path, createHash('sha256').update(read(path).replace(/\r\n/g, '\n')).digest('hex')])),
         releasePath: {workflow: '.github/workflows/firebase-deploy.yml', lastPublishedCapability: 'hosting-only',
-            candidateCapability: 'manual-hosting-or-disabled-recovery-prerequisites', backendJobPrepared: true, executed: false},
+            candidateCapability: hasFrameRules ? 'manual-hosting-or-disabled-recovery-prerequisites-or-mfa-response-or-frame-rules'
+                : hasMfaResponse ? 'manual-hosting-or-disabled-recovery-prerequisites-or-mfa-response'
+                : 'manual-hosting-or-disabled-recovery-prerequisites', backendJobPrepared: true, executed: false},
         canary: {identityCreated: false, identitySelected: false, uidPattern: 'qa-recovery-*', emailPattern: 'codex.recovery.*@example.invalid',
             disposableAuthUser: true, administrativelyVerifiedSyntheticEmail: true, passwordProvider: true, realAppCheck: true,
             syntheticBackupBoundToSameUid: true, cloudWritesAuthorized: false, qa2WipeOrRotation: false, realUserData: false,

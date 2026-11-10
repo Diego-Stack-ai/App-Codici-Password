@@ -1,3 +1,4 @@
+import {effectiveHostingHeaders} from './lib/hosting-frame-headers.mjs';
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {mkdir, readFile, readdir, writeFile} from 'node:fs/promises';
@@ -114,18 +115,29 @@ export async function readCanonicalVersion(repoRoot = defaultRoot) {
 async function readHostingContract(repoRoot = defaultRoot) {
   const firebase = JSON.parse(await readFile(path.join(repoRoot, 'firebase.json'), 'utf8'));
   const hosting = firebase.hosting;
-  const commonHeaders = hosting.headers?.find(item => item.source === '**')?.headers ?? [];
   const manifestHeaders = hosting.headers?.find(
     item => item.source === `/${manifestName}`
   )?.headers ?? [];
-  const csp = commonHeaders.find(item => item.key === 'Content-Security-Policy')?.value || '';
+  const csp = effectiveHostingHeaders(hosting, '/', {strictSecurity: false})['content-security-policy'] || '';
   const cacheControl = manifestHeaders.find(item => item.key === 'Cache-Control')?.value || '';
   const legacy = hosting.redirects?.find(item => item.source === '/login-v115.html');
   const home = hosting.rewrites?.find(item => item.source === '/home');
   if (!csp || !cacheControl || !legacy || !home) {
     throw new Error('Contratto Hosting incompleto per il rilascio attestato.');
   }
+  let routeSecurityHeaders;
+  if (hosting.headers.some(rule => rule.regex)) {
+    const html = (await listFiles(path.join(repoRoot, 'Frontend', 'public'))).filter(file => file.relative.endsWith('.html')).map(file => '/' + file.relative);
+    // Redirect middleware runs before file response headers. Its status and
+    // same-origin destination are attested separately below, not as a document.
+    const paths = [...new Set(['/', '/home', '/__frame_missing__.html', '/app.html/', '/profilo_privato.html/', ...html])].sort();
+    routeSecurityHeaders = Object.fromEntries(paths.map(pathname => {
+      const value = effectiveHostingHeaders(hosting, pathname);
+      return [pathname, {cspSha256: sha256(value['content-security-policy']), xFrameOptions: value['x-frame-options'], permissionsPolicy: value['permissions-policy']}];
+    }));
+  }
   return {
+    ...(routeSecurityHeaders ? {routeSecurityHeaders} : {}),
     contentSecurityPolicySha256: sha256(csp),
     releaseManifestCacheControl: cacheControl,
     legacyLoginRedirect: {
@@ -195,13 +207,20 @@ async function checkManifest(options) {
   return actual;
 }
 
-async function fetchBytes(url) {
+function verifySecurityHeaders(response, expected, pathname) {
+  if (!expected) return;
+  if (sha256(response.headers.get('content-security-policy') || '') !== expected.cspSha256 ||
+      response.headers.get('x-frame-options') !== expected.xFrameOptions ||
+      response.headers.get('permissions-policy') !== expected.permissionsPolicy) throw Error(`Header pubblici non conformi: ${pathname}`);
+}
+async function fetchBytes(url, security) {
   const response = await fetch(url, {
     cache: 'no-store',
     headers: {'cache-control': 'no-cache'},
     signal: AbortSignal.timeout(remoteRequestTimeoutMs)
   });
   if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
+  verifySecurityHeaders(response, security, new URL(url).pathname);
   return Buffer.from(await response.arrayBuffer());
 }
 
@@ -233,6 +252,7 @@ async function verifyRemoteOnce(baseUrl, expected) {
   });
   const legacyLocation = legacyResponse.headers.get('location') || '';
   if (legacyResponse.status !== expected.hostingContract.legacyLoginRedirect.status
+      || new URL(legacyLocation, `${root}/`).origin !== new URL(root).origin
       || new URL(legacyLocation, `${root}/`).pathname
         !== expected.hostingContract.legacyLoginRedirect.location) {
     throw new Error('Il redirect pubblico login-v115.html -> login.html non e quello atteso.');
@@ -245,6 +265,7 @@ async function verifyRemoteOnce(baseUrl, expected) {
     signal: AbortSignal.timeout(remoteRequestTimeoutMs)
   });
   if (!rootResponse.ok) throw new Error(`${rootUrl}: HTTP ${rootResponse.status}`);
+  verifySecurityHeaders(rootResponse, expected.hostingContract.routeSecurityHeaders?.['/'], '/');
   const csp = rootResponse.headers.get('content-security-policy') || '';
   if (sha256(csp) !== expected.hostingContract.contentSecurityPolicySha256) {
     throw new Error('La CSP pubblica non corrisponde alla configurazione attestata.');
@@ -254,7 +275,7 @@ async function verifyRemoteOnce(baseUrl, expected) {
     throw new Error('La route pubblica / non corrisponde a index.html.');
   }
 
-  const homeBytes = await fetchBytes(`${root}${expected.hostingContract.homeRewrite.source}?verify=${nonce}`);
+  const homeBytes = await fetchBytes(`${root}${expected.hostingContract.homeRewrite.source}?verify=${nonce}`, expected.hostingContract.routeSecurityHeaders?.['/home']);
   if (sha256(homeBytes) !== expected.files[expected.hostingContract.homeRewrite.destination]) {
     throw new Error('La rewrite pubblica /home non corrisponde a home_page.html.');
   }
@@ -267,7 +288,7 @@ async function verifyRemoteOnce(baseUrl, expected) {
       cursor += 1;
       const url = new URL(asset, `${root}/`);
       url.searchParams.set('verify', String(nonce));
-      const bytes = await fetchBytes(url);
+      const bytes = await fetchBytes(url, expected.hostingContract.routeSecurityHeaders?.[asset]);
       if (sha256(bytes) !== expectedHash) throw new Error(`Hash pubblico non valido: ${asset}`);
     }
   };
@@ -276,6 +297,11 @@ async function verifyRemoteOnce(baseUrl, expected) {
   );
   const failed = workers.find(result => result.status === 'rejected');
   if (failed) throw failed.reason;
+  for (const [pathname, headers] of Object.entries(expected.hostingContract.routeSecurityHeaders || {})) {
+    if (pathname === '/' || pathname === '/home' || expected.files[pathname]) continue;
+    const response = await fetch(`${root}${pathname}?verify=${nonce}`, {redirect: 'manual', cache: 'no-store', signal: AbortSignal.timeout(remoteRequestTimeoutMs)});
+    verifySecurityHeaders(response, headers, pathname); await response.arrayBuffer();
+  }
   return remote;
 }
 

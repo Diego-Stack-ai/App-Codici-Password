@@ -52,8 +52,10 @@ export function classifyMicrophoneAccessError(error) {
     return 'audio-capture';
 }
 
-export async function probeMicrophoneAccess({ permissions, mediaDevices } = {}) {
+export async function probeMicrophoneAccess({ permissions, mediaDevices, isActive = () => true } = {}) {
     let permission = 'unknown';
+    const cancelled = () => Object.freeze({ok: false, code: 'microphone-cancelled', permission});
+    if (!isActive()) return cancelled();
     if (permissions?.query) {
         try {
             const result = await permissions.query({ name: 'microphone' });
@@ -61,6 +63,7 @@ export async function probeMicrophoneAccess({ permissions, mediaDevices } = {}) 
         } catch {}
     }
 
+    if (!isActive()) return cancelled();
     if (permission === 'denied') {
         return Object.freeze({ ok: false, code: 'microphone-denied', permission });
     }
@@ -70,7 +73,9 @@ export async function probeMicrophoneAccess({ permissions, mediaDevices } = {}) 
 
     let stream = null;
     try {
+        if (!isActive()) return cancelled();
         stream = await mediaDevices.getUserMedia({ audio: true });
+        if (!isActive()) return cancelled();
         return Object.freeze({ ok: true, permission: 'granted' });
     } catch (error) {
         return Object.freeze({ ok: false, code: classifyMicrophoneAccessError(error), permission });

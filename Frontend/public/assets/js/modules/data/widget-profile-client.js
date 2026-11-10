@@ -1,4 +1,5 @@
-import {auth, functions} from '../../firebase-config.js?v=1.2.261';
+import {confirmFrameAction} from '../core/vault-frame-client.js';
+import {auth, functions} from '../../firebase-config.js?v=1.2.268';
 import {httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
 
 const manageWidgetProfile = httpsCallable(functions, 'manageWidgetProfile');
@@ -8,6 +9,8 @@ async function send(command) {
     const uid = auth.currentUser?.uid;
     if (!uid) throw new Error('WIDGET_SESSION_CHANGED');
     if (!navigator.onLine) throw new Error('I profili Widget si modificano soltanto online.');
+    if (command.action === 'delete') await confirmFrameAction('permanent-delete', {profileId: command.profileId, revision: command.expectedRevision});
+    if (auth.currentUser?.uid !== uid) throw Error('WIDGET_SESSION_CHANGED');
     const response = await manageWidgetProfile({...command, expectedOwnerUid: uid});
     if (response.data?.status !== 'applied') {
         throw new Error(response.data?.status === 'conflict'

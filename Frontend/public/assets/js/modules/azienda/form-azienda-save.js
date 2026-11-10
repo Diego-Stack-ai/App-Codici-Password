@@ -1,4 +1,6 @@
-import { listOwnedAccountInvitesConfirmed } from '../data/vault-repository.js';
+import {bankingRemovalPlan} from '../core/vault-frame-removal-plan.mjs';
+import {confirmFrameAction, vaultFrameClient} from '../core/vault-frame-client.js';
+import { listOwnedAccountInvitesConfirmed, getCompanyAccountConfirmed } from '../data/vault-repository.js';
 import { findProfileAccountItem, patchProfileAccountItem, profileAccountReferences } from '../privato/profile-model.js';
 import { prepareCompanyProfileLink, promptCompanyProfilePasswordChoice } from '../azienda/company-profile-link.js';
 /**
@@ -8,7 +10,7 @@ import { prepareCompanyProfileLink, promptCompanyProfilePasswordChoice } from '.
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.261';
+import { auth, db } from '../../firebase-config.js?v=1.2.268';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteField
@@ -18,7 +20,7 @@ import { t } from '../../translations.js';
 import { inviteIdForGuest, inviteMatchesAccount, inviteScopeForAccount, logError, sanitizeEmail, sharingCycleOf } from '../../utils.js';
 import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { accountModeFromFlags, isOwnerRecipientEmail, preferenceForRecipient, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
-import { formatCardExpiry, hasInvalidCardExpiry } from '../shared/banking-model.js';
+import { formatCardExpiry, hasInvalidCardExpiry, normalizeBankingAccounts } from '../shared/banking-model.js';
 import { linkProfileEmailToAccount, isProfileEmailPasswordTransferred } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { DECRYPT_FAILURE_MESSAGE, assertAccountSaveAllowed, isAccountSaveAllowed } from '../shared/credential-decrypt-guard.js';
@@ -178,6 +180,22 @@ export async function saveAccount({ bankAccounts, invitedEmails, invitePreferenc
 
         // --- ATOMIC TRANSACTION V3.1 ---
         assertAccountSaveAllowed(loadContext);
+        let frameVersion = null;
+        const frameRecordVersion = value => JSON.stringify([value?.revision ?? 0, value?.updatedAt ?? null]);
+        if (vaultFrameClient.isChild() && isEditing) {
+            const before = await getCompanyAccountConfirmed(currentUid, currentAziendaId, currentDocId);
+            frameVersion = frameRecordVersion(before);
+            const removedBanking = bankingRemovalPlan(normalizeBankingAccounts(before || {}), bankAccounts);
+            if (removedBanking.length) await confirmFrameAction('permanent-delete', {id: currentDocId, removedBanking, version: frameVersion});
+            assertAccountSaveAllowed(loadContext);
+            if (auth.currentUser?.uid !== currentUid) throw Error('FRAME_AUTH_DENIED');
+        }
+        if (isSharingActive || resetExistingSharing) {
+            await confirmFrameAction('sharing-change', {uid: currentUid, id: currentDocId || 'new-account',
+                recipients: emailsToInvite, preferences: invitePreferences, reset: resetExistingSharing});
+            assertAccountSaveAllowed(loadContext);
+            if (auth.currentUser?.uid !== currentUid) throw Error('FRAME_AUTH_DENIED');
+        }
         await runTransaction(db, async (transaction) => {
             const accRef = isEditing ? doc(db, colPath, currentDocId) : doc(collection(db, colPath));
             savedAccountId = accRef.id;
@@ -188,6 +206,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, invitePreferenc
             const profileRef = profileContactLinkDraft && !profileContactLinkDraft.sourceCompanyId ? doc(db, 'users', currentUid) : null;
             const profileSnap = profileRef ? await transaction.get(profileRef) : null;
             const oldData = accountSnap?.exists() ? accountSnap.data() : null;
+            if (frameVersion !== null && frameVersion !== frameRecordVersion(oldData)) throw Error('FRAME_TARGET_CHANGED');
             const companyLink = profileContactLinkDraft?.sourceCompanyId ? await prepareCompanyProfileLink(transaction, { uid: currentUid, draft: profileContactLinkDraft, targetId, targetCompanyId: currentAziendaId, oldData, data, isEditing, baseUpdatedAt, passwordChoice: companyPasswordChoice }) : null;
             const contactCollection = profileContactLinkDraft?.contactType === 'phone' ? 'contactPhones' : 'contactEmails';
             let linkedContact = null;

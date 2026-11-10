@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -40,7 +41,7 @@ const backupService = await read('assets/js/modules/settings/backup-export-servi
 
 function usageFixture({online = true, confirmed, cached, failConfirmed = false} = {}) {
     const calls = [];
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         navigator: {onLine: online}, console: {warn() {}}, Date, setTimeout, clearTimeout,
         decrypt: async value => String(value).replace(/^enc:/, ''),
         isEncryptedValue: value => typeof value === 'string' && value.startsWith('enc:'),
@@ -70,7 +71,7 @@ function usageFixture({online = true, confirmed, cached, failConfirmed = false} 
             if (failConfirmed) throw new Error('BACKEND_UNAVAILABLE');
             return confirmed.widgets || [];
         }
-    });
+    }));
     vm.runInContext(`${usageModel}\n${usageService}\nglobalThis.inspectAccountFieldUsage = inspectAccountFieldUsage;`, context);
     return {context, calls, inspect: () => context.inspectAccountFieldUsage('owner')};
 }
@@ -144,9 +145,9 @@ test('T-24: il report salute credenziali resta in memoria, senza segreti e azzer
         created.push(element);
         return element;
     };
-    const context = vm.createContext({createElement, t: testTranslate, tf: testTranslate,
+    const context = vm.createContext(withStandaloneFrame({createElement, t: testTranslate, tf: testTranslate,
         document: {activeElement: null, body: node('body')},
-        setTimeout: () => 1, clearTimeout() {}, console});
+        setTimeout: () => 1, clearTimeout() {}, console}));
     vm.runInContext(`${source}\nglobalThis.showCredentialHealthResults = showCredentialHealthResults;`, context);
     const secret = 'SYNTHETIC-PASSWORD-NOT-RENDERED';
     const report = {scanned: 2, atRisk: 1, unavailable: 0, results: [
@@ -165,16 +166,16 @@ test('T-24: il report salute credenziali resta in memoria, senza segreti e azzer
 // ── 3. Copie file: vCard e backup escono dal controllo dell'app ─────────────
 
 test('T-24: la vCard è un file dell’utente, creato una volta e non ritirabile', async () => {
-    const source = sliceFunction(profileSource, 'downloadVCard');
+    const source = sliceFunction(profileSource, 'saveProfileVCard') + '\n' + sliceFunction(profileSource, 'downloadVCard');
     const downloads = [], revoked = [];
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         Blob: class {constructor(chunks, options) { this.chunks = chunks; this.type = options?.type; }},
         URL: {createObjectURL: blob => { downloads.push(blob); return 'blob:synthetic'; },
             revokeObjectURL: value => revoked.push(value)},
         document: {createElement: tag => ({tag, click() { this.clicked = true; }})},
         getProfileVCard: () => 'BEGIN:VCARD\nFN:Sintetico\nEND:VCARD',
         setTimeout: callback => { callback(); return 1; }
-    });
+    }));
     vm.runInContext(`${source}\nglobalThis.downloadVCard = downloadVCard;`, context);
     context.downloadVCard();
     assert.equal(downloads.length, 1, 'viene creato un oggetto da scaricare');

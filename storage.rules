@@ -23,7 +23,7 @@ service firebase.storage {
     function isRecoveryUnlocked(userId) {
       let path = /databases/(default)/documents/vaultRecoveryLocks/$(userId);
       let lock = firestore.get(path);
-      return !firestore.exists(path) || (
+      return lock == null || (
         lock.data.get('schemaVersion', 0) == 1 &&
         lock.data.get('ownerUid', '') == userId &&
         lock.data.get('status', '') == 'released' &&
@@ -43,7 +43,9 @@ service firebase.storage {
     function isGlobalPurgeUnlocked(userId) {
       let path = /databases/(default)/documents/archivePurgeLocks/$(userId);
       let lock = firestore.get(path);
-      return isRecoveryUnlocked(userId) && (!firestore.exists(path) || (
+      // Mutation callers already require isOwner(), including its recovery fence.
+      // One lookup per lock keeps the request within Storage's two-call budget.
+      return (lock == null || (
         lock.data.get('schemaVersion', 0) == 1 &&
         lock.data.get('ownerUid', '') == userId &&
         lock.data.get('status', '') == 'released'

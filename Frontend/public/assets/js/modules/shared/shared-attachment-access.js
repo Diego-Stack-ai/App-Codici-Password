@@ -1,4 +1,5 @@
-import {functions} from '../../firebase-config.js?v=1.2.261';
+import {confirmFrameAction} from '../core/vault-frame-client.js';
+import {auth, functions} from '../../firebase-config.js?v=1.2.268';
 import {httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
 import {
     decryptAttachmentBytesWithFileKey,
@@ -27,6 +28,10 @@ async function importPublicKey(identity, expectedUid) {
 async function syncAttachmentAccess({scope, ownerUid, companyId = '', accountId, account, attachments, vaultKeyMaterial}) {
     const recipients = acceptedRecipients(account);
     if (!recipients.length || !attachments.length) return {updated: 0, waiting: 0};
+    const missing = attachments.filter(item => item?.id && item.encryption).map(item => ({id: item.id,
+        recipients: recipients.filter(uid => !item.recipientKeyEnvelopes?.[uid])})).filter(item => item.recipients.length);
+    if (!missing.length) return {updated: 0, waiting: 0};
+    let checkFrame = null;
     let updated = 0, waiting = 0;
     for (const attachment of attachments) {
         if (!attachment?.id || !attachment.encryption) continue;
@@ -54,6 +59,9 @@ async function syncAttachmentAccess({scope, ownerUid, companyId = '', accountId,
             fileKeyBytes?.fill(0);
         }
         if (!Object.keys(envelopes).length) continue;
+        if (!checkFrame) checkFrame = await confirmFrameAction('sharing-change', {ownerUid, companyId, accountId, missing}) || (async () => {});
+        await checkFrame();
+        if (auth.currentUser?.uid !== ownerUid) throw Error('FRAME_AUTH_DENIED');
         await httpsCallable(functions, 'publishSharedAttachmentEnvelopes')({
             scope, accountId, attachmentId: attachment.id, envelopes,
             ...(companyId ? {companyId} : {})

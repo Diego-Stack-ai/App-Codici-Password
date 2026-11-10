@@ -22,6 +22,11 @@
       "page": "aggiungi_scadenza.html",
       "selector": "#mode-generali",
       "reason": "Selettore legacy nel contenitore #deadline-mode-selector permanentemente nascosto; sostituito dai domini dinamici."
+    },
+    {
+      "page": "impostazioni.html",
+      "selector": "#btn-regenerate-recovery-codes",
+      "reason": "Comando di generazione temporaneamente disattivato; assistenza collegata nella nota esterna. Nessun handler o generazione automatica disponibili."
     }
   ],
   "criticalFlows": [

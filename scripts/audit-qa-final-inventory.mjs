@@ -10,6 +10,7 @@ const catalogPath = path.join(publicRoot, 'assets', 'js', 'modules', 'assistant'
 const outputPath = path.join(root, 'docs', 'evidenze', 'COLLAUDI.md');
 
 export const FIXTURE_PLANS = Object.freeze({
+    app: 'Cornice A2 spenta: solo pagina inattiva e ritorno Home; nessuna Vault o scrittura. Browser del broker separato con identità sintetica.',
     index: 'Nessuna scrittura; ingresso e inoltro verso Accesso.',
     'login': 'Identità QA verificata, password tecnica e Master Password DPAPI; nessun dato reale.',
     registrati: 'Solo percorso controllato o ambiente isolato; non creare nuove identità durante il passaggio ordinario.',
@@ -75,8 +76,8 @@ function extractStaticFields(html) {
 
 export async function buildQaFinalInventory() {
     const catalog = JSON.parse(await readFile(catalogPath, 'utf8'));
-    const canonicalPages = (await readdir(publicRoot)).filter(name => name.endsWith('.html') && name !== 'prova.html').sort();
-    assert.equal(canonicalPages.length, 30, 'Riesaminare la matrice quando cambia il numero di pagine canoniche');
+    const canonicalPages = (await readdir(publicRoot)).filter(name => name.endsWith('.html')).sort();
+    assert.equal(canonicalPages.length, 31, 'Riesaminare la matrice quando cambia il numero di pagine canoniche');
     assert.deepEqual(catalog.pages.map(page => `${page.pageId}.html`).sort(), canonicalPages,
         'Catalogo Ricerca e pagine canoniche non coincidono');
     assert.deepEqual(Object.keys(FIXTURE_PLANS).sort(), catalog.pages.map(page => page.pageId).sort(),

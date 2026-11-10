@@ -3,6 +3,7 @@
    ========================================================================== */
 
 :root {
+    --header-height: 85px;
     --footer-color: rgba(255, 255, 255, 0.4);
 }
 
@@ -127,8 +128,8 @@
 
 .base-header {
     top: 0;
-    padding-top: env(safe-area-inset-top);
-    height: calc(85px + env(safe-area-inset-top));
+    padding-top: var(--frame-safe-area-inset-top, env(safe-area-inset-top));
+    height: calc(var(--header-height) + var(--frame-safe-area-inset-top, env(safe-area-inset-top)));
     border-radius: 0;
     /* Effetto storico: vetro più solido al bordo e dissolvenza ampia verso il centro. */
     mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
@@ -138,8 +139,8 @@
 
 .base-footer {
     bottom: 0;
-    padding-bottom: env(safe-area-inset-bottom);
-    height: calc(85px + env(safe-area-inset-bottom));
+    padding-bottom: var(--frame-safe-area-inset-bottom, env(safe-area-inset-bottom));
+    height: calc(85px + var(--frame-safe-area-inset-bottom, env(safe-area-inset-bottom)));
     justify-content: space-between;
     border-radius: 0;
     /* Effetto storico speculare: dissolvenza dal bordo inferiore verso il centro. */
@@ -150,7 +151,7 @@
 
 /* --- 2. BILANCIAMENTO CONTENUTI --- */
 .header-balanced-container {
-    height: 85px;
+    height: var(--header-height);
     /* Altezza fissa del contenuto utile indipendentemente dalla notch */
     display: flex;
     align-items: center;
@@ -300,11 +301,11 @@
 
 /* --- 6. UTILITY SPACER (Footer & Header Safety) --- */
 .pb-footer-extra {
-    padding-bottom: calc(120px + env(safe-area-inset-bottom));
+    padding-bottom: calc(120px + var(--frame-safe-area-inset-bottom, env(safe-area-inset-bottom)));
 }
 
 .pt-header-extra {
-    padding-top: calc(100px + env(safe-area-inset-top));
+    padding-top: calc(100px + var(--frame-safe-area-inset-top, env(safe-area-inset-top)));
     /* Spazio sicuro per evitare overlap col header fisso */
 }
 

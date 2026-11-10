@@ -1,4 +1,6 @@
 export default {
+    "frame_export_ready": "Esportazione pronta",
+    "frame_export_action_hint": "Premi Conferma per continuare con il file appena autorizzato.",
     access_credentials: "Credenziali di accesso",
     access_protocol_data: "Dati di accesso e protocollo",
     account_code: "Codice account",

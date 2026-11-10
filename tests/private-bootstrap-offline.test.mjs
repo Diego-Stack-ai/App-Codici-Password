@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -26,9 +27,9 @@ function fixture({online = false, verified = true, tokenVerified = true, refresh
         if (!online) throw new Error('auth/network-request-failed');
     }};
     const auth = {currentUser: user};
-    const context = vm.createContext({...recoveryRoutes, gate: {block() {}, reject:()=>redirects.push('/login.html'), acceptIdentity: () => true},
+    const context = vm.createContext(withStandaloneFrame({navigateDocument: target => redirects.push(target), ...recoveryRoutes, gate: {block() {}, reject:()=>redirects.push('/login.html'), acceptIdentity: () => true},
         authSessionFence: {isCurrent:async()=>fenceCurrent}, fenceTicket: {}, authAttempt: 1, user, auth, navigator: {onLine: online}, currentPage: page, state,
-        window: {location: {pathname: `/${page}.html`, search: '', replace: url => redirects.push(url)}}});
+        window: {location: {pathname: `/${page}.html`, search: '', replace: url => redirects.push(url)}}}));
     const run = vm.runInContext(`(async () => { ${source.slice(start, end)} state.initialized++; })`, context);
     return {run, state, redirects, auth};
 }

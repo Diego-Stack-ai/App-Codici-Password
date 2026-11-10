@@ -1,5 +1,21 @@
 # Sicurezza
 
+<a id="cornice-diag-sicurezza-2026-11-10"></a>
+
+## DIAG — diagnostica locale della cornice, candidata 10/11/2026
+
+Mandato diretto di Diego: passo DIAG sulla PR #278 prima dell'esecuzione B3, senza operazioni Firebase o deploy. Registro separato dalle metriche prestazioni, **spento di default**, volontario e limitato alla singola scheda: sessionStorage, eliminato anche alla chiusura della scheda. Disattivarlo elimina consenso ed eventi. Nessuna telemetria: nessun invio di eventi/rapporto a rete, Firestore, Functions o provider; soltanto copia esplicita negli appunti e cancellazione. Caricare i moduli statici dell'app e il ping locale MessageChannel non trasmette il rapporto.
+
+Ogni evento ha **esattamente** code, at, version, page, environment: codice da allowlist chiusa, tempo numerico, versione canonica, nome pagina da elenco finito senza percorso/query/hash, browser oppure PWA. Motivi di blocco ed errori sono codici fissi, mai testo libero. Codici/campi estranei, URL/ID, versioni/ambienti arbitrari, timestamp futuri e archivi malformati sono rifiutati; non si ripulisce un payload estraneo fingendolo attendibile. Nessun UID/email, ID record/notifica, URL completo, query/hash, token, ticket/nonce Auth, chiavi/grant, contenuto Vault, messaggio/stack originale nel registro o rapporto.
+
+Massimo **200** eventi, soltanto gli ultimi; durata **inferiore a 7 giorni**. Lettura/copia esclude sempre gli scaduti e li rimuove alla prima esecuzione disponibile; una scheda congelata dal browser non può eseguire una cancellazione a orologio. A registro spento non si crea, raccoglie, pota o scrive un buffer: nessun append né archivio automatico. Le sole scritture del consenso avvengono per gesto esplicito; cancellazioni di riservatezza su logout/invalidazione non sono raccolta eventi.
+
+Il consenso è legato a generazione opaca e revisione numerica del fence, metadata locali non inclusi nel rapporto. L'identità canonica è confrontata **soltanto in RAM**, mai salvata dalla DIAG. Logout/null, cambio UID o invalidazione Auth/fence cancellano subito consenso e journal prima degli await e disabilitano la raccolta. Una nuova revisione non può leggere il vecchio registro; una nuova attivazione richiede un gesto. Cambi pagina/sblocchi/timeout Vault non sono logout: non cancellare la cronologia a ogni vault-session-locked. La sola Cancellazione del journal mantiene il consenso ma ruota la generazione, così le risposte pendenti precedenti non lo ricreano.
+
+Import/risposte tardive verificano ancora consenso catturato, documento vivo/proprio figlio e identità/fence locali. pagehide è terminale per il vecchio scrittore; non adottare callback nel successore o dopo BFCache senza nuova inizializzazione. Nessuna eccezione diagnostica deve bloccare o concedere la Vault. Lo storage negato rimane non disponibile, senza ripiego in localStorage/IndexedDB o invio remoto.
+
+Il worker FCM **non persiste** e non possiede chiavi: trasmette soltanto protocollo/codice al client principale selezionato. ACK significa ricevuto dal worker, non solo inviato dal padre. Fallback distingue richiesto, promise risolta ed errore; la risoluzione non prova una nuova finestra PWA. L'osservatore opt-in convalida evento nativo/origine/registrazione FCM attiva/schema e lifecycle dopo l'attesa. Nessun osservatore/delivery = dato non osservato, non PASS inventato. [Contratto UI](INTERFACCIA.md#cornice-diag-ui-2026-11-10), [prove](../evidenze/COLLAUDI.md#cornice-diag-verifiche-2026-11-10).
+
 ## Vincoli della candidata locale — 07/11/2026
 
 Le nuove create di inviti devono usare un'identità v2 vincolata a UID proprietario e risorsa completa; una semplice verifica di esistenza dell'Account non basta a impedire collisioni tra proprietari. Restano compatibili gli inviti legacy già esistenti, non la creazione di nuovi ID legacy da vecchi client. Il rilascio deve coordinare client, Rules e Functions e conservare un rollback coerente.

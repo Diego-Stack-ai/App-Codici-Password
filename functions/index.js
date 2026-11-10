@@ -616,7 +616,6 @@ exports.restoreBackupChunk = onCall(
 // Segreti cifrati (salvati su Google Secret Manager)
 const GMAIL_USER = defineSecret("GMAIL_USER");
 const GMAIL_APP_PASSWORD = defineSecret("GMAIL_APP_PASSWORD");
-const FIREBASE_WEB_API_KEY = "AIzaSyDDt-PacoHtUQg6Ow7-1UxvrGVZLXVYx-o";
 
 exports.createMfaRecoveryCodes = onCall(
     { region: "europe-west1", enforceAppCheck: true },
@@ -645,10 +644,10 @@ exports.recoverMfaWithCode = onCall(
     { region: "europe-west1", enforceAppCheck: true },
     async (request) => {
         const email = String(request.data?.email || "").trim().toLowerCase();
-        const password = String(request.data?.password || "");
-        if (!email || !password || normalizeRecoveryCode(request.data?.recoveryCode).length !== 16) {
+        if (!email || normalizeRecoveryCode(request.data?.recoveryCode).length !== 16) {
             throw new HttpsError("invalid-argument", "Dati di recupero non validi.");
         }
+        const recoveryUnavailableMessage = "Recupero non disponibile. Se i dati sono corretti contatta l’assistenza. Nessun codice è stato consumato.";
 
         const db = admin.firestore();
         const ipAddress = request.rawRequest?.ip || request.rawRequest?.socket?.remoteAddress || "unknown";
@@ -661,7 +660,7 @@ exports.recoverMfaWithCode = onCall(
                 next = nextRecoveryAttemptState(attemptSnap.exists ? attemptSnap.data() : null);
             } catch (error) {
                 if (error?.message !== 'RECOVERY_ATTEMPT_STATE') throw error;
-                throw new HttpsError("failed-precondition", "Recupero non disponibile: verifica dello stato di sicurezza necessaria. Nessun codice consumato.");
+                throw new HttpsError("failed-precondition", recoveryUnavailableMessage);
             }
             recoveryAttemptAllowed = next.allowed;
             transaction.set(attemptRef, {
@@ -676,33 +675,7 @@ exports.recoverMfaWithCode = onCall(
             throw new HttpsError("resource-exhausted", "Troppi tentativi. Riprova più tardi.");
         }
 
-        // Verifica il primo fattore con Firebase Auth senza creare una sessione applicativa.
-        const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_WEB_API_KEY}`, {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ email, password, returnSecureToken: true })
-        });
-        const authResult = await response.json();
-        const authenticatedUid = authResult?.localId;
-        const firstFactorAccepted = response.ok && typeof authenticatedUid === "string" &&
-            authenticatedUid.length > 0 && !authenticatedUid.includes("/") &&
-            (typeof authResult.idToken === "string" && authResult.idToken.length > 0 ||
-                typeof authResult.mfaPendingCredential === "string" && authResult.mfaPendingCredential.length > 0);
-        if (!firstFactorAccepted) throw new HttpsError("permission-denied", "Credenziali o codice di recupero non validi.");
-
-        const user = await admin.auth().getUser(authenticatedUid);
-        if (user.uid !== authenticatedUid || user.disabled ||
-            typeof user.email !== "string" || user.email.trim().toLowerCase() !== email) {
-            throw new HttpsError("permission-denied", "Credenziali o codice di recupero non validi.");
-        }
-        const enrolledFactors = Array.isArray(user.multiFactor?.enrolledFactors)
-            ? user.multiFactor.enrolledFactors : [];
-        if (enrolledFactors.length === 0) {
-            throw new HttpsError("failed-precondition",
-                "Nessun secondo fattore attivo da recuperare. Nessun codice è stato consumato.");
-        }
-        throw new HttpsError("failed-precondition",
-            "Recupero MFA automatico non disponibile. Contatta l'assistenza: nessun codice è stato consumato.");
+        throw new HttpsError("failed-precondition", recoveryUnavailableMessage);
     }
 );
 

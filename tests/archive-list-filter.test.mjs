@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -30,7 +31,7 @@ const deferred = () => { let resolve; return {promise: new Promise(done => { res
 
 test('T-30: la query dell\'Archivio privato filtra i soli archiviati', async () => {
     const captured = [];
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         db: {__db: true},
         collection: (_db, ...path) => ({__collection: path.join('/')}),
         where: (field, operator, value) => ({__where: [field, operator, value]}),
@@ -44,7 +45,7 @@ test('T-30: la query dell\'Archivio privato filtra i soli archiviati', async () 
         getDocsServerConfirmed: async () => ({docs: []}),
         getDocServerConfirmed: async () => ({exists: () => false}),
         console: {warn() {}}
-    });
+    }));
     // `strip` toglie `export`: le costanti restano legami lessicali, quindi il
     // banco le espone esplicitamente invece di cercarle sul contesto.
     vm.runInContext(`${repository}\nglobalThis.__repository = {listArchivedPrivateAccounts};`, context);
@@ -69,7 +70,7 @@ function fixture({privateAccounts = {}, companies = {}, companyAccounts = {}, ho
     const listeners = new Map();
     const reads = [];
     const auth = {currentUser: {uid: 'A'}};
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         auth, db: {}, functions: {}, deleteField: () => ({delete: true}),
         doc: (_db, ...path) => path.join('/'),
         httpsCallable: () => async () => ({data: {}}),
@@ -98,7 +99,7 @@ function fixture({privateAccounts = {}, companies = {}, companyAccounts = {}, ho
         },
         getCompany: async (uid, companyId) =>
             (companies[uid] || []).find(company => company.id === companyId) || null
-    });
+    }));
     vm.runInContext(archiveModel, context);
     vm.runInContext(service, context);
     return {context, auth, reads,

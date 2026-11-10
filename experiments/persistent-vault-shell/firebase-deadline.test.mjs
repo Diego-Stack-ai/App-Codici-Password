@@ -29,7 +29,7 @@ assert.ok(end > start, 'Canonical deletion function boundary has changed');
 const deletionSource = source.slice(start, end);
 assert.match(deletionSource, /await runTransaction\(db, async transaction =>/);
 assert.doesNotMatch(deletionSource, /getUserProfile|writeBatch/);
-const createDeletion = new Function('db', 'doc', 'deleteDoc', 'runTransaction', deletionSource + '; return deleteScadenza;');
+const createDeletion = new Function('db', 'doc', 'deleteDoc', 'runTransaction', 'confirmFrameAction = async () => undefined', deletionSource + '; return deleteScadenza;');
 
 test('canonical deadline deletion uses real SDK optimistic retries in the demo emulator', {timeout: 120000}, async t => {
     const clients = [];

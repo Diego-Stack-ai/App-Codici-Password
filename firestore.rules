@@ -78,6 +78,18 @@ service cloud.firestore {
       return request.auth.uid in resource.data.get('sharedReadyRecipientUids', []);
     }
 
+    // Singleton cohort is provisioned only by an approved server operator.
+    // It is intentionally outside the owner-writable users subtree.
+    match /vaultFramePolicy/current {
+      allow get: if hasVerifiedEmail()
+        && resource.data.keys().hasOnly(['schemaVersion', 'version', 'uid', 'enabled', 'expiresAt'])
+        && resource.data.schemaVersion == 1 && resource.data.version == 1
+        && resource.data.uid == request.auth.uid && resource.data.enabled == true
+        && resource.data.expiresAt is timestamp && request.time < resource.data.expiresAt
+        && isRecoveryUnlocked(request.auth.uid);
+      allow list, create, update, delete: if false;
+    }
+
     // Solo Cloud Functions (Admin SDK) può leggere o scrivere i codici di recupero.
     match /mfaRecovery/{userId} {
       allow read, write: if false;

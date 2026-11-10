@@ -1,4 +1,5 @@
-import { db, functions } from '../../firebase-config.js?v=1.2.261';
+import {confirmFrameAction} from '../core/vault-frame-client.js';
+import { db, functions } from '../../firebase-config.js?v=1.2.268';
 import { addDoc, collection, doc, httpsCallable, serverTimestamp, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
@@ -132,6 +133,7 @@ function usageMessage(usage = {}) {
 async function deleteContact(contact) {
     if (!await showConfirmModal(t('recipient_delete_title'), formatTranslation('recipient_delete_message', {name: contact.nome || contact.email}))) return;
     try {
+        await confirmFrameAction('permanent-delete', {id: contact.id, scope: 'recipient'});
         const removeContact = httpsCallable(functions, 'deleteContactIfUnused');
         const result = await removeContact({ contactId: contact.id });
         if (!result.data?.deleted) {

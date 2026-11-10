@@ -1,4 +1,5 @@
-import { auth, db, functions } from '../../firebase-config.js?v=1.2.261';
+import {confirmFrameAction} from '../core/vault-frame-client.js';
+import { auth, db, functions } from '../../firebase-config.js?v=1.2.268';
 import { deleteField, doc, httpsCallable, onAuthStateChanged, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createArchiveMetadata } from './archive-account-model.js';
@@ -274,6 +275,7 @@ export async function restoreArchivedAccount(uid, account, options = {}) {
 export async function archiveAccount(uid, account, options = {}) {
     const target = accountIdentity(account);
     return withArchiveSession(uid, options, async check => {
+        await confirmFrameAction('sharing-change', {id: target.id, context: target.context, companyId: target.companyId, revision: target.revision});
         check();
         const invalid = code => Object.assign(new Error(code), {code});
         const revisionOf = value => {
@@ -410,6 +412,8 @@ export async function executeArchiveDeletion(plan, {retry = false} = {}) {
     if (state.blocked) throw deletionError('ARCHIVE_DELETION_BLOCKED', state);
     if (state.uncertain && retry !== true) throw deletionError('ARCHIVE_RETRY_REQUIRED', state, true);
     state.inFlight = true;
+    try {await confirmFrameAction('permanent-delete', {commands: state.commands}); check();}
+    catch (error) {state.inFlight = false; throw error;}
     try {
         const purgeAccount = httpsCallable(functions, 'purgeArchivedAccount');
         while (state.confirmedCount < state.totalCount) {

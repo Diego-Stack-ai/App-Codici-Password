@@ -30,6 +30,7 @@ function sessionFixture() {
         name, (...args) => webcrypto.subtle[name](...args)
     ]));
     const context = vm.createContext({
+        vaultFrameClient: {isChild: () => false, onClear() {}},
         window: {addEventListener() {}},
         sessionStorage, crypto: {subtle, getRandomValues: array => webcrypto.getRandomValues(array)},
         TextEncoder, TextDecoder, Uint8Array, Date,
@@ -97,9 +98,11 @@ function securityFixture(overrides = {}) {
     let authObserver;
     const saves = [];
     const context = vm.createContext({
+        vaultFrameClient: {isChild: () => false, onClear() {}},
         window: {addEventListener() {}}, localStorage: storage(), auth,
         onAuthStateChanged: (_auth, callback) => { authObserver = callback; },
-        clearVaultSession() {},
+        frameMediaLifetime: () => ({valid: () => true, dispose() {}, signal: undefined}), confirmFrameAction: async () => undefined,
+        clearVaultSession() {}, getVaultSessionExpiry: () => null,
         restoreVaultSession: async () => null,
         saveVaultSession: async (...args) => { saves.push(args); return true; },
         showToast() {}, passwordPolicyMessage: () => 'fixture-policy',
@@ -247,4 +250,60 @@ test('session expiry reached during decryption prevents key delivery', async () 
     pause.release.resolve();
     assert.equal(await restoring, null);
     assert.equal(f.sessionStorage.getItem('vault_session_v1'), null);
+});
+
+for (const change of ['uid', 'fence', 'generation']) test(`real manager refuses frame adoption after changed ${change}`, async () => {
+    const pause = deferred(); let generation = 0, fence = true, locks = 0;
+    const client = {isChild: () => true, onClear() {}, generation: () => generation,
+        isUnlocked: () => true, request: () => pause.promise, lock: () => {locks++;}};
+    const f = securityFixture({vaultFrameClient: client,
+        authSessionFence: {readPermit: async () => ({}), isCurrent: async () => fence}});
+    const unlocking = f.run('ensureVaultKeyMaterial()');
+    await new Promise(resolve => setImmediate(resolve));
+    if (change === 'uid') f.auth.currentUser = {uid: 'uid-b'};
+    if (change === 'fence') fence = false;
+    if (change === 'generation') generation++;
+    pause.resolve({kind: 'key', material: 'synthetic-frame-material'});
+    await assert.rejects(unlocking);
+    assert.equal(f.run('_vaultKeyMaterial'), null); assert.equal(f.saves.length, 0); assert.equal(locks, 1);
+});
+test('real manager routes forceReload to fresh owner confirmation and stores the frame copy only in RAM', async () => {
+    const commands = [];
+    const client = {isChild: () => true, onClear() {}, generation: () => 0, isUnlocked: () => true,
+        request: async command => {commands.push(command);return {kind: 'key', material: 'synthetic-frame-material'};}};
+    const f = securityFixture({vaultFrameClient: client,
+        authSessionFence: {readPermit: async () => ({}), isCurrent: async () => true}});
+    assert.equal(await f.run('ensureVaultKeyMaterial()'), 'synthetic-frame-material');
+    assert.equal(await f.run('ensureVaultKeyMaterial({forceReload: true})'), 'synthetic-frame-material');
+    assert.deepEqual(commands, ['key', 'rekey']); assert.equal(f.saves.length, 0);
+});
+
+test('real manager cached frame key denies an already pending tombstone without an event', async () => {
+    const fenceSource = await readFile(new URL('../../auth-session-fence.js', root), 'utf8');
+    const {createAuthSessionFence} = await import(`data:text/javascript;base64,${Buffer.from(fenceSource).toString('base64')}`);
+    let state = {revision:1,nonce:'synthetic-fence',denied:false}; const pending = new Set();
+    const fence = createAuthSessionFence({transact: async change => (state=change(state)), pending: () => [...pending]});
+    const commands = [];
+    const client = {isChild: () => true, onClear() {}, generation: () => 0, isUnlocked: () => true, lock() {},
+        request: async command => {commands.push(command);return {kind:'key',material:'synthetic-frame-material'};}};
+    const f = securityFixture({vaultFrameClient: client, authSessionFence: fence});
+    await f.run('ensureVaultKeyMaterial()'); await f.run('ensureVaultKeyMaterial()'); assert.equal(commands.length, 1);
+    pending.add('synthetic-logout');
+    await assert.rejects(f.run('ensureVaultKeyMaterial()'));
+    assert.equal(f.run('_vaultKeyMaterial'), null); assert.equal(commands.length, 1);
+});
+
+for (const interrupt of [false,true]) test(`master change revalidates before write and revokes frame material (${interrupt})`,async()=>{
+ let active=true,prompts=0,writes=0,fresh=0,locks=0;
+ const lifetime={valid:()=>active,dispose(){active=false;},signal:new AbortController().signal};
+ const f=securityFixture({frameMediaLifetime:()=>lifetime,
+  vaultFrameClient:{isChild:()=>true,onClear(){},lock(){locks++;}},confirmFrameAction:async()=>{fresh++;},
+  showInputModal:async()=>{prompts++;if(interrupt&&prompts===2)active=false;return prompts===1?'old':'new-password';},
+  evaluatePassword:()=>({valid:true}),unwrapVaultKey:async()=> 'synthetic-key',wrapVaultKey:async()=>({synthetic:true}),createVaultVerifier:async()=> 'synthetic-verifier',
+  doc:()=>({}),db:{},setDoc:async()=>{writes++;}});
+ f.run('verifyMasterPassword=async()=>true;loadVaultEnvelope=async()=>({synthetic:true});');
+ if(interrupt)await assert.rejects(f.run('changeMasterPassword()'),/FRAME_CONFIRMATION_REQUIRED/);
+ else assert.equal(await f.run('changeMasterPassword()'),true);
+ assert.equal(writes,interrupt?0:1);assert.equal(fresh,interrupt?0:1);assert.equal(prompts,interrupt?2:3);
+ if(!interrupt){assert.equal(locks,1);assert.equal(f.run('_vaultKeyMaterial'),null);}
 });

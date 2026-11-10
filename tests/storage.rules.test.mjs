@@ -54,6 +54,45 @@ test('il proprietario può caricare, leggere ed eliminare un file consentito', a
   await assertSucceeds(deleteObject(objectRef));
 });
 
+test('upload cifrato: lock recovery e purge assenti o rilasciati, attivi e malformati', async () => {
+  const storage = testEnv.authenticatedContext(OWNER_UID).storage();
+  const states = ['missing', 'released', 'active', 'malformed'];
+  const planDigest = 'b'.repeat(64);
+  const recovery = {schemaVersion: 1, ownerUid: OWNER_UID, operationId: 'upload-regression',
+    planDigest, digest: createHash('sha256')
+      .update(JSON.stringify([1, OWNER_UID, 'upload-regression', planDigest])).digest('hex')};
+  const setLock = (collection, state, fields) => testEnv.withSecurityRulesDisabled(context => {
+    const target = doc(context.firestore(), collection, OWNER_UID);
+    return state === 'missing' ? deleteDoc(target) : setDoc(target, {
+      ...fields, status: state === 'active' ? 'active' : 'released',
+      ...(state === 'malformed' ? {ownerUid: OTHER_UID} : {})
+    });
+  });
+  try {
+    for (const recoveryState of states) {
+      for (const purgeState of states) {
+        await setLock('vaultRecoveryLocks', recoveryState, recovery);
+        await setLock('archivePurgeLocks', purgeState, {schemaVersion: 1, ownerUid: OWNER_UID});
+        const target = ref(storage, `users/${OWNER_UID}/accounts/upload-regression/attachments/${recoveryState}-${purgeState}.bin`);
+        const upload = uploadBytes(target, new Uint8Array([4, 2]), {
+          contentType: 'application/octet-stream', customMetadata: {encrypted: 'v1'}
+        });
+        const allowed = ['missing', 'released'].includes(recoveryState) &&
+          ['missing', 'released'].includes(purgeState);
+        if (allowed) {
+          await assertSucceeds(upload);
+          await assertSucceeds(deleteObject(target));
+        } else {
+          await assertFails(upload);
+        }
+      }
+    }
+  } finally {
+    await setLock('vaultRecoveryLocks', 'missing', {});
+    await setLock('archivePurgeLocks', 'missing', {});
+  }
+});
+
 test('M7: il lock globale attivo blocca creazione, modifica e cancellazione Storage ma non la lettura', async () => {
   const storage = testEnv.authenticatedContext(OWNER_UID).storage();
   const existing = ref(storage, `users/${OWNER_UID}/accounts/m7/attachments/existing.pdf`);

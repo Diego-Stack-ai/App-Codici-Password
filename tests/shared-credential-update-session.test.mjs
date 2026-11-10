@@ -6,10 +6,12 @@ async function fixture() {
     const key = `sharedClient${Math.random().toString(36).slice(2)}`;
     let release;
     const gate = new Promise(resolve => { release = resolve; });
-    const f = {auth: {currentUser: {uid: 'owner'}}, calls: [], release};
+    const f = {auth: {currentUser: {uid: 'owner'}}, calls: [], release, confirmFrameAction: async () => {}};
     f.encrypt = async value => { await gate; return `cipher:${value}`; };
     globalThis[key] = f;
-    const prefix = `const {auth, encrypt, calls} = globalThis['${key}'];
+    const prefix = `const globalState = globalThis['${key}'];
+const {auth, encrypt, calls} = globalState;
+const confirmFrameAction = (...args) => globalState.confirmFrameAction(...args);
 const functions = {}, navigator = {onLine:true};
 const httpsCallable = () => async command => { calls.push(command); return {data:{status:'applied'}}; };
 const ensureVaultKeyMaterial = async () => 'fixture-key';
@@ -74,5 +76,14 @@ test('shared creation keeps the initiating session through encryption', async ()
             await assert.rejects(saving, /Sessione cambiata/);
             assert.equal(f.calls.length, 0);
         }
+    }
+});
+
+test('shared mutation is not sent when the frame confirmation is denied or the UID changes during it', async () => {
+    for (const changed of [false, true]) {
+        const f = await fixture();
+        f.confirmFrameAction = async () => {if (changed) f.auth.currentUser={uid:'other'};else throw Error('FRAME_CONFIRMATION_REQUIRED');};
+        await assert.rejects(f.client.deleteSharedCredential('shared', 4));
+        assert.equal(f.calls.length, 0);
     }
 });

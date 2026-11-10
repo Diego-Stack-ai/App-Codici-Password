@@ -1,4 +1,5 @@
-import {auth, storage} from '../../firebase-config.js?v=1.2.261';
+import {confirmFrameAction} from '../core/vault-frame-client.js';
+import {auth, storage} from '../../firebase-config.js?v=1.2.268';
 import {createBackupExportBuffer, createBackupRecordBuffer} from './backup-export-buffer.js';
 import {getBytes, ref, onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {
@@ -191,6 +192,8 @@ export async function exportOwnerBackup(uid, options = {}) {
     let sink, records, storagePaths, recoveryKey = '';
     try {
         sink = await openSink(`codici-password-${date}.cpbackup`, check);
+        check();
+        await confirmFrameAction('backup-export', {uid, profile: 'owner-backup'});
         check();
         recoveryKey = generateRecoveryKey();
         const header = createBackupHeader(uid);

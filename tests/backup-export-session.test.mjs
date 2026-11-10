@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -28,7 +29,7 @@ function fixture(stopAt) {
         btoa: value => Buffer.from(value, 'binary').toString('base64'),
     };
     for (const name of ['listBackupCompanies', 'listBackupCompanyAccounts', 'listBackupCompanyAttachments', 'listBackupAccountWidgets', 'listBackupAccountWidgetProfiles', 'listBackupContacts', 'listBackupDeadlines', 'listBackupPrivateAccounts', 'listBackupPrivateAttachments', 'listBackupProfileWidgets', 'listBackupSettings', 'listBackupSharedVaultData', 'listBackupSharedVaultLinks']) context[name] = async () => [];
-    vm.createContext(context); vm.runInContext(source, context);
+    vm.createContext(withStandaloneFrame(context)); vm.runInContext(source, context);
     return {context, observers, writes, stats: () => ({aborted, closed, encrypted})};
 }
 

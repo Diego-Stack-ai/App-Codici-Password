@@ -1,3 +1,4 @@
+import {createFrameMediaLifetime} from '../core/vault-frame-media-lifetime.mjs';
 import {t} from '../../translations.js';
 
 const CARD_RATIO = 1012 / 638;
@@ -63,15 +64,21 @@ function renderFullResolution(source, adjustment) {
     return target;
 }
 
-export async function captureCardPhoto() {
+export async function captureCardPhoto({signal, isActive = () => true} = {}) {
+    const lifetime = signal ? createFrameMediaLifetime({window, document, signal, isCurrent: isActive}) : {signal: undefined, valid: () => true, dispose() {}};
+    let stream = null, stopped = false;
+    const stopStream = () => {if (!stopped && stream) {stopped = true; stream.getTracks().forEach(track => track.stop());}};
+    try {
     if (!navigator.mediaDevices?.getUserMedia) throw new Error('CAMERA_NOT_SUPPORTED');
     await ensureCardCameraStyles();
-    const stream = await navigator.mediaDevices.getUserMedia({video: {
+    if (!lifetime.valid()) return null;
+    stream = await navigator.mediaDevices.getUserMedia({video: {
         facingMode: {ideal: 'environment'},
         width: {ideal: CAMERA_IDEAL_SIZE.width},
         height: {ideal: CAMERA_IDEAL_SIZE.height}
     }, audio: false});
-    return new Promise(resolve => {
+    if (!lifetime.valid()) return null;
+    return await new Promise(resolve => {
         const overlay = document.createElement('div'); overlay.className = 'card-camera-overlay';
         const video = document.createElement('video'); video.className = 'card-camera-video'; video.autoplay = true; video.muted = true; video.playsInline = true; video.srcObject = stream;
         const frame = document.createElement('div'); frame.className = 'card-camera-frame';
@@ -88,7 +95,14 @@ export async function captureCardPhoto() {
         let previewing = false;
         const pointers = new Map();
         let previousCenter = null, previousDistance = 0;
-        const finish = value => {window.removeEventListener('pagehide', cancelCapture); stream.getTracks().forEach(track => track.stop()); overlay.remove(); document.body.classList.remove('card-camera-open'); resolve(value);};
+        let finished = false;
+        const finish = value => {
+            if (finished) return; finished = true; const permitted = lifetime.valid();
+            window.removeEventListener('pagehide', cancelCapture); lifetime.signal?.removeEventListener('abort', cancelCapture);
+            stopStream(); video.pause(); video.srcObject = null;
+            source.width = source.height = preview.width = preview.height = 0;
+            overlay.remove(); document.body.classList.remove('card-camera-open'); resolve(permitted ? value : null);
+        };
         const cancelCapture = () => finish(null);
         const refresh = () => {
             adjustment = renderAdjusted(source, preview, adjustment);
@@ -134,15 +148,21 @@ export async function captureCardPhoto() {
         const endPointer = event => {pointers.delete(event.pointerId); resetGesture();};
         preview.addEventListener('pointerup', endPointer); preview.addEventListener('pointercancel', endPointer);
         zoom.addEventListener('input', () => {adjustment.zoom = Number(zoom.value); refresh();});
+        lifetime.signal?.addEventListener('abort', cancelCapture, {once: true});
+        if (!lifetime.valid()) {finish(null); return;}
         window.addEventListener('pagehide', cancelCapture, {once: true}); cancel.addEventListener('click', () => finish(null)); shoot.addEventListener('click', showPreview); retake.addEventListener('click', showLive);
         use.addEventListener('click', () => {
+            if (finished || !lifetime.valid()) {finish(null); return;}
             const output = renderFullResolution(source, adjustment);
             output.toBlob(blob => {
                 output.width = output.height = 0;
+                if (finished || !lifetime.valid()) {finish(null); return;}
                 finish(blob ? new File([blob], `tessera-${Date.now()}.jpg`, {type: 'image/jpeg'}) : null);
             }, 'image/jpeg', .98);
         });
         controls.append(cancel, shoot, retake, use); frame.append(preview); overlay.append(video, frame, help, zoom, controls); document.body.append(overlay); document.body.classList.add('card-camera-open');
         video.play().catch(() => finish(null));
     });
+    } catch (error) {if (!lifetime.valid()) return null; throw error;}
+    finally {stopStream(); lifetime.dispose();}
 }

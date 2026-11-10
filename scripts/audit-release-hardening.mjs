@@ -1,3 +1,4 @@
+import {effectiveHostingHeaders, FRAME_CHILD_PATHS} from './lib/hosting-frame-headers.mjs';
 import assert from 'node:assert/strict';
 import {existsSync, readFileSync, readdirSync} from 'node:fs';
 
@@ -16,7 +17,7 @@ const workflows = readdirSync(workflowDirectory)
   .filter(name => /\.ya?ml$/i.test(name))
   .map(name => ({name, source: read(`.github/workflows/${name}`)}));
 
-const headers = firebase.hosting?.headers?.find(item => item.source === '**')?.headers ?? [];
+const headers = Object.entries(effectiveHostingHeaders(firebase.hosting, '/')).map(([key, value]) => ({key, value}));
 const header = name => headers.find(item => item.key.toLowerCase() === name.toLowerCase())?.value;
 const csp = header('Content-Security-Policy') ?? '';
 
@@ -34,6 +35,14 @@ assert.doesNotMatch(scriptPolicy, /cdnjs\.cloudflare\.com/,
 assert.match(csp, /(?:^|;)\s*object-src 'none'/, 'CSP object-src deve negare i plugin');
 assert.match(csp, /(?:^|;)\s*base-uri 'self'/, 'CSP base-uri deve essere confinata');
 assert.match(csp, /(?:^|;)\s*form-action 'self'/, 'CSP form-action deve essere confinata');
+for (const path of ['/', '/home', '/app.html', '/profilo_privato.html/', ...FRAME_CHILD_PATHS]) {
+  const value = effectiveHostingHeaders(firebase.hosting, path);
+  const child = FRAME_CHILD_PATHS.includes(path);
+  assert.equal(value['x-frame-options'], child ? 'SAMEORIGIN' : 'DENY', path);
+  assert.match(value['content-security-policy'], child ? /frame-ancestors 'self';/ : /frame-ancestors 'none';/, path);
+  const sources = value['content-security-policy'].match(/frame-src ([^;]+)/)[1].split(/\s+/);
+  assert.equal(sources.includes("'self'"), path === '/app.html', path);
+}
 assert.match(firestore, /request\.auth\.uid/, 'Firestore Rules senza vincolo UID');
 assert.match(storage, /request\.auth\.uid/, 'Storage Rules senza vincolo UID');
 assert.equal(packageLock.lockfileVersion >= 3, true, 'package-lock obsoleto');

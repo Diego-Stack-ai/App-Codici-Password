@@ -768,7 +768,7 @@
 .form-section .base-dropdown-item {
     background: rgba(30, 64, 175, 0.25);
     /* Blu medio bilanciato */
-    border: 1px solid rgb(var(--accent-rgb) / );
+    border: 1px solid rgba(var(--accent-rgb), 0.2 );
     border-radius: 14px;
     padding: 0.85rem 1rem;
     margin-bottom: 0;
@@ -782,13 +782,13 @@
 .form-section .base-dropdown-item:hover {
     background: rgba(30, 64, 175, 0.45);
     /* Più intenso all'hover */
-    border-color: rgb(var(--accent-rgb) / );
+    border-color: rgba(var(--accent-rgb), 0.5 );
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .form-section .base-dropdown-item.active {
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.1 );
     border-color: var(--accent);
     color: var(--accent);
 }
@@ -830,7 +830,7 @@
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.1 );
     color: var(--accent);
     display: flex;
     align-items: center;
@@ -976,7 +976,7 @@
 
 /* --- 8. PAGE SPECIFIC COMPRESSION --- */
 .page-container.pt-header-extra {
-    padding-top: calc(85px + env(safe-area-inset-top));
+    padding-top: calc(85px + var(--frame-safe-area-inset-top, env(safe-area-inset-top)));
     /* Ridotto da 100px */
 }
 

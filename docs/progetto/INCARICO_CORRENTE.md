@@ -1,14 +1,221 @@
 # Incarico corrente
 
-<a id="prove-grafiche-ui-2026-11-09"></a>
+<a id="cornice-b3-consegna-workflow-2026-11-10"></a>
 
-## Prove grafiche UI parallele — 09/11/2026
+## B3 — consegna del workflow, arresto dopo il singolo passo
 
-Dopo l'analisi visiva dell'app (sola lettura: troppi effetti sovrapposti, contrasto debole nel tema chiaro, gerarchia del testo poco chiara, dettagli che sembrano form), Diego sceglie la soluzione B, «tre direzioni diverse sulla stessa pagina», e ordina il commit sul ramo di lavoro. Sono autorizzate tre pagine di prova separate in `experiments/ui-prove/` («Rifinita», «Stile iPhone», «Scura sicura») per l'elenco degli Account privati e il relativo dettaglio, con dati inventati, tema chiaro/scuro e interazioni in memoria. Si aprono servendo la radice del repository (ad esempio `python3 -m http.server`) e visitando `/experiments/ui-prove/`.
+Diego trasmette il [GO DIAG di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6758777089) sul commit `2d53604ee0662e49389318c31288ef58cc999d82` e ordina di procedere un passo alla volta. Passo corrente: consegnare il file completo del workflow da caricare personalmente sul ramo della PR #278, con hash verificato. Dopo la consegna Codex si ferma e attende approvazione; nessuna applicazione del workflow, merge, dispatch o operazione Firebase da questo passo.
 
-Nella stessa giornata, dopo il confronto sulle schermate del Profilo (azioni più evidenti dei dati, tratteggio usato per ogni pulsante, cestino come elemento più visibile, intestazioni sovrapposte durante lo scorrimento), Diego ordina «procedi» per una quarta prova `profilo.html`, in un commit separato sullo stesso ramo. La prova affianca la gerarchia attuale («Oggi») a una proposta a tre livelli per Contatti, Indirizzi e Documenti: dati in primo piano, azioni rapide discrete, gestione visibile solo in modalità Modifica. Restano valide le stesse esclusioni.
+Decisioni di Diego: durata del canary **7 giorni**, distinta dalla conservazione DIAG; singleton creato da lui in console seguendo istruzioni successive; claim tramite script una tantum da preparare in un passo successivo e far rivedere a Claude prima di eseguirlo. Il Timestamp UTC effettivo sarà concordato vicino all'attivazione, senza far partire oggi la finestra. Nessuno script amministrativo eseguito o singleton creato ora. [Procedura e gate](../regole/RILASCIO.md#cornice-b3-piano-2026-11-10). I checkpoint seguenti conservano lo storico; prevale questo ordine limitato.
 
-Le prove non usano login, Firebase, Vault o dati reali, non entrano in Hosting e non modificano pagine, CSS o contratti dell'app. Commit e push riguardano soltanto il ramo di lavoro `claude/awesome-keller-kt4v9t`; nessuna PR, merge, deploy o adozione di una direzione discende da questo incarico: la scelta e l'eventuale estensione all'app richiederanno un ordine separato, nel rispetto del [contratto UI](../regole/INTERFACCIA.md#fonte-docs-ui-design-system-contract-md-contratto-ui-e-design-system).
+<a id="cornice-diag-incarico-2026-11-10"></a>
+
+## DIAG prima di B3 — ordine di Diego, candidata da rivedere
+
+Diego ordina il registro locale e la sezione Cornice sulla PR #278: default spento, allowlist chiusa e soli cinque campi non identificanti, 200 eventi/7 giorni, cancellazione su logout/cambio account, copia e cancellazione senza rete; contratti SICUREZZA/INTERFACCIA e rapporto per ogni FAIL C1. Sono autorizzati implementazione, test locali, documenti esistenti, commit/push sul medesimo ramo e avviso **PASSO DIAG COMMITTATO**, poi revisione Claude. Nessuna operazione Firebase, workflow, merge, provisioning o deploy.
+
+Il [GO di Claude sul piano B3](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6757843877), commit c79770f6, resta approvazione del solo piano; DIAG cambia i byte di Hosting e deve ricevere il proprio GO prima della prosecuzione B3 e della revisione dello SHA finale. Canale amministrativo, applicazione CI, durata/scadenza e approvazioni personali non sono decisi da questo passo. Non assumere 7 giorni di canary dalla proposta del revisore; i 7 giorni del journal sono un limite diverso.
+
+Candidata sempre 1.2.268, produzione attestata 1.2.267. [Contratto dati](../regole/SICUREZZA.md#cornice-diag-sicurezza-2026-11-10), [UI e costo statico](../regole/INTERFACCIA.md#cornice-diag-ui-2026-11-10), [evidenze e lista C1](../evidenze/COLLAUDI.md#cornice-diag-verifiche-2026-11-10). La matrice aggiunge D19 DIAG: 19 casi/quattro ambienti, tutti NE. Nuova grafica e altri rilievi separati, 34 MD invariati; i checkpoint seguenti sono cronologia.
+
+<a id="cornice-b3-preparazione-2026-11-10"></a>
+
+## Cornice B3 — preparazione soltanto, in attesa di revisione
+
+Diego trasmette il [GO D11 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6757406980) su `3820afe6be11fbdb1c1c724592232c5ad36e8503` e ordina: «prepara B3 e pubblica l’avviso; non eseguire nulla sul cloud prima della revisione di Claude e della mia approvazione». CI D11 #1049 verde, deploy saltato. Il mandato abilita solo pacchetto locale, test, documenti esistenti, commit/push sul ramo codex/vault-frame-lab-20261109 e avviso PASSO B3 COMMITTATO sulla #278. Non abilita merge, modifica del workflow attivo, workflow_dispatch, approvazioni production, letture/scritture Firebase o attivazione.
+
+Il [piano canonico B3](../regole/RILASCIO.md#cornice-b3-piano-2026-11-10) propone scope CI fisso vault-frame-rules, solo Firestore Rules, poi distinta run Hosting sul medesimo SHA finale approvato. Un pianificatore non eseguibile genera il file completo della proposta in .codex-tmp; verificatore/test ne preparano il supporto, senza applicare la modifica al workflow. Provisioning privato dopo i deploy verificati: un solo UID confermato di Diego, singleton disabilitato, conservazione/verifica degli altri claim in finestra a scrittore unico, attivazione con precondizioni come ultimo passo. UID, canale amministrativo e scadenza UTC sono ancora da verificare/approvare, non scelti o scritti da B3. Nessuna nuova Function necessaria.
+
+A fine passo: avviso con SHA completo/file/test/limiti e attesa del GO B3 di Claude sul pacchetto. Applicazione CI e successivo candidato finale richiedono ordine specifico, hash uguale alla proposta, nuovi check/revisione e approvazione personale prima di merge o Firebase. Produzione 1.2.267; candidata 1.2.268, permesso reale non predisposto da questo lavoro; C1 interamente NE, nuova grafica separata e MD fermi a 34. I checkpoint D11 e precedenti conservano la cronologia; prevale questo solo incarico preparatorio.
+
+<a id="cornice-d11-2026-11-10"></a>
+
+## Cornice D11 — notifiche corrette nella candidata, revisione richiesta
+
+Diego trasmette il [GO B2 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753602102) su `70180aaffba629d112d235d93dddd0344f7f2c75`, CI #1048 verde e deploy saltato, e autorizza la correzione D11 più le integrazioni della lista. Codex rimane unico esecutore sulla PR #278. Il nuovo intento FCM aggiorna soltanto il figlio della cornice pronta, dopo validazione e ammissione fresca; ACK correlato entro 1500 ms, altrimenti ripiego openWindow. Nessun nuovo sblocco, chiave o privilegio viene trasmesso dal worker. Finestra visibile/focalizzata preferita e percorso ordinario conservato in assenza di cornice.
+
+La [lista C1](../evidenze/COLLAUDI.md#cornice-b2-lista-2026-11-09) aggiunge safe area verticale/orizzontale e version skew, con priorità PWA iPhone e Chrome desktop, poi Safari e Android. Tutti i 18 casi rimangono NE sui quattro ambienti; il version skew richiede un rilascio successivo. [Prove e limiti D11](../evidenze/COLLAUDI.md#cornice-d11-verifiche-2026-11-10): il fallback nativo di una PWA e l'aggiornamento effettivo del worker FCM sono da collaudare, distinti dalla continuità provata nel percorso ACK.
+
+Il passo corrente termina con commit/push e avviso PASSO D11 COMMITTATO sulla #278, poi attende il GO di Claude sul nuovo SHA. **Nessun B3, merge, provisioning, UID/claim, modifica Rules/Functions/workflow o deploy** da questa correzione. Produzione 1.2.267, candidata ancora 1.2.268. Le sezioni B2/B1 sotto sono checkpoint storici superati dai rispettivi GO, non richieste di ripetere quei passi.
+
+<a id="cornice-b2-2026-11-09"></a>
+
+## Cornice B2 — lista fisica, in revisione
+
+[GO B1 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753223333) su `0d861eb093626b9e0828848fef80c83c1b0e3aee`, CI #1047 verde (3438 PASS/0 FAIL/10 skip), sblocca soltanto B2. Preparata la [lista fisica e matrice C1](../evidenze/COLLAUDI.md#cornice-b2-lista-2026-11-09), quattro ambienti e sedici casi, tutti NE. Comprende rinnovo token del pilota dopo provisioning approvato, dieci pagine, timeout scelto/background, Auth/PRF/App Check, media, push, cronologia/link/ricarica, allegati/azioni sensibili, logout da altra scheda e criteri di arresto.
+
+Rilevato nella lettura per B2 un gap concreto: il worker push ricarica ancora il WindowClient invece di inoltrare un intento alla cornice pronta. Registrato come aperto, da correggere e rivedere prima della proposta B3; non viene rinviata al telefono la scoperta né attribuito un PASS. B2 modifica soltanto documenti e attende il proprio GO. Nessun B3, merge, provisioning, nuovo UID/claim, deploy o test fisico; produzione 1.2.267. Le sezioni B1 seguenti sono cronologia del candidato approvato, non un NO-GO ancora corrente su B1.
+
+<a id="cornice-b1-2026-11-09"></a>
+
+## Cornice B1 — permesso server e intestazioni, candidata in revisione
+
+Il [GO A2 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6751236506) è verificato sul commit `455b41fc4f3bc86e0b9f9df48ccb9f5623309060`. La CI valida è [#1044](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42695875669), conclusa con successo sullo stesso SHA; il numero #1043 nel commento del revisore è un riferimento impreciso, non una run A2 distinta. Claude dichiara inoltre rieseguiti 116 test della cornice. Diego trasmette il GO e ordina B1 sulla PR #278.
+
+Perimetro B1: singleton server con coorte di un solo UID, senza UID personale nel repository e senza scrittura client; listener di revoca e letture server nei punti sensibili; Rules/test con emulatori; header selettivi e verifica HTTP/browser ufficiale. Si recepiscono le note A2 su uscite same-origin, fallback senza loop e anchor per route. La verifica fisica della cronologia e dei link nativi rimane in B2/C1. La candidata resta 1.2.268; produzione 1.2.267.
+
+Sono autorizzati codice, test, contratti, commit/push e avviso PASSO B1 COMMITTATO sulla stessa PR. Nessun documento o flag reale viene scritto in produzione in B1: l'assegnazione privata dell'UID, il percorso CI ristretto per le Rules e il rilascio Hosting saranno preparati in B3 dopo GO B1/B2 e approvazione personale di Diego. Non occorre una nuova Function. Nessuna modifica ai workflow, Storage Rules, credenziali o dati Vault. MD fermi a 34, solo Codex esecutore. Nessuna attivazione produttiva discende dal valore compilato della candidata: senza singleton server valido e Rules distribuite la cornice è negata.
+
+
+I checkpoint A2 seguenti precedono il GO del revisore: le loro indicazioni «soltanto A2» e «B1 vietata» sono storiche. Prevale il mandato B1 sopra, senza anticipare B2 o pubblicazione.
+
+Revisione B1: Claude ha dato [NO-GO su e7c7c8d9](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6752494603), confermato su 13fa2d45. La CI #1046 ha chiuso il difetto del verificatore redirect; rimaneva il costo della verifica per ogni utente/pagina. Il seguito riusa soltanto il token Auth già letto per saltare il routing quando manca la hint server del partecipante e nega subito offline; la hint non concede ammissione. B3 dovrà includere anche provisioning privato del solo claim Auth di Diego, preservando gli altri claim e con approvazione personale; nessuna operazione cloud anticipata. B1 rimane al gate: nuova CI e nuovo GO Claude sul commit corretto prima di B2.
+
+<a id="cornice-a2-preparazione-2026-11-09"></a>
+
+## Cornice A2 candidata in revisione — 09/11/2026
+
+Claude ha dato il [GO ad A1](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6747756706) sul commit `4f2bc0f812fa2f72c63a409d1aa5d3a120bcd136`. È autorizzata soltanto A2: integrazione reale pubblicabile ma spenta per tutti. Il ramo della PR #278 prepara la candidata **1.2.268**; produzione ancora **1.2.267**, nessun merge, deploy o attivazione della cornice.
+
+Il candidato introduce app.html, broker/trasporto produttivi e raccordo al security manager canonico, distinzione fra pulizia del figlio e revoca globale, timer nel padre, protocollo e release vincolati, propagazione safe area e uscite top-level. L'ammissione è doppiamente negata: switch compilato false e adapter server che restituisce null. Nessun UID personale nel repository; nessuna modifica a Rules, Functions, workflow o intestazioni in A2. B1 resta vietata fino al GO A2 sulla PR.
+
+**A2 implementata e verificata localmente per gruppi, in attesa del GO di Claude.** Raccordati i comandi sensibili censiti e le prove negative; regressioni e limiti sono nei [Collaudi](../evidenze/COLLAUDI.md#cornice-a2-preparazione-2026-11-09). La CI del nuovo SHA rimane una verifica distinta. Nessuna B1, merge o pubblicazione discende dai test locali: occorre il GO A2 sulla PR. Firebase/App Check, dispositivi fisici e comportamento dei permessi rimangono gate B1/B2/C1 distinti; nessuna prova sintetica diventa prova produttiva.
+
+<a id="cornice-a1-incarico-2026-11-09"></a>
+
+## Ordine corrente — cornice Vault A1–C2, 09/11/2026
+
+Fonte: nuovo ordine diretto di Diego dopo l'allineamento della 1.2.267. Obiettivo: niente sblocco Vault a ogni cambio pagina, chiavi solo RAM, cornice attiva **solo per Diego** al termine dei gate. Nuova grafica e altri rilievi di sicurezza sono separati. La produzione attuale resta 1.2.267, senza cornice.
+
+**Passo A1 originario, superato dagli avanzamenti sopra:** aggiornare VAULT, INTERFACCIA e DECISIONI con allowlist delle pagine, matrice selettiva degli header, camera/microfono/PRF, timer utente, background, history/direct link/push/download/stampa/logout/ricarica, limite same-origin/XSS, arresto e rollback. La preferenza background è confermata da Diego: stessa durata dell'inattività. Aggiornare soltanto gli altri documenti esistenti necessari a stato/roadmap/evidenze. Ramo `codex/vault-frame-lab-20261109`, PR #278; riallineamento a master della 1.2.267 conservando il laboratorio. Nessun A2 o cambiamento runtime nuovo in questo passo.
+
+A2 seguirà soltanto il GO di A1: bridge reale nel boundary canonico e app.html pubblicabile ma spenti per default, ripiego invariato, test negativi e rispetto della preferenza. B1 seguirà il GO di A2: ammissione server solo UID Diego, Rules/test emulatore anonimo/estraneo/revocato e intestazioni effettive per ogni route. B2 prepara la lista per Chrome desktop, Android, Safari iPhone e PWA (dieci pagine, timer, background, logout, camera, voce, push, back/reload e download). B3 prepara merge e rilascio CI dopo i GO: Rules/Function solo se richieste da B1, poi Hosting, con approvazione personale di Diego e verifica manifest/hash. C1 raccoglie le prove fisiche eseguite da Diego, corregge solo gli esiti con lo stesso ciclo; C2 registra la chiusura in COLLAUDI/STATO e sulla PR. La matrice fisica completa è ora in C1 dopo il canary individuale B3, come nel nuovo ordine: la vecchia sequenza pre-attivazione è superata soltanto per Diego; nessuna estensione ad altri utenti o falsa attestazione dei test. Non dichiarare «CORNICE CHIUSA» prima di C2.
+
+**Canale vincolante:** a ogni passo committato, commento sulla PR #278 con prefisso e campi prescritti nella [decisione](DECISIONI.md#cornice-ordine-2026-11-09). Claude è consultivo readonly e risponde sulla PR «REVISIONE CLAUDE – GO» oppure «NO-GO», con motivi; non passare al passo seguente senza GO sul candidato corrente. Nessun agente si attribuisce o pubblica al posto di Claude il GO. Una nuova PR, se necessaria, va collegata subito sulla #278. Merge/deploy anche dopo GO richiedono l'approvazione personale di Diego; le deleghe puntuali dei rilasci precedenti non si estendono a questo incarico. Solo CI, niente deploy dal PC; nessun nuovo MD oltre i 34, nessuna migrazione di dati Vault.
+
+[Contratto Vault](../regole/VAULT.md#cornice-a1-2026-11-09), [contratto UI](../regole/INTERFACCIA.md#cornice-a1-ui-2026-11-09), [evidenze A1](../evidenze/COLLAUDI.md#cornice-a1-contratto-2026-11-09). Le sezioni seguenti conservano gli incarichi precedenti, non autorizzano di saltare i gate del nuovo ordine.
+
+
+<a id="ui-overlap-followup-2026-11-09"></a>
+
+## Segnalazioni visive residue dopo la 1.2.266 — 09/11/2026
+
+**Esecuzione conclusa:** l’ordine «pubblica» porta alla 1.2.267, Hosting #1041/sorgente `1bcbef73`, dopo PR #280/#281, check verdi e contraddittorio statico di Claude. Diego approva personalmente la run; Codex verifica manifest e 341 file online. Il lavoro successivo qui autorizzato integra soltanto le ricevute nei documenti esistenti tramite PR/check e revisione readonly prima del merge, senza un altro Hosting. Cornice e controllo fisico iPhone conservano i gate separati. [Ricevuta](../evidenze/COLLAUDI.md#ui-overlap-followup-2026-11-09). I paragrafi seguenti conservano la cronologia preparatoria.
+
+Diego ordina successivamente «pubblica»: è autorizzato il rilascio **1.2.267 solo Hosting CI**, dopo check e revisione del candidato, preservando l’approvazione production secondo i permessi già stabiliti. Non autorizza la cornice né certifica le prove fisiche rinviate. La PR #280 viene integrata in `f225d599`; il controllo post-merge #1038 fallisce nella preparazione geometrica di una fixture browser, prima del confronto pixel. Prima della distribuzione si stabilizza il solo test su ramo separato, senza alterare il codice applicativo; documenti e nuova revisione accompagnano la correzione. Nessun deploy della 1.2.267 è ancora attestato.
+
+Diego mostra schermate di Profilo nelle sezioni Documenti e Indirizzi: titoli/azioni traspaiono nella fascia superiore e i metadati degli allegati invadono il cestino. Il lavoro corrente prepara una correzione mirata su ramo `codex/ui-overlap-followup-20261109`, base `02292799`, con soli dati sintetici. La 1.2.266 rimane online; la candidata è **1.2.267**, non pubblicata. La cornice della PR #278 resta un lavoro distinto e non viene modificata.
+
+Perimetro: intestazione coprente delle sole pagine che importano profile-layout (Profilo e Dati azienda), conservando altezza, safe area, footer e scroller; metadati completi degli allegati Profilo su spazio separato dal comando Elimina e bersaglio tattile coerente; prove browser di compositing/reflow e bump canonico. Nessuna apertura della Vault, dei documenti o del Chrome personale di Diego, né uso di foto o dati reali nelle fixture o nel confronto con Claude. Nessuna modifica a workflow, Rules, Functions, Auth, dati, cifratura o operazioni di cancellazione.
+
+Si prepara una PR separata con test e revisione consultiva di Claude sul diff prima di qualsiasi futuro merge. Nessun rilascio o approvazione production deriva dalla sola segnalazione o dai test: la delega della #1030 resta limitata a quella run. Il controllo fisico iPhone/Safari/PWA conserva il proprio gate. [Contratto](../regole/INTERFACCIA.md#profile-occlusion-followup-2026-11-09), [prove](../evidenze/COLLAUDI.md#ui-overlap-followup-2026-11-09).
+
+## Delega puntuale e pubblicazione UI conclusa — 09/11/2026
+
+Diego ordina direttamente «Approva e distribuisci» per la run Hosting #1030 già pronta, sorgente `193f4768`. La delega autorizza Codex a inviare questo singolo clic dall'interfaccia GitHub e sostituisce la precedente riserva personale soltanto per questa run. Non autorizza approvazioni future, modifiche alle protezioni, altre distribuzioni o attivazione della cornice. Commento e risposta API registrano la delega puntuale.
+
+La 1.2.266 è distribuita e verificata: manifest e 341 hash identici al sorgente; scope solo hosting, backend saltato. Sono autorizzati aggiornamento e integrazione delle sole ricevute nei documenti esistenti tramite PR e relativi check, con revisione in sola lettura di Claude prima del merge. Nessun nuovo Hosting serve per i documenti. Il controllo fisico iPhone resta rinviato e non eseguito; la cornice è un laboratorio distinto, PR #278 in bozza, non una correzione già online. [Ricevuta e limiti](../evidenze/COLLAUDI.md#css-profilo-pubblicazione-1-2-266).
+
+<a id="cornice-laboratorio-2026-11-09"></a>
+
+## Priorità alla cornice persistente — 09/11/2026
+
+Diego chiede «Partiamo dalla cornice» per evitare lo sblocco a ogni pagina. È avviata la preparazione isolata, disabilitata e sintetica in `codex/vault-frame-lab-20261109`, base `193f4768`: una cornice con iframe locale, policy e prove di sessione, senza collegare la Vault reale. Non è l'attivazione del canary di Diego. Il precedente ramo `codex/vault-frame-prototype`, privo di implementazione distinta, resta conservato; il laboratorio preesistente `persistent-vault-shell` è un'altra architettura e non viene adottato implicitamente.
+
+Il mandato originario dell'Incarico 2 conserva tutti i gate prima dell'attivazione: flag verificato lato server e non scrivibile dall'utente; raccordo al security manager; revoca in entrambi i documenti, timer e nuova conferma per le operazioni sensibili; header mirati; Auth/App Check, PRF e scanner; parità e prove fisiche Chrome desktop/Android, Safari iPhone e PWA. La nota del revisore accetta S1 chiuso in produzione; la distinta prova reale fra due identità resta non attestata come riuscita. Preparare il laboratorio non trasforma questi limiti in PASS. [Piano e contratto](../regole/VAULT.md#cornice-lab-2026-11-09), [prove](../evidenze/COLLAUDI.md#cornice-lab-2026-11-09).
+
+La chiave serializzata consegnata alle pagine legacy richiede una copia transitoria nella RAM del figlio: la cornice mantiene la continuità, non può essere descritta come l'unico documento che abbia mai il materiale. Nessuna persistenza è ammessa. Solo root scrive, revisori in sola lettura; nessuna modifica a pagine pubblicate, workflow, Rules, Functions, claim, utenti o dati. La consegna passa da PR separata e contraddittorio prima di qualsiasi merge; nessun rilascio o attivazione deriva dai test del laboratorio.
+
+## Fase preparatoria del rilascio UI distinto — 09/11/2026
+
+Fotografia antecedente alla delega e alla pubblicazione attestata sopra: Diego ordina «pubblica» per la 1.2.266 e rinvia il controllo visivo fisico, che resta non eseguito. Dopo check verdi sull'head `d648a5f7` e revisione statica finale valida di Claude, la PR #277 è unita in `193f4768ff67f047a0701a3c6fbc581308e04ded`, conservando i rami. Run Hosting #1030 avviata sul medesimo SHA, validazione completa riuscita, in attesa dell'approvazione personale di Diego. Non è ancora una pubblicazione verificata. Nessun deploy dal PC; scope solo hosting, master fermo al sorgente della run. Il lavoro cornice resta su un ramo distinto.
+
+## Integrazioni richieste dal riesame CSS/Profilo — 09/11/2026
+
+Diego riporta il parere di Claude sulla candidata locale, base `449c5832`: GO con riserve, non autorizzazione al merge. Il mandato comprende candidata **1.2.266** tramite bump canonico, contratto comune dell'altezza header e linguette di Profilo privato/Dati azienda, esclusione delle sole anteprime `ui-preview/` dalla precache tramite politica condivisa fra build e audit, test estesi e nome di progetto per il controllo CSS. Le anteprime restano pubbliche; nuova grafica e cornice Vault non vengono adottate. Nessuna modifica a workflow, Rules, Functions, Auth, dati o chiavi.
+
+Sequenza: correzioni → PR separata → check obbligatori → nuova revisione di Claude sul diff della PR → controllo visivo di Diego su iPhone, chiaro/scuro e almeno due palette → merge → solo Hosting CI con approvazione personale di Diego → verifica produttiva di Claude. Le ombre e trasparenze ripristinate hanno effetto su più pagine: la prova desktop emulata non sostituisce il controllo fisico. Il browser test rispetta `CHROME_PATH`, usa Chromium Playwright se presente oppure Chrome installato, senza skip o installazioni silenziose. I gate della 1.2.265 restano distinti, inclusa la prova server non eseguita. Elenco MD invariato a 34.
+
+## Prima candidata CSS/Profilo, precedente al riesame — 09/11/2026
+
+Diego riporta i rilievi UI di Claude: dichiarazioni colore incomplete e sovrapposizioni nel Profilo durante lo scroll. La verifica e la candidata locale riguardano soltanto questi difetti dell'interfaccia esistente. L'adozione della quarta proposta grafica resta differita: il ramo originale Claude e i suoi due commit vengono conservati; le sole demo sono già online e non sostituiscono le pagine reali.
+
+La candidata è isolata in `codex/ui-css-profile-fixes`, sulla base `449c5832`, senza nuova versione, commit applicativo o pubblicazione. Comprende recupero delle trasparenze dalla storia, formato coerente dei colori, controllo di regressione e correzione locale delle linguette del Profilo. Nessuna modifica a dati, Auth, Vault, Rules, Functions o workflow. Le prove locali non autorizzano merge o deploy; il contraddittorio di Claude sulla candidata è richiesto in sola lettura.
+
+Diego richiama come obiettivo principale la cornice persistente `app.html`, che non è ancora implementata. La lista precedente che rimetteva in attesa la PR #271 e i deploy 1.2.265 è superata dalle ricevute: tali passaggi sono conclusi. Prima di dichiarare sbloccata l'attivazione della cornice vanno distinti S1 dichiarato chiuso, test condiviso reale ancora bloccato e criteri del mandato originario; nessuna prova non eseguita diventa PASS. Ordine aggiornato nel [PROGRAMMA](PROGRAMMA.md#priorita-cornice-e-correzioni-ui-2026-11-09).
+
+## Esecuzione del rilascio delle prove grafiche — 09/11/2026
+
+La PR #275 è integrata in `8790963858756d694e191a4c62fee02a9f1004dd`, conservando i due commit dimostrativi e tutti i rami precedenti. Dopo i tre check obbligatori verdi e il parere finale statico favorevole di Claude sul medesimo candidato `1d1fa16b`, Codex avvia soltanto Hosting #1024. Diego delega successivamente in chat il clic «Approve and deploy» per questa specifica run: Codex lo esegue e registra la delega nel commento di approvazione. L'eccezione riguarda esclusivamente questa run, non modifica le protezioni production né introduce un'autorizzazione generale ad approvare altri rilasci.
+
+Hosting è pubblicato e verificato; le quattro prove sono accessibili separatamente dall'app, senza adottarne la grafica nelle 30 pagine canoniche. Versione applicativa sempre **1.2.265**, manifest di 341 file corrispondente al nuovo commit; 47 Functions e Rules immutate. Le ricevute documentali successive non richiedono un altro deploy. [Esiti e limiti](../evidenze/COLLAUDI.md#prove-grafiche-hosting-2026-11-09). La distinta chiusura produttiva dell'assistenza 2FA conserva i propri limiti e il riscontro finale di Claude ancora da completare.
+
+<a id="pubblicazione-prove-grafiche-2026-11-09"></a>
+
+## Pubblicazione isolata delle prove grafiche — 09/11/2026
+
+Diego autorizza la pubblicazione delle tre direzioni Account («Rifinita», «Stile iPhone», «Scura sicura») e della distinta prova Profilo «Oggi/Proposta», ricavate esclusivamente dai bundle Claude `e5387777` e `b9432851`. I 17 file sono confinati in `Frontend/public/ui-preview/ui-prove/`, con il necessario aggiornamento della precache; i documenti arretrati e gli altri commit del ramo Claude non vengono importati. Dati inventati, modifiche in memoria, nessun accesso a Firebase o Vault; soltanto la preferenza del tema viene conservata localmente. Le proposte non sono adottate nell'interfaccia dell'app.
+
+Le prove Account sono isolate nel commit `91084186`; il Profilo nel successivo `3f161bfd`. Ciascun commit include il proprio aggiornamento della precache, da ripristinare insieme alle risorse in caso di rollback. La registrazione del mandato è separata dai due commit dimostrativi. Solo Hosting, attraverso PR, check obbligatori, parere di Claude prima del merge e workflow CI con approvazione personale di Diego. Nessuna modifica a backend, Rules, workflow o dati reali. L'app **1.2.265**, sorgente `f2e810a7`, è già pubblicata; le prove sono ancora candidate e saranno dichiarate online soltanto dopo la verifica del relativo deploy. Le sezioni precedenti del recupero 2FA conservano la cronologia della preparazione, non lo stato corrente della produzione.
+
+## Delega esplicita del solo commit workflow — 09/11/2026
+
+Diego delega direttamente a Codex il passaggio del workflow già preparato e incollato nell'editor GitHub. Questa eccezione sostituisce la precedente riserva di commit personale **soltanto per quel file e per il contenuto approvato**; non estende accessi, permessi di pubblicazione o approvazioni production. Il testo nell'editor è confrontato per intero con l'impronta consegnata prima del commit, poi verificato nuovamente dal blob remoto.
+
+Commit eseguito dal sito GitHub sul branch della PR #271: `3b6425aea9e0205b33f57eae82ba2b89dd7a9b0e`, successivo a `2af21c8c`, solo workflow. Nessuna modifica ulteriore al suo contenuto. I documenti vengono riallineati con un commit separato; seguono nuovi check sullo stesso head finale, uscita da bozza e revisione finale valida di Claude prima del merge. Restano obbligatorie le approvazioni personali di Diego per entrambi i futuri deploy CI. Nessun deploy dal PC; candidata 1.2.265, produzione ancora 1.2.264, elenco MD sempre 34. [Ricevuta](../evidenze/COLLAUDI.md#workflow-delegato-pr-271-2026-11-09).
+
+
+## Integrazione richiesta dalla revisione valida della PR #271 — 08/11/2026
+
+La nota di revisione fornita da Diego sul precedente head `3ff7d29f` è il riferimento valido per la chiusura: codice giudicato corretto, due integrazioni richieste prima del merge. I precedenti pareri locali di Claude Code restano consultivi e non sostituiscono questa approvazione finale. Sono autorizzati la sospensione della generazione dei codici nelle Impostazioni, compreso il percorso automatico, il testo di assistenza e i controlli linguistici, la guida e i test. Nessuna modifica alla funzione server di generazione o ai codici già salvati.
+
+Candidata **1.2.265**, non pubblicata; produzione ancora **1.2.264**. Codex aggiorna sulla PR soltanto i due supporti del futuro percorso CI: planner e relativi test. Il workflow completo viene consegnato come file privato con SHA-256: **solo Diego lo committa dal sito GitHub sullo stesso branch**. Per mantenere verificabile il passaggio intermedio, i supporti riconoscono due contratti esatti e distinti, quello attuale e quello futuro approvato, senza variabili di bypass o nuove risorse selezionabili. Dopo il commit di Diego Codex confronta i byte e l'impronta e attende nuovamente i check verdi.
+
+Sequenza di chiusura: integrazioni e supporti con check verdi → workflow committato da Diego e impronta coincidente → check verdi → uscita da bozza e revisione finale di Claude → merge autorizzato → rilascio CI della sola funzione dedicata con approvazione personale → Hosting con approvazione personale → riscontro produttivo di Claude. Fino al nuovo gate di revisione la PR resta in bozza. Nessuna modifica del workflow da parte degli agenti, nessun deploy dal PC, nessun dato Vault o Rules modificato. Elenco MD invariato a 34; dettagli del rilievo aperto soltanto nel rapporto privato.
+
+
+## Revisione della preparazione 2FA e usabilità — 08/11/2026
+
+La nota di revisione autorizzata da Diego conferma S1 chiuso in produzione nella 1.2.264. Il distinto test completo tra due identità resta documentato come bloccato, senza trasformarlo in un PASS. L'incarico corrente aggiorna la PR [#271](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/271), ribasata sul master corrente: assistenza manuale 2FA, risposte uniformi, limiti conservati e usabilità dei download. La PR resta **in bozza, non unita e non pubblicata**. La produzione rimane alla 1.2.264; nessuna nuova versione è dichiarata distribuita.
+
+La consegna comprende una proposta privata del percorso CI futuro, da decidere con Diego: nessuna modifica applicata al workflow o ai selettori di distribuzione. Per ogni futura integrazione vale **PR → check verdi sullo stesso head → parere di Claude sul delta → merge → deploy CI → approvazione personale di Diego**. Nessun deploy dal PC, modifica Rules, chiavi, dati Vault o attivazione della cornice deriva da questo aggiornamento. Dettagli tecnici del rilievo aperto soltanto negli appunti locali esclusi da Git; elenco MD canonico sempre 34. La distinzione fra pareri locali e review formali precedenti è registrata nei [COLLAUDI](../evidenze/COLLAUDI.md#revisione-preparazione-2fa-2026-11-08).
+
+
+## Integrazione del collaudo allegati — 08/11/2026
+
+Esecuzione registrata: PR #273 integrata in `70b9618c`, run Hosting #1010 riuscita dopo l'approvazione personale di Diego; tutti i 324 file online e il completamento dei download sono verificati, con parere conclusivo consultivo di Claude. Le due fixture autorizzate e i relativi DPAPI sono eliminate. Rimane aperta la prova condivisa bloccata dall'attestazione: la cornice resta sospesa e nessun altro utente o dato reale viene coinvolto. La PR preparatoria #271 non è unita né pubblicata. Le ricevute finali vengono integrate con una PR soltanto documentale, senza ulteriore deploy.
+
+Diego approva personalmente la pubblicazione Hosting della 1.2.263 e autorizza due nuovi utenti sintetici dedicati, con nuove Vault e DPAPI separati, da eliminare al termine delle prove. Sono esclusi QA2, dati e Vault esistenti; email e push restano spenti. Il test produttivo rileva un difetto di completamento dei download grandi, che viene corretto nel medesimo perimetro con un ramo separato e candidata 1.2.264: test dei byte effettivi, revisione indipendente, check obbligatori e nuovo rilascio solo Hosting soggetto all'approvazione personale. Nessun workflow, Rules o backend viene modificato. La distinta prova tra i due utenti resta bloccata dall'attestazione del secondo partecipante; nessun bypass e nessuna attivazione della cornice. [Evidenze](../evidenze/COLLAUDI.md#attachment-download-followup-1-2-264).
+
+<a id="vault-frame-prerequisites-2026-11-08"></a>
+
+## Prerequisiti e prototipo di continuità Vault — 08/11/2026
+
+Diego richiede un prototipo di cornice persistente, riservato inizialmente al proprio account, per evitare lo sblocco della Vault a ogni cambio pagina conservando i vincoli di memoria, blocco e isolamento dell'utente. La precisazione successiva del revisore conferma che **il prototipo resta sospeso** fino alla pubblicazione e verifica indipendente di un distinto incarico preparatorio di sicurezza, con ricevuta dedicata nei COLLAUDI. La 1.2.262 corregge l'upload Storage: non attesta questo nuovo prerequisito.
+
+Diego fornisce successivamente l'incarico preparatorio completo: irrobustire la gestione degli allegati, rimuovere la pagina pubblica di prova e preparare separatamente l'uniformazione delle risposte del recupero 2FA. L'inventario statico precede le modifiche e include tutti i percorsi di apertura, anteprima e download, compresi gli archivi portabili. I dettagli dei rilievi aperti e il rapporto tecnico restano in `.codex-tmp/`, esclusa da Git; i documenti pubblici riportano solo perimetro, dipendenze ed esiti generici. Codex è l'unico scrittore, con revisori consultivi in lettura.
+
+Sono autorizzati due rami e PR separati. La PR allegati/pagina di prova passa i check `validate`, `docs` e `Gitleaks on changed commits`, riceve il parere di Claude e viene integrata prima del workflow dispatch; il rilascio è **solo Hosting**, nel workflow esistente e con approvazione personale di Diego. La PR del recupero 2FA resta **non unita e non pubblicata**, con check verdi e una proposta per il successivo rilascio CI. Nessuna modifica a workflow, Rules, chiavi o dati Vault; nessun deploy dal PC e nessuna Function pubblicata. Dependabot #268 viene aggiornata e trattata separatamente, con check verdi prima del proprio merge, senza includerla nella PR di questo rilascio. La chiusura richiede prove sintetiche in produzione, pagina di prova non più servita, ricevuta dedicata nei COLLAUDI e verifica finale di Claude.
+
+Per la futura cornice restano da definire il contratto di disponibilità e revoca delle capacità, il perimetro delle route e l'interruttore controllato dal server. Prima dell'attivazione sono obbligatorie le prove richieste su Chrome desktop, Android Chrome, iPhone Safari e iPhone PWA reali; un profilo di emulazione non le sostituisce. L'eventuale rilascio sarà solo Hosting, tramite CI e dopo l'approvazione personale di Diego. Nessun deploy dal PC e nessuna estensione ad altri utenti discendono da questo incarico.
+
+## Rilascio Storage 403 e documentazione 1.2.262 — 08/11/2026
+
+Diego autorizza commit su un nuovo ramo `codex/`, push pubblico, PR e merge dopo i check `validate`, `docs` e `Gitleaks on changed commits`, quindi rilascio esclusivamente tramite il workflow GitHub esistente. È vietato `firebase deploy` dal PC: il login Firebase locale viene usato soltanto per le letture di verifica e i collaudi QA già delegati. La PR Dependabot **#268** resta separata, con ramo `dependabot/npm_and_yarn/multi-bbf9670a95` e head `59733f5fb3d55cf37e5171de3fa5a70118ae7b84` preservati. Dopo il rifiuto della pulizia da parte del controllo automatico, Diego sceglie esplicitamente **«Conserva i vecchi rami e pubblica»**: si conservano i rami locali e remoti `codex/complete-recovery`, `codex/release-1.2.261-receipts`, `codex/release-security-1.2.261`, il worktree `.codex-tmp/security-closure-20261107` e il suo ramo locale. Le corrispondenti segnalazioni del preflight sono registrate come preservazione esplicita, con archivio integrale e bundle verificati fuori OneDrive; il controllo mantiene il suo reale exit 1, senza filtri o modifiche. Qualunque anomalia aggiuntiva blocca il rilascio. Nessuna cancellazione è autorizzata da questa scelta.
+
+La candidata comprende le Storage Rules e i test del diniego upload, gli aggiornamenti documentali e il bump canonico **1.2.262** con riesame del catalogo guida. Include inoltre l'isolamento del database emulato della suite purge-lock, che prima cancellava le fixture di profile-widgets eseguite in parallelo: non modifica Firestore Rules o runtime. Il workflow e i suoi script restano invariati. Lo scope necessario è **`recovery-prerequisites-disabled`**: seleziona Storage, Firestore Rules e 43 Functions fisse, con sorgente Functions/Firestore identico alla 1.2.261; gli aggiornamenti realmente eseguiti saranno distinti dalle risorse selezionate. Segue Hosting sul medesimo SHA di `master`. Ogni job `production` deve attendere la personale approvazione di Diego, dopo verifica dello SHA e delle modifiche a workflow/script/azioni. Gli agenti non approvano né aggirano l'ambiente.
+
+Prima e dopo il backend si confrontano hash Rules e censimento/configurazioni Functions; dopo Hosting si verificano manifest e tutti gli asset pubblici. Il 403 non sarà dichiarato risolto prima dell'upload/download/cancellazione sintetici con l'identità QA delegata. Policy recovery `disabled`, coorte vuota e flag client falso restano vincolanti; nessuna migrazione, attivazione FULL o modifica a dati reali. L'eventuale logout locale Firebase dopo il rilascio resta una decisione successiva, non una revoca già eseguita. Evidenze e limiti nei [COLLAUDI](../evidenze/COLLAUDI.md#rilascio-storage-403-1-2-262).
+
+Esecuzione conclusa: PR #269 integrata in `ef7cae863756ffa0ad97a2aff2cba8c8c290ab17`; backend `42496064235` e Hosting `42505080699` riusciti sullo stesso sorgente dopo approvazione personale di Diego. Hash Rules, 47 Functions, prova SDK QA con cleanup, manifest e tutti i 326 file pubblici sono verificati. Le ricevute finali sono aggiornate tramite una PR soltanto documentale, riutilizzando il ramo di rilascio e conservando gli altri riferimenti: non cambiano il sorgente distribuito e non richiedono un altro deploy. Dipendenze e PR #268 restano escluse; nessun'altra attività residua dell'app è dichiarata conclusa da questo lotto.
+
+## Credenziali degli agenti e rimozione delle app inutilizzate — 08/11/2026
+
+Decisione integrativa esplicita di Diego: **mantenere l'app GitHub Claude su tutti i repository**. La configurazione già verificata corrisponde alla scelta; non si applicano restrizioni alla lista dei repository né si rimuove l'app. Restano i permessi propri dell'installazione, separati dal PAT locale limitato.
+
+Diego autorizza la creazione del PAT fine-grained **Agenti App-Codici-Password**, valido 90 giorni e limitato al solo repository omonimo, e la sostituzione delle credenziali locali di `gh` e Git. I permessi sono Contents e Pull requests in scrittura, Actions, Commit statuses e Metadata in lettura; gli altri permessi non sono concessi. Conferma successivamente la revoca remota delle vecchie autorizzazioni OAuth GitHub CLI e Git Credential Manager, conserva Claude e richiede la rimozione di Cursor e Google Labs Jules dalle installazioni e dalle autorizzazioni personali. Codex revoca queste ultime; Diego completa le due conferme native di disinstallazione non gestibili dall'automazione. La lettura finale verifica l'assenza di entrambe le app nelle due liste. Questo incarico non modifica workflow, applicazione o Firebase e non avvia pubblicazioni; i canali browser e GitHub Apps rimasti sono distinti dal PAT locale. [Ricevuta](../evidenze/COLLAUDI.md#credenziali-agenti-2026-11-08).
+
+## Protezione production e rotazione dei segreti CI — 08/11/2026
+
+Per il passo 4 Diego richiede l'abilitazione di Dependabot alerts e security updates, lasciando spenti i version updates. Sono autorizzate soltanto queste impostazioni: niente configurazione periodica, modifica di dipendenze, auto-merge o rilascio. Le eventuali PR di sicurezza restano soggette ai check obbligatori e al merge manuale; il deploy conserva l'approvazione di Diego. [Verifica](../evidenze/COLLAUDI.md#dependabot-2026-11-08).
+
+Per il successivo passo 3 Diego corregge l'inventario: esiste già il ruleset attivo **Protezione master**, creato l'11/09/2026. Ordina di aggiungere soltanto i check obbligatori `docs` e `Gitleaks on changed commits`, selezionando GitHub Actions, senza cambiare le altre impostazioni o creare un duplicato. Al termine di quel passo la separazione degli accessi era ancora da definire; viene eseguita nel distinto passo 5 descritto sopra. Il solo aggiornamento del ruleset non crea token né modifica il collegamento GitHub di Codex. [Verifica](../evidenze/COLLAUDI.md#master-ruleset-2026-11-08).
+
+Diego richiede di impedire il bypass amministratore dell'ambiente GitHub `production` e di migrare i segreti CI: revoca del vecchio accesso Google Firebase CLI, generazione di una nuova credenziale nello stesso account proprietario, salvataggio di `FIREBASE_TOKEN` nell'environment e successiva eliminazione dei due segreti repository indicati. È compreso il nuovo login locale necessario dopo la revoca. La chiave del service account su Google Cloud è esplicitamente rinviata a un inventario separato degli utilizzatori; nessuna sua disattivazione è autorizzata da questo passo. Il workflow resta invariato e nessun rilascio viene avviato per provare il token. Gli agenti devono lasciare a Diego l'approvazione del deploy e non inviarla con API o browser. Riscontri eseguiti nei [COLLAUDI](../evidenze/COLLAUDI.md#production-secrets-2026-11-08), procedura in [RILASCIO](../regole/RILASCIO.md#production-protection-2026-11-08).
+
+## Diniego di upload allegati Account — 08/11/2026
+
+Diego segnala un `403` nell'aggiunta di un allegato a un nuovo Account privato e conferma il diniego anche con un file di prova. Il lavoro corrente comprende diagnosi, correzione locale mirata e verifica con dati sintetici. Il file dei codici di recupero non viene aperto né caricato dagli agenti. Le letture cloud riguardano configurazioni e soli metadati dei lock; la riproduzione usa l'identità QA già delegata e byte casuali nel suo spazio. Entrambi gli upload QA sono respinti, senza creazione di oggetti. Nessuna pubblicazione delle nuove Rules discende da questo incarico: la candidata e i limiti sono registrati nei [COLLAUDI](../evidenze/COLLAUDI.md#upload-storage-403-2026-11-08).
 
 ## Pubblicazione delle correzioni di sicurezza 1.2.261 — 08/11/2026
 

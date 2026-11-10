@@ -11,7 +11,7 @@ async function listJavaScript(directory) {
     for (const entry of entries) {
         const url = new URL(`${entry.name}${entry.isDirectory() ? '/' : ''}`, directory);
         if (entry.isDirectory()) files.push(...await listJavaScript(url));
-        else if (entry.name.endsWith('.js')) files.push(url);
+        else if (/\.(?:js|mjs)$/.test(entry.name)) files.push(url);
     }
     return files;
 }

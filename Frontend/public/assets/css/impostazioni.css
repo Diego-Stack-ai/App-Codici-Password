@@ -121,7 +121,7 @@
 
 .icon-blue {
     color: var(--accent);
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.1 );
 }
 
 .icon-red {
@@ -197,7 +197,7 @@ h3.settings-desc {
 
 .settings-toggle:checked {
     background: var(--accent);
-    box-shadow: 0 0 15px rgb(var(--accent-rgb) / );
+    box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.3 );
 }
 
 .settings-toggle::after {
@@ -241,7 +241,7 @@ h3.settings-desc {
     background: var(--accent);
     color: white;
     border-color: transparent;
-    box-shadow: 0 10px 20px rgb(var(--accent-rgb) / 30%);
+    box-shadow: 0 10px 20px rgba(var(--accent-rgb), 30%);
 }
 
 .settings-subsection-label {
@@ -313,7 +313,7 @@ h3.settings-desc {
     transform: translateX(-50%);
     width: 2px;
     height: 100px;
-    background: linear-gradient(to bottom, transparent, rgb(var(--accent-rgb) / ), white);
+    background: linear-gradient(to bottom, transparent, rgba(var(--accent-rgb), 0.8 ), white);
     opacity: 0;
     animation: saettaStrike 4s infinite ease-in-out;
 }
@@ -429,7 +429,7 @@ h3.settings-desc {
 /* --- 8. LOGOUT & FOOTER --- */
 .logout-btn-container {
     margin-top: 3.5rem;
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: var(--frame-safe-area-inset-bottom, env(safe-area-inset-bottom));
 }
 
 .btn-logout-semantic {
@@ -501,7 +501,7 @@ h3.settings-desc {
 }
 
 .settings-dropdown-btn:hover {
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.15 );
     color: var(--accent);
     transform: translateX(4px);
 }
@@ -526,14 +526,14 @@ h3.settings-desc {
     font-weight: var(--font-label-weight);
     font-size: var(--fs-xs);
     padding: 0.5rem 1rem;
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.1 );
     border-radius: 12px;
     text-decoration: none;
     transition: all 0.2s;
 }
 
 .btn-link-accent:hover {
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.2 );
     transform: translateY(-1px);
 }
 
@@ -792,7 +792,7 @@ h3.settings-desc {
 
 .portable-archive-modal {
     width: min(92vw, 34rem);
-    max-height: calc(100dvh - (2 * max(var(--space-4, 1rem), env(safe-area-inset-top))));
+    max-height: calc(100dvh - (2 * max(var(--space-4, 1rem), var(--frame-safe-area-inset-top, env(safe-area-inset-top)))));
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -822,7 +822,7 @@ h3.settings-desc {
     z-index: 2;
     margin-top: var(--space-3, 0.75rem);
     padding-top: var(--space-3, 0.75rem);
-    padding-bottom: max(var(--space-1, 0.25rem), env(safe-area-inset-bottom));
+    padding-bottom: max(var(--space-1, 0.25rem), var(--frame-safe-area-inset-bottom, env(safe-area-inset-bottom)));
     background: var(--accent-surface);
 }
 

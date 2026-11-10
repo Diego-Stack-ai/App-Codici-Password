@@ -1,9 +1,11 @@
+import {confirmFrameAction} from '../core/vault-frame-client.js';
 /**
  * Gestione allegati del dettaglio Account privato.
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.261';
+import { db, storage } from '../../firebase-config.js?v=1.2.268';
+import {decideAttachmentContent} from '../shared/attachment-content-policy.mjs';
 import { doc, collection, addDoc, setDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -284,7 +286,7 @@ function renderAttachments(list, mount) {
             : '---';
         const size = (attachment.size / (1024 * 1024)).toFixed(2);
 
-        const preview = type.includes('image') ? createElement('div', {
+        const preview = decideAttachmentContent(attachment).kind === 'image' ? createElement('div', {
             className: 'attachment-preview attachment-preview-loading',
             textContent: 'Caricamento anteprima…'
         }) : null;
@@ -316,6 +318,8 @@ function renderAttachments(list, mount) {
 
 async function loadVisibleImagePreview(attachment, preview, mount) {
     if (!mount.active() || !attachment.storagePath || !attachment.encryption) return;
+    const decision = decideAttachmentContent(attachment);
+    if (decision.kind !== 'image') return;
     try {
         const vaultKey = await ensureVaultKeyMaterial();
         if (!mount.active()) return;
@@ -326,8 +330,7 @@ async function loadVisibleImagePreview(attachment, preview, mount) {
                 attachment, recipientUid: mount.currentUid, vaultKeyMaterial: vaultKey, ciphertext: bytes})
             : await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
         if (!mount.active()) {clear?.fill?.(0); return;}
-        const type = attachment.encryption?.originalType || attachment.type || 'image/jpeg';
-        const objectUrl = URL.createObjectURL(new Blob([clear], {type}));
+        const objectUrl = URL.createObjectURL(new Blob([clear], {type: decision.mimeType}));
         clear?.fill?.(0);
         mount.addCleanup(() => URL.revokeObjectURL(objectUrl));
         const image = createElement('img', {className: 'attachment-preview-image', src: objectUrl,
@@ -370,6 +373,7 @@ async function openAttachment(attachment, mount = mounted) {
                 await openChunkedDecryptedAttachment({
                     attachment,
                     fileKeyBytes,
+                    isActive: mount.active,
                     loadChunk: chunk => getBytes(ref(storage, chunk.storagePath), Number(chunk.encryptedSize) + 1024)
                 });
             } finally {
@@ -426,6 +430,8 @@ async function deleteAttachment(attachment, mount = mounted) {
     if (!mount.active() || !confirmed) return;
 
     try {
+        await confirmFrameAction('permanent-delete', {ownerId, accountId, id});
+        if (!mount.active()) return;
         const storagePaths = attachment?.encryption?.chunked === true && Array.isArray(attachment?.chunks)
             ? attachment.chunks.map(chunk => chunk.storagePath).filter(Boolean)
             : [storagePath].filter(Boolean);

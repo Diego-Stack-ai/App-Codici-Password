@@ -37,7 +37,7 @@ function fixture(uid = 'A') {
     const sink = {write: async value => { writes.push(value); }, close: async () => {}};
     // Le sorgenti del backup sono identificatori liberi nel modulo: vanno passate
     // come parametri della funzione, non assegnate all'oggetto restituito.
-    const repositories = {};
+    const repositories = {confirmFrameAction: async () => undefined}; // Standalone export: no frame RPC.
     for (const name of ['listBackupCompanies', 'listBackupCompanyAccounts', 'listBackupCompanyAttachments',
         'listBackupAccountWidgets', 'listBackupAccountWidgetProfiles', 'listBackupContacts', 'listBackupDeadlines', 'listBackupProfileWidgets',
         'listBackupSettings', 'listBackupSharedVaultData', 'listBackupSharedVaultLinks']) {

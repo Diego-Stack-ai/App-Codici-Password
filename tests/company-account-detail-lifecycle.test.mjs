@@ -1,3 +1,5 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
+import {decideAttachmentContent} from '../Frontend/public/assets/js/modules/shared/attachment-content-policy.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -29,7 +31,7 @@ function fixture() {
     };
     let read = async () => ({nomeAccount: 'Synthetic company account'});
     const window = {location: {search: '?id=account&aziendaId=company', pathname: '/dettaglio_account_azienda.html', href: ''}, history: {replaceState() {}}};
-    const context = vm.createContext({readErrorMessage, accountModeFromRecord, URLSearchParams, AbortController, auth:{currentUser:null}, onAuthStateChanged:(_auth,fn)=>{listeners.add(fn);return()=>listeners.delete(fn)}, window, navigator: {onLine: true}, console,
+    const context = vm.createContext(withStandaloneFrame({decideAttachmentContent, readErrorMessage, accountModeFromRecord, URLSearchParams, AbortController, auth:{currentUser:null}, onAuthStateChanged:(_auth,fn)=>{listeners.add(fn);return()=>listeners.delete(fn)}, window, navigator: {onLine: true}, console,
         inviteIdForGuest, sanitizeEmail, sharingCycleOf,
         consumeAttachmentInitialMode: input => input?.dataset?.attachmentInitialMode === 'card' ? 'card' : 'free',
         document: {getElementById: id => id === 'footer-center-actions' ? footer : nodes[id] || find(footer.children, id),
@@ -48,7 +50,7 @@ function fixture() {
         renderSharingMap() {}, loadAttachments: async () => {}, renderAccountBanking() {},
         loadModule: async () => ({initAccountNoteEditor() {}, initAccountSharedCredentials() {}, initAccountEmbeddedWidgets() {}}),
         setTimeout() {}, history: {back() {}}
-    });
+    }));
     vm.runInContext(source.replace(/^import[\s\S]*?;\s*$/gm, '').replace('export async function', 'async function').replace(/\bimport\(/g, 'loadModule('), context);
     return {writes, reads, errors, modules, footer, classes, window, context, nodes, listeners,
         button: () => find(footer.children, 'btn-edit-footer'),
@@ -84,14 +86,14 @@ test('repeated mount replaces phone handler and abort during contacts blocks sha
 const moduleText=async path=>(await readFile(new URL('../Frontend/public/assets/js/modules/'+path,import.meta.url),'utf8')).replace(/^import[\s\S]*?;\s*$/gm,'').replace(/^export /gm,'');
 test('real attachment reader rejects late list and retained actions after parent context expires',async()=>{
  const text=await moduleText('azienda/dettaglio-azienda-attachments.js');const gate=deferred();let active=true,rendered=0;
- const realm=vm.createContext({showConfirmModal(){},closeAttachmentSourcePicker(){},document:{getElementById:()=>({})},listCompanyAccountAttachments:()=>gate.promise,setChildren:()=>rendered++,logError(){},showToast(){}});vm.runInContext(text,realm);
+ const realm=vm.createContext(withStandaloneFrame({decideAttachmentContent, showConfirmModal(){},closeAttachmentSourcePicker(){},document:{getElementById:()=>({})},listCompanyAccountAttachments:()=>gate.promise,setChildren:()=>rendered++,logError(){},showToast(){}}));vm.runInContext(text,realm);
  realm.initAttachmentModule({ownerUid:'A',currentAziendaId:'company',currentId:'one',isActive:()=>active});const reading=realm.loadAttachments();active=false;gate.resolve([{id:'old'}]);await reading;assert.equal(rendered,0);
 });
 test('company attachment rows retain the active lifecycle guard when opened',async()=>{
  const text=await moduleText('azienda/dettaglio-azienda-attachments.js');const opened=[];let active=true;
- const container={children:[]};const realm=vm.createContext({showConfirmModal(){},closeAttachmentSourcePicker(){},document:{getElementById:()=>container},
+ const container={children:[]};const realm=vm.createContext(withStandaloneFrame({decideAttachmentContent, showConfirmModal(){},closeAttachmentSourcePicker(){},document:{getElementById:()=>container},
   createElement:(tag,props={},children=[])=>({tag,...props,children}),clearElement:node=>{node.children=[]},
-  setChildren:(node,children)=>{node.children=children},openExternalUrl:url=>{opened.push(url);return true}});
+  setChildren:(node,children)=>{node.children=children},openExternalUrl:url=>{opened.push(url);return true}}));
  vm.runInContext(`${text}\nglobalThis.renderAttachments = renderAttachments;`,realm);
  realm.initAttachmentModule({ownerUid:'A',currentAziendaId:'company',currentId:'one',isActive:()=>active});
  realm.renderAttachments([{id:'legacy',name:'Fixture.pdf',type:'application/pdf',size:1024,url:'https://example.invalid/file.pdf'}],()=>active);
@@ -101,20 +103,20 @@ test('company attachment rows retain the active lifecycle guard when opened',asy
 test('real detail sharing name lookup respects parent teardown',async()=>{
  const text=await moduleText('shared/detail-account-mode.js');
  let active=true;const gate=deferred();
- const realm=vm.createContext({auth:{currentUser:{uid:'A',email:'owner@example.invalid'}},listContacts:()=>gate.promise,console});vm.runInContext(text,realm);
+ const realm=vm.createContext(withStandaloneFrame({decideAttachmentContent, auth:{currentUser:{uid:'A',email:'owner@example.invalid'}},listContacts:()=>gate.promise,console}));vm.runInContext(text,realm);
  const pending=realm.loadDetailSharingContactNames({ownerId:'A',isActive:()=>active});active=false;gate.resolve([{email:'guest@example.invalid',nome:'Guest'}]);assert.equal(await pending,undefined);
 });
 
 
 test('banking renderer rejects retained copy callback after teardown and keeps legacy default',async()=>{
- const text=await moduleText('shared/account-banking-view.js');let active=true,copies=0;const nodes=[];const realm=vm.createContext({readErrorMessage, crypto:{randomUUID:()=> 'fixture'},createElement:(tag,props,children)=>{const n={tag,...props,children,prepend(){}};nodes.push(n);return n},navigator:{clipboard:{writeText:async()=>copies++}},showToast(){},t:()=>'',document:{getElementById:()=>null}});vm.runInContext(text,realm);
+ const text=await moduleText('shared/account-banking-view.js');let active=true,copies=0;const nodes=[];const realm=vm.createContext(withStandaloneFrame({decideAttachmentContent, readErrorMessage, crypto:{randomUUID:()=> 'fixture'},createElement:(tag,props,children)=>{const n={tag,...props,children,prepend(){}};nodes.push(n);return n},navigator:{clipboard:{writeText:async()=>copies++}},showToast(){},t:()=>'',document:{getElementById:()=>null}}));vm.runInContext(text,realm);
  realm.createBankAccount({iban:'fixture'},0,()=>active);const copy=nodes.find(n=>n.className?.includes('copy-btn'));active=false;await copy.onclick({stopPropagation(){}});assert.equal(copies,0);
  nodes.length=0;realm.createReadonlyField('legacy','fixture','bank');await nodes.find(n=>n.className?.includes('copy-btn')).onclick({stopPropagation(){}});assert.equal(copies,1);
 });
 
 test('company account opens the shared source picker without activating the legacy modal',async()=>{
  const text=await moduleText('azienda/dettaglio-azienda-attachments.js');let pickerCalls=0;const classes=new Set(['hidden']);const modal={classList:{remove:x=>classes.delete(x),add:x=>classes.add(x)}};
- const realm=vm.createContext({showConfirmModal(){},closeAttachmentSourcePicker(){},selectAttachmentSource:async()=>{pickerCalls++;return null;},document:{getElementById:()=>modal,body:{style:{}}},setTimeout(){}});vm.runInContext(text,realm);
+ const realm=vm.createContext(withStandaloneFrame({decideAttachmentContent, showConfirmModal(){},closeAttachmentSourcePicker(){},selectAttachmentSource:async()=>{pickerCalls++;return null;},document:{getElementById:()=>modal,body:{style:{}}},setTimeout(){}}));vm.runInContext(text,realm);
  realm.initAttachmentModule({ownerUid:'A',currentAziendaId:'one',currentId:'a'});await realm.openSourceSelector();assert.equal(pickerCalls,1);assert.equal(classes.has('hidden'),true);assert.equal(classes.has('active'),false);
 });
 test('file picker node belongs to opening generation and late old change cannot upload into next account',async()=>{

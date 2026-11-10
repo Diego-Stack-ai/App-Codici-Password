@@ -1,17 +1,10 @@
+import {openAttachmentContent, isAttachmentUploadMimeAllowed} from './attachment-content-policy.mjs';
+
 export const MAX_ATTACHMENT_BYTES = 32 * 1024 * 1024;
 export const MAX_LARGE_VIDEO_BYTES = 512 * 1024 * 1024;
 export const ATTACHMENT_CHUNK_BYTES = 8 * 1024 * 1024;
 export const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
-const ALLOWED_MIME_TYPES = new Set([
-    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif',
-    'video/mp4', 'video/quicktime', 'video/webm',
-    'application/pdf', 'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'text/plain'
-]);
 const VIDEO_MIME_BY_EXTENSION = new Map([
     ['mp4', 'video/mp4'],
     ['m4v', 'video/mp4'],
@@ -139,11 +132,7 @@ export async function decryptAttachmentBytes(ciphertext, encryption, vaultKey) {
 }
 
 export function openDecryptedAttachment(bytes, attachment) {
-    const type = attachment.encryption?.originalType || attachment.type || 'application/octet-stream';
-    const objectUrl = URL.createObjectURL(new Blob([bytes], {type}));
-    const opened = window.open(objectUrl, '_blank', 'noopener,noreferrer');
-    if (opened) opened.opener = null;
-    setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+    return openAttachmentContent(bytes, attachment);
 }
 
 function fileExtension(file) {
@@ -152,7 +141,7 @@ function fileExtension(file) {
 
 export function resolveAccountAttachmentMime(file) {
     const declared = String(file?.type || '').toLowerCase();
-    if (ALLOWED_MIME_TYPES.has(declared)) return declared;
+    if (isAttachmentUploadMimeAllowed(declared)) return declared;
     if (declared && declared !== 'application/octet-stream' && declared !== 'video/x-m4v') return declared;
     return VIDEO_MIME_BY_EXTENSION.get(fileExtension(file)) || declared;
 }
@@ -165,7 +154,7 @@ export function validateAttachmentFile(file, {
     if (!(file instanceof File) || file.size <= 0) throw new Error('Seleziona un file valido.');
     if (file.size > maxBytes) throw new Error(`Il file supera il limite di ${Math.floor(maxBytes / 1024 / 1024)} MB.`);
     const mime = String(mimeType || '').toLowerCase();
-    if (!ALLOWED_MIME_TYPES.has(mime) || (imageOnly && !mime.startsWith('image/'))) {
+    if (!isAttachmentUploadMimeAllowed(mime) || (imageOnly && !mime.startsWith('image/'))) {
         throw new Error('Formato file non consentito.');
     }
     return file;

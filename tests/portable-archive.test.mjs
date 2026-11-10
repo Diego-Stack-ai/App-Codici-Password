@@ -122,7 +122,7 @@ function readStoredZip(bytes) {
 function previewRuntime(streamFixture, overrides = {}) {
     const bindings = new Map();
     const script = buildPortableViewerHtml().match(/<script>([\s\S]*?)<\/script>/)[1];
-    return runInNewContext(`${script}\nstreamEntry=globalThis.streamFixture;({canPreview,previewElement,readTextPreview,temporaryPreviewFile,releasePreviews});`, {
+    return runInNewContext(`${script}\nstreamEntry=globalThis.streamFixture;({decideAttachmentContent,canPreview,previewElement,readTextPreview,temporaryPreviewFile,releasePreviews});`, {
         TextEncoder, TextDecoder, crypto: webcrypto, streamFixture,
         navigator: {}, addEventListener() {},
         document: {
@@ -132,22 +132,44 @@ function previewRuntime(streamFixture, overrides = {}) {
     });
 }
 
-test('il confine condiviso di anteprima tratta i MIME di testo come contenuto passivo', () => {
+test('il confine condiviso di anteprima applica la stessa allowlist a tutti i contenuti importati', () => {
     const runtime = previewRuntime(async () => {});
-    for (const type of ['text/html', ' Text/XML ; charset=utf-8', 'image/svg+xml', 'image/png', 'video/mp4', 'audio/ogg', 'application/pdf']) {
+    for (const type of ['text/plain', 'image/png', 'video/mp4', 'audio/ogg', 'application/pdf']) {
         assert.equal(runtime.canPreview({type}), true, type);
     }
-    for (const type of ['application/xhtml+xml', 'application/xml', 'application/octet-stream', 'application/pdfx']) {
+    for (const type of ['text/html', ' Text/XML ; charset=utf-8', 'image/svg+xml', 'application/xhtml+xml', 'application/xml', 'application/octet-stream', 'application/pdfx', '']) {
         assert.equal(runtime.canPreview({type}), false, type);
         assert.throws(() => runtime.previewElement({type}, 'blob:synthetic', {}), /PREVIEW_UNSUPPORTED/);
     }
     assert.throws(() => runtime.previewElement({type: 'text/html'}, 'blob:synthetic', {}), /PREVIEW_UNSUPPORTED/);
 });
 
+test('il visualizzatore autonomo conserva le estensioni dei formati ammessi solo al download', () => {
+    const runtime = previewRuntime(async () => {});
+    for (const [type, name, expectedName] of [
+        ['application/msword', 'documento.doc', 'documento.doc'],
+        ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'documento.docx', 'documento.docx'],
+        ['application/vnd.ms-excel', 'foglio.xls', 'foglio.xls'],
+        ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'foglio.xlsx', 'foglio.xlsx'],
+        ['image/heic', 'foto.heic', 'foto.heic'], ['image/heif', 'foto.heif', 'foto.heif'],
+        ['video/quicktime', 'video.mov', 'video.mov'],
+        ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'fattura.pdf.exe', 'fattura_pdf.docx']
+    ]) {
+        const entry = {type, name};
+        const decision = runtime.decideAttachmentContent(entry);
+        assert.equal(decision.action, 'download', type);
+        assert.equal(decision.kind, null, type);
+        assert.equal(decision.mimeType, 'application/octet-stream', type);
+        assert.equal(decision.fileName, expectedName, name);
+        assert.equal(runtime.canPreview(entry), false, type);
+        assert.throws(() => runtime.previewElement(entry, 'blob:synthetic', {}), /PREVIEW_UNSUPPORTED/);
+    }
+});
+
 test('i contesti multimediali restano dedicati e il documento incorporato accetta soltanto PDF', () => {
     const node = tag => ({tagName: tag.toUpperCase(), append() {}, setAttribute() {}});
     const runtime = previewRuntime(async () => {}, {document: {getElementById: () => ({}), createElement: node}});
-    for (const [type, tag] of [['image/svg+xml', 'IMG'], ['audio/ogg', 'AUDIO'], ['video/mp4', 'VIDEO'], [' Application/PDF ; version=1.7', 'OBJECT']]) {
+    for (const [type, tag] of [['image/png', 'IMG'], ['audio/ogg', 'AUDIO'], ['video/mp4', 'VIDEO'], [' Application/PDF ; version=1.7', 'OBJECT']]) {
         let rendered;
         runtime.previewElement({type, name: 'sintetico'}, 'blob:synthetic', {replaceChildren(value) { rendered = value; }}, () => false);
         assert.equal(rendered.tagName, tag);
@@ -500,7 +522,7 @@ test('la UI distingue esplicitamente archivio portabile e backup', async () => {
     assert.match(settingsCss, /\.portable-archive-modal\s*\{[^}]*overflow-y:\s*auto;/s);
     assert.match(settingsCss, /\.portable-archive-modal > \.modal-actions\s*\{[^}]*position:\s*sticky;[^}]*bottom:\s*0;/s);
     assert.match(settingsTranslations, /non è un backup reimportabile/);
-    assert.match(settings, /forceReload: true, promptImmediately: true/);
+    assert.match(settings, /forceReload: !vaultFrameClient\.isChild\(\), promptImmediately: true/);
     assert.match(settings, /PORTABLE_ATTACHMENT_CAPACITY_EXCEEDED/);
     assert.match(settings, /PORTABLE_ATTACHMENT_METADATA_CONFLICT/);
     assert.match(settings, /PORTABLE_CHUNK_MANIFEST_INVALID/);

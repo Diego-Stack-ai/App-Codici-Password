@@ -1,3 +1,5 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
+import {decideAttachmentContent} from '../Frontend/public/assets/js/modules/shared/attachment-content-policy.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -37,7 +39,7 @@ function detailFixture() {
     const span = node(); nodes['toggle-password'].querySelector = () => span;
     const container = node();
     const window = {location: {search: '?id=A', pathname: '/dettaglio_account_privato.html', href: ''}, history: {replaceState() {}}};
-    const context = vm.createContext({window, URLSearchParams, AbortController, readErrorMessage, accountModeFromRecord, auth: {currentUser: {uid: 'owner'}},
+    const context = vm.createContext(withStandaloneFrame({decideAttachmentContent, window, URLSearchParams, AbortController, readErrorMessage, accountModeFromRecord, auth: {currentUser: {uid: 'owner'}},
         onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
         document: {title: 'Dettaglio', body: {style: {}}, getElementById: id => nodes[id] || null,
@@ -62,7 +64,7 @@ function detailFixture() {
         consumeAttachmentInitialMode: input => input?.dataset?.attachmentInitialMode === 'card' ? 'card' : 'free',
         loadCredentials: async () => ({initAccountSharedCredentials: data => calls.push(['credentials', data])}),
         loadWidgets: async () => ({initAccountEmbeddedWidgets: data => calls.push(['widgets', data])})
-    });
+    }));
     vm.runInContext(source, context);
     return {context, nodes, calls, copies, navigations, copy, window, observers,
         init: () => context.initDettaglioAccountPrivato({uid: context.auth.currentUser.uid}),
@@ -143,7 +145,7 @@ function attachmentFixture() {
         cloneNode() { return fileInput(id); }});
     for (const id of ['input-file', 'input-gallery', 'input-camera']) nodes[id] = fileInput(id);
     nodes['source-selector-modal'] = node(); nodes['btn-cancel-source'] = node(); nodes['attachments-list'] = node();
-    const context = vm.createContext({document: {body: {style: {}}, getElementById: id => nodes[id] || null}, navigator: {onLine: true},
+    const context = vm.createContext(withStandaloneFrame({decideAttachmentContent, document: {body: {style: {}}, getElementById: id => nodes[id] || null}, navigator: {onLine: true},
         setTimeout: callback => { timers.set(++timerId, callback); return timerId; }, clearTimeout: id => timers.delete(id),
         closeAttachmentSourcePicker() {},
         selectAttachmentSource: async () => null,
@@ -168,7 +170,7 @@ function attachmentFixture() {
         setChildren: (element, children) => { element.children = children; },
         getBytes: async () => new Uint8Array([1]), decryptAttachmentBytes: async () => new Uint8Array([2]),
         openDecryptedAttachment: () => operations.push(['open']), openExternalUrl: () => true
-    });
+    }));
     vm.runInContext(attachments, context);
     return {context, operations, nodes, timers,
         init: (accountId = 'A', options = {}) => context.initPrivateAttachmentModule({ownerId: 'owner', accountId, readOnly: false, ...options})};

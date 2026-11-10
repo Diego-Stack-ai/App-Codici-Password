@@ -1,3 +1,4 @@
+import {openAttachmentContent} from './attachment-content-policy.mjs';
 import {
     ATTACHMENT_CHUNK_BYTES,
     MAX_ATTACHMENT_BYTES,
@@ -198,30 +199,49 @@ export async function *streamDecryptedAttachmentChunks({attachment, fileKeyBytes
     }
 }
 
-export async function openChunkedDecryptedAttachment({attachment, fileKeyBytes, loadChunk}) {
+export async function openChunkedDecryptedAttachment({attachment, fileKeyBytes, loadChunk, isActive = () => true}) {
+    const checkActive = () => {
+        if (!isActive()) throw attachmentError('ATTACHMENT_SESSION_INVALIDATED');
+    };
+    checkActive();
     validateChunkedAttachmentManifest(attachment);
     if (typeof loadChunk !== 'function') throw attachmentError('ATTACHMENT_CHUNK_HANDLER_REQUIRED');
     if (!navigator.storage?.getDirectory) throw new Error('ATTACHMENT_LARGE_PREVIEW_UNSUPPORTED');
     const root = await navigator.storage.getDirectory();
+    checkActive();
     const directory = await root.getDirectoryHandle('codici-password-previews', {create: true});
+    checkActive();
     const temporaryName = `${Date.now()}-${crypto.randomUUID?.() || Math.random().toString(16).slice(2)}.bin`;
     const handle = await directory.getFileHandle(temporaryName, {create: true});
-    const writable = await handle.createWritable();
+    let writable = null;
     let closed = false;
     try {
-        for await (const clear of streamDecryptedAttachmentChunks({attachment, fileKeyBytes, loadChunk})) {
+        checkActive();
+        writable = await handle.createWritable();
+        checkActive();
+        const guardedLoad = async chunk => {
+            checkActive();
+            const bytes = await loadChunk(chunk);
+            checkActive();
+            return bytes;
+        };
+        for await (const clear of streamDecryptedAttachmentChunks({attachment, fileKeyBytes, loadChunk: guardedLoad})) {
+            checkActive();
             await writable.write(clear);
+            checkActive();
         }
         await writable.close();
         closed = true;
+        checkActive();
         const file = await handle.getFile();
-        const type = attachment.encryption.originalType || attachment.type || 'application/octet-stream';
-        const objectUrl = URL.createObjectURL(new Blob([file], {type}));
-        const opened = window.open(objectUrl, '_blank', 'noopener,noreferrer');
-        if (opened) opened.opener = null;
-        setTimeout(() => URL.revokeObjectURL(objectUrl), 10 * 60_000);
+        checkActive();
+        // A File snapshot still depends on its OPFS backing entry. Consume the
+        // stream into a browser-managed Blob before finally removes that entry.
+        const detached = await new Response(file.stream()).blob();
+        checkActive();
+        return openAttachmentContent(detached, attachment, {revokeAfter: 10 * 60_000});
     } finally {
-        if (!closed) await writable.abort().catch(() => {});
+        if (!closed && writable) await writable.abort().catch(() => {});
         await directory.removeEntry(temporaryName).catch(() => {});
     }
 }

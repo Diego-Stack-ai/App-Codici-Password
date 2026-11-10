@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -11,7 +12,7 @@ test('new account link action saves first and never links an absent record', () 
     const body={children:[],appendChild(node){this.children.push(node)}};
     const createElement=(tag,props={},children=[])=>{const node={tag,...props,children:Array.isArray(children)?children:[children],remove(){this.removed=true}};created.push(node);return node};
     const sandbox = {destroyAccountWidgetMount:section=>{destroyed=section;},createElement,setChildren:(node,children)=>{node.children=Array.isArray(children)?children:[children]},document:{body,getElementById:id=>nodes[id]},navigator:{onLine:true},showToast(){},t:testTranslate};
-    vm.createContext(sandbox);vm.runInContext(source,sandbox);
+    vm.createContext(withStandaloneFrame(sandbox));vm.runInContext(source,sandbox);
     sandbox.initNewAccountSharedCredentials({saveButtonId:'save'});
     assert.equal(destroyed,nodes['shared-credentials-section']);
     assert.equal(visible,true);assert.match(add.textContent,/Salva Account/);

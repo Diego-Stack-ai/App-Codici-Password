@@ -1,4 +1,6 @@
+import {confirmFrameAction} from '../core/vault-frame-client.js';
 import {functions, db, storage} from '../../firebase-config.js';
+import {decideAttachmentContent} from '../shared/attachment-content-policy.mjs';
 import {collection, getDocsFromServer, query, where, getBytes, ref, httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
 import {createElement, setChildren, clearElement} from '../../dom-utils.js';
 import {showToast, showConfirmModal} from '../../ui-core-v129.js';
@@ -90,7 +92,7 @@ export async function renderProfileDocumentAttachmentPreviews({uid, documentItem
         for (const attachment of attachments) {
             let name = friendlyType(attachment.mimeType);
             try { name = await decryptName(attachment.encryptedName); } catch {}
-            const isImage = String(attachment.mimeType || '').startsWith('image/');
+            const isImage = decideAttachmentContent(attachment).kind === 'image';
             const item = createElement('button', {
                 type: 'button',
                 className: `profile-document-inline-item ${isImage ? 'is-image' : 'is-file'}`,
@@ -106,7 +108,7 @@ export async function renderProfileDocumentAttachmentPreviews({uid, documentItem
                 try {
                     const ciphertext = await getBytes(ref(storage, attachment.storagePath), MAX_BYTES + 1024);
                     const clear = await decryptAttachmentBytes(ciphertext, attachment.encryption, vaultKey);
-                    const url = URL.createObjectURL(new Blob([clear], {type: attachment.mimeType || 'image/jpeg'}));
+                    const url = URL.createObjectURL(new Blob([clear], {type: decideAttachmentContent(attachment).mimeType}));
                     inlineObjectUrls.push(url);
                     item.append(createElement('img', {src: url, alt: name, className: 'profile-document-inline-image'}));
                 } catch {
@@ -136,6 +138,7 @@ export async function renderProfileDocumentAttachmentPreviews({uid, documentItem
                 if (!await showConfirmModal('Elimina allegato', `Eliminare “${name}”? Il documento rimarrà disponibile.`)) return;
                 remove.disabled = true;
                 try {
+                    await confirmFrameAction('permanent-delete', {id: attachment.id, scope: 'profile-document-attachment'});
                     await httpsCallable(functions, 'removeProfileDocumentAttachment')({attachmentId: attachment.id});
                     showToast('Allegato eliminato.', 'success');
                     await renderProfileDocumentAttachmentPreviews(renderOptions);

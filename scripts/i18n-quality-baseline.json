@@ -35,8 +35,7 @@
     "/assets/js/vendor/",
     "/assets/js/translations/",
     "/graphify-out/",
-    "/ui-preview/",
-    "/prova.html"
+    "/ui-preview/"
   ],
   "materialSymbolLiterals": [
     "account_balance",

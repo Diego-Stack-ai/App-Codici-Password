@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -14,12 +15,12 @@ function setup() {
   let resolve, reject, loads = 0;
   const pending = new Promise((done, fail) => { resolve = done; reject = fail; });
   const calls = [], toasts = [], errors = [];
-  const context = vm.createContext({
+  const context = vm.createContext(withStandaloneFrame({
     currentUserUid: 'owner', profileEditVersion: 1,
     auth: {currentUser: {uid: 'owner'}}, profileTabs: {isConnected: true},
     loadEditor: () => { loads += 1; return pending; },
     showToast: (...args) => toasts.push(args), logError: (...args) => errors.push(args),
-  });
+  }));
   vm.runInContext(`${editorSource}\nglobalThis.actions = {${actions.join(',')}};`, context);
   const editor = Object.fromEntries(actions.map(name => [name, (...args) => calls.push({name, args})]));
   return {context, calls, toasts, errors, resolve: () => resolve(editor), reject, loads: () => loads};

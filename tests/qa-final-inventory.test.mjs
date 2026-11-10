@@ -4,9 +4,9 @@ import { buildQaFinalInventory, FIXTURE_PLANS, renderQaFinalInventory } from '..
 
 test('la matrice QA copre una volta tutte le pagine canoniche', async () => {
     const inventory = await buildQaFinalInventory();
-    assert.equal(inventory.totals.pages, 30);
-    assert.equal(new Set(inventory.pages.map(page => page.pageId)).size, 30);
-    assert.equal(Object.keys(FIXTURE_PLANS).length, 30);
+    assert.equal(inventory.totals.pages, 31);
+    assert.equal(new Set(inventory.pages.map(page => page.pageId)).size, 31);
+    assert.equal(Object.keys(FIXTURE_PLANS).length, 31);
     assert.ok(inventory.totals.steps >= 100);
     assert.ok(inventory.totals.targets >= 90);
 });

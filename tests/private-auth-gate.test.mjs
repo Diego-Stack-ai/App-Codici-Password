@@ -17,7 +17,7 @@ function fixture() {
     const documentElement = {dataset: {}};
     const window = {location: {pathname: '/fixture.html', replace: url => redirects.push(url), reload: () => redirects.push('reload')},
         dispatchEvent: event => events.push(event.type), addEventListener: (name, fn) => handlers.set(name, fn)};
-    const context = vm.createContext({window, document: {body, documentElement}, Event, Promise,
+    const context = vm.createContext({beginFrameLogout: () => null, window, navigateDocument: target => window.location.replace(target), document: {body, documentElement}, Event, Promise,
         setTimeout: (fn, ms) => { timers.set(++serial, {fn, ms}); return serial; },
         clearTimeout: id => timers.delete(id),
         sessionStorage: {getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key)}});
@@ -26,10 +26,13 @@ function fixture() {
 }
 
 test('all 22 private HTML entries are hidden and inert before JavaScript; public exceptions stay public', async () => {
-    const publicPages = new Set(['index.html','login.html','registrati.html','reset_password.html','imposta_nuova_password.html','privacy.html','termini.html','contatto_condiviso.html','prova.html']);
+    const publicPages = new Set(['app.html','index.html','login.html','registrati.html','reset_password.html','imposta_nuova_password.html','privacy.html','termini.html','contatto_condiviso.html']);
     let count = 0;
     for (const name of (await readdir(root)).filter(name => name.endsWith('.html'))) {
         const html = await readFile(new URL(name, root), 'utf8');
+        if (name === 'app.html') {
+            assert.match(html, /vault-frame-entry\.js/); assert.match(html, /<iframe[^>]*hidden[^>]*inert/); continue;
+        }
         if (publicPages.has(name)) { assert.doesNotMatch(html, /data-private-auth/, name); continue; }
         count++;
         assert.match(html, /<body\b[^>]*data-private-auth[^>]*\bhidden\b[^>]*\binert\b/, name);
@@ -129,7 +132,7 @@ test('logout lock reaches the real RAM cleanup and explicit login clears the den
     const auth = await readFile(new URL('assets/js/auth.js', root), 'utf8');
     const header = await readFile(new URL('assets/js/components-v129.js', root), 'utf8');
     assert.match(security, /addEventListener\('private-auth-blocked', \(\) => clearSession\(\)\)/);
-    assert.match(security, /export function clearSession\(\) \{\s*invalidatePendingUnlock\(\);\s*_vaultKeyMaterial = null;[\s\S]*?_clearSessionStorage\(\)/);
+    assert.match(security, /export function clearSession\(\{notifyFrame = true\} = \{\}\) \{[\s\S]*?invalidatePendingUnlock\(\);\s*_vaultKeyMaterial = null;[\s\S]*?_clearSessionStorage\(\)/);
     assert.match(auth, /sessionStorage\.removeItem\('codex_explicit_logout'\)/);
     assert.match(auth, /sessionStorage\.getItem\('codex_explicit_logout'\) === '1'/);
     for (const source of [auth, header]) assert.match(source, /privateAuthGate\?\.block\(\);[\s\S]*?logoutWithCleanup\(\(\) => signOut\(auth\)\)/);

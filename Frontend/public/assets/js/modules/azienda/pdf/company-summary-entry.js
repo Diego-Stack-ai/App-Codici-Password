@@ -1,4 +1,5 @@
-import {auth} from '../../../firebase-config.js?v=1.2.261';
+import {executeFrameNativeAction} from '../../core/vault-frame-client.js';
+import {auth} from '../../../firebase-config.js?v=1.2.268';
 import {onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {ensureVaultKeyMaterial, isVaultUnlocked} from '../../core/security-manager.js';
 import {getVaultSessionExpiry} from '../../core/vault-session.js';
@@ -9,6 +10,7 @@ import {mountCompanyPdfPanel} from './company-summary-panel.js';
 export function mountCompanySummary(root, companyId) {
     return mountCompanyPdfPanel(root, companyId, {
         getUser: () => auth.currentUser,
+        nativeAction: (bytes, action) => executeFrameNativeAction({scope: 'company-pdf', companyId, snapshotBytes: bytes}, action),
         subscribeAuth: callback => onAuthStateChanged(auth, callback),
         ensureUnlocked: async () => {await ensureVaultKeyMaterial();},
         isUnlocked: () => isVaultUnlocked() && (!getVaultSessionExpiry() || Date.now() < getVaultSessionExpiry()),

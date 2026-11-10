@@ -102,11 +102,28 @@
         ]
       },
       {
-        "source": "**",
+        "source": "**/*.mjs",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      },
+      {
+        "regex": "^(?:|[^\\\\/][\\s\\S]*|[\\\\/](?:|[^acdfghilmprs][\\s\\S]*|a(?:|[^pcgr][\\s\\S]*|p(?:|[^p][\\s\\S]*|p(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+)))))))|c(?:|[^c][\\s\\S]*|c(?:|[^o][\\s\\S]*|o(?:|[^u][\\s\\S]*|u(?:|[^n][\\s\\S]*|n(?:|[^t][\\s\\S]*|t(?:|[^_][\\s\\S]*|_(?:|[^ap][\\s\\S]*|a(?:|[^z][\\s\\S]*|z(?:|[^i][\\s\\S]*|i(?:|[^e][\\s\\S]*|e(?:|[^n][\\s\\S]*|n(?:|[^d][\\s\\S]*|d(?:|[^a][\\s\\S]*|a(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+))))))))))))|p(?:|[^r][\\s\\S]*|r(?:|[^i][\\s\\S]*|i(?:|[^v][\\s\\S]*|v(?:|[^a][\\s\\S]*|a(?:|[^t][\\s\\S]*|t(?:|[^i][\\s\\S]*|i(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+)))))))))))))))))))|g(?:|[^g][\\s\\S]*|g(?:|[^i][\\s\\S]*|i(?:|[^u][\\s\\S]*|u(?:|[^n][\\s\\S]*|n(?:|[^g][\\s\\S]*|g(?:|[^i][\\s\\S]*|i(?:|[^_][\\s\\S]*|_(?:|[^s][\\s\\S]*|s(?:|[^c][\\s\\S]*|c(?:|[^a][\\s\\S]*|a(?:|[^d][\\s\\S]*|d(?:|[^e][\\s\\S]*|e(?:|[^n][\\s\\S]*|n(?:|[^z][\\s\\S]*|z(?:|[^a][\\s\\S]*|a(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+)))))))))))))))))))))|r(?:|[^ce][\\s\\S]*|c(?:|[^h][\\s\\S]*|h(?:|[^i][\\s\\S]*|i(?:|[^v][\\s\\S]*|v(?:|[^i][\\s\\S]*|i(?:|[^o][\\s\\S]*|o(?:|[^_][\\s\\S]*|_(?:|[^a][\\s\\S]*|a(?:|[^c][\\s\\S]*|c(?:|[^c][\\s\\S]*|c(?:|[^o][\\s\\S]*|o(?:|[^u][\\s\\S]*|u(?:|[^n][\\s\\S]*|n(?:|[^t][\\s\\S]*|t(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+)))))))))))))))))))|e(?:|[^a][\\s\\S]*|a(?:|[^_][\\s\\S]*|_(?:|[^p][\\s\\S]*|p(?:|[^r][\\s\\S]*|r(?:|[^i][\\s\\S]*|i(?:|[^v][\\s\\S]*|v(?:|[^a][\\s\\S]*|a(?:|[^t][\\s\\S]*|t(?:|[^a][\\s\\S]*|a(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+)))))))))))))))))|c(?:|[^o][\\s\\S]*|o(?:|[^n][\\s\\S]*|n(?:|[^f][\\s\\S]*|f(?:|[^i][\\s\\S]*|i(?:|[^g][\\s\\S]*|g(?:|[^u][\\s\\S]*|u(?:|[^r][\\s\\S]*|r(?:|[^a][\\s\\S]*|a(?:|[^z][\\s\\S]*|z(?:|[^i][\\s\\S]*|i(?:|[^o][\\s\\S]*|o(?:|[^n][\\s\\S]*|n(?:|[^e][\\s\\S]*|e(?:|[^_][\\s\\S]*|_(?:|[^adg][\\s\\S]*|a(?:|[^u][\\s\\S]*|u(?:|[^t][\\s\\S]*|t(?:|[^o][\\s\\S]*|o(?:|[^m][\\s\\S]*|m(?:|[^e][\\s\\S]*|e(?:|[^z][\\s\\S]*|z(?:|[^z][\\s\\S]*|z(?:|[^i][\\s\\S]*|i(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+))))))))))))))|d(?:|[^o][\\s\\S]*|o(?:|[^c][\\s\\S]*|c(?:|[^u][\\s\\S]*|u(?:|[^m][\\s\\S]*|m(?:|[^e][\\s\\S]*|e(?:|[^n][\\s\\S]*|n(?:|[^t][\\s\\S]*|t(?:|[^i][\\s\\S]*|i(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+))))))))))))))|g(?:|[^e][\\s\\S]*|e(?:|[^n][\\s\\S]*|n(?:|[^e][\\s\\S]*|e(?:|[^r][\\s\\S]*|r(?:|[^a][\\s\\S]*|a(?:|[^l][\\s\\S]*|l(?:|[^i][\\s\\S]*|i(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+))))))))))))))))))))))))))))|d(?:|[^ae][\\s\\S]*|a(?:|[^t][\\s\\S]*|t(?:|[^i][\\s\\S]*|i(?:|[^_][\\s\\S]*|_(?:|[^a][\\s\\S]*|a(?:|[^z][\\s\\S]*|z(?:|[^i][\\s\\S]*|i(?:|[^e][\\s\\S]*|e(?:|[^n][\\s\\S]*|n(?:|[^d][\\s\\S]*|d(?:|[^a][\\s\\S]*|a(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+))))))))))))))))|e(?:|[^t][\\s\\S]*|t(?:|[^t][\\s\\S]*|t(?:|[^a][\\s\\S]*|a(?:|[^g][\\s\\S]*|g(?:|[^l][\\s\\S]*|l(?:|[^i][\\s\\S]*|i(?:|[^o][\\s\\S]*|o(?:|[^_][\\s\\S]*|_(?:|[^as][\\s\\S]*|a(?:|[^c][\\s\\S]*|c(?:|[^c][\\s\\S]*|c(?:|[^o][\\s\\S]*|o(?:|[^u][\\s\\S]*|u(?:|[^n][\\s\\S]*|n(?:|[^t][\\s\\S]*|t(?:|[^_][\\s\\S]*|_(?:|[^ap][\\s\\S]*|a(?:|[^z][\\s\\S]*|z(?:|[^i][\\s\\S]*|i(?:|[^e][\\s\\S]*|e(?:|[^n][\\s\\S]*|n(?:|[^d][\\s\\S]*|d(?:|[^a][\\s\\S]*|a(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+))))))))))))|p(?:|[^r][\\s\\S]*|r(?:|[^i][\\s\\S]*|i(?:|[^v][\\s\\S]*|v(?:|[^a][\\s\\S]*|a(?:|[^t][\\s\\S]*|t(?:|[^o][\\s\\S]*|o(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+))))))))))))))))))))|s(?:|[^c][\\s\\S]*|c(?:|[^a][\\s\\S]*|a(?:|[^d][\\s\\S]*|d(?:|[^e][\\s\\S]*|e(?:|[^n][\\s\\S]*|n(?:|[^z][\\s\\S]*|z(?:|[^a][\\s\\S]*|a(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+)))))))))))))))))))))))|f(?:|[^o][\\s\\S]*|o(?:|[^r][\\s\\S]*|r(?:|[^m][\\s\\S]*|m(?:|[^_][\\s\\S]*|_(?:|[^a][\\s\\S]*|a(?:|[^c][\\s\\S]*|c(?:|[^c][\\s\\S]*|c(?:|[^o][\\s\\S]*|o(?:|[^u][\\s\\S]*|u(?:|[^n][\\s\\S]*|n(?:|[^t][\\s\\S]*|t(?:|[^_][\\s\\S]*|_(?:|[^ap][\\s\\S]*|a(?:|[^z][\\s\\S]*|z(?:|[^i][\\s\\S]*|i(?:|[^e][\\s\\S]*|e(?:|[^n][\\s\\S]*|n(?:|[^d][\\s\\S]*|d(?:|[^a][\\s\\S]*|a(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+))))))))))))|p(?:|[^r][\\s\\S]*|r(?:|[^i][\\s\\S]*|i(?:|[^v][\\s\\S]*|v(?:|[^a][\\s\\S]*|a(?:|[^t][\\s\\S]*|t(?:|[^o][\\s\\S]*|o(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+)))))))))))))))))))))))))|g(?:|[^e][\\s\\S]*|e(?:|[^s][\\s\\S]*|s(?:|[^t][\\s\\S]*|t(?:|[^i][\\s\\S]*|i(?:|[^o][\\s\\S]*|o(?:|[^n][\\s\\S]*|n(?:|[^e][\\s\\S]*|e(?:|[^_][\\s\\S]*|_(?:|[^d][\\s\\S]*|d(?:|[^e][\\s\\S]*|e(?:|[^s][\\s\\S]*|s(?:|[^t][\\s\\S]*|t(?:|[^i][\\s\\S]*|i(?:|[^n][\\s\\S]*|n(?:|[^a][\\s\\S]*|a(?:|[^t][\\s\\S]*|t(?:|[^a][\\s\\S]*|a(?:|[^r][\\s\\S]*|r(?:|[^i][\\s\\S]*|i(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+)))))))))))))))))))))))))|h(?:|[^o][\\s\\S]*|o(?:|[^m][\\s\\S]*|m(?:|[^e][\\s\\S]*|e(?:|[^_][\\s\\S]*|_(?:|[^p][\\s\\S]*|p(?:|[^a][\\s\\S]*|a(?:|[^g][\\s\\S]*|g(?:|[^e][\\s\\S]*|e(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+))))))))))))))|i(?:|[^m][\\s\\S]*|m(?:|[^p][\\s\\S]*|p(?:|[^o][\\s\\S]*|o(?:|[^s][\\s\\S]*|s(?:|[^t][\\s\\S]*|t(?:|[^a][\\s\\S]*|a(?:|[^z][\\s\\S]*|z(?:|[^i][\\s\\S]*|i(?:|[^o][\\s\\S]*|o(?:|[^n][\\s\\S]*|n(?:|[^i][\\s\\S]*|i(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+)))))))))))))))))|l(?:|[^i][\\s\\S]*|i(?:|[^s][\\s\\S]*|s(?:|[^t][\\s\\S]*|t(?:|[^a][\\s\\S]*|a(?:|[^_][\\s\\S]*|_(?:|[^a][\\s\\S]*|a(?:|[^z][\\s\\S]*|z(?:|[^i][\\s\\S]*|i(?:|[^e][\\s\\S]*|e(?:|[^n][\\s\\S]*|n(?:|[^d][\\s\\S]*|d(?:|[^e][\\s\\S]*|e(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+))))))))))))))))))|m(?:|[^o][\\s\\S]*|o(?:|[^d][\\s\\S]*|d(?:|[^i][\\s\\S]*|i(?:|[^f][\\s\\S]*|f(?:|[^i][\\s\\S]*|i(?:|[^c][\\s\\S]*|c(?:|[^a][\\s\\S]*|a(?:|[^_][\\s\\S]*|_(?:|[^a][\\s\\S]*|a(?:|[^z][\\s\\S]*|z(?:|[^i][\\s\\S]*|i(?:|[^e][\\s\\S]*|e(?:|[^n][\\s\\S]*|n(?:|[^d][\\s\\S]*|d(?:|[^a][\\s\\S]*|a(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+)))))))))))))))))))))|p(?:|[^r][\\s\\S]*|r(?:|[^o][\\s\\S]*|o(?:|[^f][\\s\\S]*|f(?:|[^i][\\s\\S]*|i(?:|[^l][\\s\\S]*|l(?:|[^o][\\s\\S]*|o(?:|[^_][\\s\\S]*|_(?:|[^p][\\s\\S]*|p(?:|[^r][\\s\\S]*|r(?:|[^i][\\s\\S]*|i(?:|[^v][\\s\\S]*|v(?:|[^a][\\s\\S]*|a(?:|[^t][\\s\\S]*|t(?:|[^o][\\s\\S]*|o(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+))))))))))))))))))))|r(?:|[^e][\\s\\S]*|e(?:|[^g][\\s\\S]*|g(?:|[^o][\\s\\S]*|o(?:|[^l][\\s\\S]*|l(?:|[^e][\\s\\S]*|e(?:|[^_][\\s\\S]*|_(?:|[^s][\\s\\S]*|s(?:|[^c][\\s\\S]*|c(?:|[^a][\\s\\S]*|a(?:|[^d][\\s\\S]*|d(?:|[^e][\\s\\S]*|e(?:|[^n][\\s\\S]*|n(?:|[^z][\\s\\S]*|z(?:|[^e][\\s\\S]*|e(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+))))))))))))))))))))|s(?:|[^c][\\s\\S]*|c(?:|[^a][\\s\\S]*|a(?:|[^d][\\s\\S]*|d(?:|[^e][\\s\\S]*|e(?:|[^n][\\s\\S]*|n(?:|[^z][\\s\\S]*|z(?:|[^e][\\s\\S]*|e(?:|[^.][\\s\\S]*|\\.(?:|[^h][\\s\\S]*|h(?:|[^t][\\s\\S]*|t(?:|[^m][\\s\\S]*|m(?:|[^l][\\s\\S]*|l(?:[\\s\\S]+)))))))))))))))$",
         "headers": [
           {
             "key": "X-Frame-Options",
             "value": "DENY"
+          },
+          {
+            "key": "Content-Security-Policy",
+            "value": "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' https://www.gstatic.com https://www.google.com https://www.recaptcha.net https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://www.gstatic.com https://www.google.com https://www.recaptcha.net; media-src 'self' blob: https://firebasestorage.googleapis.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://europe-west1-appcodici-password.cloudfunctions.net https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://fonts.gstatic.com https://www.gstatic.com https://www.google.com https://apis.google.com https://www.recaptcha.net; frame-src https://www.google.com https://www.recaptcha.net https://appcodici-password.firebaseapp.com; frame-ancestors 'none'; worker-src 'self' blob:; manifest-src 'self';"
+          },
+          {
+            "key": "Permissions-Policy",
+            "value": "camera=(self), microphone=(self), geolocation=(), local-network=()"
           },
           {
             "key": "X-Content-Type-Options",
@@ -115,24 +132,74 @@
           {
             "key": "Referrer-Policy",
             "value": "strict-origin-when-cross-origin"
-          },
+          }
+        ]
+      },
+      {
+        "regex": "^(?:[\\\\/]app\\.html)$",
+        "headers": [
           {
-            "key": "Permissions-Policy",
-            "value": "camera=(self), microphone=(self), geolocation=(), local-network=()"
+            "key": "X-Frame-Options",
+            "value": "DENY"
           },
           {
             "key": "Content-Security-Policy",
-            "value": "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' https://www.gstatic.com https://www.google.com https://www.recaptcha.net https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://www.gstatic.com https://www.google.com https://www.recaptcha.net; media-src 'self' blob: https://firebasestorage.googleapis.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://europe-west1-appcodici-password.cloudfunctions.net https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://fonts.gstatic.com https://www.gstatic.com https://www.google.com https://apis.google.com https://www.recaptcha.net; frame-src https://www.google.com https://www.recaptcha.net https://appcodici-password.firebaseapp.com; frame-ancestors 'none'; worker-src 'self' blob:; manifest-src 'self';"
+            "value": "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' https://www.gstatic.com https://www.google.com https://www.recaptcha.net https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://www.gstatic.com https://www.google.com https://www.recaptcha.net; media-src 'self' blob: https://firebasestorage.googleapis.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://europe-west1-appcodici-password.cloudfunctions.net https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://fonts.gstatic.com https://www.gstatic.com https://www.google.com https://apis.google.com https://www.recaptcha.net; frame-src 'self' https://www.google.com https://www.recaptcha.net https://appcodici-password.firebaseapp.com; frame-ancestors 'none'; worker-src 'self' blob:; manifest-src 'self';"
+          },
+          {
+            "key": "Permissions-Policy",
+            "value": "camera=(self), microphone=(self), geolocation=(), local-network=(), publickey-credentials-get=(self), publickey-credentials-create=(self)"
+          },
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "strict-origin-when-cross-origin"
+          }
+        ]
+      },
+      {
+        "regex": "^(?:[\\\\/]account_azienda\\.html|[\\\\/]account_privati\\.html|[\\\\/]aggiungi_scadenza\\.html|[\\\\/]archivio_account\\.html|[\\\\/]area_privata\\.html|[\\\\/]configurazione_automezzi\\.html|[\\\\/]configurazione_documenti\\.html|[\\\\/]configurazione_generali\\.html|[\\\\/]dati_azienda\\.html|[\\\\/]dettaglio_account_azienda\\.html|[\\\\/]dettaglio_account_privato\\.html|[\\\\/]dettaglio_scadenza\\.html|[\\\\/]form_account_azienda\\.html|[\\\\/]form_account_privato\\.html|[\\\\/]gestione_destinatari\\.html|[\\\\/]home_page\\.html|[\\\\/]impostazioni\\.html|[\\\\/]lista_aziende\\.html|[\\\\/]modifica_azienda\\.html|[\\\\/]profilo_privato\\.html|[\\\\/]regole_scadenze\\.html|[\\\\/]scadenze\\.html)$",
+        "headers": [
+          {
+            "key": "X-Frame-Options",
+            "value": "SAMEORIGIN"
+          },
+          {
+            "key": "Content-Security-Policy",
+            "value": "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' https://www.gstatic.com https://www.google.com https://www.recaptcha.net https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://www.gstatic.com https://www.google.com https://www.recaptcha.net; media-src 'self' blob: https://firebasestorage.googleapis.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://europe-west1-appcodici-password.cloudfunctions.net https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://fonts.gstatic.com https://www.gstatic.com https://www.google.com https://apis.google.com https://www.recaptcha.net; frame-src https://www.google.com https://www.recaptcha.net https://appcodici-password.firebaseapp.com; frame-ancestors 'self'; worker-src 'self' blob:; manifest-src 'self';"
+          },
+          {
+            "key": "Permissions-Policy",
+            "value": "camera=(self), microphone=(self), geolocation=(), local-network=(), publickey-credentials-get=(self), publickey-credentials-create=(self)"
+          },
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "strict-origin-when-cross-origin"
           }
         ]
       }
     ]
   },
   "emulators": {
-    "auth": { "port": 9099 },
-    "firestore": { "port": 8080 },
-    "functions": { "port": 5001 },
-    "ui": { "enabled": false },
+    "auth": {
+      "port": 9099
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "functions": {
+      "port": 5001
+    },
+    "ui": {
+      "enabled": false
+    },
     "singleProjectMode": true
   }
 }

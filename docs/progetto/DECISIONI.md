@@ -1,5 +1,58 @@
 # Decisioni
 
+## 10/11/2026 — B3 per singoli passi e canary di sette giorni
+
+Dopo il [GO DIAG](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6758777089), Diego sceglie esplicitamente **7 giorni di canary**, distinti dai 7 giorni massimi del journal. Il Timestamp UTC non è assegnato oggi: verrà concordato all'attivazione, senza rinnovi automatici. Diego carica il workflow e crea personalmente il singleton in console; Codex preparerà in un passo successivo uno script claim una tantum, da sottoporre a Claude prima dell'esecuzione. Il passo attuale termina con la consegna del workflow completo e hash, poi arresto e attesa di approvazione. Nessuna operazione cloud autorizzata da questa consegna. [Mandato](INCARICO_CORRENTE.md#cornice-b3-consegna-workflow-2026-11-10), [procedura](../regole/RILASCIO.md#cornice-b3-piano-2026-11-10). Questa decisione supera la precedente proposta non approvata di 24 ore.
+
+<a id="cornice-diag-decisione-2026-11-10"></a>
+
+## 10/11/2026 — DIAG prima della prosecuzione B3
+
+Diego ordina un registro diagnostico locale volontario per C1 e valutazione dell'app, con sezione Cornice, default off, allowlist chiusa, nessun dato identificante/Vault o invio remoto, massimo 200 eventi/7 giorni, eliminazione su logout/cambio account, copia e cancellazione. Aggiornare contratti e lista: ogni FAIL deve avere il rapporto copiato. Consegna sulla #278 mediante avviso PASSO DIAG COMMITTATO e revisione Claude, poi B3. Nessuna operazione Firebase o deploy autorizzata.
+
+Scelta implementativa candidata: sessionStorage della singola scheda, identità soltanto in RAM e revisione non identificante del fence nel consenso; il worker non persiste. Disattivazione elimina, Cancella ruota la generazione mantenendo il consenso. Registro distinto dalle metriche prestazioni esistenti. Specifica e limiti sono in [SICUREZZA](../regole/SICUREZZA.md#cornice-diag-sicurezza-2026-11-10); nuovo costo statico dichiarato in [INTERFACCIA](../regole/INTERFACCIA.md#cornice-diag-ui-2026-11-10), soggetto al revisore. Non è scelta della durata canary né approvazione dei successivi passi cloud.
+
+<a id="cornice-b3-decisione-2026-11-10"></a>
+
+## 10/11/2026 — B3 da preparare, cloud fermo
+
+Diego trasmette il [GO D11 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6757406980) sul commit `3820afe6be11fbdb1c1c724592232c5ad36e8503` e autorizza preparazione e avviso B3 sulla #278. Revisione Claude del pacchetto e approvazione personale di Diego precedono ogni esecuzione Firebase; nessuna delega implicita per workflow, merge o deploy. Proposta scelta per la revisione: sole Rules Firestore con scope CI fisso distinto dal recovery ampio, poi Hosting sullo stesso SHA e provisioning privato del solo pilota dopo le verifiche. Nessuna nuova Function o migrazione Vault.
+
+Il file completo della CI viene soltanto generato localmente e vincolato da SHA-256; workflow attivo invariato. Canale amministrativo, UID e scadenza UTC rimangono da concordare dopo revisione, non assegnati. La durata di 24 ore è una proposta, non una decisione acquisita. Auth e Firestore non sono una transazione: evitare writer concorrenti, verificare i claim conservati e usare precondizioni sul singleton. [Piano, gate e rollback canonici](../regole/RILASCIO.md#cornice-b3-piano-2026-11-10). L'abilitazione non equivale a collaudo C1/C2; nessun nuovo documento oltre i 34.
+
+<a id="cornice-d11-decisione-2026-11-10"></a>
+
+## 10/11/2026 — D11 dopo GO B2, prima della proposta B3
+
+Diego trasmette il [GO B2 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753602102) e ordina la correzione notifiche con le integrazioni della lista. Si adotta l'intento dal worker FCM alla cornice pronta, confermato tramite porta/nonce/path entro 1500 ms: il padre verifica sorgente attiva registrata, allowlist e stato corrente, quindi naviga il figlio senza sblocco implicito. Senza conferma si usa openWindow; mai navigate diretto sulla cornice. È una correzione candidata da rivedere, non un'attivazione. Il fallback nativo può riusare una PWA e richiede il collaudo distinto riportato nel contratto UI.
+
+Safe area verticale/orizzontale e version skew entrano nella lista C1, senza risultati precompilati; priorità PWA iPhone e Chrome desktop. Restano gate GO sul nuovo SHA, approvazione personale B3, CI soltanto e 34 MD. Questo passo non autorizza provisioning, nuove Rules/Functions/workflow, merge o deploy.
+
+<a id="cornice-b1-decisione-2026-11-09"></a>
+
+## 09/11/2026 — B1 dopo GO A2, senza attivazione produttiva
+
+Diego trasmette il [GO Claude A2](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6751236506) sul commit `455b41fc4f3bc86e0b9f9df48ccb9f5623309060` e ordina B1. Si usa un singleton fuori dal sottoalbero delle preferenze modificabili dagli utenti: un solo destinatario server, nessuna scrittura client o UID personale nel codice. Ascolto continuo con metadati e verifiche server fresche ai confini sensibili; richieste pendenti prima del background non possono soddisfare la ripresa. Il compilato candidato può instradare nella cornice solo dopo consenso server; il documento reale assente conserva il diniego. Nessuna nuova Function, chiave o migrazione Vault.
+
+La configurazione selettiva degli header è per route e non per utente. In B1 si prova il codice con SDK/emulatori e browser sintetico; provisioning privato e rilascio CI delle Rules/Hosting sono rinviati a B3 dopo i GO previsti e approvazione personale. Il vecchio scope CI che comprende più backend non viene usato per distribuire soltanto questa Rules. Nessuna modifica workflow da questo passo; nessun deploy dal PC. Questa decisione aggiorna i checkpoint A2 preparatori seguenti, preservandone la provenienza.
+
+Contraddittorio B1: Claude rileva che la pre-verifica su ogni pagina aggiunge ritardo anche ai non partecipanti; NO-GO mantenuto dopo CI verde. Correzione scelta: riutilizzare l'indicazione server negativa già disponibile nel token Auth canonico, senza richiesta ulteriore e senza cache positiva. Solo la hint booleana true per UID corrente permette di tentare il routing; singleton/Rules restano unica autorità, offline nessun tentativo. Il provisioning privato B3 dovrà proporre il solo claim del pilota preservando gli altri; nessuna mutazione Auth ora. Il consumo locale del marker precede il filtro, evitando residui anche senza hint. Costo statico dichiarato e gate di revisione in [Interfaccia B1](../regole/INTERFACCIA.md#cornice-b1-header-2026-11-09).
+
+<a id="cornice-ordine-2026-11-09"></a>
+
+## 09/11/2026 — ordine cornice A1–C2, revisione sulla PR e timer
+
+Diego ordina di chiudere e pubblicare la cornice persistente attiva soltanto per il proprio account. Sicurezza aperta fuori perimetro e nuova grafica seguiranno separatamente. Codex è unico esecutore; Claude revisore consultivo readonly sulla PR #278, senza modifica di file/commit/cloud. La lavorazione continua sulla #278; un'eventuale nuova PR va collegata subito con commento sulla #278.
+
+A fine di ogni passo l'avviso sulla #278 deve iniziare «PASSO <A1/A2/B1/…> COMMITTATO – ramo: … – commit: <SHA completo> – file toccati: … – test eseguiti ed esito: … – limiti/cosa non è fatto: … – in attesa di revisione Claude». Solo una risposta sulla PR «REVISIONE CLAUDE – GO» riferibile al passo/commit sblocca il passo seguente; NO-GO richiede correzione e nuovo avviso. I pareri CLI dei laboratori precedenti non sostituiscono questo nuovo gate. Merge e deploy richiedono inoltre l'approvazione personale di Diego: nessuna delega implicita e nessun deploy dal PC. MD fermi a 34.
+
+Sequenza autorizzata: A1 contratto nei tre documenti canonici → A2 integrazione reale pubblicabile ma spenta → B1 flag server soltanto UID Diego, Rules/emulatori e header selettivi → B2 lista prove dispositivi → B3 preparazione merge e CI, eventuale Rules/Function strettamente richiesta da B1 poi Hosting → C1 prove personali e correzioni con lo stesso ciclo → C2 ricevute e avviso «CORNICE CHIUSA». L'ordine aggiorna la precedente sola preparazione sintetica. B2 prepara la lista e C1 esegue le prove dopo l'attivazione individuale B3: questa nuova sequenza sostituisce, soltanto per il canary Diego, il precedente vincolo di completare tutta la matrice fisica prima di attivarlo. Restano obbligatori i test automatizzati precedenti, GO, approvazione personale e rollback; nessuna prova mancante è dichiarata superata e non è autorizzata l'attivazione per altri utenti.
+
+Alla domanda sul tempo in background Diego sceglie esplicitamente **«Usa lo stesso tempo dell'inattività»**. Entrambi derivano dalla preferenza `lock_timeout`, non dal default fisso del laboratorio. Scadenze, copie RAM e confine same-origin sono nel [contratto Vault A1](../regole/VAULT.md#cornice-a1-2026-11-09); intestazioni, permessi e transizioni in [Interfaccia A1](../regole/INTERFACCIA.md#cornice-a1-ui-2026-11-09). La matrice specifica che gli header statici sono per route e per tutti i visitatori: il flag server individuale governa l'abilitazione e il broker, non gli header.
+
+Aggiornamento: A1 ha ricevuto il [GO di Claude sul commit 4f2bc0f8](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6747756706). È quindi in preparazione A2 reale ma spenta; nessun GO A2, attivazione o pubblicazione della cornice. Il raccordo aggiunge conferme sensibili e pulizia delle continuazioni; costo statico circoscritto e limiti sono dichiarati in [Interfaccia](../regole/INTERFACCIA.md#cornice-a2-ui-2026-11-09), da valutare nella revisione del candidato.
+
+
 ## 07/11/2026 — riconciliazione del manifest Markdown
 
 Diego risponde «procedi» alla proposta di correggere i disallineamenti documentali e censire **34 Markdown**: i 32 già approvati e i due file tecnici `AGENTS.md` e `.agents/skills/token-saver/SKILL.md`, creati dal bootstrap token-saver richiesto. I documenti precedenti conservano funzione e autorità; le due istruzioni tecniche sono sottoposte agli stessi controlli. Nessun file o cartella viene escluso per ottenere il passaggio dell'audit. La mappa delle 71 fonti storiche conserva baseline, segmenti e impronte originali; il numero dei documenti ammessi viene riallineato al manifest, senza inventare provenienze per i file nuovi.

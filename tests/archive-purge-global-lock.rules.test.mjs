@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import {assertFails, assertSucceeds, initializeTestEnvironment} from '@firebase/rules-unit-testing';
 import {collection, collectionGroup, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where} from 'firebase/firestore';
 
-const PROJECT_ID = 'demo-codici-password-rules-test';
+const PROJECT_ID = 'demo-codici-password-purge-lock-rules-test';
 const OWNER = 'purge-owner';
 let testEnv;
 

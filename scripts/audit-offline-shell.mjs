@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { access, readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { isOfflineExcluded } from './offline-asset-policy.mjs';
 
 const root = path.resolve(import.meta.dirname, '..');
 const publicDir = path.join(root, 'Frontend', 'public');
@@ -31,10 +32,7 @@ const offlineSource = await readFile(path.join(publicDir, 'offline-assets.js'), 
 const assets = JSON.parse(offlineSource.match(/=\s*(\[[\s\S]*\]);?\s*$/)?.[1] || '[]');
 const assetSet = new Set(assets);
 const onlineOnlyDiagnostics = new Set([
-  'release-manifest.json',
-  'prova.html',
-  'assets/css/prova.css',
-  'assets/js/prova.js'
+  'release-manifest.json'
 ]);
 const serviceWorker = await readFile(path.join(publicDir, 'sw.js'), 'utf8');
 const pushWorker = await readFile(path.join(publicDir, 'firebase-messaging-sw.js'), 'utf8');
@@ -45,13 +43,15 @@ for (const file of deployableFiles) {
   const relative = path.relative(publicDir, file).replaceAll('\\', '/');
   if (/\.(?:html|js|css|json|png|jpe?g|svg|webp|woff2)$/i.test(relative)
       && relative !== 'sw.js'
-      && !onlineOnlyDiagnostics.has(relative)) {
+      && !onlineOnlyDiagnostics.has(relative)
+      && !isOfflineExcluded(relative)) {
     assert.ok(assetSet.has(relative), `Risorsa statica non precaricata: ${relative}`);
   }
 }
 
 for (const asset of assets) {
   assert.ok(!isDeployExcluded(asset), `Risorsa esclusa dal deploy presente nella shell offline: ${asset}`);
+  assert.ok(!isOfflineExcluded(asset), `Anteprima inclusa nella shell offline: ${asset}`);
   await assert.doesNotReject(access(path.join(publicDir, asset)),
     `Risorsa della shell offline assente dal filesystem: ${asset}`);
 }

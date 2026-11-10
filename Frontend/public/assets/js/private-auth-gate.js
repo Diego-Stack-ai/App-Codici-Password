@@ -1,5 +1,6 @@
 /* Presentation gate only: Firebase Rules remain the data authorization boundary. */
 (() => {
+    const requestingDocument = document;
     const AUTH_CHECK_TIMEOUT_MS = 45000;
     const FAILURE_MARKER_KEY = 'codex_auth_gate_last_failure_v1';
     let epoch = 0, blocked = false, ready = false, acceptedUid = null, redirecting = false;
@@ -20,6 +21,7 @@
         for (const key of ['vault_session_v1', 'codex_vault_session_wrapping_key_v1', 'vault_s_key', 'vault_s_expiry']) {
             try { sessionStorage.removeItem(key); } catch { /* Storage can be unavailable. */ }
         }
+        try { if (window.parent !== window) window.parent.vaultFrameNavigation?.revokeFromChild(window, requestingDocument); } catch { /* No frame authority. */ }
         window.dispatchEvent(new Event('private-auth-blocked'));
     };
     // Classic head script: keep this bounded predicate in parity with
@@ -32,6 +34,7 @@
         } catch { return false; }
     };
     const reject = (reason = '') => {
+        if (window.document && requestingDocument !== window.document) return;
         if (reason) {
             try {
                 sessionStorage.setItem(FAILURE_MARKER_KEY, JSON.stringify({
@@ -45,9 +48,17 @@
         block();
         if (!redirecting) {
             redirecting = true;
+            window.dispatchEvent(new Event('frame-diagnostics-login'));
             const recovery = hasFixedRecoveryIntent();
             const target = recovery ? '/login.html?recovery=complete' : '/login.html';
-            window.location.replace(target + (reason ? (recovery ? '&' : '?') + 'authCheck=' + encodeURIComponent(String(reason)) : ''));
+            const destination = target + (reason ? (recovery ? '&' : '?') + 'authCheck=' + encodeURIComponent(String(reason)) : '');
+            if (window.vaultFrameNavigation?.deferExit(destination, true)) return;
+            try {
+                if (window.parent !== window && window.parent.vaultFrameNavigation) {
+                    window.parent.vaultFrameNavigation.navigateFromChild(window, requestingDocument, destination, true); return;
+                }
+            } catch { /* Standalone. */ }
+            window.location.replace(destination);
         }
     };
     // Safari/PWA può impiegare più di 15 secondi a ripristinare Firebase e IndexedDB.

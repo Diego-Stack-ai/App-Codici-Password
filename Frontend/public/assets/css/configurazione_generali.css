@@ -59,7 +59,7 @@
 }
 
 .icon-blue {
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.15 );
     color: var(--accent);
 }
 
@@ -105,7 +105,7 @@
 }
 
 .btn-icon-add:hover {
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.2 );
     border-color: var(--accent);
     color: var(--accent);
     transform: scale(1.05);
@@ -152,7 +152,7 @@
 
 .config-list-item:hover {
     background: rgba(255, 255, 255, 0.06);
-    border-color: rgb(var(--accent-rgb) / );
+    border-color: rgba(var(--accent-rgb), 0.3 );
 }
 
 .config-item-main {
@@ -221,7 +221,7 @@
 .btn-icon-edit:hover,
 .btn-icon-save:hover,
 .btn-manage-account-semantic:not(.btn-delete-item-semantic):hover {
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.15 );
     color: var(--accent);
     border-color: var(--accent);
 }
@@ -261,7 +261,7 @@
 }
 
 .inline-input-glass:focus {
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.1 );
     border-color: var(--accent);
 }
 
@@ -326,9 +326,9 @@
 }
 
 .config-badge-blue {
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.2 );
     color: #60a5fa;
-    border: 1px solid rgb(var(--accent-rgb) / );
+    border: 1px solid rgba(var(--accent-rgb), 0.3 );
 }
 
 .config-badge-amber {

@@ -1,10 +1,11 @@
+import {confirmFrameRemoval} from '../core/vault-frame-client.js';
 /**
  * CONFIGURAZIONE DOCUMENTI MODULE (V4.1)
  * Gestisce la configurazione delle scadenze per documenti.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.261';
+import { db } from '../../firebase-config.js?v=1.2.268';
 import { LOG } from '../../logger.js';
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -269,6 +270,7 @@ async function addItem(listKey, promptText) {
 async function deleteItem(listKey, index) {
     const confirmed = await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_item'));
     if (!confirmed) return;
+    await confirmFrameRemoval(() => currentConfig[listKey]?.[index], {setting: 'configurazione_documenti', listKey, index});
     currentConfig = removeDeadlineListItem(currentConfig, listKey, index);
     saveConfig();
 }

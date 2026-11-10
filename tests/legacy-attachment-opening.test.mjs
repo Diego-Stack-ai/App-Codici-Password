@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -24,7 +25,8 @@ const paths = {
     incorporato: '../Frontend/public/assets/js/modules/azienda/dati-azienda-attachments.js'
 };
 const strip = text => text.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
-const securityModule = strip(await readFile(
+const policyModule = strip(await readFile(new URL('../Frontend/public/assets/js/modules/shared/attachment-content-policy.mjs', import.meta.url), 'utf8'));
+const securityModule = policyModule + '\n' + strip(await readFile(
     new URL('../Frontend/public/assets/js/modules/shared/attachment-security.js', import.meta.url), 'utf8'));
 const sources = Object.fromEntries(await Promise.all(Object.entries(paths)
     .map(async ([kind, path]) => [kind, strip(await readFile(new URL(path, import.meta.url), 'utf8'))])));
@@ -44,9 +46,9 @@ const CIPHERTEXT_PATH = 'users/A/accounts/one/attachments/c.pdf';
 // cifrato viene così esercitato per intero (involucro, chiave, decifratura e URL
 // blob) invece di essere simulato.
 const sealingRealm = (() => {
-    const context = vm.createContext({crypto, TextEncoder, TextDecoder, console, File, Blob, Date,
+    const context = vm.createContext(withStandaloneFrame({crypto, TextEncoder, TextDecoder, console, File, Blob, Date,
         btoa: value => Buffer.from(value, 'binary').toString('base64'),
-        atob: value => Buffer.from(value, 'base64').toString('binary')});
+        atob: value => Buffer.from(value, 'base64').toString('binary')}));
     vm.runInContext(`${securityModule}\nglobalThis.encryptAttachmentFile = encryptAttachmentFile;`, context);
     return context;
 })();
@@ -77,7 +79,7 @@ function realm(kind) {
     const state = {keyRequests: 0, active: true, openResult: {opener: 'synthetic'}, openThrows: false};
     const nodes = {'attachments-list': {children: [], appendChild(child) { this.children.push(child); }}};
     nodes['allegati-list'] = {children: [], isConnected: true};
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         __decrypts: decrypts,
         auth,
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
@@ -107,7 +109,7 @@ function realm(kind) {
         uploadBytes: async () => ({}), getDownloadURL: async () => 'https://example.invalid', addDoc: async () => {},
         deleteObject: async () => {}, deleteDoc: async () => {}, serverTimestamp: () => 'time',
         validateAttachmentFile() {}, createStorageObjectName: () => 'synthetic'
-    });
+    }));
     const expose = kind === 'incorporato' ? 'globalThis.openCompanyAttachment = openCompanyAttachment;'
         : 'globalThis.openAttachment = openAttachment;';
     vm.runInContext(`${securityModule}\n${sources[kind]}\n${SPY}\n${expose}`, context);
@@ -129,7 +131,7 @@ function realm(kind) {
 function deadlineRealm() {
     const opened = [], toasts = [], errors = [], reads = [], decrypts = [];
     const state = {keyRequests: 0, active: true, openResult: {opener: 'synthetic'}, ciphertext: null};
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         __decrypts: decrypts,
         window: {open: (url, target, features) => {
             opened.push({url, target, features});
@@ -142,7 +144,7 @@ function deadlineRealm() {
         getBytes: async (path, cap) => { reads.push({path, cap}); return state.ciphertext; },
         ensureVaultKeyMaterial: async () => { state.keyRequests++; return VAULT_KEY; },
         showToast: (...args) => toasts.push(args), logError: (...args) => errors.push(args)
-    });
+    }));
     vm.runInContext(`${securityModule}\n${deadlineFunction}\n${SPY}\n`
         + 'globalThis.openDeadlineAttachment = openDeadlineAttachment;', context);
     return {opened, toasts, errors, reads, decrypts, state,

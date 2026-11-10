@@ -1,4 +1,5 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.261';
+import {confirmFrameAction} from '../core/vault-frame-client.js';
+import { auth, db } from '../../firebase-config.js?v=1.2.268';
 import { collection, deleteDoc, doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
@@ -163,6 +164,8 @@ function editField(widget, field) {
 
 async function removeField(widget, field) {
     if (!await showConfirmModal('Elimina campo', `Eliminare “${field.label}”?`)) return;
+    await confirmFrameAction('permanent-delete', {widgetId: widget.id, fieldId: field.id, scope: 'profile-widget-field'});
+    if (!widgets.includes(widget) || !widget.fields.includes(field)) return;
     widget.fields = widget.fields.filter(item => item.id !== field.id).map((item, order) => ({ ...item, order }));
     await persistWidget(widget);
     renderWidgets();
@@ -181,6 +184,7 @@ async function moveField(widget, field, direction) {
 
 async function removeWidget(widget) {
     if (!await showConfirmModal('Elimina widget', `Eliminare definitivamente “${widget.title}”?`)) return;
+    await confirmFrameAction('permanent-delete', {id: widget.id, scope: 'profile-widget'});
     await deleteDoc(doc(db, 'users', auth.currentUser.uid, 'profileWidgets', widget.id));
     widgets = widgets.filter(item => item.id !== widget.id);
     renderWidgets();

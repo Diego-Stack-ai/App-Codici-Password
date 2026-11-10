@@ -26,7 +26,8 @@ const sliceFunction = (source, name) => {
 
 const detailSource = await read('../Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js');
 const saveSource = strip(await read('../Frontend/public/assets/js/modules/scadenze/deadline-save-service.js'));
-const securitySource = strip(await read('../Frontend/public/assets/js/modules/shared/attachment-security.js'));
+const securitySource = strip(await read('../Frontend/public/assets/js/modules/shared/attachment-content-policy.mjs')) + '\n' +
+    strip(await read('../Frontend/public/assets/js/modules/shared/attachment-security.js'));
 const configSource = strip(await read('../Frontend/public/assets/js/modules/scadenze/deadline-config-model.js'));
 
 const PROJECT_ID = 'codici-password-attachment-removal';
@@ -42,9 +43,9 @@ async function deleteScadenza(userId, scadenzaId, sourceRef, active) {
     const db = client().firestore(), storage = client().storage();
     const snapshot = await getDoc(doc(db, 'users', userId, 'scadenze', scadenzaId));
     const attachments = snapshot.exists() ? snapshot.data().attachments || [] : [];
-    const factory = new Function('db', 'storage', 'deleteDoc', 'deleteObject', 'doc', 'ref', 'runTransaction', 'console',
+    const factory = new Function('confirmFrameAction', 'db', 'storage', 'deleteDoc', 'deleteObject', 'doc', 'ref', 'runTransaction', 'console',
         `${sliceFunction(detailSource, 'deleteScadenza')}\nreturn deleteScadenza;`);
-    return factory(db, storage, deleteDoc, deleteObject, doc, ref, runTransaction, {warn() {}})(userId, scadenzaId, sourceRef, attachments, active);
+    return factory(async () => undefined, db, storage, deleteDoc, deleteObject, doc, ref, runTransaction, {warn() {}})(userId, scadenzaId, sourceRef, attachments, active);
 }
 
 // `saveDeadline` reale: compone `attachments: [...existingAttachments, ...nuovi]`

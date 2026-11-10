@@ -16,7 +16,7 @@
 }
 
 .page-container.pt-header-extra {
-    padding-top: calc(82px + env(safe-area-inset-top));
+    padding-top: calc(var(--header-height) + 15px + var(--frame-safe-area-inset-top, env(safe-area-inset-top)));
 }
 
 /* --- 1. QR CODE OVERRIDES (V5.0 Forced Background) --- */
@@ -192,7 +192,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     transform: translateX(-50%);
     width: 2px;
     height: 150px;
-    background: linear-gradient(to bottom, transparent, rgb(var(--accent-rgb) / ), white);
+    background: linear-gradient(to bottom, transparent, rgba(var(--accent-rgb), 0.8 ), white);
     opacity: 0;
     z-index: 0;
     animation: saettaStrike 3s infinite ease-in-out;
@@ -508,7 +508,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.1 );
     /* Light Blue */
     color: var(--accent);
     border: none;
@@ -542,7 +542,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     margin-top: 0.75rem;
     padding: 0.85rem;
     /* Reduced from 1.25rem */
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.05 );
     border: 1.5px dashed var(--accent);
     /* Darker border */
     border-radius: 14px;
@@ -571,8 +571,8 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 
 .dark .btn-upload-trigger {
     color: var(--accent);
-    background: rgb(var(--accent-rgb) / );
-    border-color: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.1 );
+    border-color: rgba(var(--accent-rgb), 0.4 );
 }
 
 /* Helper for grouped data items */
@@ -605,13 +605,13 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     margin-left: 1.5rem;
     font-size: var(--fs-lg);
     color: var(--accent);
-    filter: drop-shadow(0 0 5px rgb(var(--accent-rgb) / ));
+    filter: drop-shadow(0 0 5px rgba(var(--accent-rgb), 0.3 ));
 }
 
 .dark .glass-field-icon {
     color: var(--accent);
     /* Brighter blue for visibility */
-    filter: drop-shadow(0 0 8px rgb(var(--accent-rgb) / ));
+    filter: drop-shadow(0 0 8px rgba(var(--accent-rgb), 0.5 ));
 }
 
 /* Base Data Labels in dark Mode */
@@ -931,7 +931,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.08 );
     /* Light Azure */
     color: var(--accent);
     border: none;
@@ -978,12 +978,12 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     height: 40px;
     border-radius: 12px;
     flex-shrink: 0;
-    background: rgb(var(--accent-rgb) / );
+    background: rgba(var(--accent-rgb), 0.1 );
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--accent);
-    border: 1px solid rgb(var(--accent-rgb) / );
+    border: 1px solid rgba(var(--accent-rgb), 0.2 );
 }
 
 .card-icon-box .material-symbols-outlined {

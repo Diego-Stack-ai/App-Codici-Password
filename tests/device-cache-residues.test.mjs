@@ -1,3 +1,4 @@
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -27,7 +28,7 @@ const queueSource = await read('assets/js/modules/data/offline-mutation-queue.js
 const queue = await import(`data:text/javascript;base64,${Buffer.from(queueSource).toString('base64')}`);
 const swSource = await read('sw.js');
 const offlineAssetsSource = await read('offline-assets.js');
-const offlineAssetsContext = vm.createContext({self: {}});
+const offlineAssetsContext = vm.createContext(withStandaloneFrame({self: {}}));
 vm.runInContext(offlineAssetsSource, offlineAssetsContext);
 const offlineAssets = [...offlineAssetsContext.self.__OFFLINE_ASSETS];
 
@@ -51,14 +52,14 @@ function logoutFixture({signOutFails = false} = {}) {
         removeItem: key => { calls.push([`${kind}.removeItem`, key]); map.delete(key); },
         clear: () => { calls.push([`${kind}.clear`]); map.clear(); }
     });
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         console: {warn() {}}, crypto, TextEncoder, TextDecoder, Date, Event: class {constructor(type) { this.type = type; }},
         setTimeout, clearTimeout,
         sessionStorage: storage(session, 'sessionStorage'), localStorage: storage(local, 'localStorage'),
         window: {privateAuthGate: {block: () => calls.push(['gate.block'])},
             dispatchEvent: event => { events.push(event.type); return true; },
             location: {replace: url => calls.push(['location.replace', url])}}
-    });
+    }));
     vm.runInContext(`${vaultSessionSource}\n${logoutSource}\n`
         + 'globalThis.logoutWithCleanup = logoutWithCleanup;\nglobalThis.clearVaultSession = clearVaultSession;', context);
     return {context, session, local, calls, events,
@@ -162,7 +163,7 @@ function serviceWorkerFixture(shell = ['home_page.html', 'assets/js/modules/priv
     };
     const listeners = new Map();
     const fetched = [];
-    const context = vm.createContext({
+    const context = vm.createContext(withStandaloneFrame({
         URL, console, Response: {error: () => ({error: true})},
         caches, fetch: async request => {
             fetched.push(request.url);
@@ -173,7 +174,7 @@ function serviceWorkerFixture(shell = ['home_page.html', 'assets/js/modules/priv
         self: {__OFFLINE_ASSETS: shell, skipWaiting() {}, clients: {claim: async () => {}},
             location: {origin: 'https://appcodici-password.web.app'},
             addEventListener: (type, handler) => listeners.set(type, handler)}
-    });
+    }));
     vm.runInContext(swSource, context);
     return {put, deleted, opened, fetched, listeners};
 }
@@ -184,6 +185,19 @@ function fetchEvent(fixture, {url, mode = 'no-cors', method = 'GET'}) {
     fixture.listeners.get('fetch')(event);
     return responded;
 }
+
+test('public UI previews stay outside the service worker cache even after navigation', async () => {
+    const source = await readFile(new URL('../Frontend/public/offline-assets.js', import.meta.url), 'utf8');
+    const shell = JSON.parse(source.match(/=\s*(\[[\s\S]*\]);?\s*$/)[1]);
+    const f = serviceWorkerFixture(shell);
+    for (const [file, mode] of [['index.html', 'navigate'], ['base.css', 'no-cors'], ['profilo.js', 'no-cors']]) {
+        const url = `https://appcodici-password.web.app/ui-preview/ui-prove/${file}?v=fixture`;
+        assert.equal(fetchEvent(f, {url, mode}), null, url);
+    }
+    assert.deepEqual(f.fetched, []);
+    assert.deepEqual(f.opened, []);
+    assert.deepEqual(f.put, []);
+});
 
 test('T-23: il service worker conserva solo la shell stessa-origine, mai risposte del backend', async () => {
     const f = serviceWorkerFixture();

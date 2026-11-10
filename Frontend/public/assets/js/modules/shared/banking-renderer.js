@@ -1,3 +1,4 @@
+import {markBankingRemoval} from '../core/vault-frame-removal-plan.mjs';
 /**
  * BANKING RENDERER (V2.0 — Unified)
  * Renderer UI per la sezione conti bancari e carte nei form account.
@@ -72,6 +73,7 @@ export function renderBankAccounts(bankAccounts, rerender, options = {}) {
                                 showToast('Sposta o elimina prima i Widget di questo conto.', 'warning');
                                 return;
                             }
+                            markBankingRemoval(bankAccounts, {kind: 'bank', bankId: acc.bankId || `legacy-bank-${idx}`});
                             bankAccounts.splice(idx, 1);
                             rerender();
                         }
@@ -161,6 +163,7 @@ function _renderCardEntry(bankAccounts, bankIdx, cardIdx, card, rerender) {
                     const msg = t('confirm_delete_card') || 'Eliminare questa carta?';
                     const ok = await showConfirmModal('Elimina Carta', msg, 'Elimina', 'Annulla');
                     if (ok) {
+                        markBankingRemoval(bankAccounts, {kind: 'card', bankId: bankAccounts[bankIdx].bankId || `legacy-bank-${bankIdx}`, cardIndex: cardIdx});
                         bankAccounts[bankIdx].cards.splice(cardIdx, 1);
                         rerender();
                     }
