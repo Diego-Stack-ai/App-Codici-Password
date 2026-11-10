@@ -172,6 +172,15 @@ Il primo lotto locale della candidata 1.2.259 è rendicontato in [STATO](STATO.m
 
 Questo blocco accompagna la bonifica pre-finale e prosegue dopo il rilascio: non sostituisce aggiornamenti automatici del sistema operativo o dei browser, audit indipendente, test fisici e gestione incidenti.
 
+<a id="pentagi-nota-2026-11-10"></a>
+
+**Nota di Diego, 10/11/2026 — prova PentAGI a fine lavori.** Dopo la chiusura della cornice e della fase sicurezza successiva (notifiche dopo il logout, MIME, AAD, purge, COOP, vulnerabilità npm, token e Node), provare lo strumento open source di penetration testing con agenti AI PentAGI come controllo finale. Vincoli già concordati:
+- mai contro la produzione o account con dati reali, ma solo contro gli emulatori locali o un progetto Firebase di prova con account inventati;
+- esecuzione soltanto sul PC di Diego, in Docker, dopo la lettura del codice da parte di Claude;
+- ogni segnalazione è un'ipotesi da validare da Claude e Codex prima di qualsiasi correzione, che segue il normale ciclo di ramo, revisione e rilascio.
+
+Non è un incarico attivo e non autorizza installazioni.
+
 ## COLLAUDO-QA-FINALE-01 — matrice funzionale e linguistica — 03/11/2026
 
 **Obiettivo:** dimostrare con l'utente tecnico sintetico che ogni percorso dell'app è comprensibile e funzionante dall'interfaccia reale, non soltanto coperto dal codice o da test isolati.
