@@ -8,6 +8,14 @@
 
 10/11/2026 — registrati la [decisione](DECISIONI.md#ui-tre-livelli-decisione-2026-11-10) e il [contratto UI a tre livelli](../regole/INTERFACCIA.md#ui-tre-livelli-2026-11-10) sul ramo Claude. Nessuna pagina cambiata; produzione invariata, cornice in corso nella PR #278.
 
+<a id="cornice-b35-modello-stato-2026-11-10"></a>
+
+## Cornice: Hosting 1.2.268 verificato, modello HTTP corretto in revisione
+
+Produzione **1.2.268**, sorgente `79ebd9b8014c606ecdea9f6a4ce696e674d90c0a`: [Rules #1059](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42777892603) e [Hosting #1060](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42786989182) riusciti dopo approvazioni personali di Diego. [GO B3.5 Claude con prescrizione](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6763989370). Verifica pubblica ripetuta con modello corretto: **361/361 hash, 41 profili, 46/46 probe supplementari e tre probe di normalizzazione PASS**. [Ricevuta e precedente 45/46 conservato](../evidenze/COLLAUDI.md#cornice-b35-modello-2026-11-10).
+
+Seguito sul ramo `codex/hosting-header-normalization-20261110`: solo modello, verificatore, test e documenti; nessun byte dell'app o configurazione di produzione modificato e nessun nuovo deploy. Attende revisione Claude, senza merge o attivazione. Singleton e claim non eseguiti da questo passo; durata canary resta sette giorni. C1 **19 casi × quattro ambienti tutti NE**, nessuna CORNICE CHIUSA. Prevale il [mandato corrente](INCARICO_CORRENTE.md#cornice-b35-modello-incarico-2026-11-10); le ricevute sotto descrivono fasi precedenti.
+
 <a id="cornice-b3-workflow-stato-2026-11-10"></a>
 
 ## Cornice: DIAG approvata, workflow consegnato a Diego
@@ -68,7 +76,7 @@ A1 approvata da Claude sulla PR #278, commit `4f2bc0f812fa2f72c63a409d1aa5d3a120
 
 <a id="stato-corrente"></a>
 
-**10/11/2026 — stato corrente:** DIAG approvata; consegna del workflow a Diego come singolo passo B3, poi arresto. Produzione 1.2.267, candidata 1.2.268, nessuna attivazione. Prevale il [riepilogo B3](#cornice-b3-workflow-stato-2026-11-10); C1 19 casi/quattro ambienti tutti NE.
+**10/11/2026 — stato corrente:** produzione 1.2.268 / #1060 / 79ebd9b8 verificata. Prescrizione B3.5 sul modello HTTP consegnata per revisione, nessun nuovo deploy o attivazione. Prevale il [riepilogo B3.5](#cornice-b35-modello-stato-2026-11-10); C1 19 casi/quattro ambienti tutti NE.
 
 Cronologia precedente al GO A1 — 09/11/2026: **Cornice: passo A1 preparato sulla PR #278, in attesa di revisione Claude sulla PR**. Nuovo ordine di Diego A1–C2 e scelta esplicita background = durata `lock_timeout`; definiti contratto Vault/UI, 22 pagine candidate, header per route, permessi e limiti same-origin. Nessuna integrazione reale, flag o attivazione eseguiti; A2 attende «REVISIONE CLAUDE – GO». Produzione invariata **1.2.267 / #1041 / `1bcbef73`**. [Mandato corrente](INCARICO_CORRENTE.md#cornice-a1-incarico-2026-11-09), [decisione](DECISIONI.md#cornice-ordine-2026-11-09), [evidenze](../evidenze/COLLAUDI.md#cornice-a1-contratto-2026-11-09). I precedenti pareri CLI sul laboratorio non sono il GO del nuovo passo.
 

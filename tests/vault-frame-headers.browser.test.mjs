@@ -38,8 +38,11 @@ test('header definitions are idempotent and assign exactly one security profile'
  }
  for(let i=0;i<500;i++)assert.equal(effectiveHostingHeaders(firebase.hosting,'/unknown-'+i+'.html')['x-frame-options'],'DENY');
 });
-test('official Hosting HTTP: every HTML, alias, unknown path, query and suffix has the intended single headers',async()=>{
+test('Hosting emulator HTTP: every HTML, alias, unknown path, query and suffix has the intended single headers',async()=>{
  const probes=[...paths,'/','/home','/login-v115.html','/__frame_missing__.html','/app.html/','/profilo_privato.html/','/nested/profilo_privato.html','/%61pp.html','/appXhtml','/impostazioni.html?recovery=complete'];
+ // Installed superstatic matches the raw pathname before file decoding, unlike
+ // production Hosting. No publicPaths inventory here deliberately retains this
+ // emulator contract; production normalization is probed by release-manifest.
  for(const path of probes){const actual=await response(path),pathname=new URL(base+path).pathname,expected=effectiveHostingHeaders(firebase.hosting,pathname);
   if(path==='/login-v115.html'&&actual.status===302){
    assert.equal(new URL(actual.headers.location,base).href,base+'/login.html');

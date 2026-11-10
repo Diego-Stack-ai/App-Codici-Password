@@ -8,6 +8,14 @@ Con la scelta **«A»** Diego affida a Claude l'esecuzione della revisione UI e 
 
 Tappa corrente: soltanto decisione e [contratto UI](../regole/INTERFACCIA.md#ui-tre-livelli-2026-11-10), sul ramo `claude/awesome-keller-kt4v9t` allineato a `fafd064a`. La tappa pilota (componenti + Profilo privato) inizia dopo l'integrazione della PR #278. Claude non incrementa la versione, non unisce e non pubblica; ogni documento condiviso riceve solo sezioni proprie datate. Nessun nuovo Markdown: elenco fermo a 34.
 
+<a id="cornice-b35-modello-incarico-2026-11-10"></a>
+
+## Cornice B3.5 — prescrizione sul modello HTTP, prima dell'attivazione
+
+Ordine diretto di Diego del 10/11/2026 dopo il [GO B3.5 di Claude con prescrizione](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6763989370): allineare modello degli header alla normalizzazione osservata in Hosting, aggiungere tre probe e pubblicare l'avviso di revisione sulla #278. La #278 è già unita: seguito separato sul ramo `codex/hosting-header-normalization-20261110`, base `79ebd9b8014c606ecdea9f6a4ce696e674d90c0a`; eventuale nuova PR collegata subito sulla #278.
+
+Autorizzati soltanto script di verifica, test, documenti esistenti, commit/push e avviso. Nessun cambiamento al runtime pubblico, firebase.json, workflow, Rules, Functions, versione o dati; nessun merge, deploy, singleton, claim o attivazione. Nuovo GO Claude prima del seguito, poi ogni passo richiede l'approvazione personale di Diego. Durata canary scelta resta sette giorni; provisioning non eseguito da questa consegna. [Evidenze e limiti](../evidenze/COLLAUDI.md#cornice-b35-modello-2026-11-10). I checkpoint sotto sono cronologia, non istruzioni operative correnti.
+
 <a id="cornice-b3-consegna-workflow-2026-11-10"></a>
 
 ## B3 — consegna del workflow, arresto dopo il singolo passo

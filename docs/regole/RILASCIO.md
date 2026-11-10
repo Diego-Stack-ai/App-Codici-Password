@@ -1,5 +1,11 @@
 # Rilascio
 
+## B3.5 — verifica del modello dopo Hosting, 10/11/2026
+
+Rules #1059 e Hosting #1060 sullo SHA 79ebd9b8 sono già pubblicati; il piano preparatorio sottostante è storico per quei passaggi. Il seguito autorizzato corregge soltanto modello/script/test/documenti, non richiede un nuovo deploy e non autorizza provisioning. [Mandato e gate](../progetto/INCARICO_CORRENTE.md#cornice-b35-modello-incarico-2026-11-10).
+
+Il verificatore usa un inventario esplicito di file pubblici e il [contratto di normalizzazione degli header](INTERFACCIA.md#cornice-b1-header-2026-11-09). Tre richieste aggiuntive controllano figlia codificata (profilo figlia, ma diniego del router JavaScript), cornice codificata (DENY/ancestors none **e frame-src self**) e pagina pubblica codificata (DENY/none senza concessioni della cornice). Richiesti stato 200, hash del file canonico, CSP completa e Permissions Policy: il solo DENY non distingue gli ultimi due casi. I tre probe non aggiungono campi o route al manifest, preservandone l'identità. Il banco dell'emulatore conserva esplicitamente il matching letterale di superstatic; non attesta la normalizzazione della CDN. Evidenze di produzione e test locali restano distinti da C1 fisico e dall'attivazione.
+
 <a id="cornice-b3-piano-2026-11-10"></a>
 
 ## Cornice B3 — pacchetto proposto, nessuna esecuzione
