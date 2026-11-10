@@ -18,6 +18,8 @@
 
 **Consegna su GitHub:** commit applicativo 9e9488b875286b8b8571ea954a462df5efeed6db inviato nel ramo dedicato; [PR #286 in bozza](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/286), rapporto completo copiato nella descrizione. [Richiesta readonly a Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/286#issuecomment-6781467146) e [rinvio sulla #278](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6781468385) pubblicati. Gitleaks su indice e singolo nuovo commit: nessun nuovo segreto. Manifest rigenerato dopo il commit: 362 file, albero f6939510a6a2af2ed8451e6bfd94bb2d685c4659bd66061c382806c8725606e1, verifica locale riuscita. Eventuali commit delle sole ricevute lasciano invariato il codice applicativo; CI e revisione del relativo head restano leggibili su GitHub, non dichiarate superate da questa ricevuta. Nessun merge, deploy o accensione.
 
+**Allineamento catalogo dopo CI:** la run validate 42918461368 si ferma sul gate guide: reviewedAppVersion era ancora 1.2.268. Riesaminati route, target e diff di app.html: i comandi non cambiano; catalogo aggiornato a 1.2.269, contentVersion 12 conservata. `npm run test:guide`: 31 pagine, 126 istruzioni, 111 target e **12/12 PASS**. Questa modifica aggiuntiva del solo metadato pubblico cambia l'hash del catalogo e richiede un nuovo manifest locale/CI; l'albero f6939510 sopra resta la ricevuta del commit precedente. Esito completo CI da leggere sul nuovo head della PR, senza dichiararlo preventivamente verde.
+
 <a id="cornice-c1-qa2-2026-11-10"></a>
 
 ## Cornice C1 QA2 — avvio guidato fisico, 10/11/2026
