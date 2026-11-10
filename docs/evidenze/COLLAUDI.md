@@ -1,5 +1,33 @@
 # Collaudi
 
+<a id="cornice-adc-offline-2026-11-10"></a>
+
+## #285 — ADC impersonata e rimozione, prove offline del 10/11/2026
+
+Letto il [GO sospeso Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/285#issuecomment-6766818781). Scelta A di Diego: istruzioni per SA dedicato/ruoli/delega/ADC isolata/revoca; nessuna esecuzione Google/Firebase. [Procedura e limiti IAM](../regole/RILASCIO.md#cornice-adc-impersonata-2026-11-10). Nessun UID nei rapporti, anche sola prova; input resta privato ed esplicito. Preparato --remove prima del cambio binding/C2, idempotente e senza sostituire altri claim.
+
+Prove dedicate: modello/parser/CLI/writer/ricevuta DPAPI e adapter ADC reale con soli dati sintetici. Firebase Admin **14.5.0** e GoogleAuth **11.3.3** dalle dipendenze functions bloccate: OAuth sorgente e mint IAM intercettati sul trasporto Gaxios effettivo; lettura Auth mantiene AuthorizedHttpClient reale fino all'inserimento del Bearer impersonato; GET singleton e singolo POST claim intercettati. Provati grant e remove, preservazione degli altri claim e verifica finale. HTTP/HTTPS, socket e fetch non previsti bloccati; nessuna credenziale reale caricata, nessuna rete esterna. La dipendenza emette avvisi di deprecazione/validazione dei costruttori; il runner valida preventivamente forma, URL e identità SA. Non rappresentano una verifica dei ruoli reali.
+
+Il riesame interno ha rilevato il rischio che applicationDefault riscoprisse un file diverso da quello validato: corretto usando soltanto il JSON già letto e GoogleAuth esplicito. Test con CLOUDSDK_CONFIG divergente (e alias minuscolo divergente su sistemi case-sensitive). Guardia anche per quota annidata/override, ADC authorized_user o chiave privata, URL/SA/delegate/universo non ammessi; rifiuto prima dell'import Admin. Primo test d'integrazione non riuscito: fixture Windows con variabili equivalenti per maiuscole e mock Gaxios di una diversa copia della dipendenza; corretti il banco e il trasporto annidato, senza usare credenziali o rete reali. Normalizzata anche l'asserzione del percorso privato per il casing Windows, senza attenuare i controlli del percorso.
+
+Prima esecuzione hardening nel sandbox: **66/71**, cinque blocchi ambientali (tre subprocess prompt sintetici in timeout e due connessioni loopback EACCES), nessun fallimento dei nuovi casi ADC/claim. Ripetizione autorizzata solo per i test locali, senza operazioni cloud: **71/71 PASS**, zero skip, include **30 prove dedicate** (26 core/CLI/DPAPI e quattro ADC/SDK). `npm run test:docs` **12/12 PASS**, 34 MD e 861 link locali. Il primo controllo docs segnalava l'ancora di questa ricevuta ancora mancante durante la stesura: completata prima della verifica finale. Riesame interno readonly: ADC rieseguita indipendentemente **4/4 PASS**, rischio discovery risolto; IAM corretto precisando che users.get può enumerare utenti. Questi riscontri interni non sono il GO di Claude.
+
+Precondizioni reali **non eseguite**: nuovo GO Claude; ammissibilità QA2 e lettura identità; SA/ruoli/ADC; singleton OFF con destinatario sintetico e Timestamp futuro concordato; dry-run/apply/attivazione autorizzati separatamente. Prima del passaggio fase: OFF e revoca, remove a binding invariato, poi cambio destinatario. Due matrici C1 **19 × quattro ambienti ciascuna, tutte NE**; sette giorni da concordare, nessuna CORNICE CHIUSA. Nessun workflow/Rules/Functions/runtime/versione modificati, nessun merge/deploy.
+
+<a id="cornice-claim-candidato-2026-11-10"></a>
+
+## Cornice — runner claim candidato e piano C1 in due fasi, 10/11/2026
+
+Dopo [GO Claude #284](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/284#issuecomment-6764572316), merge **28c97128716deb804385a084088a6f4367a5bcc1** e [ricevuta](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6764652342), Diego ha predisposto personalmente in console quattro campi del singleton: schema/versione 1, enabled false, UID personale; manca expiresAt. Stato osservato in sola lettura via UI, confronto del solo valore UID appena incollato senza stamparlo; non è verifica indipendente Auth della titolarità né documento completo/attivabile. Nessuna scadenza provvisoria o claim assegnato.
+
+Nuovo mandato di preparazione e successiva [decisione sintetico → personale](../progetto/DECISIONI.md#cornice-canary-due-fasi-2026-11-10). Ricognizione documentale: QA2 popolata è l'identità sintetica conservata dalla bonifica; QA1 è storico e le fixture S1 temporanee eliminate. Le esclusioni QA2 citate riguardano i lotti recovery/S1; non bastano per affermare un divieto globale, né per certificare l'ammissione al nuovo canary. Diego indica il riuso dell'account già popolato: **QA2 candidata fase 1, da confermare con Claude e preflight Auth/policy in un passo autorizzato**. Nessuna nuova lettura Auth/Firestore amministrativa, creazione utente o modifica cloud per questa ricognizione. Il singleton non è stato spostato al candidato.
+
+Runner/helper nuovi nel ramo codex/vault-frame-claim-preparation-20261110: UID/fase espliciti, piano privato corrispondente, default sola prova, UID inizialmente mostrato solo in quella modalità, poi escluso da ogni rapporto dall'ultimo ordine di Diego, altri claim preservati/non stampati. Singleton incompleto, acceso o discordante impedisce apply. Ricevuta DPAPI privata prima del set, seconda lettura con confronto di stato, unica scrittura e verifica completa; deriva/esito incerto fermano senza ripetizioni o ripristino globale. La finestra a scrittore unico resta una condizione operativa, non atomicità dimostrata.
+
+Prove locali sintetiche dedicate: **23/23 PASS**, incluso roundtrip DPAPI in RAM e dal file, rifiuto overwrite sul solo payload di prova locale e adapter REST a un solo tentativo. Test del modello con Auth/Firestore finti; help/parser e main testati tramite dipendenze finte, nessun SDK Admin caricato e nessun runner eseguito su Firebase, neppure dry-run. Coperti preservazione nested/array/flag precedente, UID/fase/identità/policy errati, limite byte, staging senza expiry, nessuna scrittura in dry-run, deriva pre-set, errore ambiguo e mismatch post-set, errori redatti e percorsi privati. `npm run test:release-hardening` **64/64 PASS** (include i 23 dedicati, non sommare), `npm run test:docs` **12/12 PASS**, 34 MD e 852 link; sintassi dei quattro nuovi moduli superata. In Linux CI il solo test DPAPI Windows è marcato non applicabile, distinto dal suo PASS locale effettivo. CI e revisione Claude del nuovo SHA ancora da attendere. Il primo insieme 17/17 non provava il trasporto reale: il riesame readonly ha rilevato i retry automatici del writer SDK. Il seguito usa un adapter REST fisso senza retry/redirect, verificato con fetch finto su 503, 302, reset e timeout, sempre un invio; SDK lasciato soltanto alle letture. L'esito iniziale non è una prova di assenza retry. Nessun test di rete reale eseguito.
+
+[C1](#cornice-b2-lista-2026-11-09) separa fase 1 e fase 2: **19 × quattro ambienti per fase, tutto NE**. Solo ordine del piano cambiato; nessuna prova fisica, attivazione, nuova versione/deploy, claim o dato Vault modificato. Frontend/Rules/Functions/workflow invariati. Scadenza sette giorni da concordare, nessuna CORNICE CHIUSA; consegna per GO Claude e arresto.
+
 <a id="cornice-b35-modello-2026-11-10"></a>
 
 ## Cornice B3.5 — produzione 1.2.268 e prescrizione del modello, 10/11/2026
@@ -84,11 +112,20 @@ Prerequisito: [GO B1 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Pas
 
 ### Preparazione di C1, dopo il rilascio B3 approvato
 
-Diego esegue le prove separatamente su **Chrome desktop Windows, Chrome Android, Safari iPhone e PWA installata su iPhone**. **Priorità: PWA iPhone e Chrome desktop per primi, poi Safari iPhone e Chrome Android.** Registrare per ogni colonna modello/OS/browser/versione app/data, sorgente del rilascio approvato e presenza effettiva della cornice; Safari e PWA sono due ambienti distinti. Oggi produzione 1.2.267 e nessun permesso reale: la tabella è interamente **NE**, non eseguibile come canary già attivo. La futura versione 1.2.268 va prima verificata da manifest/worker e non dedotta dalla sola etichetta.
+Aggiornamento del 10/11/2026: **fase 1 su QA2 candidata sintetica già popolata, da confermare con Claude e preflight; fase 2 sull’account personale di Diego**. Un solo UID nel singleton per volta, fasi e ricevute separate. Questa lista non abilita alcun utente o cambio cloud. Produzione attestata 1.2.268 / #1060 / 79ebd9b8; il singleton predisposto manualmente è ancora spento, parziale e personale, non configurato per la fase 1.
+
+Diego esegue le prove separatamente su **Chrome desktop Windows, Chrome Android, Safari iPhone e PWA installata su iPhone**. **Priorità: PWA iPhone e Chrome desktop per primi, poi Safari iPhone e Chrome Android.** Registrare per ogni colonna modello/OS/browser/versione app/data, sorgente del rilascio approvato e presenza effettiva della cornice; Safari e PWA sono due ambienti distinti. Le due tabelle sono interamente **NE**: codice pubblicato e singleton parziale non provano un canary attivo. Prima di ogni fase verificare versione da manifest/worker e non dalla sola etichetta.
 
 B3 deve proporre l'assegnazione privata del singleton e del solo claim del pilota, preservando gli altri claim; il token nuovo richiede un nuovo accesso oppure un refresh esplicito. Per C1 preferire logout/login normale dopo la conferma del provisioning, così non si chiede a Diego di incollare token o eseguire comandi in console. La hint non concede ammissione: il documento server e il fence rimangono obbligatori. Nessun altro account viene abilitato o creato da B2.
 
 Annotare il valore originale di Tempo di Inattività; per i casi temporizzati scegliere prima 1 minuto, poi verificare anche 3 minuti e infine ripristinare la preferenza originale. Ogni scheda/finestra parte con RAM propria. Dopo logout o ricarica completa è corretto richiedere un nuovo sblocco; il requisito di continuità riguarda le navigazioni interne con padre vivo. Per tutte le prove usare soltanto l'account pilota, dati di prova già autorizzati e contenuti innocui; annullare editor, fotocamera e operazioni sensibili prima di qualsiasi scrittura non prevista. Non cancellare record, cambiare Master Password, revocare condivisioni o pubblicare backup per dimostrare la sola conferma.
+
+### Gate delle due fasi, prima di D01
+
+1. **Fase 1:** confermare con Claude l'ammissibilità di QA2 per questa cornice e verificare privatamente UID/identità Auth e dati esclusivamente sintetici. Nessun fallback a QA1, nessuna creazione/provisioning o lettura di credenziali dal semplice piano. Singleton completo ma spento con quell'UID e Timestamp concordato; confronto con il parametro UID mostrato dal dry-run. Se il singleton conserva ancora l'UID personale o manca expiresAt, STOP: non cambiare UID/data o approvare apply per aggirare il controllo. Claim e accensione richiedono ordini separati. Confermare che l'account personale/estranei non ricevano ammissione durante questa fase.
+2. Eseguire D01–D19 nei quattro ambienti sulla fase 1, registrando PASS/FAIL/NE/LIMITE senza dati reali; ogni FAIL con rapporto DIAG. Funzioni non disponibili nell'account/dispositivo sono LIMITE/NE, non PASS. Eventuali fixture mancanti richiedono un incarico esplicito prima di essere create.
+3. **Passaggio fase:** dopo revisione degli esiti e approvazione personale, spegnere e verificare revoca/chiave non riusabile nella vecchia fase; solo dopo cambiare il singleton al solo UID personale con precondizioni, ricevuta e scadenza approvate. Nessun rinnovo implicito dei sette giorni. Un eventuale claim residuo del vecchio pilota non concede ammissione: verificare il diniego; rimozione del claim distinta e solo approvata. STOP su deriva o revoca non rispettata.
+4. **Fase 2:** nuovo preflight/dry-run/revisione/approvazioni, token aggiornato e D01–D19 con ricevute proprie; non trasferire i PASS sintetici alla fase personale. Le prove distruttive reali rimangono vietate. Verificare che il pilota sintetico non sia più ammesso.
 
 ### Itinerario di dieci pagine private
 
@@ -122,9 +159,33 @@ Prima delle prove scegliere volontariamente se attivare Impostazioni → Diagnos
 | D18 — version skew | Tenere aperta la cornice della versione precedente, poi dopo un rilascio successivo navigare internamente: uscita o ricarica pulita sulla destinazione valida, nessuna chiave consegnata a protocollo/versione diversa, nessun loop o pagina bianca. NE finché manca un secondo rilascio; non forzare versioni o cache dai comandi in console per attribuire un PASS reale. |
 | D19 — DIAG | Default spento, sola lettura dello stato; attivare, eseguire navigazioni/blocco/push e copiare rapporto; nomi pagina senza query/ID. Cancella lascia la raccolta scelta ma azzera gli eventi; disattivare elimina. Logout/cambio account cancella e non riattiva. Provare appunti reali su Safari/PWA; errore/permesso negato resta LIMITE, nessun invio di rete. Nessun dato Vault aggiunto a mano. |
 
-### Matrice C1 da compilare da Diego
+### Matrice C1 fase 1 — account sintetico candidato (QA2, da confermare)
 
 `NE` = non eseguito, `PASS` = azione e risultato entrambi osservati, `FAIL` = comportamento diverso, `LIMITE` = capacità primaria non disponibile o prova incompleta da decidere con revisore/Diego. Un fallback riuscito non trasforma un LIMITE in PASS. Nessun risultato viene precompilato dalle suite automatiche.
+
+| Caso | Chrome desktop | Chrome Android | Safari iPhone | PWA iPhone |
+|---|---|---|---|---|
+| D01 | NE | NE | NE | NE |
+| D02 | NE | NE | NE | NE |
+| D03 | NE | NE | NE | NE |
+| D04 | NE | NE | NE | NE |
+| D05 | NE | NE | NE | NE |
+| D06 | NE | NE | NE | NE |
+| D07 | NE | NE | NE | NE |
+| D08 | NE | NE | NE | NE |
+| D09 | NE | NE | NE | NE |
+| D10 | NE | NE | NE | NE |
+| D11 | NE | NE | NE | NE |
+| D12 | NE | NE | NE | NE |
+| D13 | NE | NE | NE | NE |
+| D14 | NE | NE | NE | NE |
+| D15 | NE | NE | NE | NE |
+| D16 | NE | NE | NE | NE |
+| D17 | NE | NE | NE | NE |
+| D18 | NE | NE | NE | NE |
+| D19 | NE | NE | NE | NE |
+
+### Matrice C1 fase 2 — account personale di Diego
 
 | Caso | Chrome desktop | Chrome Android | Safari iPhone | PWA iPhone |
 |---|---|---|---|---|

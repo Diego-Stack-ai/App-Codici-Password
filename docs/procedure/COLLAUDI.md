@@ -1,5 +1,9 @@
 # Collaudi
 
+## Canary cornice — gate amministrativi aggiornati, 10/11/2026
+
+Prima di ogni prova cloud del runner: nuovo GO Claude #285, approvazione personale del passo, credenziale impersonata dedicata verificata senza stamparla, destinatario privato confermato e singleton OFF concordante. Il grant richiede anche Timestamp futuro approvato; il documento parziale attuale non basta. Per il cambio fase/C2: OFF → revoca verificata → rimozione del solo claim con binding invariato e rilettura → eventuale cambio destinatario → infine revoca IAM/ADC. Nessuna prova di produzione o PASS fisico derivati dai mock. Nessun UID nel rapporto, neppure dry-run. [Istruzioni amministrative](../regole/RILASCIO.md#cornice-adc-impersonata-2026-11-10), [due matrici C1](../evidenze/COLLAUDI.md#cornice-b2-lista-2026-11-09), entrambe NE; per ogni FAIL rapporto DIAG copiato privo di identificativi.
+
 ## Procedura pre-finale con utente tecnico sintetico
 
 ### Preparazione sicura
