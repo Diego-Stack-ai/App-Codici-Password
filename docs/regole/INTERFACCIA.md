@@ -25,14 +25,14 @@ Per le famiglie di pagine migrate con questa revisione, la regola storica «cons
 
 ### Stile «Rifinita» e palette
 
-- Il colore d'accento, le superfici tenui e lo sfondo sfumato derivano dai token della palette attiva di `core.css`; nessun colore d'identità fisso nelle pagine migrate. Ogni tappa va verificata almeno in tre palette, in chiaro e in scuro.
+- Il colore d'accento, le superfici tenui e lo sfondo sfumato derivano dai token della palette attiva di `core.css`; nessun colore d'identità fisso nelle pagine migrate. Durante lo sviluppo di ogni tappa si controllano almeno tre palette, in chiaro e in scuro; prima del rilascio la verifica copre **tutte e sette le palette × chiaro/scuro**.
 - Colori funzionali (valido, in scadenza, scaduto, errore, eliminazione) restano indipendenti dalla palette.
 - Vetro e sfocatura soltanto su intestazione e piè di pagina; card e righe usano superfici piene con un solo livello d'ombra dai token.
 
 ### Filigrane: simbolo nel titolo e filigrana discreta
 
 - **Titolo:** il simbolo semantico della pagina (stesse famiglie già censite: configurazione, informazione, liste) compare come piccola icona accanto al titolo dell'intestazione, decorativa (`aria-hidden`), senza alterare il nome accessibile del titolo.
-- **Filigrana discreta:** lo stesso simbolo resta in un angolo inferiore, ridotto e tenue, dietro al contenuto ma **mai sotto testi, campi o pulsanti**; non intercetta input, non cambia le dimensioni del documento e rispetta `prefers-reduced-motion`.
+- **Filigrana discreta:** lo stesso simbolo resta in un angolo inferiore, ridotto e tenue, su un livello decorativo arretrato ma **senza alcuna sovrapposizione con testi, campi o pulsanti**, verificata anche durante lo scorrimento e sui dispositivi; non intercetta input, non cambia le dimensioni del documento e rispetta `prefers-reduced-motion`.
 - La filigrana grande centrata e ruotata dietro al contenuto non viene più usata nelle pagine migrate. Il gate `test:page-shells` continua a verificare presenza, simbolo e `aria-hidden`; posizione e dimensione seguono questa sezione.
 
 ### Vincoli
