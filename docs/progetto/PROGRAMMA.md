@@ -1,5 +1,9 @@
 # Programma
 
+## Cornice: revisione della prescrizione B3.5, poi provisioning per passi
+
+Hosting 1.2.268 già pubblicato sullo SHA 79ebd9b8, dopo Rules sullo stesso SHA. Ora soltanto [modello HTTP, test e ricevute](INCARICO_CORRENTE.md#cornice-b35-modello-incarico-2026-11-10), da sottoporre a Claude sulla #278 prima dell'attivazione; nessun nuovo rilascio necessario per questi soli file. Dopo GO e ordine personale: istruzioni per singleton creato **spento** da Diego, script claim una tantum separato da far rivedere prima dell'esecuzione, verifica e attivazione autorizzata con durata sette giorni. Nessuno di questi passi è implicito nella consegna corrente. Seguono C1 19 × quattro ambienti tutto NE, rapporto DIAG per ogni FAIL, infine C2. UI nuova separata; checkpoint seguenti storici.
+
 ## Cornice: prossimo passo riservato al caricamento del workflow
 
 [DIAG approvata da Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6758777089). Diego riceve il workflow completo, lo carica sul ramo della PR #278 e conferma; Codex si ferma alla consegna. Seguiranno verifica dell'hash/check/revisione finale e approvazioni separate, non un'esecuzione automatica dell'intera B3. Canary scelto per 7 giorni; singleton di Diego in console, futuro script claim una tantum da far rivedere prima di eseguirlo. [Ordine corrente](INCARICO_CORRENTE.md#cornice-b3-consegna-workflow-2026-11-10). C1 resta 19 casi/quattro ambienti tutto NE; nuova grafica separata. I checkpoint seguenti sono storici.

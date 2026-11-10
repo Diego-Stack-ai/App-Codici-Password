@@ -5,17 +5,40 @@ import {createServer} from 'node:http';
 import {mkdtemp, mkdir, readFile, rm, unlink, writeFile} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import {buildFrameHostingHeaders,effectiveHostingHeaders} from '../scripts/lib/hosting-frame-headers.mjs';
+import {buildFrameHostingHeaders,effectiveHostingHeaders,normalizeHostingPathname} from '../scripts/lib/hosting-frame-headers.mjs';
+import {privateFrameUrl} from '../Frontend/public/assets/js/modules/core/vault-frame-policy.mjs';
 import {
   buildReleaseManifest,
   hashPublicTree,
   isWorktreeDirty,
   readCanonicalVersion,
+  verifyFrameHeaderNormalization,
   verifyRemote
 } from '../scripts/release-manifest.mjs';
 
 const commit = 'a'.repeat(40);
 const fixtureCsp = "default-src 'self'; object-src 'none'; frame-ancestors 'none';";
+
+test('Hosting unreserved normalization requires an exact existing file and preserves conservative fences', () => {
+  const files = new Set(['/app.html', '/home_page.html', '/login.html', '/a-~_09.html']);
+  for (const [encoded, canonical] of [
+    ['/%61pp.html', '/app.html'], ['/home%5Fpage.html', '/home_page.html'],
+    ['/home%5fpage.html', '/home_page.html'], ['/%6Cogin.html', '/login.html'],
+    ['/%61%2D%7e%5f%30%39.html', '/a-~_09.html']
+  ]) assert.equal(normalizeHostingPathname(encoded, files), canonical, encoded);
+  for (const unchanged of [
+    '/%61bsent.html', '/%41pp.html', '/%61pp.html/', '/nested/%61pp.html',
+    '/%61pp%2Ehtml', '/%61pp%2ehtml', '/%2F%61pp.html', '/%2f%61pp.html',
+    '/%5C%61pp.html', '/%5c%61pp.html', '/%2561pp.html', '/%61pp%25.html',
+    '/%61pp%.html', '/%61pp%6.html', '/%61pp%GG.html', '/%c3%a0pp.html',
+    '/%61pp.html?x=1', '/%61pp.html#anchor'
+  ]) assert.equal(normalizeHostingPathname(unchanged, files), unchanged, unchanged);
+  assert.equal(normalizeHostingPathname('/%61pp.html'), '/%61pp.html', 'no inventory means no decoding');
+  assert.equal(normalizeHostingPathname('/%61pp.html', [...files]), '/app.html');
+  // HTTP matching must not broaden the separately enforced Vault key policy.
+  assert.equal(privateFrameUrl('/home%5Fpage.html', 'https://fixture.invalid'), null);
+  assert.equal(privateFrameUrl('/home_page.html', 'https://fixture.invalid').pathname, '/home_page.html');
+});
 
 async function fixture() {
   const root = await mkdtemp(path.join(os.tmpdir(), 'release-manifest-'));
@@ -193,17 +216,40 @@ test('the release verifier rejects selective child header drift even with identi
  assert.equal(manifest.hostingContract.routeSecurityHeaders['/home_page.html'].xFrameOptions,'SAMEORIGIN');
  assert.equal(manifest.hostingContract.routeSecurityHeaders['/app.html'].xFrameOptions,'DENY');
  assert.equal(manifest.hostingContract.routeSecurityHeaders['/login-v115.html'],undefined);
- let drift='';const server=createServer((request,response)=>{
+ const publicPaths=new Set(payload.keys()),seenProbes=new Set();
+ let drift='',encodedDrift='',encodedStatus=200,encodedPayload=false;
+ const server=createServer((request,response)=>{
   const pathname=new URL(request.url,'http://fixture.invalid').pathname;
-  const headers=effectiveHostingHeaders(config.hosting,pathname);
+  const canonical=normalizeHostingPathname(pathname,publicPaths);
+  const headers=effectiveHostingHeaders(config.hosting,pathname,{publicPaths});
   for(const [key,value]of Object.entries(headers))response.setHeader(key,value);
   if(pathname==='/home_page.html'&&drift)response.setHeader(drift,drift==='x-frame-options'?'DENY':fixtureCsp);
+  if(pathname.includes('%'))seenProbes.add(pathname);
+  if(pathname===encodedDrift){
+   // Use the wrong complete profile. Shell and public are both DENY, so an
+   // X-Frame-Options-only check would miss this production-model regression.
+   const wrong=effectiveHostingHeaders(config.hosting,canonical==='/app.html'?'/login.html':'/app.html');
+   for(const [key,value]of Object.entries(wrong))response.setHeader(key,value);
+  }
   if(pathname==='/release-manifest.json'){response.end(JSON.stringify(manifest));return;}
   if(pathname==='/login-v115.html'){response.writeHead(302,{Location:'/login.html'});response.end();return;}
-  const bytes=payload.get(pathname==='/'?'/index.html':pathname==='/home'?'/home_page.html':pathname);
+  if(pathname.includes('%')&&encodedStatus!==200){response.writeHead(encodedStatus,{Location:canonical});response.end();return;}
+  if(pathname.includes('%')&&encodedPayload){response.end('wrong canonical file');return;}
+  const bytes=payload.get(pathname==='/'?'/index.html':pathname==='/home'?'/home_page.html':canonical);
   if(!bytes)response.statusCode=404;response.end(bytes||'missing');
  });
  await new Promise(done=>server.listen(0,'127.0.0.1',done));t.after(()=>new Promise(done=>server.close(done)));
  const baseUrl='http://127.0.0.1:'+server.address().port;await verifyRemote(baseUrl,manifest);
+ assert.deepEqual([...seenProbes].sort(),['/%61pp.html','/%6cogin.html','/home%5Fpage.html']);
+ assert.equal(Object.keys(manifest.hostingContract.routeSecurityHeaders).some(value=>value.includes('%')),false,'extra probes do not alter manifest identity');
  for(const header of ['x-frame-options','content-security-policy']){drift=header;await assert.rejects(()=>verifyRemote(baseUrl,manifest),/Header pubblici non conformi/);}
+ drift='';
+ for(const probe of [...seenProbes]){
+  encodedDrift=probe;
+  await assert.rejects(()=>verifyFrameHeaderNormalization(baseUrl,manifest),/Header pubblici non conformi/);
+ }
+ encodedDrift='';
+ for(const status of [302,404]){encodedStatus=status;await assert.rejects(()=>verifyFrameHeaderNormalization(baseUrl,manifest),/Normalization probe child: HTTP/);}
+ encodedStatus=200;encodedPayload=true;
+ await assert.rejects(()=>verifyFrameHeaderNormalization(baseUrl,manifest),/noncanonical payload/);
 });

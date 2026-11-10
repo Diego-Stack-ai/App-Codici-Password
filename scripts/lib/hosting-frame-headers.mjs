@@ -31,9 +31,25 @@ export function exceptExactPathRegex(paths) {
 export function headerMatches(rule, pathname) {
   return rule.regex ? new RegExp(rule.regex, 'u').test(pathname) : matchesGlob(pathname, rule.source);
 }
-export function effectiveHostingHeaders(hosting, pathname, {strictSecurity = true} = {}) {
+// Production Hosting matches existing files after decoding ASCII unreserved
+// characters. Keep the review's conservative exceptions (including encoded
+// dots) literal. This is an HTTP-header model, never the Vault route allowlist.
+// Do not URL-parse here: that would normalize dot segments before these fences.
+export function normalizeHostingPathname(pathname, publicPaths = []) {
+  if (typeof pathname !== 'string' || /%(?:2f|5c|2e)/i.test(pathname)) return pathname;
+  const candidate = pathname.replace(/%([0-9a-f]{2})/gi, (encoded, hex) => {
+    const char = String.fromCharCode(parseInt(hex, 16));
+    return /^[A-Za-z0-9_~-]$/.test(char) ? char : encoded;
+  });
+  // Residual escapes include malformed, reserved, non-ASCII and double encoding.
+  if (candidate.includes('%')) return pathname;
+  const files = publicPaths instanceof Set ? publicPaths : new Set(publicPaths);
+  return files.has(candidate) ? candidate : pathname;
+}
+export function effectiveHostingHeaders(hosting, pathname, {strictSecurity = true, publicPaths = []} = {}) {
+  const matchedPathname = normalizeHostingPathname(pathname, publicPaths);
   const headers = new Map(), seen = new Map();
-  for (const rule of hosting.headers || []) if (headerMatches(rule, pathname)) for (const header of rule.headers || []) {
+  for (const rule of hosting.headers || []) if (headerMatches(rule, matchedPathname)) for (const header of rule.headers || []) {
     const key = header.key.toLowerCase(); seen.set(key, (seen.get(key) || 0) + 1); headers.set(key, header.value);
   }
   if (strictSecurity) for (const key of ['content-security-policy', 'x-frame-options', 'permissions-policy']) {
