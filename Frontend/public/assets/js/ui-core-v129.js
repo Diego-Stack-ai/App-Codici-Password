@@ -226,6 +226,7 @@ export function showAlertModal(title, message, buttonText = 'Ho capito') {
  * [CORE UI] INPUT MODAL
  */
 export function showInputModal(title, initialValue = '', placeholder = '', description = '', options = {}) {
+    if (options.signal?.aborted) return Promise.resolve(null);
     return new Promise((resolve) => {
         const modalId = 'protocol-input-modal';
         let modal = document.getElementById(modalId);
@@ -276,23 +277,24 @@ export function showInputModal(title, initialValue = '', placeholder = '', descr
         });
 
         // One completion; a frame cancellation clears the input immediately.
-        let closed = false;
-        const abort = () => closeModal(null);
-        const closeModal = (val) => {
-            if (closed) return;
+        let closed = false, finishClose = null, focusScope = null;
+        const abort = () => closeModal(null, true);
+        const closeModal = (val, immediate = false) => {
+            if (closed) {if (immediate) finishClose?.(); return;}
             closed = true;
             options.signal?.removeEventListener('abort', abort);
             if (isVaultSecret) input.value = '';
 
             modal.classList.remove('active');
-            setTimeout(() => {
-                if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+            finishClose = () => {
+                modal.remove();
+                focusScope?.close();
                 resolve(val);
-            }, 300);
+            };
+            if (immediate) finishClose(); else setTimeout(finishClose, 300);
         };
 
         options.signal?.addEventListener('abort', abort, {once: true});
-        if (options.signal?.aborted) closeModal(null);
         btnCancel.addEventListener('click', () => closeModal(null));
         btnConfirm.addEventListener('click', () => closeModal(input.value));
 
@@ -320,6 +322,7 @@ export function showInputModal(title, initialValue = '', placeholder = '', descr
 
         modal.appendChild(content);
         document.body.appendChild(modal);
+        focusScope = window.vaultFrameNavigation?.beginModalFocus?.({modal, dialog: content, onCancel: () => closeModal(null, true), signal: options.signal});
         if (options.passwordType) {
             const labels = ['Lunghezza minima', 'Una minuscola', 'Una maiuscola', 'Un numero', 'Un simbolo', 'Nessuno spazio esterno'];
             content.querySelectorAll('.modal-password-requirements li').forEach((item, index) => { item.textContent = labels[index]; });

@@ -1,5 +1,9 @@
 # Sicurezza
 
+## Conferma Vault nella cornice — isolamento dell'interazione, 10/11/2026
+
+L'isolamento UI del dialogo parent e un obbligo distinto dall'ammissione e dalla disponibilita della chiave. Un hold della modale non concede ne conserva materiale Vault, non rinnova i timer e non neutralizza abort/revoca. Iframe inert, focus confinato e rilascio subordinato allo stato corrente sono definiti nel [contratto UI](INTERFACCIA.md#cornice-dialogo-ui-2026-11-10). La diagnostica active/permitValid non certifica da sola uno sblocco riuscito; prova UI locale, stato della chiave e collaudo fisico restano evidenze diverse.
+
 ## ADC impersonata del runner cornice — contratto candidato, 10/11/2026
 
 Accettare solo ADC impersonated_service_account per il SA dedicato, sorgente authorized_user validata, URL IAM ufficiale esatto, universo predefinito e assenza di delegate/progetto quota. Il JSON validato una volta alimenta esplicitamente GoogleAuth, senza successiva ricerca di altri file/cache; Auth lettura, GET REST singleton e unico POST claim condividono la credenziale impersonata in RAM. Rifiutare emulatori e override quota. Nessun token, UID o dato Auth nei rapporti, anche sola prova. --remove elimina soltanto il claim cornice, dopo OFF e prima del cambio binding; nessuna ripetizione o ripristino globale dopo esito incerto.

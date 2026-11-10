@@ -121,6 +121,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/azienda/pdf/company-summary-reader.js",
   "assets/js/modules/azienda/pdf/company-summary-view.js",
   "assets/js/modules/core/crypto-utils.js",
+  "assets/js/modules/core/frame-modal-focus.js",
   "assets/js/modules/core/mfa-manager.js",
   "assets/js/modules/core/password-policy.js",
   "assets/js/modules/core/security-manager.js",
