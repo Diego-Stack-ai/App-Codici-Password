@@ -47,7 +47,7 @@ Le regole di sicurezza restano prevalenti: mascheramento dei campi sensibili, co
 4. Elenchi e Home: Account, Aziende, Scadenze, Archivio, Area privata.
 5. Impostazioni, configurazioni, Regole, Destinatari e form.
 
-Ogni tappa applicativa (1–5) è una PR distinta con revisione di Codex, check verdi, prova fisica di Diego e rilascio Hosting approvato personalmente; la versione dell'app viene incrementata solo dal rilascio. La tappa 0, soltanto documentale, non richiede prova fisica, versione o deploy.
+**Modalità di rilascio scelta da Diego (10/11/2026):** le tappe 1–5 si sviluppano sulla stessa PR #283, **un commit per famiglia di pagine**, ciascuno con avviso e revisione GO/NO-GO di Codex. Dopo il pilota Profilo, Diego valuta le schermate (palette, chiaro/scuro, modalità Modifica) **prima** dell'estensione alle altre famiglie. Segue **un solo rilascio Hosting** finale, dopo la pubblicazione e la prova C1 della cornice, con suite completa, sette palette × chiaro/scuro, otto lingue, prova fisica di Diego e approvazione personale; la versione dell'app viene incrementata solo da quel rilascio. La tappa 0, soltanto documentale, non richiede prova fisica, versione o deploy.
 
 <a id="cornice-diag-ui-2026-11-10"></a>
 
