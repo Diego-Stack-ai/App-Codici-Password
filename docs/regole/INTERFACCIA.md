@@ -18,7 +18,7 @@ Per le famiglie di pagine migrate con questa revisione, la regola storica «cons
 
 - **Quattro tipi di pulsante:** principale pieno (al massimo uno per vista), secondario tenue, testo (intestazioni e righe di gestione), icona. Nessun rilievo decorativo: profondità e colore derivano dai token di `core.css`.
 - **Tratteggio** riservato all'invito ad aggiungere in una sezione vuota o in modalità Modifica; mai per aprire, cambiare o scollegare.
-- **Rosso** riservato all'eliminazione, visibile soltanto in modalità Modifica. Eliminazione con conferma esplicita (secondo tocco o dialogo esistente), senza scorciatoie.
+- **Comandi distruttivi** (eliminare, svuotare) in rosso, visibili soltanto in modalità Modifica, con conferma esplicita (secondo tocco o dialogo esistente) e senza scorciatoie. La regola riguarda i comandi: restano ammessi il rosso funzionale di errore, urgenza e scaduto e la palette `red` già prevista.
 - **Account collegato** come riga-link discreta; l'appartenenza al biglietto QR come indicatore, modificabile solo in Modifica.
 - **Scadenze** come etichetta di stato (valido, in scadenza, scaduto) con colori funzionali indipendenti dalla palette.
 - Etichette in tono neutro, non nel colore d'accento; il colore d'accento identifica ciò che si tocca. Niente testo in maiuscolo continuo per titoli o paragrafi; tipografia dai token di `core_fonts.css`.
@@ -35,7 +35,7 @@ Le regole di sicurezza restano prevalenti: mascheramento dei campi sensibili, co
 4. Elenchi e Home: Account, Aziende, Scadenze, Archivio, Area privata.
 5. Impostazioni, configurazioni, Regole, Destinatari e form.
 
-Ogni tappa è una PR distinta con revisione di Codex, check verdi, prova fisica di Diego e rilascio Hosting approvato personalmente; la versione dell'app viene incrementata solo dal rilascio.
+Ogni tappa applicativa (1–5) è una PR distinta con revisione di Codex, check verdi, prova fisica di Diego e rilascio Hosting approvato personalmente; la versione dell'app viene incrementata solo dal rilascio. La tappa 0, soltanto documentale, non richiede prova fisica, versione o deploy.
 
 <a id="cornice-diag-ui-2026-11-10"></a>
 
