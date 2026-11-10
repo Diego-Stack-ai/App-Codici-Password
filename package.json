@@ -155,7 +155,7 @@
     "test:assistant-session-browser": "node --test tests/assistant-ui-lifecycle.browser.test.mjs",
     "test:vault-frame-lab": "node --test experiments/persistent-vault-frame/*.test.mjs",
     "prototype:vault-frame-lab": "node experiments/persistent-vault-frame/serve.mjs",
-    "test:vault-frame-runtime": "node --test tests/vault-frame-permit.test.mjs tests/vault-frame-runtime.test.mjs tests/vault-frame-navigation.test.mjs tests/vault-frame-boundaries.test.mjs tests/vault-frame-runtime.browser.test.mjs tests/vault-frame-media.browser.test.mjs tests/vault-frame-headers.browser.test.mjs"
+    "test:vault-frame-runtime": "node --test tests/vault-frame-permit.test.mjs tests/vault-frame-runtime.test.mjs tests/vault-frame-navigation.test.mjs tests/vault-frame-boundaries.test.mjs tests/vault-frame-runtime.browser.test.mjs tests/vault-frame-media.browser.test.mjs tests/vault-frame-headers.browser.test.mjs tests/vault-frame-push.test.mjs tests/vault-frame-push.browser.test.mjs"
   },
   "repository": {
     "type": "git",

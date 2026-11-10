@@ -5,6 +5,7 @@ import {auth, db} from '../../firebase-config.js?v=1.2.268';
 import {authSessionFence} from '../../auth-session-fence.js';
 import {getUserProfile} from '../data/vault-repository.js';
 import {createVaultFrameOwner} from './vault-frame-owner.mjs';
+import {installFramePushNavigation} from './vault-frame-push.mjs';
 
 
 let mounted = null, mountGeneration = 0;
@@ -17,7 +18,7 @@ export async function startVaultFrame({user, securityManager, fenceTicket}) {
     auth.currentUser?.uid === user.uid && await authSessionFence.isCurrent(fenceTicket);
   const getIdentity = () => auth.currentUser?.uid === user.uid && authSessionFence.isLocallyAllowed()
     ? {uid: user.uid, epoch} : null;
-  let stopPreference = () => {}, preferenceEpoch = 0;
+  let stopPreference = () => {}, stopPush = () => {}, preferenceEpoch = 0;
   const status = document.getElementById('frame-status'), resume = document.getElementById('frame-resume');
   let owner;
   const admission = createProductionFrameAdmission({user, fenceTicket, onDeny: () => owner?.session.lock('policy-revoked')});
@@ -40,10 +41,11 @@ export async function startVaultFrame({user, securityManager, fenceTicket}) {
         return !signal.aborted && await valid({uid: user.uid, epoch}) && !signal.aborted;
       } finally {signal.removeEventListener('abort', cancel);}
     }, clearMaterial: () => {if (generation === mountGeneration) securityManager.clearSession();},
-    onDispose: () => {stopPreference(); admission.dispose();},
-    onState: state => {if (generation !== mountGeneration) return; if (state.locked) {stopPreference(); admission.dispose();} status.hidden = !state.locked; resume.hidden = !state.locked;}
+    onDispose: () => {stopPush(); stopPreference(); admission.dispose();},
+    onState: state => {if (generation !== mountGeneration) return; if (state.locked) {stopPush(); stopPreference(); admission.dispose();} status.hidden = !state.locked; resume.hidden = !state.locked;}
   });
   mounted = owner;
+  stopPush = installFramePushNavigation({window, owner});
   securityManager.setFrameExpiryAuthority(() => owner.session.state().expiresAt);
   resume.addEventListener('click', event => {if (mounted === owner && owner.resume()) event.preventDefault();});
   const route = new URL(window.location.href).searchParams.get('route') || '/home_page.html';

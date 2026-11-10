@@ -133,6 +133,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/core/vault-frame-permit.mjs",
   "assets/js/modules/core/vault-frame-policy.mjs",
   "assets/js/modules/core/vault-frame-production.js",
+  "assets/js/modules/core/vault-frame-push.mjs",
   "assets/js/modules/core/vault-frame-removal-plan.mjs",
   "assets/js/modules/core/vault-frame-routing.js",
   "assets/js/modules/core/vault-frame-session.mjs",

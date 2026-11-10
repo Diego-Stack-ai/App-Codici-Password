@@ -6,7 +6,7 @@ import {createFrameSession} from './vault-frame-session.mjs';
 export function createVaultFrameOwner({window: win, iframe, release, getIdentity,
   readPermit = async () => null, validateIdentity = async () => false,
   unlock, confirmSensitive, readTimeout = async () => null, clearMaterial = () => {},
-  onState = () => {}, onDispose = () => {}}) {
+  onState = () => {}, onDispose = () => {}, now = Date.now}) {
   const origin = win.location.origin;
   let disposed = false, locked = false, nonce = null, route = null, sequence = 0, visibilityEpoch = 0;
   let checking = null, internalClear = false, nextCheck = 0;
@@ -196,7 +196,20 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
     }
   });
   win.vaultFrameNavigation = facade;
-  return Object.freeze({session, async start(target) {
+  return Object.freeze({session, async navigateFromPush(target, {expiresAt, validateSource, isActive}) {
+    const url = privateFrameUrl(target, origin), before = identity();
+    const generation = session.state().generation, documentObject = currentDocument(), documentToken = nonce, visibleEpoch = visibilityEpoch;
+    const current = () => !disposed && !locked && !logoutHold && !win.document.hidden && route && documentToken &&
+      nonce === documentToken && currentDocument() === documentObject && visibilityEpoch === visibleEpoch &&
+      session.state().generation === generation && session.state().unlocked && now() < expiresAt && isActive() &&
+      identity()?.uid === before?.uid && identity()?.epoch === before?.epoch;
+    if (!url || !before || !current()) return false;
+    if (!await validateSource() || !current()) return false;
+    const ok = await admission({fresh: true});
+    if (!current()) return false;
+    if (!ok) {session.lock('push-admission-denied'); return false;}
+    return navigate(url.href, false);
+  }, async start(target) {
     mask(true);
     if (!await admission({fresh: true})) {session.lock('admission-denied'); return false;}
     const minutes = await readTimeout();

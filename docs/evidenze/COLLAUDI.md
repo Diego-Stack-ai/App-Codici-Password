@@ -1,16 +1,32 @@
 # Collaudi
 
+<a id="cornice-d11-verifiche-2026-11-10"></a>
+
+## Cornice D11 — notifiche e lista C1 candidate, 10/11/2026
+
+Fonte: [GO B2 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753602102) sul commit `70180aaffba629d112d235d93dddd0344f7f2c75`, con validate/docs/Gitleaks verdi nella CI #1048 e deploy saltato. Diego autorizza D11 e le integrazioni della lista sulla stessa PR #278. Il GO B2 non è ancora GO sul codice D11.
+
+Implementato nel worker FCM il click verso cornice pronta tramite intento e ACK entro 1500 ms, senza navigate sul padre. Destinazione limitata e coordinate id/received/notification conservate; preferenza per client principale focalizzato/visibile. Il padre verifica evento nativo, origine, registrazione FCM attiva, nonce/schema/path/deadline e stato attuale; dopo le attese ricontrolla identità, fence, generazione, documento del figlio e visibilità. Solo una sessione già aperta e ammessa naviga il figlio. Nessuna chiave o token nel canale, nessuno sblocco implicito o rinnovo dell'inattività. In assenza di cornice resta il percorso ordinario; su diniego, errore o timeout della cornice si richiede openWindow, mai navigate diretto sul padre.
+
+`npm run test:vault-frame-runtime`: **204/204 PASS**, inclusi **35 test D11 unitari/VM** e **7 browser D11**. I test browser usano Chrome effettivo, ServiceWorker/WindowClient/MessageChannel nativi e owner/receiver produttivi, con identità e permesso sintetici: due notifiche cambiano il figlio conservando padre e singolo sblocco; rifiuti per sorgente estranea/percorso non ammesso, blocco, timeout, cambio UID/epoca, sospensione, revoca e documento sostituito durante l'attesa. Provati anche il ramo ordinario reale e il suo errore nativo fuori scope FCM. I test VM coprono schema/ACK/nonce/scadenza, porta/focus in errore, replay e callback tardive. Aggiornato solo l'harness del test di mount precedente per iniettare il nuovo installer: non viene conteggiato come prova D11.
+
+Altri controlli locali D11: documenti **12/12**, **34 MD/799 collegamenti**; sintassi **245 moduli**, assenza cicli e budget statico **31 pagine** riusciti. Rigenerato runtime offline **61 export/338 risorse**, anteprime sempre escluse; manifest locale candidato verificato, **358 file**, non una ricevuta di produzione. Gitleaks sull’indice senza nuovi segreti. Ricevute tecniche in .codex-tmp esclusa da Git. La regressione generale e la CI sul nuovo SHA hanno esiti distinti dalla suite dedicata.
+
+**Limiti espliciti:** click notifiche e servizio FCM sono simulati; openWindow è intercettato nel banco browser, senza certificare gesto nativo o creazione di finestre. Chrome Android/Windows può riusare la finestra PWA nel fallback ([MDN](https://developer.mozilla.org/en-US/docs/Web/API/Clients/openWindow)); resta C1 e non si dichiara «padre mai ricaricato» in assenza di ACK. L'ACK prova adozione dell'intento, non caricamento completo. L'update best effort della registrazione FCM esistente va verificato davvero dopo aggiornamento; il controller offline sw.js non dimostra che il worker FCM sia aggiornato. Nessuna prova push fisica, PRF/Auth/App Check o dei quattro dispositivi dedotta da questi test.
+
+La lista C1 sotto contiene ora **18 casi/quattro ambienti, tutti NE**: D17 safe area esplicita Safari/PWA in verticale e orizzontale, D18 version skew NE fino al secondo rilascio. Priorità PWA iPhone e Chrome desktop, poi Safari e Android. Invariati arresto/rollback e i gate: nuovo commit, check e GO D11 di Claude prima di B3, più approvazione personale di Diego per merge/provisioning/deploy. Produzione ancora 1.2.267, candidata 1.2.268; nessun provisioning, Rules/Functions/workflow o cloud modificato da D11. Nessun nuovo MD.
+
 <a id="cornice-b2-lista-2026-11-09"></a>
 
 ## Cornice B2 — lista fisica candidata, nessuna prova eseguita
 
 Prerequisito: [GO B1 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753223333) su `0d861eb093626b9e0828848fef80c83c1b0e3aee`. [CI #1047](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42711090070) riuscita, **3448 casi/3438 PASS/0 FAIL/0 cancellati/10 skip in 64 gruppi**, docs e Gitleaks verdi, deploy saltato. Checkout CI merge sintetico `02a289d907abb3870e3b9622c6e7043407b0ac11`, genitori master `039b7a6b` e head `0d861eb0`; confronto API: zero file diversi dall'head. Manifest CI 357 file, hash `6300e82c5f675064a0fbc744a0f46ca4a73e94f746570aca9c5774a9ac595c6c`. Il GO accetta il filtro del token già acquisito e l'eccezione statica dichiarata; non è merge, attivazione o prova fisica.
 
-**Gap statico noto prima di B3:** il worker notifiche corrente seleziona un WindowClient e ne chiama navigate; manca l'intento verso la cornice già pronta con conferma di ricezione. Se il client scelto è app.html, il padre viene ricaricato e perde la RAM. Il caso D11 seguente non è soltanto da provare: la continuità richiesta dal contratto non è ancora implementata. Nessun PASS dedotto dal GO B1; occorre correzione e revisione prima di proporre la pubblicazione B3. In B2 si consegna la lista e si segnala il gap, senza modificare il worker o anticipare B3/C1.
+**Cronologia B2:** il gap statico del worker che chiamava navigate su app.html era aperto alla consegna B2. Il [GO B2 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753602102) ne conferma la correzione necessaria prima di B3. Ora D11 implementa il percorso nella candidata, con ricevuta sopra; non è ancora pubblicato né verificato sui dispositivi. Nessun PASS fisico deriva dai GO o dai test automatici.
 
 ### Preparazione di C1, dopo il rilascio B3 approvato
 
-Diego esegue le prove separatamente su **Chrome desktop Windows, Chrome Android, Safari iPhone e PWA installata su iPhone**. Registrare per ogni colonna modello/OS/browser/versione app/data, sorgente del rilascio approvato e presenza effettiva della cornice; Safari e PWA sono due ambienti distinti. Oggi produzione 1.2.267 e nessun permesso reale: la tabella è interamente **NE**, non eseguibile come canary già attivo. La futura versione 1.2.268 va prima verificata da manifest/worker e non dedotta dalla sola etichetta.
+Diego esegue le prove separatamente su **Chrome desktop Windows, Chrome Android, Safari iPhone e PWA installata su iPhone**. **Priorità: PWA iPhone e Chrome desktop per primi, poi Safari iPhone e Chrome Android.** Registrare per ogni colonna modello/OS/browser/versione app/data, sorgente del rilascio approvato e presenza effettiva della cornice; Safari e PWA sono due ambienti distinti. Oggi produzione 1.2.267 e nessun permesso reale: la tabella è interamente **NE**, non eseguibile come canary già attivo. La futura versione 1.2.268 va prima verificata da manifest/worker e non dedotta dalla sola etichetta.
 
 B3 deve proporre l'assegnazione privata del singleton e del solo claim del pilota, preservando gli altri claim; il token nuovo richiede un nuovo accesso oppure un refresh esplicito. Per C1 preferire logout/login normale dopo la conferma del provisioning, così non si chiede a Diego di incollare token o eseguire comandi in console. La hint non concede ammissione: il documento server e il fence rimangono obbligatori. Nessun altro account viene abilitato o creato da B2.
 
@@ -34,12 +50,14 @@ Sbloccare una volta e raggiungere, tramite i menu/link dell'app e senza incollar
 | D08 — logout/fence | Logout dalla cornice e da altra scheda dello stesso browser: UI bloccata, vecchie schede e Back non riaprono dati; nuovo accesso/sblocco necessari. Nuova epoca dello stesso UID non riusa la vecchia RAM. |
 | D09 — biometria | Con PRF realmente supportato eseguire lo sblocco e una nuova conferma; annullamento/errore non sbloccano. Incompatibilità e ripiego Master Password sono registrati separatamente e non certificano PRF. |
 | D10 — camera/voce | Dal gesto previsto aprire fotocamera/scanner documenti e dettatura con contenuto innocuo; consentire/rifiutare/annullare. Stream arrestati su cambio pagina/background/blocco, risultato tardivo scartato e nessun caricamento involontario. Picker nativo distinto dalla camera integrata; annullare prima del salvataggio. |
-| D11 — notifiche | **Gap statico aperto.** Cornice pronta: notifica deve selezionare la destinazione autorizzata mantenendo il padre vivo e conservando id/received/notification validi. Senza cornice pronta: nuova sessione/destinazione corretta e sblocco se necessario. Provare notifica reale autorizzata sui dispositivi che la supportano; simulazione/helper non equivale a push fisico. |
+| D11 — notifiche | Dopo conferma del nuovo **worker FCM attivo**, una notifica reale autorizzata seleziona la destinazione validata: cornice pronta e ACK ricevuto, padre vivo e id/received/notification conservati senza nuovo sblocco. Ripetere con app bloccata, assente e risposta tardiva: destinazione corretta e sblocco se necessario, senza navigate diretto sul padre. Nel fallback openWindow annotare se il browser crea o riusa la finestra PWA; il riuso può ricaricare il padre, quindi non certifica continuità. Aggiornamento del worker offline distinto dal FCM. Annotare limiti dei push sul dispositivo; simulazione/helper non equivale a notifica fisica. |
 | D12 — allegati/export/stampa | PDF/immagine ammessi si aprono fuori cornice, altri formati restano download secondo S1; ritorno conserva il padre vivo se non scaduto. Export/vCard/PDF richiedono conferma fresca e gesto finale previsto; annullare senza esportare dati reali. Stampa fuori cornice, annullamento e ritorno corretti. |
 | D13 — azioni sensibili | A Vault aperta, export/backup, cambio Master Password, condivisione e cancellazione definitiva chiedono nuova conferma; annullare PRIMA della scrittura. Non usare operazioni distruttive su dati reali per questo collaudo. Le prove sintetiche di grant scaduti/riusati restano nelle ricevute B1. |
 | D14 — uscite | Privacy/termini/login escono al livello principale dopo revoca. Link web esterno senza opener, tel/mailto aprono il percorso nativo e il ritorno non mostra dati scaduti. Verificare anche ritorno da picker/telefono/email. |
 | D15 — rete/policy | Offline iniziale prosegue standalone senza attesa aggiuntiva del permesso. Perdita rete/policy non verificabile nella cornice: blocco e nessuna riapertura da cache. Spegnimento del singleton e riaccensione sono prove operative B3/C1 solo approvate, mai modifica client del flag. La rimozione del claim non è il kill switch. |
 | D16 — confini | Confermare le evidenze automatiche su origine estranea, URL non ammessi/blob/data, UID/fence, assenza chiavi in storage/URL/log. Il controllo fisico è distinto: non chiedere dump di chiavi o storage; qualunque materiale sensibile visibile fuori dalla vista autorizzata impone arresto. Altro account solo se già disponibile e autorizzato, altrimenti NE senza crearne uno. |
+| D17 — safe area | Su Safari iPhone e PWA installata, provare verticale e orizzontale: header e footer dei figli fuori da notch e barra home, ultimi pulsanti visibili e toccabili, anche dopo scroll/cambio pagina/orientamento. Annotare separatamente i due ambienti; gli inset del banco sintetico non certificano il dispositivo. |
+| D18 — version skew | Tenere aperta la cornice della versione precedente, poi dopo un rilascio successivo navigare internamente: uscita o ricarica pulita sulla destinazione valida, nessuna chiave consegnata a protocollo/versione diversa, nessun loop o pagina bianca. NE finché manca un secondo rilascio; non forzare versioni o cache dai comandi in console per attribuire un PASS reale. |
 
 ### Matrice C1 da compilare da Diego
 
@@ -57,16 +75,18 @@ Sbloccare una volta e raggiungere, tramite i menu/link dell'app e senza incollar
 | D08 | NE | NE | NE | NE |
 | D09 | NE | NE | NE | NE |
 | D10 | NE | NE | NE | NE |
-| D11 — gap statico | NE | NE | NE | NE |
+| D11 | NE | NE | NE | NE |
 | D12 | NE | NE | NE | NE |
 | D13 | NE | NE | NE | NE |
 | D14 | NE | NE | NE | NE |
 | D15 | NE | NE | NE | NE |
 | D16 | NE | NE | NE | NE |
+| D17 | NE | NE | NE | NE |
+| D18 | NE | NE | NE | NE |
 
 Per ogni esito riportare caso, ambiente/versioni, passi, risultato e ora; riferimenti o schermate solo ripuliti da dati personali/credenziali. Le ricevute tecniche sensibili restano fuori Git. Eventuali tempi misurati sono del dispositivo indicato, non promesse generali.
 
-**Arresto e chiusura:** chiave/dati non autorizzati, revoca non rispettata, contenuto navigabile nel frame o bypass coorte impongono blocco immediato del canary e revisione prima di riprendere. Ripetizione dello sblocco ad ogni pagina, perdita di route, regressioni camera/voce/push o form non utilizzabili impediscono di dichiarare il requisito concluso. Il gap D11 va corretto/rivisto prima di B3; gli altri FAIL/NE/LIMITE rimangono aperti in C1. Spegnimento d'emergenza mediante singleton disabled/rimosso; rimozione dell'instradamento Hosting solo CI approvata, mai deploy dal PC. B2 non esegue tali operazioni. C2 richiede ricevute STATO/COLLAUDI e GO sui seguiti; nessun «CORNICE CHIUSA» con prove obbligatorie mancanti.
+**Arresto e chiusura:** chiave/dati non autorizzati, revoca non rispettata, contenuto navigabile nel frame o bypass coorte impongono blocco immediato del canary e revisione prima di riprendere. Ripetizione dello sblocco ad ogni pagina, perdita di route, regressioni camera/voce/push o form non utilizzabili impediscono di dichiarare il requisito concluso. La correzione candidata D11 richiede il proprio GO prima di B3; gli altri FAIL/NE/LIMITE rimangono aperti in C1. Spegnimento d'emergenza mediante singleton disabled/rimosso; rimozione dell'instradamento Hosting solo CI approvata, mai deploy dal PC. B2 non esegue tali operazioni. C2 richiede ricevute STATO/COLLAUDI e GO sui seguiti; nessun «CORNICE CHIUSA» con prove obbligatorie mancanti.
 
 <a id="cornice-b1-verifiche-2026-11-09"></a>
 

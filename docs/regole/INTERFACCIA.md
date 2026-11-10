@@ -1,5 +1,17 @@
 # Interfaccia
 
+<a id="cornice-d11-ui-2026-11-10"></a>
+
+## Cornice D11 — intento notifiche candidato
+
+Il worker FCM registra il gestore notificationclick prima delle librerie Firebase, così il loro gestore predefinito non ricarica la cornice ([Firebase](https://firebase.google.com/docs/cloud-messaging/web/receive-messages)). Se esiste app.html come client principale same-origin, preferisce quello focalizzato/visibile, lo focalizza e invia soltanto coordinate non segrete di navigazione su MessageChannel. Non chiama navigate sul padre, neppure su errore o timeout. Il sottoinsieme push comprende Home, lista scadenze e dettaglio con un solo id oppure received e notification opzionale, tutti normalizzati e validati; niente hash, parametri extra o URL esterni. Nessuna cornice: percorso ordinario navigate/focus e ripiego esistenti, con esclusione dei frame annidati.
+
+Il padre riceve su ServiceWorkerContainer, separato da window e dal controller offline sw.js. Verifica evento nativo/origine, script FCM esatto, identità del worker attivo nella registrazione FCM ammessa, protocollo, schema chiuso, nonce monouso, path e scadenza massima 1500 ms. Una registrazione FCM ruotata è ammessa soltanto nel suo scope canonico. Dopo le attese ricontrolla UID/epoca/fence, Document/nonce del figlio, generazione, visibilità, blocco e scadenza; ammissione server fresca obbligatoria. L'ACK correlato conferma l'adozione dell'intento e la navigazione del figlio, non il completamento del caricamento. Un ACK tardivo/riusato non naviga; il push non sblocca né rinnova l'inattività.
+
+Senza ACK valido entro il termine il worker richiede openWindow(target). **Non si garantisce una nuova finestra fisica:** Chrome Android/Windows può riusare una PWA installata ([MDN openWindow](https://developer.mozilla.org/en-US/docs/Web/API/Clients/openWindow)). Questo può distruggere la RAM della cornice nel fallback: si registra come limite C1, senza promettere continuità anche in quel caso. Il percorso ACK pronto conserva invece il padre. Pop-up/permessi e attivazione nativa restano prove fisiche; il banco browser intercetta soltanto la richiesta di fallback.
+
+All'avvio la cornice richiede update best effort delle registrazioni FCM esistenti, senza crearne una né bloccare la UI. Aggiornare sw.js non dimostra che firebase-messaging-sw.js sia già attivo: C1 deve verificare il nuovo worker FCM effettivo, anche dopo aggiornamento da versione precedente. [Lista e limiti](../evidenze/COLLAUDI.md#cornice-b2-lista-2026-11-09).
+
 <a id="cornice-b1-header-2026-11-09"></a>
 
 ## Cornice B1 — profili HTTP candidati

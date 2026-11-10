@@ -1,5 +1,13 @@
 # Decisioni
 
+<a id="cornice-d11-decisione-2026-11-10"></a>
+
+## 10/11/2026 — D11 dopo GO B2, prima della proposta B3
+
+Diego trasmette il [GO B2 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753602102) e ordina la correzione notifiche con le integrazioni della lista. Si adotta l'intento dal worker FCM alla cornice pronta, confermato tramite porta/nonce/path entro 1500 ms: il padre verifica sorgente attiva registrata, allowlist e stato corrente, quindi naviga il figlio senza sblocco implicito. Senza conferma si usa openWindow; mai navigate diretto sulla cornice. È una correzione candidata da rivedere, non un'attivazione. Il fallback nativo può riusare una PWA e richiede il collaudo distinto riportato nel contratto UI.
+
+Safe area verticale/orizzontale e version skew entrano nella lista C1, senza risultati precompilati; priorità PWA iPhone e Chrome desktop. Restano gate GO sul nuovo SHA, approvazione personale B3, CI soltanto e 34 MD. Questo passo non autorizza provisioning, nuove Rules/Functions/workflow, merge o deploy.
+
 <a id="cornice-b1-decisione-2026-11-09"></a>
 
 ## 09/11/2026 — B1 dopo GO A2, senza attivazione produttiva

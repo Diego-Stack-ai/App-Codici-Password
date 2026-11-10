@@ -1,5 +1,11 @@
 # Vault
 
+<a id="cornice-d11-vault-2026-11-10"></a>
+
+## Cornice D11 — notifiche senza prestito di chiavi
+
+Il canale FCM trasmette soltanto coordinate di destinazione e correlazione, mai chiavi, grant, token Auth o UID. Una cornice pronta adotta il push soltanto dopo verifica della sorgente registrata e ammissione fresca, ancora nello stesso documento/identità/generazione e prima della deadline. Blocco, sospensione, logout o revoca intervenuti durante l'attesa impediscono l'adozione. Nessun sblocco o rinnovo dell'inattività deriva dal messaggio. La chiave continua a vivere solo nella RAM prevista dal contratto A1; il fallback non ricrea continuità da storage. Protocollo, limiti nativi e worker distinto sono definiti in [Interfaccia D11](INTERFACCIA.md#cornice-d11-ui-2026-11-10); le prove C1 restano NE.
+
 <a id="cornice-b1-permesso-2026-11-09"></a>
 
 ## Cornice B1 — ammissione server candidata

@@ -1,5 +1,15 @@
 # Incarico corrente
 
+<a id="cornice-d11-2026-11-10"></a>
+
+## Cornice D11 — notifiche corrette nella candidata, revisione richiesta
+
+Diego trasmette il [GO B2 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753602102) su `70180aaffba629d112d235d93dddd0344f7f2c75`, CI #1048 verde e deploy saltato, e autorizza la correzione D11 più le integrazioni della lista. Codex rimane unico esecutore sulla PR #278. Il nuovo intento FCM aggiorna soltanto il figlio della cornice pronta, dopo validazione e ammissione fresca; ACK correlato entro 1500 ms, altrimenti ripiego openWindow. Nessun nuovo sblocco, chiave o privilegio viene trasmesso dal worker. Finestra visibile/focalizzata preferita e percorso ordinario conservato in assenza di cornice.
+
+La [lista C1](../evidenze/COLLAUDI.md#cornice-b2-lista-2026-11-09) aggiunge safe area verticale/orizzontale e version skew, con priorità PWA iPhone e Chrome desktop, poi Safari e Android. Tutti i 18 casi rimangono NE sui quattro ambienti; il version skew richiede un rilascio successivo. [Prove e limiti D11](../evidenze/COLLAUDI.md#cornice-d11-verifiche-2026-11-10): il fallback nativo di una PWA e l'aggiornamento effettivo del worker FCM sono da collaudare, distinti dalla continuità provata nel percorso ACK.
+
+Il passo corrente termina con commit/push e avviso PASSO D11 COMMITTATO sulla #278, poi attende il GO di Claude sul nuovo SHA. **Nessun B3, merge, provisioning, UID/claim, modifica Rules/Functions/workflow o deploy** da questa correzione. Produzione 1.2.267, candidata ancora 1.2.268. Le sezioni B2/B1 sotto sono checkpoint storici superati dai rispettivi GO, non richieste di ripetere quei passi.
+
 <a id="cornice-b2-2026-11-09"></a>
 
 ## Cornice B2 — lista fisica, in revisione

@@ -1,5 +1,13 @@
 # Programma
 
+<a id="cornice-d11-roadmap-2026-11-10"></a>
+
+## Cornice: correzione D11 dopo GO B2
+
+[GO B2 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753602102) su `70180aaffba629d112d235d93dddd0344f7f2c75`, CI #1048 verde. Passo corrente: consegnare sulla #278 l'intento notifiche alla cornice e le aggiunte C1 richieste (safe area e version skew, 18 casi tutti NE). Poi check e GO D11 prima di proporre B3. Nessun merge, provisioning individuale o deploy anticipato; produzione 1.2.267, candidata 1.2.268. [Mandato D11](INCARICO_CORRENTE.md#cornice-d11-2026-11-10), [prove e limiti](../evidenze/COLLAUDI.md#cornice-d11-verifiche-2026-11-10).
+
+Dopo GO D11: preparazione B3 con approvazione personale di Diego; quindi C1, prima PWA iPhone e Chrome desktop, poi Safari iPhone e Chrome Android. Version skew resta NE fino al rilascio successivo; fallback PWA nativo e worker FCM effettivamente aggiornato sono limiti da verificare. C2 resta subordinata alle ricevute fisiche e non è autorizzata una chiusura dedotta dai test automatici. Nuova grafica separata.
+
 <a id="cornice-b2-roadmap-2026-11-09"></a>
 
 ## Cornice: GO B1, lista B2 e gap prima di B3
