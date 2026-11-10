@@ -1,5 +1,15 @@
 # Incarico corrente
 
+<a id="cornice-claim-preparazione-2026-11-10"></a>
+
+## Cornice — runner del claim e piano in due fasi, solo preparazione
+
+Ordini diretti di Diego del 10/11/2026: preparare lo script una tantum del solo claim `vault_frame_canary=true`, preservare tutta la mappa corrente, sola prova senza scritture, rilettura dopo aggiornamento, pubblicazione per Claude e arresto. Aggiornamento successivo: prima account di prova già popolato (QA2 **candidata**, ammissibilità da confermare con il revisore), poi account personale; UID esplicito e visibile nel solo dry-run. [Decisione e limiti](DECISIONI.md#cornice-canary-due-fasi-2026-11-10).
+
+Ramo `codex/vault-frame-claim-preparation-20261110`, base master `28c97128716deb804385a084088a6f4367a5bcc1`, dopo GO Claude e merge autorizzato #284. Sono autorizzati runner/helper/test locali, normale manutenzione dei documenti esistenti, commit/push e PR collegata alla #278 per revisione. Nessuna esecuzione Firebase del runner (anche dry-run), login amministrativo, cambio di singleton/claim/utente, creazione QA, modifica workflow/Rules/Functions/runtime, merge, deploy o attivazione. Token e dati sensibili esclusi; la sola eccezione di output UID appartiene al futuro dry-run amministrativo richiesto, non a DIAG/C1.
+
+Il documento reale è stato predisposto manualmente da Diego con quattro campi, `enabled=false` e UID personale, senza `expiresAt`: preparazione parziale verificata via UI, non autorizzazione o documento pronto per l'apply. UID non riportato. La scelta QA2 non lo cambia automaticamente; scadenza sette giorni da concordare prima dell'attivazione. Il nuovo runner deve distinguere lo staging incompleto e negare apply finché mancano precondizioni complete. [Procedura](../regole/RILASCIO.md#cornice-claim-runner-2026-11-10), [evidenze e lista C1](../evidenze/COLLAUDI.md#cornice-claim-candidato-2026-11-10). Consegna → revisione Claude → approvazioni separate dei passi reali. I checkpoint seguenti sono cronologia.
+
 <a id="cornice-b35-modello-incarico-2026-11-10"></a>
 
 ## Cornice B3.5 — prescrizione sul modello HTTP, prima dell'attivazione

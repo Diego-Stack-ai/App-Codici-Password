@@ -1,5 +1,11 @@
 # Sicurezza
 
+## Preparazione amministrativa del claim cornice — 10/11/2026
+
+Runner manuale e una tantum per UID approvato esplicito, fase sintetica prima della personale; [decisione](../progetto/DECISIONI.md#cornice-canary-due-fasi-2026-11-10). Non usa runner QA, non crea credenziali/utenti, non modifica Vault, singleton o altre risorse. `setCustomUserClaims` sostituisce la mappa: conservarla integralmente in RAM, doppia lettura prima dell'unico set e verifica completa dopo; **non è CAS né transazione** e richiede una finestra a scrittore unico confermata. Il writer effettivo usa un solo POST REST fisso con ADC, senza retry o redirect; le letture mantengono l'SDK. Deriva, errore o risultato incerto fermano la sequenza senza retry né ripristino dell'intera mappa. [Semantica Firebase](https://firebase.google.com/docs/auth/admin/custom-claims).
+
+Default dry-run senza salvataggi o scritture cloud, con l'UID richiesto mostrato esplicitamente per ordine di Diego; altri output solo codici/booleans/conteggi, niente token, email, valori/nomi degli altri claim o errori SDK liberi. L'eccezione UID **non si estende a DIAG, rapporti C1, MD, PR o log pubblici**. Input privato e ricevuta pre-scrittura fuori da Git/OneDrive; ricevuta cifrata DPAPI CurrentUser verificata, mai JSON temporaneo in chiaro. Il canale amministrativo esistente e i percorsi privati richiedono conferma prima dell'uso; nessun nuovo login o chiave impliciti. Singleton completo/spento, identità verificata e scadenza futura sono necessari per apply; quattro campi senza expiresAt sono solo staging negato. La consegna presente non esegue il runner o richieste Firebase.
+
 <a id="cornice-diag-sicurezza-2026-11-10"></a>
 
 ## DIAG — diagnostica locale della cornice, candidata 10/11/2026

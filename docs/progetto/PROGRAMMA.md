@@ -1,5 +1,9 @@
 # Programma
 
+## Cornice — revisione del runner e del piano sintetico → personale
+
+Prima [revisione Claude del runner e della decisione in due fasi](INCARICO_CORRENTE.md#cornice-claim-preparazione-2026-11-10), senza eseguirlo. QA2 già popolata è candidata, non automaticamente ammessa; nessun nuovo account o riuso di QA1/fixture eliminate. Dopo GO e singoli ordini: preflight privato dell'identità, completamento singleton **spento** per il solo UID sintetico e Timestamp concordato, dry-run con UID visibile e verifica personale, ulteriore approvazione prima dell'unico aggiornamento claim, poi distinta attivazione e C1 fase 1. Per la fase 2: spegnere/verificare revoca, cambio UID personale e controlli/approvazioni propri, C1 separata. Durata sette giorni da concordare senza rinnovi impliciti. C1 entrambe NE; UI e altri rilievi separati. Checkpoint sotto storici.
+
 ## Cornice: revisione della prescrizione B3.5, poi provisioning per passi
 
 Hosting 1.2.268 già pubblicato sullo SHA 79ebd9b8, dopo Rules sullo stesso SHA. Ora soltanto [modello HTTP, test e ricevute](INCARICO_CORRENTE.md#cornice-b35-modello-incarico-2026-11-10), da sottoporre a Claude sulla #278 prima dell'attivazione; nessun nuovo rilascio necessario per questi soli file. Dopo GO e ordine personale: istruzioni per singleton creato **spento** da Diego, script claim una tantum separato da far rivedere prima dell'esecuzione, verifica e attivazione autorizzata con durata sette giorni. Nessuno di questi passi è implicito nella consegna corrente. Seguono C1 19 × quattro ambienti tutto NE, rapporto DIAG per ogni FAIL, infine C2. UI nuova separata; checkpoint seguenti storici.

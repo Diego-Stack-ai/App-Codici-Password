@@ -1,5 +1,9 @@
 # Vault
 
+## Canary della cornice in due fasi — 10/11/2026
+
+Per il solo canary cambia l'ordine della coorte: prima un'identità sintetica approvata (QA2 popolata candidata, da confermare), poi Diego. Rimane **un solo UID per volta** nel singleton, nessuna lista di abilitati e nessuna nuova autorità del claim. Prima del cambio fase occorrono spegnimento/revoca verificati e distinta approvazione di identità, stato e scadenza. I risultati C1 appartengono alla rispettiva fase. Le diciture precedenti «solo Diego» descrivono il primo mandato, superato esclusivamente da questa [decisione](../progetto/DECISIONI.md#cornice-canary-due-fasi-2026-11-10); RAM, fence, schema, controlli del broker e contratti di blocco restano invariati. Preparazione del runner non concede alcun permesso o attivazione.
+
 <a id="cornice-d11-vault-2026-11-10"></a>
 
 ## Cornice D11 — notifiche senza prestito di chiavi
