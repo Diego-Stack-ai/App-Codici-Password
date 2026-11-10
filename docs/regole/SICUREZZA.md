@@ -1,5 +1,17 @@
 # Sicurezza
 
+## ADC impersonata del runner cornice — contratto candidato, 10/11/2026
+
+Accettare solo ADC impersonated_service_account per il SA dedicato, sorgente authorized_user validata, URL IAM ufficiale esatto, universo predefinito e assenza di delegate/progetto quota. Il JSON validato una volta alimenta esplicitamente GoogleAuth, senza successiva ricerca di altri file/cache; Auth lettura, GET REST singleton e unico POST claim condividono la credenziale impersonata in RAM. Rifiutare emulatori e override quota. Nessun token, UID o dato Auth nei rapporti, anche sola prova. --remove elimina soltanto il claim cornice, dopo OFF e prima del cambio binding; nessuna ripetizione o ripristino globale dopo esito incerto.
+
+Il ruolo Auth get/update ha ambito progetto; Firestore entities.get si restringe per database, **non al documento**. Il vincolo a target/claim/singleton è del runner, non IAM. Il refresh token sorgente nell'ADC rimane sensibile e potenzialmente più privilegiato del SA: protezione locale e revoca obbligatorie, nessuna promessa di isolamento dall'Owner. Nessuna chiave privata SA generata. [Istruzioni e limiti di revoca](RILASCIO.md#cornice-adc-impersonata-2026-11-10). Compatibilità offline e autorizzazione produttiva rimangono attestazioni distinte.
+
+## Preparazione amministrativa del claim cornice — 10/11/2026
+
+Runner manuale e una tantum per UID approvato esplicito, fase sintetica prima della personale; [decisione](../progetto/DECISIONI.md#cornice-canary-due-fasi-2026-11-10). Non usa runner QA, non crea credenziali/utenti, non modifica Vault, singleton o altre risorse. `setCustomUserClaims` sostituisce la mappa: conservarla integralmente in RAM, doppia lettura prima dell'unico set e verifica completa dopo; **non è CAS né transazione** e richiede una finestra a scrittore unico confermata. Il writer effettivo usa un solo POST REST fisso con ADC, senza retry o redirect; la lettura Auth mantiene l'SDK, il singleton usa un GET REST fisso con la stessa credenziale. Deriva, errore o risultato incerto fermano la sequenza senza retry né ripristino dell'intera mappa. [Semantica Firebase](https://firebase.google.com/docs/auth/admin/custom-claims).
+
+Default dry-run senza salvataggi o scritture cloud, senza UID anche in sola prova per l'ultimo ordine di Diego; output solo codici/booleans/conteggi, niente token, email, valori/nomi degli altri claim o errori SDK liberi. La precedente eccezione UID nel dry-run è superata: nessun identificativo in rapporti, DIAG, MD, PR o log. Input privato e ricevuta pre-scrittura fuori da Git/OneDrive; ricevuta cifrata DPAPI CurrentUser verificata, mai JSON temporaneo in chiaro. Il canale amministrativo esistente e i percorsi privati richiedono conferma prima dell'uso; nessun nuovo login o chiave impliciti. Singleton completo/spento, identità verificata e scadenza futura sono necessari per apply grant; apply remove ammette scadenza passata/assente ma richiede OFF e binding invariato; quattro campi senza expiresAt sono solo staging negato. La consegna presente non esegue il runner o richieste Firebase.
+
 <a id="cornice-diag-sicurezza-2026-11-10"></a>
 
 ## DIAG — diagnostica locale della cornice, candidata 10/11/2026

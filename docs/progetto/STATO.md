@@ -1,5 +1,21 @@
 # Stato
 
+## #285 aggiornata per ADC impersonata — nessuna esecuzione cloud, 10/11/2026
+
+[GO Claude sospeso](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/285#issuecomment-6766818781): opzione A scelta da Diego; istruzioni SA/ruoli/ADC/revoca predisposte, runner vincolato al JSON impersonato validato e --remove disponibile. [Evidenze offline e limiti](../evidenze/COLLAUDI.md#cornice-adc-offline-2026-11-10). Si tratta di compatibilità locale sintetica, **non** prova che IAM/servizi o credenziali reali funzionino. Nessun SA, ADC, singleton o claim creato/modificato da questo passo; nessun login o richiesta Google. Nessun UID nei rapporti.
+
+La #285 resta in bozza, senza merge; nuova revisione di Claude e ordini personali prima dei passi reali. Produzione sempre 1.2.268/#1060, master 28c97128, C1 entrambe le fasi NE. QA2 ancora candidata; il singleton documentato resta parziale/OFF/personale, non predisposto automaticamente al canary sintetico. [Istruzioni complete](../regole/RILASCIO.md#cornice-adc-impersonata-2026-11-10). Le sezioni successive conservano i checkpoint precedenti.
+
+<a id="cornice-claim-stato-2026-11-10"></a>
+
+## Cornice — #284 unita, runner candidato e prova sintetica prima di Diego
+
+[GO Claude #284](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/284#issuecomment-6764572316) e merge autorizzato su master **`28c97128716deb804385a084088a6f4367a5bcc1`**, albero identico al candidato revisionato; [ricevuta](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6764652342). Produzione sempre **1.2.268 / #1060 / 79ebd9b8**, nessun nuovo deploy necessario per quel seguito.
+
+Diego ha predisposto manualmente il singleton parziale, quattro campi, `enabled=false`, UID personale e nessun `expiresAt`; non completo né attivabile. Il nuovo ordine propone prima QA2 già popolata con dati inventati, **ammissibilità da confermare con Claude e nel futuro preflight**, poi Diego: nessun cambio effettivo di UID/claim da questa consegna. Script candidato con UID/fase espliciti, dry-run predefinito senza identificativi in output, claim restanti preservati, ricevuta DPAPI e confronti prima/dopo. Nessuna esecuzione SDK/cloud del runner, creazione utente o attivazione. [Mandato](INCARICO_CORRENTE.md#cornice-claim-preparazione-2026-11-10), [prove e limiti](../evidenze/COLLAUDI.md#cornice-claim-candidato-2026-11-10).
+
+C1 ora ha due matrici distinte: **19 casi × quattro ambienti per fase, tutti NE**, senza trasferire risultati. Date dei sette giorni ancora da concordare; nessuna CORNICE CHIUSA. Attesa di check/GO Claude sul nuovo candidato, poi stop fino all'approvazione personale del passo successivo.
+
 <a id="ui-tappa-0-stato-2026-11-10"></a>
 
 ## Revisione UI: tappa 0 sul ramo Claude
@@ -76,7 +92,7 @@ A1 approvata da Claude sulla PR #278, commit `4f2bc0f812fa2f72c63a409d1aa5d3a120
 
 <a id="stato-corrente"></a>
 
-**10/11/2026 — stato corrente:** produzione 1.2.268 / #1060 / 79ebd9b8 verificata. Prescrizione B3.5 sul modello HTTP consegnata per revisione, nessun nuovo deploy o attivazione. Prevale il [riepilogo B3.5](#cornice-b35-modello-stato-2026-11-10); C1 19 casi/quattro ambienti tutti NE.
+**10/11/2026 — stato corrente:** produzione 1.2.268 / #1060 / 79ebd9b8; #284 unita in master 28c97128. Runner del claim e canary in due fasi soltanto candidati per Claude; singleton reale parziale e spento. Prevale il [riepilogo corrente](#cornice-claim-stato-2026-11-10); entrambe le matrici C1 sono NE.
 
 Cronologia precedente al GO A1 — 09/11/2026: **Cornice: passo A1 preparato sulla PR #278, in attesa di revisione Claude sulla PR**. Nuovo ordine di Diego A1–C2 e scelta esplicita background = durata `lock_timeout`; definiti contratto Vault/UI, 22 pagine candidate, header per route, permessi e limiti same-origin. Nessuna integrazione reale, flag o attivazione eseguiti; A2 attende «REVISIONE CLAUDE – GO». Produzione invariata **1.2.267 / #1041 / `1bcbef73`**. [Mandato corrente](INCARICO_CORRENTE.md#cornice-a1-incarico-2026-11-09), [decisione](DECISIONI.md#cornice-ordine-2026-11-09), [evidenze](../evidenze/COLLAUDI.md#cornice-a1-contratto-2026-11-09). I precedenti pareri CLI sul laboratorio non sono il GO del nuovo passo.
 

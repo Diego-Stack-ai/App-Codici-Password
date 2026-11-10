@@ -1,5 +1,109 @@
 # Rilascio
 
+<a id="cornice-adc-impersonata-2026-11-10"></a>
+
+## Cornice — opzione A: istruzioni da revisionare, non ancora eseguite
+
+Diego sceglie l'impersonazione senza chiave privata di service account. [GO sospeso di Claude sulla #285](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/285#issuecomment-6766818781): questo aggiornamento prepara credenziale, rimozione del claim e gate del singleton, ma non esegue login, operazioni Firebase/Google Cloud o merge. Ogni passo reale richiede il suo ordine. Il vecchio ADC authorized_user non è il canale accettato dal runner aggiornato. Nessun UID in output, anche dry-run: l'ultimo ordine supera l'eccezione precedente. Produzione e durata canary restano invariate.
+
+### Limiti effettivi dei permessi, da conoscere prima di concederli
+
+IAM non restringe qui Auth a un singolo utente/custom claim, né Firestore a un singolo documento: il ruolo Auth consente lettura/aggiornamento utenti del progetto; il ruolo Firestore consente GET dei documenti del solo database default. Il runner limita invece utente, sola mappa dei claim e singolo documento fisso. Non promettere isolamento IAM al singleton. Se questo residuo non è accettabile, fermarsi e progettare un intermediario server dedicato con nuovo incarico. [Permessi Auth](https://docs.cloud.google.com/identity-platform/docs/access-control), [condizioni per database Firestore](https://firebase.google.com/docs/firestore/manage-databases#configure_database_access_conditions).
+
+Il JSON ADC impersonato non contiene una chiave privata SA, ma contiene il refresh token dell'utente sorgente, in chiaro: resta una credenziale sensibile. Se l'utente è Owner, un soggetto che leggesse il file potrebbe riutilizzare quelle credenziali sorgente; i ruoli minimi del SA limitano l'identità adottata dal runner, non costituiscono una barriera contro un PC compromesso. Fuori Git/OneDrive, niente copie/report o stampa dei token; sessione temporanea e revoca finale. [Protezione ADC locali](https://docs.cloud.google.com/docs/security/bps-for-protecting-developer-credentials).
+
+### Passo A1 — console Google Cloud, progetto corretto e API
+
+1. Aprire console.cloud.google.com, selezionare il progetto con ID appcodici-password, controllando l'ID nel selettore. Non usare altri progetti.
+2. API e servizi → Libreria: verificare IAM API e IAM Service Account Credentials API (iamcredentials.googleapis.com). Abilitare solo se necessario e dopo autorizzazione; non attivare credenziali o chiavi dalla Libreria. Auth e Firestore appartengono già all'app: nessuna risorsa nuova da creare.
+3. Fermarsi e confermare il progetto/API prima del passo seguente. Non serve un nuovo FIREBASE_TOKEN.
+
+### Passo A2 — creare due ruoli personalizzati
+
+IAM e amministrazione → Ruoli → Crea ruolo, nel progetto appcodici-password. Per ciascuno: titolo indicato, ID esatto, fase di lancio General Availability, Aggiungi autorizzazioni, selezionare solo quelle della tabella e Crea. Se un permesso non è disponibile, fermarsi senza sostituirlo con un ruolo ampio.
+
+| Titolo / ID | Autorizzazioni esatte |
+|---|---|
+| Vault frame claim operator / vaultFrameClaimOperator | firebaseauth.users.get; firebaseauth.users.update |
+| Vault frame policy reader / vaultFramePolicyReader | datastore.entities.get |
+
+Nessun datastore.entities.list, create/delete utenti, gestione IAM, Rules o scrittura Firestore. Auth users.get consente anche QueryUserInfo/DownloadAccount, quindi può enumerare utenti: il runner usa solo lookup del destinatario privato. Nessun ruolo Owner, Editor, Firebase Admin o Datastore User. I ruoli sono due perché la condizione database si applicherà solo alla lettura Firestore. Fermarsi e far verificare l'elenco. [Creazione ruoli personalizzati](https://docs.cloud.google.com/iam/docs/creating-custom-roles).
+
+### Passo A3 — service account e assegnazioni
+
+1. IAM e amministrazione → Account di servizio → Crea account di servizio.
+2. Nome: Vault frame canary operator; ID: vault-frame-canary-operator. L'indirizzo proposto, che il runner verifica esattamente, è vault-frame-canary-operator@appcodici-password.iam.gserviceaccount.com. Se esiste già, fermarsi e verificarne l'uso prima di riutilizzarlo. Crearlo senza assegnazioni automatiche di ruoli e senza chiavi.
+3. IAM e amministrazione → IAM → Concedi accesso: principale = quel service account. Assegnare il solo ruolo personalizzato Vault frame claim operator, senza condizione.
+4. Nuova assegnazione per lo stesso principale, ruolo Vault frame policy reader; Aggiungi condizione, titolo vault_frame_default_database, Editor condizioni:
+   ```cel
+   resource.name == "projects/appcodici-password/databases/(default)"
+   ```
+   Salvare. Non applicare questa condizione al ruolo Auth. Verificare che non esistano assegnazioni equivalenti più ampie o ereditate.
+5. Account di servizio → aprire quello dedicato → Autorizzazioni / Gestisci accesso → Concedi accesso: principale = l'account Google di Diego che farà il login. Ruolo Service Account Token Creator (roles/iam.serviceAccountTokenCreator), **su questo service account soltanto**, non dalla pagina IAM del progetto. Verificare ambito della risorsa e principale; non creare una chiave nella scheda Chiavi.
+6. Fermarsi per controllo e ordine separato prima del login locale. [Accesso al singolo service account](https://docs.cloud.google.com/iam/docs/manage-access-service-accounts).
+
+### Passo A4 — ADC locale isolata, solo dopo approvazione
+
+Nuovo PowerShell sul PC di Diego, senza trascrizione o cattura output sensibile. Usare una directory privata dedicata fuori Git/OneDrive; non sovrascrivere l'ADC precedente. Il blocco seguente è un'istruzione, **non è stato eseguito**:
+
+```powershell
+$canaryAdcDir = Join-Path $env:LOCALAPPDATA 'AppCodiciPassword\vault-frame-canary-adc'
+if (Test-Path -LiteralPath $canaryAdcDir) {
+    throw 'Directory gia presente: fermarsi e verificarla prima del riuso.'
+}
+$env:CLOUDSDK_CONFIG = $canaryAdcDir
+Remove-Item Env:GOOGLE_APPLICATION_CREDENTIALS -ErrorAction SilentlyContinue
+Remove-Item Env:GOOGLE_CLOUD_QUOTA_PROJECT -ErrorAction SilentlyContinue
+gcloud auth application-default login `
+  --impersonate-service-account=vault-frame-canary-operator@appcodici-password.iam.gserviceaccount.com `
+  --project=appcodici-password `
+  --disable-quota-project
+if ($LASTEXITCODE -ne 0) { throw 'Login ADC non riuscito: fermarsi.' }
+$env:GOOGLE_APPLICATION_CREDENTIALS = Join-Path $canaryAdcDir 'application_default_credentials.json'
+```
+
+Accedere nel browser con lo stesso principale del passo A3; può essere necessario consenso/login, non è garantito il riuso di una sessione precedente. CLOUDSDK_CONFIG isola gcloud, GOOGLE_APPLICATION_CREDENTIALS indica esplicitamente il file al runner; niente setx, nessuna modifica permanente delle variabili. Il runner valida una sola volta il JSON, tipo impersonated_service_account, URL ufficiale/SA dedicato, nessun delegate, universo predefinito, nessun quota_project_id/override; costruisce la credenziale dal JSON già validato, senza ulteriore scoperta ADC o cache applicationDefault. Non richiede nuovi pacchetti globali.
+
+--disable-quota-project evita la configurazione di un progetto quota e il suo permesso aggiuntivo serviceusage.services.use. Non garantisce l'assenza di ogni requisito del servizio: su 403 fermarsi, non aggiungere ruoli ampi o chiavi. Non eseguire print-access-token, firebase login/deploy o il runner per verificare di nascosto la credenziale. La compatibilità è provata offline; efficacia IAM/progetto sarà verificata solo con successivo dry-run autorizzato. [ADC impersonata supportata da Node](https://docs.cloud.google.com/docs/authentication/set-up-adc-local-dev-environment), [flag del comando](https://docs.cloud.google.com/sdk/gcloud/reference/auth/application-default/login).
+
+### Passo A5 — precondizioni e claim: restano ordini separati
+
+Prima del grant: Claude conferma QA2 candidata; identità privata verificata; Diego porta manualmente il singleton ancora OFF al solo account sintetico ammesso, schemaVersion/version 1 ed expiresAt vero Timestamp UTC futuro. Il documento predisposto finora è personale e incompleto: non viene riparato o spostato dal runner. Concordare prima dell'attivazione i sette giorni, senza avviare oggi il conto alla rovescia.
+
+Il comando amministrativo usa --uid esplicito e piano privato concordanti, ma il rapporto non riporta UID, email, token, valori/nomi degli altri claim o errori liberi. Per evitare l'UID nella cronologia del terminale inserirlo privatamente con Read-Host e passare la variabile; non avviare transcript. Resta un argomento del processo locale: non condividere liste processi o catture. Dry-run, apply, attivazione e ogni cambio fase richiedono approvazioni proprie; default dry-run non scrive. Apply richiede finestra esclusiva e nuova ricevuta DPAPI.
+
+Per passare a Diego: OFF → verifica revoca → --remove --dry-run → approvazione → --remove --apply con gli altri flag obbligatori → verifica claim rimossi e altri preservati → solo allora cambiare il destinatario del singleton. Rimozione idempotente, anche con scadenza passata/assente, ma documento OFF ancora associato al vecchio destinatario e identità Auth valida restano obbligatori. Se utente disabilitato/non verificato o binding già cambiato, fermarsi: niente override. Nessun rollback dell'intera mappa. C1 fase 1 e fase 2 restano entrambe NE.
+
+### Fine canary — revoca da autorizzare e verificare prima di C2
+
+1. Diego spegne il singleton, verifica la revoca dei client e, mentre la credenziale funziona ancora e il binding è quello giusto, rimuove il solo claim con il modo --remove revisionato, ricevuta e rilettura. Non cancellare il singleton o cambiarne UID prima della rimozione. Refresh/login utente e prove di diniego sono passi distinti.
+2. Console → Account di servizio → quello dedicato → Autorizzazioni: rimuovere l'assegnazione Token Creator a Diego; controllare eventuali permessi ereditati/alternativi. Disabilitare il service account (Azioni → Disabilita); eliminarlo solo dopo verifica che non sia usato da altri processi e approvazione.
+3. Nello stesso PowerShell/configurazione isolata, rimuovere la variabile GOOGLE_APPLICATION_CREDENTIALS e revocare l'ADC:
+   ```powershell
+   $env:CLOUDSDK_CONFIG = $canaryAdcDir
+   Remove-Item Env:GOOGLE_APPLICATION_CREDENTIALS -ErrorAction SilentlyContinue
+   gcloud auth application-default revoke
+   if ($LASTEXITCODE -ne 0) { throw 'Revoca locale da verificare.' }
+   Test-Path -LiteralPath (Join-Path $canaryAdcDir 'application_default_credentials.json')
+   ```
+   L'ultimo risultato atteso è False, senza leggere il contenuto. Per ADC impersonata il comando può eliminare il file locale segnalando che non può revocare la credenziale sul server: **non sostituisce rimozione IAM e disabilitazione**. Verificare l'esito, non interpretare un warning come revoca remota riuscita.
+4. Togliere le due assegnazioni dei ruoli al SA; eliminare eventualmente SA/ruoli inutilizzati dopo controllo degli usi. Chiudere il PowerShell temporaneo, così le variabili non persistono; verificare nessun nuovo file ADC/receipt nel progetto o in copie sincronizzate. Non revocare implicitamente l'accesso OAuth globale di altre sessioni.
+5. Token già emessi e propagazione IAM non sono istantanei; i token SA normalmente durano fino a un'ora. Registrare verifiche senza identificativi, non dichiarare revoca immediata dal solo clic. [Revoca ADC](https://docs.cloud.google.com/sdk/gcloud/reference/auth/application-default/revoke), [disabilitare/eliminare il SA](https://docs.cloud.google.com/iam/docs/service-accounts-disable-enable), [durata token](https://docs.cloud.google.com/iam/docs/service-account-creds).
+
+<a id="cornice-claim-runner-2026-11-10"></a>
+
+## Runner una tantum del claim — candidato, nessuna esecuzione
+
+[Nuovo mandato](../progetto/INCARICO_CORRENTE.md#cornice-claim-preparazione-2026-11-10): prima QA2 sintetica candidata da far confermare a Claude, poi account personale, con un solo UID ammesso. Il precedente piano B3 sotto rimane storico nei suoi riferimenti «solo Diego»; valgono i gate aggiornati della [decisione](../progetto/DECISIONI.md#cornice-canary-due-fasi-2026-11-10). La #284 è unita in 28c97128, produzione 1.2.268 invariata.
+
+`scripts/prepare-vault-frame-claim.mjs` riceve obbligatoriamente `--uid`, `--phase test|personal` e `--private-config`; nessun default QA o UID nel repository. Il JSON privato approvato ha esattamente schemaVersion=1, projectId=appcodici-password, uid, expectedEmail, phase, approvedForCanary=true. Il parametro UID e la fase devono coincidere col piano privato, Auth e singleton: email verificata, account abilitato; per test indirizzo sintetico .invalid del progetto. Il flag approved è una dichiarazione operativa da compilare solo dopo approvazione, non una prova automatica del consenso. Nessun file privato reale preparato dalla consegna.
+
+Default `--dry-run`: legge singleton e utente, non espone identificativi, mostra solo modifica prevista del solo vault_frame_canary=true e conteggio degli altri claim, senza stamparli. Uno staging OFF senza expiresAt viene segnalato incompleto e non idoneo alla scrittura; non viene completato con date arbitrarie. Prima di qualsiasi prova reale richiedere GO Claude, verifica dell'account scelto e ordine personale; il dry-run non è autorizzato dal semplice fatto che lo script è disponibile.
+
+La futura modalità `--apply` richiede anche `--confirm-exclusive-writer` e un nuovo `--receipt-file` privato. Percorsi fuori da Git/OneDrive, nessun overwrite; protezione Windows DPAPI CurrentUser via stdin, roundtrip in memoria e scrittura CreateNew prima del set. Requisiti di progetto, singleton completo e spento, UID/fase/config approvati e Timestamp futuro; nessuna creazione/riparazione automatica. Rileggere policy/revisione e Auth subito prima del set confrontando identità e mappa, preservare tutti i claim JSON e limite 1000 byte, un solo set, poi rileggere mappa completa e policy. Flag già true è idempotente, senza set. La doppia lettura non elimina la corsa: nessun altro writer deve operare nella finestra. Errori dopo set sono esito incerto, nessun retry o rollback automatico. La ricevuta cifrata non è uno script di ripristino globale.
+
+SDK Admin ufficiale già bloccato in functions per la lettura Auth, GoogleAuth per la credenziale impersonata validata e GET REST fisso per il singleton, importato soltanto all'esecuzione dopo le guardie locali; non importa functions/index, non esegue login, provision-qa-user, revoca sessioni o deploy. La mutazione usa un solo fetch POST all'endpoint ufficiale [projects.accounts.update](https://docs.cloud.google.com/identity-platform/docs/reference/rest/v1/projects.accounts/update), progetto fisso, solo localId/customAttributes, Bearer ADC in RAM, timeout 15 secondi e redirect vietati. Non usa il writer Auth SDK con retry automatici; nessun tentativo aggiuntivo su 503/reset/timeout. La risposta non viene stampata e la verità è accertata con la rilettura. La ricevuta è riletta e decrittata dal file prima di proseguire. Il canale scelto successivamente è l'impersonazione dedicata descritta sopra; percorsi privati, finestra esclusiva e ogni uso reale rimangono da approvare. Questa PR contiene solo preparazione e test con adattatori sintetici/ricevuta DPAPI locale; **nessuna esecuzione Firebase**. Cambio UID del singleton, expiresAt, claim reale, attivazione, passaggio fase e rimozione del vecchio claim sono passi separati da approvare. Le matrici C1 restano NE.
+
 ## B3.5 — verifica del modello dopo Hosting, 10/11/2026
 
 Rules #1059 e Hosting #1060 sullo SHA 79ebd9b8 sono già pubblicati; il piano preparatorio sottostante è storico per quei passaggi. Il seguito autorizzato corregge soltanto modello/script/test/documenti, non richiede un nuovo deploy e non autorizza provisioning. [Mandato e gate](../progetto/INCARICO_CORRENTE.md#cornice-b35-modello-incarico-2026-11-10).
