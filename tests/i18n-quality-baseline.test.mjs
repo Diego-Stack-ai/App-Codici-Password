@@ -72,7 +72,7 @@ test('i contenuti dinamici dei Profili hanno un catalogo completo in tutte le li
   const profileSource = await readFile(new URL('../Frontend/public/assets/js/translations/profile.js', import.meta.url), 'utf8');
   const { profileCatalogs } = await import(`data:text/javascript;base64,${Buffer.from(profileSource).toString('base64')}`);
   const expectedKeys = Object.keys(profileCatalogs.it).sort();
-  assert.equal(expectedKeys.length, 50);
+  assert.equal(expectedKeys.length, 53);
   for (const language of languages) {
     assert.deepEqual(Object.keys(profileCatalogs[language]).sort(), expectedKeys, `catalogo Profilo incompleto: ${language}`);
     for (const key of ['common_show_hide_field', 'company_open_named_account', 'company_attachments_open',

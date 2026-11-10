@@ -28,6 +28,7 @@ import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } fro
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns, updateProfileLabelOptions } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
+import { installManageMode } from '../shared/manage-mode.js';
 import { readLinkedEmailAccountPassword, connectEmailAccount, connectPhoneAccount, connectUtilityAccount, connectDocumentAccount, refreshProfileAccountReferences, createDeadlineFromDocument, openLinkedAccount } from './profilo-links.js';
 
 // Le funzioni crypto sono disponibili solo via import ES6 (non esposte globalmente per sicurezza)
@@ -215,6 +216,7 @@ export async function initProfiloPrivato(user) {
     initProxyDropdowns();
     setupQRToggles();
     setupCollapsibleSections();
+    installManageMode(document);
 
     // Il profilo principale è già pronto: widget e relativi campi cifrati
     // vengono caricati in background e non bloccano il primo contenuto.

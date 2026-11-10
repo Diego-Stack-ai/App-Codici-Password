@@ -37,7 +37,7 @@ export async function readLinkedAccountName(contact) {
 export function createLinkedAccountButton(contact, open, connect) {
     const linked = Boolean(contact.linkedAccountId);
     const button = createElement('button', {
-        className: linked ? 'btn-upload-trigger profile-account-primary' : 'btn-upload-trigger',
+        className: linked ? 'btn-upload-trigger profile-account-primary' : 'btn-upload-trigger profile-account-connect',
         textContent: linked ? 'Apri Account collegato' : 'Collega o crea Account',
         onclick: linked ? open : connect
     });

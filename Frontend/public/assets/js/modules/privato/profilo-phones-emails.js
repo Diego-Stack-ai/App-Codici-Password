@@ -155,7 +155,7 @@ export function renderPhonesView() {
     if (!container) return;
     clearElement(container);
 
-    const btnAdd = createElement('button', { className: 'btn-upload-trigger' }, [
+    const btnAdd = createElement('button', { className: 'btn-upload-trigger profile-add-trigger' }, [
         createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add_call' }),
         createElement('span', { textContent: t('add_phone') || 'Aggiungi Telefono' })
     ]);
@@ -271,7 +271,7 @@ export function renderEmailsView() {
     if (!container) return;
     clearElement(container);
 
-    const btnAdd = createElement('button', { className: 'btn-upload-trigger' }, [
+    const btnAdd = createElement('button', { className: 'btn-upload-trigger profile-add-trigger' }, [
         createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'alternate_email' }),
         createElement('span', { textContent: t('add_email') })
     ]);
@@ -320,7 +320,7 @@ export function renderEmailsView() {
                 () => _callbacks.connectEmailAccount(e, _callbacks.syncData)),
             ...accountManagementButtons(e,'email')]),
             e.linkedAccountId && hasLegacyEmailPassword(e) ? createElement('button', {
-                className: 'btn-upload-trigger',
+                className: 'btn-upload-trigger profile-account-verify',
                 textContent: 'Verifica trasferimento password',
                 onclick: () => _callbacks.connectEmailAccount(e, _callbacks.syncData)
             }) : null
@@ -389,5 +389,5 @@ export async function editEmail(idx) {
 
 function accountManagementButtons(contact,type) {
     if(!contact.linkedAccountId) return [];
-    return [createElement('button',{className:'btn-upload-trigger',textContent:t('company_change_account'),onclick:()=>_callbacks.changeProfileAccount({contact,type})}),createElement('button',{className:'btn-upload-trigger',textContent:t('company_unlink_account'),onclick:()=>_callbacks.unlinkProfileAccount({contact,type})})];
+    return [createElement('button',{className:'btn-upload-trigger profile-account-manage',textContent:t('company_change_account'),onclick:()=>_callbacks.changeProfileAccount({contact,type})}),createElement('button',{className:'btn-upload-trigger profile-account-manage',textContent:t('company_unlink_account'),onclick:()=>_callbacks.unlinkProfileAccount({contact,type})})];
 }

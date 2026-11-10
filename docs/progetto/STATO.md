@@ -4,6 +4,8 @@
 
 ## Revisione UI: tappa 0 sul ramo Claude
 
+10/11/2026 — **pilota Profilo privato (tappe 1–2) sul ramo Claude, PR #283:** modulo condiviso `modules/shared/manage-mode.js` (Modifica/Fine per sezione, reset su blocco Vault, blocco Auth e cambio linguetta) usato da sei sezioni del Profilo; stili «Rifinita» e consultazione a tre livelli limitati a `body[data-ui-revision="tre-livelli"]`; tre chiavi Profilo nelle otto lingue; nuovo test browser `manage-mode.browser.test.mjs` (3/3). Nessuna logica di dati, salvataggio, cifratura o cornice modificata. Non pubblicato: produzione invariata, rilascio unico finale dopo la cornice.
+
 10/11/2026 — registrati la [decisione](DECISIONI.md#ui-tre-livelli-decisione-2026-11-10) e il [contratto UI a tre livelli](../regole/INTERFACCIA.md#ui-tre-livelli-2026-11-10) sul ramo Claude. Nessuna pagina cambiata; produzione invariata, cornice in corso nella PR #278.
 
 <a id="cornice-b3-workflow-stato-2026-11-10"></a>
