@@ -23,6 +23,7 @@ on:
           - hosting
           - recovery-prerequisites-disabled
           - mfa-recovery-response
+          - vault-frame-rules
 
 permissions:
   contents: read
@@ -96,7 +97,7 @@ jobs:
           RELEASE_SCOPE: ${{ inputs.release_scope || 'hosting' }}
         run: |
           set -euo pipefail
-          case "$RELEASE_SCOPE" in hosting|recovery-prerequisites-disabled|mfa-recovery-response) ;; *) exit 1 ;; esac
+          case "$RELEASE_SCOPE" in hosting|recovery-prerequisites-disabled|mfa-recovery-response|vault-frame-rules) ;; *) exit 1 ;; esac
           test "$GITHUB_REF" = "refs/heads/master"
           remote_master="$(git ls-remote origin refs/heads/master | cut -f1)"
           test -n "$remote_master"
@@ -221,6 +222,20 @@ jobs:
           node scripts/plan-recovery-canary.mjs >> "$GITHUB_STEP_SUMMARY"
           node scripts/deploy-recovery-prerequisites.mjs
 
+      - name: Recheck master and deploy Vault frame Firestore Rules only
+        if: inputs.release_scope == 'vault-frame-rules'
+        shell: bash
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          set -euo pipefail
+          remote_master="$(git ls-remote origin refs/heads/master | cut -f1)"
+          test -n "$remote_master"
+          test "$GITHUB_SHA" = "$remote_master"
+          node scripts/plan-recovery-canary.mjs --check
+          node scripts/plan-vault-frame-release.mjs --check
+          node node_modules/firebase-tools/lib/bin/firebase.js deploy --project appcodici-password --only firestore:rules --non-interactive --token "$FIREBASE_TOKEN"
+
       - name: Recheck master and deploy MFA recovery response only
         if: inputs.release_scope == 'mfa-recovery-response'
         shell: bash
@@ -263,6 +278,10 @@ jobs:
             if [ "$RELEASE_SCOPE" = "mfa-recovery-response" ]; then
               echo "- Selected resource: functions:recoverMfaWithCode only. Hosting, Rules and all other Functions are excluded."
               echo "- Verify the callable and compare all other backend metadata before any separate Hosting release."
+            fi
+            if [ "$RELEASE_SCOPE" = "vault-frame-rules" ]; then
+              echo "- Selected resource: firestore:rules only. Functions, Storage, indexes and Hosting are excluded."
+              echo "- Pilot singleton and Auth claims are not provisioned by this run."
             fi
             if [ "$GITHUB_SHA" != "$remote_master" ]; then
               echo "- Notice: master advanced after the final pre-deploy check; the approved workflow SHA remains the deployed source."
