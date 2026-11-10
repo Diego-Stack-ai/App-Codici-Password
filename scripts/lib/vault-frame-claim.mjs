@@ -5,7 +5,7 @@ export const FRAME_CLAIM = 'vault_frame_canary';
 const codes = new Set(['ARGUMENT_INVALID','TARGET_NOT_APPROVED','IDENTITY_MISMATCH','CLAIMS_INVALID',
   'CLAIMS_TOO_LARGE','CLAIM_CONFLICT','POLICY_INVALID','POLICY_INCOMPLETE','STATE_CHANGED',
   'EXCLUSIVE_WRITER_REQUIRED','RECEIPT_REQUIRED','RECEIPT_FAILED','READ_FAILED',
-  'WRITE_OUTCOME_UNKNOWN','POSTCHECK_FAILED','ADAPTER_UNAVAILABLE','LOCAL_CONFIG_INVALID']);
+  'WRITE_OUTCOME_UNKNOWN','POSTCHECK_FAILED','ADAPTER_UNAVAILABLE','LOCAL_CONFIG_INVALID','ADC_INVALID']);
 export class ClaimPreparationError extends Error {
   constructor(code) { super(codes.has(code) ? code : 'READ_FAILED'); this.code = this.message; }
 }
@@ -14,7 +14,7 @@ export const safeClaimError = error => error instanceof ClaimPreparationError &&
 const uidValid = uid => typeof uid === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(uid);
 
 export function parseClaimArguments(args) {
-  const options = {mode: 'dry-run', exclusiveWriter: false};
+  const options = {mode: 'dry-run', operation:'grant', exclusiveWriter: false};
   const seen = new Set();
   for (let index = 0; index < args.length; index++) {
     const key = args[index];
@@ -22,6 +22,7 @@ export function parseClaimArguments(args) {
     if (key === '--help') options.help = true;
     else if (key === '--dry-run' || key === '--apply') options.mode = key.slice(2);
     else if (key === '--confirm-exclusive-writer') options.exclusiveWriter = true;
+    else if (key === '--remove') options.operation = 'remove';
     else if (['--uid','--phase','--private-config','--receipt-file'].includes(key)) {
       const value = args[++index];
       if (!value || value.startsWith('--')) fail('ARGUMENT_INVALID');
@@ -92,34 +93,40 @@ async function read(operation) {
 // and the second read reduces, but cannot eliminate, the final race window.
 export async function runVaultFrameClaim({auth, readPolicy, target, options, saveBefore, now = Date.now}) {
   target = validateClaimTarget(target,options);
+  const operation = options.operation ?? 'grant';
+  if (!['grant','remove'].includes(operation)) fail('ARGUMENT_INVALID');
   if (!['apply','dry-run'].includes(options.mode)) fail('ARGUMENT_INVALID');
   if (options.mode === 'apply' && !options.exclusiveWriter) fail('EXCLUSIVE_WRITER_REQUIRED');
   if (options.mode === 'apply' && typeof saveBefore !== 'function') fail('RECEIPT_REQUIRED');
   const firstPolicy = policyState(await read(readPolicy),target);
   const first = await read(() => auth.getUser(target.uid)); identity(first,target);
   const before = claimsFrom(first);
-  if (Object.hasOwn(before,FRAME_CLAIM) && typeof before[FRAME_CLAIM] !== 'boolean') fail('CLAIM_CONFLICT');
-  const after = {...before, [FRAME_CLAIM]:true};
+  if (operation === 'grant' && Object.hasOwn(before,FRAME_CLAIM) && typeof before[FRAME_CLAIM] !== 'boolean') fail('CLAIM_CONFLICT');
+  const after = {...before};
+  if (operation === 'remove') delete after[FRAME_CLAIM]; else after[FRAME_CLAIM] = true;
   if (Buffer.byteLength(JSON.stringify(after),'utf8') > 1000) fail('CLAIMS_TOO_LARGE');
-  const alreadySet = before[FRAME_CLAIM] === true;
-  const applyReady = firstPolicy.complete && firstPolicy.expiresAt > now();
-  const report = {mode:options.mode, phase:options.phase, projectId:CLAIM_PROJECT,
-    ...(options.mode === 'dry-run' ? {targetUid:target.uid} : {}),
-    intendedChange:{claim:FRAME_CLAIM,value:true}, otherClaimCount:Object.keys(before).filter(key=>key!==FRAME_CLAIM).length,
+  const alreadyCurrent = operation === 'remove' ? !Object.hasOwn(before,FRAME_CLAIM) : before[FRAME_CLAIM] === true;
+  // Removal must work after expiry, while the singleton is OFF and still bound
+  // to this target. Remove the old pilot's claim before changing that binding.
+  const eligible = policy => operation === 'remove' || (policy.complete && policy.expiresAt > now());
+  const applyReady = eligible(firstPolicy);
+  const report = {mode:options.mode,operation,phase:options.phase, projectId:CLAIM_PROJECT,targetValidated:true,
+    intendedChange:operation === 'remove' ? {claim:FRAME_CLAIM,action:'remove'} : {claim:FRAME_CLAIM,value:true},
+    otherClaimCount:Object.keys(before).filter(key=>key!==FRAME_CLAIM).length,
     preservesOtherClaims:true, policyComplete:firstPolicy.complete, applyReady,
-    wouldWrite:!alreadySet && applyReady, alreadySet, wrote:false, verified:false};
+    wouldWrite:!alreadyCurrent && applyReady, alreadyCurrent, wrote:false, verified:false};
   if (options.mode === 'dry-run') return report;
   if (!applyReady) fail('POLICY_INCOMPLETE');
-  if (!alreadySet) {
-    try { await saveBefore({schemaVersion:1,projectId:CLAIM_PROJECT,uid:target.uid,
+  if (!alreadyCurrent) {
+    try { await saveBefore({schemaVersion:1,projectId:CLAIM_PROJECT,operation,
       phase:target.phase,previousClaims:before,expectedClaims:after,policyRevision:firstPolicy.revision}); }
     catch { fail('RECEIPT_FAILED'); }
   }
   const secondPolicy = policyState(await read(readPolicy),target);
   const second = await read(() => auth.getUser(target.uid)); identity(second,target);
   if (!isDeepStrictEqual(firstPolicy,secondPolicy) || !isDeepStrictEqual(before,claimsFrom(second)) ||
-      secondPolicy.expiresAt <= now()) fail('STATE_CHANGED');
-  if (!alreadySet) {
+      !eligible(secondPolicy)) fail('STATE_CHANGED');
+  if (!alreadyCurrent) {
     // Never retry after this call: a failed response may still mean it committed.
     try { await auth.setCustomUserClaims(target.uid,after); }
     catch { fail('WRITE_OUTCOME_UNKNOWN'); }
@@ -129,7 +136,7 @@ export async function runVaultFrameClaim({auth, readPolicy, target, options, sav
     const finalPolicy = policyState(await readPolicy(),target);
     const final = await auth.getUser(target.uid); identity(final,target);
     if (!isDeepStrictEqual(firstPolicy,finalPolicy) || !isDeepStrictEqual(after,claimsFrom(final)) ||
-        finalPolicy.expiresAt <= now()) fail('POSTCHECK_FAILED');
+        !eligible(finalPolicy)) fail('POSTCHECK_FAILED');
   } catch { fail('POSTCHECK_FAILED'); }
   report.verified = true; return report;
 }

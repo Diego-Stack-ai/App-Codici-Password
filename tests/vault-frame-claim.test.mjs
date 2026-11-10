@@ -34,12 +34,13 @@ test('arguments default to read-only and require explicit UID and phase without 
   assert.throws(()=>parseClaimArguments([...args,'--apply','--confirm-exclusive-writer']),/RECEIPT_REQUIRED/);
   assert.equal(parseClaimArguments([...args,'--apply','--confirm-exclusive-writer','--receipt-file','private.dpapi']).mode,'apply');
 });
-test('dry-run explicitly shows only the selected UID and intended claim change, never writes or saves receipt',async()=>{
+test('dry-run reports only validated target and intended change, never an identifier or write',async()=>{
   const f=fixture();const report=await runVaultFrameClaim(f);
-  assert.equal(report.targetUid,uid);assert.deepEqual(report.intendedChange,{claim:FRAME_CLAIM,value:true});
+  assert.equal(Object.hasOwn(report,'targetUid'),false);assert.equal(report.targetValidated,true);
+  assert.deepEqual(report.intendedChange,{claim:FRAME_CLAIM,value:true});
   assert.equal(report.wouldWrite,true);assert.equal(report.wrote,false);assert.equal(report.verified,false);
   assert.equal(f.state.writes.length,0);assert.equal(f.state.receipts.length,0);
-  assert.doesNotMatch(JSON.stringify(report),/fixture@|preserved|nested|admin|token/i);
+  assert.doesNotMatch(JSON.stringify(report),new RegExp(uid+'|fixture@|preserved|nested|admin|token','i'));
 });
 test('incomplete OFF singleton is reported by dry-run and prevents apply without inventing expiry',async()=>{
   const f=fixture({complete:false});const report=await runVaultFrameClaim(f);
@@ -56,8 +57,36 @@ test('one write preserves every other nested claim, protects the before state an
 });
 test('already true is idempotent, rereads and never overwrites or creates another receipt',async()=>{
   const f=fixture({claims:{[FRAME_CLAIM]:true,other:42}});const report=await runVaultFrameClaim(apply(f));
-  assert.equal(report.alreadySet,true);assert.equal(report.verified,true);assert.equal(f.state.reads,3);
+  assert.equal(report.alreadyCurrent,true);assert.equal(report.verified,true);assert.equal(f.state.reads,3);
   assert.equal(f.state.writes.length,0);assert.equal(f.state.receipts.length,0);
+});
+test('removal defaults to dry-run without identifiers and preserves every other claim on apply',async()=>{
+  const args=['--uid',uid,'--phase','test','--private-config','private.json','--remove'];
+  assert.equal(parseClaimArguments(args).mode,'dry-run');assert.equal(parseClaimArguments(args).operation,'remove');
+  const f=fixture({claims:{nested:{array:[1,true]},[FRAME_CLAIM]:true}});f.options.operation='remove';
+  const report=await runVaultFrameClaim(f);
+  assert.deepEqual(report.intendedChange,{claim:FRAME_CLAIM,action:'remove'});
+  assert.doesNotMatch(JSON.stringify(report),new RegExp(uid+'|fixture@|nested'));
+  assert.equal(f.state.writes.length,0);
+  const applied=await runVaultFrameClaim(apply(f));assert.equal(applied.verified,true);
+  assert.deepEqual(f.state.writes,[{nested:{array:[1,true]}}]);
+  assert.equal(f.state.receipts[0].operation,'remove');assert.equal(Object.hasOwn(f.state.receipts[0],'uid'),false);
+});
+test('removal is possible after expiry or incomplete expiry only while OFF and still bound to the target',async()=>{
+  for(const complete of [true,false]){
+    const f=fixture({complete,claims:{other:1,[FRAME_CLAIM]:true}});f.options.operation='remove';f.state.expiry=1;
+    assert.equal((await runVaultFrameClaim(apply(f))).verified,true);assert.deepEqual(f.state.claims,{other:1});
+  }
+  for(const patch of [{enabled:true},{uid:'another-target'}]){
+    const f=fixture({claims:{[FRAME_CLAIM]:true}});f.options.operation='remove';const read=f.readPolicy;
+    f.readPolicy=async()=>{const snap=await read();Object.assign(snap.data,patch);return snap;};
+    await rejectsCode(()=>runVaultFrameClaim(apply(f)),'POLICY_INVALID');assert.equal(f.state.writes.length,0);
+  }
+});
+test('removal is idempotent without a claim and never restores an entire previous map',async()=>{
+  const f=fixture({claims:{other:1}});f.options.operation='remove';
+  const report=await runVaultFrameClaim(apply(f));assert.equal(report.alreadyCurrent,true);
+  assert.equal(report.verified,true);assert.equal(f.state.writes.length,0);assert.equal(f.state.receipts.length,0);
 });
 test('both phases require a privately approved matching identity, never a default QA account',async()=>{
   for(const mutation of [
@@ -176,7 +205,8 @@ test('safe diagnostics never expose raw SDK messages or mutable error codes',asy
 test('private files reject Git/OneDrive locations and existing receipt destinations',async t=>{
   const directory=await mkdtemp(path.join(os.tmpdir(),'frame-private-path-'));t.after(()=>rm(directory,{recursive:true,force:true}));
   const file=path.join(directory,'input.json');await writeFile(file,'{}');
-  assert.equal(await privateFilePath(file),file);
+  const resolved=await privateFilePath(file);
+  assert.equal(process.platform==='win32'?resolved.toLowerCase():resolved,process.platform==='win32'?file.toLowerCase():file);
   await assert.rejects(()=>privateFilePath(file,{mustExist:false}));
   await assert.rejects(()=>privateFilePath('relative.json'));
   for(const kind of ['OneDrive - fixture','repository']){

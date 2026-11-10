@@ -1,8 +1,12 @@
 # Programma
 
+## #285 — revisione opzione A, poi singoli passi autorizzati
+
+Prima nuovo GO Claude su runner/ADC/rimozione e istruzioni IAM con i limiti espliciti; nessun merge o cloud in questo incarico. Poi ordini separati per ruoli/SA/delega, login ADC isolato, preflight autorizzato e ammissibilità QA2. Singleton OFF con destinatario sintetico corretto e Timestamp futuro concordato precede qualunque grant; dry-run non mostra identificativi e non sostituisce l'approvazione all'apply. Rimozione del claim dopo OFF e prima del cambio destinatario/C2, quindi revoca delega/SA/ADC. [Sequenza completa](../regole/RILASCIO.md#cornice-adc-impersonata-2026-11-10). C1 di ciascuna fase e sette giorni restano da concordare/eseguire; nessun automatismo.
+
 ## Cornice — revisione del runner e del piano sintetico → personale
 
-Prima [revisione Claude del runner e della decisione in due fasi](INCARICO_CORRENTE.md#cornice-claim-preparazione-2026-11-10), senza eseguirlo. QA2 già popolata è candidata, non automaticamente ammessa; nessun nuovo account o riuso di QA1/fixture eliminate. Dopo GO e singoli ordini: preflight privato dell'identità, completamento singleton **spento** per il solo UID sintetico e Timestamp concordato, dry-run con UID visibile e verifica personale, ulteriore approvazione prima dell'unico aggiornamento claim, poi distinta attivazione e C1 fase 1. Per la fase 2: spegnere/verificare revoca, cambio UID personale e controlli/approvazioni propri, C1 separata. Durata sette giorni da concordare senza rinnovi impliciti. C1 entrambe NE; UI e altri rilievi separati. Checkpoint sotto storici.
+Prima [revisione Claude del runner e della decisione in due fasi](INCARICO_CORRENTE.md#cornice-claim-preparazione-2026-11-10), senza eseguirlo. QA2 già popolata è candidata, non automaticamente ammessa; nessun nuovo account o riuso di QA1/fixture eliminate. Dopo GO e singoli ordini: preflight privato dell'identità, completamento singleton **spento** per il solo UID sintetico e Timestamp concordato, dry-run senza identificativi nel rapporto e verifica personale privata, ulteriore approvazione prima dell'unico aggiornamento claim, poi distinta attivazione e C1 fase 1. Per la fase 2: spegnere/verificare revoca, rimuovere claim precedente prima del cambio UID personale e controlli/approvazioni propri, C1 separata. Durata sette giorni da concordare senza rinnovi impliciti. C1 entrambe NE; UI e altri rilievi separati. Checkpoint sotto storici.
 
 ## Cornice: revisione della prescrizione B3.5, poi provisioning per passi
 

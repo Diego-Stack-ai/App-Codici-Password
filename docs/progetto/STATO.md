@@ -1,12 +1,18 @@
 # Stato
 
+## #285 aggiornata per ADC impersonata — nessuna esecuzione cloud, 10/11/2026
+
+[GO Claude sospeso](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/285#issuecomment-6766818781): opzione A scelta da Diego; istruzioni SA/ruoli/ADC/revoca predisposte, runner vincolato al JSON impersonato validato e --remove disponibile. [Evidenze offline e limiti](../evidenze/COLLAUDI.md#cornice-adc-offline-2026-11-10). Si tratta di compatibilità locale sintetica, **non** prova che IAM/servizi o credenziali reali funzionino. Nessun SA, ADC, singleton o claim creato/modificato da questo passo; nessun login o richiesta Google. Nessun UID nei rapporti.
+
+La #285 resta in bozza, senza merge; nuova revisione di Claude e ordini personali prima dei passi reali. Produzione sempre 1.2.268/#1060, master 28c97128, C1 entrambe le fasi NE. QA2 ancora candidata; il singleton documentato resta parziale/OFF/personale, non predisposto automaticamente al canary sintetico. [Istruzioni complete](../regole/RILASCIO.md#cornice-adc-impersonata-2026-11-10). Le sezioni successive conservano i checkpoint precedenti.
+
 <a id="cornice-claim-stato-2026-11-10"></a>
 
 ## Cornice — #284 unita, runner candidato e prova sintetica prima di Diego
 
 [GO Claude #284](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/284#issuecomment-6764572316) e merge autorizzato su master **`28c97128716deb804385a084088a6f4367a5bcc1`**, albero identico al candidato revisionato; [ricevuta](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6764652342). Produzione sempre **1.2.268 / #1060 / 79ebd9b8**, nessun nuovo deploy necessario per quel seguito.
 
-Diego ha predisposto manualmente il singleton parziale, quattro campi, `enabled=false`, UID personale e nessun `expiresAt`; non completo né attivabile. Il nuovo ordine propone prima QA2 già popolata con dati inventati, **ammissibilità da confermare con Claude e nel futuro preflight**, poi Diego: nessun cambio effettivo di UID/claim da questa consegna. Script candidato con UID/fase espliciti, dry-run predefinito e UID visibile soltanto lì, claim restanti preservati, ricevuta DPAPI e confronti prima/dopo. Nessuna esecuzione SDK/cloud del runner, creazione utente o attivazione. [Mandato](INCARICO_CORRENTE.md#cornice-claim-preparazione-2026-11-10), [prove e limiti](../evidenze/COLLAUDI.md#cornice-claim-candidato-2026-11-10).
+Diego ha predisposto manualmente il singleton parziale, quattro campi, `enabled=false`, UID personale e nessun `expiresAt`; non completo né attivabile. Il nuovo ordine propone prima QA2 già popolata con dati inventati, **ammissibilità da confermare con Claude e nel futuro preflight**, poi Diego: nessun cambio effettivo di UID/claim da questa consegna. Script candidato con UID/fase espliciti, dry-run predefinito senza identificativi in output, claim restanti preservati, ricevuta DPAPI e confronti prima/dopo. Nessuna esecuzione SDK/cloud del runner, creazione utente o attivazione. [Mandato](INCARICO_CORRENTE.md#cornice-claim-preparazione-2026-11-10), [prove e limiti](../evidenze/COLLAUDI.md#cornice-claim-candidato-2026-11-10).
 
 C1 ora ha due matrici distinte: **19 casi × quattro ambienti per fase, tutti NE**, senza trasferire risultati. Date dei sette giorni ancora da concordare; nessuna CORNICE CHIUSA. Attesa di check/GO Claude sul nuovo candidato, poi stop fino all'approvazione personale del passo successivo.
 

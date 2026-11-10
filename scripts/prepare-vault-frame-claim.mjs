@@ -1,13 +1,12 @@
 import {readFile} from 'node:fs/promises';
-import {createRequire} from 'node:module';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {CLAIM_PROJECT, ClaimPreparationError, parseClaimArguments, validateClaimTarget,
   runVaultFrameClaim, safeClaimError} from './lib/vault-frame-claim.mjs';
 import {privateFilePath,savePrivateClaimReceipt} from './lib/vault-frame-private-receipt.mjs';
-import {singleAttemptClaimWriter} from './lib/vault-frame-claim-write.mjs';
+import {createVaultFrameClaimAdmin} from './lib/vault-frame-claim-admin.mjs';
 
-export const CLAIM_HELP = 'Prepare one approved target only. Default: --dry-run (reads only). Required: --uid <UID> --phase test|personal --private-config <private JSON file>. Apply additionally requires --apply --confirm-exclusive-writer --receipt-file <new private DPAPI file>. Execute only after Claude review and separate approval by Diego. No singleton writes, activation, credential creation, login or deploy.';
+export const CLAIM_HELP = 'Prepare one approved target only, with the dedicated impersonated ADC. Default: --dry-run (reads only). Required: --uid <private value> --phase test|personal --private-config <private JSON file>. Optional --remove deletes only the frame claim after OFF, including after expiry, before a phase switch or C2. Apply additionally requires --apply --confirm-exclusive-writer --receipt-file <new private DPAPI file>. Reports never echo identifiers. Execute only after Claude review and separate approval by Diego. No singleton writes, activation, credential creation, login or deploy.';
 
 export async function claimMain(args, dependencies = {}) {
   const options = parseClaimArguments(args);
@@ -25,21 +24,9 @@ export async function claimMain(args, dependencies = {}) {
   const loadAdmin = dependencies.loadAdmin || (async()=>{
     try {
       const firebase = JSON.parse(await readFile(new URL('../.firebaserc',import.meta.url),'utf8'));
-      if (firebase.projects?.default !== CLAIM_PROJECT ||
-          ['FIREBASE_AUTH_EMULATOR_HOST','FIRESTORE_EMULATOR_HOST'].some(key=>process.env[key])) throw Error('LOCAL_CONFIG_INVALID');
-      const require = createRequire(new URL('../functions/package.json',import.meta.url));
-      const {applicationDefault,initializeApp,deleteApp} = require('firebase-admin/app');
-      const {getAuth} = require('firebase-admin/auth');
-      const {getFirestore} = require('firebase-admin/firestore');
-      const credential = applicationDefault();
-      const app = initializeApp({projectId:CLAIM_PROJECT,credential},'vault-frame-claim-once');
-      const db = getFirestore(app);
-      const reader = getAuth(app);
-      return {auth:{getUser:uid=>reader.getUser(uid),setCustomUserClaims:singleAttemptClaimWriter({credential})},readPolicy:async()=>{
-        const snap = await db.doc('vaultFramePolicy/current').get();
-        return {exists:snap.exists,data:snap.data(),revision:snap.updateTime ? snap.updateTime.seconds+':'+snap.updateTime.nanoseconds : ''};
-      },close:()=>deleteApp(app)};
-    } catch { throw new ClaimPreparationError('ADAPTER_UNAVAILABLE'); }
+      if (firebase.projects?.default !== CLAIM_PROJECT) throw new ClaimPreparationError('LOCAL_CONFIG_INVALID');
+      return await createVaultFrameClaimAdmin();
+    } catch (error) { throw error instanceof ClaimPreparationError ? error : new ClaimPreparationError('ADAPTER_UNAVAILABLE'); }
   });
   const admin = await loadAdmin();
   try {
