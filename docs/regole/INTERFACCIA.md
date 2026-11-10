@@ -23,6 +23,18 @@ Per le famiglie di pagine migrate con questa revisione, la regola storica «cons
 - **Scadenze** come etichetta di stato (valido, in scadenza, scaduto) con colori funzionali indipendenti dalla palette.
 - Etichette in tono neutro, non nel colore d'accento; il colore d'accento identifica ciò che si tocca. Niente testo in maiuscolo continuo per titoli o paragrafi; tipografia dai token di `core_fonts.css`.
 
+### Stile «Rifinita» e palette
+
+- Il colore d'accento, le superfici tenui e lo sfondo sfumato derivano dai token della palette attiva di `core.css`; nessun colore d'identità fisso nelle pagine migrate. Ogni tappa va verificata almeno in tre palette, in chiaro e in scuro.
+- Colori funzionali (valido, in scadenza, scaduto, errore, eliminazione) restano indipendenti dalla palette.
+- Vetro e sfocatura soltanto su intestazione e piè di pagina; card e righe usano superfici piene con un solo livello d'ombra dai token.
+
+### Filigrane: simbolo nel titolo e filigrana discreta
+
+- **Titolo:** il simbolo semantico della pagina (stesse famiglie già censite: configurazione, informazione, liste) compare come piccola icona accanto al titolo dell'intestazione, decorativa (`aria-hidden`), senza alterare il nome accessibile del titolo.
+- **Filigrana discreta:** lo stesso simbolo resta in un angolo inferiore, ridotto e tenue, dietro al contenuto ma **mai sotto testi, campi o pulsanti**; non intercetta input, non cambia le dimensioni del documento e rispetta `prefers-reduced-motion`.
+- La filigrana grande centrata e ruotata dietro al contenuto non viene più usata nelle pagine migrate. Il gate `test:page-shells` continua a verificare presenza, simbolo e `aria-hidden`; posizione e dimensione seguono questa sezione.
+
 ### Vincoli
 
 Le regole di sicurezza restano prevalenti: mascheramento dei campi sensibili, conferme sensibili della cornice, Vault bloccata e confini dati non cambiano. Nessuna funzione viene rimossa: ogni azione di oggi resta raggiungibile al massimo con un tocco in più. Ogni testo nuovo entra nelle otto lingue; stati vuoto/caricamento/errore usano `createUiState()`. Tema chiaro/scuro e tutte le palette vanno verificati; `prefers-reduced-motion` rispettato. Budget, purezza HTML, test UI e gate fisico iPhone/Windows del contratto restano obbligatori.
