@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="ui-claude-incarico-2026-11-10"></a>
+
+## Revisione UI affidata a Claude — tappa 0
+
+Con la scelta **«A»** Diego affida a Claude l'esecuzione della revisione UI e a Codex la revisione del suo lavoro; Codex resta esecutore unico della cornice (PR #278) e poi dei punti di sicurezza. Le due aree non si sovrappongono: Claude non modifica file della cornice, workflow, Rules, Functions o configurazioni cloud.
+
+Tappa corrente: soltanto decisione e [contratto UI](../regole/INTERFACCIA.md#ui-tre-livelli-2026-11-10), sul ramo `claude/awesome-keller-kt4v9t` allineato a `fafd064a`. La tappa pilota (componenti + Profilo privato) inizia dopo l'integrazione della PR #278. Claude non incrementa la versione, non unisce e non pubblica; ogni documento condiviso riceve solo sezioni proprie datate. Nessun nuovo Markdown: elenco fermo a 34.
+
 <a id="cornice-b3-consegna-workflow-2026-11-10"></a>
 
 ## B3 — consegna del workflow, arresto dopo il singolo passo

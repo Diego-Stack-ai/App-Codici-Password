@@ -1,5 +1,11 @@
 # Stato
 
+<a id="ui-tappa-0-stato-2026-11-10"></a>
+
+## Revisione UI: tappa 0 sul ramo Claude
+
+10/11/2026 — registrati la [decisione](DECISIONI.md#ui-tre-livelli-decisione-2026-11-10) e il [contratto UI a tre livelli](../regole/INTERFACCIA.md#ui-tre-livelli-2026-11-10) sul ramo Claude. Nessuna pagina cambiata; produzione invariata, cornice in corso nella PR #278.
+
 <a id="cornice-b3-workflow-stato-2026-11-10"></a>
 
 ## Cornice: DIAG approvata, workflow consegnato a Diego

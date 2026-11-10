@@ -1,5 +1,42 @@
 # Interfaccia
 
+<a id="ui-tre-livelli-2026-11-10"></a>
+
+## Gerarchia a tre livelli — contratto UI, 10/11/2026
+
+> **Autorità:** [decisione di Diego](../progetto/DECISIONI.md#ui-tre-livelli-decisione-2026-11-10). **Esecutore:** Claude, con revisione di Codex. **Stato:** contratto adottato, applicazione a tappe non ancora iniziata.
+
+Per le famiglie di pagine migrate con questa revisione, la regola storica «consolidamento senza variazioni grafiche intenzionali» è superata dalle regole seguenti. Le famiglie non ancora migrate restano invariate finché non vengono toccate dalla propria tappa.
+
+### Livelli di importanza
+
+1. **Contenuto:** il dato (numero, indirizzo, documento, scadenza, credenziale mascherata) è l'elemento più visibile della sezione.
+2. **Azioni rapide sul dato:** copia, chiama, scrivi, apri mappe, mostra/nascondi, apri allegato. Icone neutre accanto al valore, sempre disponibili in consultazione, area di tocco minima 44 px e nome accessibile.
+3. **Gestione:** aggiungi, collega/cambia/scollega account, modifica, includi nel QR, elimina. Nascosta in consultazione; compare soltanto dopo il comando **Modifica** dell'intestazione di sezione o della pagina e scompare con **Fine**.
+
+### Componenti
+
+- **Quattro tipi di pulsante:** principale pieno (al massimo uno per vista), secondario tenue, testo (intestazioni e righe di gestione), icona. Nessun rilievo decorativo: profondità e colore derivano dai token di `core.css`.
+- **Tratteggio** riservato all'invito ad aggiungere in una sezione vuota o in modalità Modifica; mai per aprire, cambiare o scollegare.
+- **Rosso** riservato all'eliminazione, visibile soltanto in modalità Modifica. Eliminazione con conferma esplicita (secondo tocco o dialogo esistente), senza scorciatoie.
+- **Account collegato** come riga-link discreta; l'appartenenza al biglietto QR come indicatore, modificabile solo in Modifica.
+- **Scadenze** come etichetta di stato (valido, in scadenza, scaduto) con colori funzionali indipendenti dalla palette.
+- Etichette in tono neutro, non nel colore d'accento; il colore d'accento identifica ciò che si tocca. Niente testo in maiuscolo continuo per titoli o paragrafi; tipografia dai token di `core_fonts.css`.
+
+### Vincoli
+
+Le regole di sicurezza restano prevalenti: mascheramento dei campi sensibili, conferme sensibili della cornice, Vault bloccata e confini dati non cambiano. Nessuna funzione viene rimossa: ogni azione di oggi resta raggiungibile al massimo con un tocco in più. Ogni testo nuovo entra nelle otto lingue; stati vuoto/caricamento/errore usano `createUiState()`. Tema chiaro/scuro e tutte le palette vanno verificati; `prefers-reduced-motion` rispettato. Budget, purezza HTML, test UI e gate fisico iPhone/Windows del contratto restano obbligatori.
+
+### Ordine delle tappe
+
+0. Decisione e contratto (questa sezione).
+1–2. Componenti nati con il **pilota Profilo privato** (Contatti, Indirizzi, Documenti), dopo l'integrazione della cornice.
+3. Dettagli: Profilo azienda, dettagli Account privato/azienda, dettaglio Scadenza.
+4. Elenchi e Home: Account, Aziende, Scadenze, Archivio, Area privata.
+5. Impostazioni, configurazioni, Regole, Destinatari e form.
+
+Ogni tappa è una PR distinta con revisione di Codex, check verdi, prova fisica di Diego e rilascio Hosting approvato personalmente; la versione dell'app viene incrementata solo dal rilascio.
+
 <a id="cornice-diag-ui-2026-11-10"></a>
 
 ## DIAG — sezione Cornice in Impostazioni

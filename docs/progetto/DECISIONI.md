@@ -1,5 +1,15 @@
 # Decisioni
 
+<a id="ui-tre-livelli-decisione-2026-11-10"></a>
+
+## 10/11/2026 — Revisione UI a tre livelli e ripartizione Claude/Codex
+
+Dopo l'analisi visiva, le quattro prove grafiche isolate (`/ui-preview/ui-prove/`) e il confronto «Oggi/Proposta» del Profilo, Diego dichiara che la quarta prova lo convince e chiede di applicarne il principio a tutta l'app. Alla scelta sulla ripartizione del lavoro risponde **«A»**: **Claude esegue la revisione UI**, Codex conclude la cornice e poi i punti di sicurezza aperti; ciascuno rivede l'altro con lo stesso ciclo avviso → GO/NO-GO, senza auto-approvazione.
+
+La decisione adotta il principio, non una delle tre direzioni stilistiche: identità, palette, tema automatico e le sette palette restano quelle correnti. Le regole sono nel [contratto UI a tre livelli](../regole/INTERFACCIA.md#ui-tre-livelli-2026-11-10). La regola «un componente condiviso nasce con almeno due utilizzi reali» resta valida: i componenti nascono insieme al primo pilota (Profilo privato), non come libreria inutilizzata.
+
+Stato: decisione e contratto registrati sul ramo `claude/awesome-keller-kt4v9t`, allineato alla candidata cornice 1.2.268. Nessuna pagina applicativa modificata; il codice della tappa pilota attende l'integrazione della PR #278 per non sovrapporsi alla cornice. Nessun merge, versione o deploy deriva da questa decisione.
+
 ## 10/11/2026 — B3 per singoli passi e canary di sette giorni
 
 Dopo il [GO DIAG](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6758777089), Diego sceglie esplicitamente **7 giorni di canary**, distinti dai 7 giorni massimi del journal. Il Timestamp UTC non è assegnato oggi: verrà concordato all'attivazione, senza rinnovi automatici. Diego carica il workflow e crea personalmente il singleton in console; Codex preparerà in un passo successivo uno script claim una tantum, da sottoporre a Claude prima dell'esecuzione. Il passo attuale termina con la consegna del workflow completo e hash, poi arresto e attesa di approvazione. Nessuna operazione cloud autorizzata da questa consegna. [Mandato](INCARICO_CORRENTE.md#cornice-b3-consegna-workflow-2026-11-10), [procedura](../regole/RILASCIO.md#cornice-b3-piano-2026-11-10). Questa decisione supera la precedente proposta non approvata di 24 ore.
