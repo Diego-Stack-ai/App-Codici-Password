@@ -16,6 +16,8 @@
 
 **Limiti e seguito:** Chrome headless con viewport emulati non certifica Chrome Windows manuale, Android Chrome, Safari iPhone o PWA installata. Non provati nel banco: Firebase Auth/App Check, PRF, chiave reale, consegna push, revoca live o intero percorso storico C1. Il doppio clic Home resta rilievo separato e non e corretto da questa PR. C1 ON rimane sospeso, nessuna CORNICE CHIUSA. Riesame interno statico non equivale al GO Claude; revisione del nuovo SHA e ordine personale prima di merge, rilascio e ulteriore accensione. [Contratto UI](../regole/INTERFACCIA.md#cornice-dialogo-ui-2026-11-10).
 
+**Consegna su GitHub:** commit applicativo 9e9488b875286b8b8571ea954a462df5efeed6db inviato nel ramo dedicato; [PR #286 in bozza](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/286), rapporto completo copiato nella descrizione. [Richiesta readonly a Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/286#issuecomment-6781467146) e [rinvio sulla #278](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6781468385) pubblicati. Gitleaks su indice e singolo nuovo commit: nessun nuovo segreto. Manifest rigenerato dopo il commit: 362 file, albero f6939510a6a2af2ed8451e6bfd94bb2d685c4659bd66061c382806c8725606e1, verifica locale riuscita. Eventuali commit delle sole ricevute lasciano invariato il codice applicativo; CI e revisione del relativo head restano leggibili su GitHub, non dichiarate superate da questa ricevuta. Nessun merge, deploy o accensione.
+
 <a id="cornice-c1-qa2-2026-11-10"></a>
 
 ## Cornice C1 QA2 — avvio guidato fisico, 10/11/2026
