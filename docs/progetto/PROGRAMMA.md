@@ -1,5 +1,13 @@
 # Programma
 
+<a id="cornice-b3-roadmap-2026-11-10"></a>
+
+## Cornice: GO D11, revisione del pacchetto B3
+
+[GO D11 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6757406980), CI #1049 verde, sblocca soltanto la preparazione richiesta da Diego. Pacchetto corrente: pianificatore locale non eseguibile, proposta CI sole Firestore Rules distinta dal recovery ampio e [sequenza/rollback](../regole/RILASCIO.md#cornice-b3-piano-2026-11-10). Il workflow attivo resta invariato; non si è eseguita alcuna operazione Firebase. Nuovo commit/check e revisione Claude B3 prima di chiedere a Diego approvazione sul pacchetto concreto.
+
+Dopo il GO e gli ordini necessari: applicazione della sola proposta workflow mediante canale autorizzato, hash/check/revisione finale, merge personale, Rules CI poi Hosting sullo stesso SHA con approvazioni separate. Solo dopo verifiche effettive: provisioning privato, claim del pilota senza sovrascrivere gli altri, singleton attivato per ultimo con scadenza UTC approvata. Poi C1 (18 × 4 NE, PWA iPhone e desktop prima), infine C2. Nessuna chiusura dedotta dai test automatici. Nota D11 sugli ID malformati e nuova grafica separate.
+
 <a id="cornice-d11-roadmap-2026-11-10"></a>
 
 ## Cornice: correzione D11 dopo GO B2

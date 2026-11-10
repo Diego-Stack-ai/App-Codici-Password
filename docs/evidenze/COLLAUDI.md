@@ -1,5 +1,21 @@
 # Collaudi
 
+<a id="cornice-b3-preparazione-2026-11-10"></a>
+
+## Cornice B3 — preparazione per revisione, nessuna operazione Firebase
+
+Prerequisito verificato: [GO D11 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6757406980) su `3820afe6be11fbdb1c1c724592232c5ad36e8503`. [CI #1049](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42742698785) riuscita: **3490 casi/3480 PASS/0 FAIL/0 cancellati/10 skip, 64 gruppi**, docs/Gitleaks verdi, deploy saltato. Log validate e API verificati; checkout merge sintetico `bbe16f76daec103aae8332e9314fff58c6ab5d14`, genitori master `039b7a6b` e head `3820afe6`, confronto API zero file diversi. Manifest CI: 358 file, albero `8a372cacd68141811683806dd3bf7f1c1ca2c985082f97d93a5a5e9ea301a375`; distinto da quello locale e dalla produzione. Questo chiude il gate D11, non autorizza il cloud.
+
+Il pacchetto B3 introduce solo pianificatore/generatore locale, supporto del futuro quarto scope nel verificatore, test e documenti. Il file .github/workflows/firebase-deploy.yml **non cambia** e non offre ancora vault-frame-rules. Il pianificatore restituisce executable=false/cloudCalls=false/cloudReadsPerformed=false, rifiuta apply/deploy/UID e crea la proposta soltanto in .codex-tmp/vault-frame-b3-proposal con opzione locale esplicita. Niente SDK amministrativo, credenziale, UID reale o runner di provisioning. Proposta completa UTF-8/LF, SHA-256 **`f08956fc606c554a661a898bd80a9a69b7e89c4becc73db2c169aee3d8d16bb3`**; la rimozione delle quattro modifiche previste deve ricostruire semanticamente il workflow originale.
+
+Controlli preparatori: `node --test tests/vault-frame-release-plan.test.mjs tests/recovery-canary-plan.test.mjs` **9/9 PASS**; `npm run test:release-hardening` **40/40 PASS**, inclusi 5 nuovi test B3 con 23 mutazioni negative della proposta (scope/selettori ampliati, guardie/credenziali alterate, duplicati, condizioni ibride). Verificati tutti i quattro scope, assenza di install Functions/Hosting nello scope Rules, riproducibilità e hash del file completo, rifiuto dei comandi operativi. La prima esecuzione nel sandbox fallisce soltanto sui server HTTP locali per EACCES; ripetizione con loopback autorizzato riuscita, log distinti conservati. Nessun FAIL viene sommato come PASS e nessuna rete Firebase usata dal banco.
+
+Controllo documentale finale **12/12**, elenco invariato di **34 MD**; sintassi dei due script riuscita. Gitleaks sulla proposta completa e sul piano locale: nessun segreto rilevato. La regressione generale D11 sopra non viene presentata come riesecuzione sul nuovo codice di governance B3: la CI del nuovo SHA resta distinta. Mappa codice riutilizzata senza estrazione semantica dei documenti; artefatti locali esclusi da Git.
+
+Perimetro proposto e non eseguito: [Rilascio B3](../regole/RILASCIO.md#cornice-b3-piano-2026-11-10). Il delta Rules candidato rispetto a origin/master locale aggiunge solo dodici righe del singleton read-only; non è una lettura delle Rules realmente pubblicate. Functions, Storage, indici e file pubblici non sono modificati da B3. Occorrono ancora GO Claude sul pacchetto, applicazione CI da proprietario/canale esplicito e verifica hash/check, approvazione finale prima di merge e Firebase; canale amministrativo/UID/scadenza UTC sono da verificare privatamente soltanto dopo l'autorizzazione. Nessun valore reale cercato nel cloud da questo passo.
+
+Candidata ancora 1.2.268; produzione attestata 1.2.267. Nessun deploy o permesso reale creato; C1 18 casi/quattro ambienti **tutto NE**, priorità PWA iPhone e Chrome desktop. I contratti runtime Vault/UI non cambiano: B3 precisa soltanto rilascio, concorrenza amministrativa e rollback, nella sede canonica RILASCIO. MD sempre 34. Non è CORNICE CHIUSA e i pareri interni readonly non sono il GO di Claude sulla PR.
+
 <a id="cornice-d11-verifiche-2026-11-10"></a>
 
 ## Cornice D11 — notifiche e lista C1 candidate, 10/11/2026

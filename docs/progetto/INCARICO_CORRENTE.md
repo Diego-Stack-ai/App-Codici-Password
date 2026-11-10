@@ -1,5 +1,15 @@
 # Incarico corrente
 
+<a id="cornice-b3-preparazione-2026-11-10"></a>
+
+## Cornice B3 — preparazione soltanto, in attesa di revisione
+
+Diego trasmette il [GO D11 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6757406980) su `3820afe6be11fbdb1c1c724592232c5ad36e8503` e ordina: «prepara B3 e pubblica l’avviso; non eseguire nulla sul cloud prima della revisione di Claude e della mia approvazione». CI D11 #1049 verde, deploy saltato. Il mandato abilita solo pacchetto locale, test, documenti esistenti, commit/push sul ramo codex/vault-frame-lab-20261109 e avviso PASSO B3 COMMITTATO sulla #278. Non abilita merge, modifica del workflow attivo, workflow_dispatch, approvazioni production, letture/scritture Firebase o attivazione.
+
+Il [piano canonico B3](../regole/RILASCIO.md#cornice-b3-piano-2026-11-10) propone scope CI fisso vault-frame-rules, solo Firestore Rules, poi distinta run Hosting sul medesimo SHA finale approvato. Un pianificatore non eseguibile genera il file completo della proposta in .codex-tmp; verificatore/test ne preparano il supporto, senza applicare la modifica al workflow. Provisioning privato dopo i deploy verificati: un solo UID confermato di Diego, singleton disabilitato, conservazione/verifica degli altri claim in finestra a scrittore unico, attivazione con precondizioni come ultimo passo. UID, canale amministrativo e scadenza UTC sono ancora da verificare/approvare, non scelti o scritti da B3. Nessuna nuova Function necessaria.
+
+A fine passo: avviso con SHA completo/file/test/limiti e attesa del GO B3 di Claude sul pacchetto. Applicazione CI e successivo candidato finale richiedono ordine specifico, hash uguale alla proposta, nuovi check/revisione e approvazione personale prima di merge o Firebase. Produzione 1.2.267; candidata 1.2.268, permesso reale non predisposto da questo lavoro; C1 interamente NE, nuova grafica separata e MD fermi a 34. I checkpoint D11 e precedenti conservano la cronologia; prevale questo solo incarico preparatorio.
+
 <a id="cornice-d11-2026-11-10"></a>
 
 ## Cornice D11 — notifiche corrette nella candidata, revisione richiesta

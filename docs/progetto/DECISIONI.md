@@ -1,5 +1,13 @@
 # Decisioni
 
+<a id="cornice-b3-decisione-2026-11-10"></a>
+
+## 10/11/2026 — B3 da preparare, cloud fermo
+
+Diego trasmette il [GO D11 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6757406980) sul commit `3820afe6be11fbdb1c1c724592232c5ad36e8503` e autorizza preparazione e avviso B3 sulla #278. Revisione Claude del pacchetto e approvazione personale di Diego precedono ogni esecuzione Firebase; nessuna delega implicita per workflow, merge o deploy. Proposta scelta per la revisione: sole Rules Firestore con scope CI fisso distinto dal recovery ampio, poi Hosting sullo stesso SHA e provisioning privato del solo pilota dopo le verifiche. Nessuna nuova Function o migrazione Vault.
+
+Il file completo della CI viene soltanto generato localmente e vincolato da SHA-256; workflow attivo invariato. Canale amministrativo, UID e scadenza UTC rimangono da concordare dopo revisione, non assegnati. La durata di 24 ore è una proposta, non una decisione acquisita. Auth e Firestore non sono una transazione: evitare writer concorrenti, verificare i claim conservati e usare precondizioni sul singleton. [Piano, gate e rollback canonici](../regole/RILASCIO.md#cornice-b3-piano-2026-11-10). L'abilitazione non equivale a collaudo C1/C2; nessun nuovo documento oltre i 34.
+
 <a id="cornice-d11-decisione-2026-11-10"></a>
 
 ## 10/11/2026 — D11 dopo GO B2, prima della proposta B3

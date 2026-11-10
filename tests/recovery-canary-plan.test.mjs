@@ -19,6 +19,7 @@ const step = (value, name, job = 'deploy') => value.jobs[job].steps.find(item =>
 // The future fixture performs no I/O and does not depend on a private YAML file.
 function workflowFixture(hasMfaResponse) {
     const value = load(read('.github/workflows/firebase-deploy.yml'));
+    value.jobs.deploy.steps = value.jobs.deploy.steps.filter(item => item.name !== 'Recheck master and deploy Vault frame Firestore Rules only');
     value.on.workflow_dispatch.inputs.release_scope.options = hasMfaResponse
         ? ['hosting', 'recovery-prerequisites-disabled', 'mfa-recovery-response']
         : ['hosting', 'recovery-prerequisites-disabled'];
@@ -55,8 +56,10 @@ test('reviewed canary prerequisites cover every prior writer, exclude unrelated 
     for (const forbidden of ['functions', 'hosting', 'firestore', 'firestore:indexes', ...plan.excludedFunctions.map(name => `functions:${name}`)]) assert.equal(plan.selectors.includes(forbidden), false);
     assert.equal(plan.executable, false); assert.equal(plan.cloudCalls, false);
     assert.equal(plan.releasePath.backendJobPrepared, true); assert.equal(plan.releasePath.executed, false);
-    const hasMfaResponse = load(read('.github/workflows/firebase-deploy.yml')).on.workflow_dispatch.inputs.release_scope.options.length === 3;
-    assert.equal(plan.releasePath.candidateCapability, hasMfaResponse
+    const scopes = load(read('.github/workflows/firebase-deploy.yml')).on.workflow_dispatch.inputs.release_scope.options;
+    const hasMfaResponse = scopes.includes('mfa-recovery-response');
+    assert.equal(plan.releasePath.candidateCapability, scopes.includes('vault-frame-rules')
+        ? 'manual-hosting-or-disabled-recovery-prerequisites-or-mfa-response-or-frame-rules' : hasMfaResponse
         ? 'manual-hosting-or-disabled-recovery-prerequisites-or-mfa-response'
         : 'manual-hosting-or-disabled-recovery-prerequisites');
     assert.equal(plan.canary.cloudWritesAuthorized, false); assert.equal(plan.canary.qa2WipeOrRotation, false);

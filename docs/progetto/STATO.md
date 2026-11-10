@@ -1,5 +1,15 @@
 # Stato
 
+<a id="cornice-b3-stato-2026-11-10"></a>
+
+## Cornice: D11 approvata, B3 preparata senza esecuzione
+
+[GO Claude D11](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6757406980) su `3820afe6be11fbdb1c1c724592232c5ad36e8503`. [CI #1049](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42742698785) verde: **3490 casi/3480 PASS/0 FAIL/10 skip**, docs/Gitleaks verdi e deploy saltato. Il checkout CI era il merge sintetico bbe16f76, stessi file dell'head; non è un merge reale della PR.
+
+B3 prepara pianificatore locale, supporto verificato del futuro scope sole Rules, file completo della proposta CI e [sequenza di provisioning/rollback](../regole/RILASCIO.md#cornice-b3-piano-2026-11-10). Il workflow attivo non è modificato. Nuovo pacchetto B3 da sottoporre a check/Claude e poi a Diego; nessun merge, dispatch, lettura/scrittura Firebase, claim/singleton o deploy eseguito. UID, credenziale amministrativa utilizzabile e scadenza UTC non verificati né assegnati in questo passo.
+
+Produzione invariata **1.2.267 / #1041 / 1bcbef73631380ec30821357641ce9695cc6e230**. Candidata 1.2.268; C1 **18 × 4 tutto NE**, compresi limiti push e version skew. [Ricevuta B3](../evidenze/COLLAUDI.md#cornice-b3-preparazione-2026-11-10). I checkpoint precedenti sono storici e non attestano un nuovo rilascio.
+
 <a id="cornice-d11-stato-2026-11-10"></a>
 
 ## Cornice: B2 approvata, D11 candidata prima di B3
@@ -34,7 +44,7 @@ A1 approvata da Claude sulla PR #278, commit `4f2bc0f812fa2f72c63a409d1aa5d3a120
 
 <a id="stato-corrente"></a>
 
-**10/11/2026 — stato corrente:** A1/A2/B1/B2 approvate; correzione D11 candidata in revisione. Produzione 1.2.267, candidata 1.2.268 senza permesso server produttivo. Il [riepilogo D11](#cornice-d11-stato-2026-11-10) prevale sui checkpoint precedenti; nessun B3/merge/attivazione/collaudo fisico eseguito.
+**10/11/2026 — stato corrente:** A1/A2/B1/B2/D11 approvate; B3 solo preparata e in revisione. Produzione 1.2.267, candidata 1.2.268 senza permesso server predisposto da questo incarico. Il [riepilogo B3](#cornice-b3-stato-2026-11-10) prevale sui checkpoint precedenti; nessun merge/provisioning/attivazione o collaudo fisico eseguito.
 
 Cronologia precedente al GO A1 — 09/11/2026: **Cornice: passo A1 preparato sulla PR #278, in attesa di revisione Claude sulla PR**. Nuovo ordine di Diego A1–C2 e scelta esplicita background = durata `lock_timeout`; definiti contratto Vault/UI, 22 pagine candidate, header per route, permessi e limiti same-origin. Nessuna integrazione reale, flag o attivazione eseguiti; A2 attende «REVISIONE CLAUDE – GO». Produzione invariata **1.2.267 / #1041 / `1bcbef73`**. [Mandato corrente](INCARICO_CORRENTE.md#cornice-a1-incarico-2026-11-09), [decisione](DECISIONI.md#cornice-ordine-2026-11-09), [evidenze](../evidenze/COLLAUDI.md#cornice-a1-contratto-2026-11-09). I precedenti pareri CLI sul laboratorio non sono il GO del nuovo passo.
 
