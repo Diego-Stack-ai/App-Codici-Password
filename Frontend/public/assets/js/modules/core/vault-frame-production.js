@@ -1,3 +1,4 @@
+import {emitFrameDiagnostic} from '../../frame-navigation.js';
 import {createProductionFrameAdmission} from './vault-frame-admission.js';
 import {doc, onSnapshot} from '/assets/js/vendor/firebase-runtime.js';
 import {APP_VERSION} from '../../app-env.js';
@@ -23,7 +24,7 @@ export async function startVaultFrame({user, securityManager, fenceTicket}) {
   let owner;
   const admission = createProductionFrameAdmission({user, fenceTicket, onDeny: () => owner?.session.lock('policy-revoked')});
   owner = createVaultFrameOwner({window, iframe: document.getElementById('vault-frame'), release: APP_VERSION,
-    getIdentity, validateIdentity: valid, readPermit: admission.read,
+    getIdentity, validateIdentity: valid, readPermit: admission.read, onDiagnostic: emitFrameDiagnostic,
     readTimeout: async () => (await getUserProfile(user.uid))?.lock_timeout,
     unlock: async (uid, {signal}) => {
       if (uid !== user.uid || !await valid({uid, epoch}) || signal.aborted) throw Error('FRAME_AUTH_DENIED');

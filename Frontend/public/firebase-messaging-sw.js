@@ -56,6 +56,27 @@ function requestFrameNavigation(client, path) {
     });
 }
 
+const FRAME_DIAG_PROTOCOL = 'vault-frame-diag/v1';
+function reportFramePush(windows, code) {
+    // Local messages only. The authenticated opt-in document owns persistence.
+    for (const client of windows) {try {client.postMessage({protocol: FRAME_DIAG_PROTOCOL, code});} catch { /* No observer. */ }}
+}
+async function frameFallback(windows, target) {
+    reportFramePush(windows, 'PUSH_FALLBACK_REQUESTED');
+    try {const result = await self.clients.openWindow(target); reportFramePush(windows, 'PUSH_FALLBACK_RESOLVED'); return result;}
+    catch (error) {reportFramePush(windows, 'PUSH_FALLBACK_FAILED'); throw error;}
+}
+self.addEventListener('message', event => {
+    const data = event.data;
+    if (!data || Array.isArray(data) || Object.keys(data).sort().join(',') !== 'kind,protocol' ||
+        data.protocol !== FRAME_DIAG_PROTOCOL || data.kind !== 'probe' || event.ports?.length !== 1) return;
+    try {
+        if (new URL(event.source.url).origin !== self.location.origin) return;
+        event.ports[0].postMessage({protocol: FRAME_DIAG_PROTOCOL, kind: 'ready', revision: 1});
+        event.ports[0].close();
+    } catch { /* Diagnostic readiness never affects push handling. */ }
+});
+
 // Install before FCM so its default click handler cannot navigate the frame.
 self.addEventListener('notificationclick', event => {
     event.stopImmediatePropagation(); event.notification.close();
@@ -67,16 +88,16 @@ self.addEventListener('notificationclick', event => {
             .filter(client => clientUrl(client)).sort((a, b) => preference(b) - preference(a));
         const frame = windows.find(isFrameClient);
         if (frame) {
-            try {if (await requestFrameNavigation(frame, path)) return frame;}
+            try {if (await requestFrameNavigation(frame, path)) {reportFramePush([frame], 'PUSH_ACK_RECEIVED');return frame;}}
             catch { /* Missing channel/crypto support never triggers direct frame navigation. */ }
-            return self.clients.openWindow(target);
+            return frameFallback([frame], target);
         }
         const existing = windows[0];
         if (existing) {
             try {const navigated = await existing.navigate(target); return await (navigated ? navigated.focus() : existing.focus());}
             catch { /* Preserve the ordinary new-window fallback. */ }
         }
-        return self.clients.openWindow(target);
+        return frameFallback(existing ? [existing] : [], target);
     })());
 });
 

@@ -1,5 +1,13 @@
 # Programma
 
+<a id="cornice-diag-roadmap-2026-11-10"></a>
+
+## Cornice: consegna DIAG prima di B3
+
+Nuovo ordine di Diego: implementare DIAG, verificare dati/lifecycle/UI e consegnare sulla #278 con avviso e GO di Claude. Piano B3 già approvato come piano su c79770f6, ma la sua esecuzione resta sospesa. [Mandato](INCARICO_CORRENTE.md#cornice-diag-incarico-2026-11-10), [contratto](../regole/SICUREZZA.md#cornice-diag-sicurezza-2026-11-10), [prove](../evidenze/COLLAUDI.md#cornice-diag-verifiche-2026-11-10).
+
+Dopo GO DIAG: riprendere i gate del piano B3, decisioni personali su applicazione workflow/canale amministrativo/durata e revisione dello SHA finale; nessun cloud o deploy implicito. Quindi C1: 19 casi/quattro ambienti, tutti NE; PWA iPhone e desktop prima. Per ogni FAIL allegare rapporto locale copiato, indicando quando il registro era spento o il dato non osservato. Infine C2; nuova grafica separata.
+
 <a id="cornice-b3-roadmap-2026-11-10"></a>
 
 ## Cornice: GO D11, revisione del pacchetto B3

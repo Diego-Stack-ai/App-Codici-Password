@@ -480,6 +480,21 @@
                     </div>
                 </div>
 
+                <section id="frame-diagnostics-panel" class="settings-container mt-section" aria-labelledby="frame-diagnostics-title">
+                    <h3 id="frame-diagnostics-title" class="settings-label" data-t="frame_diag_title">Cornice</h3>
+                    <p class="settings-desc" data-t="frame_diag_description">Registro locale di questa scheda, spento per impostazione predefinita. Nessun invio di rete. Disattivarlo elimina gli eventi.</p>
+                    <div class="settings-item">
+                        <label class="settings-label" for="frame-diagnostics-toggle" data-t="frame_diag_logging">Registra eventi della cornice</label>
+                        <input type="checkbox" id="frame-diagnostics-toggle" class="settings-toggle" data-t-aria="frame_diag_logging" aria-label="Registra eventi della cornice">
+                    </div>
+                    <div id="frame-diagnostics-summary" class="diagnostics-sample-list" aria-live="polite"></div>
+                    <p id="frame-diagnostics-count" class="settings-desc" aria-live="polite"></p>
+                    <div class="diagnostics-actions">
+                        <button type="button" id="btn-copy-frame-diagnostics" class="btn-maintenance-accent"><span data-t="frame_diag_copy">Copia rapporto</span></button>
+                        <button type="button" id="btn-clear-frame-diagnostics" class="btn-maintenance-danger"><span data-t="frame_diag_clear">Cancella</span></button>
+                    </div>
+                </section>
+
                 <!-- Supporto e Info -->
                 <div class="settings-container mt-section">
                     <h3 class="settings-desc" data-t="section_support">Supporto e Info</h3>

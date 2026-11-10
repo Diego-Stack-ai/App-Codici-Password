@@ -1,5 +1,15 @@
 # Incarico corrente
 
+<a id="cornice-diag-incarico-2026-11-10"></a>
+
+## DIAG prima di B3 — ordine di Diego, candidata da rivedere
+
+Diego ordina il registro locale e la sezione Cornice sulla PR #278: default spento, allowlist chiusa e soli cinque campi non identificanti, 200 eventi/7 giorni, cancellazione su logout/cambio account, copia e cancellazione senza rete; contratti SICUREZZA/INTERFACCIA e rapporto per ogni FAIL C1. Sono autorizzati implementazione, test locali, documenti esistenti, commit/push sul medesimo ramo e avviso **PASSO DIAG COMMITTATO**, poi revisione Claude. Nessuna operazione Firebase, workflow, merge, provisioning o deploy.
+
+Il [GO di Claude sul piano B3](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6757843877), commit c79770f6, resta approvazione del solo piano; DIAG cambia i byte di Hosting e deve ricevere il proprio GO prima della prosecuzione B3 e della revisione dello SHA finale. Canale amministrativo, applicazione CI, durata/scadenza e approvazioni personali non sono decisi da questo passo. Non assumere 7 giorni di canary dalla proposta del revisore; i 7 giorni del journal sono un limite diverso.
+
+Candidata sempre 1.2.268, produzione attestata 1.2.267. [Contratto dati](../regole/SICUREZZA.md#cornice-diag-sicurezza-2026-11-10), [UI e costo statico](../regole/INTERFACCIA.md#cornice-diag-ui-2026-11-10), [evidenze e lista C1](../evidenze/COLLAUDI.md#cornice-diag-verifiche-2026-11-10). La matrice aggiunge D19 DIAG: 19 casi/quattro ambienti, tutti NE. Nuova grafica e altri rilievi separati, 34 MD invariati; i checkpoint seguenti sono cronologia.
+
 <a id="cornice-b3-preparazione-2026-11-10"></a>
 
 ## Cornice B3 — preparazione soltanto, in attesa di revisione

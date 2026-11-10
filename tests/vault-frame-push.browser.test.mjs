@@ -158,3 +158,16 @@ test('revocation, identity, visibility or child replacement during admission rej
  }finally{await f.context.close();}
  }
 });
+
+test('passive owner diagnostics exposes a closed own-child snapshot without new admission reads',async()=>{
+ const f=await fixture();try{
+ const value=await f.page.evaluate(()=>{const before=fixture.reads,iframe=document.querySelector('iframe');
+  const denied=vaultFrameNavigation.diagnosticsFromChild(window,document);
+  const state=vaultFrameNavigation.diagnosticsFromChild(iframe.contentWindow,iframe.contentDocument);
+  return {before,after:fixture.reads,denied,state};});
+ assert.equal(value.denied,null);assert.equal(value.before,value.after);
+ assert.deepEqual(Object.keys(value.state).sort(),['active','idleMs','lastBlock','permitExpiresAt','permitValid']);assert.equal(value.state.permitValid,true);assert.equal(value.state.idleMs,180000);
+ await f.page.evaluate(()=>frameOwner.session.lock('secret uid=123'));
+ const locked=await f.page.evaluate(()=>frameOwner.diagnostics());assert.equal(locked.active,false);assert.equal(locked.permitValid,false);assert.equal(locked.lastBlock,'LOCK_OTHER');
+ }finally{await f.context.close();}
+});

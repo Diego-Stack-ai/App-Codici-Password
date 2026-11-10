@@ -67,7 +67,7 @@ function productionFixture(started=true){
  const context=vm.createContext({window:{location:{href:'https://fixture.invalid/app.html'}},document:{getElementById:id=>id==='frame-resume'?anchor:{}},
  URL,APP_VERSION:'fixture',auth:{currentUser:{uid:'synthetic'}},db:{},doc:()=>({}),getUserProfile:async()=>({lock_timeout:3}),
  createProductionFrameAdmission:()=>({read:async()=>null,dispose(){}}),
- installFramePushNavigation:()=>()=>{},
+ installFramePushNavigation:()=>()=>{}, emitFrameDiagnostic:()=>{},
  authSessionFence:{isCurrent:()=>state.valid(),isLocallyAllowed:()=>true},createVaultFrameOwner:()=>owner,
  onSnapshot:(_ref,next,error)=>{state.snap=next;state.error=error;return()=>{};}});
  vm.runInContext(productionSource,context);return {state,anchor,start:()=>vm.runInContext("startVaultFrame({user:{uid:'synthetic'},fenceTicket:{revision:1,nonce:'n'},securityManager:{setFrameExpiryAuthority(){}}})",context)};

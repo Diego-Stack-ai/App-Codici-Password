@@ -1,4 +1,5 @@
 import {FRAME_PROTOCOL, privateFrameUrl, residualInsets, inactivityMilliseconds, invalidInactivityPreference, frameStandaloneTarget} from './vault-frame-policy.mjs';
+import {frameLockCode} from './vault-frame-diagnostics.mjs';
 import {createFrameSession} from './vault-frame-session.mjs';
 
 // Injectable host, used by the canonical authenticated bootstrap and browser tests.
@@ -6,8 +7,10 @@ import {createFrameSession} from './vault-frame-session.mjs';
 export function createVaultFrameOwner({window: win, iframe, release, getIdentity,
   readPermit = async () => null, validateIdentity = async () => false,
   unlock, confirmSensitive, readTimeout = async () => null, clearMaterial = () => {},
-  onState = () => {}, onDispose = () => {}, now = Date.now}) {
+  onState = () => {}, onDispose = () => {}, onDiagnostic = () => {}, now = Date.now}) {
   const origin = win.location.origin;
+  let lastBlock = null, diagnosticPermitExpiry = 0, diagnosticIdleMs = 180000, diagnosticIdentity = null;
+  const diagnose = code => {try {onDiagnostic(code, route?.pathname.slice(1) || 'app.html');} catch { /* DIAG never controls the Vault. */ }};
   let disposed = false, locked = false, nonce = null, route = null, sequence = 0, visibilityEpoch = 0;
   let checking = null, internalClear = false, nextCheck = 0;
   let logoutHold = false, logoutDone = false, logoutTimer = null, queuedExit = null, logoutContext = null;
@@ -22,6 +25,7 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
     refreshPreference: readTimeout,
     onLock(reason) {
       if (disposed || locked) return;
+      lastBlock = frameLockCode(reason); diagnose(lastBlock);
       locked = true; visibilityEpoch++; mask(true);
       // Revoke immediately, preserving a child that is finishing durable logout.
       if (nonce) post({kind: 'revoke'});
@@ -49,6 +53,7 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
     const url = new URL(target, origin);
     if (url.origin !== origin || !['https:', 'http:'].includes(url.protocol) || url.username || url.password) return false;
     win.clearTimeout(logoutTimer); logoutHold = false;
+    diagnose('FRAME_EXIT');
     session.lock('exit'); iframe.remove();
     const standalone = frameStandaloneTarget(url.href, origin);
     if (standalone) url.search = standalone.search;
@@ -71,8 +76,11 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
     const permit = await readPermit(before.uid, {fresh});
     if (disposed || !await validateIdentity(before)) return false;
     const after = identity();
-    return after?.uid === before.uid && after?.epoch === before.epoch &&
+    const admitted = after?.uid === before.uid && after?.epoch === before.epoch &&
       session.renewPermit(permit, before, generation);
+    if (admitted) {diagnosticPermitExpiry = permit.expiresAt;diagnosticIdentity = before;}
+    else diagnose(diagnosticPermitExpiry && diagnosticPermitExpiry <= now() ? 'ADMISSION_EXPIRED' : 'ADMISSION_DENIED');
+    return admitted;
   }
   async function message(event) {
     if (disposed || event.origin !== origin || !isOwnChild(event.source)) return;
@@ -81,7 +89,7 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
     if (typeof data.protocol !== 'string' || !data.protocol.startsWith('vault-frame/')) return;
     if (data.protocol !== FRAME_PROTOCOL || data.release !== release) {
       // Version-skew recovery is standalone; no reload loop in a mismatched shell.
-      session.lock('version-mismatch'); if (route) exit(route.href); return;
+      diagnose('VERSION_SKEW'); session.lock('version-mismatch'); if (route) exit(route.href); return;
     }
     if (data.kind === 'hello') {
       if (locked) return;
@@ -107,6 +115,7 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
       return;
     }
     const reply = await session.handle(event);
+    if (reply?.kind === 'error') diagnose('ERROR_FRAME_OPERATION');
     if (reply) await session.deliver(reply);
   }
   const listen = (surface, name, handler, options) => {surface.addEventListener(name, handler, options); handlers.push(() => surface.removeEventListener(name, handler, options));};
@@ -153,7 +162,14 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
     if (!locked && !checking && Date.now() >= nextCheck) { nextCheck = Date.now() + 10000; checking = admission().then(ok => {if (!disposed && !ok) session.lock('admission-revoked');})
       .catch(() => {if (!disposed) session.lock('admission-unavailable');}).finally(() => {checking = null;}); }
   }, 1000);
+  const diagnosticSnapshot = () => {
+    const current = identity(), same = diagnosticIdentity && current?.uid === diagnosticIdentity.uid && current?.epoch === diagnosticIdentity.epoch;
+    return Object.freeze({active: !disposed && !locked && !!route && !!same,
+      permitValid: !disposed && !locked && !!same && diagnosticPermitExpiry > now(), permitExpiresAt: diagnosticPermitExpiry || null,
+      idleMs: diagnosticIdleMs, lastBlock});
+  };
   const facade = Object.freeze({
+    diagnosticsFromChild(source, documentObject) {return isOwnChild(source, documentObject) ? diagnosticSnapshot() : null;},
     navigateFromChild(source, documentObject, target, replace) {
       if (!isOwnChild(source, documentObject)) return false;
       if (logoutHold && documentObject !== logoutContext?.documentObject) return false;
@@ -196,7 +212,7 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
     }
   });
   win.vaultFrameNavigation = facade;
-  return Object.freeze({session, async navigateFromPush(target, {expiresAt, validateSource, isActive}) {
+  return Object.freeze({session, diagnostics: diagnosticSnapshot, async navigateFromPush(target, {expiresAt, validateSource, isActive}) {
     const url = privateFrameUrl(target, origin), before = identity();
     const generation = session.state().generation, documentObject = currentDocument(), documentToken = nonce, visibleEpoch = visibilityEpoch;
     const current = () => !disposed && !locked && !logoutHold && !win.document.hidden && route && documentToken &&
@@ -214,13 +230,14 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
     if (!await admission({fresh: true})) {session.lock('admission-denied'); return false;}
     const minutes = await readTimeout();
     if (disposed || locked || !await admission()) return false;
-    session.setTimeouts(inactivityMilliseconds(minutes), invalidInactivityPreference(minutes));
+    diagnosticIdleMs = inactivityMilliseconds(minutes);
+    session.setTimeouts(diagnosticIdleMs, invalidInactivityPreference(minutes));
     session.setVisibility(!win.document.hidden);
     const started = navigate(target, true);
-    if (started) onState({locked: false});
+    if (started) {diagnose('FRAME_ENTER'); onState({locked: false});}
     return started;
   }, updatePreference(value) {
-    if (!disposed && !locked) session.setTimeouts(inactivityMilliseconds(value), invalidInactivityPreference(value));
+    if (!disposed && !locked) {diagnosticIdleMs = inactivityMilliseconds(value);session.setTimeouts(diagnosticIdleMs, invalidInactivityPreference(value));}
   }, resume() {if (logoutHold) return true; if (!route) return false; session.lock('reload'); win.location.reload(); return true;}, dispose() {
     session.lock('dispose'); iframe.remove(); disposed = true; win.clearInterval(timer); win.clearTimeout(logoutTimer); resizeObserver?.disconnect();
     for (const remove of handlers) remove(); if (win.vaultFrameNavigation === facade) delete win.vaultFrameNavigation; onDispose();

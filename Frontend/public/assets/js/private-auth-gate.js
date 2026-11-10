@@ -48,6 +48,7 @@
         block();
         if (!redirecting) {
             redirecting = true;
+            window.dispatchEvent(new Event('frame-diagnostics-login'));
             const recovery = hasFixedRecoveryIntent();
             const target = recovery ? '/login.html?recovery=complete' : '/login.html';
             const destination = target + (reason ? (recovery ? '&' : '?') + 'authCheck=' + encodeURIComponent(String(reason)) : '');

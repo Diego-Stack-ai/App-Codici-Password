@@ -1,5 +1,13 @@
 # Stato
 
+<a id="cornice-diag-stato-2026-11-10"></a>
+
+## Cornice: DIAG candidata, B3 attuativa sospesa
+
+Piano B3 approvato da [Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6757843877) su c79770f6, CI #1050 verde e deploy saltato. Il nuovo ordine DIAG di Diego precede la sua esecuzione: sezione Cornice e journal della scheda, spento di default, codici/campi chiusi, 200 eventi/7 giorni e nessun invio di rete. Contratti e lista aggiornati, nuovo codice da rivedere sulla #278. [Evidenze/limiti DIAG](../evidenze/COLLAUDI.md#cornice-diag-verifiche-2026-11-10).
+
+Produzione attestata **1.2.267 / #1041 / 1bcbef73**, candidata 1.2.268. Nessuna operazione Firebase, applicazione workflow, merge, dispatch, provisioning o deploy da questo lavoro. C1 ora **19 × 4 tutto NE**; ogni FAIL richiede rapporto copiato, senza trasformare il banco sintetico in prova fisica. Occorrono GO DIAG e successivi gate B3/applicazione CI/SHA finale più approvazioni personali; nessuna CORNICE CHIUSA.
+
 <a id="cornice-b3-stato-2026-11-10"></a>
 
 ## Cornice: D11 approvata, B3 preparata senza esecuzione
@@ -44,7 +52,7 @@ A1 approvata da Claude sulla PR #278, commit `4f2bc0f812fa2f72c63a409d1aa5d3a120
 
 <a id="stato-corrente"></a>
 
-**10/11/2026 — stato corrente:** A1/A2/B1/B2/D11 approvate; B3 solo preparata e in revisione. Produzione 1.2.267, candidata 1.2.268 senza permesso server predisposto da questo incarico. Il [riepilogo B3](#cornice-b3-stato-2026-11-10) prevale sui checkpoint precedenti; nessun merge/provisioning/attivazione o collaudo fisico eseguito.
+**10/11/2026 — stato corrente:** piano B3 approvato; DIAG candidata in revisione prima dell’esecuzione B3. Produzione 1.2.267, candidata 1.2.268, nessuna attivazione. Prevale il [riepilogo DIAG](#cornice-diag-stato-2026-11-10); C1 19 casi/quattro ambienti tutti NE.
 
 Cronologia precedente al GO A1 — 09/11/2026: **Cornice: passo A1 preparato sulla PR #278, in attesa di revisione Claude sulla PR**. Nuovo ordine di Diego A1–C2 e scelta esplicita background = durata `lock_timeout`; definiti contratto Vault/UI, 22 pagine candidate, header per route, permessi e limiti same-origin. Nessuna integrazione reale, flag o attivazione eseguiti; A2 attende «REVISIONE CLAUDE – GO». Produzione invariata **1.2.267 / #1041 / `1bcbef73`**. [Mandato corrente](INCARICO_CORRENTE.md#cornice-a1-incarico-2026-11-09), [decisione](DECISIONI.md#cornice-ordine-2026-11-09), [evidenze](../evidenze/COLLAUDI.md#cornice-a1-contratto-2026-11-09). I precedenti pareri CLI sul laboratorio non sono il GO del nuovo passo.
 

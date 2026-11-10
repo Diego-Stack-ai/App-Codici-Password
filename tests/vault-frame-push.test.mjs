@@ -8,7 +8,7 @@ const source=await readFile(new URL('../Frontend/public/firebase-messaging-sw.js
 const turn=()=>new Promise(resolve=>setImmediate(resolve));
 const deferred=()=>{let resolve;const promise=new Promise(done=>{resolve=done;});return {promise,resolve};};
 function workerFixture(clients=[]){
- const state={calls:[],messages:[],timers:new Map(),order:[]};let listener,timerId=0;
+ const state={calls:[],messages:[],diagnostics:[],timers:new Map(),order:[]};let listener,timerId=0;
  const self={location:{origin},crypto:{randomUUID:()=> 'synthetic-request-00000001'},addEventListener:(name,fn)=>{state.order.push(name);listener=fn;},
   registration:{showNotification:async()=>{}},clients:{matchAll:async()=>clients,openWindow:async target=>{state.calls.push(['open',target]);}}};
  const firebase={initializeApp(){},messaging:()=>({onBackgroundMessage(){}})};
@@ -18,7 +18,7 @@ function workerFixture(clients=[]){
   url:origin+path,frameType:type,focused,visibilityState:visible?'visible':'hidden',
   focus:async()=>{state.calls.push(['focus',name]);if(focusFailure)throw Error('fixture');return null;},
   navigate:async target=>{state.calls.push(['navigate',name,target]);return null;},
-  postMessage:(data,ports)=>{state.messages.push({name,data,port:ports[0]});if(postFailure)throw Error('fixture');
+  postMessage:(data,ports)=>{if(data.protocol==='vault-frame-diag/v1'){state.diagnostics.push({name,data});return;}state.messages.push({name,data,port:ports[0]});if(postFailure)throw Error('fixture');
    if(ack!==null){ports[0].postMessage({protocol:FRAME_PUSH_PROTOCOL,kind:'ack',requestId:data.requestId,path:data.path,accepted:ack});ports[0].close();}}
  });
  return {state,client,clients,async click(data={eventType:'deadline',deadlineId:'synthetic',notificationId:'notice'}){
@@ -27,7 +27,7 @@ function workerFixture(clients=[]){
 }
 
 test('the custom click handler is installed before the FCM library',()=>{
- const f=workerFixture();assert.deepEqual(f.state.order,['notificationclick','import']);
+ const f=workerFixture();assert.deepEqual(f.state.order,['message','notificationclick','import']);
 });
 test('worker selects focused top-level frame before visible ordinary and nested clients, with coordinate-only ACK',async()=>{
  const f=workerFixture();f.clients.push(f.client('ordinary','/home_page.html',{focused:true}),f.client('nested','/app.html',{focused:true,type:'nested'}),
@@ -115,4 +115,10 @@ test('receiver disposal and timeout invalidate pending source verification',asyn
   const item=f.send();if(mode==='dispose')f.dispose();else f.state.now=2501;
   pending.resolve([f.registration]);await turn();assert.deepEqual(f.state.adopted,[]);assert.ok(!item.replies.some(reply=>reply.accepted));f.dispose();
  }
+});
+
+test('push diagnostic outcomes are attributed only to the selected client and carry no coordinates',async()=>{
+ const f=workerFixture();f.clients.push(f.client('other','/home_page.html',{focused:false}),f.client('selected','/app.html',{focused:true}));
+ await f.click();assert.deepEqual(f.state.diagnostics.map(e=>e.name),['selected']);
+ assert.deepEqual(Object.keys(f.state.diagnostics[0].data).sort(),['code','protocol']);assert.equal(f.state.diagnostics[0].data.code,'PUSH_ACK_RECEIVED');
 });

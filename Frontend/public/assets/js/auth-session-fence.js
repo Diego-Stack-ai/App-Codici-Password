@@ -115,6 +115,7 @@ export function createAuthSessionFence({transact = browserTransaction,
             adopt(state);
             notify();
         },
+        diagnosticRevision: () => current && !current.denied ? current.revision : null,
         refresh
     });
 }

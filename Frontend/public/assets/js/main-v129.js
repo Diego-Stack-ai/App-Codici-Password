@@ -6,7 +6,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Refactor: rimozione innerHTML, uso dom-utils.js e componenti condivisi.
  */
 
-import {navigateDocument} from './frame-navigation.js';
+import {clearFrameDiagnostics, loadFrameDiagnostics, navigateDocument} from './frame-navigation.js';
 import {VAULT_FRAME_ENABLED} from './app-env.js';
 import {consumeFrameStandaloneMarker} from './modules/core/vault-frame-policy.mjs';
 import { LOG, LOG_ERROR, LOG_WARN } from './logger.js';
@@ -246,7 +246,10 @@ async function bootstrapMain() {
     }
     // --- fine N1 avvisi di revoca ---
 
+    let diagIdentity;
     onAuthStateChanged(auth, async (user) => {
+        if(!user || (diagIdentity !== undefined && diagIdentity !== user.uid)) clearFrameDiagnostics();
+        diagIdentity=user?.uid;
         completeRecoveryMount?.dispose(); completeRecoveryMount = null;
         const n1Epoch = ++n1CallbackEpoch;
         stopN1ShareRevokedNotices();
@@ -259,6 +262,7 @@ async function bootstrapMain() {
             if (isCompleteRecoveryRoute(window.location)) { gate?.block(); navigateDocument(COMPLETE_RECOVERY_LOGIN_PATH, true); return; }
             gate?.reject(); return;
         }
+        try {if(user&&sessionStorage.getItem('app_frame_diag_consent_v1'))void loadFrameDiagnostics().catch(()=>{});}catch{ /* DIAG off. */ }
         const authAttempt = gate?.begin(user?.uid);
         if (gate && authAttempt === null) { inviteUnsubscribe?.(); return; }
         if (user) {

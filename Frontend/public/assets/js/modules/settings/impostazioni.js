@@ -48,6 +48,7 @@ export async function initImpostazioni(user) {
     setupPrivacyShort();
     setupTermsShort();
     setupPerformanceDiagnostics();
+    void import('./frame-diagnostics-ui.js').then(module => module.setupFrameDiagnostics()).catch(() => {});
     setupEncryptedBackup(user);
     setupPortableArchive(user);
     setupEncryptedRestore(user);

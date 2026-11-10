@@ -143,3 +143,6 @@ function stopMonitoring() {
         document.removeEventListener(name, recordActivity);
     });
 }
+
+// Passive local snapshot: does not renew or resynchronize the timer.
+export function inactivityDiagnosticTimeout() {return lockTimerMs;}

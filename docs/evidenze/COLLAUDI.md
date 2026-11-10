@@ -1,5 +1,23 @@
 # Collaudi
 
+<a id="cornice-diag-verifiche-2026-11-10"></a>
+
+## Cornice DIAG — candidata locale, 10/11/2026
+
+Mandato di Diego prima della prosecuzione B3, PR #278. Il [GO B3 del revisore](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6757843877) approva il solo piano su c79770f6, non questi nuovi byte. Nuova sezione Cornice e registro per scheda, separati dalla diagnostica prestazioni: default off, schema chiuso a cinque campi, 200 eventi/7 giorni, sessionStorage senza UID/email/URL/query/chiavi/contenuti o errori liberi. Consenso/revisione e identità RAM non entrano nel rapporto. Cancellazione sincrona su logout/cambio account/fence e generazione ruotata su Cancella/riattivazione; import e callback tardivi respinti. Worker senza persistenza, messaggi chiusi solo al contesto push selezionato, ping locale di capacità distinto da consegna FCM.
+
+Prove dedicate: 24 casi del modello, 8 browser DIAG, più un caso di attribuzione worker e uno sullo snapshot passivo dell'owner. Il banco Chrome usa UI/controller e moduli effettivi, storage e worker/MessageChannel reali, Auth/FCM sintetici e rete esterna bloccata. Copia usa appunti intercettati: non certifica il permesso clipboard Safari/PWA. Verificati otto cataloghi, off senza scritture, coppia copia/cancella senza modifica Auth/Vault, logout/cambio UID, reload stessa scheda, TTL, storage negato, import pendente dopo pagehide, probe e fallback senza coordinate. Lo snapshot accetta solo proprio figlio e non avvia letture d'ammissione.
+
+Riscontro del sorgente finale nella regressione locale: **238/238 test della cornice PASS**, inclusi i 34 casi nuovi/estesi DIAG; documenti **12/12**, 34 MD/824 link, sintassi **248 moduli**, assenza cicli e budget di 31 pagine riusciti. Offline rigenerato **61 export/341 risorse**, anteprime escluse. Gitleaks sull’indice senza nuovi segreti; artefatti e mappa codice non committati. La regressione generale è distinta dal gruppo dedicato e dal futuro esito CI del nuovo SHA.
+
+`npm test` finale termina con codice 0: **3529 casi / 3519 PASS / 0 FAIL / 0 cancellati / 10 skip in 64 gruppi**. Il sorgente applicativo è quello della consegna; i successivi aggiornamenti della ricevuta non cambiano il runtime. La futura CI deve validare il nuovo SHA e non viene dichiarata verde anticipatamente.
+
+Tentativi di sviluppo conservati separatamente: fixture inizialmente non rivelata dal bootstrap sintetico, validatore della versione senza prefisso v, fixture con ordine import diverso dal bootstrap reale; corretti senza dichiarare quei tentativi PASS. La prima regressione generale segnala un ciclo fra bridge e runtime: eliminato con guardia di lifecycle passata dal bridge al runtime lazy, assenza cicli ricontrollata. Casi push attribuiti al solo client selezionato e import tardivo terminale verificati dopo il riesame interno; nessun parere interno è GO Claude.
+
+Misura statica ripetibile su c79770f6 tramite letture git show locali, senza modificare la base: +0,97 KB gzip per gli hook condivisi, +1,27 KB su Impostazioni con controlli/testi. Recorder/UI differiti; sei eccezioni di budget incrementate di 1 KB (dettaglio privato nuovo 339, aggiungi_scadenza 341,5), limite generale/moduli/CSS e target fisici invariati. La nuova eccezione deve essere valutata da Claude. Rigenerati inventario statico pagine e QA: 167 campi compilabili, incluso toggle DIAG. Nessuna nuova prova visiva/dispositivo dedotta dagli inventari.
+
+[Contratto sicurezza](../regole/SICUREZZA.md#cornice-diag-sicurezza-2026-11-10), [UI/stato e limiti](../regole/INTERFACCIA.md#cornice-diag-ui-2026-11-10). C1 aggiunge D19 e rapporto per ogni FAIL: **19 casi × quattro ambienti, tutti NE**. Storage chiuso con la scheda; scadenza applicata alla prima esecuzione e prima della copia, senza promessa di eseguire codice quando l'OS congela l'app. In assenza di osservatore push il dato resta non osservato; fallback risolto non prova una nuova finestra. Nessuna operazione Firebase, modifica workflow/Rules/Functions/Storage, provisioning, merge o deploy. Candidata sempre 1.2.268, produzione attestata 1.2.267. Nuovo commit/check/GO DIAG richiesti, poi gli ulteriori gate B3 e approvazioni personali. MD sempre 34, nessuna CORNICE CHIUSA.
+
 <a id="cornice-b3-preparazione-2026-11-10"></a>
 
 ## Cornice B3 — preparazione per revisione, nessuna operazione Firebase
@@ -52,6 +70,10 @@ Annotare il valore originale di Tempo di Inattività; per i casi temporizzati sc
 
 Sbloccare una volta e raggiungere, tramite i menu/link dell'app e senza incollare URL nella barra degli indirizzi: **Home → Area privata → lista Account privati standard → Profilo → Impostazioni → Regole scadenze → Configurazione documenti → Scadenze → Archivio Account → Destinatari**. Le destinazioni canoniche sono home_page, area_privata, account_privati, profilo_privato, impostazioni, regole_scadenze, configurazione_documenti, scadenze, archivio_account e gestione_destinatari. È consentito tornare a Home fra le tappe; contare dieci Document distinti, non dieci linguette dello stesso Profilo. Non salvare i moduli. In desktop controllare che l'indirizzo esterno rimanga app.html con destinazione applicativa; PWA senza barra: registrare la sequenza e l'assenza di nuove cerimonie Vault. Un nuovo incolla/nuova scheda/ricarica del padre non è questo test.
 
+### Rapporto DIAG per ogni FAIL
+
+Prima delle prove scegliere volontariamente se attivare Impostazioni → Diagnostica → Cornice → Registra eventi. Per **ogni FAIL**, premere **Copia rapporto** e allegare il JSON copiato alla ricevuta tramite il canale concordato con Diego/revisore; nessun invio automatico. Il rapporto contiene solo stato tecnico e codici ammessi. Non aggiungere URL con query, screenshot Vault, UID o contenuti reali. Se il registro era spento o un evento non osservabile, indicarlo: rapporto di solo stato/zero eventi non ricostruisce una cronologia né attribuisce PASS. Logout/cambio account elimina intenzionalmente il journal; ove possibile copiare la ricevuta prima del logout, senza impedire la cancellazione di riservatezza.
+
 ### Casi e risultati attesi
 
 | Caso | Azione e risultato atteso |
@@ -74,6 +96,7 @@ Sbloccare una volta e raggiungere, tramite i menu/link dell'app e senza incollar
 | D16 — confini | Confermare le evidenze automatiche su origine estranea, URL non ammessi/blob/data, UID/fence, assenza chiavi in storage/URL/log. Il controllo fisico è distinto: non chiedere dump di chiavi o storage; qualunque materiale sensibile visibile fuori dalla vista autorizzata impone arresto. Altro account solo se già disponibile e autorizzato, altrimenti NE senza crearne uno. |
 | D17 — safe area | Su Safari iPhone e PWA installata, provare verticale e orizzontale: header e footer dei figli fuori da notch e barra home, ultimi pulsanti visibili e toccabili, anche dopo scroll/cambio pagina/orientamento. Annotare separatamente i due ambienti; gli inset del banco sintetico non certificano il dispositivo. |
 | D18 — version skew | Tenere aperta la cornice della versione precedente, poi dopo un rilascio successivo navigare internamente: uscita o ricarica pulita sulla destinazione valida, nessuna chiave consegnata a protocollo/versione diversa, nessun loop o pagina bianca. NE finché manca un secondo rilascio; non forzare versioni o cache dai comandi in console per attribuire un PASS reale. |
+| D19 — DIAG | Default spento, sola lettura dello stato; attivare, eseguire navigazioni/blocco/push e copiare rapporto; nomi pagina senza query/ID. Cancella lascia la raccolta scelta ma azzera gli eventi; disattivare elimina. Logout/cambio account cancella e non riattiva. Provare appunti reali su Safari/PWA; errore/permesso negato resta LIMITE, nessun invio di rete. Nessun dato Vault aggiunto a mano. |
 
 ### Matrice C1 da compilare da Diego
 
@@ -99,6 +122,7 @@ Sbloccare una volta e raggiungere, tramite i menu/link dell'app e senza incollar
 | D16 | NE | NE | NE | NE |
 | D17 | NE | NE | NE | NE |
 | D18 | NE | NE | NE | NE |
+| D19 | NE | NE | NE | NE |
 
 Per ogni esito riportare caso, ambiente/versioni, passi, risultato e ora; riferimenti o schermate solo ripuliti da dati personali/credenziali. Le ricevute tecniche sensibili restano fuori Git. Eventuali tempi misurati sono del dispositivo indicato, non promesse generali.
 
@@ -733,7 +757,7 @@ La scansione redatta dell'intera cronologia copre 1.611 commit e circa 112 MB, c
 <!-- generated:pages:start -->
 #### Inventario QA finale
 
-Fonte verificata: **31 pagine canoniche**, **126 istruzioni**, **111 target guida** e **166 campi HTML statici compilabili**.
+Fonte verificata: **31 pagine canoniche**, **126 istruzioni**, **111 target guida** e **167 campi HTML statici compilabili**.
 
 > I campi creati dinamicamente dai moduli JavaScript non sono dichiarati coperti da questo inventario statico: vengono censiti e provati nel passaggio browser. BASELINE AUTOMATICA indica soltanto accesso/sblocco/Home, non il collaudo visivo completo della pagina.
 
@@ -763,7 +787,7 @@ Fonte verificata: **31 pagine canoniche**, **126 istruzioni**, **111 target guid
 | `configurazione_automezzi`<br>Configurazione Automezzi - PROTOCOLLO BASE V5.0 | internal | 0: — | 3: #vehicle-rule-title, #btn-add-email-object, #btn-save-vehicle-rule | Regola veicolo con modello/targa fittizi, oggetto, testo e pianificazione. | **NON ESEGUITO** |
 | `configurazione_documenti`<br>Configurazione Documenti - PROTOCOLLO BASE V5.0 | internal | 0: — | 3: #btn-add-type, #btn-add-model, #btn-add-template | Tipo, modello e testo sintetici per Documento. | **NON ESEGUITO** |
 | `configurazione_generali`<br>Configurazione Generali - PROTOCOLLO BASE V5.0 | internal | 0: — | 2: #btn-add-type, #btn-add-template | Tipo e testo sintetici per regola generale. | **NON ESEGUITO** |
-| `impostazioni`<br>Impostazioni - PROTOCOLLO BASE V5.0 | internal | 6: 2fa-toggle, company-area-toggle, deadline-push-toggle, face-id-toggle, performance-diagnostics-toggle, sharing-push-toggle | 20: #btn-toggle-lang, #theme-settings-toggle, #company-area-toggle, #btn-account-archive, #btn-shared-credentials, #btn-export-encrypted-backup, #btn-restore-encrypted-backup, #btn-credential-health, #btn-account-field-usage, #btn-expiry-rules, #btn-change-password, #btn-regenerate-recovery-codes, #btn-change-master-password, #face-id-toggle, #lock-timer-selector, #btn-reset-vault, #btn-revoke-all-sessions, #deadline-push-toggle, #btn-run-app-diagnostics, #logout-btn-settings | Preferenze QA reversibili; Account archiviato, credenziale comune, backup/archivio sintetici e diagnostica senza notifiche reali. | **NON ESEGUITO** |
+| `impostazioni`<br>Impostazioni - PROTOCOLLO BASE V5.0 | internal | 7: 2fa-toggle, company-area-toggle, deadline-push-toggle, face-id-toggle, frame-diagnostics-toggle, performance-diagnostics-toggle, sharing-push-toggle | 20: #btn-toggle-lang, #theme-settings-toggle, #company-area-toggle, #btn-account-archive, #btn-shared-credentials, #btn-export-encrypted-backup, #btn-restore-encrypted-backup, #btn-credential-health, #btn-account-field-usage, #btn-expiry-rules, #btn-change-password, #btn-regenerate-recovery-codes, #btn-change-master-password, #face-id-toggle, #lock-timer-selector, #btn-reset-vault, #btn-revoke-all-sessions, #deadline-push-toggle, #btn-run-app-diagnostics, #logout-btn-settings | Preferenze QA reversibili; Account archiviato, credenziale comune, backup/archivio sintetici e diagnostica senza notifiche reali. | **NON ESEGUITO** |
 | `gestione_destinatari`<br>Gestione destinatari - Codici & Password | internal | 3: recipient-email, recipient-first-name, recipient-last-name | 3: #recipient-first-name, #recipient-email, #recipient-list | Tre destinatari .invalid: privato, aziendale e disattivato; nessun recapito raggiungibile. | **NON ESEGUITO** |
 | `archivio_account`<br>Archivio Account - PROTOCOLLO BASE V5.0 | internal | 1: archive-search | 3: #archive-filter-btn, #archive-search, #btn-empty-trash | Account e Memorandum sintetici archiviati; ripristino e cancellazione soltanto delle fixture QA. | **NON ESEGUITO** |
 | `contatto_condiviso`<br>Salva contatto — Codici &amp; Password | public-contact | 0: — | 3: #contact-details, #save-contact, #retry-contact | vCard/QR completamente fittizio e privo di recapiti reali. | **NON ESEGUITO** |

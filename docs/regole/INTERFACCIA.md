@@ -1,5 +1,19 @@
 # Interfaccia
 
+<a id="cornice-diag-ui-2026-11-10"></a>
+
+## DIAG — sezione Cornice in Impostazioni
+
+Sezione **Cornice** in Impostazioni → Diagnostica, indipendente dal controllo prestazioni. Mostra versione, cornice attiva, permesso valido osservato/scadenza, timeout locale in uso, worker notifiche pronto e ultimo motivo di blocco codificato. Il toggle **Registra eventi della cornice** governa soltanto la raccolta locale: non cambia coorte, flag server, ammissione, timeout o Vault. Stato e rapporto sono ricostruiti da campi chiusi, mai serializzando owner/worker/eccezioni.
+
+Il riepilogo del padre è passivo e disponibile soltanto al proprio Window/Document figlio ammesso; nessun nuovo GET Firestore, richiesta key/fresh/consume, sblocco o rinnovo d'attività per mostrare, copiare o cancellare. Permesso valido significa ultimo permesso osservato ancora futuro e identità/epoca locali corrispondenti, non una nuova certificazione server. Fuori cornice non si inventa un permesso: attiva/valido sono no, scadenza non disponibile. Il tempo standalone viene dal timer locale effettivo, non da una nuova lettura del profilo. L'ultimo blocco è un codice fisso osservato in RAM o nel journal consentito, non un motivo ricostruito da testi d'errore.
+
+Worker pronto richiede registrazione FCM attiva esatta e risposta al ping diagnostico locale su porta entro 800 ms, distinto dal controller sw.js e da una consegna push. Il ping non aggiorna registrazioni né avvia test remoti/notifiche. Assenza/vecchio worker/timeout = no; la consegna reale rimane C1. Report push attribuito solo al client selezionato, mai a tutte le schede. L'ACK conferma l'intento, non il rendering; fallback risolto non certifica finestra nuova.
+
+Soltanto due pulsanti nuovi: **Copia rapporto** (JSON locale esplicito negli appunti) e **Cancella**. La cancellazione lascia la raccolta accesa se già scelta, ma invalida le scritture precedenti; disattivazione elimina l'intero archivio/consenso. Storage non disponibile o clipboard negata sono mostrati senza testo d'errore libero e senza fallback di rete. Testi/ARIA in tutte le otto lingue; riepilogo aggiornato al cambio lingua. Sessione della scheda e limiti 200/7 giorni sono nel [contratto sicurezza](SICUREZZA.md#cornice-diag-sicurezza-2026-11-10).
+
+Caricamento di recorder/UI differito; soltanto piccoli hook sincroni di consenso/logout/lifecycle nel bootstrap comune. Confronto statico con c79770f6: circa **+0,97 KB gzip** sulle pagine interessate, **+1,27 KB** su Impostazioni con nuovi controlli. Eccezioni candidate per sei pagine incrementate di 1 KB rispetto al tetto precedente (aggiungi_scadenza 340,5→341,5; dettaglio privato nuovo 339); tetto generale 338 KB, moduli/CSS e target fisici invariati. Valori misurati finali circa 341,0/338,8/344,4/342,7/339,9/348,5 KB. Costo esplicito da rivedere con Claude, non una misura di prestazioni dei dispositivi. [Inventario statico](../evidenze/INVENTARI.md).
+
 <a id="cornice-d11-ui-2026-11-10"></a>
 
 ## Cornice D11 — intento notifiche candidato

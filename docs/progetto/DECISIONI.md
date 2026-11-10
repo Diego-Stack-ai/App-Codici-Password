@@ -1,5 +1,13 @@
 # Decisioni
 
+<a id="cornice-diag-decisione-2026-11-10"></a>
+
+## 10/11/2026 — DIAG prima della prosecuzione B3
+
+Diego ordina un registro diagnostico locale volontario per C1 e valutazione dell'app, con sezione Cornice, default off, allowlist chiusa, nessun dato identificante/Vault o invio remoto, massimo 200 eventi/7 giorni, eliminazione su logout/cambio account, copia e cancellazione. Aggiornare contratti e lista: ogni FAIL deve avere il rapporto copiato. Consegna sulla #278 mediante avviso PASSO DIAG COMMITTATO e revisione Claude, poi B3. Nessuna operazione Firebase o deploy autorizzata.
+
+Scelta implementativa candidata: sessionStorage della singola scheda, identità soltanto in RAM e revisione non identificante del fence nel consenso; il worker non persiste. Disattivazione elimina, Cancella ruota la generazione mantenendo il consenso. Registro distinto dalle metriche prestazioni esistenti. Specifica e limiti sono in [SICUREZZA](../regole/SICUREZZA.md#cornice-diag-sicurezza-2026-11-10); nuovo costo statico dichiarato in [INTERFACCIA](../regole/INTERFACCIA.md#cornice-diag-ui-2026-11-10), soggetto al revisore. Non è scelta della durata canary né approvazione dei successivi passi cloud.
+
 <a id="cornice-b3-decisione-2026-11-10"></a>
 
 ## 10/11/2026 — B3 da preparare, cloud fermo

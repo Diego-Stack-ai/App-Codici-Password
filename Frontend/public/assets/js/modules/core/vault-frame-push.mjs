@@ -16,7 +16,7 @@ function messagingScript(value, origin) {
   try {const url = new URL(value); return url.origin === origin && url.pathname === '/firebase-messaging-sw.js' && !url.search && !url.hash && !url.username && !url.password;}
   catch {return false;}
 }
-function messagingRegistration(registration, origin) {
+export function messagingRegistration(registration, origin) {
   try {
     const url = new URL(registration.scope);
     return url.origin === origin && !url.search && !url.hash && !url.username && !url.password &&
