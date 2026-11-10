@@ -1,4 +1,5 @@
-import {effectiveHostingHeaders} from './lib/hosting-frame-headers.mjs';
+import {effectiveHostingHeaders, FRAME_CHILD_PATHS, normalizeHostingPathname} from './lib/hosting-frame-headers.mjs';
+import {privateFrameUrl} from '../Frontend/public/assets/js/modules/core/vault-frame-policy.mjs';
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {mkdir, readFile, readdir, writeFile} from 'node:fs/promises';
@@ -127,12 +128,14 @@ async function readHostingContract(repoRoot = defaultRoot) {
   }
   let routeSecurityHeaders;
   if (hosting.headers.some(rule => rule.regex)) {
-    const html = (await listFiles(path.join(repoRoot, 'Frontend', 'public'))).filter(file => file.relative.endsWith('.html')).map(file => '/' + file.relative);
+    const publicFiles = await listFiles(path.join(repoRoot, 'Frontend', 'public'));
+    const publicPaths = new Set(publicFiles.map(file => '/' + file.relative));
+    const html = [...publicPaths].filter(file => file.endsWith('.html'));
     // Redirect middleware runs before file response headers. Its status and
     // same-origin destination are attested separately below, not as a document.
     const paths = [...new Set(['/', '/home', '/__frame_missing__.html', '/app.html/', '/profilo_privato.html/', ...html])].sort();
     routeSecurityHeaders = Object.fromEntries(paths.map(pathname => {
-      const value = effectiveHostingHeaders(hosting, pathname);
+      const value = effectiveHostingHeaders(hosting, pathname, {publicPaths});
       return [pathname, {cspSha256: sha256(value['content-security-policy']), xFrameOptions: value['x-frame-options'], permissionsPolicy: value['permissions-policy']}];
     }));
   }
@@ -224,6 +227,49 @@ async function fetchBytes(url, security) {
   return Buffer.from(await response.arrayBuffer());
 }
 
+// Extra verification requests, not new manifest fields: existing attestations
+// retain their identity and the strict JavaScript admission policy is unchanged.
+export async function verifyFrameHeaderNormalization(baseUrl, expected, {nonce = Date.now()} = {}) {
+  const profiles = expected.hostingContract.routeSecurityHeaders;
+  if (!profiles) return [];
+  const files = new Set(Object.keys(expected.files));
+  const child = FRAME_CHILD_PATHS.find(file => file.includes('_') && files.has(file));
+  if (!child || !files.has('/app.html') || !files.has('/login.html')) throw Error('Missing frame normalization probe files');
+  const probes = [
+    {kind: 'child', pathname: child.replace('_', '%5F'), canonical: child},
+    {kind: 'shell', pathname: '/%61pp.html', canonical: '/app.html'},
+    {kind: 'public', pathname: '/%6cogin.html', canonical: '/login.html'}
+  ];
+  const root = baseUrl.replace(/\/$/, ''), origin = new URL(root).origin;
+  for (const probe of probes) {
+    if (normalizeHostingPathname(probe.pathname, files) !== probe.canonical ||
+        !profiles[probe.canonical]) throw Error('Invalid frame normalization probe contract');
+    if (probe.kind === 'child' && privateFrameUrl(probe.pathname, origin) !== null) {
+      throw Error('Encoded child admitted by the Vault route policy');
+    }
+    const response = await fetch(root + probe.pathname + '?verify=' + nonce, {
+      redirect: 'manual', cache: 'no-store', headers: {'cache-control': 'no-cache'},
+      signal: AbortSignal.timeout(remoteRequestTimeoutMs)
+    });
+    if (response.status !== 200) throw Error(`Normalization probe ${probe.kind}: HTTP ${response.status}`);
+    verifySecurityHeaders(response, profiles[probe.canonical], probe.pathname);
+    const csp = response.headers.get('content-security-policy') || '';
+    const frameSrc = csp.split(';').map(value => value.trim()).find(value => value.startsWith('frame-src ')) || '';
+    if (probe.kind === 'child') {
+      if (response.headers.get('x-frame-options') !== 'SAMEORIGIN' || !/frame-ancestors 'self'(?:;|$)/.test(csp)) {
+        throw Error('Encoded child lacks its canonical child profile');
+      }
+    } else if (response.headers.get('x-frame-options') !== 'DENY' || !/frame-ancestors 'none'(?:;|$)/.test(csp) ||
+        frameSrc.includes("'self'") !== (probe.kind === 'shell')) {
+      throw Error(`Normalization probe ${probe.kind}: incorrect shell/public profile`);
+    }
+    if (sha256(Buffer.from(await response.arrayBuffer())) !== expected.files[probe.canonical]) {
+      throw Error(`Normalization probe ${probe.kind}: noncanonical payload`);
+    }
+  }
+  return probes.map(({kind, pathname, canonical}) => ({kind, pathname, canonical}));
+}
+
 async function verifyRemoteOnce(baseUrl, expected) {
   const root = baseUrl.replace(/\/$/, '');
   const nonce = Date.now();
@@ -302,6 +348,7 @@ async function verifyRemoteOnce(baseUrl, expected) {
     const response = await fetch(`${root}${pathname}?verify=${nonce}`, {redirect: 'manual', cache: 'no-store', signal: AbortSignal.timeout(remoteRequestTimeoutMs)});
     verifySecurityHeaders(response, headers, pathname); await response.arrayBuffer();
   }
+  await verifyFrameHeaderNormalization(root, expected, {nonce});
   return remote;
 }
 
