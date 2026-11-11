@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+## Produzione 1.2.269 pubblicata e verificata — 11/11/2026
+
+La [PR #286](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/286) è unita dopo il [GO Claude sul candidato f25ed120](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/286#issuecomment-6788613792) e l'ordine personale di Diego. Sorgente Hosting **6b61eead6dc6791eafea15038486020d22267ac4**, [run #1075](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42972066163) riuscita con approvazione personale registrata, nessun bypass e solo scope hosting. Manifest, **362/362 payload e hash**, 41 profili di intestazioni e probe delle route verificati anche indipendentemente dalla CI. Diego conferma dopo Ctrl+R su Chrome QA2 **v1.2.269**: PASS della sola versione caricata, distinto dai collaudi della cornice. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-dialogo-pubblicazione-1-2-269).
+
+**Singleton OFF**, secondo l'ultimo ordine e senza nuova rilettura amministrativa di Codex. D01, revoca live e matrice C1 nei quattro ambienti rimangono da collaudare; doppio clic Home separato e ancora aperto. Nessuna CORNICE CHIUSA, nuova grafica o modifica backend. Verifica finale produttiva di Claude richiesta sulla PR, ancora distinta dal GO del candidato. Questa ricevuta documentale non richiede un nuovo Hosting; le sezioni seguenti conservano lo stato preparatorio precedente.
+
 ## Candidata 1.2.269 — correzione dialogo cornice, non pubblicata, 10/11/2026
 
 Ramo codex/vault-frame-unlock-modal-20261110, base 41c63006. Correzione locale del dialogo nel padre, isolamento iframe subordinato all'owner e focus confinato; annullamento/revoca/sostituzione gestiti. Nuovi browser **10/10 PASS**, suite cornice **248/248 PASS** inclusi header su emulatore; controllo negativo senza CSS produce due fallimenti attesi. Offline 342 risorse, manifest locale 362 file e versione 1.2.269 verificati; budget di 31 pagine invariati, nessun nuovo margine. [Evidenze e limiti](../evidenze/COLLAUDI.md#cornice-dialogo-fix-2026-11-10).

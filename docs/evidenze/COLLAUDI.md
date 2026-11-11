@@ -1,5 +1,19 @@
 # Collaudi
 
+<a id="cornice-dialogo-pubblicazione-1-2-269"></a>
+
+## Cornice: rilascio Hosting 1.2.269 verificato — 11/11/2026
+
+**Fonte e autorizzazione:** [ordine corrente](../progetto/INCARICO_CORRENTE.md#cornice-dialogo-rilascio-2026-11-11), [GO Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/286#issuecomment-6788613792) sul candidato f25ed120848c603da5520e078aba8efce4b27806, tre check obbligatori verdi. #286 segnata pronta e unita con expected_head_sha vincolato; sorgente master **6b61eead6dc6791eafea15038486020d22267ac4**, albero identico al candidato e ramo conservato. Nessuna modifica ai file dopo il GO prima del merge.
+
+**Run e approvazione:** [Hosting #1075](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42972066163), evento workflow_dispatch su master, RELEASE_SCOPE hosting letto nei log. La run era già stata avviata da Diego; Codex non ne avvia una duplicata. L'API registra approved dall'account Diego-Stack-ai per production; l'endpoint non riporta l'ora del clic. Nessun bypass amministratore. validate e deploy riusciti; pubblicazione alle **07:38:40 Europe/Rome**, verifica CI alle 07:38:48. Solo comando --only hosting eseguito: Rules, Functions e gli altri scope backend saltati. Il singleton non è parte di questo rilascio.
+
+**Verifica indipendente:** dal checkout pulito del merge eseguito `node scripts/release-manifest.mjs --commit 6b61eead6dc6791eafea15038486020d22267ac4 --require-clean --verify-url https://appcodici-password.web.app --retries 8 --delay-ms 5000`, concluso con codice 0. Versione **1.2.269**, manifest e **362/362 payload/hash** uguali al sorgente; 363 file serviti contando il manifest. Albero pubblico **f7c4e7b057c89c6f317e65017a77b4124e605a623d52f8adc4e841b440a18e5c**. Verificati i 41 profili header, cache del manifest, root/home, redirect storico e tre probe di normalizzazione. Nessun SDK amministrativo o dato Vault usato. Versionamento locale coerente su 275 riferimenti; documenti **12/12 PASS**, 34 MD e 877 collegamenti prima della presente ricevuta.
+
+**Versione caricata, prova manuale:** Diego riferisce dopo Ctrl+R nella Home di Chrome QA2 «Vedo v1.2.269». PASS della sola verifica dell'aggiornamento di quel browser; non è un PASS D01 né certifica tutte le PWA installate.
+
+**Limiti e seguito:** singleton OFF secondo l'ordine e la precedente conferma dell'operatore, non riletto da Codex; nessuna nuova attivazione, claim o modifica dati. Restano D01, revoca durante sessione aperta e C1 nei quattro ambienti fisici, oltre al distinto doppio clic Home. Sul telefono il passaggio in background annulla il dialogo: comportamento atteso da annotare nel futuro C1. La [ricevuta pubblica sulla #286](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/286#issuecomment-6789028976) e l'[avviso sulla #278](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6789029978) richiedono la verifica produttiva readonly di Claude, non ancora attestata qui. Nessuna CORNICE CHIUSA. Le sezioni successive documentano la preparazione precedente al rilascio.
+
 <a id="cornice-dialogo-fix-2026-11-10"></a>
 
 ## Dialogo della cornice — candidata 1.2.269, 10/11/2026

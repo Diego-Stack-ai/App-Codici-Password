@@ -1,8 +1,8 @@
 # Guida
 
-## Cornice in collaudo — candidata 1.2.269, non pubblicata
+## Cornice in collaudo — produzione 1.2.269, 11/11/2026
 
-La produzione attestata è 1.2.268. Il canary della cornice è spento, dopo una prima prova interrotta; il normale sblocco delle pagine resta invariato. La candidata 1.2.269 corregge la visibilità e l'interazione della finestra di sblocco nella cornice, ma non è ancora pubblicata e richiede revisione e ulteriori prove. Il catalogo delle 31 pagine è stato riesaminato: testi, comandi e target sono conservati; la matrice non certifica prove su dispositivi fisici. Per lo stato aggiornato e i limiti consultare [STATO](../progetto/STATO.md#stato-corrente). Le sezioni datate successive conservano il contesto dei rilasci precedenti.
+La produzione attestata è **1.2.269**. Il canary della cornice resta spento; il normale sblocco delle pagine resta invariato. Il rilascio corregge la visibilità e l'interazione della finestra di sblocco nella cornice; le prove della navigazione persistente restano da completare e il canary resta OFF fino a un nuovo ordine personale. Per verificare la versione caricata, riapri la Home dell'app e leggi «Versione app» in fondo; su Chrome desktop puoi prima usare Ctrl+R. La conferma di v1.2.269 su un browser non certifica l'aggiornamento di ogni PWA installata. Il catalogo delle 31 pagine mantiene testi, comandi e target; la matrice non certifica prove su dispositivi fisici. Per stato e limiti consultare [STATO](../progetto/STATO.md#stato-corrente). Le sezioni datate successive conservano il contesto dei rilasci precedenti.
 
 ## Aggiornamento preparatorio dell’assistenza 2FA — 08/11/2026
 

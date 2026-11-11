@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="cornice-dialogo-rilascio-2026-11-11"></a>
+
+## Rilascio 1.2.269 concluso, singleton OFF — 11/11/2026
+
+Diego ordina di segnare pronta la #286, unirla dopo il GO Claude sullo SHA f25ed120 e preparare il solo rilascio Hosting CI, riservando a sé Approve and deploy. PR unita in **6b61eead6dc6791eafea15038486020d22267ac4**, albero identico al candidato revisionato e ramo conservato. La run #1075, già avviata personalmente da Diego, usa master e scope hosting; nessun avvio duplicato di Codex. Diego conferma il clic finale, registrato anche via API, e il rilascio riesce. Manifest, file/hash e intestazioni online verificati; dopo guida manuale e Ctrl+R Diego conferma **v1.2.269** su Chrome QA2.
+
+Sono preparate le sole ricevute nei documenti esistenti su ramo separato, per revisione prima dell'integrazione; nessun nuovo rilascio è necessario per i Markdown. [Ricevuta](../evidenze/COLLAUDI.md#cornice-dialogo-pubblicazione-1-2-269). **Il singleton resta OFF fino a un nuovo ordine personale.** Nessuna attivazione, operazione amministrativa Firebase, nuova grafica o chiusura C1 deriva dal rilascio o dalla verifica della versione. D01 e revoca live restano da provare; la revisione produttiva finale di Claude resta distinta dal GO del codice. Le sezioni successive sono la cronologia preparatoria.
+
 <a id="cornice-dialogo-fix-incarico-2026-11-10"></a>
 
 ## Correzione dialogo della cornice — PR in bozza autorizzata, 10/11/2026
