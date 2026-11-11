@@ -2,11 +2,11 @@
 
 <a id="stato-corrente"></a>
 
-## C1 fermo, candidata 1.2.270 «Sblocca e riprendi» — 11/11/2026
+## Produzione 1.2.270 verificata, C1 fermo e canary OFF — 11/11/2026
 
-Produzione sempre **1.2.269 / 6b61eead**. Diego conferma personalmente **canary OFF**, senza rilettura amministrativa di Codex; D01/D02 e il resto della matrice non sono certificati. Scelta opzione 3 per il rilievo della vista bloccata: title/intestazione Vault bloccata, azione Sblocca e riprendi, nelle otto lingue, con il comportamento di ripresa esistente. Candidata **1.2.270** sul ramo codex/vault-frame-resume-copy-20261111, non pubblicata e ancora da rivedere. [Prove e limiti](../evidenze/COLLAUDI.md#cornice-riprendi-fix-2026-11-11).
+La #288 e unita dopo il GO Claude e l'ordine personale di Diego. Produzione **1.2.270**, sorgente **cb48b7196a3816a62dda05d11e11ff4ca7c51d26**, [Hosting #1088](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43036071599) riuscito. Diego delega esplicitamente a Codex il clic finale per la sola run: approvazione registrata, nessun bypass. Manifest, **362/362 payload e hash**, 41 profili di intestazioni, alias e tre probe di normalizzazione verificati indipendentemente dalla CI. Title/intestazione Vault bloccata e azione Sblocca e riprendi pubblicati nelle otto lingue; comportamento di ripresa conservato. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-riprendi-pubblicazione-1-2-270).
 
-Nessuna modifica dei due errori tecnici non ancora attribuiti, della graduatoria Ricerca o del distinto doppio clic OFF; nessuna adozione UI sperimentale. Solo codice/test gia pertinenti e documenti esistenti, elenco fermo a 34. Nessun merge/deploy, attivazione o CORNICE CHIUSA; i checkpoint sottostanti precedono la conferma finale OFF.
+**Canary OFF secondo l'ultima conferma personale di Diego**, senza nuova rilettura amministrativa di Codex. D01/D02 e il resto della matrice non sono certificati; aggiornamento delle singole schede/PWA e nuova etichetta sui quattro ambienti fisici ancora da verificare. Nessuna correzione dei due errori tecnici non attribuiti, della graduatoria Ricerca o del distinto doppio clic OFF; nessuna pubblicazione di grafica o sicurezza. Elenco fermo a 34 MD. Nessuna attivazione o CORNICE CHIUSA; revisione produttiva Claude distinta dal GO del candidato, nuovo ordine personale prima della riaccensione. I checkpoint sottostanti conservano le fasi precedenti.
 
 ## C1 QA2 ripreso manualmente — 11/11/2026
 

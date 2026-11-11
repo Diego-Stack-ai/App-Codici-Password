@@ -1,5 +1,17 @@
 # Collaudi
 
+<a id="cornice-riprendi-pubblicazione-1-2-270"></a>
+
+## Hosting 1.2.270 pubblicato e verificato, canary OFF — 11/11/2026
+
+Fonti: [GO Claude sul candidato finale ee101767](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/288#issuecomment-6797126819), ordine personale di merge/Hosting e successiva delega esplicita per il clic finale in chat; [run #1088](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43036071599), log dei job e storico approvazioni API, confronto pubblico indipendente. La [#288](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/288) e unita in **cb48b7196a3816a62dda05d11e11ff4ca7c51d26**, albero identico al candidato revisionato. I check PR e post-merge sono verdi; la run manuale usa master, tale SHA e release_scope=hosting.
+
+Diego delega a Codex Approve and deploy **per la sola #1088**. Approvazione production registrata come approved con il commento che identifica delega/scope/SHA; nessun bypass o modifica delle protezioni. Non e una delega generale. Validate **130575108944** e Deploy Firebase production **130582061839** conclusi SUCCESS. Comando CI effettivo con --only hosting; installazione backend e scope recovery prerequisites, Vault Rules e MFA response saltati, nessuna Functions/Rules distribuita.
+
+Pubblicazione completata **11/11/2026 14:57:16 UTC (15:57:16 Europe/Rome)**; verifica pubblica CI riuscita alle 14:57:29 UTC. Successiva verifica indipendente dal checkout pulito dell'esatto merge: generazione del manifest ignorato e comando release-manifest con --require-clean e --verify-url sul sito pubblico, uscita 0; esito acquisito prima delle 15:03:28 UTC. **Manifest 1.2.270**, sourceCommit esatto, **362/362 payload e hash** (363 file compreso il manifest), public tree SHA-256 **5689f9de7059c9733f6ad5fd5d4c598982e4a3c2aece1767e148942b18bdb735**. Verificati 41 profili di intestazioni, root/rewrite/redirect/alias e i tre probe di normalizzazione child/shell/public, inclusa policy del manifest. Nessuna modifica a modello, header configurati o precache per questa ricevuta.
+
+Rapporto completo pubblicato per Claude sulla [#288](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/288#issuecomment-6799339795) e sulla [#278](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6799344776). **Limiti:** confronto HTTP distinto da prova fisica e aggiornamento delle singole schede/PWA; C1 D01/D02 sospesi/NE, revoca live e altri ambienti non certificati. La 1.2.270 corregge le etichette della vista bloccata nelle otto lingue, senza risolvere i rilievi separati su Ricerca, doppio clic OFF o gli errori tecnici non attribuiti. **Canary OFF secondo l'ultima conferma personale di Diego**, senza rilettura o scrittura amministrativa di Codex. Nessun singleton/claim modificato, nuova grafica o sicurezza pubblicata; revisione produttiva Claude e nuovo ordine personale prima della riaccensione. La ricevuta documentale non richiede altro deploy. Le sezioni seguenti conservano la fase candidata e le prove precedenti.
+
 <a id="cornice-riprendi-fix-2026-11-11"></a>
 
 ## C1 — candidata 1.2.270, testo della vista bloccata — 11/11/2026

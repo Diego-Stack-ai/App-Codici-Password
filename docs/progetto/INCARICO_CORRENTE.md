@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Rilascio 1.2.270 concluso, delega limitata alla #1088 — 11/11/2026
+
+Dopo il GO Claude sul candidato finale della #288, Diego autorizza merge in master e avvio del solo Hosting CI 1.2.270. La PR e unita nello SHA cb48b7196a3816a62dda05d11e11ff4ca7c51d26, albero identico al candidato revisionato. Con successivo ordine esplicito Diego delega a Codex anche Approve and deploy **per la sola run #1088**: clic eseguito e approvazione production confermata via API, senza bypass o modifica delle protezioni. Per i rilasci successivi resta la normale approvazione personale; nessuna delega generale.
+
+Deploy e confronto pubblico indipendente riusciti; [ricevuta canonica](../evidenze/COLLAUDI.md#cornice-riprendi-pubblicazione-1-2-270) pubblicata sulla #288 e sulla #278 per Claude. Sono autorizzate le sole ricevute nei documenti esistenti, su ramo separato e in bozza per revisione: nessun nuovo Hosting necessario per i Markdown. **Singleton OFF secondo l'ultima conferma di Diego**, nessuna lettura/scrittura amministrativa Firebase/Google Cloud, attivazione o modifica claim. C1 resta sospeso/NE, nuova riaccensione soltanto su ordine personale; nessuna pubblicazione di grafica o sicurezza. I paragrafi successivi conservano i mandati preparatori.
+
 <a id="cornice-riprendi-incarico-2026-11-11"></a>
 
 ## C1 — correzione scelta della schermata bloccata, 11/11/2026
