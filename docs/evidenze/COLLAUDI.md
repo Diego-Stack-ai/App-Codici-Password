@@ -1,5 +1,21 @@
 # Collaudi
 
+<a id="cornice-riprendi-fix-2026-11-11"></a>
+
+## C1 — candidata 1.2.270, testo della vista bloccata — 11/11/2026
+
+Diego sceglie [l'opzione 3](../progetto/DECISIONI.md#cornice-riprendi-scelta-2026-11-11): Vault bloccata / Sblocca e riprendi. Conferma successivamente enabled=false; nessuna rilettura o scrittura amministrativa di Codex. Base runtime 6b61eead, ramo codex/vault-frame-resume-copy-20261111 dalle ricevute 1350971d. Produzione 1.2.269; questa e una candidata non pubblicata.
+
+Implementazione limitata al title, h1 e testo/chiave del link di app.html e a due traduzioni dedicate nei cataloghi it/en/es/fr/de/zh/hi/pt. Le chiavi condivise di Privato e Home restano intatte; href e gestore resume non cambiano. Aggiornamenti meccanici del versionamento canonico alla 1.2.270 e metadato reviewedAppVersion del catalogo guida; nessun cambiamento alle istruzioni/target D0. Nessun nuovo MD o dipendenza installata.
+
+**Verifiche locali:** suite cornice **248/248 PASS**, compresi dieci casi del dialogo reale sopra iframe/focus/inert e cinque casi header/framing su Hosting Emulator demo. Offline **16/16 PASS**, precache **342 risorse**, runtime Firebase con 61 export rigenerato usando lo stesso SDK gia installato; vendor e lista precache identici alla base. I18n **19/19 PASS**, zero nuove chiavi usate mancanti nelle otto lingue; guida **12/12 PASS**, 31 pagine/126 istruzioni/111 target; budget rispettati da tutte le 31 pagine senza aumento delle soglie, diagnostica **4/4 PASS** e sintassi di 249 moduli valida. Versionamento coerente su 275 riferimenti; documenti **12/12 PASS**, 34 MD e 890 collegamenti; diff senza errori di spaziatura.
+
+**Preparazione del banco:** la prima build non trova il pacchetto Firebase nel nuovo worktree; copia locale dello stesso SDK, versione confrontata col lock, consente la build senza installazioni. I cinque test header sono inizialmente bloccati dalla CLI assente nel worktree, poi dal timeout di avvio; riuso della CLI locale della versione del lock e modalita CI senza controllo aggiornamenti risolvono il solo banco. Rerun dei cinque header **5/5 PASS**, quindi nuova esecuzione integrale della suite **248/248 PASS** con uscita 0. Nessun test saltato o modifica ai test/permissi di produzione per ottenere il risultato.
+
+**Manifest locale:** 1.2.270, 362 payload, albero pubblico **e997a8dc177ef0a3304cb4e9aa6cdc8ddd90fb52181b479c0f5faad2424b447c**, generazione e verifica locale riuscite. La generazione preliminare sul tree non ancora committato non certifica l'origine del rilascio: manifest da riallineare al commit finale e verificare in CI prima di un eventuale rilascio. firebase.json, Rules, Functions e workflow identici alla base; il diff applicativo normalizzato per la sola versione contiene solo app.html e le due chiavi negli otto dizionari. Nessuna variazione funzionale al gestore resume.
+
+**Limiti:** CI del nuovo head e revisione Claude ancora da attendere. I test browser usano solo fixture e chiavi fittizie, non l'account QA2 o il cloud; non certificano i quattro ambienti fisici o la nuova etichetta gia online. D01/D02 restano sospesi/NE e i due ERROR_FRAME_OPERATION restano di causa non identificata. La correzione delle etichette non risolve o riclassifica i rilievi separati su Ricerca e doppio clic OFF. Revisione Claude e ordine personale prima di qualsiasi merge/rilascio.
+
 <a id="cornice-c1-ripresa-2026-11-11"></a>
 
 ## C1 QA2 — ripresa manuale su 1.2.269, 11/11/2026

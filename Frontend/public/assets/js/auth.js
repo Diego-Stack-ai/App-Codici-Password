@@ -1,10 +1,10 @@
 import {beginFrameLogout} from './frame-navigation.js';
 import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
-import { auth, db } from './firebase-config.js?v=1.2.269';
+import { auth, db } from './firebase-config.js?v=1.2.270';
 import { LOG } from './logger.js';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail, sendEmailVerification, setPersistence, browserLocalPersistence, browserSessionPersistence, getMultiFactorResolver, TotpMultiFactorGenerator } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
-import { showToast } from './ui-core-v129.js?v=1.2.269';
+import { showToast } from './ui-core-v129.js?v=1.2.270';
 import { logError } from './utils.js';
 import { ACCOUNT_PASSWORD_POLICY_VERSION, evaluatePassword, firstPasswordPolicyError } from './modules/core/password-policy.js';
 import { authSessionFence } from './auth-session-fence.js';

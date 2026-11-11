@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="cornice-riprendi-incarico-2026-11-11"></a>
+
+## C1 — correzione scelta della schermata bloccata, 11/11/2026
+
+Diego sceglie l'opzione 3: titolo Vault bloccata e collegamento Sblocca e riprendi. Nel perimetro gia autorizzato delle correzioni emerse da C1, Codex prepara il solo aggiornamento di testo/traduzioni, candidata 1.2.270 con versionamento canonico, controlli pertinenti, documenti esistenti e PR in bozza per Claude. Ripresa della route validata e ripiego negato conservati; nessuna modifica a broker, ammissione, crittografia, diagnostica, Ricerca, grafica sperimentale, workflow, Rules o Functions.
+
+Base codice pubblicata 6b61eead; ramo codex/vault-frame-resume-copy-20261111 dalle ricevute C1 1350971d. Diego conferma personalmente enabled=false prima della consegna; nessuna operazione Firebase di Codex. D01/D02 restano sospesi/NE. Revisione Claude sul nuovo head e ordine personale prima di merge/rilascio CI; nessun nuovo deploy implicito. [Decisione](DECISIONI.md#cornice-riprendi-scelta-2026-11-11), [ricevuta](../evidenze/COLLAUDI.md#cornice-riprendi-fix-2026-11-11). Gli incarichi sotto conservano i checkpoint precedenti.
+
 ## Priorita C1, revisione UI e sicurezza separata — 11/11/2026
 
 Diego ordina, nell'ordine: guida manuale C1 su QA2 come priorita assoluta; revisione in sola lettura del pilota Profilo #283 al commit 5e6bd39 con GO/NO-GO sulla PR; avvio della sicurezza su ramo separato, un punto alla volta e avviso a Claude per ciascun passo. Nessuna pubblicazione di grafica o sicurezza fino alla fine C1. I file della cornice sono modificabili soltanto per correzioni emerse da C1, mantenendo revisione Claude e approvazione personale prima di merge e deploy CI.

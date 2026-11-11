@@ -2,6 +2,8 @@
 // Modificar este ficheiro diretamente; não regenerar com split-translations.mjs.
 // As chaves devem permanecer alinhadas com o catálogo italiano.
 export default {
+    "frame_locked_title": "Cofre bloqueado",
+    "frame_unlock_resume": "Desbloquear e retomar",
     "frame_export_ready": "Exportação pronta",
     "frame_export_action_hint": "Selecione Confirmar para continuar com o ficheiro que acabou de autorizar.",
     "deadline_swipe_archive_restore": "Deslize para a direita para arquivar ou restaurar",

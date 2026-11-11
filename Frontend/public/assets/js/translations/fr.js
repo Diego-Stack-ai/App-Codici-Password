@@ -2,6 +2,8 @@
 // Ne pas régénérer avec scripts/split-translations.mjs (générateur historique obsolète).
 // Lingua: fr — parité avec le catalogue de base italien.
 export default {
+    "frame_locked_title": "Coffre verrouillé",
+    "frame_unlock_resume": "Déverrouiller et reprendre",
     "frame_export_ready": "Exportation prête",
     "frame_export_action_hint": "Sélectionnez Confirmer pour continuer avec le fichier que vous venez d’autoriser.",
     "deadline_swipe_archive_restore": "Balayez vers la droite pour archiver ou restaurer",

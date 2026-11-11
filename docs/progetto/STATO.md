@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+## C1 fermo, candidata 1.2.270 «Sblocca e riprendi» — 11/11/2026
+
+Produzione sempre **1.2.269 / 6b61eead**. Diego conferma personalmente **canary OFF**, senza rilettura amministrativa di Codex; D01/D02 e il resto della matrice non sono certificati. Scelta opzione 3 per il rilievo della vista bloccata: title/intestazione Vault bloccata, azione Sblocca e riprendi, nelle otto lingue, con il comportamento di ripresa esistente. Candidata **1.2.270** sul ramo codex/vault-frame-resume-copy-20261111, non pubblicata e ancora da rivedere. [Prove e limiti](../evidenze/COLLAUDI.md#cornice-riprendi-fix-2026-11-11).
+
+Nessuna modifica dei due errori tecnici non ancora attribuiti, della graduatoria Ricerca o del distinto doppio clic OFF; nessuna adozione UI sperimentale. Solo codice/test gia pertinenti e documenti esistenti, elenco fermo a 34. Nessun merge/deploy, attivazione o CORNICE CHIUSA; i checkpoint sottostanti precedono la conferma finale OFF.
+
 ## C1 QA2 ripreso manualmente — 11/11/2026
 
 Priorita assoluta al collaudo fisico della cornice pubblicata **1.2.269**, sorgente 6b61eead. Dopo logout/login OFF e nuovo consenso DIAG, Diego conferma la riaccensione e dieci destinazioni raggiunte senza Master nelle singole transizioni riferite. **D02 sospeso/NE, nessun PASS della continuita:** il rapporto finale contiene piu sessioni, sette scadenze e due operazioni rifiutate seguite da blocco difensivo del figlio. Causa non identificabile dal registro: Master errata/annullamento non esclusi, nessun difetto di sicurezza confermato. Stato finale active=true e permitValid=true non certifica il percorso passato. D01 incompleto. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-c1-ripresa-2026-11-11).
