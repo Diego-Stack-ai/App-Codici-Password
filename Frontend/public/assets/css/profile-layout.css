@@ -146,7 +146,7 @@
 }
 
 [data-ui-revision="tre-livelli"] [data-manage="off"] :is(.field-header, .qr-check-badge):has(> .qr-checkbox:checked) > .qr-mini-label::before {
-    content: 'qr_code_2';
+    content: 'qr_code_2' / "";
     font-family: 'Material Symbols Outlined';
     font-size: var(--icon-sm);
     font-weight: normal;
@@ -176,11 +176,11 @@
     font-feature-settings: 'liga';
 }
 
-[data-ui-revision="tre-livelli"] .profile-account-primary::before { content: 'link'; }
-[data-ui-revision="tre-livelli"] .profile-deadline-link::before { content: 'event'; }
+[data-ui-revision="tre-livelli"] .profile-account-primary::before { content: 'link' / ""; }
+[data-ui-revision="tre-livelli"] .profile-deadline-link::before { content: 'event' / ""; }
 
 [data-ui-revision="tre-livelli"] :is(.profile-account-primary, .profile-deadline-link)::after {
-    content: 'chevron_right';
+    content: 'chevron_right' / "";
     margin-left: auto;
     font-family: 'Material Symbols Outlined';
     font-size: var(--icon-sm);

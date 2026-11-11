@@ -80,7 +80,8 @@
 
 [data-ui-revision="tre-livelli"] .header-title::before,
 [data-ui-revision="tre-livelli"] .page-container::after {
-    content: var(--page-symbol, none);
+    /* Decorativo: testo alternativo vuoto, la ligatura non entra nel nome accessibile. */
+    content: var(--page-symbol, none) / "";
     font-family: 'Material Symbols Outlined';
     font-weight: normal;
     font-style: normal;

@@ -161,11 +161,20 @@ test('QR indicator is passive in consultation and the explicit toggle works in M
     await page.evaluate(() => document.querySelector('#full .collapsible-header').click());
     assert.equal(await page.getAttribute('#full', 'data-manage'), 'off', 'opening the section is not Modifica');
     const indicator = page.locator('#qr-on + .qr-mini-label');
+    // Attende la fine dell'animazione dell'accordion: posizione stabile per 3 letture consecutive.
+    await page.evaluate(() => new Promise(resolve => {
+      const node = document.querySelector('#qr-on + .qr-mini-label'); let last = '', same = 0;
+      const tick = () => { const r = node.getBoundingClientRect(); const key = `${r.x}|${r.y}|${r.width}`;
+        same = key === last ? same + 1 : 0; last = key; if (same >= 3) resolve(); else requestAnimationFrame(tick); };
+      tick();
+    }));
+    await page.waitForTimeout(350);
     assert.equal(await indicator.evaluate(node => getComputedStyle(node).pointerEvents), 'none');
     // Clic reale alle coordinate dell'indicatore, senza attese di actionability.
     // Il punto deve cadere sull'indicatore stesso, non su altri controlli vicini: la
     // larghezza dell'icona dipende dai font disponibili (in CI la ligatura può mancare).
-    const box = await indicator.evaluate(node => { node.scrollIntoView({block: 'center'}); const r = node.getBoundingClientRect(); return {x: r.x + Math.min(6, r.width / 2), y: r.y + r.height / 2, w: r.width}; });
+    await indicator.evaluate(node => node.scrollIntoView({block: 'center', behavior: 'instant'}));
+    const box = await indicator.evaluate(node => { const r = node.getBoundingClientRect(); return {x: r.x + Math.min(6, r.width / 2), y: r.y + r.height / 2, w: r.width}; });
     assert.ok(box.w > 0, 'indicator rendered');
     // L'indicatore è trasparente al puntatore: sotto quel punto non deve esserci un altro comando.
     assert.equal(await page.evaluate(({x, y}) => !document.elementFromPoint(x, y)?.closest('button, input, a, label, .collapsible-header'), box), true, 'no other control under the indicator');
