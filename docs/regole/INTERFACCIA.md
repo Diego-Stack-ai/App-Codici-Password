@@ -1,5 +1,15 @@
 # Interfaccia
 
+<a id="cornice-riprendi-ui-2026-11-11"></a>
+
+## Schermata di blocco comune e ripresa — 11/11/2026
+
+Per la [scelta esplicita di Diego](../progetto/DECISIONI.md#cornice-riprendi-scelta-2026-11-11), title e intestazione di app.html usano la chiave dedicata frame_locked_title, «Vault bloccata» in italiano; il collegamento usa frame_unlock_resume, «Sblocca e riprendi». Traduzioni complete in it/en/es/fr/de/zh/hi/pt. Non riutilizzare o modificare le chiavi condivise di Privato/Home, che descrivono altre pagine.
+
+La dicitura e comune ai motivi di blocco e non li attribuisce tutti all'inattivita. Quando ammessa, la ripresa ricarica la cornice sulla destinazione gia validata e richiede il nuovo sblocco previsto; non sposta arbitrariamente l'utente a Home. Montaggio negato o non piu disponibile conserva il collegamento standalone sicuro esistente: nessuna promessa di ritorno alla vecchia pagina senza ammissione. Gate Auth/policy, modalita di sblocco, timer, gestione iframe/focus e cronologia non cambiano con questa scelta di testo.
+
+Candidata 1.2.270, produzione sempre 1.2.269 fino a nuova revisione e ordine di rilascio. [Prove e limiti](../evidenze/COLLAUDI.md#cornice-riprendi-fix-2026-11-11). Canary OFF confermato dall'operatore; le altre prove C1 restano distinte.
+
 <a id="cornice-dialogo-ui-2026-11-10"></a>
 
 ## Dialogo di sblocco nel padre — 10/11/2026

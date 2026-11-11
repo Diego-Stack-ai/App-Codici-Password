@@ -1,4 +1,6 @@
 export default {
+    "frame_locked_title": "Vault bloccata",
+    "frame_unlock_resume": "Sblocca e riprendi",
     "frame_export_ready": "Esportazione pronta",
     "frame_export_action_hint": "Premi Conferma per continuare con il file appena autorizzato.",
     access_credentials: "Credenziali di accesso",

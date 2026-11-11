@@ -1,5 +1,29 @@
 # Incarico corrente
 
+<a id="cornice-riprendi-incarico-2026-11-11"></a>
+
+## C1 — correzione scelta della schermata bloccata, 11/11/2026
+
+Diego sceglie l'opzione 3: titolo Vault bloccata e collegamento Sblocca e riprendi. Nel perimetro gia autorizzato delle correzioni emerse da C1, Codex prepara il solo aggiornamento di testo/traduzioni, candidata 1.2.270 con versionamento canonico, controlli pertinenti, documenti esistenti e PR in bozza per Claude. Ripresa della route validata e ripiego negato conservati; nessuna modifica a broker, ammissione, crittografia, diagnostica, Ricerca, grafica sperimentale, workflow, Rules o Functions.
+
+Base codice pubblicata 6b61eead; ramo codex/vault-frame-resume-copy-20261111 dalle ricevute C1 1350971d. Diego conferma personalmente enabled=false prima della consegna; nessuna operazione Firebase di Codex. D01/D02 restano sospesi/NE. Revisione Claude sul nuovo head e ordine personale prima di merge/rilascio CI; nessun nuovo deploy implicito. [Decisione](DECISIONI.md#cornice-riprendi-scelta-2026-11-11), [ricevuta](../evidenze/COLLAUDI.md#cornice-riprendi-fix-2026-11-11). Gli incarichi sotto conservano i checkpoint precedenti.
+
+## Priorita C1, revisione UI e sicurezza separata — 11/11/2026
+
+Diego ordina, nell'ordine: guida manuale C1 su QA2 come priorita assoluta; revisione in sola lettura del pilota Profilo #283 al commit 5e6bd39 con GO/NO-GO sulla PR; avvio della sicurezza su ramo separato, un punto alla volta e avviso a Claude per ciascun passo. Nessuna pubblicazione di grafica o sicurezza fino alla fine C1. I file della cornice sono modificabili soltanto per correzioni emerse da C1, mantenendo revisione Claude e approvazione personale prima di merge e deploy CI.
+
+La revisione UI richiesta e pubblicata come [REVISIONE CODEX - NO-GO sul commit esatto](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/283#issuecomment-6789523626), distinta dagli head successivi e senza modificare il lavoro di Claude. Ramo sicurezza codex/security-followup-20261111 aperto da 6b61eead; primo inventario ancora in preparazione, nessuna correzione o pubblicazione da dichiarare.
+
+C1 ripreso personalmente da Diego dopo logout/login OFF e attivazione DIAG; nuovo enabled=true confermato e rapporto ammesso su 1.2.269. Guida un caso alla volta, arresto con enabled=false alla prima anomalia, nessuna operazione Firebase/Google Cloud al suo posto. [Riscontri parziali, non certificazione C1](../evidenze/COLLAUDI.md#cornice-c1-ripresa-2026-11-11). Le sezioni OFF sotto conservano i checkpoint antecedenti alla riaccensione autorizzata.
+
+<a id="cornice-dialogo-rilascio-2026-11-11"></a>
+
+## Rilascio 1.2.269 concluso, singleton OFF — 11/11/2026
+
+Diego ordina di segnare pronta la #286, unirla dopo il GO Claude sullo SHA f25ed120 e preparare il solo rilascio Hosting CI, riservando a sé Approve and deploy. PR unita in **6b61eead6dc6791eafea15038486020d22267ac4**, albero identico al candidato revisionato e ramo conservato. La run #1075, già avviata personalmente da Diego, usa master e scope hosting; nessun avvio duplicato di Codex. Diego conferma il clic finale, registrato anche via API, e il rilascio riesce. Manifest, file/hash e intestazioni online verificati; dopo guida manuale e Ctrl+R Diego conferma **v1.2.269** su Chrome QA2.
+
+Sono preparate le sole ricevute nei documenti esistenti su ramo separato, per revisione prima dell'integrazione; nessun nuovo rilascio è necessario per i Markdown. [Ricevuta](../evidenze/COLLAUDI.md#cornice-dialogo-pubblicazione-1-2-269). **Il singleton resta OFF fino a un nuovo ordine personale.** Nessuna attivazione, operazione amministrativa Firebase, nuova grafica o chiusura C1 deriva dal rilascio o dalla verifica della versione. D01 e revoca live restano da provare; la revisione produttiva finale di Claude resta distinta dal GO del codice. Le sezioni successive sono la cronologia preparatoria.
+
 <a id="cornice-dialogo-fix-incarico-2026-11-10"></a>
 
 ## Correzione dialogo della cornice — PR in bozza autorizzata, 10/11/2026

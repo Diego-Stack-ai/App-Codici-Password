@@ -10,5 +10,5 @@ if (window.parent !== window || !VAULT_FRAME_ENABLED) {
     guard.src = '/assets/js/private-auth-gate.js'; guard.onload = resolve; guard.onerror = reject;
     document.head.append(guard);
   });
-  await import('./main-v129.js?v=1.2.269');
+  await import('./main-v129.js?v=1.2.270');
 }

@@ -2,6 +2,8 @@
 // Modificare questo file direttamente; non rigenerare con split-translations.mjs.
 // Le chiavi devono restare allineate al catalogo italiano.
 export default {
+    "frame_locked_title": "Bóveda bloqueada",
+    "frame_unlock_resume": "Desbloquear y continuar",
     "frame_export_ready": "Exportación lista",
     "frame_export_action_hint": "Pulsa Confirmar para continuar con el archivo que acabas de autorizar.",
     "deadline_swipe_archive_restore": "Desliza a la derecha para archivar o restaurar",
