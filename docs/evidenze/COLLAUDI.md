@@ -1,5 +1,169 @@
 # Collaudi
 
+<a id="cornice-c1-d05a-ricarica-270-2026-11-11"></a>
+
+## C1 QA2 — D05-A ricarica del padre, destinazione e nuovo sblocco PASS — 11/11/2026
+
+Prova manuale eseguita da Diego su **Google Chrome desktop Windows, QA2, app v1.2.270**, sorgente distribuito cb48b7196a3816a62dda05d11e11ff4ca7c51d26. Guida completa prima dell'inizio, DIAG acceso e timeout invariato a **180000 ms**; nessuna attesa della chat fra le azioni. Versione esatta Chrome/build Windows non raccolte. Diego opera personalmente ON, sblocco iniziale, ricarica dal pulsante di Chrome, nuovo sblocco e OFF. Codex guida e analizza il rapporto, senza controllare Chrome, inserire password o usare Firebase/Google Cloud amministrativi.
+
+Riscontro esplicito dell'operatore: **stessa pagina e categoria dopo la ricarica; una sola Master dopo il pulsante Ricarica; sempre app.html; Spento**. Destinazione prima e dopo: **Account privato, categoria Account Personali**. Il nuovo sblocco dopo la ricarica e atteso, distinto dallo sblocco iniziale e dalla continuita nelle navigazioni interne. Nessun dato o modulo modificato richiesto/riferito.
+
+Rapporto di **66 eventi**, tutti v1.2.270/browser, ordinati e conformi all'allowlist: i **primi 47 sono identici** al rapporto della riprova D04, seguono **19 eventi append-only**. LOCK_POLICY_REVOKED delle 23:25:07.149, ADMISSION_DENIED/LOCK_ADMISSION_DENIED delle 23:25:38.597 e gli altri eventi prima del nuovo ingresso appartengono alla preparazione/arresto precedente; sono fuori dal segmento D05-A. Nessun errore storico viene cancellato o attribuito a questa ricarica.
+
+**Segmento D05-A:** FRAME_ENTER Area Privata alle **23:39:22.844**, at=1794436762844, fino a FRAME_EXIT Account alle **23:41:11.315**, orari **Europe/Rome**. **Otto eventi: due ingressi, cinque uscite e un solo LOCK_PAGEHIDE del padre**, durata del tratto **108,471 secondi**. Il PAGEHIDE intenzionale e compatibile con il clic Ricarica riferito dall'operatore; il codice da solo non distinguerebbe una ricarica da altre uscite del documento.
+
+| Evento | Ora Europe/Rome | Riscontro e limite |
+|---|---|---|
+| FRAME_ENTER area_privata.html | 23:39:22.844 | Ingresso della preparazione ammessa, prima della ricarica su Account. |
+| FRAME_EXIT area_privata.html | 23:39:29.957 | Preparazione tra pagine. |
+| FRAME_EXIT home_page.html | 23:39:44.251 | Preparazione verso Area Privata. |
+| FRAME_EXIT area_privata.html | 23:40:30.294 | Passaggio verso Account Personali riferito. |
+| LOCK_PAGEHIDE app.html | 23:40:37.403 | Uscita del padre durante la ricarica riferita. |
+| FRAME_EXIT account_privati.html | 23:40:37.405 | Uscita del vecchio figlio, due millisecondi dopo il padre. |
+| FRAME_ENTER account_privati.html | 23:40:38.913 | Nuovo ingresso sulla pagina Account. |
+| FRAME_EXIT account_privati.html | 23:41:11.315 | Uscita successiva verso la raccolta DIAG nelle Impostazioni. |
+
+PAGEHIDE → nuovo ingresso: **1,510 secondi**, intervallo fra eventi che non misura il completamento dello sblocco o del caricamento. Il tratto dopo il nuovo ingresso fino all'ultima uscita dura **32,402 secondi** e non contiene blocchi, errori o altri ingressi. Lo stato copiato e active=true, permitValid=true, idleMs=180000, pushReady=true, registro attivo/disponibile; lastBlock=LOCK_PAGEHIDE rinvia alla ricarica precedente al nuovo ingresso e non prova un blocco successivo.
+
+**PASS del sottocaso D05-A**, limitato alla ricarica del padre dal pulsante Chrome, stessa pagina/categoria riferite, una sola nuova Master e permanenza in app.html, **solo fase 1 QA2 / Chrome desktop Windows / v1.2.270**. Non e una misura diretta della cancellazione RAM o una certificazione generale di query/hash. Ricarica del solo figlio, link privato diretto, nuova scheda con sblocco proprio e Back dopo logout restano non eseguiti: **D05 complessivo LIMITE/incompleto** in matrice. I PASS D02 e del percorso D04 mantengono il proprio perimetro; nessun trasferimento a altri ambienti o fase personale.
+
+**Ultimo stato OFF:** Diego conferma Spento dopo la copia ancora attiva. Nessuna rilettura amministrativa o DIAG dopo l'ultimo spegnimento; la revoca storica non prova l'ultimo OFF, latenza o cancellazione RAM/D15. pushReady non certifica D11. Scadenza e timeout invariati. Solo ricevute nei quattro Markdown esistenti, senza codice, versione, workflow, Rules, Functions, singleton/claim o credenziali modificati da Codex; nessun deploy o merge. Si aggiorna la bozza #291 con nuova revisione richiesta sul nuovo head: il GO precedente sul solo 5ca66ce0 resta storico, #289 e #290 preservate. C1/C2 restano aperti; nessuna CORNICE CHIUSA o nuova accensione implicita.
+
+
+
+<a id="cornice-c1-d04-continuita-270-2026-11-11"></a>
+
+## C1 QA2 — continuita e tre comandi D04 del percorso Chrome PASS — 11/11/2026
+
+Riprova eseguita personalmente da Diego su **Google Chrome desktop Windows, QA2, app v1.2.270**, sorgente distribuito cb48b7196a3816a62dda05d11e11ff4ca7c51d26. La guida completa viene fornita prima dell'inizio, con timeout invariato a **180000 ms**: nessuna attesa della chat tra i sette passaggi. Versione esatta Chrome/build Windows non raccolte. ON, sblocco e OFF eseguiti dall'operatore; Codex legge soltanto il rapporto e guida, senza controllare Chrome nativo, inserire credenziali o usare servizi amministrativi.
+
+Diego conferma esplicitamente **sette passaggi corretti, nessun doppio salto, nessuna nuova Master durante i sette passaggi, sempre app.html e Spento**. Percorso: Home → avatar Profilo → Home → Privato → Account Personali → Indietro Chrome (Area Privata) → Avanti Chrome (Account Personali) → freccia interna dell'app (Area Privata). La categoria Personali e le destinazioni sono riferite dall'operatore, non dedotte dai soli eventi. Il successivo accesso alle Impostazioni serve alla copia DIAG ed e distinto dai sette passaggi valutati.
+
+Il nuovo rapporto contiene **47 eventi**, tutti v1.2.270/browser, conformi all'allowlist e ordinati; i **primi 34 sono identici** al rapporto precedente e seguono **13 eventi append-only**. Tra le aggiunte, LOCK_POLICY_REVOKED delle 23:08:14.347 e l'uscita Impostazioni appartengono all'arresto precedente; LOCK_PAGEHIDE del padre alle 23:22:44.307 precede il nuovo ingresso. Sono esclusi dal segmento della riprova, insieme ai blocchi e due errori tecnici storici, ancora non attribuiti.
+
+**Segmento pulito:** FRAME_ENTER Impostazioni alle **23:22:46.054** (at=1794435766054) fino a FRAME_EXIT Area Privata alle **23:24:24.521**, orari **Europe/Rome**. **10 eventi: un ingresso e nove uscite**, **98,467 secondi** compresa la preparazione dalla pagina ammessa e la raccolta finale. Nessun LOCK_*, ERROR_*, ADMISSION_*, nuovo FRAME_ENTER o uscita del padre all'interno. FRAME_EXIT delle pagine figlie e coerente con la navigazione normale, senza dimostrare da solo quale pulsante e stato usato.
+
+| Evento nel segmento | Ora Europe/Rome | Riscontro riferito/coerente |
+|---|---|---|
+| FRAME_ENTER impostazioni.html | 23:22:46.054 | Nuovo ingresso ammesso, prima del giro dalla Home. |
+| FRAME_EXIT impostazioni.html | 23:22:53.269 | Preparazione verso Home. |
+| FRAME_EXIT home_page.html | 23:22:55.786 | 1. Avatar → Profilo. |
+| FRAME_EXIT profilo_privato.html | 23:23:09.106 | 2. Casetta → Home. |
+| FRAME_EXIT home_page.html | 23:23:11.683 | 3. Privato → Area Privata. |
+| FRAME_EXIT area_privata.html | 23:23:14.065 | 4. Account Personali → Account privato. |
+| FRAME_EXIT account_privati.html | 23:23:20.007 | 5. Indietro Chrome → Area Privata. |
+| FRAME_EXIT area_privata.html | 23:23:30.470 | 6. Avanti Chrome → Account Personali. |
+| FRAME_EXIT account_privati.html | 23:23:34.964 | 7. Freccia app → Area Privata. |
+| FRAME_EXIT area_privata.html | 23:24:24.521 | Raccolta successiva nelle Impostazioni. |
+
+L'uscita Account relativa al settimo passaggio e registrata **48,910 secondi dopo l'ingresso del padre**; la destinazione finale e confermata dall'operatore prima della raccolta nel segmento di **98,467 secondi**. La soglia di tre minuti e rispettata senza cambiare preferenze; l'evento di uscita non misura da solo il completamento del caricamento. Stato alla copia active=true, permitValid=true, idleMs=180000, pushReady=true, registro attivo/disponibile. lastBlock=LOCK_PAGEHIDE e storico, anteriore al nuovo FRAME_ENTER. Il solo stato attivo non basterebbe: il risultato combina il segmento con le conferme manuali. pushReady non certifica D11.
+
+**PASS del sottocaso continuita e dei tre comandi per questo itinerario, soltanto fase 1 QA2 / Chrome desktop Windows / v1.2.270.** Non e un PASS globale di C1, degli altri ambienti o della fase personale. Altri percorsi/query, anchor e ripristino di form sensibili non sono esercitati/certificati da questo giro: **D04 complessivo resta incompleto**, riportato in matrice come LIMITE con collegamento al PASS circoscritto, secondo la legenda e da rivedere con Claude. D02 conserva il proprio PASS; D01/D03 e gli altri casi restano aperti. Nessuna cancellazione o reinterpretazione dei precedenti blocchi/errori.
+
+**Ultimo stato OFF:** Diego conferma Spento dopo il rapporto copiato ancora attivo. Nessuna rilettura amministrativa indipendente o DIAG dopo questo ultimo spegnimento. Il LOCK_POLICY_REVOKED storico non prova l'ultimo OFF, la latenza o cancellazione RAM: nessun PASS D15/revoca live. Scadenza concordata invariata. Nessun codice, versione, workflow, Rules, Functions, singleton/claim o timeout modificati da Codex; nessun merge, deploy, grafica o sicurezza pubblicata. Ricevuta separata da base 0dd3b123 per preservare gli head gia revisionati di #289 e #290; nuovo GO richiesto per questo seguito, nessuna CORNICE CHIUSA o nuova accensione implicita.
+
+
+
+<a id="cornice-c1-d04-chrome-270-2026-11-11"></a>
+
+## C1 QA2 — D04 Chrome, destinazioni corrette e continuita non certificata — 11/11/2026
+
+Prova manuale riferita da Diego su **Google Chrome desktop Windows, profilo QA2**, app **v1.2.270**, sorgente distribuito cb48b7196a3816a62dda05d11e11ff4ca7c51d26. Versione esatta Chrome/build Windows non raccolte. Fonti: risposte di Diego e rapporto DIAG di 34 eventi; nessun controllo della sessione Chrome nativa da Codex, nessuna password inserita o operazione amministrativa Firebase/Google Cloud dell'agente. Le prove nel browser della chat restano ausili separati.
+
+Baseline prima dell'accensione: active=false, permitValid=false, permitExpiresAt=null, idleMs=180000, pushReady=true, lastBlock=null, registro enabled=true/available=true ed events vuoto. Diego conferma poi il solo enabled=true personale e Home leggibile con indirizzo app.html. Il primo tentativo con la scorciatoia della tastiera non produce un risultato ricostruibile; non si dichiara un difetto dell'app. Dopo aver chiarito i comandi, Diego riferisce il percorso **Home → avatar Profilo → Home → Privato → Account Personali**, seguito dai tre clic distinti:
+
+| Comando riferito da Diego | Destinazione riferita |
+|---|---|
+| Freccia Indietro di Chrome, nella barra degli indirizzi | Area Privata |
+| Freccia Avanti di Chrome, nella stessa barra | Account Personali |
+| Freccia interna dell'app, accanto al titolo | Area Privata |
+
+Diego conferma che l'indirizzo rimane sempre app.html. Conferma anche che **la Master Password ricompare**, ritenendo trascorsi i tre minuti: i riscontri positivi delle destinazioni non certificano una sola sessione senza nuovo sblocco.
+
+Il rapporto finale contiene **34 eventi**, tutti v1.2.270/browser, ordinati e conformi all'allowlist di codici/campi/pagine. Totali: FRAME_EXIT 19, FRAME_ENTER 5, LOCK_EXPIRED 2, LOCK_PAGEHIDE 4, ERROR_FRAME_OPERATION 2 e LOCK_CHILD_REQUEST 2. Stato alla copia: active=true, permitValid=true, permitExpiresAt=1795042740000, idleMs=180000, pushReady=true, lastBlock=LOCK_PAGEHIDE; registro attivo/disponibile. Lo stato attivo della copia non ricostruisce la continuita precedente; pushReady non prova una consegna push e non assegna PASS D11. Orari seguenti **Europe/Rome**; FRAME_EXIT indica l'uscita della pagina, non il nome del comando premuto.
+
+| Evento o tratto nel rapporto | Riscontro e limite |
+|---|---|
+| 22:49:18.622 FRAME_ENTER Home; 22:56:50.483 LOCK_EXPIRED Account | Primo tratto e blocco precedenti alla sequenza finale. |
+| 22:59:14.450 e 22:59:26.814 ERROR_FRAME_OPERATION Account, ciascuno seguito da LOCK_CHILD_REQUEST | Errori tecnici prima del segmento finale; causa non attribuita. Nessuna Master errata, problema di rete o vulnerabilita dedotti dal solo codice. |
+| 22:59:38.099 FRAME_ENTER Account | Inizio del tratto finale esaminato: 14 eventi complessivi, due ingressi, dieci uscite, un blocco expired e un pagehide del padre. |
+| FRAME_EXIT 23:00:49.305 Account; 23:00:54.857 Home; 23:01:00.320 Profilo; 23:01:04.986 Home; 23:01:09.880 Area Privata | Uscite compatibili con la preparazione riferita; il registro non contiene query o hash. |
+| FRAME_EXIT 23:02:19.733 Account e 23:03:18.111 Area Privata | Ordine compatibile con i risultati Indietro/Avanti riferiti; l'identificazione dei pulsanti viene dalla conferma dell'operatore. |
+| 23:04:10.025 LOCK_EXPIRED Account; uscita; 23:04:43.012 LOCK_PAGEHIDE padre; 23:04:44.927 FRAME_ENTER Account | La sequenza attraversa un blocco e un nuovo ingresso. Il blocco e circa 180 secondi dopo l'uscita Area Privata delle 23:01:09.880: compatibile con il timeout scelto, senza provare da solo la causa. |
+| FRAME_EXIT 23:05:08.825 Account e 23:06:46.745 Area Privata | Seguito coerente con il ritorno riferito tramite freccia interna e la visita finale alle Impostazioni per copiare il rapporto. |
+
+**D04 Chrome resta parziale/NE**, con tre destinazioni positive riferite, permanenza in app.html e nuovo sblocco confermato; niente PASS della continuita, parita completa query/anchor o mancato ripristino di form sensibili. LOCK_EXPIRED confluisce da piu cause, tra cui inattivita, scadenza permesso, attesa dello sblocco e background: non tutti gli eventi expired sono una prova automatica dei tre minuti di inattivita. Le pause della guida sono compatibili con il superamento della soglia, ma non sostituiscono la diagnosi.
+
+**Arresto finale:** dopo la copia Diego conferma esplicitamente Si, spento e salvato alla richiesta di rimettere solo enabled=false. Ultimo stato **canary OFF riferito dall'operatore**, distinto dalla fotografia DIAG ancora attiva; nessuna rilettura amministrativa indipendente o rapporto successivo allo spegnimento. Nessun PASS D15/revoca live, latenza o cancellazione RAM. D02 Chrome mantiene il proprio PASS; D03 e gli altri casi/ambienti, fase personale e C2 restano aperti.
+
+Il seguito documentale parte da 02beeb1b su un ramo separato: la **#289 e il suo GO restano invariati**, nessun merge ancora autorizzato da Diego. Nessun codice, versione, workflow, Rules, Functions, singleton/claim, scadenza o preferenza di inattivita modificati da Codex; nessun deploy, grafica o sicurezza pubblicata. Il prossimo eventuale tentativo richiede ordine personale, preparazione chiara dei tre comandi e una sequenza continua entro la soglia, senza pause della chat fra i clic e senza allungare il timeout per ottenere un PASS. Gli errori tecnici rimangono da qualificare; nessuna correzione dichiarata.
+
+
+
+<a id="cornice-c1-d03-d04-270-2026-11-11"></a>
+
+## C1 QA2 — D03 parziale, D04 Chrome inconcluso, nuova prova integrata positiva e OFF — 11/11/2026
+
+Seguito manuale su Google Chrome/profilo QA2, app v1.2.270, sorgente distribuito cb48b7196a3816a62dda05d11e11ff4ca7c51d26. Fonti: risposte di Diego nella chat, osservazioni del browser integrato e test locale distinto. Nessun UID, dato copiato o contenuto Vault viene aggiunto alla ricevuta. Il precedente D02 Chrome PASS resta limitato al proprio segmento; questo seguito non riapre o estende quel risultato.
+
+**D03, sottocasi riferiti da Diego nella cornice:** Contatti leggibili/raggiungibili e senza sovrapposizioni; Indirizzi leggibili con pulsanti raggiungibili; Documenti leggibili/raggiungibili senza sovrapposizioni fino in fondo; Tessera digitale leggibile/raggiungibile senza sovrapposizioni. Lasciato Contatti selezionato, il QR nelle Impostazioni apre direttamente Tessera digitale: query di destinazione riscontrata corretta. L'indicazione iniziale Gestisci Tessera digitale era il nome del collegamento, non una scritta visibile; chiarita la guida al riquadro QR, nessun difetto attribuito a quella incomprensione.
+
+In Anagrafica, matita Note Anagrafica → apertura → Annulla senza cambiamenti: Diego conferma chiusura e Profilo invariato. Copia di un telefono fittizio nei Contatti, incolla nel campo Ricerca senza invio e successiva rimozione/chiusura: Diego conferma copia corretta; nessun valore e riportato. In Dati Azienda dell'azienda sintetica gia presente visita Contatti, Indirizzi, Documenti e Tessera digitale e risponde tutto OK alla verifica di apertura, leggibilita/raggiungibilita e sovrapposizioni; nessuna sezione vuota segnalata. **D03 resta incompleto/NE:** confronto diretto con lo standalone ancora da eseguire e parita/anchor complessivi non certificati; nessun PASS globale dedotto dai soli sottocasi positivi. Nessun salvataggio richiesto o riferito.
+
+**D04 Chrome, prima prova inconclusa:** percorso guidato Home → Profilo → Home → Privato → Account Standard. Diego riferisce Indietro corretto e Avanti di Chrome non selezionabile. Dopo una prima identificazione di entrambe le frecce come comandi Chrome, precisa di non ricordare con certezza e che forse Indietro era quello interno dell'app. La sequenza iniziale non e quindi ricostruita: **D04 Chrome rimane NE/inconcluso**, senza FAIL o difetto specifico dimostrato. La lettura della finestra Chrome nativa si era interrotta prima di acquisire la schermata per insufficiente riconoscimento dell'URL, anche dopo la conferma Chrome pronto; nessun clic nativo eseguito e nessuna immagine ottenuta. Nell'inventario disponibile per la successiva prova non compare una finestra Chrome controllabile. Nessun risultato di altre superfici certifica la colonna Chrome.
+
+**Due riscontri distinti:** il test locale gia presente real broker/transport: ten private documents use one unlock, queries/fragments and back/forward persist viene rieseguito con Chrome headless e Auth/ammissione sintetiche, sola rete loopback: **1/1 PASS**, zero skip. Usa chiamate al facade e non l'esatta sequenza mista di clic dell'app: non chiude D04 fisico. Dopo l'ordine aggiuntivo fai la prova anche tu e l'apertura personale dell'app nella chat, Codex legge una sessione gia sbloccata e prova nel **browser integrato** Home → Privato → Account Personali, poi Indietro → Area Privata e Avanti → Account privato standard: destinazioni riscontrate nelle pagine visibili. Il primo tentativo con un selettore non si completa mentre la pagina osservata passa a Home; la sequenza conclusiva riparte dalla Home con i comandi effettivamente presenti. I comandi di cronologia usano le API del browser integrato: non viene certificato lo stato del pulsante Avanti della finestra Chrome nativa. Nessuna password inserita, record aperto o modifica salvata da Codex; nessun accesso amministrativo Firebase/Google Cloud. Il riscontro integrato resta ausiliario, fuori dalle quattro colonne canoniche C1.
+
+**Primo arresto e rapporto OFF:** dopo la prima prova ausiliaria Diego conferma il salvataggio personale di enabled=false. Tornato nella stessa scheda Chrome QA2 senza ricaricare o altri clic, riferisce Vault bloccata / Sblocca e riprendi. Il rapporto successivo ricevuto mostra v1.2.270, active=false, permitValid=false, permitExpiresAt=null, idleMs=180000, pushReady=false, lastBlock=null, registro enabled=true/available=true ed events vuoto. enabled nel rapporto riguarda il registro, non il singleton. Le nuove richieste Master fra pagine standalone con cornice OFF sono attese; il journal vuoto non ricostruisce D04. La vista bloccata non misura la latenza, non esclude un blocco precedente per inattivita e non prova cancellazione RAM: **nessun PASS D15**.
+
+**Nuova prova completa nel browser integrato, distinta da Chrome:** dopo la precisazione sulla freccia Diego chiede di rifare la prova e ordina fai tu. Conferma personalmente una nuova accensione; la Master Password iniziale e inserita soltanto da lui nell'app. Codex osserva poi la Home sbloccata nella cornice e svolge la sequenza seguente, con lettura della pagina visibile dopo ogni passaggio. I comandi browser sono Back/Forward del browser integrato; l'ultimo Indietro e invece il pulsante interno dell'app.
+
+| Passaggio eseguito | Destinazione osservata |
+|---|---|
+| Home → avatar del Profilo | Profilo Utente |
+| Profilo → Home | Home |
+| Home → Privato | Area Privata |
+| Area Privata → Account Personali | Account privato, categoria standard |
+| Indietro del browser integrato | Area Privata |
+| Avanti del browser integrato | Account privato, categoria standard conservata |
+| Indietro interno dell'app | Area Privata |
+
+Pagine leggibili, padre rimasto app.html con route coerente, nessuna nuova richiesta Master osservata durante questa sequenza. Verificate le destinazioni anche dopo l'effettivo caricamento, senza dedurle dal solo clic; le immagini ritagliate dei due esiti finali mostrano soltanto le intestazioni Account privato e Area Privata. Il percorso comprende il clic reale sull'avatar, oltre ai collegamenti e ai due tipi di Indietro. Nessun record aperto, dato modificato o salvataggio, nessuna password inserita da Codex. Questa prova e **positiva come ausilio IAB**, fuori dalle quattro colonne canoniche C1: non prova lo stato del pulsante Chrome nativo, la parita completa di query/anchor o il mancato ripristino di form sensibili. Nessun nuovo test locale rieseguito o difetto corretto per questo seguito.
+
+**Arresto di quella prova:** Diego conferma nuovamente di avere salvato personalmente enabled=false; nessuna rilettura amministrativa indipendente o nuovo rapporto DIAG successivo a questo secondo spegnimento. Questo e il checkpoint precedente all'ulteriore ripetizione seguente.
+
+**Ulteriore riprova su richiesta prova ancora:** Diego conferma prima il singleton OFF, poi esegue personalmente la nuova accensione e lo sblocco nella pagina della chat. Il segmento valutato inizia soltanto dopo la Home figlia visibile nella cornice. Codex ripete tutti i sette passaggi della tabella, compresi il clic sull'avatar, Back e Forward del browser integrato e la freccia interna dell'app: Home/Profilo/Area Privata/Account privato osservati dopo il caricamento, categoria standard mantenuta, padre app.html con route coerente e nessuna nuova finestra Master durante la sequenza. L'ultimo Indietro interno termina su Area Privata; immagine di prova limitata alla sua intestazione, senza dati dei record. Nessun record aperto, modifica salvata, password inserita da Codex o nuovo test locale. Il tentativo separato di accedere alla finestra Chrome si era nuovamente interrotto per riconoscimento insufficiente dell'URL, prima di clic applicativi. **Riprova IAB positiva come solo ausilio; D04 Chrome ancora NE/inconcluso**, senza certificare query/anchor complessivi o ripristino di form sensibili.
+
+**Ultimo arresto confermato:** alla fine dell'ulteriore riprova Diego risponde ho messo false alla richiesta di salvare personalmente solo enabled=false. **Canary OFF secondo l'operatore**, senza rilettura amministrativa o nuovo rapporto DIAG successivo all'ultimo spegnimento. Nessuna revoca live, latenza o cancellazione RAM certificata e nessun PASS D15. D02 Chrome conserva il proprio PASS; D03/D04, altri casi/ambienti e fase personale restano incompleti/NE. Nessun cambiamento a app, workflow, Rules, Functions, claim, scadenza o preferenza di inattivita, nessun accesso amministrativo Firebase/Google Cloud di Codex. Nessuna correzione, merge/deploy o CORNICE CHIUSA; nessuna nuova accensione implicita. Si aggiorna solo questa evidenza: STATO, incarico e guida conservano perimetro, risultati e stato OFF gia descritti. Ricevuta e avviso a Claude sulla #289/#278 per revisione readonly.
+
+<a id="cornice-c1-d02-270-2026-11-11"></a>
+
+## C1 QA2 su 1.2.270 — D02 PASS Chrome Windows, D03 parziale — 11/11/2026
+
+Fonti: azioni/conferme personali di Diego e due rapporti DIAG copiati nella chat; Diego conferma esplicitamente che il giro e svolto in Google Chrome con profilo QA2, distinto dal browser integrato della chat. Versione app **v1.2.270**, sorgente distribuito cb48b7196a3816a62dda05d11e11ff4ca7c51d26; versione esatta di Chrome/build Windows non raccolte. Nessuna esecuzione autenticata, login, sblocco o operazione amministrativa Firebase/Google Cloud di Codex.
+
+Preparazione: un primo rapporto apparteneva all'account personale e viene escluso da C1 QA2; la sua preferenza di inattivita non viene modificata. Diego esce da quell'account, accede a QA2 e copia la baseline OFF: active=false, permitValid=false, idleMs=180000, lastBlock=null, registro acceso/disponibile e zero eventi. Dopo la guida cambia personalmente solo enabled a true, confermando l'accensione; scadenza invariata al 18/11/2026 ore 23:59 Europe/Rome. Raggiunta la vista Vault bloccata, riferisce un clic su Sblocca e riprendi, inserimento locale della Master Password e Home aperta. Questi sono riscontri del primo accesso, **non un PASS globale D01/Auth/App Check**.
+
+Il primo rapporto contiene 107 eventi e il secondo 124: i primi 107 sono identici, seguono 17 FRAME_EXIT v1.2.270. Si isola il segmento dal **FRAME_ENTER 1794420113369**, Home alle **19:01:53.369 Europe/Rome**, fino all'ultimo evento alle **19:14:34.186**: **37 eventi**, un ingresso e 36 uscite delle pagine figlie, tutti v1.2.270/browser. Nessun nuovo LOCK_*, ERROR_*, ADMISSION_*, FRAME_ENTER o uscita del padre nel segmento; FRAME_EXIT e compatibile con il pagehide normale della figlia. Il lastBlock=LOCK_PAGEHIDE finale rinvia al blocco precedente all'ingresso, non a un blocco durante D02. I 77 eventi storici v1.2.269 e il precedente LOCK_EXPIRED v1.2.270 non concorrono al risultato.
+
+Nel primo tratto manca Archivio Account e Diego non ricorda di averlo aperto: **nessun PASS assegnato a quel rapporto isolato**. Il seguito e append-only dello stesso segmento, senza interruzioni documentate, e contiene Archivio Account alle 19:12:11.493 e 19:13:26.499. Ora sono presenti tutte le destinazioni canoniche: home_page, area_privata, account_privati, profilo_privato, impostazioni, regole_scadenze, configurazione_documenti, scadenze, archivio_account, gestione_destinatari. Presenti anche aggiungi_scadenza e dettaglio_account_privato, senza una prova CRUD o salvataggio dedotta dalle aperture.
+
+Diego conferma separatamente per entrambi i tratti **nessuna nuova Master Password, pagine leggibili e permanenza nella stessa scheda app.html**; la sequenza e stata guidata con soli collegamenti interni, senza reload o salvataggi. Stato finale active=true, permitValid=true, idleMs=180000, registro acceso e disponibile. **D02 PASS soltanto fase 1 QA2 / Chrome desktop Windows / 1.2.270**, sulla base delle prove manuali riferite e del segmento compatibile: il solo stato DIAG non avrebbe certificato lo sblocco. Nessun trasferimento agli altri ambienti o alla fase personale.
+
+**D03 parziale:** Diego apre Profilo → Contatti, scorre senza modificare dati e conferma testi/pulsanti leggibili, raggiungibili e senza sovrapposizioni. Restano Indirizzi, Documenti, Tessera digitale e gli altri controlli previsti; D03 in matrice rimane NE, senza estendere il sottocaso positivo a parita completa, copia/annullamento o profilo aziendale. D01 e gli altri casi restano NE/incompleti; pushReady=false non attribuisce un esito a D11. **Canary ON secondo la conferma personale e i rapporti ricevuti**, nessuna rilettura amministrativa indipendente; arresto con enabled=false alla prima anomalia effettiva. Nessuna modifica a codice, preferenza di inattivita, singleton/claim da parte di Codex o nuova pubblicazione. C1 e C2 restano aperti; nessuna CORNICE CHIUSA.
+
+<a id="cornice-riprendi-pubblicazione-1-2-270"></a>
+
+## Hosting 1.2.270 pubblicato e verificato, canary OFF — 11/11/2026
+
+Fonti: [GO Claude sul candidato finale ee101767](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/288#issuecomment-6797126819), ordine personale di merge/Hosting e successiva delega esplicita per il clic finale in chat; [run #1088](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43036071599), log dei job e storico approvazioni API, confronto pubblico indipendente. La [#288](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/288) e unita in **cb48b7196a3816a62dda05d11e11ff4ca7c51d26**, albero identico al candidato revisionato. I check PR e post-merge sono verdi; la run manuale usa master, tale SHA e release_scope=hosting.
+
+Diego delega a Codex Approve and deploy **per la sola #1088**. Approvazione production registrata come approved con il commento che identifica delega/scope/SHA; nessun bypass o modifica delle protezioni. Non e una delega generale. Validate **130575108944** e Deploy Firebase production **130582061839** conclusi SUCCESS. Comando CI effettivo con --only hosting; installazione backend e scope recovery prerequisites, Vault Rules e MFA response saltati, nessuna Functions/Rules distribuita.
+
+Pubblicazione completata **11/11/2026 14:57:16 UTC (15:57:16 Europe/Rome)**; verifica pubblica CI riuscita alle 14:57:29 UTC. Successiva verifica indipendente dal checkout pulito dell'esatto merge: generazione del manifest ignorato e comando release-manifest con --require-clean e --verify-url sul sito pubblico, uscita 0; esito acquisito prima delle 15:03:28 UTC. **Manifest 1.2.270**, sourceCommit esatto, **362/362 payload e hash** (363 file compreso il manifest), public tree SHA-256 **5689f9de7059c9733f6ad5fd5d4c598982e4a3c2aece1767e148942b18bdb735**. Verificati 41 profili di intestazioni, root/rewrite/redirect/alias e i tre probe di normalizzazione child/shell/public, inclusa policy del manifest. Nessuna modifica a modello, header configurati o precache per questa ricevuta.
+
+Rapporto completo pubblicato per Claude sulla [#288](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/288#issuecomment-6799339795) e sulla [#278](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6799344776). **Limiti:** confronto HTTP distinto da prova fisica e aggiornamento delle singole schede/PWA; C1 D01/D02 sospesi/NE, revoca live e altri ambienti non certificati. La 1.2.270 corregge le etichette della vista bloccata nelle otto lingue, senza risolvere i rilievi separati su Ricerca, doppio clic OFF o gli errori tecnici non attribuiti. **Canary OFF secondo l'ultima conferma personale di Diego**, senza rilettura o scrittura amministrativa di Codex. Nessun singleton/claim modificato, nuova grafica o sicurezza pubblicata; revisione produttiva Claude e nuovo ordine personale prima della riaccensione. La ricevuta documentale non richiede altro deploy. Le sezioni seguenti conservano la fase candidata e le prove precedenti.
+
 <a id="cornice-riprendi-fix-2026-11-11"></a>
 
 ## C1 — candidata 1.2.270, testo della vista bloccata — 11/11/2026
@@ -218,7 +382,7 @@ Prerequisito: [GO B1 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Pas
 
 Aggiornamento del 10/11/2026: **fase 1 su QA2 candidata sintetica già popolata, da confermare con Claude e preflight; fase 2 sull’account personale di Diego**. Un solo UID nel singleton per volta, fasi e ricevute separate. Questa lista non abilita alcun utente o cambio cloud. Produzione attestata 1.2.268 / #1060 / 79ebd9b8; il singleton predisposto manualmente è ancora spento, parziale e personale, non configurato per la fase 1.
 
-Diego esegue le prove separatamente su **Chrome desktop Windows, Chrome Android, Safari iPhone e PWA installata su iPhone**. **Priorità: PWA iPhone e Chrome desktop per primi, poi Safari iPhone e Chrome Android.** Registrare per ogni colonna modello/OS/browser/versione app/data, sorgente del rilascio approvato e presenza effettiva della cornice; Safari e PWA sono due ambienti distinti. Le due tabelle sono interamente **NE**: codice pubblicato e singleton parziale non provano un canary attivo. Prima di ogni fase verificare versione da manifest/worker e non dalla sola etichetta.
+Diego esegue le prove separatamente su **Chrome desktop Windows, Chrome Android, Safari iPhone e PWA installata su iPhone**. **Priorità: PWA iPhone e Chrome desktop per primi, poi Safari iPhone e Chrome Android.** Registrare per ogni colonna modello/OS/browser/versione app/data, sorgente del rilascio approvato e presenza effettiva della cornice; Safari e PWA sono due ambienti distinti. Le tabelle nascono interamente NE; la [ricevuta dell'11/11 su 1.2.270](#cornice-c1-d02-270-2026-11-11) assegna il solo D02 Chrome desktop della fase 1. Codice pubblicato e provisioning da soli non provano un collaudo riuscito. Prima di ogni fase verificare versione da manifest/worker e non dalla sola etichetta.
 
 B3 deve proporre l'assegnazione privata del singleton e del solo claim del pilota, preservando gli altri claim; il token nuovo richiede un nuovo accesso oppure un refresh esplicito. Per C1 preferire logout/login normale dopo la conferma del provisioning, così non si chiede a Diego di incollare token o eseguire comandi in console. La hint non concede ammissione: il documento server e il fence rimangono obbligatori. Nessun altro account viene abilitato o creato da B2.
 
@@ -263,17 +427,17 @@ Prima delle prove scegliere volontariamente se attivare Impostazioni → Diagnos
 | D18 — version skew | Tenere aperta la cornice della versione precedente, poi dopo un rilascio successivo navigare internamente: uscita o ricarica pulita sulla destinazione valida, nessuna chiave consegnata a protocollo/versione diversa, nessun loop o pagina bianca. NE finché manca un secondo rilascio; non forzare versioni o cache dai comandi in console per attribuire un PASS reale. |
 | D19 — DIAG | Default spento, sola lettura dello stato; attivare, eseguire navigazioni/blocco/push e copiare rapporto; nomi pagina senza query/ID. Cancella lascia la raccolta scelta ma azzera gli eventi; disattivare elimina. Logout/cambio account cancella e non riattiva. Provare appunti reali su Safari/PWA; errore/permesso negato resta LIMITE, nessun invio di rete. Nessun dato Vault aggiunto a mano. |
 
-### Matrice C1 fase 1 — account sintetico candidato (QA2, da confermare)
+### Matrice C1 fase 1 — account sintetico QA2
 
 `NE` = non eseguito, `PASS` = azione e risultato entrambi osservati, `FAIL` = comportamento diverso, `LIMITE` = capacità primaria non disponibile o prova incompleta da decidere con revisore/Diego. Un fallback riuscito non trasforma un LIMITE in PASS. Nessun risultato viene precompilato dalle suite automatiche.
 
 | Caso | Chrome desktop | Chrome Android | Safari iPhone | PWA iPhone |
 |---|---|---|---|---|
 | D01 | NE | NE | NE | NE |
-| D02 | NE | NE | NE | NE |
+| D02 | [PASS](#cornice-c1-d02-270-2026-11-11) | NE | NE | NE |
 | D03 | NE | NE | NE | NE |
-| D04 | NE | NE | NE | NE |
-| D05 | NE | NE | NE | NE |
+| D04 | LIMITE — [continuita del percorso PASS](#cornice-c1-d04-continuita-270-2026-11-11) | NE | NE | NE |
+| D05 | LIMITE — [ricarica padre D05-A PASS](#cornice-c1-d05a-ricarica-270-2026-11-11) | NE | NE | NE |
 | D06 | NE | NE | NE | NE |
 | D07 | NE | NE | NE | NE |
 | D08 | NE | NE | NE | NE |

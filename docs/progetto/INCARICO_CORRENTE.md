@@ -1,5 +1,47 @@
 # Incarico corrente
 
+## C1 QA2 — D05-A Chrome, ricarica con nuovo sblocco e OFF — 11/11/2026
+
+Diego chiede tutti i passi del prossimo test prima di iniziare. Riceve D05-A, limitato alla ricarica dell'intera cornice sulla pagina Account Personali: ON personale, sblocco iniziale, ricarica dal pulsante Chrome, un nuovo sblocco, copia DIAG e OFF. Conferma **stessa pagina e categoria dopo la ricarica, una sola Master dopo Ricarica, sempre app.html e Spento**. Il rapporto di 66 eventi conserva i 47 precedenti e comprende il PAGEHIDE intenzionale del padre seguito dal nuovo ingresso Account, senza altri blocchi/errori nel segmento. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-c1-d05a-ricarica-270-2026-11-11).
+
+Si registra PASS del solo D05-A QA2/Chrome/1.2.270, non una misura diretta RAM o un PASS di tutto D05; altri sottocasi e ambienti restano da provare. Ultimo stato OFF secondo l'operatore; nessuna nuova accensione implicita o operazione amministrativa di Codex. Si estende la bozza #291 con questo seguito e nuovo avviso readonly a Claude sul nuovo head; il precedente GO 5ca66ce0 non viene riutilizzato per il nuovo delta. #289 e #290 restano invariate, nessun ordine di merge eseguito. Solo ricevute esistenti, nessun codice, timeout, test runtime nuovo/rieseguito, credenziale o deploy. I checkpoint sotto precedono D05-A.
+
+
+
+## C1 QA2 — riprova continua D04 Chrome e OFF confermato — 11/11/2026
+
+Diego conferma le tre destinazioni del giro precedente e chiede tutti i passi prima di iniziare, per ripetere la sequenza completa entro tre minuti senza attendere la chat fra i clic. Riceve preparazione, sette passi, copia DIAG e spegnimento finale; riferisce **sette passaggi corretti, nessun doppio salto, nessuna nuova Master durante i sette passaggi, sempre app.html e Spento**. Il rapporto di 47 eventi conserva i precedenti 34 e aggiunge un segmento pulito di un ingresso e nove uscite in 98,467 secondi, senza nuovi blocchi o errori. [Ricevuta e perimetro del PASS](../evidenze/COLLAUDI.md#cornice-c1-d04-continuita-270-2026-11-11).
+
+Si registra il PASS del sottocaso continuita e dei tre comandi nel percorso effettivo, soltanto QA2/Chrome/1.2.270; D04 complessivo resta incompleto/LIMITE per i controlli non esercitati, senza trasferire PASS a altri ambienti, fase personale o C1 complessivo. Ultimo stato OFF confermato dall'operatore; nessuna nuova accensione implicita. Nuova ricevuta sul ramo codex/c1-d04-continuity-receipts-20261111, base 0dd3b123: si preservano #289 e #290 gia revisionate, senza ordine di merge eseguito. Solo quattro Markdown esistenti, bozza e avviso readonly a Claude; nessun runtime, timeout, credenziale, operazione amministrativa o deploy di Codex. Gli errori tecnici storici restano non attribuiti. I checkpoint sotto precedono questa riprova.
+
+
+
+## C1 QA2 — D04 manuale su Chrome, ricevuta separata e OFF — 11/11/2026
+
+Diego prosegue C1 e conferma Home QA2 pronta in Chrome. Fornisce la baseline DIAG OFF, conferma la nuova accensione personale e Home nella cornice; Codex guida senza controllare la finestra Chrome o inserire credenziali. Dopo il dubbio sulla scorciatoia da tastiera, il percorso viene preparato e i comandi vengono distinti tramite i pulsanti: Indietro Chrome → Area Privata, Avanti Chrome → Account Personali, freccia interna → Area Privata. Diego conferma sempre app.html, Master ricomparsa ritenendo trascorsi tre minuti, rapporto copiato e infine Si, spento e salvato. [Evidenze e limiti](../evidenze/COLLAUDI.md#cornice-c1-d04-chrome-270-2026-11-11).
+
+D04 resta parziale/NE per blocco e nuovo ingresso nel segmento, senza attribuire una causa ai due errori tecnici precedenti. D02 conserva il PASS limitato; altri casi/ambienti e fase personale non chiusi. Ultimo stato OFF secondo l'operatore; nessuna nuova accensione implicita. Il seguito viene preparato su codex/c1-chrome-d04-receipts-20261111, base 02beeb1b, con ricevute nei Markdown esistenti e bozza per Claude: la #289 gia revisionata rimane ferma al suo SHA e attende ancora l'ordine esplicito di merge. Nessun codice, test runtime aggiuntivo, nuovo rilascio o operazione amministrativa di Codex; nessuna modifica del timeout per far passare il caso. I checkpoint sotto precedono questo seguito.
+
+
+
+## C1 QA2 — D04 Chrome inconcluso, nuova prova integrata e OFF — 11/11/2026
+
+Diego prosegue D03 con i sottocasi visivi, link QR, copia fittizia e annullamento senza salvataggio; confronto standalone e parita complessiva ancora aperti. In D04 riferisce Indietro corretto ma Avanti Chrome non selezionabile, poi precisa di non ricordare con certezza se Indietro fosse del browser o interno all'app. Dopo una prima prova ausiliaria nel browser integrato, ordina di rifare la prova con fai tu. La lettura Chrome nativa era bloccata dallo strumento prima di qualsiasi clic; l'ausilio non sostituisce quella colonna.
+
+Per la nuova prova Diego conferma personalmente enabled=true e inserisce la Master iniziale soltanto nell'app. Codex esegue nel browser integrato la sequenza reale Home → avatar Profilo → Home → Privato → Account Personali → Back browser → Forward browser → Indietro interno: destinazioni corrette e nessuna ulteriore Master osservata. Solo navigazione e osservazione UI, senza inserire password, aprire record, modificare dati o compiere operazioni amministrative. Al termine Diego conferma personalmente enabled=false: **ultimo stato OFF riferito**, nessuna rilettura/scrittura amministrativa di Codex. Il rapporto OFF vuoto precedente non ricostruisce D04; nessuna revoca live dedotta. Nessun nuovo tentativo nativo o riaccensione implicita. D02 Chrome QA2 resta PASS nel proprio perimetro; D01/D03/D04 e gli altri casi/ambienti rimangono incompleti/NE. [Ricevuta canonica](../evidenze/COLLAUDI.md#cornice-c1-d03-d04-270-2026-11-11). Aggiornamento delle sole ricevute esistenti e avviso readonly a Claude su #289/#278; nessuna correzione codice, nuova versione, merge, deploy, grafica o sicurezza pubblicata. I checkpoint sotto precedono l'ultima conferma OFF.
+
+## Ripresa C1 su QA2 dopo la 1.2.270 — 11/11/2026
+
+Diego ordina «procedi» alla guida C1 e conferma la versione 1.2.270. Chiarito che il primo rapporto appartiene all'account personale, esce da quello e accede a QA2; baseline OFF/registro attivo e tre minuti, poi cambia personalmente solo enabled a true e conferma. Nessuna operazione Firebase/Google Cloud, login o sblocco di Codex. Rimangono fase 1 individuale, scadenza concordata invariata e spegnimento personale alla prima anomalia; nessuna estensione al conto personale o ad altri utenti.
+
+Codex guida un caso alla volta e annota soltanto esiti riferiti/osservati: **D02 PASS QA2 / Chrome desktop Windows / 1.2.270**, da conferme esplicite di Diego e due rapporti con segmento append-only; il primo rapporto senza Archivio non e dichiarato sufficiente. Profilo → Contatti positivo come solo sottocaso D03; D01/D03 e i casi restanti non sono chiusi. [Ricevuta canonica](../evidenze/COLLAUDI.md#cornice-c1-d02-270-2026-11-11). Sono aggiornate le sole ricevute nei documenti esistenti e l'avviso readonly a Claude sulla PR in bozza #289 e sulla #278. Nessun merge/deploy, nuova grafica, modifica sicurezza/cornice o auto-approvazione. I mandati successivi sono checkpoint precedenti.
+
+## Rilascio 1.2.270 concluso, delega limitata alla #1088 — 11/11/2026
+
+Dopo il GO Claude sul candidato finale della #288, Diego autorizza merge in master e avvio del solo Hosting CI 1.2.270. La PR e unita nello SHA cb48b7196a3816a62dda05d11e11ff4ca7c51d26, albero identico al candidato revisionato. Con successivo ordine esplicito Diego delega a Codex anche Approve and deploy **per la sola run #1088**: clic eseguito e approvazione production confermata via API, senza bypass o modifica delle protezioni. Per i rilasci successivi resta la normale approvazione personale; nessuna delega generale.
+
+Deploy e confronto pubblico indipendente riusciti; [ricevuta canonica](../evidenze/COLLAUDI.md#cornice-riprendi-pubblicazione-1-2-270) pubblicata sulla #288 e sulla #278 per Claude. Sono autorizzate le sole ricevute nei documenti esistenti, su ramo separato e in bozza per revisione: nessun nuovo Hosting necessario per i Markdown. **Singleton OFF secondo l'ultima conferma di Diego**, nessuna lettura/scrittura amministrativa Firebase/Google Cloud, attivazione o modifica claim. C1 resta sospeso/NE, nuova riaccensione soltanto su ordine personale; nessuna pubblicazione di grafica o sicurezza. I paragrafi successivi conservano i mandati preparatori.
+
 <a id="cornice-riprendi-incarico-2026-11-11"></a>
 
 ## C1 — correzione scelta della schermata bloccata, 11/11/2026
