@@ -33,6 +33,8 @@ let _currentUserStart = null;
  * @param {Object} user - Oggetto User di Firebase Auth
  */
 export async function initAreaPrivata(user) {
+    // UI a tre livelli: «Azzera statistiche» dietro «Modifica» della sezione Top 10.
+    import('../shared/manage-mode.js').then(module => module.installManageMode?.(document)).catch(() => {});
     if (!user) return;
 
     // Evita re-inizializzazione se l'utente è lo stesso

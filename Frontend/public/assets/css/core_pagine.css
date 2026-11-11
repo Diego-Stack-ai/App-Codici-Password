@@ -264,3 +264,73 @@ html:not(.dark) .dashboard-list-item {
     background: rgba(0, 0, 0, 0.03);
     color: var(--text-primary);
 }
+
+/* === Revisione UI a tre livelli — base condivisa in ui-tre-livelli.css === */
+/* Pagine hub (Home, Area privata) — tappa 4, 11/11/2026.
+   Schede piene in tinta tenue dalla palette attiva; nessun colore d'identità fisso.
+   I colori funzionali restano solo dove indicano uno stato (Scadenze, Urgenze). */
+body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card:is(.card-blue, .card-green, .card-orange, .card-red) {
+    background: var(--rev-surface);
+    border: 1px solid var(--rev-border);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    color: var(--text-primary);
+}
+
+body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card.border-glow::after {
+    display: none;
+}
+
+/* Icona della scheda: piccolo riquadro accentato, non più filigrana a tutta scheda. */
+body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card .matrix-icon-box {
+    position: static;
+    transform: none;
+    opacity: 1;
+    filter: none;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin: 0 0 var(--space-2, 0.5rem);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    box-shadow: none;
+    color: var(--accent);
+}
+
+body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card .matrix-icon-box span {
+    font-size: var(--icon-lg);
+    color: inherit;
+}
+
+body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card .card-text-block {
+    height: auto;
+}
+
+/* Stato: Scadenze in arrivo e Urgenze conservano il colore funzionale su icona e contatore. */
+body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card.area-scadenze {
+    --accent-rgb: 249, 115, 22;
+}
+
+body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card.area-urgenze {
+    --accent-rgb: 239, 68, 68;
+}
+
+body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .area-scadenze .matrix-icon-box {
+    background: color-mix(in srgb, var(--status-warning) 16%, transparent);
+    color: var(--status-warning);
+}
+
+body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .area-urgenze .matrix-icon-box {
+    background: color-mix(in srgb, var(--status-error) 14%, transparent);
+    color: var(--status-error);
+}
+
+body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .top10-title {
+    font: var(--font-label);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--text-secondary);
+}
+

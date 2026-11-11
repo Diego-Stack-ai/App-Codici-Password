@@ -97,3 +97,8 @@
     pointer-events: none;
     user-select: none;
 }
+
+/* «Azzera statistiche» è gestione: visibile solo dopo «Modifica» della sezione. */
+body[data-ui-revision="tre-livelli"] [data-manage="off"] #btn-reset-views {
+    display: none;
+}

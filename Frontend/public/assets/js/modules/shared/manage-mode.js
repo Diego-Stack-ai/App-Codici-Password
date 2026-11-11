@@ -15,8 +15,8 @@ import { t } from '../../translations.js';
 const installed = new WeakSet();
 // Intestazioni di sezione riconosciute: profili (form-section), pagine di dettaglio e
 // riga d'intestazione del Profilo azienda (accordion + azione, senza pulsanti annidati).
-const HEADER = ':scope > :is(.form-section-header, .detail-section-header, .profile-overview-heading)';
-const TITLE = '.form-section-title, .detail-section-title';
+const HEADER = ':scope > :is(.form-section-header, .detail-section-header, .profile-overview-heading, .top10-widget-header)';
+const TITLE = '.form-section-title, .detail-section-title, .top10-title';
 
 function label(active) {
     return active ? (t('ui_manage_done') || 'Fine') : (t('ui_manage_edit') || 'Modifica');
