@@ -1,5 +1,69 @@
 # Collaudi
 
+<a id="cornice-c1-d05a-ricarica-270-2026-11-11"></a>
+
+## C1 QA2 — D05-A ricarica del padre, destinazione e nuovo sblocco PASS — 11/11/2026
+
+Prova manuale eseguita da Diego su **Google Chrome desktop Windows, QA2, app v1.2.270**, sorgente distribuito cb48b7196a3816a62dda05d11e11ff4ca7c51d26. Guida completa prima dell'inizio, DIAG acceso e timeout invariato a **180000 ms**; nessuna attesa della chat fra le azioni. Versione esatta Chrome/build Windows non raccolte. Diego opera personalmente ON, sblocco iniziale, ricarica dal pulsante di Chrome, nuovo sblocco e OFF. Codex guida e analizza il rapporto, senza controllare Chrome, inserire password o usare Firebase/Google Cloud amministrativi.
+
+Riscontro esplicito dell'operatore: **stessa pagina e categoria dopo la ricarica; una sola Master dopo il pulsante Ricarica; sempre app.html; Spento**. Destinazione prima e dopo: **Account privato, categoria Account Personali**. Il nuovo sblocco dopo la ricarica e atteso, distinto dallo sblocco iniziale e dalla continuita nelle navigazioni interne. Nessun dato o modulo modificato richiesto/riferito.
+
+Rapporto di **66 eventi**, tutti v1.2.270/browser, ordinati e conformi all'allowlist: i **primi 47 sono identici** al rapporto della riprova D04, seguono **19 eventi append-only**. LOCK_POLICY_REVOKED delle 23:25:07.149, ADMISSION_DENIED/LOCK_ADMISSION_DENIED delle 23:25:38.597 e gli altri eventi prima del nuovo ingresso appartengono alla preparazione/arresto precedente; sono fuori dal segmento D05-A. Nessun errore storico viene cancellato o attribuito a questa ricarica.
+
+**Segmento D05-A:** FRAME_ENTER Area Privata alle **23:39:22.844**, at=1794436762844, fino a FRAME_EXIT Account alle **23:41:11.315**, orari **Europe/Rome**. **Otto eventi: due ingressi, cinque uscite e un solo LOCK_PAGEHIDE del padre**, durata del tratto **108,471 secondi**. Il PAGEHIDE intenzionale e compatibile con il clic Ricarica riferito dall'operatore; il codice da solo non distinguerebbe una ricarica da altre uscite del documento.
+
+| Evento | Ora Europe/Rome | Riscontro e limite |
+|---|---|---|
+| FRAME_ENTER area_privata.html | 23:39:22.844 | Ingresso della preparazione ammessa, prima della ricarica su Account. |
+| FRAME_EXIT area_privata.html | 23:39:29.957 | Preparazione tra pagine. |
+| FRAME_EXIT home_page.html | 23:39:44.251 | Preparazione verso Area Privata. |
+| FRAME_EXIT area_privata.html | 23:40:30.294 | Passaggio verso Account Personali riferito. |
+| LOCK_PAGEHIDE app.html | 23:40:37.403 | Uscita del padre durante la ricarica riferita. |
+| FRAME_EXIT account_privati.html | 23:40:37.405 | Uscita del vecchio figlio, due millisecondi dopo il padre. |
+| FRAME_ENTER account_privati.html | 23:40:38.913 | Nuovo ingresso sulla pagina Account. |
+| FRAME_EXIT account_privati.html | 23:41:11.315 | Uscita successiva verso la raccolta DIAG nelle Impostazioni. |
+
+PAGEHIDE → nuovo ingresso: **1,510 secondi**, intervallo fra eventi che non misura il completamento dello sblocco o del caricamento. Il tratto dopo il nuovo ingresso fino all'ultima uscita dura **32,402 secondi** e non contiene blocchi, errori o altri ingressi. Lo stato copiato e active=true, permitValid=true, idleMs=180000, pushReady=true, registro attivo/disponibile; lastBlock=LOCK_PAGEHIDE rinvia alla ricarica precedente al nuovo ingresso e non prova un blocco successivo.
+
+**PASS del sottocaso D05-A**, limitato alla ricarica del padre dal pulsante Chrome, stessa pagina/categoria riferite, una sola nuova Master e permanenza in app.html, **solo fase 1 QA2 / Chrome desktop Windows / v1.2.270**. Non e una misura diretta della cancellazione RAM o una certificazione generale di query/hash. Ricarica del solo figlio, link privato diretto, nuova scheda con sblocco proprio e Back dopo logout restano non eseguiti: **D05 complessivo LIMITE/incompleto** in matrice. I PASS D02 e del percorso D04 mantengono il proprio perimetro; nessun trasferimento a altri ambienti o fase personale.
+
+**Ultimo stato OFF:** Diego conferma Spento dopo la copia ancora attiva. Nessuna rilettura amministrativa o DIAG dopo l'ultimo spegnimento; la revoca storica non prova l'ultimo OFF, latenza o cancellazione RAM/D15. pushReady non certifica D11. Scadenza e timeout invariati. Solo ricevute nei quattro Markdown esistenti, senza codice, versione, workflow, Rules, Functions, singleton/claim o credenziali modificati da Codex; nessun deploy o merge. Si aggiorna la bozza #291 con nuova revisione richiesta sul nuovo head: il GO precedente sul solo 5ca66ce0 resta storico, #289 e #290 preservate. C1/C2 restano aperti; nessuna CORNICE CHIUSA o nuova accensione implicita.
+
+
+
+<a id="cornice-c1-d04-continuita-270-2026-11-11"></a>
+
+## C1 QA2 — continuita e tre comandi D04 del percorso Chrome PASS — 11/11/2026
+
+Riprova eseguita personalmente da Diego su **Google Chrome desktop Windows, QA2, app v1.2.270**, sorgente distribuito cb48b7196a3816a62dda05d11e11ff4ca7c51d26. La guida completa viene fornita prima dell'inizio, con timeout invariato a **180000 ms**: nessuna attesa della chat tra i sette passaggi. Versione esatta Chrome/build Windows non raccolte. ON, sblocco e OFF eseguiti dall'operatore; Codex legge soltanto il rapporto e guida, senza controllare Chrome nativo, inserire credenziali o usare servizi amministrativi.
+
+Diego conferma esplicitamente **sette passaggi corretti, nessun doppio salto, nessuna nuova Master durante i sette passaggi, sempre app.html e Spento**. Percorso: Home → avatar Profilo → Home → Privato → Account Personali → Indietro Chrome (Area Privata) → Avanti Chrome (Account Personali) → freccia interna dell'app (Area Privata). La categoria Personali e le destinazioni sono riferite dall'operatore, non dedotte dai soli eventi. Il successivo accesso alle Impostazioni serve alla copia DIAG ed e distinto dai sette passaggi valutati.
+
+Il nuovo rapporto contiene **47 eventi**, tutti v1.2.270/browser, conformi all'allowlist e ordinati; i **primi 34 sono identici** al rapporto precedente e seguono **13 eventi append-only**. Tra le aggiunte, LOCK_POLICY_REVOKED delle 23:08:14.347 e l'uscita Impostazioni appartengono all'arresto precedente; LOCK_PAGEHIDE del padre alle 23:22:44.307 precede il nuovo ingresso. Sono esclusi dal segmento della riprova, insieme ai blocchi e due errori tecnici storici, ancora non attribuiti.
+
+**Segmento pulito:** FRAME_ENTER Impostazioni alle **23:22:46.054** (at=1794435766054) fino a FRAME_EXIT Area Privata alle **23:24:24.521**, orari **Europe/Rome**. **10 eventi: un ingresso e nove uscite**, **98,467 secondi** compresa la preparazione dalla pagina ammessa e la raccolta finale. Nessun LOCK_*, ERROR_*, ADMISSION_*, nuovo FRAME_ENTER o uscita del padre all'interno. FRAME_EXIT delle pagine figlie e coerente con la navigazione normale, senza dimostrare da solo quale pulsante e stato usato.
+
+| Evento nel segmento | Ora Europe/Rome | Riscontro riferito/coerente |
+|---|---|---|
+| FRAME_ENTER impostazioni.html | 23:22:46.054 | Nuovo ingresso ammesso, prima del giro dalla Home. |
+| FRAME_EXIT impostazioni.html | 23:22:53.269 | Preparazione verso Home. |
+| FRAME_EXIT home_page.html | 23:22:55.786 | 1. Avatar → Profilo. |
+| FRAME_EXIT profilo_privato.html | 23:23:09.106 | 2. Casetta → Home. |
+| FRAME_EXIT home_page.html | 23:23:11.683 | 3. Privato → Area Privata. |
+| FRAME_EXIT area_privata.html | 23:23:14.065 | 4. Account Personali → Account privato. |
+| FRAME_EXIT account_privati.html | 23:23:20.007 | 5. Indietro Chrome → Area Privata. |
+| FRAME_EXIT area_privata.html | 23:23:30.470 | 6. Avanti Chrome → Account Personali. |
+| FRAME_EXIT account_privati.html | 23:23:34.964 | 7. Freccia app → Area Privata. |
+| FRAME_EXIT area_privata.html | 23:24:24.521 | Raccolta successiva nelle Impostazioni. |
+
+L'uscita Account relativa al settimo passaggio e registrata **48,910 secondi dopo l'ingresso del padre**; la destinazione finale e confermata dall'operatore prima della raccolta nel segmento di **98,467 secondi**. La soglia di tre minuti e rispettata senza cambiare preferenze; l'evento di uscita non misura da solo il completamento del caricamento. Stato alla copia active=true, permitValid=true, idleMs=180000, pushReady=true, registro attivo/disponibile. lastBlock=LOCK_PAGEHIDE e storico, anteriore al nuovo FRAME_ENTER. Il solo stato attivo non basterebbe: il risultato combina il segmento con le conferme manuali. pushReady non certifica D11.
+
+**PASS del sottocaso continuita e dei tre comandi per questo itinerario, soltanto fase 1 QA2 / Chrome desktop Windows / v1.2.270.** Non e un PASS globale di C1, degli altri ambienti o della fase personale. Altri percorsi/query, anchor e ripristino di form sensibili non sono esercitati/certificati da questo giro: **D04 complessivo resta incompleto**, riportato in matrice come LIMITE con collegamento al PASS circoscritto, secondo la legenda e da rivedere con Claude. D02 conserva il proprio PASS; D01/D03 e gli altri casi restano aperti. Nessuna cancellazione o reinterpretazione dei precedenti blocchi/errori.
+
+**Ultimo stato OFF:** Diego conferma Spento dopo il rapporto copiato ancora attivo. Nessuna rilettura amministrativa indipendente o DIAG dopo questo ultimo spegnimento. Il LOCK_POLICY_REVOKED storico non prova l'ultimo OFF, la latenza o cancellazione RAM: nessun PASS D15/revoca live. Scadenza concordata invariata. Nessun codice, versione, workflow, Rules, Functions, singleton/claim o timeout modificati da Codex; nessun merge, deploy, grafica o sicurezza pubblicata. Ricevuta separata da base 0dd3b123 per preservare gli head gia revisionati di #289 e #290; nuovo GO richiesto per questo seguito, nessuna CORNICE CHIUSA o nuova accensione implicita.
+
+
+
 <a id="cornice-c1-d04-chrome-270-2026-11-11"></a>
 
 ## C1 QA2 — D04 Chrome, destinazioni corrette e continuita non certificata — 11/11/2026
@@ -372,8 +436,8 @@ Prima delle prove scegliere volontariamente se attivare Impostazioni → Diagnos
 | D01 | NE | NE | NE | NE |
 | D02 | [PASS](#cornice-c1-d02-270-2026-11-11) | NE | NE | NE |
 | D03 | NE | NE | NE | NE |
-| D04 | NE | NE | NE | NE |
-| D05 | NE | NE | NE | NE |
+| D04 | LIMITE — [continuita del percorso PASS](#cornice-c1-d04-continuita-270-2026-11-11) | NE | NE | NE |
+| D05 | LIMITE — [ricarica padre D05-A PASS](#cornice-c1-d05a-ricarica-270-2026-11-11) | NE | NE | NE |
 | D06 | NE | NE | NE | NE |
 | D07 | NE | NE | NE | NE |
 | D08 | NE | NE | NE | NE |

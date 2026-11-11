@@ -1,5 +1,21 @@
 # Incarico corrente
 
+## C1 QA2 — D05-A Chrome, ricarica con nuovo sblocco e OFF — 11/11/2026
+
+Diego chiede tutti i passi del prossimo test prima di iniziare. Riceve D05-A, limitato alla ricarica dell'intera cornice sulla pagina Account Personali: ON personale, sblocco iniziale, ricarica dal pulsante Chrome, un nuovo sblocco, copia DIAG e OFF. Conferma **stessa pagina e categoria dopo la ricarica, una sola Master dopo Ricarica, sempre app.html e Spento**. Il rapporto di 66 eventi conserva i 47 precedenti e comprende il PAGEHIDE intenzionale del padre seguito dal nuovo ingresso Account, senza altri blocchi/errori nel segmento. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-c1-d05a-ricarica-270-2026-11-11).
+
+Si registra PASS del solo D05-A QA2/Chrome/1.2.270, non una misura diretta RAM o un PASS di tutto D05; altri sottocasi e ambienti restano da provare. Ultimo stato OFF secondo l'operatore; nessuna nuova accensione implicita o operazione amministrativa di Codex. Si estende la bozza #291 con questo seguito e nuovo avviso readonly a Claude sul nuovo head; il precedente GO 5ca66ce0 non viene riutilizzato per il nuovo delta. #289 e #290 restano invariate, nessun ordine di merge eseguito. Solo ricevute esistenti, nessun codice, timeout, test runtime nuovo/rieseguito, credenziale o deploy. I checkpoint sotto precedono D05-A.
+
+
+
+## C1 QA2 — riprova continua D04 Chrome e OFF confermato — 11/11/2026
+
+Diego conferma le tre destinazioni del giro precedente e chiede tutti i passi prima di iniziare, per ripetere la sequenza completa entro tre minuti senza attendere la chat fra i clic. Riceve preparazione, sette passi, copia DIAG e spegnimento finale; riferisce **sette passaggi corretti, nessun doppio salto, nessuna nuova Master durante i sette passaggi, sempre app.html e Spento**. Il rapporto di 47 eventi conserva i precedenti 34 e aggiunge un segmento pulito di un ingresso e nove uscite in 98,467 secondi, senza nuovi blocchi o errori. [Ricevuta e perimetro del PASS](../evidenze/COLLAUDI.md#cornice-c1-d04-continuita-270-2026-11-11).
+
+Si registra il PASS del sottocaso continuita e dei tre comandi nel percorso effettivo, soltanto QA2/Chrome/1.2.270; D04 complessivo resta incompleto/LIMITE per i controlli non esercitati, senza trasferire PASS a altri ambienti, fase personale o C1 complessivo. Ultimo stato OFF confermato dall'operatore; nessuna nuova accensione implicita. Nuova ricevuta sul ramo codex/c1-d04-continuity-receipts-20261111, base 0dd3b123: si preservano #289 e #290 gia revisionate, senza ordine di merge eseguito. Solo quattro Markdown esistenti, bozza e avviso readonly a Claude; nessun runtime, timeout, credenziale, operazione amministrativa o deploy di Codex. Gli errori tecnici storici restano non attribuiti. I checkpoint sotto precedono questa riprova.
+
+
+
 ## C1 QA2 — D04 manuale su Chrome, ricevuta separata e OFF — 11/11/2026
 
 Diego prosegue C1 e conferma Home QA2 pronta in Chrome. Fornisce la baseline DIAG OFF, conferma la nuova accensione personale e Home nella cornice; Codex guida senza controllare la finestra Chrome o inserire credenziali. Dopo il dubbio sulla scorciatoia da tastiera, il percorso viene preparato e i comandi vengono distinti tramite i pulsanti: Indietro Chrome → Area Privata, Avanti Chrome → Account Personali, freccia interna → Area Privata. Diego conferma sempre app.html, Master ricomparsa ritenendo trascorsi tre minuti, rapporto copiato e infine Si, spento e salvato. [Evidenze e limiti](../evidenze/COLLAUDI.md#cornice-c1-d04-chrome-270-2026-11-11).
