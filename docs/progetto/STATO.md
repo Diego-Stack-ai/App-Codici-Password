@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+## C1 QA2 ripreso manualmente — 11/11/2026
+
+Priorita assoluta al collaudo fisico della cornice pubblicata **1.2.269**, sorgente 6b61eead. Dopo logout/login OFF e nuovo consenso DIAG, Diego conferma la riaccensione e dieci destinazioni raggiunte senza Master nelle singole transizioni riferite. **D02 sospeso/NE, nessun PASS della continuita:** il rapporto finale contiene piu sessioni, sette scadenze e due operazioni rifiutate seguite da blocco difensivo del figlio. Causa non identificabile dal registro: Master errata/annullamento non esclusi, nessun difetto di sicurezza confermato. Stato finale active=true e permitValid=true non certifica il percorso passato. D01 incompleto. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-c1-ripresa-2026-11-11).
+
+Prove sospese, richiesto spegnimento personale enabled=false e conferma ancora attesa; nessuna rilettura amministrativa indipendente. Scadenza 18/11/2026 ore 23:59 italiane invariata. Rilievi separati su etichetta Home Page e graduatoria della Ricerca, nessuna correzione runtime. Altri ambienti e fase personale non certificati, nessuna CORNICE CHIUSA. Nessuna pubblicazione di grafica o sicurezza fino alla fine C1; nessun nuovo deploy da queste annotazioni. I checkpoint OFF e preparatori sotto sono storici.
+
 ## Produzione 1.2.269 pubblicata e verificata — 11/11/2026
 
 La [PR #286](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/286) è unita dopo il [GO Claude sul candidato f25ed120](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/286#issuecomment-6788613792) e l'ordine personale di Diego. Sorgente Hosting **6b61eead6dc6791eafea15038486020d22267ac4**, [run #1075](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42972066163) riuscita con approvazione personale registrata, nessun bypass e solo scope hosting. Manifest, **362/362 payload e hash**, 41 profili di intestazioni e probe delle route verificati anche indipendentemente dalla CI. Diego conferma dopo Ctrl+R su Chrome QA2 **v1.2.269**: PASS della sola versione caricata, distinto dai collaudi della cornice. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-dialogo-pubblicazione-1-2-269).

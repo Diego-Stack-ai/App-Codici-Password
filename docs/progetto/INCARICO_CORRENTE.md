@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Priorita C1, revisione UI e sicurezza separata — 11/11/2026
+
+Diego ordina, nell'ordine: guida manuale C1 su QA2 come priorita assoluta; revisione in sola lettura del pilota Profilo #283 al commit 5e6bd39 con GO/NO-GO sulla PR; avvio della sicurezza su ramo separato, un punto alla volta e avviso a Claude per ciascun passo. Nessuna pubblicazione di grafica o sicurezza fino alla fine C1. I file della cornice sono modificabili soltanto per correzioni emerse da C1, mantenendo revisione Claude e approvazione personale prima di merge e deploy CI.
+
+La revisione UI richiesta e pubblicata come [REVISIONE CODEX - NO-GO sul commit esatto](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/283#issuecomment-6789523626), distinta dagli head successivi e senza modificare il lavoro di Claude. Ramo sicurezza codex/security-followup-20261111 aperto da 6b61eead; primo inventario ancora in preparazione, nessuna correzione o pubblicazione da dichiarare.
+
+C1 ripreso personalmente da Diego dopo logout/login OFF e attivazione DIAG; nuovo enabled=true confermato e rapporto ammesso su 1.2.269. Guida un caso alla volta, arresto con enabled=false alla prima anomalia, nessuna operazione Firebase/Google Cloud al suo posto. [Riscontri parziali, non certificazione C1](../evidenze/COLLAUDI.md#cornice-c1-ripresa-2026-11-11). Le sezioni OFF sotto conservano i checkpoint antecedenti alla riaccensione autorizzata.
+
 <a id="cornice-dialogo-rilascio-2026-11-11"></a>
 
 ## Rilascio 1.2.269 concluso, singleton OFF — 11/11/2026
