@@ -1463,6 +1463,20 @@ function setupThemeSelector() {
             window.location.reload();
         });
     });
+    // Grafica Nuova/Classica: preferenza solo locale, applicata da theme-init.js al prossimo caricamento.
+    const graphics = localStorage.getItem('ui_graphics') === 'classic' ? 'classic' : 'new';
+    document.querySelectorAll('.ui-graphics-btn').forEach(btn => {
+        const isCurrent = btn.dataset.uiGraphics === graphics;
+        btn.classList.toggle('active', isCurrent);
+        btn.setAttribute('aria-pressed', String(isCurrent));
+        btn.addEventListener('click', () => {
+            const selected = btn.dataset.uiGraphics;
+            if (!['new', 'classic'].includes(selected) || selected === graphics) return;
+            if (selected === 'classic') localStorage.setItem('ui_graphics', 'classic');
+            else localStorage.removeItem('ui_graphics');
+            window.location.reload();
+        });
+    });
     const savedColorTheme = localStorage.getItem('color_theme');
     const colorTheme = ['blue', 'green', 'red', 'sand', 'petrol', 'lavender', 'dusty-rose'].includes(savedColorTheme) ? savedColorTheme : 'blue';
     document.querySelectorAll('.color-theme-btn').forEach(btn => {

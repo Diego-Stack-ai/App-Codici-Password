@@ -47,6 +47,8 @@ function expandIfCollapsed(section) {
  * @param {string} selector - sezioni gestibili (es. '.form-section[data-manageable]')
  */
 export function installManageMode(root = document, selector = '[data-manageable]') {
+    // «Grafica classica»: nessun comando Modifica, tutti i comandi restano visibili come prima.
+    if ((root.ownerDocument || root).documentElement?.dataset.uiGraphics === 'classic') return;
     root.querySelectorAll(selector).forEach(section => {
         if (installed.has(section)) return;
         const header = section.querySelector(HEADER);
