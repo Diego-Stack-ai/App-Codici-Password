@@ -1,5 +1,5 @@
 import {createFrameMediaLifetime} from './vault-frame-media-lifetime.mjs';
-import {auth} from '../../firebase-config.js?v=1.2.269';
+import {auth} from '../../firebase-config.js?v=1.2.270';
 import {authSessionFence} from '../../auth-session-fence.js';
 import {APP_VERSION, VAULT_FRAME_ENABLED} from '../../app-env.js';
 import {createFrameTransport} from './vault-frame-transport.mjs';

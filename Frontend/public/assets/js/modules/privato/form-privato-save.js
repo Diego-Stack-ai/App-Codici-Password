@@ -3,7 +3,7 @@ import {confirmFrameAction, vaultFrameClient} from '../core/vault-frame-client.j
 import { listOwnedAccountInvitesConfirmed, getPrivateAccountConfirmed } from '../data/vault-repository.js';
 import { findProfileAccountItem, patchProfileAccountItem, profileAccountReferences } from '../privato/profile-model.js';
 import { prepareCompanyProfileLink, promptCompanyProfilePasswordChoice } from '../azienda/company-profile-link.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.269';
+import { auth, db } from '../../firebase-config.js?v=1.2.270';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';

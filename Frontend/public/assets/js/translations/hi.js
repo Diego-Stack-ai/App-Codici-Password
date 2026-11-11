@@ -1,6 +1,8 @@
 // हिंदी का आधिकारिक अनुवाद कैटलॉग।
 // scripts/split-translations.mjs से दोबारा न बनाएँ: वह पुरानी इनलाइन संरचना के लिए है।
 export default {
+    "frame_locked_title": "वॉल्ट लॉक है",
+    "frame_unlock_resume": "अनलॉक करके जारी रखें",
     "frame_export_ready": "निर्यात तैयार है",
     "frame_export_action_hint": "अभी अधिकृत की गई फ़ाइल के साथ जारी रखने के लिए पुष्टि करें दबाएँ।",
     "deadline_swipe_archive_restore": "संग्रहित या पुनर्स्थापित करने के लिए दाईं ओर स्वाइप करें",

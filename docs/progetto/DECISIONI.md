@@ -1,5 +1,13 @@
 # Decisioni
 
+<a id="cornice-riprendi-scelta-2026-11-11"></a>
+
+## 11/11/2026 — schermata comune «Vault bloccata» / «Sblocca e riprendi»
+
+Durante C1 Diego rileva che la vista comune dice Privato e Home Page anche quando il clic riapre Impostazioni o un'altra destinazione precedente. Tra ritorno sempre a Home, etichetta con nome della destinazione e azione generica, sceglie esplicitamente la terza: **Vault bloccata** come titolo, **Sblocca e riprendi** come collegamento. Nessuna promessa di ritorno sempre alla Home o aggiunta del nome della pagina nel testo.
+
+La correzione riguarda le etichette della cornice nelle otto lingue supportate e conserva il percorso di ripresa gia validato. Se il montaggio e negato, resta il ripiego standalone sicuro esistente verso Home: il testo generico non concede ammissione o chiavi e non garantisce la vecchia destinazione quando il pilota non e ammesso. [Contratto](../regole/INTERFACCIA.md#cornice-riprendi-ui-2026-11-11). Candidata 1.2.270 da rivedere, non pubblicata; produzione 1.2.269. Diego conferma personalmente enabled=false; C1 sospeso. Nessun ordine di merge/deploy o modifica di altri rilievi.
+
 <a id="cornice-c1-scadenza-2026-11-10"></a>
 
 ## 10/11/2026 — canary QA2, scadenza fissa e arresto delle prove fisiche

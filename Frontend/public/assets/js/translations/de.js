@@ -2,6 +2,8 @@
 // Nicht mit scripts/split-translations.mjs neu erzeugen (veralteter historischer Generator).
 // Lingua: de — Parität mit dem italienischen Basiskatalog.
 export default {
+    "frame_locked_title": "Tresor gesperrt",
+    "frame_unlock_resume": "Entsperren und fortsetzen",
     "frame_export_ready": "Export bereit",
     "frame_export_action_hint": "Wählen Sie Bestätigen, um mit der gerade autorisierten Datei fortzufahren.",
     "deadline_swipe_archive_restore": "Nach rechts wischen, um zu archivieren oder wiederherzustellen",

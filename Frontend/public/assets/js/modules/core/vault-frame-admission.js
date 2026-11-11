@@ -1,5 +1,5 @@
 import {doc, onSnapshot, getDocFromServer} from '/assets/js/vendor/firebase-runtime.js';
-import {auth, db} from '../../firebase-config.js?v=1.2.269';
+import {auth, db} from '../../firebase-config.js?v=1.2.270';
 import {authSessionFence} from '../../auth-session-fence.js';
 import {FRAME_POLICY_PATH, createFramePermitWatcher} from './vault-frame-permit.mjs';
 export function createProductionFrameAdmission({user, fenceTicket, onDeny}) {

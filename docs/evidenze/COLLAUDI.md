@@ -1,5 +1,57 @@
 # Collaudi
 
+<a id="cornice-riprendi-fix-2026-11-11"></a>
+
+## C1 — candidata 1.2.270, testo della vista bloccata — 11/11/2026
+
+Diego sceglie [l'opzione 3](../progetto/DECISIONI.md#cornice-riprendi-scelta-2026-11-11): Vault bloccata / Sblocca e riprendi. Conferma successivamente enabled=false; nessuna rilettura o scrittura amministrativa di Codex. Base runtime 6b61eead, ramo codex/vault-frame-resume-copy-20261111 dalle ricevute 1350971d. Produzione 1.2.269; questa e una candidata non pubblicata.
+
+Implementazione limitata al title, h1 e testo/chiave del link di app.html e a due traduzioni dedicate nei cataloghi it/en/es/fr/de/zh/hi/pt. Le chiavi condivise di Privato e Home restano intatte; href e gestore resume non cambiano. Aggiornamenti meccanici del versionamento canonico alla 1.2.270 e metadato reviewedAppVersion del catalogo guida; nessun cambiamento alle istruzioni/target D0. Nessun nuovo MD o dipendenza installata.
+
+**Verifiche locali:** suite cornice **248/248 PASS**, compresi dieci casi del dialogo reale sopra iframe/focus/inert e cinque casi header/framing su Hosting Emulator demo. Offline **16/16 PASS**, precache **342 risorse**, runtime Firebase con 61 export rigenerato usando lo stesso SDK gia installato; vendor e lista precache identici alla base. I18n **19/19 PASS**, zero nuove chiavi usate mancanti nelle otto lingue; guida **12/12 PASS**, 31 pagine/126 istruzioni/111 target; budget rispettati da tutte le 31 pagine senza aumento delle soglie, diagnostica **4/4 PASS** e sintassi di 249 moduli valida. Versionamento coerente su 275 riferimenti; documenti **12/12 PASS**, 34 MD e 890 collegamenti; diff senza errori di spaziatura.
+
+**Preparazione del banco:** la prima build non trova il pacchetto Firebase nel nuovo worktree; copia locale dello stesso SDK, versione confrontata col lock, consente la build senza installazioni. I cinque test header sono inizialmente bloccati dalla CLI assente nel worktree, poi dal timeout di avvio; riuso della CLI locale della versione del lock e modalita CI senza controllo aggiornamenti risolvono il solo banco. Rerun dei cinque header **5/5 PASS**, quindi nuova esecuzione integrale della suite **248/248 PASS** con uscita 0. Nessun test saltato o modifica ai test/permissi di produzione per ottenere il risultato.
+
+**Manifest locale:** 1.2.270, 362 payload, albero pubblico **e997a8dc177ef0a3304cb4e9aa6cdc8ddd90fb52181b479c0f5faad2424b447c**, generazione e verifica locale riuscite. La generazione preliminare sul tree non ancora committato non certifica l'origine del rilascio: manifest da riallineare al commit finale e verificare in CI prima di un eventuale rilascio. firebase.json, Rules, Functions e workflow identici alla base; il diff applicativo normalizzato per la sola versione contiene solo app.html e le due chiavi negli otto dizionari. Nessuna variazione funzionale al gestore resume.
+
+**Limiti:** CI del nuovo head e revisione Claude ancora da attendere. I test browser usano solo fixture e chiavi fittizie, non l'account QA2 o il cloud; non certificano i quattro ambienti fisici o la nuova etichetta gia online. D01/D02 restano sospesi/NE e i due ERROR_FRAME_OPERATION restano di causa non identificata. La correzione delle etichette non risolve o riclassifica i rilievi separati su Ricerca e doppio clic OFF. Revisione Claude e ordine personale prima di qualsiasi merge/rilascio.
+
+<a id="cornice-c1-ripresa-2026-11-11"></a>
+
+## C1 QA2 — ripresa manuale su 1.2.269, 11/11/2026
+
+Fonte: azioni e riscontri riferiti da Diego nella chat, Chrome desktop Windows, profilo QA2; nessuna esecuzione autenticata o lettura amministrativa di Codex. Produzione 1.2.269 e sorgente 6b61eead restano quelli della ricevuta seguente. I risultati non si trasferiscono agli altri tre ambienti o alla fase personale.
+
+Preparazione ripetuta con singleton OFF confermato: logout con conferma, ritorno al login, nuovo accesso e Home riferiti da Diego. In Impostazioni riattivato volontariamente il registro; rapporto v1.2.269 con active=false, permitValid=false, permitExpiresAt=null, idleMs=180000, lastBlock=null ed eventi vuoti. enabled=true nel rapporto indica solo il registro diagnostico. Diego conferma poi il cambio personale del solo enabled del singleton a true; scadenza invariata al 18/11/2026 alle 23:59 Europe/Rome. Nessun nuovo claim o provisioning.
+
+Primo ingresso: vista «Privato / Home Page» in app.html; Diego riferisce che il clic apre SBLOCCO VAULT e, dopo l'inserimento locale, mostra Impostazioni. Il gestore resume conserva la route richiesta: l'etichetta Home Page e fuorviante, non prova una destinazione Home. Il successivo rapporto ha active=true, permitValid=true, permitExpiresAt=1795042740000, idleMs=180000, lastBlock=LOCK_PAGEHIDE, registro acceso e disponibile. Il journal comprende anche tentativi precedenti e LOCK_POLICY_REVOKED, LOCK_CHILD_REQUEST e LOCK_EXPIRED: senza un collegamento temporale controllato non attribuiamo loro una causa o un PASS della revoca/inattivita. La spia active attesta il documento figlio riconosciuto dall'owner, non da sola la chiave sbloccata.
+
+**D02 in corso, riscontri parziali:** dopo lo sblocco, Diego riferisce navigazioni senza nuove richieste Master e conferma separatamente Area privata e lista Account privati standard, aperte senza Master Password. Home e Impostazioni sono le altre due destinazioni gia raggiunte: quattro Document distinti riferiti, non ancora l'itinerario completo di dieci. Nessuna modifica dei dati richiesta. D01 resta incompleto per la sequenza iniziale da chiarire; D02 non e ancora PASS. D01-D19 della matrice rimangono NE finche non sono completate le singole azioni e i risultati attesi. Nessun esito fisico dedotto dai test automatici.
+
+**Prosecuzione D02:** Diego conferma poi Profilo, Regole invio scadenze, Destinatari, Scadenze e Archivio Account senza nuove richieste Master: nove destinazioni distinte riferite. Configurazione documenti resta da raggiungere. Il comando suggerito «apri configurazione documenti» nella Ricerca mostra Configurazione della regola come primo risultato, non apre la pagina prevista. Riproduzione locale in memoria con catalogo e motore produttivi, zero record, nessun browser/Auth/rete: la pagina esatta e settima e viene esclusa dai cinque risultati; la ricerca «configurazione documenti» senza «apri» la restituisce invece al primo posto. E un rilievo distinto sulla graduatoria della Ricerca, non una richiesta Master ripetuta e non una navigazione D02 completata. Nessuna correzione runtime eseguita; indicazione successiva limitata alla frase verificata e alla selezione esplicita della pagina.
+
+**Rapporto finale acquisito e D02 sospeso/NE:** usando la frase verificata, Diego conferma anche Configurazione documenti aperta senza Master. Sono quindi dieci destinazioni visitate; cio non certifica una singola sessione continua. Il rapporto successivo contiene 74 eventi, dieci pagine figlie distinte piu app.html, 13 FRAME_ENTER, 12 LOCK_PAGEHIDE, sette LOCK_EXPIRED, tre LOCK_CHILD_REQUEST, due LOCK_POLICY_REVOKED e due ERROR_FRAME_OPERATION. Stato finale active=true e permitValid=true, versione v1.2.269; non ricostruisce da solo la continuita passata. La guida una pagina per messaggio ha interposto pause: non si deve aggirare il timer o assegnare PASS a dieci aperture distribuite fra sessioni diverse.
+
+I due errori avvengono alle 11:44:16.250 su Profilo e alle 12:20:49.653 su Scadenze, Europe/Rome; seguono l'ingresso di 5.211 e 4.293 secondi, poi LOCK_CHILD_REQUEST dopo 2 e 3 ms. Sorgente verificato: l'owner aggrega ogni risposta kind=error nello stesso evento, il transport ne perde il codice specifico e il figlio chiama clearSession/lock. Il ciclo e compatibile anche con Master errata o sblocco annullato: nessuna di queste cause e provata e nessun bug e dichiarato confermato. Sette scadenze sono tutte oltre 180000 ms dall'evento registrato precedente; mancano gesti, completamento unlock e visibilita per misurare l'inattivita effettiva. FRAME_EXIT puo essere normale pagehide del figlio, non uscita dall'owner.
+
+Non si passa a D03: richiesto a Diego di rimettere personalmente enabled=false prima di altri tentativi; conferma ancora attesa alla presente ricevuta. Registro acquisito, nessuna richiesta di cancellazione o logout. Nuova revisione readonly di Claude sulle evidenze, poi eventuale chiarimento e una prova D02 continua senza attese in chat tra le pagine; nessun innalzamento della preferenza per far passare il test. D01 e D02 restano incompleti/NE; nessun FAIL di sicurezza, PASS C1 completo o correzione runtime dedotti dal solo journal.
+
+**Stato operativo alla presente annotazione:** ultimo rapporto ammesso, spegnimento personale richiesto e ancora da confermare; nessuna lettura/scrittura Firebase di Codex. Prove sospese, nessun deploy, modifica alla cornice, UID o dato personale in questa ricevuta. Nessuna CORNICE CHIUSA. Le sezioni sotto conservano i checkpoint precedenti, compresi gli spegnimenti.
+
+<a id="cornice-dialogo-pubblicazione-1-2-269"></a>
+
+## Cornice: rilascio Hosting 1.2.269 verificato — 11/11/2026
+
+**Fonte e autorizzazione:** [ordine corrente](../progetto/INCARICO_CORRENTE.md#cornice-dialogo-rilascio-2026-11-11), [GO Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/286#issuecomment-6788613792) sul candidato f25ed120848c603da5520e078aba8efce4b27806, tre check obbligatori verdi. #286 segnata pronta e unita con expected_head_sha vincolato; sorgente master **6b61eead6dc6791eafea15038486020d22267ac4**, albero identico al candidato e ramo conservato. Nessuna modifica ai file dopo il GO prima del merge.
+
+**Run e approvazione:** [Hosting #1075](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/42972066163), evento workflow_dispatch su master, RELEASE_SCOPE hosting letto nei log. La run era già stata avviata da Diego; Codex non ne avvia una duplicata. L'API registra approved dall'account Diego-Stack-ai per production; l'endpoint non riporta l'ora del clic. Nessun bypass amministratore. validate e deploy riusciti; pubblicazione alle **07:38:40 Europe/Rome**, verifica CI alle 07:38:48. Solo comando --only hosting eseguito: Rules, Functions e gli altri scope backend saltati. Il singleton non è parte di questo rilascio.
+
+**Verifica indipendente:** dal checkout pulito del merge eseguito `node scripts/release-manifest.mjs --commit 6b61eead6dc6791eafea15038486020d22267ac4 --require-clean --verify-url https://appcodici-password.web.app --retries 8 --delay-ms 5000`, concluso con codice 0. Versione **1.2.269**, manifest e **362/362 payload/hash** uguali al sorgente; 363 file serviti contando il manifest. Albero pubblico **f7c4e7b057c89c6f317e65017a77b4124e605a623d52f8adc4e841b440a18e5c**. Verificati i 41 profili header, cache del manifest, root/home, redirect storico e tre probe di normalizzazione. Nessun SDK amministrativo o dato Vault usato. Versionamento locale coerente su 275 riferimenti; documenti **12/12 PASS**, 34 MD e 877 collegamenti prima della presente ricevuta.
+
+**Versione caricata, prova manuale:** Diego riferisce dopo Ctrl+R nella Home di Chrome QA2 «Vedo v1.2.269». PASS della sola verifica dell'aggiornamento di quel browser; non è un PASS D01 né certifica tutte le PWA installate.
+
+**Limiti e seguito:** singleton OFF secondo l'ordine e la precedente conferma dell'operatore, non riletto da Codex; nessuna nuova attivazione, claim o modifica dati. Restano D01, revoca durante sessione aperta e C1 nei quattro ambienti fisici, oltre al distinto doppio clic Home. Sul telefono il passaggio in background annulla il dialogo: comportamento atteso da annotare nel futuro C1. La [ricevuta pubblica sulla #286](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/286#issuecomment-6789028976) e l'[avviso sulla #278](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6789029978) richiedono la verifica produttiva readonly di Claude, non ancora attestata qui. Nessuna CORNICE CHIUSA. Le sezioni successive documentano la preparazione precedente al rilascio.
+
 <a id="cornice-dialogo-fix-2026-11-10"></a>
 
 ## Dialogo della cornice — candidata 1.2.269, 10/11/2026
@@ -930,7 +982,7 @@ Fonte verificata: **31 pagine canoniche**, **126 istruzioni**, **111 target guid
 | `contatto_condiviso`<br>Salva contatto — Codici &amp; Password | public-contact | 0: — | 3: #contact-details, #save-contact, #retry-contact | vCard/QR completamente fittizio e privo di recapiti reali. | **NON ESEGUITO** |
 | `privacy`<br>Privacy Policy - PROTOCOLLO BASE V5.0 | internal | 0: — | 0: — | Nessuna fixture; lettura, navigazione, zoom, tastiera e link. | **NON ESEGUITO** |
 | `termini`<br>Termini e Condizioni - PROTOCOLLO BASE V5.0 | internal | 0: — | 0: — | Nessuna fixture; lettura, navigazione, zoom, tastiera e link. | **NON ESEGUITO** |
-| `app`<br>Privato | internal | 0: — | 1: #frame-resume | Cornice A2 spenta: solo pagina inattiva e ritorno Home; nessuna Vault o scrittura. Browser del broker separato con identità sintetica. | **NON ESEGUITO** |
+| `app`<br>Vault bloccata | internal | 0: — | 1: #frame-resume | Cornice A2 spenta: solo pagina inattiva e ritorno Home; nessuna Vault o scrittura. Browser del broker separato con identità sintetica. | **NON ESEGUITO** |
 
 #### Regole di esecuzione
 
