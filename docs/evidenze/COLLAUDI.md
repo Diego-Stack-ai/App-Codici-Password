@@ -1,5 +1,41 @@
 # Collaudi
 
+<a id="cornice-c1-d04-chrome-270-2026-11-11"></a>
+
+## C1 QA2 — D04 Chrome, destinazioni corrette e continuita non certificata — 11/11/2026
+
+Prova manuale riferita da Diego su **Google Chrome desktop Windows, profilo QA2**, app **v1.2.270**, sorgente distribuito cb48b7196a3816a62dda05d11e11ff4ca7c51d26. Versione esatta Chrome/build Windows non raccolte. Fonti: risposte di Diego e rapporto DIAG di 34 eventi; nessun controllo della sessione Chrome nativa da Codex, nessuna password inserita o operazione amministrativa Firebase/Google Cloud dell'agente. Le prove nel browser della chat restano ausili separati.
+
+Baseline prima dell'accensione: active=false, permitValid=false, permitExpiresAt=null, idleMs=180000, pushReady=true, lastBlock=null, registro enabled=true/available=true ed events vuoto. Diego conferma poi il solo enabled=true personale e Home leggibile con indirizzo app.html. Il primo tentativo con la scorciatoia della tastiera non produce un risultato ricostruibile; non si dichiara un difetto dell'app. Dopo aver chiarito i comandi, Diego riferisce il percorso **Home → avatar Profilo → Home → Privato → Account Personali**, seguito dai tre clic distinti:
+
+| Comando riferito da Diego | Destinazione riferita |
+|---|---|
+| Freccia Indietro di Chrome, nella barra degli indirizzi | Area Privata |
+| Freccia Avanti di Chrome, nella stessa barra | Account Personali |
+| Freccia interna dell'app, accanto al titolo | Area Privata |
+
+Diego conferma che l'indirizzo rimane sempre app.html. Conferma anche che **la Master Password ricompare**, ritenendo trascorsi i tre minuti: i riscontri positivi delle destinazioni non certificano una sola sessione senza nuovo sblocco.
+
+Il rapporto finale contiene **34 eventi**, tutti v1.2.270/browser, ordinati e conformi all'allowlist di codici/campi/pagine. Totali: FRAME_EXIT 19, FRAME_ENTER 5, LOCK_EXPIRED 2, LOCK_PAGEHIDE 4, ERROR_FRAME_OPERATION 2 e LOCK_CHILD_REQUEST 2. Stato alla copia: active=true, permitValid=true, permitExpiresAt=1795042740000, idleMs=180000, pushReady=true, lastBlock=LOCK_PAGEHIDE; registro attivo/disponibile. Lo stato attivo della copia non ricostruisce la continuita precedente; pushReady non prova una consegna push e non assegna PASS D11. Orari seguenti **Europe/Rome**; FRAME_EXIT indica l'uscita della pagina, non il nome del comando premuto.
+
+| Evento o tratto nel rapporto | Riscontro e limite |
+|---|---|
+| 22:49:18.622 FRAME_ENTER Home; 22:56:50.483 LOCK_EXPIRED Account | Primo tratto e blocco precedenti alla sequenza finale. |
+| 22:59:14.450 e 22:59:26.814 ERROR_FRAME_OPERATION Account, ciascuno seguito da LOCK_CHILD_REQUEST | Errori tecnici prima del segmento finale; causa non attribuita. Nessuna Master errata, problema di rete o vulnerabilita dedotti dal solo codice. |
+| 22:59:38.099 FRAME_ENTER Account | Inizio del tratto finale esaminato: 14 eventi complessivi, due ingressi, dieci uscite, un blocco expired e un pagehide del padre. |
+| FRAME_EXIT 23:00:49.305 Account; 23:00:54.857 Home; 23:01:00.320 Profilo; 23:01:04.986 Home; 23:01:09.880 Area Privata | Uscite compatibili con la preparazione riferita; il registro non contiene query o hash. |
+| FRAME_EXIT 23:02:19.733 Account e 23:03:18.111 Area Privata | Ordine compatibile con i risultati Indietro/Avanti riferiti; l'identificazione dei pulsanti viene dalla conferma dell'operatore. |
+| 23:04:10.025 LOCK_EXPIRED Account; uscita; 23:04:43.012 LOCK_PAGEHIDE padre; 23:04:44.927 FRAME_ENTER Account | La sequenza attraversa un blocco e un nuovo ingresso. Il blocco e circa 180 secondi dopo l'uscita Area Privata delle 23:01:09.880: compatibile con il timeout scelto, senza provare da solo la causa. |
+| FRAME_EXIT 23:05:08.825 Account e 23:06:46.745 Area Privata | Seguito coerente con il ritorno riferito tramite freccia interna e la visita finale alle Impostazioni per copiare il rapporto. |
+
+**D04 Chrome resta parziale/NE**, con tre destinazioni positive riferite, permanenza in app.html e nuovo sblocco confermato; niente PASS della continuita, parita completa query/anchor o mancato ripristino di form sensibili. LOCK_EXPIRED confluisce da piu cause, tra cui inattivita, scadenza permesso, attesa dello sblocco e background: non tutti gli eventi expired sono una prova automatica dei tre minuti di inattivita. Le pause della guida sono compatibili con il superamento della soglia, ma non sostituiscono la diagnosi.
+
+**Arresto finale:** dopo la copia Diego conferma esplicitamente Si, spento e salvato alla richiesta di rimettere solo enabled=false. Ultimo stato **canary OFF riferito dall'operatore**, distinto dalla fotografia DIAG ancora attiva; nessuna rilettura amministrativa indipendente o rapporto successivo allo spegnimento. Nessun PASS D15/revoca live, latenza o cancellazione RAM. D02 Chrome mantiene il proprio PASS; D03 e gli altri casi/ambienti, fase personale e C2 restano aperti.
+
+Il seguito documentale parte da 02beeb1b su un ramo separato: la **#289 e il suo GO restano invariati**, nessun merge ancora autorizzato da Diego. Nessun codice, versione, workflow, Rules, Functions, singleton/claim, scadenza o preferenza di inattivita modificati da Codex; nessun deploy, grafica o sicurezza pubblicata. Il prossimo eventuale tentativo richiede ordine personale, preparazione chiara dei tre comandi e una sequenza continua entro la soglia, senza pause della chat fra i clic e senza allungare il timeout per ottenere un PASS. Gli errori tecnici rimangono da qualificare; nessuna correzione dichiarata.
+
+
+
 <a id="cornice-c1-d03-d04-270-2026-11-11"></a>
 
 ## C1 QA2 — D03 parziale, D04 Chrome inconcluso, nuova prova integrata positiva e OFF — 11/11/2026

@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## C1 QA2 — D04 manuale su Chrome, ricevuta separata e OFF — 11/11/2026
+
+Diego prosegue C1 e conferma Home QA2 pronta in Chrome. Fornisce la baseline DIAG OFF, conferma la nuova accensione personale e Home nella cornice; Codex guida senza controllare la finestra Chrome o inserire credenziali. Dopo il dubbio sulla scorciatoia da tastiera, il percorso viene preparato e i comandi vengono distinti tramite i pulsanti: Indietro Chrome → Area Privata, Avanti Chrome → Account Personali, freccia interna → Area Privata. Diego conferma sempre app.html, Master ricomparsa ritenendo trascorsi tre minuti, rapporto copiato e infine Si, spento e salvato. [Evidenze e limiti](../evidenze/COLLAUDI.md#cornice-c1-d04-chrome-270-2026-11-11).
+
+D04 resta parziale/NE per blocco e nuovo ingresso nel segmento, senza attribuire una causa ai due errori tecnici precedenti. D02 conserva il PASS limitato; altri casi/ambienti e fase personale non chiusi. Ultimo stato OFF secondo l'operatore; nessuna nuova accensione implicita. Il seguito viene preparato su codex/c1-chrome-d04-receipts-20261111, base 02beeb1b, con ricevute nei Markdown esistenti e bozza per Claude: la #289 gia revisionata rimane ferma al suo SHA e attende ancora l'ordine esplicito di merge. Nessun codice, test runtime aggiuntivo, nuovo rilascio o operazione amministrativa di Codex; nessuna modifica del timeout per far passare il caso. I checkpoint sotto precedono questo seguito.
+
+
+
 ## C1 QA2 — D04 Chrome inconcluso, nuova prova integrata e OFF — 11/11/2026
 
 Diego prosegue D03 con i sottocasi visivi, link QR, copia fittizia e annullamento senza salvataggio; confronto standalone e parita complessiva ancora aperti. In D04 riferisce Indietro corretto ma Avanti Chrome non selezionabile, poi precisa di non ricordare con certezza se Indietro fosse del browser o interno all'app. Dopo una prima prova ausiliaria nel browser integrato, ordina di rifare la prova con fai tu. La lettura Chrome nativa era bloccata dallo strumento prima di qualsiasi clic; l'ausilio non sostituisce quella colonna.
