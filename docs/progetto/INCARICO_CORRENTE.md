@@ -1,5 +1,19 @@
 # Incarico corrente
 
+<a id="cornice-dialogo-fix-incarico-2026-11-10"></a>
+
+## Correzione dialogo della cornice — PR in bozza autorizzata, 10/11/2026
+
+Diego ordina un ramo dedicato e una PR in bozza con correzione del dialogo coperto dall'iframe, test che rilevi il difetto senza correzione e rapporto completo copiato nella PR per Claude cloud. Verifiche richieste: dialogo sopra iframe, iframe inert durante apertura, focus confinato, header effettivi, manifest e precache. Sono autorizzati implementazione, test locali sintetici, manutenzione dei documenti esistenti, commit/push, apertura bozza e avviso al revisore. Nessuna modifica a workflow, Rules, Functions, dati, credenziali o policy canary; **singleton OFF**, nessun merge o deploy senza revisione e nuovo ordine personale.
+
+Candidata **1.2.269**, base master 41c63006, ramo codex/vault-frame-unlock-modal-20261110; [PR #286 aperta in bozza](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/286), codice 9e9488b8, rapporto pubblicato e Claude avvisato. [Contratto del dialogo](../regole/INTERFACCIA.md#cornice-dialogo-ui-2026-11-10), [evidenze e limiti](../evidenze/COLLAUDI.md#cornice-dialogo-fix-2026-11-10). Il rapporto pubblico non contiene UID, credenziali o dati personali; le prove locali non certificano i quattro ambienti fisici. Nuovo GO Claude sulla PR prima del seguito; la grafica sperimentale resta distinta e rinviata. I paragrafi successivi conservano i passaggi antecedenti.
+
+## Conduzione manuale C1 QA2 — 10/11/2026
+
+Ultimo ordine diretto: dopo il GO Claude sul PRE-OFF Chrome Windows riportato da Diego, accensione eseguita **da Diego in console**, cambiando solo enabled; guida Codex al primo accesso con DIAG e alla matrice C1 un caso alla volta, con annotazione degli esiti. Alla prima anomalia la prima azione e enabled=false, operata personalmente, prima di approfondimenti o nuovi tentativi. Codex non esegue operazioni cloud, login, sblocco o prove fisiche al posto dell'utente. Nessun UID nei rapporti; niente commit/push/merge/deploy impliciti o nuovi MD.
+
+[Scadenza esplicitamente confermata](DECISIONI.md#cornice-c1-scadenza-2026-11-10): 18/11/2026 alle 23:59 Europe/Rome, senza modificare expiresAt. Diego conferma ON e poi lo spegnimento personale enabled=false; nessuna scrittura o rilettura cloud indipendente di Codex. **D01 ON sospeso, non PASS:** stato DIAG ammesso non attesta chiave sbloccata. Il seguito illustrato con due richieste Master riguarda Home e Impostazioni standalone dopo OFF ed e atteso; doppio clic sul collegamento Home Page da chiarire separatamente. Rapporto OFF ricevuto: diniego al nuovo ingresso confermato, revoca live e D06 non chiusi. Nessuna riaccensione dal seguito, niente D02; approfondimento in sola lettura sul primo sblocco e sull'uscita verso Home. [Ricevuta corrente](../evidenze/COLLAUDI.md#cornice-c1-qa2-2026-11-10); le sezioni successive descrivono i mandati preparatori antecedenti.
+
 ## Opzione A e chiusura dei punti della #285 — sola preparazione, 10/11/2026
 
 Ultimo ordine diretto: istruzioni console per SA dedicato/ruoli minimi, delega Token Creator sul solo SA, ADC impersonata senza chiave privata; verifica offline della compatibilità del runner e aggiornamento della #285; revoca documentata. Nessuna operazione su Firebase/Google Cloud. [Procedura completa](../regole/RILASCIO.md#cornice-adc-impersonata-2026-11-10). Il [GO sospeso Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/285#issuecomment-6766818781) richiede nuova revisione sul commit aggiornato: nessun GO dedotto dalle prove locali.

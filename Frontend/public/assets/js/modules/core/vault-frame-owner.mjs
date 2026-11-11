@@ -1,6 +1,7 @@
 import {FRAME_PROTOCOL, privateFrameUrl, residualInsets, inactivityMilliseconds, invalidInactivityPreference, frameStandaloneTarget} from './vault-frame-policy.mjs';
 import {frameLockCode} from './vault-frame-diagnostics.mjs';
 import {createFrameSession} from './vault-frame-session.mjs';
+import {beginFrameModalFocus} from './frame-modal-focus.js';
 
 // Injectable host, used by the canonical authenticated bootstrap and browser tests.
 // No writable client-side admission switch; the production adapter defaults DENY.
@@ -11,14 +12,16 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
   const origin = win.location.origin;
   let lastBlock = null, diagnosticPermitExpiry = 0, diagnosticIdleMs = 180000, diagnosticIdentity = null;
   const diagnose = code => {try {onDiagnostic(code, route?.pathname.slice(1) || 'app.html');} catch { /* DIAG never controls the Vault. */ }};
-  let disposed = false, locked = false, nonce = null, route = null, sequence = 0, visibilityEpoch = 0;
+  let disposed = false, locked = false, masked = true, nonce = null, route = null, sequence = 0, visibilityEpoch = 0;
+  const modalHolds = new Set();
   let checking = null, internalClear = false, nextCheck = 0;
   let logoutHold = false, logoutDone = false, logoutTimer = null, queuedExit = null, logoutContext = null;
   const handlers = [], identity = getIdentity;
   const currentUrl = () => {try {return iframe.contentWindow.location.href;} catch {return '';} };
   const currentDocument = () => {try {return iframe.contentDocument;} catch {return null;} };
   const post = data => iframe.contentWindow?.postMessage({protocol: FRAME_PROTOCOL, release, documentNonce: nonce, ...data}, origin);
-  const mask = value => { iframe.hidden = false; iframe.style.visibility = value ? 'hidden' : 'visible'; iframe.inert = value; };
+  const applyInert = () => {iframe.inert = masked || locked || disposed || modalHolds.size > 0;};
+  const mask = value => { masked = value; iframe.hidden = false; iframe.style.visibility = value ? 'hidden' : 'visible'; applyInert(); };
   const session = createFrameSession({origin, release, getFrameWindow: () => iframe.contentWindow,
     getFrameUrl: currentUrl, getFrameDocument: currentDocument, getIdentity: identity,
     readPermit, validateIdentity, unlock, confirmSensitive,
@@ -169,6 +172,13 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
       idleMs: diagnosticIdleMs, lastBlock});
   };
   const facade = Object.freeze({
+    beginModalFocus(options) {return beginFrameModalFocus({...options, window: win});},
+    holdModal(modal) {
+      if (disposed || locked || modal?.ownerDocument !== win.document || !modal.isConnected) return null;
+      const token = {}; modalHolds.add(token); applyInert();
+      let released = false;
+      return () => {if (released) return; released = true; modalHolds.delete(token); applyInert();};
+    },
     diagnosticsFromChild(source, documentObject) {return isOwnChild(source, documentObject) ? diagnosticSnapshot() : null;},
     navigateFromChild(source, documentObject, target, replace) {
       if (!isOwnChild(source, documentObject)) return false;

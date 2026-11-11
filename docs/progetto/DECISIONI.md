@@ -1,5 +1,13 @@
 # Decisioni
 
+<a id="cornice-c1-scadenza-2026-11-10"></a>
+
+## 10/11/2026 — canary QA2, scadenza fissa e arresto delle prove fisiche
+
+Diego riporta il GO di Claude sul PRE-OFF Chrome Windows, consiglia di ripeterlo negli altri ambienti e ordina l'accensione personale del solo campo enabled. Prima del salvataggio Codex segnala che la data gia predisposta supera sette giorni dall'accensione odierna; Diego sceglie esplicitamente **mantenere il 18/11/2026 alle 23:59 Europe/Rome (22:59 UTC)**. Questa scelta sostituisce per questa finestra la durata nominale di sette giorni; nessuna proroga implicita o cambio di destinatario. La fase personale resta distinta.
+
+Diego modifica il cloud personalmente; Codex guida primo accesso e C1 un caso alla volta e registra solo esiti riferiti o realmente osservati. Alla prima anomalia la prima azione operativa e riportare enabled a false in console, poi raccogliere la diagnostica e sospendere il seguito. Nessun UID, credenziale o contenuto Vault nei rapporti; nessun deploy, merge o modifica applicativa discende dal collaudo. [Esiti e limiti](../evidenze/COLLAUDI.md#cornice-c1-qa2-2026-11-10).
+
 <a id="cornice-adc-decisione-2026-11-10"></a>
 
 ## 10/11/2026 — scelta opzione A, credenziale impersonata e revoca del claim
