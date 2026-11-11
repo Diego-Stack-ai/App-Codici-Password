@@ -2,11 +2,13 @@
 
 <a id="stato-corrente"></a>
 
-## Produzione 1.2.270 verificata, C1 fermo e canary OFF — 11/11/2026
+## Produzione 1.2.270 verificata, C1 QA2 ripreso e D02 Chrome PASS — 11/11/2026
 
 La #288 e unita dopo il GO Claude e l'ordine personale di Diego. Produzione **1.2.270**, sorgente **cb48b7196a3816a62dda05d11e11ff4ca7c51d26**, [Hosting #1088](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43036071599) riuscito. Diego delega esplicitamente a Codex il clic finale per la sola run: approvazione registrata, nessun bypass. Manifest, **362/362 payload e hash**, 41 profili di intestazioni, alias e tre probe di normalizzazione verificati indipendentemente dalla CI. Title/intestazione Vault bloccata e azione Sblocca e riprendi pubblicati nelle otto lingue; comportamento di ripresa conservato. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-riprendi-pubblicazione-1-2-270).
 
-**Canary OFF secondo l'ultima conferma personale di Diego**, senza nuova rilettura amministrativa di Codex. D01/D02 e il resto della matrice non sono certificati; aggiornamento delle singole schede/PWA e nuova etichetta sui quattro ambienti fisici ancora da verificare. Nessuna correzione dei due errori tecnici non attribuiti, della graduatoria Ricerca o del distinto doppio clic OFF; nessuna pubblicazione di grafica o sicurezza. Elenco fermo a 34 MD. Nessuna attivazione o CORNICE CHIUSA; revisione produttiva Claude distinta dal GO del candidato, nuovo ordine personale prima della riaccensione. I checkpoint sottostanti conservano le fasi precedenti.
+Diego ordina la ripresa C1, esegue logout dall'account personale e accesso QA2, baseline OFF/DIAG e nuova accensione personale. **Canary ON secondo la sua conferma e i rapporti ammessi**, senza rilettura amministrativa di Codex; scadenza invariata. **D02 PASS soltanto QA2 / Google Chrome desktop Windows / v1.2.270**: dieci destinazioni canoniche nello stesso segmento registrato, nessun nuovo blocco/errore e conferme esplicite di pagine leggibili, app.html invariato e nessuna nuova Master. Profilo → Contatti positivo come solo sottocaso D03; D03 e D01 restano incompleti/NE. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-c1-d02-270-2026-11-11).
+
+Altri ambienti, fase personale, revoca live e resto della matrice non certificati; le prove QA2 non si trasferiscono. Nessuna correzione dei due errori tecnici storici non attribuiti, della graduatoria Ricerca o del distinto doppio clic OFF; nessuna pubblicazione di grafica o sicurezza. Elenco fermo a 34 MD, nessun nuovo deploy o intervento amministrativo di Codex. Arresto personale con enabled=false alla prima anomalia effettiva; C1/C2 restano aperti e nessuna CORNICE CHIUSA. Le sezioni sottostanti conservano i checkpoint precedenti, compreso OFF al momento del rilascio.
 
 ## C1 QA2 ripreso manualmente — 11/11/2026
 

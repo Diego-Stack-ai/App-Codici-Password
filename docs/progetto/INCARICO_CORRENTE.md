@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Ripresa C1 su QA2 dopo la 1.2.270 — 11/11/2026
+
+Diego ordina «procedi» alla guida C1 e conferma la versione 1.2.270. Chiarito che il primo rapporto appartiene all'account personale, esce da quello e accede a QA2; baseline OFF/registro attivo e tre minuti, poi cambia personalmente solo enabled a true e conferma. Nessuna operazione Firebase/Google Cloud, login o sblocco di Codex. Rimangono fase 1 individuale, scadenza concordata invariata e spegnimento personale alla prima anomalia; nessuna estensione al conto personale o ad altri utenti.
+
+Codex guida un caso alla volta e annota soltanto esiti riferiti/osservati: **D02 PASS QA2 / Chrome desktop Windows / 1.2.270**, da conferme esplicite di Diego e due rapporti con segmento append-only; il primo rapporto senza Archivio non e dichiarato sufficiente. Profilo → Contatti positivo come solo sottocaso D03; D01/D03 e i casi restanti non sono chiusi. [Ricevuta canonica](../evidenze/COLLAUDI.md#cornice-c1-d02-270-2026-11-11). Sono aggiornate le sole ricevute nei documenti esistenti e l'avviso readonly a Claude sulla PR in bozza #289 e sulla #278. Nessun merge/deploy, nuova grafica, modifica sicurezza/cornice o auto-approvazione. I mandati successivi sono checkpoint precedenti.
+
 ## Rilascio 1.2.270 concluso, delega limitata alla #1088 — 11/11/2026
 
 Dopo il GO Claude sul candidato finale della #288, Diego autorizza merge in master e avvio del solo Hosting CI 1.2.270. La PR e unita nello SHA cb48b7196a3816a62dda05d11e11ff4ca7c51d26, albero identico al candidato revisionato. Con successivo ordine esplicito Diego delega a Codex anche Approve and deploy **per la sola run #1088**: clic eseguito e approvazione production confermata via API, senza bypass o modifica delle protezioni. Per i rilasci successivi resta la normale approvazione personale; nessuna delega generale.

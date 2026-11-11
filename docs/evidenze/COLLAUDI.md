@@ -1,5 +1,21 @@
 # Collaudi
 
+<a id="cornice-c1-d02-270-2026-11-11"></a>
+
+## C1 QA2 su 1.2.270 — D02 PASS Chrome Windows, D03 parziale — 11/11/2026
+
+Fonti: azioni/conferme personali di Diego e due rapporti DIAG copiati nella chat; Diego conferma esplicitamente che il giro e svolto in Google Chrome con profilo QA2, distinto dal browser integrato della chat. Versione app **v1.2.270**, sorgente distribuito cb48b7196a3816a62dda05d11e11ff4ca7c51d26; versione esatta di Chrome/build Windows non raccolte. Nessuna esecuzione autenticata, login, sblocco o operazione amministrativa Firebase/Google Cloud di Codex.
+
+Preparazione: un primo rapporto apparteneva all'account personale e viene escluso da C1 QA2; la sua preferenza di inattivita non viene modificata. Diego esce da quell'account, accede a QA2 e copia la baseline OFF: active=false, permitValid=false, idleMs=180000, lastBlock=null, registro acceso/disponibile e zero eventi. Dopo la guida cambia personalmente solo enabled a true, confermando l'accensione; scadenza invariata al 18/11/2026 ore 23:59 Europe/Rome. Raggiunta la vista Vault bloccata, riferisce un clic su Sblocca e riprendi, inserimento locale della Master Password e Home aperta. Questi sono riscontri del primo accesso, **non un PASS globale D01/Auth/App Check**.
+
+Il primo rapporto contiene 107 eventi e il secondo 124: i primi 107 sono identici, seguono 17 FRAME_EXIT v1.2.270. Si isola il segmento dal **FRAME_ENTER 1794420113369**, Home alle **19:01:53.369 Europe/Rome**, fino all'ultimo evento alle **19:14:34.186**: **37 eventi**, un ingresso e 36 uscite delle pagine figlie, tutti v1.2.270/browser. Nessun nuovo LOCK_*, ERROR_*, ADMISSION_*, FRAME_ENTER o uscita del padre nel segmento; FRAME_EXIT e compatibile con il pagehide normale della figlia. Il lastBlock=LOCK_PAGEHIDE finale rinvia al blocco precedente all'ingresso, non a un blocco durante D02. I 77 eventi storici v1.2.269 e il precedente LOCK_EXPIRED v1.2.270 non concorrono al risultato.
+
+Nel primo tratto manca Archivio Account e Diego non ricorda di averlo aperto: **nessun PASS assegnato a quel rapporto isolato**. Il seguito e append-only dello stesso segmento, senza interruzioni documentate, e contiene Archivio Account alle 19:12:11.493 e 19:13:26.499. Ora sono presenti tutte le destinazioni canoniche: home_page, area_privata, account_privati, profilo_privato, impostazioni, regole_scadenze, configurazione_documenti, scadenze, archivio_account, gestione_destinatari. Presenti anche aggiungi_scadenza e dettaglio_account_privato, senza una prova CRUD o salvataggio dedotta dalle aperture.
+
+Diego conferma separatamente per entrambi i tratti **nessuna nuova Master Password, pagine leggibili e permanenza nella stessa scheda app.html**; la sequenza e stata guidata con soli collegamenti interni, senza reload o salvataggi. Stato finale active=true, permitValid=true, idleMs=180000, registro acceso e disponibile. **D02 PASS soltanto fase 1 QA2 / Chrome desktop Windows / 1.2.270**, sulla base delle prove manuali riferite e del segmento compatibile: il solo stato DIAG non avrebbe certificato lo sblocco. Nessun trasferimento agli altri ambienti o alla fase personale.
+
+**D03 parziale:** Diego apre Profilo → Contatti, scorre senza modificare dati e conferma testi/pulsanti leggibili, raggiungibili e senza sovrapposizioni. Restano Indirizzi, Documenti, Tessera digitale e gli altri controlli previsti; D03 in matrice rimane NE, senza estendere il sottocaso positivo a parita completa, copia/annullamento o profilo aziendale. D01 e gli altri casi restano NE/incompleti; pushReady=false non attribuisce un esito a D11. **Canary ON secondo la conferma personale e i rapporti ricevuti**, nessuna rilettura amministrativa indipendente; arresto con enabled=false alla prima anomalia effettiva. Nessuna modifica a codice, preferenza di inattivita, singleton/claim da parte di Codex o nuova pubblicazione. C1 e C2 restano aperti; nessuna CORNICE CHIUSA.
+
 <a id="cornice-riprendi-pubblicazione-1-2-270"></a>
 
 ## Hosting 1.2.270 pubblicato e verificato, canary OFF — 11/11/2026
@@ -230,7 +246,7 @@ Prerequisito: [GO B1 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Pas
 
 Aggiornamento del 10/11/2026: **fase 1 su QA2 candidata sintetica già popolata, da confermare con Claude e preflight; fase 2 sull’account personale di Diego**. Un solo UID nel singleton per volta, fasi e ricevute separate. Questa lista non abilita alcun utente o cambio cloud. Produzione attestata 1.2.268 / #1060 / 79ebd9b8; il singleton predisposto manualmente è ancora spento, parziale e personale, non configurato per la fase 1.
 
-Diego esegue le prove separatamente su **Chrome desktop Windows, Chrome Android, Safari iPhone e PWA installata su iPhone**. **Priorità: PWA iPhone e Chrome desktop per primi, poi Safari iPhone e Chrome Android.** Registrare per ogni colonna modello/OS/browser/versione app/data, sorgente del rilascio approvato e presenza effettiva della cornice; Safari e PWA sono due ambienti distinti. Le due tabelle sono interamente **NE**: codice pubblicato e singleton parziale non provano un canary attivo. Prima di ogni fase verificare versione da manifest/worker e non dalla sola etichetta.
+Diego esegue le prove separatamente su **Chrome desktop Windows, Chrome Android, Safari iPhone e PWA installata su iPhone**. **Priorità: PWA iPhone e Chrome desktop per primi, poi Safari iPhone e Chrome Android.** Registrare per ogni colonna modello/OS/browser/versione app/data, sorgente del rilascio approvato e presenza effettiva della cornice; Safari e PWA sono due ambienti distinti. Le tabelle nascono interamente NE; la [ricevuta dell'11/11 su 1.2.270](#cornice-c1-d02-270-2026-11-11) assegna il solo D02 Chrome desktop della fase 1. Codice pubblicato e provisioning da soli non provano un collaudo riuscito. Prima di ogni fase verificare versione da manifest/worker e non dalla sola etichetta.
 
 B3 deve proporre l'assegnazione privata del singleton e del solo claim del pilota, preservando gli altri claim; il token nuovo richiede un nuovo accesso oppure un refresh esplicito. Per C1 preferire logout/login normale dopo la conferma del provisioning, così non si chiede a Diego di incollare token o eseguire comandi in console. La hint non concede ammissione: il documento server e il fence rimangono obbligatori. Nessun altro account viene abilitato o creato da B2.
 
@@ -275,14 +291,14 @@ Prima delle prove scegliere volontariamente se attivare Impostazioni → Diagnos
 | D18 — version skew | Tenere aperta la cornice della versione precedente, poi dopo un rilascio successivo navigare internamente: uscita o ricarica pulita sulla destinazione valida, nessuna chiave consegnata a protocollo/versione diversa, nessun loop o pagina bianca. NE finché manca un secondo rilascio; non forzare versioni o cache dai comandi in console per attribuire un PASS reale. |
 | D19 — DIAG | Default spento, sola lettura dello stato; attivare, eseguire navigazioni/blocco/push e copiare rapporto; nomi pagina senza query/ID. Cancella lascia la raccolta scelta ma azzera gli eventi; disattivare elimina. Logout/cambio account cancella e non riattiva. Provare appunti reali su Safari/PWA; errore/permesso negato resta LIMITE, nessun invio di rete. Nessun dato Vault aggiunto a mano. |
 
-### Matrice C1 fase 1 — account sintetico candidato (QA2, da confermare)
+### Matrice C1 fase 1 — account sintetico QA2
 
 `NE` = non eseguito, `PASS` = azione e risultato entrambi osservati, `FAIL` = comportamento diverso, `LIMITE` = capacità primaria non disponibile o prova incompleta da decidere con revisore/Diego. Un fallback riuscito non trasforma un LIMITE in PASS. Nessun risultato viene precompilato dalle suite automatiche.
 
 | Caso | Chrome desktop | Chrome Android | Safari iPhone | PWA iPhone |
 |---|---|---|---|---|
 | D01 | NE | NE | NE | NE |
-| D02 | NE | NE | NE | NE |
+| D02 | [PASS](#cornice-c1-d02-270-2026-11-11) | NE | NE | NE |
 | D03 | NE | NE | NE | NE |
 | D04 | NE | NE | NE | NE |
 | D05 | NE | NE | NE | NE |
