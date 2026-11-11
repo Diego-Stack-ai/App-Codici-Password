@@ -1,10 +1,10 @@
 # Guida
 
-## Schermata di blocco — candidata 1.2.270, non ancora online
+## Schermata di blocco — produzione 1.2.270, 11/11/2026
 
-Nella candidata, dopo il blocco della cornice compare **Vault bloccata** e il comando **Sblocca e riprendi**. Se la sessione e ancora ammessa, dopo il nuovo sblocco ritrovi la pagina precedente. Se l'accesso alla cornice non e piu disponibile, resta il normale percorso verso Home. La schermata comune puo comparire per motivi diversi: non indica sempre inattivita.
+Nella 1.2.270, dopo il blocco della cornice compare **Vault bloccata** e il comando **Sblocca e riprendi**. Se la sessione e ancora ammessa, dopo il nuovo sblocco ritrovi la pagina precedente. Se l'accesso alla cornice non e piu disponibile, resta il normale percorso verso Home. La schermata comune puo comparire per motivi diversi: non indica sempre inattivita.
 
-Questa dicitura non e ancora pubblicata: online resta 1.2.269. Diego ha confermato lo spegnimento del canary; le prove riprenderanno solo secondo gli ordini personali e i gate C1. [Stato corrente](../progetto/STATO.md#stato-corrente). Le sezioni sotto conservano i checkpoint precedenti.
+La 1.2.270 e pubblicata e verificata sul sito. Dopo la nuova prova nel browser integrato Diego conferma il canary nuovamente spento; gli altri account non vengono abilitati da questo collaudo. Con cornice spenta, il normale percorso standalone puo richiedere la Master Password al cambio pagina. La voce enabled nel rapporto della Diagnostica indica il registro locale e non l'interruttore Firebase. Per verificare la versione caricata nella tua scheda, apri la Home e leggi «Versione app» in fondo; su Chrome desktop puoi prima premere Ctrl+R. La verifica del sito e i singoli percorsi provati non certificano l'aggiornamento di ogni scheda/PWA o il completamento di C1. [Stato corrente](../progetto/STATO.md#stato-corrente). Le sezioni sotto conservano i checkpoint precedenti.
 
 ## Cornice in collaudo — produzione 1.2.269, 11/11/2026
 
