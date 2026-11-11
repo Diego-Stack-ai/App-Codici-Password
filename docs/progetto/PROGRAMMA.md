@@ -172,6 +172,10 @@ Il primo lotto locale della candidata 1.2.259 è rendicontato in [STATO](STATO.m
 
 Questo blocco accompagna la bonifica pre-finale e prosegue dopo il rilascio: non sostituisce aggiornamenti automatici del sistema operativo o dei browser, audit indipendente, test fisici e gestione incidenti.
 
+<a id="scadenza-elimina-decisione-2026-11-11"></a>
+
+**Decisione di Diego, 11/11/2026 — «Elimina» nel dettaglio Scadenza.** Per la revisione UI resta nel piè di pagina del dettaglio, con la conferma esistente (scelta C): eccezione dichiarata al contratto a tre livelli. Nella **fase sicurezza** si passa alla scelta A: «Elimina» spostato nel modulo di modifica della scadenza, insieme alla revisione dei percorsi di cancellazione (documento del Profilo collegato, allegati, purge), con test e revisione incrociata. L'elenco Scadenze conserva l'eliminazione con scorrimento e conferma.
+
 <a id="pentagi-nota-2026-11-10"></a>
 
 **Nota di Diego, 10/11/2026 — prova PentAGI a fine lavori.** Dopo la chiusura della cornice e della fase sicurezza successiva (notifiche dopo il logout, MIME, AAD, purge, COOP, vulnerabilità npm, token e Node), provare lo strumento open source di penetration testing con agenti AI PentAGI come controllo finale. Vincoli già concordati:
