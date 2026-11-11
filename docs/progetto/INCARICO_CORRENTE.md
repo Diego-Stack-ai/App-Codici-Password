@@ -1,5 +1,15 @@
 # Incarico corrente
 
+<a id="cornice-c1-e2e-incarico-2026-11-12"></a>
+
+## C1 — piano E2E in una bozza e revisione UI readonly, 12/11/2026
+
+Diego autorizza una sola PR in bozza con piano E2E della matrice C1, solo QA2 con futuri segreti GitHub e mai account personali, e codice se verificabile localmente. Nessuna esecuzione in produzione, merge, deploy, operazione Firebase o cambio interruttore; canary OFF. Non attendere Claude fra i passi di preparazione locale: Claude rivede la consegna complessiva. In parallelo revisione readonly della #283, grafica e tipografia, con GO/NO-GO sulla PR; nessuna modifica UI di Codex.
+
+Il [piano e perimetro del prototipo locale](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12) distingue proposta, codice presente e prove fisiche. Adapter produttivo e workflow restano da implementare/rivedere dopo il piano; CLI chiusa senza rete. Nessuna nuova versione o modifica ai file della cornice. Al termine avviso a Claude sulla bozza, monitoraggio del GO riferito allo SHA finale e arresto prima di azioni non autorizzate. Il GO di Claude non sostituisce l'ordine di Diego per produzione/merge.
+
+Le ricevute #289 → #290 → #291 sono già unite nell'ordine autorizzato, master finale `8afadf8e80ff8b52e789530a6619698d7b4f7869`, [ricevuta GitHub](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6809075057). Solo documenti, nessun rilascio. I checkpoint sottostanti precedono questi merge.
+
 ## C1 QA2 — D05-A Chrome, ricarica con nuovo sblocco e OFF — 11/11/2026
 
 Diego chiede tutti i passi del prossimo test prima di iniziare. Riceve D05-A, limitato alla ricarica dell'intera cornice sulla pagina Account Personali: ON personale, sblocco iniziale, ricarica dal pulsante Chrome, un nuovo sblocco, copia DIAG e OFF. Conferma **stessa pagina e categoria dopo la ricarica, una sola Master dopo Ricarica, sempre app.html e Spento**. Il rapporto di 66 eventi conserva i 47 precedenti e comprende il PAGEHIDE intenzionale del padre seguito dal nuovo ingresso Account, senza altri blocchi/errori nel segmento. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-c1-d05a-ricarica-270-2026-11-11).

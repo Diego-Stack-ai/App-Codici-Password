@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+## C1 — piano E2E e prototipo locale da rivedere, 12/11/2026
+
+Ordine notturno di Diego in preparazione su base master `8afadf8e80ff8b52e789530a6619698d7b4f7869`: [piano E2E QA2 e limiti](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12), con nucleo locale D02/D04/D05-A e guardie identità/DIAG; adapter e workflow produttivi assenti. Test locali distinti dalla matrice fisica: nessun nuovo PASS C1. Le ricevute #289, #290 e #291 sono già unite in ordine, [avviso e SHA finale](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6809075057); nessun codice distribuito da quei merge.
+
+Produzione resta **1.2.270** da `cb48b7196a3816a62dda05d11e11ff4ca7c51d26`; ultimo stato canary **OFF confermato da Diego**, senza rilettura amministrativa. Fase personale/C2, D rimanenti e dispositivi reali aperti. Revisione readonly della #283 separata; nessuna pubblicazione grafica/sicurezza. Si prepara una sola bozza per Claude: nessun merge, deploy, secret o operazione cloud in questo incarico. I checkpoint sotto sono storici.
+
 ## Produzione 1.2.270 verificata, D05-A Chrome PASS e canary OFF — 11/11/2026
 
 La #288 e unita dopo il GO Claude e l'ordine personale di Diego. Produzione **1.2.270**, sorgente **cb48b7196a3816a62dda05d11e11ff4ca7c51d26**, [Hosting #1088](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43036071599) riuscito. Diego delega esplicitamente a Codex il clic finale per la sola run: approvazione registrata, nessun bypass. Manifest, **362/362 payload e hash**, 41 profili di intestazioni, alias e tre probe di normalizzazione verificati indipendentemente dalla CI. Title/intestazione Vault bloccata e azione Sblocca e riprendi pubblicati nelle otto lingue; comportamento di ripresa conservato. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-riprendi-pubblicazione-1-2-270).

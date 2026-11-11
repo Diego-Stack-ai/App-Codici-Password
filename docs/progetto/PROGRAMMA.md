@@ -1,5 +1,9 @@
 # Programma
 
+## C1 — revisione piano E2E QA2, poi adapter e ordine di esecuzione
+
+[Piano proposto e prototipo soltanto locale](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12): consegna in una bozza, test locali e GO Claude sull'ultimo SHA. Dopo l'approvazione del piano, completare adapter/workflow e sottocasi scelti, con nuova revisione prima dell'ordine di Diego alla produzione. Emulazioni Android/iPhone separate dalle quattro colonne fisiche; nessuna riduzione del contratto o chiusura C1 implicita. Restano prove fisiche Safari/PWA/camera/push, D15 personale, D18 con secondo rilascio reale, fase personale e C2. UI #283 soltanto revisione readonly; sicurezza e grafica restano fuori produzione fino a C1 completata. Canary OFF, nessun cloud/merge/deploy da questa preparazione. I checkpoint sotto precedono l'ordine del 12/11 e i merge documentali #289–#291.
+
 ## #285 — revisione opzione A, poi singoli passi autorizzati
 
 Prima nuovo GO Claude su runner/ADC/rimozione e istruzioni IAM con i limiti espliciti; nessun merge o cloud in questo incarico. Poi ordini separati per ruoli/SA/delega, login ADC isolato, preflight autorizzato e ammissibilità QA2. Singleton OFF con destinatario sintetico corretto e Timestamp futuro concordato precede qualunque grant; dry-run non mostra identificativi e non sostituisce l'approvazione all'apply. Rimozione del claim dopo OFF e prima del cambio destinatario/C2, quindi revoca delega/SA/ADC. [Sequenza completa](../regole/RILASCIO.md#cornice-adc-impersonata-2026-11-10). C1 di ciascuna fase e sette giorni restano da concordare/eseguire; nessun automatismo.
