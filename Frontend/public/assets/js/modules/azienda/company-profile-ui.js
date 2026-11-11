@@ -108,12 +108,14 @@ export function renderCompanyContacts(data, companyId, reload) {
         if (contact.note) fields.push(createElement('div',{className:'company-contact-note'},[text(t('notes'),'view-label'),text(contact.note)]));
         const actions = contact.linkedAccountId ? [button(t('company_open_linked_account'),()=>{window.location.href=profileAccountUrl(contact.linkedAccountId,contact.linkedAccountCompanyId||'');}),button(t('company_change_account'),()=>changeProfileAccount({contact,type,sourceCompanyId:companyId},reload)),button(t('company_unlink_account'),()=>unlinkProfileAccount({contact,type,sourceCompanyId:companyId},reload))] : [button(t('company_link_or_create_account'),()=>connectCompanyContact(contact,companyId,type))];
         actions.forEach(action=>action.classList.add('profile-contact-connect'));
+        if (contact.linkedAccountId) actions.slice(1).forEach(action=>action.classList.add('profile-account-manage'));
+        else actions.forEach(action=>action.classList.add('profile-account-connect'));
         if (contact.linkedAccountId) {
             actions[0].classList.add('profile-account-primary');
             readLinkedAccountName(contact).then(name=>{if(name && actions[0].isConnected) actions[0].textContent=formatTranslation('company_open_named_account',{name});}).catch(()=>{});
         }
         fields.push(createElement('div',{className:contact.linkedAccountId?'company-contact-actions profile-account-actions':'company-contact-actions'},actions));
-        const header = createElement('div',{className:'profile-contact-header'},[text(contact.label,'profile-contact-label'),miniButton(t('company_edit_contact'),'edit',()=>{window.location.href=editUrl(companyId)+(type==='email'?'#section-email':'');})]);
+        const header = createElement('div',{className:'profile-contact-header'},[text(contact.label,'profile-contact-label'),Object.assign(miniButton(t('company_edit_contact'),'edit',()=>{window.location.href=editUrl(companyId)+(type==='email'?'#section-email':'');}),{className:'profile-contact-mini company-item-edit'})]);
         return createElement('article',{className:'company-contact-card profile-contact-card'},[header,createElement('div',{className:'profile-contact-fields'},fields.slice(1))]);
     };
     setChildren(document.getElementById('email-list-container'),contacts.emails.length ? contacts.emails.map(e=>card(e,'email')) : [text(t('company_no_email'))]);
@@ -210,6 +212,7 @@ export function initCompanyProfile(data, companyId, {buildVCard, reload}) {
     ])]);
     refresh();
     renderCompanyContacts(data,companyId,reload);
+    import('../shared/manage-mode.js').then(module=>module.installManageMode?.(document)).catch(()=>{});
     activate(new URLSearchParams(window.location.search).get('profileTab')||sessionStorage.getItem('company-profile-tab:'+companyId)||'overview');
 }
 
@@ -240,9 +243,12 @@ function styleCompanySections(companyId) {
             const action=miniButton(t('company_profile_edit'),'edit',event=>{
                 event.stopPropagation();window.location.href=editUrl(companyId)+(type==='contacts'?'#section-email':'');
             });
+            action.classList.add('company-section-edit');
             // Avoid nested buttons in accordion triggers.
             const row=createElement('div',{className:'profile-overview-heading'});
             header.before(row);row.append(header,action);
         }
+        // UI a tre livelli: gestione della sezione dietro «Modifica».
+        panel.dataset.manageable='';
     });
 }

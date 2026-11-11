@@ -13,8 +13,9 @@ import { createElement } from '../../dom-utils.js';
 import { t } from '../../translations.js';
 
 const installed = new WeakSet();
-// Intestazioni di sezione riconosciute: profili (form-section) e pagine di dettaglio.
-const HEADER = ':scope > :is(.form-section-header, .detail-section-header)';
+// Intestazioni di sezione riconosciute: profili (form-section), pagine di dettaglio e
+// riga d'intestazione del Profilo azienda (accordion + azione, senza pulsanti annidati).
+const HEADER = ':scope > :is(.form-section-header, .detail-section-header, .profile-overview-heading)';
 const TITLE = '.form-section-title, .detail-section-title';
 
 function label(active) {

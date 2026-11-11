@@ -300,7 +300,7 @@ function setupLocations(data) {
         return createElement('article',{className:'form-card'},[
             createElement('div',{className:'profile-contact-header'},[
                 createElement('span',{className:'profile-contact-label',textContent:'Sede '+location.tipo}),
-                createElement('button',{type:'button',className:'profile-contact-mini',title:'Modifica sede','aria-label':'Modifica sede',onclick:()=>{window.location.href=`modifica_azienda.html?id=${encodeURIComponent(currentAziendaId)}`;}},[createElement('span',{className:'material-symbols-outlined notranslate',textContent:'edit'})])
+                createElement('button',{type:'button',className:'profile-contact-mini company-item-edit',title:'Modifica sede','aria-label':'Modifica sede',onclick:()=>{window.location.href=`modifica_azienda.html?id=${encodeURIComponent(currentAziendaId)}`;}},[createElement('span',{className:'material-symbols-outlined notranslate',textContent:'edit'})])
             ]),
             createElement('div',{className:'data-display-group'},[
                 createElement('span',{className:'view-label',textContent:t('shared_contact_field_address')}),
