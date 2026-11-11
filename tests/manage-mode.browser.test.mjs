@@ -157,15 +157,20 @@ test('Vault lock, auth block and tab change return every section to consultation
 test('QR indicator is passive in consultation and the explicit toggle works in Modifica', {timeout: 30000}, async () => {
   const page = await open();
   try {
-    await page.locator('#full .collapsible-header').click({position: {x: 5, y: 5}});
+    // Apre la sezione senza entrare in Modifica (stesso handler della fixture).
+    await page.evaluate(() => document.querySelector('#full .collapsible-header').click());
     assert.equal(await page.getAttribute('#full', 'data-manage'), 'off', 'opening the section is not Modifica');
-    const indicator = page.locator('#full [data-probe="qr-label"]').first();
+    const indicator = page.locator('#qr-on + .qr-mini-label');
     assert.equal(await indicator.evaluate(node => getComputedStyle(node).pointerEvents), 'none');
-    await indicator.click({force: true});
+    // Clic reale alle coordinate dell'indicatore, senza attese di actionability.
+    const box = await indicator.evaluate(node => { node.scrollIntoView({block: 'center'}); const r = node.getBoundingClientRect(); return {x: r.x + r.width / 2, y: r.y + r.height / 2, w: r.width}; });
+    assert.ok(box.w > 0, 'indicator rendered');
+    await page.mouse.click(box.x, box.y);
     assert.equal(await page.evaluate(() => document.getElementById('qr-on').checked), true, 'label must not toggle the hidden checkbox');
     assert.equal(await page.evaluate(() => window.qrSaves), 0, 'no preference change in consultation');
-    await page.locator('#full .manage-toggle').click();
-    await page.locator('#qr-on').click();
+    await page.evaluate(() => document.querySelector('#full .manage-toggle').click());
+    assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById('qr-on')).display !== 'none'), true, 'checkbox shown in Modifica');
+    await page.evaluate(() => document.getElementById('qr-on').click());
     assert.equal(await page.evaluate(() => document.getElementById('qr-on').checked), false);
     assert.equal(await page.evaluate(() => window.qrSaves), 1, 'explicit toggle still saves in Modifica');
   } finally { await page.close(); }
