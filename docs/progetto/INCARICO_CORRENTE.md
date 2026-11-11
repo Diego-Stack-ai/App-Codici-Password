@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## C1 QA2 — sospensione D04, ausilio integrato e spegnimento personale — 11/11/2026
+
+Diego prosegue D03 con i sottocasi visivi, link QR, copia fittizia e annullamento senza salvataggio; confronto standalone e parita complessiva ancora aperti. In D04 riferisce Indietro corretto ma Avanti Chrome non selezionabile e chiede prima di chiarire la freccia, poi ordina a Codex fai la prova anche tu. La lettura Chrome nativa e bloccata dallo strumento prima di qualsiasi clic. Diego apre allora l'app nella chat: sono eseguite soltanto osservazione e navigazione della sessione gia sbloccata sul browser integrato, senza password, apertura record, salvataggi o accesso amministrativo. Riscontro ausiliario distinto dal collaudo Chrome e dal test locale sintetico; nessuna estensione dei PASS.
+
+Diego conferma infine di aver salvato personalmente enabled=false: **ultimo stato OFF riferito**, nessuna rilettura/scrittura amministrativa di Codex. Riferisce poi la schermata bloccata nella stessa scheda Chrome QA2; acquisire il DIAG successivo e chiarire D04 prima di altre prove, senza attribuire da sola la revoca live alla schermata. Nessun nuovo tentativo nativo o riaccensione implicita. D02 Chrome QA2 resta PASS nel proprio perimetro; D01/D03/D04 e gli altri casi/ambienti rimangono incompleti/NE. [Ricevuta canonica](../evidenze/COLLAUDI.md#cornice-c1-d03-d04-270-2026-11-11). Aggiornamento delle sole ricevute esistenti e avviso readonly a Claude su #289/#278; nessuna correzione codice, nuova versione, merge, deploy, grafica o sicurezza pubblicata. I checkpoint sotto precedono la nuova conferma OFF.
+
 ## Ripresa C1 su QA2 dopo la 1.2.270 — 11/11/2026
 
 Diego ordina «procedi» alla guida C1 e conferma la versione 1.2.270. Chiarito che il primo rapporto appartiene all'account personale, esce da quello e accede a QA2; baseline OFF/registro attivo e tre minuti, poi cambia personalmente solo enabled a true e conferma. Nessuna operazione Firebase/Google Cloud, login o sblocco di Codex. Rimangono fase 1 individuale, scadenza concordata invariata e spegnimento personale alla prima anomalia; nessuna estensione al conto personale o ad altri utenti.
