@@ -163,12 +163,18 @@ test('QR indicator is passive in consultation and the explicit toggle works in M
     const indicator = page.locator('#qr-on + .qr-mini-label');
     assert.equal(await indicator.evaluate(node => getComputedStyle(node).pointerEvents), 'none');
     // Clic reale alle coordinate dell'indicatore, senza attese di actionability.
-    const box = await indicator.evaluate(node => { node.scrollIntoView({block: 'center'}); const r = node.getBoundingClientRect(); return {x: r.x + r.width / 2, y: r.y + r.height / 2, w: r.width}; });
+    // Il punto deve cadere sull'indicatore stesso, non su altri controlli vicini: la
+    // larghezza dell'icona dipende dai font disponibili (in CI la ligatura può mancare).
+    const box = await indicator.evaluate(node => { node.scrollIntoView({block: 'center'}); const r = node.getBoundingClientRect(); return {x: r.x + Math.min(6, r.width / 2), y: r.y + r.height / 2, w: r.width}; });
     assert.ok(box.w > 0, 'indicator rendered');
+    // L'indicatore è trasparente al puntatore: sotto quel punto non deve esserci un altro comando.
+    assert.equal(await page.evaluate(({x, y}) => !document.elementFromPoint(x, y)?.closest('button, input, a, label, .collapsible-header'), box), true, 'no other control under the indicator');
     await page.mouse.click(box.x, box.y);
     assert.equal(await page.evaluate(() => document.getElementById('qr-on').checked), true, 'label must not toggle the hidden checkbox');
     assert.equal(await page.evaluate(() => window.qrSaves), 0, 'no preference change in consultation');
+    assert.equal(await page.getAttribute('#full', 'data-manage'), 'off', 'the click did not reach another control');
     await page.evaluate(() => document.querySelector('#full .manage-toggle').click());
+    assert.equal(await page.getAttribute('#full', 'data-manage'), 'on');
     assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById('qr-on')).display !== 'none'), true, 'checkbox shown in Modifica');
     await page.evaluate(() => document.getElementById('qr-on').click());
     assert.equal(await page.evaluate(() => document.getElementById('qr-on').checked), false);
