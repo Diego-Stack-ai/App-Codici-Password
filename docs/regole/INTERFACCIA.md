@@ -1,5 +1,13 @@
 # Interfaccia
 
+<a id="cornice-dialogo-ui-2026-11-10"></a>
+
+## Dialogo di sblocco nel padre — 10/11/2026
+
+La cornice carica i CSS comuni dei modali nel proprio documento: quelli della figlia non governano il padre. Il dialogo di sblocco/conferma deve stare sopra l'iframe, avere nome e ruolo accessibili e confinare Tab/Shift+Tab e focus. Finche e aperto, iframe e altri controlli del padre restano non interattivi; l'owner conserva inert anche dopo inset/resize. Chiusura, annullamento, abort, sostituzione o uscita rilasciano il solo hold UI senza cambiare permesso, chiave o inattivita. Un rilascio tardivo non annulla blocco/dispose e non riporta focus nella figlia revocata.
+
+Il guard e limitato al documento padre; le pagine standalone conservano la UI ordinaria. Test di regressione con modale reale e controllo negativo, poi prove fisiche separate nei quattro ambienti C1. [Evidenze e limiti](../evidenze/COLLAUDI.md#cornice-dialogo-fix-2026-11-10). La candidata non autorizza accensione o rilascio.
+
 <a id="cornice-diag-ui-2026-11-10"></a>
 
 ## DIAG — sezione Cornice in Impostazioni

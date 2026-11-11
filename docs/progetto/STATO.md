@@ -1,5 +1,25 @@
 # Stato
 
+<a id="stato-corrente"></a>
+
+## Candidata 1.2.269 — correzione dialogo cornice, non pubblicata, 10/11/2026
+
+Ramo codex/vault-frame-unlock-modal-20261110, base 41c63006. Correzione locale del dialogo nel padre, isolamento iframe subordinato all'owner e focus confinato; annullamento/revoca/sostituzione gestiti. Nuovi browser **10/10 PASS**, suite cornice **248/248 PASS** inclusi header su emulatore; controllo negativo senza CSS produce due fallimenti attesi. Offline 342 risorse, manifest locale 362 file e versione 1.2.269 verificati; budget di 31 pagine invariati, nessun nuovo margine. [Evidenze e limiti](../evidenze/COLLAUDI.md#cornice-dialogo-fix-2026-11-10).
+
+Produzione attestata resta **1.2.268 / Hosting #1060**, canary **OFF confermato dall'utente**. Le prove fisiche ON C1 restano sospese; nessuna certificazione Chrome Android, Safari iPhone o PWA, PRF/Auth/App Check o revoca live derivata dai test sintetici. **[PR #286 in bozza](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/286)** aperta con commit applicativo 9e9488b8, rapporto completo nella descrizione e richiesta di revisione readonly a Claude; [avviso sulla #278](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6781468385). I successivi aggiornamenti delle sole ricevute non cambiano il runtime. Check CI e GO del revisore si leggono sulla PR, distinti dai test locali. Nessun merge/deploy o operazione amministrativa Firebase eseguiti dal nuovo incarico. Elenco MD sempre 34. Le voci successive sono fasi precedenti.
+
+## Canary QA2 — PRE-OFF Windows riferito PASS, D01 sospeso e OFF confermato, 10/11/2026
+
+Diego ha eseguito personalmente dry-run/apply del claim e successivo nuovo login QA2; la ricevuta apply riferita contiene wrote=true e verified=true. Il successivo dry-run dopo login contiene alreadyCurrent=true, wouldWrite=false e wrote=false; verified=false e atteso in sola prova. Sono preservati tre altri claim, senza stamparli. Su Chrome Windows, profilo locale QA2, Home standalone riferita e DIAG v1.2.268 con active=false, permitValid=false, idleMs=180000, registro acceso e zero eventi. **PRE-OFF Windows PASS in base ai riscontri dell'utente**, GO Claude riportato da Diego; nessuna verifica indipendente cloud/device eseguita in questo passo.
+
+Diego ordina il solo cambio personale enabled=true e conferma la [scadenza fissa](DECISIONI.md#cornice-c1-scadenza-2026-11-10); successivamente conferma il salvataggio ON in chat. Nessuna scrittura/rilettura cloud indipendente di Codex: **D01-D19 restano NE in tutti e quattro gli ambienti**, D01 in avvio guidato, D19 ha soltanto riscontri preparatori parziali; PRE-OFF Android/Safari/PWA NE. pushReady=false non certifica un guasto push ne una prova di consegna. [Ricevuta e progressione](../evidenze/COLLAUDI.md#cornice-c1-qa2-2026-11-10). Nessun nuovo rilascio; DIAG osservata dall'utente v1.2.268, precedente attestazione Hosting #1060 distinta e non ripetuta. Le voci seguenti sono checkpoint antecedenti, non lo stato del provisioning attuale.
+
+**Ultimo seguito D01:** Diego conferma enabled=false; screenshot successivi mostrano la vista cornice priva del figlio e poi richieste Master su Home e Impostazioni **standalone**. Le due richieste dopo OFF sono attese e non provano un FAIL della continuita ON. Il doppio clic riferito sul collegamento Home Page della vista bloccata resta un rilievo separato da verificare. Rimozione UI figlia osservata, latenza e cancellazione RAM non certificate: D15 solo parziale. D01 ON resta sospeso/NE; D02 non avviato. Nessuna vulnerabilita dedotta, riaccensione non eseguita. [Dettaglio e punti da chiarire](../evidenze/COLLAUDI.md#cornice-c1-qa2-2026-11-10).
+
+Il rapporto OFF successivo mostra LOCK_EXPIRED circa tre minuti dopo l'ultimo ingresso, poi ammissione negata al successivo reload: confermato il diniego al nuovo ingresso OFF, **non provata revoca live** perche il blocco precede quella ricarica. D06 non chiuso: expired puo includere uno sblocco pendente o background. enabled=true nel rapporto riguarda soltanto il registro. Doppio clic Home spiegabile dal gestore resume della vecchia route; indagine statica, nessuna correzione o riaccensione.
+
+Il banco locale successivo riproduce un difetto di visibilita del dialogo di sblocco nella cornice: stili correnti, dialogo dietro iframe; sola aggiunta di stili UI in memoria, dialogo raggiungibile e Conferma/Annulla riusciti. Test con testi fittizi, senza Auth/broker produttivi o chiavi reali; non equivale a PASS C1. Rapporto/proposta privati predisposti per revisione Claude, **nessuna correzione applicata o pubblicata**. Canary OFF, D01 sospeso; documenti esistenti aggiornati localmente, elenco sempre 34.
+
 ## #285 aggiornata per ADC impersonata — nessuna esecuzione cloud, 10/11/2026
 
 [GO Claude sospeso](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/285#issuecomment-6766818781): opzione A scelta da Diego; istruzioni SA/ruoli/ADC/revoca predisposte, runner vincolato al JSON impersonato validato e --remove disponibile. [Evidenze offline e limiti](../evidenze/COLLAUDI.md#cornice-adc-offline-2026-11-10). Si tratta di compatibilità locale sintetica, **non** prova che IAM/servizi o credenziali reali funzionino. Nessun SA, ADC, singleton o claim creato/modificato da questo passo; nessun login o richiesta Google. Nessun UID nei rapporti.
@@ -82,7 +102,6 @@ Seguito B1: CI #1046 verde su 13fa2d45 (3432 PASS/0 FAIL/10 skip), ma Claude man
 
 A1 approvata da Claude sulla PR #278, commit `4f2bc0f812fa2f72c63a409d1aa5d3a120bcd136`. A2 implementata e verificata localmente per gruppi sul medesimo ramo; candidata 1.2.268, produzione invariata 1.2.267. Broker reale e bridge RAM preparati, ammissione ancora negata, nessun UID personale in codice. Test sintetici e tutti i gruppi di regressione passati dopo il raccordo degli harness standalone; non sono il collaudo Firebase o dei dispositivi. Raccordati i comandi sensibili censiti; restano la CI sul nuovo SHA e il GO A2 di Claude. Nessuna B1 o pubblicazione autorizzata dal solo GO A1. [Mandato corrente](INCARICO_CORRENTE.md#cornice-a2-preparazione-2026-11-09).
 
-<a id="stato-corrente"></a>
 
 **10/11/2026 — stato corrente:** produzione 1.2.268 / #1060 / 79ebd9b8; #284 unita in master 28c97128. Runner del claim e canary in due fasi soltanto candidati per Claude; singleton reale parziale e spento. Prevale il [riepilogo corrente](#cornice-claim-stato-2026-11-10); entrambe le matrici C1 sono NE.
 

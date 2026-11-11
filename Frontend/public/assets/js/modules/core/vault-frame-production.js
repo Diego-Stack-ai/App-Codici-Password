@@ -2,7 +2,7 @@ import {emitFrameDiagnostic} from '../../frame-navigation.js';
 import {createProductionFrameAdmission} from './vault-frame-admission.js';
 import {doc, onSnapshot} from '/assets/js/vendor/firebase-runtime.js';
 import {APP_VERSION} from '../../app-env.js';
-import {auth, db} from '../../firebase-config.js?v=1.2.268';
+import {auth, db} from '../../firebase-config.js?v=1.2.269';
 import {authSessionFence} from '../../auth-session-fence.js';
 import {getUserProfile} from '../data/vault-repository.js';
 import {createVaultFrameOwner} from './vault-frame-owner.mjs';

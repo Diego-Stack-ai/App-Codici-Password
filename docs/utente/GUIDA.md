@@ -1,8 +1,8 @@
 # Guida
 
-## Cornice in preparazione — candidata 1.2.268
+## Cornice in collaudo — candidata 1.2.269, non pubblicata
 
-La candidata aggiunge una pagina di servizio disattivata per la futura navigazione persistente. Non è ancora pubblicata né attiva; la produzione resta 1.2.267 e il comportamento dello sblocco non cambia. Il registro conta ora 31 pagine, inclusa questa pagina inattiva: la matrice non certifica prove sul servizio attivo o su dispositivi fisici. Le 30 guide esistenti sono state riesaminate per i target, conservati; le tre nuove frasi preparatorie sono presenti nelle otto lingue.
+La produzione attestata è 1.2.268. Il canary della cornice è spento, dopo una prima prova interrotta; il normale sblocco delle pagine resta invariato. La candidata 1.2.269 corregge la visibilità e l'interazione della finestra di sblocco nella cornice, ma non è ancora pubblicata e richiede revisione e ulteriori prove. Il catalogo delle 31 pagine è stato riesaminato: testi, comandi e target sono conservati; la matrice non certifica prove su dispositivi fisici. Per lo stato aggiornato e i limiti consultare [STATO](../progetto/STATO.md#stato-corrente). Le sezioni datate successive conservano il contesto dei rilasci precedenti.
 
 ## Aggiornamento preparatorio dell’assistenza 2FA — 08/11/2026
 
