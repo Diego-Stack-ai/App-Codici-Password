@@ -73,12 +73,28 @@ export function installManageMode(root = document, selector = '[data-manageable]
     const reset = () => resetManageMode(root);
     globalThis.addEventListener?.('vault-session-locked', reset);
     globalThis.addEventListener?.('private-auth-blocked', reset);
-    globalThis.addEventListener?.('app-language-applied', () => {
+    // translations.js emette l'evento sul document, senza bubbling.
+    const doc = root.ownerDocument || root;
+    doc.addEventListener?.('app-language-applied', () => {
         root.querySelectorAll('.manage-toggle').forEach(toggle => {
             const active = toggle.getAttribute('aria-pressed') === 'true';
             toggle.querySelector('.manage-toggle-label').textContent = label(active);
+            const title = toggle.closest(HEADER.replace(':scope > ', ''))?.querySelector(TITLE)?.textContent?.trim();
+            const edit = t('ui_manage_edit') || 'Modifica';
+            toggle.setAttribute('aria-label', title ? `${edit}: ${title}` : edit);
         });
     });
+    // Cambio effettivo di linguetta, da mouse, tastiera (frecce/Home/End) o codice:
+    // una linguetta che passa da aria-selected=false a true chiude ogni Modifica.
+    const Observer = globalThis.MutationObserver;
+    if (Observer) {
+        new Observer(records => {
+            if (records.some(record => record.target.matches?.('[role="tab"]') &&
+                record.oldValue === 'false' && record.target.getAttribute('aria-selected') === 'true')) reset();
+        }).observe(root === doc ? doc.documentElement : root, {
+            subtree: true, attributes: true, attributeFilter: ['aria-selected'], attributeOldValue: true
+        });
+    }
     root.addEventListener?.('click', event => {
         if (event.target.closest?.('[role="tab"]')) reset();
     });

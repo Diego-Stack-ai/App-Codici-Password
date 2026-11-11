@@ -139,6 +139,10 @@
     background: rgba(var(--accent-rgb), 0.1);
     color: var(--text-secondary);
     cursor: default;
+    /* Indicatore passivo: il label resta associato al checkbox nascosto, ma in
+       consultazione non deve poterlo commutare né salvare la preferenza QR. */
+    pointer-events: none;
+    user-select: none;
 }
 
 [data-ui-revision="tre-livelli"] [data-manage="off"] :is(.field-header, .qr-check-badge):has(> .qr-checkbox:checked) > .qr-mini-label::before {
