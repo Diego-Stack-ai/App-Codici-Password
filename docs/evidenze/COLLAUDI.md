@@ -14,6 +14,8 @@ Implementazione limitata al title, h1 e testo/chiave del link di app.html e a du
 
 **Manifest locale:** 1.2.270, 362 payload, albero pubblico **e997a8dc177ef0a3304cb4e9aa6cdc8ddd90fb52181b479c0f5faad2424b447c**, generazione e verifica locale riuscite. La generazione preliminare sul tree non ancora committato non certifica l'origine del rilascio: manifest da riallineare al commit finale e verificare in CI prima di un eventuale rilascio. firebase.json, Rules, Functions e workflow identici alla base; il diff applicativo normalizzato per la sola versione contiene solo app.html e le due chiavi negli otto dizionari. Nessuna variazione funzionale al gestore resume.
 
+**Seguito CI:** la [run 43020042265](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43020042265) sul primo candidato 16c4e7ea supera la suite applicativa e gli emulatori, poi fallisce Build and verify release manifest per la sola COLLAUDI.md modificata dal generatore QA. Mancava l'allineamento della riga app nel blocco pages: titolo Privato diventa Vault bloccata. Eseguito il generatore canonico nel test:qa-automation, **14/14 PASS**; test:docs ancora **12/12 PASS**. Il seguito cambia solo questa MD e conserva il controllo require-clean, workflow e albero pubblico. Nuovi check sul commit documentale da attendere; nessun rerun o PASS dedotto dal vecchio head.
+
 **Limiti:** CI del nuovo head e revisione Claude ancora da attendere. I test browser usano solo fixture e chiavi fittizie, non l'account QA2 o il cloud; non certificano i quattro ambienti fisici o la nuova etichetta gia online. D01/D02 restano sospesi/NE e i due ERROR_FRAME_OPERATION restano di causa non identificata. La correzione delle etichette non risolve o riclassifica i rilievi separati su Ricerca e doppio clic OFF. Revisione Claude e ordine personale prima di qualsiasi merge/rilascio.
 
 <a id="cornice-c1-ripresa-2026-11-11"></a>
@@ -982,7 +984,7 @@ Fonte verificata: **31 pagine canoniche**, **126 istruzioni**, **111 target guid
 | `contatto_condiviso`<br>Salva contatto — Codici &amp; Password | public-contact | 0: — | 3: #contact-details, #save-contact, #retry-contact | vCard/QR completamente fittizio e privo di recapiti reali. | **NON ESEGUITO** |
 | `privacy`<br>Privacy Policy - PROTOCOLLO BASE V5.0 | internal | 0: — | 0: — | Nessuna fixture; lettura, navigazione, zoom, tastiera e link. | **NON ESEGUITO** |
 | `termini`<br>Termini e Condizioni - PROTOCOLLO BASE V5.0 | internal | 0: — | 0: — | Nessuna fixture; lettura, navigazione, zoom, tastiera e link. | **NON ESEGUITO** |
-| `app`<br>Privato | internal | 0: — | 1: #frame-resume | Cornice A2 spenta: solo pagina inattiva e ritorno Home; nessuna Vault o scrittura. Browser del broker separato con identità sintetica. | **NON ESEGUITO** |
+| `app`<br>Vault bloccata | internal | 0: — | 1: #frame-resume | Cornice A2 spenta: solo pagina inattiva e ritorno Home; nessuna Vault o scrittura. Browser del broker separato con identità sintetica. | **NON ESEGUITO** |
 
 #### Regole di esecuzione
 
