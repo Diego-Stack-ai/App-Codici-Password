@@ -472,7 +472,7 @@ textarea::placeholder {
 }
 
 .archive-watermark span {
-    font-size: 600px;
+    font-size: var(--icon-deco-page, 600px);
     color: var(--text-primary);
 }
 
@@ -529,7 +529,7 @@ textarea::placeholder {
     color: #fff7d6;
     background: rgb(76 48 8 / 92%);
     box-shadow: 0 8px 28px rgb(0 0 0 / 28%);
-    font-size: 0.82rem;
+    font-size: var(--fs-xs, 0.82rem);
     line-height: 1.25;
     text-align: center;
     transform: translateX(-50%);

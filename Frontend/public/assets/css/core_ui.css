@@ -292,7 +292,7 @@
 }
 
 .modal-icon {
-    font-size: 54px;
+    font-size: var(--icon-2xl, 54px);
     margin-bottom: 1.25rem;
     display: block;
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
@@ -484,7 +484,7 @@
 }
 
 .btn-fab-action span.material-symbols-outlined {
-    font-size: 1.8rem;
+    font-size: var(--icon-xl, 1.8rem);
     font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 

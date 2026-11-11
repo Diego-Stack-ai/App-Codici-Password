@@ -34,7 +34,7 @@
 
 .auth-verification-icon {
     color: var(--accent-blue);
-    font-size: 3rem;
+    font-size: var(--icon-2xl);
 }
 
 html[data-i18n="loading"] body {
@@ -261,7 +261,7 @@ html[data-i18n="loading"] body {
 }
 
 .icon-box .material-symbols-outlined {
-    font-size: 32px;
+    font-size: var(--icon-xl);
     /* Mantenuto per auth hero */
 }
 
@@ -402,7 +402,7 @@ html[data-i18n="loading"] body {
 
 .auth-secondary-action .material-symbols-outlined {
     flex: 0 0 auto;
-    font-size: 1.1rem;
+    font-size: var(--icon-sm);
 }
 
 .auth-secondary-action:hover,
@@ -517,7 +517,7 @@ html[data-i18n="loading"] body {
     cursor: pointer;
 }
 
-.password-suggestion-btn .material-symbols-outlined { font-size: 1.1rem; }
+.password-suggestion-btn .material-symbols-outlined { font-size: var(--icon-sm); }
 .password-suggestion-btn:hover, .password-suggestion-btn:focus-visible { color: #93c5fd; }
 
 .password-requirements li::before {

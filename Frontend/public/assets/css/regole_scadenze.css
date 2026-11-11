@@ -818,7 +818,7 @@
 
 /* --- 2. WATERMARK & DECOR --- */
 .archive-watermark span {
-    font-size: 500px;
+    font-size: var(--icon-deco-page-rules);
 }
 
 .saetta-master {

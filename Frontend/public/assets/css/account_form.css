@@ -60,7 +60,7 @@
 }
 
 .hero-status-dot span {
-    font-size: 14px;
+    font-size: var(--icon-xs);
     color: white;
 }
 

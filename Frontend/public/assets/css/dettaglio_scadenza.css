@@ -226,7 +226,7 @@
 }
 
 .detail-list-item-arrow {
-    font-size: 14px;
+    font-size: var(--icon-xs);
     opacity: 0.2;
 }
 

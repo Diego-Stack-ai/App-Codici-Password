@@ -381,7 +381,7 @@
 }
 
 .call-icon {
-    font-size: 14px;
+    font-size: var(--icon-xs);
     color: rgba(16, 185, 129, 0.5);
 }
 

@@ -132,7 +132,7 @@
 }
 
 .matrix-icon-box span {
-    font-size: 32px;
+    font-size: var(--icon-xl);
 }
 
 .matrix-card-top-row {

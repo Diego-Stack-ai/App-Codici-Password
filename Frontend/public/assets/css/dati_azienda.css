@@ -44,7 +44,7 @@
 }
 
 .detail-avatar-placeholder {
-    font-size: calc(var(--icon-lg) * 2);
+    font-size: var(--icon-2xl);
     color: var(--text-secondary);
     opacity: 0.5;
 }

@@ -8,8 +8,8 @@
     margin-bottom: 2rem;
 }
 
-.account-pin-icon { font-size: 18px; }
-.account-action-icon { font-size: 16px; }
+.account-pin-icon { font-size: var(--icon-sm); }
+.account-action-icon { font-size: var(--icon-xs); }
 
 .toolbar-spacing {
     margin-top: 0.5rem;
@@ -39,7 +39,7 @@
 }
 
 .sort-icon {
-    font-size: 1.2rem;
+    font-size: var(--icon-md);
 }
 
 .glass-btn-icon {
@@ -435,7 +435,7 @@ html:not(.dark) .account-card-subtitle {
 }
 
 .loading-spinner-icon {
-    font-size: 3rem;
+    font-size: var(--icon-2xl);
     /* Animation handled globally by .animate-spin in core_ui.css */
 }
 

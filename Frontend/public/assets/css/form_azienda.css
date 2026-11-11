@@ -49,7 +49,7 @@
 }
 
 .detail-avatar-placeholder {
-    font-size: 36px;
+    font-size: var(--icon-xl);
     opacity: 0.2;
     color: var(--text-primary);
     display: flex;
@@ -93,7 +93,7 @@
 
 .hero-title {
     font: var(--font-h2);
-    font-size: 1.35rem;
+    font-size: var(--fs-lg);
     /* Override per hero specifico */
     color: var(--text-primary);
     text-align: center;

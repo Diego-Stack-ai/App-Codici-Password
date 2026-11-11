@@ -108,7 +108,7 @@
     display: block;
     margin-top: var(--space-6, 1.5rem);
     text-align: right;
-    font-size: calc(var(--icon-lg) * 3);
+    font-size: var(--icon-deco-mark, 72px);
     color: var(--text-primary);
     opacity: 0.06;
     pointer-events: none;

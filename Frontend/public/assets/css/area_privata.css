@@ -12,8 +12,8 @@
     grid-template-columns: 1fr 1fr;
 }
 
-.micro-visto-inline { margin-left: 4px; font-size: 0.8em; opacity: 0.6; }
-.account-action-icon { font-size: 16px; }
+.micro-visto-inline { margin-left: 4px; font-size: var(--fs-micro); opacity: 0.6; }
+.account-action-icon { font-size: var(--icon-xs); }
 
 /* Nuova Estetica Icone Fuse (Watermark Style) */
 .matrix-card .matrix-icon-box {
@@ -29,7 +29,7 @@
 }
 
 .matrix-card .matrix-icon-box span {
-    font-size: 120px;
+    font-size: var(--icon-deco-card);
     /* Icona che "prende tutta la card" */
     line-height: 1;
 }
@@ -132,7 +132,7 @@
 }
 
 .matrix-icon-box .material-symbols-outlined {
-    font-size: 26px;
+    font-size: var(--icon-lg);
     color: white;
     font-variation-settings: 'FILL' 1;
 }
@@ -355,7 +355,7 @@ html:not(.dark) .rubrica-toggle-btn:hover {
 }
 
 .rubrica-icon {
-    font-size: 22px;
+    font-size: var(--icon-md);
 }
 
 .micro-account-name {

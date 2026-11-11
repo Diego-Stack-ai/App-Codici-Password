@@ -29,7 +29,7 @@
 
 .hero-status-dot span {
     color: white;
-    font-size: 14px;
+    font-size: var(--icon-xs);
 }
 
 .hero-title {
