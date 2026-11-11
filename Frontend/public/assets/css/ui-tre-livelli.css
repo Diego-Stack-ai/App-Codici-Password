@@ -1,0 +1,52 @@
+/* === Revisione UI a tre livelli — base condivisa (stile «Rifinita», 10–11/11/2026) ===
+   Caricato solo dalle pagine migrate, che dichiarano body[data-ui-revision="tre-livelli"].
+   Token di superficie derivati dalla palette attiva e comando «Modifica/Fine» per sezione.
+   Le regole specifiche di ogni famiglia restano nel CSS della famiglia. */
+[data-ui-revision="tre-livelli"] {
+    --rev-surface: color-mix(in srgb, var(--accent) 3%, #fff);
+    --rev-border: color-mix(in srgb, var(--accent) 14%, #e2e8f0);
+}
+
+.dark [data-ui-revision="tre-livelli"] {
+    --rev-surface: color-mix(in srgb, var(--accent) 8%, #0d1220);
+    --rev-border: color-mix(in srgb, var(--accent) 22%, #1a2030);
+}
+
+/* Comando «Modifica/Fine» per sezione (modules/shared/manage-mode.js). */
+.manage-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-height: 36px;
+    margin-left: auto;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(var(--accent-rgb), 0.12);
+    color: var(--accent);
+    font: var(--font-button);
+    cursor: pointer;
+}
+
+/* Area di tocco di 44 px senza ingrandire il pulsante visibile. */
+.manage-toggle::after {
+    content: '';
+    position: absolute;
+    inset: -4px -2px;
+}
+
+.manage-toggle[aria-pressed="true"] {
+    background: var(--accent);
+    color: #fff;
+}
+
+.dark .manage-toggle[aria-pressed="true"] {
+    color: #0b0f17;
+}
+
+.manage-toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}

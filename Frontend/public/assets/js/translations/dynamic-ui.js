@@ -1,4 +1,5 @@
 const it = {
+  ui_manage_edit: 'Modifica', ui_manage_done: 'Fine',
   dyn_settings_health_incomplete: 'Controllo non completato. Nessun dato è stato salvato.',
   dyn_field_report_copied: 'Report aggregato copiato. Non contiene valori degli Account.',
   dyn_copy_unavailable_device: 'Copia non disponibile su questo dispositivo.',
@@ -53,6 +54,7 @@ const it = {
 };
 
 const en = {
+  ui_manage_edit: 'Edit', ui_manage_done: 'Done',
   dyn_settings_health_incomplete: 'Check not completed. No data was saved.',
   dyn_field_report_copied: 'Aggregate report copied. It contains no Account values.',
   dyn_copy_unavailable_device: 'Copying is unavailable on this device.',
@@ -107,6 +109,7 @@ const en = {
 };
 
 const es = {
+  ui_manage_edit: 'Editar', ui_manage_done: 'Listo',
   dyn_settings_health_incomplete: 'Comprobación no completada. No se guardó ningún dato.',
   dyn_field_report_copied: 'Informe agregado copiado. No contiene valores de las cuentas.',
   dyn_copy_unavailable_device: 'La copia no está disponible en este dispositivo.',
@@ -161,6 +164,7 @@ const es = {
 };
 
 const fr = {
+  ui_manage_edit: 'Modifier', ui_manage_done: 'Terminé',
   dyn_settings_health_incomplete: 'Contrôle non terminé. Aucune donnée n’a été enregistrée.',
   dyn_field_report_copied: 'Rapport agrégé copié. Il ne contient aucune valeur de compte.',
   dyn_copy_unavailable_device: 'La copie n’est pas disponible sur cet appareil.',
@@ -215,6 +219,7 @@ const fr = {
 };
 
 const de = {
+  ui_manage_edit: 'Bearbeiten', ui_manage_done: 'Fertig',
   dyn_settings_health_incomplete: 'Prüfung nicht abgeschlossen. Es wurden keine Daten gespeichert.',
   dyn_field_report_copied: 'Aggregierter Bericht kopiert. Er enthält keine Kontowerte.',
   dyn_copy_unavailable_device: 'Kopieren ist auf diesem Gerät nicht verfügbar.',
@@ -269,6 +274,7 @@ const de = {
 };
 
 const zh = {
+  ui_manage_edit: '编辑', ui_manage_done: '完成',
   dyn_settings_health_incomplete: '检查未完成。未保存任何数据。',
   dyn_field_report_copied: '汇总报告已复制，其中不包含账户值。',
   dyn_copy_unavailable_device: '此设备无法复制。',
@@ -323,6 +329,7 @@ const zh = {
 };
 
 const hi = {
+  ui_manage_edit: 'संपादित करें', ui_manage_done: 'पूर्ण',
   dyn_settings_health_incomplete: 'जाँच पूरी नहीं हुई। कोई डेटा सहेजा नहीं गया।',
   dyn_field_report_copied: 'समेकित रिपोर्ट कॉपी हो गई। इसमें खाते के मान नहीं हैं।',
   dyn_copy_unavailable_device: 'इस डिवाइस पर कॉपी उपलब्ध नहीं है।',
@@ -377,6 +384,7 @@ const hi = {
 };
 
 const pt = {
+  ui_manage_edit: 'Editar', ui_manage_done: 'Concluído',
   dyn_settings_health_incomplete: 'Verificação não concluída. Nenhum dado foi guardado.',
   dyn_field_report_copied: 'Relatório agregado copiado. Não contém valores das contas.',
   dyn_copy_unavailable_device: 'A cópia não está disponível neste dispositivo.',

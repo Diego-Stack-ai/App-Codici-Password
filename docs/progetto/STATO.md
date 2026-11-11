@@ -40,6 +40,8 @@ C1 ora ha due matrici distinte: **19 casi × quattro ambienti per fase, tutti NE
 
 ## Revisione UI: tappa 0 sul ramo Claude
 
+11/11/2026 — **tappa 3, prima parte: dettagli Account privato e azienda (PR #283).** Diego approva le schermate del pilota Profilo («va bene così, procedi con le altre pagine»). Base comune spostata in `assets/css/ui-tre-livelli.css` (token Rifinita e comando Modifica), chiavi Modifica/Fine spostate nel catalogo comune. Note, Allegati, Credenziali comuni e Widget gestibili solo dopo «Modifica»; campi a superficie piena ed etichette neutre. Eccezioni di budget circoscritte (340/341 KB, profilo 9 CSS). Restano nella tappa 3 il Profilo azienda e il dettaglio Scadenza; per quest'ultimo l'«Elimina» oggi vive solo nel piè di pagina del dettaglio e il suo spostamento nel modulo di modifica è un passo separato da decidere. Non pubblicato.
+
 10/11/2026 — **pilota Profilo privato (tappe 1–2) sul ramo Claude, PR #283:** modulo condiviso `modules/shared/manage-mode.js` (Modifica/Fine per sezione, reset su blocco Vault, blocco Auth e cambio linguetta) usato da sei sezioni del Profilo; stili «Rifinita» e consultazione a tre livelli limitati a `body[data-ui-revision="tre-livelli"]`; tre chiavi Profilo nelle otto lingue; nuovo test browser `manage-mode.browser.test.mjs` (3/3). Nessuna logica di dati, salvataggio, cifratura o cornice modificata. Non pubblicato: produzione invariata, rilascio unico finale dopo la cornice.
 
 10/11/2026 — registrati la [decisione](DECISIONI.md#ui-tre-livelli-decisione-2026-11-10) e il [contratto UI a tre livelli](../regole/INTERFACCIA.md#ui-tre-livelli-2026-11-10) sul ramo Claude. Nessuna pagina cambiata; produzione invariata, cornice in corso nella PR #278.

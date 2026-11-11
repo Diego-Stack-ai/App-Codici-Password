@@ -67,6 +67,8 @@ function clearPrivateDetail(view = document) {
  */
 
 export async function initDettaglioAccountPrivato(user, options = {}) {
+    // Gestione delle sezioni dietro «Modifica» (UI a tre livelli), caricata a parte.
+    import('../shared/manage-mode.js').then(module => module.installManageMode?.(document)).catch(() => {});
     mounted?.destroy();
     if (!user) return {destroy() {}};
     loadVersion++;

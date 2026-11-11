@@ -22,12 +22,13 @@
     <link rel="stylesheet" href="assets/css/account_detail.css?v=1.2.269">
     <link rel="stylesheet" href="assets/css/dettaglio_account_privato.css?v=1.2.269">
     <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.269">
+    <link rel="stylesheet" href="assets/css/ui-tre-livelli.css?v=1.2.269">
 
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
 </head>
 
-<body data-private-auth hidden inert class="base-bg" data-ui-model="detail">
+<body data-private-auth hidden inert class="base-bg" data-ui-model="detail" data-ui-revision="tre-livelli">
     <!-- 1. CONTENITORE PRINCIPALE -->
     <div class="base-container relative">
         <!-- Ambient Glow -->
@@ -239,7 +240,7 @@
                         </div>
                     </section>
 
-                    <section id="account-widgets-section" class="section-spacing hidden">
+                    <section id="account-widgets-section" data-manageable class="section-spacing hidden">
                         <div class="detail-section-header detail-section-header-spread">
                             <div class="header-left-group">
                                 <span class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">widgets</span>
@@ -261,7 +262,7 @@
                         <div id="account-widgets-list" class="shared-account-credentials content-spacing"></div>
                     </section>
 
-                    <section id="shared-credentials-section" class="section-spacing hidden">
+                    <section id="shared-credentials-section" data-manageable class="section-spacing hidden">
                         <div class="detail-section-header detail-section-header-spread">
                             <div class="header-left-group">
                                 <span class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">key</span>
@@ -276,7 +277,7 @@
 
                     <!-- NOTE -->
                     <button id="btn-edit-account-note" type="button" class="btn-modal btn-secondary hidden" data-t="add_note">Aggiungi nota</button>
-                    <section id="section-notes" class="section-spacing">
+                    <section id="section-notes" data-manageable class="section-spacing">
                         <div class="detail-section-header">
                             <span
                                 class="material-symbols-outlined detail-section-icon icon-accent-amber notranslate" translate="no">sticky_note_2</span>
@@ -297,7 +298,7 @@
                     </section>
 
                     <!-- ALLEGATI (Sezione Dinamica) -->
-                    <section id="section-attachments" class="section-spacing">
+                    <section id="section-attachments" data-manageable class="section-spacing">
                         <div class="detail-section-header detail-section-header-spread">
                             <div class="header-left-group">
                                 <span

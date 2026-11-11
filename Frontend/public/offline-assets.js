@@ -47,6 +47,7 @@ self.__OFFLINE_ASSETS = [
   "assets/css/registrati.css",
   "assets/css/regole_scadenze.css",
   "assets/css/scadenze.css",
+  "assets/css/ui-tre-livelli.css",
   "assets/css/vault-assistant.css",
   "assets/css/vault-frame.css",
   "assets/fonts/manrope/manrope-11.woff2",

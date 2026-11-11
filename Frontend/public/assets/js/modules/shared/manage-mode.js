@@ -13,6 +13,9 @@ import { createElement } from '../../dom-utils.js';
 import { t } from '../../translations.js';
 
 const installed = new WeakSet();
+// Intestazioni di sezione riconosciute: profili (form-section) e pagine di dettaglio.
+const HEADER = ':scope > :is(.form-section-header, .detail-section-header)';
+const TITLE = '.form-section-title, .detail-section-title';
 
 function label(active) {
     return active ? (t('ui_manage_done') || 'Fine') : (t('ui_manage_edit') || 'Modifica');
@@ -21,7 +24,7 @@ function label(active) {
 export function setSectionManage(section, active) {
     if (!section) return;
     section.dataset.manage = active ? 'on' : 'off';
-    const toggle = section.querySelector(':scope > .form-section-header .manage-toggle');
+    const toggle = section.querySelector(`${HEADER} .manage-toggle`);
     if (toggle) {
         toggle.setAttribute('aria-pressed', String(active));
         toggle.querySelector('.manage-toggle-label').textContent = label(active);
@@ -45,10 +48,10 @@ function expandIfCollapsed(section) {
 export function installManageMode(root = document, selector = '[data-manageable]') {
     root.querySelectorAll(selector).forEach(section => {
         if (installed.has(section)) return;
-        const header = section.querySelector(':scope > .form-section-header');
+        const header = section.querySelector(HEADER);
         if (!header) return;
         installed.add(section);
-        const title = header.querySelector('.form-section-title')?.textContent?.trim() || '';
+        const title = header.querySelector(TITLE)?.textContent?.trim() || '';
         const toggle = createElement('button', {
             type: 'button',
             className: 'manage-toggle',

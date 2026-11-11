@@ -606,3 +606,45 @@
 .attachment-upload-progress { width: 100%; accent-color: var(--accent-primary, #6d5bd0); }
 .attachment-upload-status.is-success { border-color: #22c55e; }
 .attachment-upload-status.is-error { border-color: #ef4444; }
+
+/* === Revisione UI a tre livelli — dettaglio Account (tappa 3, 11/11/2026) ===
+   Solo con body[data-ui-revision="tre-livelli"]; base comune in ui-tre-livelli.css.
+   Consultazione: dati, copia/mostra/apri. Gestione di note, allegati, credenziali
+   comuni e widget solo dopo «Modifica» della sezione. */
+[data-ui-revision="tre-livelli"] .glass-field {
+    gap: var(--space-3, 0.75rem);
+    background: var(--rev-surface);
+    border-color: var(--rev-border);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+[data-ui-revision="tre-livelli"] .glass-field.border-glow::after {
+    display: none;
+}
+
+[data-ui-revision="tre-livelli"] .view-label {
+    color: var(--text-secondary);
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+[data-ui-revision="tre-livelli"] .detail-section-title {
+    font: var(--font-label);
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+[data-ui-revision="tre-livelli"] [data-manage="off"] :is(#btn-modify-account-note, #btn-delete-account-note, #btn-add-attachment, .btn-delete-attachment, #btn-link-shared-credential, .shared-account-unlink, #account-widget-actions, .account-widget-card-actions) {
+    display: none;
+}
+
+/* Sezione vuota: l'invito ad aggiungere o collegare resta visibile in consultazione. */
+[data-ui-revision="tre-livelli"] [data-manage="off"]:has(.empty-attachments-text) #btn-add-attachment,
+[data-ui-revision="tre-livelli"] [data-manage="off"]:has(#shared-credentials-list:empty) #btn-link-shared-credential {
+    display: inline-flex;
+}
+
+[data-ui-revision="tre-livelli"] [data-manage="off"]:has(#account-widgets-list:empty) #account-widget-actions:not(.hidden) {
+    display: grid;
+}
