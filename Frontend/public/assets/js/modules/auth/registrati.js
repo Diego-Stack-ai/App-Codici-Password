@@ -13,6 +13,8 @@ import { bindPasswordChecklist, evaluatePassword, firstPasswordPolicyError, gene
 import { configurationText, hasExplicitLanguageChoice, openInitialLanguageDialog, resolveLanguage, setLanguagePreference } from '../settings/first-configuration.js';
 
 export async function initRegistrati() {
+    // Famiglia Accesso: stesso «?» del login, prima del modulo pagina e indipendente dalla Vault.
+    import('../../guide.js').then(({ init }) => init()).catch(() => {});
     
 
     try {

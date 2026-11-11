@@ -31,6 +31,8 @@ async function updateAuthenticatedPassword(newPassword) {
 }
 
 export async function initImpostaNuovaPassword() {
+    // Famiglia Accesso: stesso «?» del login, prima del modulo pagina e indipendente dalla Vault.
+    import('../../guide.js').then(({ init }) => init()).catch(() => {});
     
 
     try {

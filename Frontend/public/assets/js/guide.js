@@ -25,7 +25,9 @@ export function mountDocumentationHelp({ pageId } = {}) {
     const pageHost = document.querySelector('.page-container') || document.querySelector('.vault')
         || document.querySelector('main.shared-contact-card');
     const footerHost = document.getElementById('footer-center-actions');
-    const host = footerHost || pageHost;
+    // Famiglia Accesso: «?» compatto dentro la card, a sinistra, simmetrico al selettore lingua.
+    const cardHost = footerHost ? null : document.querySelector('.vault > .card.border-glow');
+    const host = footerHost || cardHost || pageHost;
     if (!host) return null;
     let live = true;
     let loading = false;
@@ -52,13 +54,13 @@ export function mountDocumentationHelp({ pageId } = {}) {
     notice.className = 'documentation-entry-notice';
     notice.setAttribute('role', 'status');
     entry.append(trigger, notice);
-    if (footerHost) {
-        entry.classList.add('documentation-entry-footer');
+    if (footerHost || cardHost) {
+        entry.classList.add(footerHost ? 'documentation-entry-footer' : 'documentation-entry-card');
         trigger.classList.add('documentation-button-footer');
         trigger.title = trigger.textContent;
         trigger.setAttribute('aria-label', trigger.textContent);
         trigger.textContent = '?';
-        host.append(entry);
+        if (footerHost) host.append(entry); else host.prepend(entry);
     } else {
         host.prepend(entry);
     }
