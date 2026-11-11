@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## C1 QA2 — D05-A Chrome, ricarica con nuovo sblocco e OFF — 11/11/2026
+
+Diego chiede tutti i passi del prossimo test prima di iniziare. Riceve D05-A, limitato alla ricarica dell'intera cornice sulla pagina Account Personali: ON personale, sblocco iniziale, ricarica dal pulsante Chrome, un nuovo sblocco, copia DIAG e OFF. Conferma **stessa pagina e categoria dopo la ricarica, una sola Master dopo Ricarica, sempre app.html e Spento**. Il rapporto di 66 eventi conserva i 47 precedenti e comprende il PAGEHIDE intenzionale del padre seguito dal nuovo ingresso Account, senza altri blocchi/errori nel segmento. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-c1-d05a-ricarica-270-2026-11-11).
+
+Si registra PASS del solo D05-A QA2/Chrome/1.2.270, non una misura diretta RAM o un PASS di tutto D05; altri sottocasi e ambienti restano da provare. Ultimo stato OFF secondo l'operatore; nessuna nuova accensione implicita o operazione amministrativa di Codex. Si estende la bozza #291 con questo seguito e nuovo avviso readonly a Claude sul nuovo head; il precedente GO 5ca66ce0 non viene riutilizzato per il nuovo delta. #289 e #290 restano invariate, nessun ordine di merge eseguito. Solo ricevute esistenti, nessun codice, timeout, test runtime nuovo/rieseguito, credenziale o deploy. I checkpoint sotto precedono D05-A.
+
+
+
 ## C1 QA2 — riprova continua D04 Chrome e OFF confermato — 11/11/2026
 
 Diego conferma le tre destinazioni del giro precedente e chiede tutti i passi prima di iniziare, per ripetere la sequenza completa entro tre minuti senza attendere la chat fra i clic. Riceve preparazione, sette passi, copia DIAG e spegnimento finale; riferisce **sette passaggi corretti, nessun doppio salto, nessuna nuova Master durante i sette passaggi, sempre app.html e Spento**. Il rapporto di 47 eventi conserva i precedenti 34 e aggiunge un segmento pulito di un ingresso e nove uscite in 98,467 secondi, senza nuovi blocchi o errori. [Ricevuta e perimetro del PASS](../evidenze/COLLAUDI.md#cornice-c1-d04-continuita-270-2026-11-11).
