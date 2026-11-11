@@ -50,3 +50,50 @@
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
+
+/* Filigrane «B + C» (decisione di Diego, 10/11/2026). Ogni famiglia dichiara il
+   simbolo della pagina in --page-symbol (stesso simbolo di .archive-watermark).
+   B: piccola icona decorativa accanto al titolo dell'intestazione.
+   C: filigrana ridotta e tenue in fondo al contenuto, nel flusso della pagina:
+      non si sovrappone mai a testi, campi o pulsanti, neppure scorrendo.
+   La grande filigrana centrata resta nel markup (gate page-shells) ma è nascosta. */
+[data-ui-revision="tre-livelli"] .archive-watermark {
+    display: none;
+}
+
+[data-ui-revision="tre-livelli"] .header-title::before,
+[data-ui-revision="tre-livelli"] .page-container::after {
+    content: var(--page-symbol, none);
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+}
+
+[data-ui-revision="tre-livelli"] .header-title::before {
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    margin-right: var(--space-2, 0.5rem);
+    border-radius: 9px;
+    background: rgba(var(--accent-rgb), 0.12);
+    color: var(--accent);
+    font-size: var(--icon-md);
+    vertical-align: middle;
+}
+
+[data-ui-revision="tre-livelli"] .page-container::after {
+    display: block;
+    margin-top: var(--space-6, 1.5rem);
+    text-align: right;
+    font-size: calc(var(--icon-lg) * 3);
+    color: var(--text-primary);
+    opacity: 0.06;
+    pointer-events: none;
+    user-select: none;
+}

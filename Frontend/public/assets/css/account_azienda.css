@@ -507,3 +507,8 @@ html:not(.dark) .account-card-subtitle {
         grid-column: 1 / -1;
     }
 }
+
+/* Revisione UI a tre livelli: simbolo della pagina per le filigrane B + C (ui-tre-livelli.css). */
+body[data-ui-revision="tre-livelli"] {
+    --page-symbol: 'business_center';
+}
