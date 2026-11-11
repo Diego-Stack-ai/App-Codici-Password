@@ -8,8 +8,25 @@
 }
 
 .dark [data-ui-revision="tre-livelli"] {
-    --rev-surface: color-mix(in srgb, var(--accent) 8%, #0d1220);
-    --rev-border: color-mix(in srgb, var(--accent) 22%, #1a2030);
+    /* Più chiaro dello sfondo: le schede non devono sembrare nere (riscontro di Diego). */
+    --rev-surface: color-mix(in srgb, var(--accent) 12%, #1b2333);
+    --rev-border: color-mix(in srgb, var(--accent) 30%, #2a3346);
+    --rev-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+[data-ui-revision="tre-livelli"] {
+    --rev-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.07);
+}
+
+/* Profondità comune: ombra leggera su schede e campi delle pagine migrate. */
+[data-ui-revision="tre-livelli"] :is(.form-card, .profile-data-card, .profile-contact-card, .glass-field, .detail-field-box, .detail-info-item, .detail-notes-box) {
+    box-shadow: var(--rev-shadow);
+}
+
+/* Solo ciò che porta altrove si solleva al passaggio; le schede di soli dati no. */
+[data-ui-revision="tre-livelli"] :is(.profile-account-primary, .profile-deadline-link):is(:hover, :focus-visible) {
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    border-radius: 10px;
 }
 
 /* Comando «Modifica/Fine» per sezione (modules/shared/manage-mode.js). */
