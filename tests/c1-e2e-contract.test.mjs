@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
-import {assertLoopback,qa2IdentityAllowed,validateDiag,safeFailure} from '../scripts/lib/c1-e2e-contract.mjs';
+import {assertLoopback,qa2IdentityAllowed,validateDiag,safeFailure,authHttpFailureCode,C1_AUTH_CODES,C1_CODES} from '../scripts/lib/c1-e2e-contract.mjs';
 import {createLocalC1Driver} from '../scripts/lib/c1-e2e-cases.mjs';
 const now=1794440000000;
 const report=()=>({state:{version:'v1.2.270',active:true,permitValid:true,permitExpiresAt:now+60000,idleMs:180000,pushReady:false,lastBlock:null},
@@ -33,6 +33,31 @@ test('identity guard has no personal fallback and checks private target before M
 test('untrusted errors never enter a report',()=>{
   assert.equal(safeFailure(new Error('private URL token uid contents')),'C1_TECHNICAL');
   assert.equal(safeFailure(new Error('C1_CONTINUITY_BROKEN')),'C1_CONTINUITY_BROKEN');
+});
+
+test('Auth HTTP diagnostics classify exact hosts only and never echo private URL parts',()=>{
+  for(const [host,code] of [
+    ['content-firebaseappcheck.googleapis.com','C1_AUTH_HTTP_APPCHECK'],
+    ['firebaseappcheck.googleapis.com','C1_AUTH_HTTP_APPCHECK'],
+    ['identitytoolkit.googleapis.com','C1_AUTH_HTTP_IDENTITY'],
+    ['securetoken.googleapis.com','C1_AUTH_HTTP_IDENTITY'],
+    ['firestore.googleapis.com','C1_AUTH_HTTP_FIRESTORE'],
+    ['other.invalid','C1_AUTH_HTTP_OTHER']
+  ]) assert.equal(authHttpFailureCode('https://synthetic:never-export@'+host+'/private-record?key=never-export#private'),code);
+  assert.equal(authHttpFailureCode('https://FIREBASEAPPCHECK.GOOGLEAPIS.COM/v1'),'C1_AUTH_HTTP_APPCHECK');
+  for(const url of [null,{},'', 'not a URL',
+    'https://firebaseappcheck.googleapis.com.evil.invalid/private',
+    'https://content-firebaseappcheck.googleapis.com.evil.invalid/private',
+    'https://content-firebaseappcheck.googleapis.com@other.invalid/private',
+    'https://firebaseappcheck.googleapis.com@other.invalid/private',
+    'https://other.invalid/firebaseappcheck.googleapis.com?host=firestore.googleapis.com'])
+    assert.equal(authHttpFailureCode(url),'C1_AUTH_HTTP_OTHER');
+  assert.equal(C1_AUTH_CODES.length,6);
+  assert.equal(C1_CODES.includes('C1_AUTH_BLOCKED'),false);
+  for(const code of C1_AUTH_CODES){
+    assert.equal(safeFailure(new Error(code)),code);
+    assert.equal(safeFailure(new Error(code+': synthetic-private-detail')),'C1_TECHNICAL');
+  }
 });
 test('driver rechecks origin before reload and callback, and guards outgoing requests',async()=>{
   let current='http://127.0.0.1:9191/app.html',reloads=0,unlocks=0,guard;

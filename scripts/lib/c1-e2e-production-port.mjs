@@ -1,5 +1,5 @@
 import {C1_ORIGIN} from './c1-e2e-execution.mjs';
-import {fail,validateDiag,assertLoopback} from './c1-e2e-contract.mjs';
+import {fail,validateDiag,assertLoopback,authHttpFailureCode} from './c1-e2e-contract.mjs';
 
 const routes=new Set(['home_page.html','area_privata.html','account_privati.html?type=standard',
  'profilo_privato.html','impostazioni.html','archivio_account.html','regole_scadenze.html',
@@ -37,7 +37,7 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
  const setFatal=code=>{fatal??=code;};
  page.on('pageerror',()=>setFatal('C1_RUNTIME_FAILURE'));
  page.on('console',message=>{if(message.type()==='error')setFatal('C1_RUNTIME_FAILURE');});
- page.on('response',response=>{if(response.status()===401||response.status()===403)setFatal('C1_AUTH_BLOCKED');
+ page.on('response',response=>{if(response.status()===401||response.status()===403)setFatal(authHttpFailureCode(response.url()));
    else if(response.status()>=400)setFatal('C1_HTTP_FAILURE');});
  page.on('requestfailed',request=>{if(request.failure()?.errorText!=='net::ERR_ABORTED')setFatal('C1_NETWORK_FAILURE');});
  page.on('dialog',dialog=>{setFatal('C1_MODAL_UNEXPECTED');void dialog.dismiss().catch(()=>{});});
@@ -68,13 +68,15 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
     const {auth}=await import(moduleUrl),user=auth.currentUser;
     if(!user)return {ready:false};
     if(auth.app.options.projectId!=='appcodici-password'||user.uid!==expected.uid||
-      user.email!==expected.email||user.emailVerified!==true)return {ready:true,target:false};
+      user.email!==expected.email)return {ready:true,target:false};
+    if(user.emailVerified!==true)return {ready:true,emailUnverified:true};
     const token=await user.getIdTokenResult(expected.refresh);
     return {ready:true,target:auth.currentUser===user&&user.uid===expected.uid&&
       user.email===expected.email&&user.emailVerified===true&&token.claims.vault_frame_canary===true};
    },{uid:secrets.uid,email:secrets.email,version:config.version,refresh});
   }catch{fail('C1_BOOTSTRAP_MISMATCH');}
-  if(result?.ready!==true){if(allowPending)return false;fail('C1_AUTH_BLOCKED');}
+  if(result?.ready!==true){if(allowPending)return false;fail('C1_AUTH_NOT_READY');}
+  if(result.emailUnverified===true)fail('C1_AUTH_EMAIL_UNVERIFIED');
   if(result.target!==true)fail('C1_TARGET_DENIED');
   checkpoint();return true;
  }
@@ -211,13 +213,13 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
    while(Date.now()<deadline){
     checkpoint();
     if(await page.locator('#totp-form-group').isVisible()||await page.locator('#totp-code').isVisible())fail('C1_MFA_BLOCKED');
-    if(await page.locator('#email-verification-panel').isVisible())fail('C1_AUTH_BLOCKED');
+    if(await page.locator('#email-verification-panel').isVisible())fail('C1_AUTH_EMAIL_UNVERIFIED');
     if(['/home_page.html','/app.html'].includes(new URL(page.url()).pathname)){
      if(await guardQa2({refresh:true,allowPending:true})){authenticated=true;break;}
     }
     await delay(150);
    }
-   if(!authenticated)fail('C1_AUTH_BLOCKED');
+   if(!authenticated)fail('C1_AUTH_NOT_READY');
    await page.goto(origin+'/app.html?route=%2Fhome_page.html',{waitUntil:'domcontentloaded'});
    checkpoint();
    try{await page.locator('#protocol-input-modal-input').waitFor({state:'visible',timeout:Math.min(10000,timeout)});}

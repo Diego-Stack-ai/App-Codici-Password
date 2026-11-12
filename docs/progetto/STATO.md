@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+## C1 #1 bloccato, canary OFF e PR diagnostica — 12/11/2026
+
+La #293 è unita su ordine di Diego in master `cd05b44e26792a70fe7f37e43be5172dfc75f81d`. Il [primo giro reale QA2/Chrome desktop](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43183551202), con preflight e approvazione personale, supera le fixture locali e si ferma in **SETUP BLOCKED / C1_AUTH_BLOCKED**: nessun caso C1 completato, DIAG non disponibile e nessun cambio timeout tentato. [Ricevuta accettata da Claude e limiti](../evidenze/COLLAUDI.md#cornice-c1-primo-giro-2026-11-12). **Ultimo canary OFF confermato da Diego**, senza verifica amministrativa di Codex; nessun retry.
+
+Ordine corrente: PR diagnostica con sei sottocodici chiusi (quattro categorie host HTTP, email non verificata, utente non pronto), test locali e [valutazione A](../procedure/COLLAUDI.md#cornice-c1-self-hosted-valutazione-2026-11-12). La candidata modifica solo runner/test/documenti: nessun workflow, browser visibile o self-hosted attivato. La causa del primo blocco resta indeterminata; l'ipotesi App Check non è certificata. Nuovo giro subordinato a revisione Claude e nuovo ordine di Diego. Produzione ancora **1.2.270 / cb48b7196a3816a62dda05d11e11ff4ca7c51d26**; UI #283 e sicurezza restano fuori dalla pubblicazione fino a C1. Nessun merge, deploy, intervento Firebase o nuovo PASS da questa preparazione. I checkpoint sotto precedono il giro reale.
+
 ## C1 — adapter integrato, configurazione GitHub e PR workflow — 12/11/2026
 
 La #292 ha [GO Claude sul codice 45f50a9e](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6812002019) e CI verde; merge ordinato da Diego, master `6dd80df1ee7be63550583b89bde6b326ad8122b5`, [ricevuta](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6816335473). Adapter D02/D04/D05-A/D06/D08 integrato, mai eseguito in produzione. Diego ha configurato l'environment protetto, la variabile operatore e quattro segreti: Codex ha verificato solo nomi/presenza e protezioni UI, **non valori o funzionamento**. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-c1-workflow-config-2026-11-12).

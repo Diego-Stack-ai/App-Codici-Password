@@ -2,17 +2,35 @@ import {FRAME_DIAG_CODES, validFrameDiagnosticEvent, FRAME_DIAG_MAX} from '../..
 
 export const C1_CASES = Object.freeze(['D02-core', 'D04-core', 'D05-A']);
 export const C1_PROFILES = Object.freeze(['chrome-desktop', 'android-emulated', 'iphone-emulated']);
+export const C1_AUTH_CODES = Object.freeze([
+  'C1_AUTH_HTTP_APPCHECK', 'C1_AUTH_HTTP_IDENTITY', 'C1_AUTH_HTTP_FIRESTORE', 'C1_AUTH_HTTP_OTHER',
+  'C1_AUTH_EMAIL_UNVERIFIED', 'C1_AUTH_NOT_READY'
+]);
 export const C1_CODES = Object.freeze([
   'C1_LOCAL_ONLY', 'C1_OPTIONS_INVALID', 'C1_TARGET_DENIED', 'C1_REPORT_INVALID',
   'C1_CONTINUITY_BROKEN', 'C1_DESTINATION_WRONG', 'C1_UNLOCK_MISSING',
   'C1_UNLOCK_REPEATED', 'C1_TECHNICAL', 'C1_PRODUCTION_NOT_IMPLEMENTED',
   'C1_EXECUTION_NOT_AUTHORIZED','C1_PLATFORM_UNSUPPORTED','C1_RELEASE_MISMATCH',
-  'C1_AUTH_BLOCKED','C1_MFA_BLOCKED','C1_BOOTSTRAP_MISMATCH','C1_READINESS',
+  ...C1_AUTH_CODES,'C1_MFA_BLOCKED','C1_BOOTSTRAP_MISMATCH','C1_READINESS',
   'C1_NETWORK_FAILURE','C1_HTTP_FAILURE','C1_RUNTIME_FAILURE','C1_MODAL_UNEXPECTED',
   'C1_DIAG_UNAVAILABLE','C1_CONFIG_DOC_ROUTE_UNAVAILABLE','C1_TIMEOUT_NOT_LOCKED',
   'C1_TIMEOUT_BASELINE','C1_LOGOUT_FAILED','C1_REPORT_WRITE','C1_FIXTURE_MISSING','C1_ROUTE_UNAVAILABLE',
   'C1_UNEXPECTED_DIAG','C1_DIAG_TRUNCATED'
 ]);
+// Only exact service hosts select a fixed code. Never retain/return the URL,
+// credentials, path, query, response body or a provider's free error message.
+export function authHttpFailureCode(url) {
+  let host;
+  try { host = typeof url === 'string' ? new URL(url).hostname : ''; } catch { host = ''; }
+  switch (host) {
+    case 'content-firebaseappcheck.googleapis.com':
+    case 'firebaseappcheck.googleapis.com': return 'C1_AUTH_HTTP_APPCHECK';
+    case 'identitytoolkit.googleapis.com':
+    case 'securetoken.googleapis.com': return 'C1_AUTH_HTTP_IDENTITY';
+    case 'firestore.googleapis.com': return 'C1_AUTH_HTTP_FIRESTORE';
+    default: return 'C1_AUTH_HTTP_OTHER';
+  }
+}
 export function fail(code) {
   throw new Error(C1_CODES.includes(code) ? code : 'C1_TECHNICAL');
 }
