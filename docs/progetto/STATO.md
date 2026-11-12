@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+## C1 — adapter candidato dopo GO sul piano, nessuna esecuzione — 12/11/2026
+
+Preparazione autorizzata da Diego, base master `8afadf8e80ff8b52e789530a6619698d7b4f7869`: [piano E2E QA2 e limiti](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12). [GO Claude sul piano/prototipo f2ad012d](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6810738784); adapter per D02/D04/D05-A/D06/D08 e workflow proposto fuori da .github ora preparati, da rivedere sul nuovo SHA. CLI senza autorizzazioni CI si ferma prima di segreti/rete; nessun giro reale o nuovo PASS C1. D02 Configurazione documenti rimane NE se manca il link UI canonico, senza URL diretto sostitutivo. Ricevute #289–#291 già unite in ordine, [SHA finale e avviso](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6809075057), senza rilascio.
+
+Produzione osservata **1.2.270** da `cb48b7196a3816a62dda05d11e11ff4ca7c51d26`; ultimo canary **OFF confermato da Diego**, senza rilettura amministrativa. Fase personale/C2 e matrice fisica restano aperte. [GO readonly UI #283 su ae529fa](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/283#issuecomment-6810651505), nessun rilascio grafica/sicurezza. Una sola bozza #292, nessun merge/deploy, segreto configurato o operazione cloud; il GO del piano non copre il nuovo codice. I checkpoint sotto sono storici.
+
 ## Produzione 1.2.270 verificata, D05-A Chrome PASS e canary OFF — 11/11/2026
 
 La #288 e unita dopo il GO Claude e l'ordine personale di Diego. Produzione **1.2.270**, sorgente **cb48b7196a3816a62dda05d11e11ff4ca7c51d26**, [Hosting #1088](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43036071599) riuscito. Diego delega esplicitamente a Codex il clic finale per la sola run: approvazione registrata, nessun bypass. Manifest, **362/362 payload e hash**, 41 profili di intestazioni, alias e tre probe di normalizzazione verificati indipendentemente dalla CI. Title/intestazione Vault bloccata e azione Sblocca e riprendi pubblicati nelle otto lingue; comportamento di ripresa conservato. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-riprendi-pubblicazione-1-2-270).

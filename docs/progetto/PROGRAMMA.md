@@ -1,5 +1,9 @@
 # Programma
 
+## C1 — revisione adapter QA2, poi ordini personali di configurazione ed esecuzione
+
+[Piano e adapter preparato](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12): il piano/prototipo f2ad012d ha GO Claude; il seguito per D02/D04/D05-A/D06/D08 e workflow non attivo richiede nuovo GO sullo SHA finale e CI verde. Configurazione documenti resta sottocaso NE senza link UI canonico; non simulare il giro completo. Eventuale caricamento workflow/environment/segreti e dispatch solo su ordini di Diego, canary OFF fino al suo passo. Emulazioni non sostituiscono automaticamente le quattro colonne fisiche: criterio di riduzione ancora da decidere/registrare in DECISIONI. Restano Safari/PWA/camera/push, D15 personale, D18 con secondo rilascio, fase personale e C2. UI #283 con GO readonly su ae529fa; grafica/sicurezza fuori produzione fino a C1 completata e ordine di Diego. I checkpoint sotto sono precedenti.
+
 ## #285 — revisione opzione A, poi singoli passi autorizzati
 
 Prima nuovo GO Claude su runner/ADC/rimozione e istruzioni IAM con i limiti espliciti; nessun merge o cloud in questo incarico. Poi ordini separati per ruoli/SA/delega, login ADC isolato, preflight autorizzato e ammissibilità QA2. Singleton OFF con destinatario sintetico corretto e Timestamp futuro concordato precede qualunque grant; dry-run non mostra identificativi e non sostituisce l'approvazione all'apply. Rimozione del claim dopo OFF e prima del cambio destinatario/C2, quindi revoca delega/SA/ADC. [Sequenza completa](../regole/RILASCIO.md#cornice-adc-impersonata-2026-11-10). C1 di ciascuna fase e sette giorni restano da concordare/eseguire; nessun automatismo.

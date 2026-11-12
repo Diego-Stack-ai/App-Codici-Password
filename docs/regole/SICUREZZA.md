@@ -1,5 +1,15 @@
 # Sicurezza
 
+<a id="cornice-c1-qa2-segreti-2026-11-12"></a>
+
+## C1 automatizzato — QA2 esclusivamente sintetica e segreti, 12/11/2026
+
+L'account QA2 del runner C1 deve contenere **sempre e soltanto dati inventati: mai dati reali**, personali o aziendali. La Master e le credenziali restano segreti da proteggere anche per un account sintetico. L'uso nei segreti GitHub è limitato a QA2 approvata, environment protetto con approvazione personale e ordine di esecuzione; nessun account personale entra nel runner. Se la natura sintetica non è verificata, oppure vengono introdotti dati reali, sospendere le run, mantenere il canary OFF e rivedere gestione/accessi ai segreti prima di riprendere.
+
+UID/email vengono confrontati privatamente e non riportati; password, Master, token e claim estranei non entrano in log, screenshot, trace, HAR, storageState o artefatti. Il browser non eredita i segreti del processo Node; report ricostruiti da schema chiuso, solo codici e DIAG sanificata. L'adapter non crea/ruota credenziali, non usa ADC/SDK Admin e non scrive singleton, claim, Rules o Functions.
+
+2FA/MFA non viene indebolita per il test: se QA2 richiede TOTP, stato BLOCKED e decisione di Diego, senza recupero o disattivazione automatica. L'ammissione server e i controlli dell'app restano effettivi. Login/bootstrap, preferenze timeout 1/3 e logout possono scrivere: richiedono l'ordine esplicito con gli effetti elencati nel [piano C1](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12). Un verde locale o GO sul piano non autorizza produzione, merge, deploy o attivazione.
+
 ## Conferma Vault nella cornice — isolamento dell'interazione, 10/11/2026
 
 L'isolamento UI del dialogo parent e un obbligo distinto dall'ammissione e dalla disponibilita della chiave. Un hold della modale non concede ne conserva materiale Vault, non rinnova i timer e non neutralizza abort/revoca. Iframe inert, focus confinato e rilascio subordinato allo stato corrente sono definiti nel [contratto UI](INTERFACCIA.md#cornice-dialogo-ui-2026-11-10). La diagnostica active/permitValid non certifica da sola uno sblocco riuscito; prova UI locale, stato della chiave e collaudo fisico restano evidenze diverse.
