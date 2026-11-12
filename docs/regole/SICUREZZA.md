@@ -1,5 +1,19 @@
 # Sicurezza
 
+<a id="cornice-c1-recaptcha-eccezione-2026-11-12"></a>
+
+## C1 — strada A, eccezione reCAPTCHA registrata, candidata 12/11/2026
+
+[Decisione esplicita di Diego](../progetto/DECISIONI.md#cornice-c1-recaptcha-eccezione-2026-11-12), limitata al runner. Non altera Auth/App Check o le protezioni dell'app. La deroga richiede contemporaneamente: console type=error, args() disponibile e array realmente vuoto, origin=google, sottocategoria reCAPTCHA ammessa da host/path canonici, kind=OTHER, tag=OTHER, testo primitivo leggibile/non vuoto e assenza dei marcatori di sicurezza descritti nella [procedura](../procedure/COLLAUDI.md#cornice-c1-recaptcha-eccezione-2026-11-12). RESOURCE e dati indisponibili non sono esentati.
+
+Pageerror, console dell'app o con argomenti, messaggi di sicurezza riconosciuti o con marcatori espliciti, HTTP almeno 400 inclusi App Check/Identity/Firestore, requestfailed e dialoghi/download/popup conservano i fatal preesistenti. Primo errore, deadline, guardia privata prima della Master, freeze e assenza di retry invariati. La deroga non concede ammissione né forza la cornice; target diverso o app standalone restano rifiutati.
+
+Ogni deroga ammessa incrementa thirdPartyConsole, oggetto chiuso nel rapporto candidato v4: count intero 0–20, prima fase e categoria del primo percorso. A 20 il conteggio è saturato e significa **almeno 20**, non esattamente 20. Stato per singolo port in RAM, getter ricostruttivo e snapshot congelato prima del cleanup; nessun evento successivo a fatal/freeze modifica il contatore. Zero ha contesti null, positivo soltanto enum ammessi. firstError aggiunge googlePath chiuso/null: 10 campi esatti, senza rendere retroattiva la deroga sul rapporto #5.
+
+Nessun testo, URL, query/hash, frame name, valore di argomento, stack o identificativo esportato. La policy usa transitoriamente solo la location dell'API per il percorso canonico, mai URL nel testo; codifiche percentuali residue nel pathname normalizzato o host imitatori restano esclusi. Registro nel solo artefatto C1 già previsto, nessuna telemetria applicativa o chiamata extra. Rapporto v4 ricostruito con 17 campi, versioni precedenti conservate come ricevute storiche.
+
+La combinazione non prova un messaggio nativo o innocuo: resta possibile OTHER per una variante priva anche dei marcatori riconosciuti. Non si afferma che la deroga copra il giro #5 o che ogni errore reCAPTCHA si manifesti necessariamente negli altri canali. [Banco e limiti](../evidenze/COLLAUDI.md#cornice-c1-recaptcha-eccezione-2026-11-12). Canary OFF; nessun nuovo giro o deploy autorizzato dal candidato. Il contratto v3 sotto è storico.
+
 <a id="cornice-c1-console-classificazione-2026-11-12"></a>
 
 ## C1 — contratto candidato della classificazione v3, 12/11/2026

@@ -1,5 +1,6 @@
 import {C1_ORIGIN} from './c1-e2e-execution.mjs';
-import {fail,validateDiag,assertLoopback,httpFailureCode,consoleErrorCategory,errorHostCategory,errorOriginCategory,validateFirstError,safeFailure} from './c1-e2e-contract.mjs';
+import {fail,validateDiag,assertLoopback,httpFailureCode,consoleErrorCategory,errorHostCategory,errorOriginCategory,validateFirstError,
+ validateThirdPartyConsole,C1_THIRD_PARTY_CONSOLE_MAX,C1_GOOGLE_PATHS,safeFailure} from './c1-e2e-contract.mjs';
 
 // C1 requires Italian. The local fixture uses the actual onboarding module,
 // so changed application text cannot silently select a different action.
@@ -41,6 +42,7 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
  const timeout=operationTimeout;
  const entryTransition=Symbol('home document replaced');
  let fatal=null,firstError=null,phase='LOGIN_READY',errorsOpen=true;
+ const thirdPartyConsole={count:0,firstPhase:null,googlePath:null};
  let expectedCount=0,timerChanged=false,timerStartedAt=0,lastActivityAt=0,timerIdle=180000;
  let notifyFatal;
  const fatalSignal=new Promise(resolve=>{notifyFatal=resolve;});
@@ -55,7 +57,7 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
  // Native pageerror has no Frame. Keep OTHER; do not introduce another error
  // observer which could turn handled/synthetic events into new fatal signals.
  page.on('pageerror',()=>setFatal('C1_RUNTIME_FAILURE',{source:'pageerror',frame:'other',tag:null,host:null,
-  kind:null,origin:'none',hasArgs:null,firebaseComponent:null}));
+  kind:null,origin:'none',hasArgs:null,firebaseComponent:null,googlePath:null}));
  page.on('console',message=>{
   if(message.type()!=='error'||fatal!==null||!errorsOpen)return;
   let text,locationUrl,firstArg,hasArgs=null;
@@ -64,6 +66,14 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
   try{const args=message.args();if(Array.isArray(args)){hasArgs=args.length>0;firstArg=args[0];}}
   catch{/* Count and realm can be unavailable; never read argument values. */}
   const category=consoleErrorCategory(text,locationUrl);
+  // Explicit policy A: an observable, bounded exception, never a general
+  // Google-console filter. Unknown/unreadable data remains fatal.
+  if(hasArgs===false&&category.origin==='google'&&C1_GOOGLE_PATHS.slice(0,3).includes(category.googlePath)&&
+   category.kind==='OTHER'&&category.tag==='OTHER'&&typeof text==='string'&&text.trim()!==''&&
+   !/\b(?:csp|cors)\b|content[\s-]+security[\s-]+policy|permissions[\s-]+policy/i.test(text)){
+   if(thirdPartyConsole.count===0){thirdPartyConsole.firstPhase=phase;thirdPartyConsole.googlePath=category.googlePath;}
+   thirdPartyConsole.count=Math.min(C1_THIRD_PARTY_CONSOLE_MAX,thirdPartyConsole.count+1);return;
+  }
   if(!setFatal('C1_RUNTIME_FAILURE',{source:'console',frame:'other',...category,hasArgs}))return;
   const reserved=firstError;
   // Resolve only this error's realm, without reading its argument. No new wait
@@ -77,7 +87,7 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
    if(status>=400){let source;try{source=response.frame();}catch{/* Service worker / detached frame. */}
     const url=response.url();
     setFatal(httpFailureCode(status,url),{source:'http',frame:errorFrame(source),tag:null,host:errorHostCategory(url),
-     kind:null,origin:errorOriginCategory(url),hasArgs:null,firebaseComponent:null});}});
+     kind:null,origin:errorOriginCategory(url),hasArgs:null,firebaseComponent:null,googlePath:null});}});
  page.on('requestfailed',request=>{if(request.failure()?.errorText!=='net::ERR_ABORTED')setFatal('C1_NETWORK_FAILURE');});
  page.on('dialog',dialog=>{setFatal('C1_MODAL_UNEXPECTED');void dialog.dismiss().catch(()=>{});});
  page.on('download',download=>{setFatal('C1_MODAL_UNEXPECTED');void download.cancel().catch(()=>{});});
@@ -306,6 +316,7 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
  }
  const port={
   freezeErrors:()=>{errorsOpen=false;},
+  thirdPartyConsole:()=>validateThirdPartyConsole(thirdPartyConsole),
   failureCode:error=>fatal??safeFailure(error),
   firstError:code=>fatal===code?validateFirstError(firstError):null,
   beginCases:()=>{phase='CASE';},

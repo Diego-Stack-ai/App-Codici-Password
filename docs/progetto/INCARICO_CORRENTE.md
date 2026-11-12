@@ -1,5 +1,15 @@
 # Incarico corrente
 
+<a id="cornice-c1-recaptcha-eccezione-2026-11-12"></a>
+
+## C1 — strada A, eccezione reCAPTCHA stretta e registrata, 12/11/2026
+
+Diego ordina **«Autorizzo la strada A: PR del solo runner con eccezione stretta e registrata per i messaggi nativi reCAPTCHA, banco RED → GREEN e negativi come indicato. Nessun giro senza mio ordine»**, dopo la [revisione Claude della ricevuta #5](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/297#issuecomment-6832293781). Base master `b2028a158e2374eff2e6069c663271064d62b129`, ramo codex/c1-recaptcha-native-exception-20261112. [Decisione e limiti](DECISIONI.md#cornice-c1-recaptcha-eccezione-2026-11-12).
+
+Perimetro: solo runner/test e sei documenti esistenti pertinenti. Cambiare il criterio d'arresto soltanto per console error senza argomenti JS, origine Google e percorso reCAPTCHA da elenco chiuso, kind/tag OTHER e testo leggibile; esclusi segnali di risorsa o sicurezza. Registrazione obbligatoria e limitata nel rapporto candidato v4. Tutti gli altri canali, guardie QA2/pre-Master, primo fatal, deadline, timeout e assenza di retry invariati. Banco RED → GREEN e negativi richiesti; commit/push, PR in bozza e avviso Claude autorizzati.
+
+Nessun app/cornice, workflow, versione, header, manifest/precache, Rules/Functions, segreto, logger o cloud modificato. Elenco di 34 MD invariato. Canary OFF secondo Diego, nessuna rilettura amministrativa. Nessuna esecuzione produttiva, merge, deploy o sesto giro: nuovi ordini personali e gate distinti dopo CI/revisione. Stato DA_VERIFICARE, nessuna auto-approvazione. I blocchi seguenti sono checkpoint precedenti.
+
 <a id="cornice-c1-console-classificazione-2026-11-12"></a>
 
 ## C1 — classificazione chiusa dopo il quarto giro e la prova manuale, 12/11/2026

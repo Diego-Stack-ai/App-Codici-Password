@@ -60,6 +60,8 @@ const errorHosts=Object.freeze(['appcheck','identity','firestore','other']);
 export const C1_ERROR_KINDS=Object.freeze(['CSP','CORS','PERMISSIONS_POLICY','FIREBASE_SDK','UNCAUGHT_PROMISE','OTHER']);
 export const C1_ERROR_ORIGINS=Object.freeze(['app','google','firebase','none','other']);
 export const C1_FIREBASE_COMPONENTS=Object.freeze(['app-check','auth','firestore','messaging','installations','app']);
+export const C1_GOOGLE_PATHS=Object.freeze(['recaptcha-api','recaptcha-frame','gstatic-recaptcha','other']);
+export const C1_THIRD_PARTY_CONSOLE_MAX=20;
 const googleLocations=new Set(['www.google.com','www.gstatic.com','www.recaptcha.net','recaptcha.google.com']);
 const firebaseLocations=new Set(['content-firebaseappcheck.googleapis.com','firebaseappcheck.googleapis.com',
  'identitytoolkit.googleapis.com','securetoken.googleapis.com','firestore.googleapis.com','firebase.googleapis.com',
@@ -81,6 +83,22 @@ export function errorOriginCategory(value){
  }catch{/* Missing or malformed locations never enter the report. */}
  return 'other';
 }
+function recaptchaLocationCategory(value){
+ if(errorOriginCategory(value)!=='google')return 'other';
+ const {hostname,pathname}=new URL(value);
+ if(pathname.includes('%'))return 'other';
+ if(hostname==='www.gstatic.com')return pathname.startsWith('/recaptcha/')&&pathname.length>'/recaptcha/'.length?'gstatic-recaptcha':'other';
+ if(!['www.google.com','www.recaptcha.net','recaptcha.google.com'].includes(hostname))return 'other';
+ if(['/recaptcha/api.js','/recaptcha/enterprise.js'].includes(pathname))return 'recaptcha-api';
+ return ['/recaptcha/api2/','/recaptcha/enterprise/'].some(prefix=>pathname.startsWith(prefix)&&pathname.length>prefix.length)?'recaptcha-frame':'other';
+}
+export function validateThirdPartyConsole(value){
+ if(!exact(value,['count','firstPhase','googlePath'])||!Number.isInteger(value.count)||value.count<0||
+  value.count>C1_THIRD_PARTY_CONSOLE_MAX||
+  (value.count===0?value.firstPhase!==null||value.googlePath!==null:
+   !C1_ERROR_PHASES.includes(value.firstPhase)||!C1_GOOGLE_PATHS.slice(0,3).includes(value.googlePath)))fail('C1_REPORT_INVALID');
+ return {count:value.count,firstPhase:value.firstPhase,googlePath:value.googlePath};
+}
 function consoleKind(text){
  if(typeof text!=='string')return {kind:'OTHER',firebaseComponent:null};
  if(['Refused to ','Framing ','Loading ','Connecting ','Executing '].some(prefix=>text.startsWith(prefix))&&
@@ -95,7 +113,8 @@ function consoleKind(text){
 }
 export function consoleErrorCategory(text,locationUrl){
  // The original string is transient: return canonical enums, never its suffix.
- const detail={...consoleKind(text),origin:errorOriginCategory(locationUrl)};
+ const origin=errorOriginCategory(locationUrl);
+ const detail={...consoleKind(text),origin,googlePath:origin==='google'?recaptchaLocationCategory(locationUrl):null};
  if(typeof text==='string'&&/^Failed to load resource(?::|\s|$)/.test(text))
   return {tag:'RESOURCE',host:errorHostCategory(locationUrl),...detail};
  const prefix=typeof text==='string'?text.match(/^\[([^\]\r\n]{1,40})\]/)?.[1]:null;
@@ -103,8 +122,8 @@ export function consoleErrorCategory(text,locationUrl){
 }
 export function validateFirstError(value){
  if(value===null)return null;
- if(!exact(value,['phase','source','frame','tag','host','kind','origin','hasArgs','firebaseComponent']))fail('C1_REPORT_INVALID');
- const {phase,source,frame,tag,host,kind,origin,hasArgs,firebaseComponent}=value;
+ if(!exact(value,['phase','source','frame','tag','host','kind','origin','hasArgs','firebaseComponent','googlePath']))fail('C1_REPORT_INVALID');
+ const {phase,source,frame,tag,host,kind,origin,hasArgs,firebaseComponent,googlePath}=value;
  if(!C1_ERROR_PHASES.includes(phase)||!['console','pageerror','http'].includes(source)||
   !['top','vault-child','other'].includes(frame)||
   (source==='console'?!C1_ERROR_TAGS.includes(tag):tag!==null)||
@@ -114,8 +133,9 @@ export function validateFirstError(value){
    (tag!=='OTHER'&&kind!=='OTHER')||
    (kind==='FIREBASE_SDK'?!C1_FIREBASE_COMPONENTS.includes(firebaseComponent):firebaseComponent!==null):
    kind!==null||hasArgs!==null||firebaseComponent!==null)||
-  source==='pageerror'&&origin!=='none')fail('C1_REPORT_INVALID');
- return {phase,source,frame,tag,host,kind,origin,hasArgs,firebaseComponent};
+  source==='pageerror'&&origin!=='none'||
+  (source==='console'&&origin==='google'?!C1_GOOGLE_PATHS.includes(googlePath):googlePath!==null))fail('C1_REPORT_INVALID');
+ return {phase,source,frame,tag,host,kind,origin,hasArgs,firebaseComponent,googlePath};
 }
 
 // This prototype cannot accept a production URL, profile directory or credentials.

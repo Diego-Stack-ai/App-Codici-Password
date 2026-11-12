@@ -14,12 +14,106 @@ const good=()=>({GITHUB_ACTIONS:'true',GITHUB_EVENT_NAME:'workflow_dispatch',GIT
  C1_EXECUTION_ORDER:'https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-1',
  C1_PREFLIGHT_CONFIRMED:'true',C1_EFFECTS_CONFIRMED:'true',C1_ACCEPT_D02_LIMIT:'true',
  C1_PROFILE:'chrome-desktop',C1_RELEASE_SHA:'b'.repeat(40),C1_RELEASE_VERSION:'1.2.270'});
-const reportV3=()=>({schemaVersion:3,profile:'chrome-desktop',platform:'win32',engineVersion:'156.0',runnerSha:'a'.repeat(40),
+const reportV4=()=>({schemaVersion:4,profile:'chrome-desktop',platform:'win32',engineVersion:'156.0',runnerSha:'a'.repeat(40),
  release:{version:'1.2.270',sourceSha:'b'.repeat(40),publicTreeSha256:'c'.repeat(64)},productionExecuted:true,possibleAppWrites:true,
  network:true,diagSource:'getter',cases:[{id:'SETUP',status:'FAIL',code:'C1_RUNTIME_FAILURE',diag:null}],code:'C1_RUNTIME_FAILURE',
  failureDiagCode:'C1_DIAG_UNAVAILABLE',offRequired:true,timeoutRestoreRequired:false,
  firstError:{phase:'FRAME_ENTRY',source:'console',frame:'top',tag:'BLINDA',host:null,
-  kind:'OTHER',origin:'app',hasArgs:true,firebaseComponent:null}});
+  kind:'OTHER',origin:'app',hasArgs:true,firebaseComponent:null,googlePath:null},
+ thirdPartyConsole:{count:0,firstPhase:null,googlePath:null}});
+async function nativeConsoleHarness(){
+ const handlers=new Map();let fills=0;
+ const page={url:()=> 'http://127.0.0.1:9191/login.html',on:(event,callback)=>handlers.set(event,callback),
+  context:()=>({serviceWorkers:()=>[],route:async()=>{},on:(event,callback)=>handlers.set('context:'+event,callback)}),addInitScript:async()=>{},setDefaultTimeout:()=>{},
+  locator:()=>{fills++;throw Error('MUST_NOT_FILL');}};
+ return {port:await createLocalFixturePort(page,{},{}),handlers,fills:()=>fills};
+}
+const nativeConsoleMessage=(url='https://www.google.com/recaptcha/api2/anchor?key=synthetic-private',args=[],text='Synthetic native notice')=>
+ ({type:()=> 'error',text:()=>text,location:()=>({url}),args:()=>args});
+test('native recaptcha-shaped console error is registered rather than fatal',async()=>{
+ for(const [url,googlePath]of [['https://www.google.com/recaptcha/api.js','recaptcha-api'],
+  ['https://www.recaptcha.net/recaptcha/api2/anchor','recaptcha-frame'],
+  ['https://www.gstatic.com/recaptcha/releases/synthetic/recaptcha.js','gstatic-recaptcha']]){
+  const h=await nativeConsoleHarness();h.handlers.get('console')(nativeConsoleMessage(url));
+  assert.equal(h.port.firstError('C1_RUNTIME_FAILURE'),null);
+  assert.deepEqual(h.port.thirdPartyConsole(),{count:1,firstPhase:'LOGIN_READY',googlePath});
+  assert.equal(h.port.failureCode(Error('C1_READINESS')),'C1_READINESS');assert.equal(h.fills(),0);
+ }
+});
+test('recaptcha exception negatives remain fatal before any secret input',async()=>{
+ const url='https://www.google.com/recaptcha/api2/anchor?private=never-export';
+ const unreadable=()=>{throw Error('synthetic-private');};
+ const cases=[
+  nativeConsoleMessage(url,[{}]),nativeConsoleMessage(url,[undefined]),
+  {...nativeConsoleMessage(url),args:unreadable},{...nativeConsoleMessage(url),args:()=>({length:0})},
+  nativeConsoleMessage('https://www.google.com/unrelated'),
+  nativeConsoleMessage('https://appcodici-password.web.app/recaptcha/api2/anchor'),
+  nativeConsoleMessage('https://www.google.com.evil.invalid/recaptcha/api2/anchor'),
+  nativeConsoleMessage(url,[],'Failed to load resource: synthetic-private'),
+  nativeConsoleMessage(url,[],'[BLINDA] synthetic-private'),
+  nativeConsoleMessage(url,[],'Refused to frame private because of Content Security Policy'),
+  nativeConsoleMessage(url,[],'The source list for Content Security Policy directive contains an invalid source'),
+  nativeConsoleMessage(url,[],'Access to private has been blocked by CORS policy'),
+  nativeConsoleMessage(url,[],'Unknown CORS problem'),
+  nativeConsoleMessage(url,[],'Permissions policy violation: synthetic-private'),
+  nativeConsoleMessage(url,[],'The Permissions-Policy header is invalid'),
+  nativeConsoleMessage(url,[],'@firebase/auth: synthetic-private'),
+  nativeConsoleMessage(url,[],'Uncaught (in promise) synthetic-private'),
+  nativeConsoleMessage(url,[],''),nativeConsoleMessage(url,[],'  '),
+  {...nativeConsoleMessage(url),text:unreadable},{...nativeConsoleMessage(url),text:()=>({toString:unreadable})},
+  {...nativeConsoleMessage(url),location:unreadable}
+ ];
+ for(const message of cases){
+  const h=await nativeConsoleHarness();h.handlers.get('console')(message);
+  assert.equal(h.port.failureCode(Error('C1_READINESS')),'C1_RUNTIME_FAILURE');
+  assert.deepEqual(h.port.thirdPartyConsole(),{count:0,firstPhase:null,googlePath:null});
+  await assert.rejects(()=>h.port.collectDiag(),/^Error: C1_RUNTIME_FAILURE$/);assert.equal(h.fills(),0);
+ }
+});
+test('HTTP, pageerror, failed requests and modal channels remain fatal after a recorded exception',async()=>{
+ for(const [channel,event,code]of [
+  ['response',{status:()=>400,url:()=> 'https://firebaseappcheck.googleapis.com/private'},'C1_HTTP_FAILURE_APPCHECK'],
+  ['response',{status:()=>401,url:()=> 'https://identitytoolkit.googleapis.com/private'},'C1_AUTH_HTTP_IDENTITY'],
+  ['response',{status:()=>503,url:()=> 'https://firestore.googleapis.com/private'},'C1_HTTP_FAILURE_FIRESTORE'],
+  ['response',{status:()=>400,url:()=> 'https://www.google.com/recaptcha/api2/anchor'},'C1_HTTP_FAILURE_OTHER'],
+  ['pageerror',Error('synthetic-private'),'C1_RUNTIME_FAILURE'],
+  ['requestfailed',{failure:()=>({errorText:'net::ERR_FAILED'})},'C1_NETWORK_FAILURE'],
+  ['dialog',{dismiss:async()=>{}},'C1_MODAL_UNEXPECTED'],
+  ['download',{cancel:async()=>{}},'C1_MODAL_UNEXPECTED'],
+  ['context:page',{close:async()=>{}},'C1_MODAL_UNEXPECTED']
+ ]){
+  const h=await nativeConsoleHarness();const message=nativeConsoleMessage();h.handlers.get('console')(message);
+  h.handlers.get(channel)(event);assert.equal(h.port.failureCode(Error('C1_READINESS')),code);
+  const first=h.port.firstError(code);h.port.beginCases();h.handlers.get('console')(message);
+  h.handlers.get('pageerror')(Error('later-private'));
+  assert.equal(h.port.failureCode(Error('C1_READINESS')),code);assert.deepEqual(h.port.firstError(code),first);
+  assert.deepEqual(h.port.thirdPartyConsole(),{count:1,firstPhase:'LOGIN_READY',googlePath:'recaptcha-frame'});
+  await assert.rejects(()=>h.port.collectDiag(),new RegExp('^Error: '+code+'$'));assert.equal(h.fills(),0);
+ }
+});
+test('exception record saturates, preserves its first context and freezes before cleanup',async()=>{
+ const h=await nativeConsoleHarness();h.handlers.get('console')(nativeConsoleMessage());h.port.beginCases();
+ for(let i=0;i<25;i++)h.handlers.get('console')(nativeConsoleMessage('https://www.gstatic.com/recaptcha/synthetic.js'));
+ const expected={count:20,firstPhase:'LOGIN_READY',googlePath:'recaptcha-frame'};
+ const snapshot=h.port.thirdPartyConsole();assert.deepEqual(snapshot,expected);snapshot.count=0;
+ assert.deepEqual(h.port.thirdPartyConsole(),expected);h.port.freezeErrors();h.handlers.get('console')(nativeConsoleMessage());
+ h.handlers.get('pageerror')(Error('cleanup-private'));
+ assert.deepEqual(h.port.thirdPartyConsole(),expected);assert.equal(h.port.firstError('C1_RUNTIME_FAILURE'),null);
+});
+test('v4 report preserves the bounded exception record even with no DIAG',()=>{
+ const report={...reportV4(),schemaVersion:4,firstError:{...reportV4().firstError,googlePath:null},
+  thirdPartyConsole:{count:1,firstPhase:'FRAME_ENTRY',googlePath:'recaptcha-frame'}};
+ assert.deepEqual(sanitizeC1Report(report),report);
+ for(const delta of [{count:-1},{count:1.5},{count:21},{count:'1'},{count:true},{firstPhase:'private-phase'},{googlePath:'private-path'},
+  {count:0},{url:'https://never-export.invalid'},{[Symbol('private')]:true}])
+  assert.throws(()=>sanitizeC1Report({...report,thirdPartyConsole:{...report.thirdPartyConsole,...delta}}),/^Error: C1_REPORT_INVALID$/);
+ assert.doesNotMatch(JSON.stringify(sanitizeC1Report(report)),/https?:|private/);
+ assert.deepEqual(sanitizeC1Report({...report,thirdPartyConsole:{count:0,firstPhase:null,googlePath:null}}).thirdPartyConsole,
+  {count:0,firstPhase:null,googlePath:null});
+ assert.throws(()=>sanitizeC1Report({...report,schemaVersion:3}),/^Error: C1_REPORT_INVALID$/);
+ for(const delta of [{count:1,firstPhase:null},{googlePath:'other'},{count:0,firstPhase:null,googlePath:'recaptcha-api'}])
+  assert.throws(()=>sanitizeC1Report({...report,thirdPartyConsole:{...report.thirdPartyConsole,...delta}}),/^Error: C1_REPORT_INVALID$/);
+});
 test('execution requires dispatch/master/reviewed SHA/operator/order and all separate attestations',()=>{
  assert.equal(authorizeC1(good(),'win32').version,'1.2.270');
  for(const key of ['GITHUB_ACTIONS','GITHUB_EVENT_NAME','GITHUB_REPOSITORY','GITHUB_REF','GITHUB_SHA',
@@ -29,9 +123,9 @@ test('execution requires dispatch/master/reviewed SHA/operator/order and all sep
  assert.throws(()=>authorizeC1({...good(),DEBUG:'pw:api'},'win32'),/^Error: C1_EXECUTION_NOT_AUTHORIZED$/);
  assert.throws(()=>authorizeC1(good(),'linux'),/^Error: C1_PLATFORM_UNSUPPORTED$/);
 });
-test('v3 diagnostic report accepts only the extended closed metadata',()=>{
- const report={...reportV3(),schemaVersion:3,firstError:{...reportV3().firstError,
-  kind:'OTHER',origin:'app',hasArgs:true,firebaseComponent:null}};
+test('v4 diagnostic report accepts only the extended closed metadata',()=>{
+ const report={...reportV4(),schemaVersion:4,firstError:{...reportV4().firstError,
+  kind:'OTHER',origin:'app',hasArgs:true,firebaseComponent:null,googlePath:null}};
  assert.deepEqual(sanitizeC1Report(report),report);
  for(const delta of [{kind:'private-kind'},{origin:'https://never-export.invalid'},{hasArgs:'true'},
   {firebaseComponent:'private-component'},{kind:'CSP',firebaseComponent:'auth'},{url:'https://never-export.invalid'}])
@@ -108,15 +202,15 @@ test('browser receives system environment only, reports refuse extra case data a
  assert.throws(()=>sanitizeCase({id:'SETUP',status:'BLOCKED',code:'C1_AUTH_HTTP_OTHER synthetic-private',diag:null}),/^Error: C1_REPORT_INVALID$/);
 });
 
-test('v3 report rejects sensitive additions, malformed metadata and legacy versions instead of silently spreading',()=>{
- assert.deepEqual(sanitizeC1Report(reportV3()),reportV3());
+test('v4 report rejects sensitive additions, malformed metadata and legacy versions instead of silently spreading',()=>{
+ assert.deepEqual(sanitizeC1Report(reportV4()),reportV4());
  for(const mutate of [r=>r.uid='synthetic-private',r=>r.firstError.message='synthetic-private',
   r=>r.firstError.frame='private-frame',r=>r.firstError.tag='private-tag',r=>r.release.url='https://synthetic.invalid/private',
   r=>r.cases[0].value='private',r=>r.code='private-error',r=>r.schemaVersion=1,r=>delete r.firstError,
   r=>r[Symbol('private')]=true,r=>r.firstError[Symbol('private')]=true,r=>r.cases[0][Symbol('private')]=true]){
-  const r=reportV3();mutate(r);assert.throws(()=>sanitizeC1Report(r),/^Error: C1_REPORT_INVALID$/);
+  const r=reportV4();mutate(r);assert.throws(()=>sanitizeC1Report(r),/^Error: C1_REPORT_INVALID$/);
  }
- const serialized=JSON.stringify(sanitizeC1Report(reportV3()));
+ const serialized=JSON.stringify(sanitizeC1Report(reportV4()));
  assert.doesNotMatch(serialized,/uid|email|password|token|https?:|synthetic-private/);
 });
 
@@ -147,7 +241,7 @@ test('response handler preserves the first HTTP host code and stops before crede
   const first=port.firstError(expected);
   assert.equal(port.failureCode(new Error('C1_READINESS')),expected);
   assert.deepEqual(first,{phase:'LOGIN_READY',source:'http',frame:'other',tag:null,host:code.slice('C1_AUTH_HTTP_'.length).toLowerCase(),
-   kind:null,origin:code.endsWith('_OTHER')?'other':'firebase',hasArgs:null,firebaseComponent:null});
+   kind:null,origin:code.endsWith('_OTHER')?'other':'firebase',hasArgs:null,firebaseComponent:null,googlePath:null});
   port.beginCases();handlers.get('pageerror')(new Error('later synthetic-private'));
   assert.deepEqual(port.firstError(expected),first);
  }
@@ -181,7 +275,7 @@ test('pending or absent console realm stays OTHER without delaying failure or re
   const port=await createLocalFixturePort(page,{},{});
   await assert.rejects(()=>port.start(),/^Error: C1_RUNTIME_FAILURE$/);
   const first={phase:'LOGIN_READY',source:'console',frame:'other',tag:'RESOURCE',host:'firestore',
-   kind:'OTHER',origin:'firebase',hasArgs:pending,firebaseComponent:null};
+   kind:'OTHER',origin:'firebase',hasArgs:pending,firebaseComponent:null,googlePath:null};
   assert.deepEqual(port.firstError('C1_RUNTIME_FAILURE'),first);
   port.beginCases();handlers.get('pageerror')(new Error('later synthetic-private'));
   assert.deepEqual(port.firstError('C1_RUNTIME_FAILURE'),first);
@@ -203,7 +297,7 @@ test('console metadata counts handles once without reading their values or delay
   await assert.rejects(()=>port.start(),/^Error: C1_RUNTIME_FAILURE$/);
   const detail=port.firstError('C1_RUNTIME_FAILURE');
   assert.deepEqual(detail,{phase:'LOGIN_READY',source:'console',frame:'other',tag:'OTHER',host:null,
-   kind:'PERMISSIONS_POLICY',origin:'google',hasArgs:mode==='unavailable'?null:mode!=='empty',firebaseComponent:null});
+   kind:'PERMISSIONS_POLICY',origin:'google',hasArgs:mode==='unavailable'?null:mode!=='empty',firebaseComponent:null,googlePath:'other'});
   assert.equal(argsReads,1);assert.equal(valueReads,0);assert.equal(fills,0);
   assert.doesNotMatch(JSON.stringify(detail),/synthetic-private|recaptcha|https?:|key=/);
   port.beginCases();handlers.get('console')(message);port.freezeErrors();handlers.get('pageerror')(Error('later private'));
@@ -224,12 +318,12 @@ test('artifact flag is set only for a newly written report, never for a stale wx
  const env={RUNNER_TEMP:dir,GITHUB_OUTPUT:output},file=join(dir,'c1-qa2-report.json');
  try{
   await writeFile(output,'');
-  await writeSanitizedReport(reportV3(),env);
+  await writeSanitizedReport(reportV4(),env);
   assert.equal(await readFile(output,'utf8'),'report_written=true\n');
   await writeFile(output,'');
-  await assert.rejects(()=>writeSanitizedReport(reportV3(),env),/^Error: C1_REPORT_WRITE$/);
+  await assert.rejects(()=>writeSanitizedReport(reportV4(),env),/^Error: C1_REPORT_WRITE$/);
   assert.equal(await readFile(output,'utf8'),'');
-  assert.equal(JSON.parse(await readFile(file,'utf8')).schemaVersion,3);
+  assert.equal(JSON.parse(await readFile(file,'utf8')).schemaVersion,4);
  }finally{await unlink(file).catch(()=>{});await unlink(output).catch(()=>{});await rmdir(dir);}
 });
 test('installed workflow is manual-only, pinned, without cloud roles, and uploads only current report',async()=>{

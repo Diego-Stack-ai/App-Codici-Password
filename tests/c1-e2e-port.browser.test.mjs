@@ -248,8 +248,9 @@ async function fixture(fault='',onWait=null){
  // Test-only observation of real waits/navigation; never fake their result.
  // The race models an interrupted admission when the OLD runner requests goto.
  // It is not evidence that this particular abort occurred in production.
- let interrupted=false;
+ let interrupted=false,consoleListener=null;
  const observed=new Proxy(page,{get(target,key){
+  if(key==='on')return(event,callback)=>{if(event==='console')consoleListener=callback;return target.on(event,callback);};
   if(key==='evaluate')return async(...args)=>{
    if(!interrupted&&String(args[0]).includes('getIdTokenResult')&&fault.startsWith('context-')&&
     new URL(target.url()).pathname===(fault==='context-app'?'/app.html':'/home_page.html')){
@@ -258,7 +259,7 @@ async function fixture(fault='',onWait=null){
    return target.evaluate(...args);
   };
   if(key==='waitForFunction')return(...args)=>{
-   onWait?.();
+   onWait?.({predicate:String(args[0]),emitConsole:message=>consoleListener?.(message)});
    if((fault==='admission-race'||admissionHarness?.releaseOnWait)&&String(args[0]).includes("location.pathname==='/app.html'"))admissionHarness.release('allowed');
    return target.waitForFunction(...args);
   };
@@ -318,6 +319,36 @@ test('asynchronous app admission enters the frame without a competing runner got
    {'login-attempts':1,'master-submits':1,'fixture-app-entries':1,'fixture-diag-opt-ins':1});
  }finally{release('allowed');error();await f.context.close();await run?.catch(()=>{});admissionHarness=null;}
 });
+test('recaptcha console exception allows the real local setup while recording its entry phase',async()=>{
+ admissionHarness=entryGate({releaseOnWait:true});let emitted=false;
+ const f=await fixture('admission-race',({predicate,emitConsole})=>{
+  if(emitted||!predicate.includes("location.pathname==='/app.html'"))return;
+  emitted=true;emitConsole({type:()=> 'error',text:()=> 'Synthetic native third-party notice',
+   location:()=>({url:'https://www.google.com/recaptcha/api2/anchor?key=synthetic-private'}),args:()=>[]});
+ });
+ try{
+  await f.port.start();assert.equal(emitted,true);assert.equal(admissionHarness.forced,0);
+  assert.deepEqual(f.port.thirdPartyConsole(),{count:1,firstPhase:'FRAME_ENTRY',googlePath:'recaptcha-frame'});
+  assert.deepEqual(await f.page.evaluate(()=>Object.fromEntries(
+   ['login-attempts','master-submits','fixture-app-entries','fixture-diag-opt-ins'].map(key=>[key,Number(sessionStorage.getItem(key)||0)]))),
+   {'login-attempts':1,'master-submits':1,'fixture-app-entries':1,'fixture-diag-opt-ins':1});
+ }finally{admissionHarness.release('allowed');admissionHarness.error();await f.context.close();admissionHarness=null;}
+});
+test('recaptcha exception cannot admit another target or force entry from standalone',async()=>{
+ for(const [fault,code]of [['context-home-target','C1_TARGET_DENIED'],['context-home-stuck','C1_FRAME_NOT_ENTERED']]){
+  admissionHarness=entryGate({releaseOnWait:fault!=='context-home-stuck'});let emitted=false;
+  const f=await fixture(fault,({predicate,emitConsole})=>{
+   if(emitted||!predicate.includes("location.pathname==='/app.html'"))return;
+   emitted=true;emitConsole({type:()=> 'error',text:()=> 'Synthetic native third-party notice',
+    location:()=>({url:'https://www.google.com/recaptcha/api2/anchor'}),args:()=>[]});
+  });
+  try{
+   await assert.rejects(()=>f.port.start(),new RegExp('^Error: '+code+'$'));
+   assert.equal(emitted,true);assert.equal(f.masterAttempts(),0);assert.equal(admissionHarness.forced,0);
+   assert.deepEqual(f.port.thirdPartyConsole(),{count:1,firstPhase:'FRAME_ENTRY',googlePath:'recaptcha-frame'});
+  }finally{admissionHarness.release('allowed');admissionHarness.error();await f.context.close();admissionHarness=null;}
+ }
+});
 
 test('standalone app is reported without forced entry or Master submission',async()=>{
  const f=await fixture('standalone');
@@ -359,7 +390,7 @@ test('runtime console failure captures UNLOCK before checkpoint and never submit
   await f.page.evaluate(()=>null); // Drain the reserved error's realm inspection.
   const detail=f.port.firstError('C1_RUNTIME_FAILURE');
   assert.deepEqual(detail,{phase:'UNLOCK',source:'console',frame:'top',tag:'BLINDA',host:null,
-   kind:'OTHER',origin:'other',hasArgs:true,firebaseComponent:null});
+   kind:'OTHER',origin:'other',hasArgs:true,firebaseComponent:null,googlePath:null});
   assert.doesNotMatch(JSON.stringify(detail),/uid|token|contents|exported/);
   assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('master-submits')||0)),0);
   assert.equal(await f.page.locator('#protocol-input-modal-input').evaluate(node=>node.value===''),true);
@@ -389,7 +420,7 @@ test('first runtime during readiness remains first after the readiness wait reje
  try{
   await assert.rejects(()=>f.port.start(),/^Error: C1_RUNTIME_FAILURE$/);
   assert.deepEqual(f.port.firstError('C1_RUNTIME_FAILURE'),{phase:'UNLOCK',source:'console',frame:'vault-child',tag:'PWA',host:null,
-   kind:'OTHER',origin:'other',hasArgs:true,firebaseComponent:null});
+   kind:'OTHER',origin:'other',hasArgs:true,firebaseComponent:null,googlePath:null});
  }finally{await f.context.close();}
 });
 
@@ -403,7 +434,7 @@ test('console from the real child keeps only known tag or OTHER and the original
    await f.page.evaluate(()=>null);
    const detail=f.port.firstError('C1_RUNTIME_FAILURE');
    assert.deepEqual(detail,{phase:'CASE',source:'console',frame:'vault-child',tag,host:null,
-    kind:'OTHER',origin:'none',hasArgs:true,firebaseComponent:null});
+    kind:'OTHER',origin:'none',hasArgs:true,firebaseComponent:null,googlePath:null});
    await assert.rejects(()=>f.port.collectDiag(),/^Error: C1_RUNTIME_FAILURE$/);
    f.port.freezeErrors();
    await f.page.evaluate(()=>console.error('[BLINDA] later synthetic-private'));
@@ -420,7 +451,7 @@ test('native pageerror from the real child keeps unknown frame without exporting
    setTimeout(()=>{throw new Error('synthetic-private-uid-token-url');},0);
   })]);
   assert.deepEqual(f.port.firstError('C1_RUNTIME_FAILURE'),{phase:'CASE',source:'pageerror',frame:'other',tag:null,host:null,
-   kind:null,origin:'none',hasArgs:null,firebaseComponent:null});
+   kind:null,origin:'none',hasArgs:null,firebaseComponent:null,googlePath:null});
   await assert.rejects(()=>f.port.collectDiag(),/^Error: C1_RUNTIME_FAILURE$/);
  }finally{await f.context.close();}
 });
@@ -432,7 +463,7 @@ test('real unhandled promise keeps pageerror metadata unavailable rather than gu
    void Promise.reject(new Error('synthetic-private-unhandled'));
   })]);
   assert.deepEqual(f.port.firstError('C1_RUNTIME_FAILURE'),{phase:'CASE',source:'pageerror',frame:'other',tag:null,host:null,
-   kind:null,origin:'none',hasArgs:null,firebaseComponent:null});
+   kind:null,origin:'none',hasArgs:null,firebaseComponent:null,googlePath:null});
  }finally{await f.context.close();}
 });
 
@@ -458,7 +489,7 @@ test('real resource 404 retains only HTTP host category and frame',async()=>{
    const img=document.createElement('img');img.src='/synthetic-missing?token=synthetic-private';document.body.append(img);
   })]);
   assert.deepEqual(f.port.firstError('C1_HTTP_FAILURE_OTHER'),{phase:'CASE',source:'http',frame:'top',tag:null,host:'other',
-   kind:null,origin:'other',hasArgs:null,firebaseComponent:null});
+   kind:null,origin:'other',hasArgs:null,firebaseComponent:null,googlePath:null});
   await assert.rejects(()=>f.port.collectDiag(),/^Error: C1_HTTP_FAILURE_OTHER$/);
  }finally{await f.context.close();}
 });

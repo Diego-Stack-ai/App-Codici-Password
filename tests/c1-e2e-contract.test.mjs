@@ -7,6 +7,29 @@ import {createLocalC1Driver} from '../scripts/lib/c1-e2e-cases.mjs';
 const now=1794440000000;
 const report=()=>({state:{version:'v1.2.270',active:true,permitValid:true,permitExpiresAt:now+60000,idleMs:180000,pushReady:false,lastBlock:null},
   enabled:true,available:true,events:[{code:'FRAME_ENTER',at:now-1,version:'v1.2.270',page:'home_page.html',environment:'browser'}]});
+test('recaptcha path categories are closed and never inferred from text or query',()=>{
+ for(const [url,expected] of [
+  ['https://www.google.com/recaptcha/api.js?private=never-export#private','recaptcha-api'],
+  ['https://www.recaptcha.net/recaptcha/enterprise.js','recaptcha-api'],
+  ['https://recaptcha.google.com/recaptcha/api2/anchor?private=never-export','recaptcha-frame'],
+  ['https://www.google.com/recaptcha/enterprise/bframe','recaptcha-frame'],
+  ['https://www.google.com/recaptcha/%2e/api2/anchor','recaptcha-frame'],
+  ['https://www.gstatic.com/recaptcha/releases/synthetic/recaptcha.js','gstatic-recaptcha'],
+  ['https://www.google.com/unrelated?path=/recaptcha/api.js','other'],
+  ['https://www.google.com/recaptcha/api.js.evil','other'],
+  ['https://www.google.com/recaptcha/api2-similar/anchor','other'],
+  ['https://www.google.com/recaptcha/api2/','other'],
+  ['https://www.google.com.evil.invalid/recaptcha/api.js',null],
+  ['https://www.google.com@evil.invalid/recaptcha/api.js',null],
+  ['https://private@www.google.com/recaptcha/api.js',null],
+  ['https://www.google.com:444/recaptcha/api.js',null],
+  ['http://www.google.com/recaptcha/api.js',null],
+  ['https://www.google.com/recaptcha/api2%2fanchor','other']
+ ]){
+  const detail=consoleErrorCategory('synthetic native notice',url);
+  assert.equal(detail.googlePath,expected);assert.doesNotMatch(JSON.stringify(detail),/https?:|never-export/);
+ }
+});
 test('console kind diagnostics use fixed prefixes and discard private suffixes',()=>{
  const privateText=' synthetic-private-marker https://never-export.invalid/private?token=never-export';
  for(const [text,kind,component] of [
@@ -57,7 +80,7 @@ test('closed DIAG reconstructs approved fields only',()=>{
 
 test('first error accepts only closed phase/source/frame/tag/host combinations',()=>{
  const value={phase:'FRAME_ENTRY',source:'console',frame:'top',tag:'BLINDA',host:null,
-  kind:'OTHER',origin:'app',hasArgs:true,firebaseComponent:null};
+  kind:'OTHER',origin:'app',hasArgs:true,firebaseComponent:null,googlePath:null};
  assert.equal(validateFirstError(null),null);
  for(const phase of C1_ERROR_PHASES)assert.deepEqual(validateFirstError({...value,phase}),{...value,phase});
  for(const tag of C1_ERROR_TAGS)assert.equal(validateFirstError({...value,tag,host:tag==='RESOURCE'?'other':null}).tag,tag);
@@ -82,13 +105,19 @@ test('first error accepts only closed phase/source/frame/tag/host combinations',
   assert.equal(consoleErrorCategory('@firebase/'+firebaseComponent+': synthetic-private').firebaseComponent,firebaseComponent);
  }
  for(const delta of [{kind:'CSP'},{origin:'private-origin'},{hasArgs:'false'},{hasArgs:new Boolean(false)},
-  {firebaseComponent:'auth'},{tag:'OTHER',kind:'FIREBASE_SDK',firebaseComponent:null},
+  {firebaseComponent:'auth'},{tag:'OTHER',kind:'FIREBASE_SDK',firebaseComponent:null,googlePath:null},
   {tag:'OTHER',kind:'FIREBASE_SDK',firebaseComponent:'private-component'}])
   assert.throws(()=>validateFirstError({...value,...delta}),/^Error: C1_REPORT_INVALID$/);
+ const google={...value,tag:'OTHER',origin:'google',hasArgs:false,googlePath:'recaptcha-frame'};
+ assert.deepEqual(validateFirstError(google),google);
+ for(const delta of [{googlePath:'private-path'},{googlePath:'https://never-export.invalid'},
+  {origin:'app'},{source:'http',tag:null,host:'other',kind:null,hasArgs:null},
+  {source:'pageerror',tag:null,kind:null,origin:'none',hasArgs:null}])
+  assert.throws(()=>validateFirstError({...google,...delta}),/^Error: C1_REPORT_INVALID$/);
 });
 
 test('console classification discards suffixes and uses exact resource hosts only',()=>{
- const expected=(tag='OTHER',host=null,origin='none')=>({tag,host,kind:'OTHER',origin,firebaseComponent:null});
+ const expected=(tag='OTHER',host=null,origin='none')=>({tag,host,kind:'OTHER',origin,firebaseComponent:null,googlePath:null});
  assert.deepEqual(consoleErrorCategory('[BLINDA] synthetic uid/token/value/private-url'),expected('BLINDA'));
  for(const text of ['[UNLISTED] synthetic-private','[BLINDA-private] value','prefix [BLINDA] value','synthetic private'])
   assert.deepEqual(consoleErrorCategory(text),expected());
