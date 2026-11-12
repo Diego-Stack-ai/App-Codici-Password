@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
-import {assertLoopback,qa2IdentityAllowed,validateDiag,safeFailure,authHttpFailureCode,C1_AUTH_CODES,C1_CODES} from '../scripts/lib/c1-e2e-contract.mjs';
+import {assertLoopback,qa2IdentityAllowed,validateDiag,safeFailure,authHttpFailureCode,httpFailureCode,C1_AUTH_CODES,C1_HTTP_FAILURE_CODES,C1_CODES} from '../scripts/lib/c1-e2e-contract.mjs';
 import {createLocalC1Driver} from '../scripts/lib/c1-e2e-cases.mjs';
 const now=1794440000000;
 const report=()=>({state:{version:'v1.2.270',active:true,permitValid:true,permitExpiresAt:now+60000,idleMs:180000,pushReady:false,lastBlock:null},
@@ -55,6 +55,26 @@ test('Auth HTTP diagnostics classify exact hosts only and never echo private URL
   assert.equal(C1_AUTH_CODES.length,6);
   assert.equal(C1_CODES.includes('C1_AUTH_BLOCKED'),false);
   for(const code of C1_AUTH_CODES){
+    assert.equal(safeFailure(new Error(code)),code);
+    assert.equal(safeFailure(new Error(code+': synthetic-private-detail')),'C1_TECHNICAL');
+  }
+});
+
+test('all HTTP failures keep the host category, while non-errors produce no code',()=>{
+  for(const [host,code] of [
+    ['content-firebaseappcheck.googleapis.com','C1_HTTP_FAILURE_APPCHECK'],
+    ['identitytoolkit.googleapis.com','C1_HTTP_FAILURE_IDENTITY'],
+    ['firestore.googleapis.com','C1_HTTP_FAILURE_FIRESTORE'],
+    ['content-firebaseappcheck.googleapis.com.evil.invalid','C1_HTTP_FAILURE_OTHER']
+  ]) for(const status of [400,404,429,500,503]){
+    assert.equal(httpFailureCode(status,'https://'+host+'/private?key=synthetic-secret'),code);
+    assert.equal(C1_CODES.includes(code),true);
+  }
+  for(const status of [401,403])assert.equal(httpFailureCode(status,'https://content-firebaseappcheck.googleapis.com/v1'),'C1_AUTH_HTTP_APPCHECK');
+  assert.equal(httpFailureCode(400,'not a URL'),'C1_HTTP_FAILURE_OTHER');
+  for(const status of [0,200,204,302,null,'400',NaN])assert.equal(httpFailureCode(status,'not a URL'),null);
+  assert.equal(C1_HTTP_FAILURE_CODES.length,4);
+  for(const code of C1_HTTP_FAILURE_CODES){
     assert.equal(safeFailure(new Error(code)),code);
     assert.equal(safeFailure(new Error(code+': synthetic-private-detail')),'C1_TECHNICAL');
   }

@@ -1,5 +1,5 @@
 import {C1_ORIGIN} from './c1-e2e-execution.mjs';
-import {fail,validateDiag,assertLoopback,authHttpFailureCode} from './c1-e2e-contract.mjs';
+import {fail,validateDiag,assertLoopback,httpFailureCode} from './c1-e2e-contract.mjs';
 
 const routes=new Set(['home_page.html','area_privata.html','account_privati.html?type=standard',
  'profilo_privato.html','impostazioni.html','archivio_account.html','regole_scadenze.html',
@@ -37,8 +37,8 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
  const setFatal=code=>{fatal??=code;};
  page.on('pageerror',()=>setFatal('C1_RUNTIME_FAILURE'));
  page.on('console',message=>{if(message.type()==='error')setFatal('C1_RUNTIME_FAILURE');});
- page.on('response',response=>{if(response.status()===401||response.status()===403)setFatal(authHttpFailureCode(response.url()));
-   else if(response.status()>=400)setFatal('C1_HTTP_FAILURE');});
+ page.on('response',response=>{const status=response.status();
+   if(status>=400)setFatal(httpFailureCode(status,response.url()));});
  page.on('requestfailed',request=>{if(request.failure()?.errorText!=='net::ERR_ABORTED')setFatal('C1_NETWORK_FAILURE');});
  page.on('dialog',dialog=>{setFatal('C1_MODAL_UNEXPECTED');void dialog.dismiss().catch(()=>{});});
  page.on('download',download=>{setFatal('C1_MODAL_UNEXPECTED');void download.cancel().catch(()=>{});});

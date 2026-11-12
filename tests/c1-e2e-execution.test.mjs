@@ -4,7 +4,7 @@ import {authorizeC1,readQa2Secrets,verifyC1Release} from '../scripts/lib/c1-e2e-
 import {timerCase} from '../scripts/lib/c1-e2e-priority.mjs';
 import {browserEnvironment,sanitizeCase,assertCaseDiagnostics,writeSanitizedReport,runAuthorizedC1} from '../scripts/lib/c1-e2e-runner.mjs';
 import {createLocalFixturePort} from '../scripts/lib/c1-e2e-production-port.mjs';
-import {C1_AUTH_CODES} from '../scripts/lib/c1-e2e-contract.mjs';
+import {C1_AUTH_CODES,C1_HTTP_FAILURE_CODES} from '../scripts/lib/c1-e2e-contract.mjs';
 import {access,mkdtemp,readFile,writeFile,unlink,rmdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
@@ -84,8 +84,8 @@ test('browser receives system environment only, reports refuse extra case data a
   {id:'D02',status:'PASS',code:null,diag:null,uid:'never-share'},
   {id:'D02',status:'PASS',code:'free SDK error',diag:null}])
   assert.throws(()=>sanitizeCase(row),/^Error: C1_REPORT_INVALID$/);
- for(const code of C1_AUTH_CODES){
-  const row={id:'SETUP',status:'BLOCKED',code,diag:null};
+ for(const code of [...C1_AUTH_CODES,...C1_HTTP_FAILURE_CODES]){
+  const row={id:'SETUP',status:C1_AUTH_CODES.includes(code)?'BLOCKED':'FAIL',code,diag:null};
   assert.deepEqual(sanitizeCase(row),row);
   for(const extra of [{url:'https://synthetic.invalid/private'},{host:'synthetic.invalid'},{uid:'synthetic-only'}])
    assert.throws(()=>sanitizeCase({...row,...extra}),/^Error: C1_REPORT_INVALID$/);
@@ -93,9 +93,9 @@ test('browser receives system environment only, reports refuse extra case data a
  assert.throws(()=>sanitizeCase({id:'SETUP',status:'BLOCKED',code:'C1_AUTH_HTTP_OTHER synthetic-private',diag:null}),/^Error: C1_REPORT_INVALID$/);
 });
 
-test('response handler preserves the first Auth host code and stops before credentials or Master',async()=>{
+test('response handler preserves the first HTTP host code and stops before credentials or Master',async()=>{
  // Event doubles only: no browser, DNS, request, provider or production access.
- for(const status of [401,403])for(const [host,code] of [
+ for(const status of [400,401,403,404,429,500,503])for(const [host,code] of [
   ['content-firebaseappcheck.googleapis.com','C1_AUTH_HTTP_APPCHECK'],
   ['firebaseappcheck.googleapis.com','C1_AUTH_HTTP_APPCHECK'],
   ['identitytoolkit.googleapis.com','C1_AUTH_HTTP_IDENTITY'],
@@ -113,7 +113,8 @@ test('response handler preserves the first Auth host code and stops before crede
     handlers.get('pageerror')(new Error('synthetic private provider detail'));
    },locator:()=>{inputs++;throw Error('MUST_NOT_REACH_INPUTS');}};
   const port=await createLocalFixturePort(page,{},{});
-  await assert.rejects(()=>port.start(),new RegExp('^Error: '+code+'$'));
+  const expected=status===401||status===403?code:code.replace('C1_AUTH_HTTP_','C1_HTTP_FAILURE_');
+  await assert.rejects(()=>port.start(),new RegExp('^Error: '+expected+'$'));
   assert.equal(inputs,0);
   assert.equal(port.timerRestoreRequired(),false);
  }

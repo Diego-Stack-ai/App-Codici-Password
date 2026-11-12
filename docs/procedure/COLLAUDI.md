@@ -4,7 +4,7 @@
 
 ## C1 — diagnostica Auth dopo il primo giro bloccato, 12/11/2026
 
-Il [primo giro reale](../evidenze/COLLAUDI.md#cornice-c1-primo-giro-2026-11-12) non ha superato SETUP; canary OFF confermato da Diego. La nuova PR sostituisce il generico C1_AUTH_BLOCKED con sei codici chiusi, senza ampliare lo schema del rapporto o modificare login, attese, protezioni e browser. Nessun nuovo giro prima della revisione Claude e di un nuovo ordine personale.
+Il [primo giro reale](../evidenze/COLLAUDI.md#cornice-c1-primo-giro-2026-11-12) non ha superato SETUP; canary OFF confermato da Diego. La nuova PR sostituisce il generico C1_AUTH_BLOCKED con sei codici chiusi. Il seguito alla revisione di 079c6ed2 aggiunge quattro C1_HTTP_FAILURE_* per classificare anche gli altri status almeno 400, senza ampliare lo schema del rapporto o modificare login, attese, protezioni e browser. Nessun nuovo giro prima del riesame Claude e di un nuovo ordine personale.
 
 | Segnale osservato | Sottocodice fisso |
 |---|---|
@@ -14,10 +14,11 @@ Il [primo giro reale](../evidenze/COLLAUDI.md#cornice-c1-primo-giro-2026-11-12) 
 | HTTP 401/403, qualsiasi altro host o URL non analizzabile | C1_AUTH_HTTP_OTHER |
 | Pannello di verifica email visibile, oppure email non verificata nel bootstrap dopo il confronto privato QA2 | C1_AUTH_EMAIL_UNVERIFIED |
 | Utente/bootstrap non pronto al controllo richiesto o autenticazione non confermata entro il limite esistente | C1_AUTH_NOT_READY |
+| Altri HTTP almeno 400, stesse quattro categorie host | C1_HTTP_FAILURE_APPCHECK / C1_HTTP_FAILURE_IDENTITY / C1_HTTP_FAILURE_FIRESTORE / C1_HTTP_FAILURE_OTHER |
 
 I servizi canonici sono documentati da [Firebase](https://firebase.google.com/docs/projects/api-keys); l'alias content-firebaseappcheck è presente nel bundle Firebase distribuito dall'app. Nessun suffisso, substring, path o query decide la categoria. L'URL serve transitoriamente a leggere hostname, poi resta solo il codice; nessun host arbitrario, URL, header, body, testo del provider o identificativo entra in log, DIAG o rapporto. Un codice HTTP identifica il servizio osservato, **non la causa del diniego** e non prova un punteggio reCAPTCHA. Email/utente non pronto non dimostrano credenziali errate. Il vecchio rapporto C1 #1 conserva il codice storico: nessuna riclassificazione retroattiva.
 
-Tutti i sottocodici sono BLOCKED, emettono OFF_REQUIRED e mantengono l'arresto senza retry. Il primo errore resta prevalente; un errore runtime successivo non lo sostituisce. MFA, identità/progetto/claim errati e bootstrap non verificabile conservano i propri codici e guardie. DIAG assente resta null, non un rapporto vuoto inventato. Nessun dato aggiuntivo né prova positiva deriva dal verde dei test locali.
+I sei sottocodici Auth restano BLOCKED; i quattro C1_HTTP_FAILURE_* restano FAIL come il precedente HTTP generico. Tutti emettono OFF_REQUIRED e mantengono l'arresto senza retry. Anche un 400, 429 o 5xx conserva la categoria del servizio, senza concludere quale causa abbia prodotto la risposta. Il primo errore resta prevalente; un errore runtime successivo non lo sostituisce. MFA, identità/progetto/claim errati e bootstrap non verificabile conservano i propri codici e guardie. DIAG assente resta null, non un rapporto vuoto inventato. Nessun dato aggiuntivo né prova positiva deriva dal verde dei test locali.
 
 <a id="cornice-c1-self-hosted-valutazione-2026-11-12"></a>
 
