@@ -10,6 +10,8 @@ UID/email vengono confrontati privatamente e non riportati; password, Master, to
 
 2FA/MFA non viene indebolita per il test: se QA2 richiede TOTP, stato BLOCKED e decisione di Diego, senza recupero o disattivazione automatica. L'ammissione server e i controlli dell'app restano effettivi. Login/bootstrap, preferenze timeout 1/3 e logout possono scrivere: richiedono l'ordine esplicito con gli effetti elencati nel [piano C1](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12). Un verde locale o GO sul piano non autorizza produzione, merge, deploy o attivazione.
 
+La [ricevuta della configurazione GitHub](../evidenze/COLLAUDI.md#cornice-c1-workflow-config-2026-11-12) attesta soltanto environment, protezioni, variabile operatore e presenza dei quattro nomi di segreti. Non attesta contenuti, corrispondenza effettiva QA2, stato MFA, login o provider. Lo spostamento del workflow nel percorso riconosciuto da Actions non concede un ordine di esecuzione: approvazione di Claude sullo SHA, ordine personale di Diego, gate dell'environment e attestazioni del singolo giro restano distinti.
+
 ## Conferma Vault nella cornice — isolamento dell'interazione, 10/11/2026
 
 L'isolamento UI del dialogo parent e un obbligo distinto dall'ammissione e dalla disponibilita della chiave. Un hold della modale non concede ne conserva materiale Vault, non rinnova i timer e non neutralizza abort/revoca. Iframe inert, focus confinato e rilascio subordinato allo stato corrente sono definiti nel [contratto UI](INTERFACCIA.md#cornice-dialogo-ui-2026-11-10). La diagnostica active/permitValid non certifica da sola uno sblocco riuscito; prova UI locale, stato della chiave e collaudo fisico restano evidenze diverse.

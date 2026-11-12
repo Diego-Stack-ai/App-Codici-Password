@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {authorizeC1,readQa2Secrets,verifyC1Release} from '../scripts/lib/c1-e2e-execution.mjs';
 import {timerCase} from '../scripts/lib/c1-e2e-priority.mjs';
 import {browserEnvironment,sanitizeCase,assertCaseDiagnostics,writeSanitizedReport,runAuthorizedC1} from '../scripts/lib/c1-e2e-runner.mjs';
-import {mkdtemp,readFile,writeFile,unlink,rmdir} from 'node:fs/promises';
+import {access,mkdtemp,readFile,writeFile,unlink,rmdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 const good=()=>({GITHUB_ACTIONS:'true',GITHUB_EVENT_NAME:'workflow_dispatch',GITHUB_REPOSITORY:'Diego-Stack-ai/App-Codici-Password',
@@ -96,15 +96,19 @@ test('artifact flag is set only for a newly written report, never for a stale wx
   assert.equal(JSON.parse(await readFile(file,'utf8')).schemaVersion,1);
  }finally{await unlink(file).catch(()=>{});await unlink(output).catch(()=>{});await rmdir(dir);}
 });
-test('workflow proposal is dispatch-only, pinned, without cloud roles, and uploads only current report',async()=>{
- const source=await readFile(new URL('../scripts/workflows/c1-qa2-e2e.yml',import.meta.url),'utf8');
- assert.match(source,/'on':\s+workflow_dispatch:/);
- assert.doesNotMatch(source,/^\s+(push|pull_request|pull_request_target|schedule):/m);
+test('installed workflow is manual-only, pinned, without cloud roles, and uploads only current report',async()=>{
+ const source=await readFile(new URL('../.github/workflows/c1-qa2-e2e.yml',import.meta.url),'utf8');
+ await assert.rejects(access(new URL('../scripts/workflows/c1-qa2-e2e.yml',import.meta.url)),{code:'ENOENT'});
+ const triggers=source.match(/^'on':\r?\n([\s\S]*?)^permissions:/m);
+ assert.ok(triggers,'the installed workflow must declare its event block');
+ assert.deepEqual([...triggers[1].matchAll(/^  ([a-z_]+):/gm)].map(match=>match[1]),['workflow_dispatch']);
  assert.match(source,/permissions:\s+contents: read/);
  assert.doesNotMatch(source,/id-token|firebase deploy|gcloud auth|GOOGLE_APPLICATION_CREDENTIALS/);
  assert.match(source,/environment: c1-qa2-production/);
  assert.match(source,/cancel-in-progress: false/);
  assert.match(source,/steps\.c1\.outputs\.report_written == 'true'/);
  assert.match(source,/retention-days: 7/);
- assert.ok([...source.matchAll(/uses: ([^\n]+)/g)].every(match=>/@[a-f0-9]{40}/.test(match[1])));
+ const actions=[...source.matchAll(/uses: ([^\n]+)/g)];
+ assert.equal(actions.length,3);
+ assert.ok(actions.every(match=>/@[a-f0-9]{40}/.test(match[1])));
 });
