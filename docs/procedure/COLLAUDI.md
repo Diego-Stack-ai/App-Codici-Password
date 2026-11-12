@@ -4,9 +4,11 @@
 
 ## C1 — ingresso autonomo e rapporto v2 del primo errore, 12/11/2026
 
-Seguito candidato alla [ricevuta #3 e revisione](../evidenze/COLLAUDI.md#cornice-c1-frame-entry-runtime-2026-11-12). Dopo l'unico submit di login il runner non esegue goto(app.html): sulla Home attende l'ingresso autonomo dell'app nel budget iniziale residuo, poi rivalida il documento della cornice. Se l'app resta standalone con Auth pronta, C1_FRAME_NOT_ENTERED / BLOCKED, senza invio Master. Un cambio documento Home → app durante la lettura Auth comporta soltanto osservazione e rivalidazione del nuovo documento, mai un secondo login o un import privo dell'entry Resource Timing. La guardia privata immediatamente prima della Master resta obbligatoria.
+Seguito candidato alla [ricevuta #3 e revisione](../evidenze/COLLAUDI.md#cornice-c1-frame-entry-runtime-2026-11-12). Dopo l'unico submit di login il runner non esegue goto(app.html): sulla Home attende l'ingresso autonomo dell'app nel budget iniziale residuo, poi rivalida il documento della cornice. Se l'app resta standalone con Auth pronta, C1_FRAME_NOT_ENTERED / BLOCKED, senza invio Master. Solo il segnale framework Playwright di contesto distrutto, riconosciuto con firma completa nella guardia iniziale campionata sulla Home, può indicare la sostituzione del documento mentre la lettura Auth è pendente. L'osservazione non dipende dal nuovo URL già visibile: si attende app entro la stessa deadline, poi si esegue la guardia completa del nuovo documento. Un normale errore del token, una stringa simile lanciata dall'app o lo stesso segnale su app non concede questa transizione: C1_BOOTSTRAP_MISMATCH. Mai un secondo login o un import privo dell'entry Resource Timing. La guardia privata immediatamente prima della Master resta obbligatoria.
 
 Il rapporto nuovo ha schemaVersion=2 e gli stessi campi v1 più firstError: null oppure oggetto esatto phase/source/frame/tag/host. I rapporti v1 già prodotti restano storici e non vengono riscritti. Il nuovo validatore ricostruisce l'intero involucro v2 e respinge campi/codici estranei prima di scrivere l'artefatto.
+
+Se le letture UI del ciclo consumano il budget, non avviare una nuova guardia Auth oltre la deadline: resta l'ultima osservazione chiusa già ottenuta. Una guardia effettivamente iniziata ma non verificabile entro il limite resta C1_BOOTSTRAP_MISMATCH; la race con il timer e il controllo finale continuano a rifiutare successi tardivi. Nessun tempo aggiuntivo o nuovo tentativo di login.
 
 | Campo firstError | Valori ammessi |
 |---|---|

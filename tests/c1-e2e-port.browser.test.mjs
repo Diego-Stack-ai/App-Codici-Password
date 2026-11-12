@@ -10,11 +10,18 @@ import {assertCaseDiagnostics,browserEnvironment} from '../scripts/lib/c1-e2e-ru
 // Same port as the future production adapter; only the origin wrapper and 3s UI
 // timeout differ. All Auth/admission/DIAG/UI content is synthetic; real owner and
 // transport run on loopback. No production host is opened or contacted.
-const authModule=`const user={uid:sessionStorage.getItem('fault')==='identity'?'other-fixture':'fixture-qa2-only',
+const authModule=`const wrongTarget=sessionStorage.getItem('fault')==='identity'||
+ ['guard-navigation-target','context-home-target'].includes(sessionStorage.getItem('fault'))&&location.pathname==='/app.html';
+const user={uid:wrongTarget?'other-fixture':'fixture-qa2-only',
  email:'codex.qa2@appcodici-password.invalid',emailVerified:sessionStorage.getItem('fault')!=='email-unverified-guard',
  getIdTokenResult:async()=>{
   const fault=sessionStorage.getItem('fault');
   if(fault==='token-pending')return new Promise(()=>{});
+  if(fault==='guard-token-error')throw Error('Synthetic token failure');
+  if(fault==='guard-error-spoof')throw Error('Execution context was destroyed, most likely because of a navigation');
+  if(fault.startsWith('guard-navigation')&&location.pathname==='/home_page.html'){
+   void fetch('/fixture-token-pending');return new Promise(()=>{});
+  }
   if(fault==='identity-during-token'||fault==='identity-after-fill'&&document.querySelector('#protocol-input-modal-input')?.value.length>0)sessionStorage.removeItem('fixture-auth');
   return {claims:{vault_frame_canary:true}};
  }};
@@ -76,6 +83,7 @@ else{
     console.error('[BLINDA] synthetic uid/token/contents never exported'),{once:true});
    const focus=beginFrameModalFocus({modal,dialog:modal,onCancel:()=>{},window});
    modal.querySelector('button').onclick=()=>{
+    void window.__fixtureMasterAttempt(); // Fixed event only; no input value.
     sessionStorage.setItem('master-submits',String(Number(sessionStorage.getItem('master-submits')||0)+1));
     modal.remove();focus?.close();resolve('SYNTHETIC-MATERIAL');
    };
@@ -98,7 +106,7 @@ if(parent===window&&location.pathname==='/home_page.html'){
  await new Promise(resolve=>{
   const ready=()=>{if(auth.currentUser)resolve();else addEventListener('fixture-auth-ready',ready,{once:true});};ready();
  });
- if(!['standalone','resource-absent','token-pending'].includes(fault)){
+ if(!['standalone','resource-absent','token-pending','guard-token-error','guard-error-spoof'].includes(fault)){
   const result=await(await fetch('/fixture-admission-gate')).text();
   if(result==='interrupted'){
    console.error('[BLINDA] Synthetic standalone continuation after interrupted admission');
@@ -200,6 +208,9 @@ test.before(async()=>{
    }
    else if(path==='/fixture-bootstrap-gate'){await bootstrapHarness.gate;body='';}
    else if(path==='/fixture-admission-gate')body=admissionHarness?await admissionHarness.gate:'allowed';
+   else if(path==='/fixture-token-pending'){
+    admissionHarness.tokenPending++;admissionHarness.release('allowed');body='';
+   }
    else if(path==='/fixture-home-error'){admissionHarness?.error();body='';}
    else if(path==='/app.html')body=rootHtml(false);
    else if(path==='/home_page.html'||privatePages.has(path.slice(1)))body=childHtml;
@@ -227,6 +238,8 @@ async function fixture(fault='',onWait=null){
  const context=await browser.newContext({serviceWorkers:'block',locale:'it-IT'});
  await context.route('**/*',route=>new URL(route.request().url()).origin===base?route.continue():route.abort());
  const page=await context.newPage();
+ let masterAttempts=0;
+ await page.exposeFunction('__fixtureMasterAttempt',()=>{masterAttempts++;});
  if(fault==='resource-absent')await page.addInitScript(()=>{
   const entries=performance.getEntriesByType.bind(performance);
   performance.getEntriesByType=type=>entries(type).filter(entry=>!entry.name.includes('firebase-config.js'));
@@ -235,10 +248,18 @@ async function fixture(fault='',onWait=null){
  // Test-only observation of real waits/navigation; never fake their result.
  // The race models an interrupted admission when the OLD runner requests goto.
  // It is not evidence that this particular abort occurred in production.
+ let interrupted=false;
  const observed=new Proxy(page,{get(target,key){
+  if(key==='evaluate')return async(...args)=>{
+   if(!interrupted&&String(args[0]).includes('getIdTokenResult')&&fault.startsWith('context-')&&
+    new URL(target.url()).pathname===(fault==='context-app'?'/app.html':'/home_page.html')){
+    interrupted=true;throw Error('page.evaluate: Execution context was destroyed, most likely because of a navigation');
+   }
+   return target.evaluate(...args);
+  };
   if(key==='waitForFunction')return(...args)=>{
    onWait?.();
-   if(fault==='admission-race'&&String(args[0]).includes("location.pathname==='/app.html'"))admissionHarness.release('allowed');
+   if((fault==='admission-race'||admissionHarness?.releaseOnWait)&&String(args[0]).includes("location.pathname==='/app.html'"))admissionHarness.release('allowed');
    return target.waitForFunction(...args);
   };
   if(key==='goto')return async(...args)=>{
@@ -256,7 +277,13 @@ async function fixture(fault='',onWait=null){
  const port=await createLocalFixturePort(observed,{version:'1.2.270'},{
   uid:'fixture-qa2-only',email:'codex.qa2@appcodici-password.invalid',
   password:'Synthetic-login-only-123!',master:'Synthetic-master-only-456!'});
- return {page,context,port};
+ return {page,context,port,masterAttempts:()=>masterAttempts};
+}
+
+function entryGate({releaseOnWait=false}={}){
+ let release,error;
+ return {gate:new Promise(r=>{release=r;}),release:value=>release(value),releaseOnWait,
+  errored:new Promise(r=>{error=r;}),error:()=>error(),forced:0,tokenPending:0};
 }
 
 test('delayed real login form waits for bootstrap instead of native GET, then submits once',async()=>{
@@ -299,6 +326,30 @@ test('standalone app is reported without forced entry or Master submission',asyn
   assert.equal(new URL(f.page.url()).pathname,'/home_page.html');
   assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('master-submits')||0)),0);
  }finally{await f.context.close();}
+});
+
+test('real app replacement destroys pending token observation and rechecks the new document target',async()=>{
+ for(const wrong of [false,true]){
+  admissionHarness=entryGate();const f=await fixture(wrong?'guard-navigation-target':'guard-navigation');
+  try{
+   if(wrong){await assert.rejects(()=>f.port.start(),/^Error: C1_TARGET_DENIED$/);assert.equal(f.masterAttempts(),0);}
+   else{await f.port.start();assert.equal(f.masterAttempts(),1);}
+   assert.equal(admissionHarness.tokenPending,1);assert.equal(admissionHarness.forced,0);
+  }finally{admissionHarness.release('allowed');admissionHarness.error();await f.context.close();admissionHarness=null;}
+ }
+});
+
+test('only initial HOME framework context loss may wait for entry within the existing budget',async()=>{
+ for(const [fault,code]of [['context-home',null],['context-home-target','C1_TARGET_DENIED'],
+  ['context-home-stuck','C1_FRAME_NOT_ENTERED'],['context-app','C1_BOOTSTRAP_MISMATCH'],
+  ['guard-token-error','C1_BOOTSTRAP_MISMATCH'],['guard-error-spoof','C1_BOOTSTRAP_MISMATCH']]){
+  admissionHarness=entryGate({releaseOnWait:fault!=='context-home-stuck'});const f=await fixture(fault);
+  try{
+   if(code){await assert.rejects(()=>f.port.start(),new RegExp('^Error: '+code+'$'));assert.equal(f.masterAttempts(),0);}
+   else{await f.port.start();assert.equal(f.masterAttempts(),1);}
+   assert.equal(admissionHarness.forced,0);
+  }finally{admissionHarness.release('allowed');admissionHarness.error();await f.context.close();admissionHarness=null;}
+ }
 });
 
 test('runtime console failure captures UNLOCK before checkpoint and never submits Master',async()=>{
@@ -407,7 +458,7 @@ test('bootstrap error remains first even when revealed, missing readiness never 
   try{
    await assert.rejects(()=>f.port.start(),new RegExp('^Error: '+code+'$'));
    assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('login-attempts')||0)),0);
-   assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('master-submits')||0)),0);
+   assert.equal(f.masterAttempts(),0);
   }finally{await f.context.close();}
  }
 });
@@ -418,7 +469,7 @@ test('resource observation, user absence and other route remain distinct closed 
   try{
    await assert.rejects(()=>f.port.start(),new RegExp('^Error: '+code+'$'));
    assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('login-attempts')||0)),1);
-   assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('master-submits')||0)),0);
+   assert.equal(f.masterAttempts(),0);
    if(fault==='resource-absent'){
     // Auth exists in the loaded module; the Resource Timing guard is retained.
     assert.equal(await f.page.evaluate(async()=>!!(await import('/assets/js/firebase-config.js?v=1.2.270')).auth.currentUser),true);
@@ -464,7 +515,7 @@ test('MFA, wrong identity and Master creation dialogs stop before any Master sub
   const f=await fixture(fault);
   try{
    await assert.rejects(()=>f.port.start(),new RegExp('^Error: '+code+'$'));
-   assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('master-submits')||0)),0);
+   assert.equal(f.masterAttempts(),0);
    if(fault==='identity-after-fill')assert.equal(await f.page.locator('#protocol-input-modal-input').evaluate(node=>node.value===''),true);
   }finally{await f.context.close();}
  }
@@ -481,7 +532,7 @@ test('unverified email and absent Auth readiness have distinct codes before Mast
    },true));
    await assert.rejects(()=>f.port.start(),new RegExp('^Error: '+code+'$'));
    assert.equal(logins,1);
-   assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('master-submits')||0)),0);
+   assert.equal(f.masterAttempts(),0);
    assert.equal(f.port.timerRestoreRequired(),false);
   }finally{await f.context.close();}
  }

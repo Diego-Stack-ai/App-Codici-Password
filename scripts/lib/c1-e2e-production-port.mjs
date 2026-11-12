@@ -39,6 +39,7 @@ export async function createLocalFixturePort(page,config,secrets){
 }
 async function createPort(page,config,secrets,origin,operationTimeout=timeout){
  const timeout=operationTimeout;
+ const entryTransition=Symbol('home document replaced');
  let fatal=null,firstError=null,phase='LOGIN_READY',errorsOpen=true;
  let expectedCount=0,timerChanged=false,timerStartedAt=0,lastActivityAt=0,timerIdle=180000;
  let notifyFatal;
@@ -81,8 +82,8 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
   if(url.origin!==origin)fail('C1_DESTINATION_WRONG');
  }
  const remaining=deadline=>Math.max(1,deadline-Date.now());
- async function withinLoginBudget(operation,deadline,code){
-  checkpoint();if(Date.now()>=deadline)fail(code);
+ async function withinLoginBudget(operation,deadline,code,beforeStartCode=code){
+  checkpoint();if(Date.now()>=deadline)fail(beforeStartCode);
   const expired=Symbol('login deadline');let timer;
   try{
    const value=await Promise.race([operation(),fatalSignal.then(code=>fail(code)),
@@ -140,7 +141,7 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
   if(!result||new URL(result.url()).origin!==origin)fail('C1_DESTINATION_WRONG');
   return result;
  }
- async function guardQa2({refresh=false,allowPending=false}={}){
+ async function guardQa2({refresh=false,allowPending=false,allowEntryTransition=false}={}){
   checkpoint();
   let result;
   try{
@@ -156,7 +157,14 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
     return {ready:true,target:auth.currentUser===user&&user.uid===expected.uid&&
       user.email===expected.email&&user.emailVerified===true&&token.claims.vault_frame_canary===true};
    },{uid:secrets.uid,email:secrets.email,version:config.version,refresh});
-  }catch{checkpoint();fail('C1_BOOTSTRAP_MISMATCH');}
+  }catch(error){
+   checkpoint();
+   // Only the framework's context-loss signal on the initial HOME guard may
+   // describe the app's own navigation. App-thrown Error: ... is not accepted.
+   if(allowEntryTransition&&typeof error?.message==='string'&&
+    /^(?:page\.evaluate:\s*)?Execution context was destroyed, most likely because of a navigation\.?$/.test(error.message))return entryTransition;
+   fail('C1_BOOTSTRAP_MISMATCH');
+  }
   checkpoint();
   if(result?.ready!==true){
    const code=result?.reason==='resource'?'C1_AUTH_NOT_READY_RESOURCE':result?.reason==='user'?'C1_AUTH_NOT_READY_USER':null;
@@ -312,28 +320,18 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
     checkpoint();
     if(await page.locator('#totp-form-group').isVisible()||await page.locator('#totp-code').isVisible())fail('C1_MFA_BLOCKED');
     if(await page.locator('#email-verification-panel').isVisible())fail('C1_AUTH_EMAIL_UNVERIFIED');
+    if(Date.now()>=deadline)break; // No new guard begins after the poll's UI checks exhausted the budget.
     const path=new URL(page.url()).pathname;
     if(['/home_page.html','/app.html'].includes(path)){
-     let result;
-     try{result=await withinLoginBudget(()=>guardQa2({refresh:true,allowPending:true}),deadline,'C1_BOOTSTRAP_MISMATCH');}
-     catch(error){
-      checkpoint();
-      // The app may replace home while its pending guard is being evaluated.
-      // Observe the new document; never resubmit login or initiate navigation.
-      if(error.message==='C1_BOOTSTRAP_MISMATCH'&&path==='/home_page.html'&&new URL(page.url()).pathname==='/app.html')continue;
-      throw error;
-     }
-     if(result===true){
+     const result=await withinLoginBudget(()=>guardQa2({refresh:true,allowPending:true,
+      allowEntryTransition:path==='/home_page.html'}),deadline,'C1_BOOTSTRAP_MISMATCH',pending);
+     if(result===entryTransition||result===true&&path==='/home_page.html'){
       phase='FRAME_ENTRY';
-      if(path==='/home_page.html'){
-       if(new URL(page.url()).pathname==='/home_page.html'){
-        try{await withinLoginBudget(()=>page.waitForFunction(()=>location.pathname==='/app.html',null,{timeout:remaining(deadline)}),deadline,'C1_FRAME_NOT_ENTERED');}
-        catch{checkpoint();fail('C1_FRAME_NOT_ENTERED');}
-       }
-       continue; // Revalidate the app document's target before Master.
-      }
-      authenticated=true;break;
-     }pending=result;
+      try{await withinLoginBudget(()=>page.waitForFunction(()=>location.pathname==='/app.html',null,{timeout:remaining(deadline)}),deadline,'C1_FRAME_NOT_ENTERED');}
+      catch{checkpoint();fail('C1_FRAME_NOT_ENTERED');}
+      continue; // Revalidate the entire app document's guard before Master.
+     }
+     if(result===true){phase='FRAME_ENTRY';authenticated=true;break;}pending=result;
     }else pending=path==='/login.html'?'C1_AUTH_NOT_READY_LOGIN':'C1_AUTH_NOT_READY_ROUTE';
     await delay(Math.min(150,remaining(deadline)));
    }
