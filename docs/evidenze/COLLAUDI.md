@@ -4,6 +4,20 @@
 
 ## C1 — preparazione E2E, verifiche locali e limiti, 12/11/2026
 
+<a id="cornice-c1-workflow-config-2026-11-12"></a>
+
+### Configurazione GitHub osservata e nuova PR workflow — nessuna run reale
+
+La #292 è unita su ordine di Diego in master `6dd80df1ee7be63550583b89bde6b326ad8122b5`, dopo [GO Claude sul codice 45f50a9e](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6812002019) e [CI verde](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6812127683); [ricevuta del merge](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6816335473). Il successivo ordine di Diego autorizza una PR dedicata al workflow e l'avviso a Claude, **non merge, dispatch, produzione o accensione**.
+
+Diego ha configurato privatamente GitHub, con riscontri UI di Codex: environment `c1-qa2-production`; Required reviewers attivo con il suo account; bypass amministratori disattivato; Prevent self-review non selezionato per il suo avvio/clic; **solo branch master, un ramo e zero tag**. Variabile C1_ALLOWED_OPERATOR presente e coincidente con il login GitHub dell'operatore. Presenti i quattro nomi C1_QA2_EMAIL, C1_QA2_EXPECTED_UID, C1_QA2_PASSWORD e C1_QA2_MASTER_PASSWORD negli Environment secrets. L'ultima verifica ha cercato solo nomi e booleani delle protezioni, con modulo segreti chiuso: **nessun valore letto o copiato da Codex, nessun contenuto sensibile nel rapporto**. Presenza non significa correttezza di UID/password/Master, identità QA2, stato MFA o riuscita del login: restano da verificare solo nel futuro giro autorizzato.
+
+Il nuovo ramo parte dal master sopra e sposta il solo YAML revisionato da scripts/workflows a .github/workflows: corpo eseguibile identico, cambiano soltanto due commenti iniziali. Nuovo percorso **candidato in PR**, non installazione su master o esecuzione. Test del workflow aggiornato per leggere il file riconosciuto da Actions, rifiutare la vecchia copia e ammettere come unico trigger workflow_dispatch; nessun trigger automatico, modifica di adapter/Frontend o accesso ai segreti. Prima dello spostamento il nuovo test fallisce per file mancante (gli altri otto test puri passano): il controllo non valida una copia rimasta fuori da Actions.
+
+Verifiche locali del seguito: test:qa-automation **14/14 QA e 27/27 C1** su fixture loopback, test:docs **12/12** (34 Markdown, 916 collegamenti locali), YAML parsato e confronto del corpo eseguibile con il template revisionato identico. Nessun nuovo provider, motore emulato o ambiente produttivo provato. I risultati CI e la revisione sullo SHA candidato saranno riportati nell'avviso della PR.
+
+Restano tutti i limiti della matrice: D02 Configurazione documenti NE senza link UI reale, D08 multischeda non implementato, provider/attese produttive/dispositivi non provati, nessun nuovo PASS C1. Canary OFF secondo Diego, senza rilettura Firebase. Nuovo GO sullo SHA della PR dedicata e CI verde precedono un eventuale ordine di merge; dispatch ancora separato. **Seguito nella stessa #293:** Diego approva il [metodo AUTO + giro breve per dispositivo](../progetto/DECISIONI.md#cornice-c1-auto-giro-breve-2026-11-12); aggiornamento soltanto documentale, nessun esito o ordine operativo implicito. I checkpoint seguenti conservano la preparazione precedente alla configurazione.
+
 ### Seguito al GO sul piano f2ad012d — adapter mai eseguito in produzione
 
 Il [GO Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6810738784) copre piano e primo prototipo. Il seguito prepara adapter con gate CI/manuali, QA2 privata, dialogo Master validato (sopra iframe, inert e focus), contatore DOM senza valori, itinerari reali, reload, timer e logout; proposta YAML fuori da .github. Nessun segreto reale letto, provider chiamato, workflow avviato o nuovo PASS C1. Frontend/Rules/Functions/versione/header/precache invariati; canary OFF secondo Diego.
@@ -401,6 +415,8 @@ Prerequisito: [GO B1 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Pas
 **Cronologia B2:** il gap statico del worker che chiamava navigate su app.html era aperto alla consegna B2. Il [GO B2 di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6753602102) ne conferma la correzione necessaria prima di B3. Ora D11 implementa il percorso nella candidata, con ricevuta sopra; non è ancora pubblicato né verificato sui dispositivi. Nessun PASS fisico deriva dai GO o dai test automatici.
 
 ### Preparazione di C1, dopo il rilascio B3 approvato
+
+**Metodo aggiornato il 12/11/2026:** Diego approva [AUTO + giro breve su ciascun ambiente reale](../progetto/DECISIONI.md#cornice-c1-auto-giro-breve-2026-11-12). L'elenco D01–D19 e le quattro colonne per fase restano l'indice della copertura; i riscontri riportano fonte, ambiente, sottocasi e limiti senza convertire emulazioni in prove fisiche o precompilare PASS. Si evitano ripetizioni manuali integrali dei medesimi controlli coperti validamente da AUTO; residui hardware/OS, D15, D18, fase personale e C2 conservano i loro gate. Preparazione e tabelle seguenti preservano lo storico: nessun nuovo risultato discende dall'approvazione del metodo.
 
 Aggiornamento del 10/11/2026: **fase 1 su QA2 candidata sintetica già popolata, da confermare con Claude e preflight; fase 2 sull’account personale di Diego**. Un solo UID nel singleton per volta, fasi e ricevute separate. Questa lista non abilita alcun utente o cambio cloud. Produzione attestata 1.2.268 / #1060 / 79ebd9b8; il singleton predisposto manualmente è ancora spento, parziale e personale, non configurato per la fase 1.
 

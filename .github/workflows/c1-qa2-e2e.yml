@@ -1,5 +1,5 @@
-# PROPOSTA NON ATTIVA: fuori da .github/workflows.
-# Caricamento/configurazione e qualunque dispatch richiedono GO sullo SHA finale e ordine di Diego.
+# Disponibile soltanto tramite workflow_dispatch dopo il merge autorizzato.
+# Ogni esecuzione richiede GO sullo SHA finale e un nuovo ordine personale di Diego.
 name: C1 QA2 controlled browser checks
 'on':
   workflow_dispatch:

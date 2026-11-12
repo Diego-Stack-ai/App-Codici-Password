@@ -1,5 +1,17 @@
 # Decisioni
 
+<a id="cornice-c1-auto-giro-breve-2026-11-12"></a>
+
+## 12/11/2026 — C1 con prove automatiche e giro breve sui dispositivi
+
+Fonte: nella chat Diego risponde **«approvo»** alla proposta esplicita «test automatici + giro breve sui dispositivi», dopo il chiarimento che fino a questa decisione valeva la matrice 19×4 per fase. Approva il metodo combinato: prove automatiche QA2 nel perimetro revisionato, accompagnate da un giro breve su ciascun ambiente reale e dalle prove applicabili che richiedono hardware/browser/sistema operativo effettivi. I controlli già coperti da evidenze automatiche valide e pertinenti non richiedono una ripetizione manuale integrale; il residuo fisico rimane esplicito e valutato per ciascun ambiente.
+
+**La matrice D01–D19 × quattro ambienti per fase resta l'indice della copertura**, con fonti e risultati tracciati: AUTO, sottocasi realmente esercitati e riscontro fisico conservano ambiente/versione/limiti propri. Le emulazioni Android/iPhone restano aggiuntive e non attribuiscono PASS alle colonne dei dispositivi. Il giro breve non elimina requisiti o trasforma NE/LIMITE/FAIL in PASS; i casi parziali richiedono evidenze sufficienti prima della chiusura. D02 Configurazione documenti rimane NE senza il vero link UI. Questa decisione cambia il metodo di collaudo, non assegna nuovi esiti.
+
+Il runner continua a usare solo QA2 con dati inventati. La fase personale resta fuori dai runner e dai segreti GitHub, con preflight, ordini e ricevute proprie; nessun trasferimento dei PASS QA2. Restano le prove reali applicabili, D15 con spegnimento personale di Diego, D18 NE fino al secondo rilascio approvato e C2. **Nessun merge, dispatch, accensione, cambio cloud o pubblicazione è autorizzato dall'approvazione del criterio**; GO sullo SHA e ordini operativi restano separati. Canary OFF secondo Diego.
+
+[Metodo e residuo fisico](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12), [matrici ed esiti](../evidenze/COLLAUDI.md#cornice-b2-lista-2026-11-09). La #293 riceve la decisione nella stessa revisione del workflow; codice e YAML restano invariati rispetto al checkpoint 3310a702.
+
 <a id="cornice-riprendi-scelta-2026-11-11"></a>
 
 ## 11/11/2026 — schermata comune «Vault bloccata» / «Sblocca e riprendi»

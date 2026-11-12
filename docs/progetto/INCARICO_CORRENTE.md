@@ -2,7 +2,15 @@
 
 <a id="cornice-c1-e2e-incarico-2026-11-12"></a>
 
-## C1 — piano E2E in una bozza e revisione UI readonly, 12/11/2026
+## C1 — PR dedicata al workflow manuale, 12/11/2026
+
+Diego autorizza la PR per rendere disponibile il workflow C1 e l'avviso a Claude. Base master `6dd80df1ee7be63550583b89bde6b326ad8122b5` dopo il merge ordinato della #292, con [GO sul codice 45f50a9e](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6812002019) e CI verde. L'environment e i segreti sono stati configurati privatamente da Diego; [osservati soltanto nomi/presenza e protezioni UI](../evidenze/COLLAUDI.md#cornice-c1-workflow-config-2026-11-12), nessun valore letto da Codex.
+
+Perimetro: spostamento del YAML revisionato in .github/workflows, rimozione della copia scripts/workflows, test del file installabile e aggiornamento dei Markdown esistenti pertinenti. Corpo eseguibile del workflow e adapter invariati; avvio esclusivamente workflow_dispatch. Test locali con fixture sintetiche e rete esterna bloccata, PR separata e nuovo GO/NO-GO di Claude sullo SHA candidato. **Nessun merge, dispatch o esecuzione produttiva, deploy, intervento Firebase, accesso ai valori dei segreti o modifica del canary. Canary OFF secondo Diego.** Dopo revisione/CI fermarsi prima di nuovi ordini personali. Nessun file della cornice o versione cambia.
+
+Seguito di Diego nella stessa chat: **«approvo»** alla proposta AUTO + giro breve sui dispositivi. Registrare la [decisione sul metodo](DECISIONI.md#cornice-c1-auto-giro-breve-2026-11-12) nella #293, con raccordi a piano/matrice/stato. Questo seguito aggiunge DECISIONI ai sei MD già toccati e non cambia YAML, adapter o esiti. Matrice 19×4 come indice della copertura, nessuna conversione di emulazioni/NE/FAIL in PASS; residui fisici, fase personale e C2 restano aperti. Nessuna autorizzazione operativa aggiuntiva.
+
+### Checkpoint #292 — preparazione precedente, conclusa con merge autorizzato
 
 Diego autorizza una sola PR in bozza con piano E2E della matrice C1, solo QA2 con futuri segreti GitHub e mai account personali, e codice se verificabile localmente. Nessuna esecuzione in produzione, merge, deploy, operazione Firebase o cambio interruttore; canary OFF. Non attendere Claude fra i passi di preparazione locale: Claude rivede la consegna complessiva. In parallelo revisione readonly della #283, grafica e tipografia, con GO/NO-GO sulla PR; nessuna modifica UI di Codex.
 
