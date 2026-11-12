@@ -7,6 +7,43 @@ import {createLocalC1Driver} from '../scripts/lib/c1-e2e-cases.mjs';
 const now=1794440000000;
 const report=()=>({state:{version:'v1.2.270',active:true,permitValid:true,permitExpiresAt:now+60000,idleMs:180000,pushReady:false,lastBlock:null},
   enabled:true,available:true,events:[{code:'FRAME_ENTER',at:now-1,version:'v1.2.270',page:'home_page.html',environment:'browser'}]});
+test('console kind diagnostics use fixed prefixes and discard private suffixes',()=>{
+ const privateText=' synthetic-private-marker https://never-export.invalid/private?token=never-export';
+ for(const [text,kind,component] of [
+  ['Refused to frame '+privateText+' because it violates the following Content Security Policy directive','CSP',null],
+  ['Refused to set unsafe header '+privateText,'OTHER',null],
+  ['Framing '+privateText+' violates the following Content Security Policy directive','CSP',null],
+  ['Executing inline script violates the following Content Security Policy directive'+privateText,'CSP',null],
+  ['Access to fetch at '+privateText+' has been blocked by CORS policy','CORS',null],
+  ['Permissions policy violation: camera is not allowed'+privateText,'PERMISSIONS_POLICY',null],
+  ['Error with Permissions-Policy header: '+privateText,'PERMISSIONS_POLICY',null],
+  ['[2026-11-12T15:00:00.000Z]  @firebase/app-check: '+privateText,'FIREBASE_SDK','app-check'],
+  ['@firebase/firestore: '+privateText,'FIREBASE_SDK','firestore'],
+  ['@firebase/unlisted: '+privateText,'OTHER',null],
+  ['Uncaught (in promise) Error: '+privateText,'UNCAUGHT_PROMISE',null],
+  ['private prefix Refused to load '+privateText,'OTHER',null],
+  ['[BLINDA] '+privateText,'OTHER',null]
+ ]){
+  const result=consoleErrorCategory(text,'');
+  assert.equal(result.kind,kind);assert.equal(result.firebaseComponent,component);
+  assert.doesNotMatch(JSON.stringify(result),/synthetic-private-marker|never-export|https?:/);
+ }
+});
+test('console source origins use exact public locations, never text or lookalikes',()=>{
+ for(const [url,origin] of [
+  ['https://appcodici-password.web.app/assets/app.js?token=never-export','app'],
+  ['https://www.google.com/recaptcha/private','google'],
+  ['https://www.gstatic.com/recaptcha/private','google'],
+  ['https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js','firebase'],
+  ['https://firestore.googleapis.com/private','firebase'],
+  ['https://appcodici-password.web.app.evil.invalid/private','other'],
+  ['https://appcodici-password.web.app@evil.invalid/private','other'],
+  ['https://evil.invalid/www.google.com?source=firestore.googleapis.com','other'],
+  ['https://private:never-export@www.google.com/private','other'],
+  ['https://www.google.com:444/private','other'],
+  ['data:text/javascript,private','other'],['invalid-private','other'],['','none'],[null,'none']
+ ])assert.equal(consoleErrorCategory('unrecognized private',url).origin,origin);
+});
 test('closed DIAG reconstructs approved fields only',()=>{
   assert.deepEqual(validateDiag(report(),now),report());
   for(const mutate of [
@@ -19,12 +56,16 @@ test('closed DIAG reconstructs approved fields only',()=>{
 });
 
 test('first error accepts only closed phase/source/frame/tag/host combinations',()=>{
- const value={phase:'FRAME_ENTRY',source:'console',frame:'top',tag:'BLINDA',host:null};
+ const value={phase:'FRAME_ENTRY',source:'console',frame:'top',tag:'BLINDA',host:null,
+  kind:'OTHER',origin:'app',hasArgs:true,firebaseComponent:null};
  assert.equal(validateFirstError(null),null);
  for(const phase of C1_ERROR_PHASES)assert.deepEqual(validateFirstError({...value,phase}),{...value,phase});
  for(const tag of C1_ERROR_TAGS)assert.equal(validateFirstError({...value,tag,host:tag==='RESOURCE'?'other':null}).tag,tag);
- for(const source of ['http','pageerror'])assert.deepEqual(validateFirstError({...value,source,tag:null,host:source==='http'?'identity':null}),
-  {...value,source,tag:null,host:source==='http'?'identity':null});
+ for(const source of ['http','pageerror']){
+  const detail={...value,source,tag:null,host:source==='http'?'identity':null,kind:null,
+   origin:source==='http'?'firebase':'none',hasArgs:null};
+  assert.deepEqual(validateFirstError(detail),detail);
+ }
  for(const extra of [{uid:'synthetic-private'},{url:'https://synthetic.invalid/private'},{message:'synthetic-private'},{stack:'synthetic-private'}])
   assert.throws(()=>validateFirstError({...value,...extra}),/^Error: C1_REPORT_INVALID$/);
  assert.throws(()=>validateFirstError({...value,[Symbol('synthetic-private')]:true}),/^Error: C1_REPORT_INVALID$/);
@@ -32,19 +73,32 @@ test('first error accepts only closed phase/source/frame/tag/host combinations',
   {tag:'BLINDA synthetic-private'},{host:'identitytoolkit.googleapis.com'},
   {source:'pageerror'},{source:'http',tag:null,host:null},{tag:'RESOURCE',host:null}])
   assert.throws(()=>validateFirstError({...value,...delta}),/^Error: C1_REPORT_INVALID$/);
+ for(const kind of ['CSP','CORS','PERMISSIONS_POLICY','UNCAUGHT_PROMISE','OTHER']){
+  const detail={...value,tag:'OTHER',kind};assert.deepEqual(validateFirstError(detail),detail);
+ }
+ for(const firebaseComponent of ['app-check','auth','firestore','messaging','installations','app']){
+  const detail={...value,tag:'OTHER',kind:'FIREBASE_SDK',firebaseComponent};
+  assert.deepEqual(validateFirstError(detail),detail);
+  assert.equal(consoleErrorCategory('@firebase/'+firebaseComponent+': synthetic-private').firebaseComponent,firebaseComponent);
+ }
+ for(const delta of [{kind:'CSP'},{origin:'private-origin'},{hasArgs:'false'},{hasArgs:new Boolean(false)},
+  {firebaseComponent:'auth'},{tag:'OTHER',kind:'FIREBASE_SDK',firebaseComponent:null},
+  {tag:'OTHER',kind:'FIREBASE_SDK',firebaseComponent:'private-component'}])
+  assert.throws(()=>validateFirstError({...value,...delta}),/^Error: C1_REPORT_INVALID$/);
 });
 
 test('console classification discards suffixes and uses exact resource hosts only',()=>{
- assert.deepEqual(consoleErrorCategory('[BLINDA] synthetic uid/token/value/private-url'),{tag:'BLINDA',host:null});
+ const expected=(tag='OTHER',host=null,origin='none')=>({tag,host,kind:'OTHER',origin,firebaseComponent:null});
+ assert.deepEqual(consoleErrorCategory('[BLINDA] synthetic uid/token/value/private-url'),expected('BLINDA'));
  for(const text of ['[UNLISTED] synthetic-private','[BLINDA-private] value','prefix [BLINDA] value','synthetic private'])
-  assert.deepEqual(consoleErrorCategory(text),{tag:'OTHER',host:null});
+  assert.deepEqual(consoleErrorCategory(text),expected());
  for(const [host,category]of [['content-firebaseappcheck.googleapis.com','appcheck'],['identitytoolkit.googleapis.com','identity'],
   ['firestore.googleapis.com','firestore'],['firestore.googleapis.com.evil.invalid','other']]){
   const url='https://synthetic:private@'+host+'/private?key=synthetic-secret#private';
   assert.equal(errorHostCategory(url),category);
-  assert.deepEqual(consoleErrorCategory('Failed to load resource: synthetic free text',url),{tag:'RESOURCE',host:category});
+  assert.deepEqual(consoleErrorCategory('Failed to load resource: synthetic free text',url),expected('RESOURCE',category,'other'));
  }
- assert.deepEqual(consoleErrorCategory({toString:()=>{throw Error('MUST_NOT_READ');}}),{tag:'OTHER',host:null});
+ assert.deepEqual(consoleErrorCategory({toString:()=>{throw Error('MUST_NOT_READ');}}),expected());
 });
 test('prototype refuses production and URL tricks without echoing input',()=>{
   assert.equal(assertLoopback('http://127.0.0.1:9191/app.html'),'http://127.0.0.1:9191');

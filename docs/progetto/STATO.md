@@ -2,6 +2,14 @@
 
 <a id="stato-corrente"></a>
 
+<a id="cornice-c1-console-classificazione-2026-11-12"></a>
+
+## C1 #4 FAIL, manuale non riprodotto e candidata v3 — 12/11/2026
+
+La #296 è integrata in master `f5f0e0db1e4881c89a6b0ba4054aab3bd2d67634` dopo GO Claude, CI verde e ordine personale. Il quarto giro QA2/Chrome desktop supera 54 test locali ma si ferma in SETUP / FAIL / C1_RUNTIME_FAILURE: primo segnale FRAME_ENTRY/console/other/OTHER, DIAG non disponibile, nessun caso D o cambio timeout. Dopo la revisione Claude, prova manuale autorizzata in Chrome Incognito: Console vuota prima/dopo, registro mantenuto secondo Diego, richiesta di sblocco raggiunta. Errore non riprodotto, causa non identificata; [ricevute e limiti](../evidenze/COLLAUDI.md#cornice-c1-console-classificazione-2026-11-12).
+
+Nuovo ordine: PR in bozza del solo runner/test con classificazione chiusa più precisa e rapporto v3, banco RED → GREEN. Base f5f0e0db, ramo codex/c1-console-categories-20261112, stato DA_VERIFICARE; nessuna auto-approvazione. Canary OFF confermato da Diego, senza rilettura amministrativa. Hosting invariato **1.2.270 / cb48b7196a3816a62dda05d11e11ff4ca7c51d26**, UI/caratteri #283 dopo C1. Nessun app/workflow/versione/manifest/precache/cloud modificato; nessun merge, nuovo giro o deploy. Le sezioni sotto conservano i checkpoint precedenti e i vecchi formati dei rapporti.
+
 <a id="cornice-c1-frame-entry-runtime-2026-11-12"></a>
 
 ## C1 #3 FAIL, OFF confermato e nuova PR diagnostica — 12/11/2026

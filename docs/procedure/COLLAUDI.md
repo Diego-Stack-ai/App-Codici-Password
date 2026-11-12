@@ -1,5 +1,29 @@
 # Collaudi
 
+<a id="cornice-c1-console-classificazione-2026-11-12"></a>
+
+## C1 — rapporto candidato v3 e classificazione della console, 12/11/2026
+
+Seguito autorizzato della [prova manuale dopo il quarto giro](../evidenze/COLLAUDI.md#cornice-c1-console-classificazione-2026-11-12). Solo runner/test; nessun nuovo giro produttivo. Il rapporto v3 mantiene i 16 campi dell'involucro v2 e rende firstError nullo oppure oggetto esatto con questi nove campi. Il writer candidato rifiuta versioni precedenti, senza riscrivere le ricevute storiche.
+
+| Campo firstError | Valori ammessi nel candidato v3 |
+|---|---|
+| phase | LOGIN_READY, LOGIN_SUBMIT, AUTH_WAIT, FRAME_ENTRY, UNLOCK, SETTINGS, DIAG_OPT_IN, CASE |
+| source | console, pageerror, http |
+| frame | top, vault-child, other; limiti del realm invariati |
+| tag | 32 prefissi app chiusi più RESOURCE/OTHER solo console; null altrimenti |
+| host | appcheck, identity, firestore, other solo HTTP/console RESOURCE; null altrimenti |
+| kind | Solo console: CSP, CORS, PERMISSIONS_POLICY, FIREBASE_SDK, UNCAUGHT_PROMISE, OTHER; null altrimenti |
+| origin | app, google, firebase, none, other; console: location del messaggio; HTTP: URL della risposta, non script/initiator; pageerror: none |
+| hasArgs | Solo console: booleano se args() disponibile, null se indisponibile; null negli altri canali |
+| firebaseComponent | app-check, auth, firestore, messaging, installations, app solo per FIREBASE_SDK; null negli altri casi |
+
+Un kind diverso da OTHER richiede tag OTHER. Prefissi CSP classici/moderni richiedono anche Content Security Policy; un generico Refused to set unsafe header resta OTHER. CORS richiede Access to e blocked by CORS policy; Permissions-Policy usa prefissi letterali. Firebase riconosce soltanto @firebase/componente chiuso, anche dopo timestamp ISO; nessun componente arbitrario. Uncaught (in promise) è classificato solo se presente nel messaggio console: una promessa rilevata dal solo pageerror non riceve un kind inventato.
+
+origin usa soltanto URL HTTPS standard senza userinfo e con host esatti: message.location().url per console e URL della risposta per HTTP, senza dedurne lo script o initiator. app è l'origine Hosting canonica; google comprende www.google.com, www.gstatic.com, www.recaptcha.net e recaptcha.google.com; firebase comprende gli host esatti Auth/App Check/Firestore già riconosciuti, firebase.googleapis.com, firebaseinstallations.googleapis.com, fcmregistrations.googleapis.com, fcm.googleapis.com e il percorso /firebasejs/ di www.gstatic.com. Location assente = none; sconosciuta/non valida/non HTTPS = other. URL, path, query, hash e testo originali non entrano nell'artefatto. Classificazioni e hasArgs non certificano che il messaggio sia nativo: JavaScript può imitare i prefissi.
+
+Tutti i dati sincroni vengono raccolti prima di setFatal; args() una sola volta e nessuna lettura dei valori. L'eventuale risoluzione realm resta senza attesa aggiuntiva. Primo errore, codice, fase, guardia pre-Master, timer/stop/freeze e gate personali invariati. Banco solo loopback con rete esterna bloccata: CSP nativo reale, promessa non gestita reale e doubles per categorie/assenza API. Non è una prova produttiva o la causa dimostrata del giro #4. Canary OFF; nuovo giro solo dopo PR/CI/revisione/merge e ordine di Diego. Le sezioni v2/v1 successive restano storiche.
+
 <a id="cornice-c1-frame-entry-runtime-2026-11-12"></a>
 
 ## C1 — ingresso autonomo e rapporto v2 del primo errore, 12/11/2026

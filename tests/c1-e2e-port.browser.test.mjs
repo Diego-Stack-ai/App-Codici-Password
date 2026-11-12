@@ -358,10 +358,29 @@ test('runtime console failure captures UNLOCK before checkpoint and never submit
   await assert.rejects(()=>f.port.start(),/^Error: C1_RUNTIME_FAILURE$/);
   await f.page.evaluate(()=>null); // Drain the reserved error's realm inspection.
   const detail=f.port.firstError('C1_RUNTIME_FAILURE');
-  assert.deepEqual(detail,{phase:'UNLOCK',source:'console',frame:'top',tag:'BLINDA',host:null});
+  assert.deepEqual(detail,{phase:'UNLOCK',source:'console',frame:'top',tag:'BLINDA',host:null,
+   kind:'OTHER',origin:'other',hasArgs:true,firebaseComponent:null});
   assert.doesNotMatch(JSON.stringify(detail),/uid|token|contents|exported/);
   assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('master-submits')||0)),0);
   assert.equal(await f.page.locator('#protocol-input-modal-input').evaluate(node=>node.value===''),true);
+ }finally{await f.context.close();}
+});
+test('native CSP diagnostic is closed and distinguishes missing JavaScript args',async()=>{
+ const f=await fixture();
+ try{
+  await f.port.start();f.port.beginCases();
+  await Promise.all([f.page.waitForEvent('console',{predicate:event=>event.type()==='error'}),f.page.evaluate(()=>{
+   const policy=document.createElement('meta');policy.httpEquiv='Content-Security-Policy';policy.content="script-src 'self'";
+   document.head.append(policy);
+   const script=document.createElement('script');script.textContent='window.syntheticPrivateMarker="never-run"';document.body.append(script);
+  })]);
+  const detail=f.port.firstError('C1_RUNTIME_FAILURE');
+  assert.equal(detail.kind,'CSP');assert.equal(detail.hasArgs,false);assert.equal(detail.phase,'CASE');
+  assert.equal(detail.tag,'OTHER');assert.equal(detail.firebaseComponent,null);
+  assert.ok(['none','other'].includes(detail.origin));
+  assert.equal(await f.page.evaluate(()=>window.syntheticPrivateMarker??null),null);
+  assert.doesNotMatch(JSON.stringify(detail),/syntheticPrivateMarker|never-run|https?:|127\.0\.0\.1/);
+  await assert.rejects(()=>f.port.collectDiag(),/^Error: C1_RUNTIME_FAILURE$/);
  }finally{await f.context.close();}
 });
 
@@ -369,7 +388,8 @@ test('first runtime during readiness remains first after the readiness wait reje
  const f=await fixture('runtime-readiness');
  try{
   await assert.rejects(()=>f.port.start(),/^Error: C1_RUNTIME_FAILURE$/);
-  assert.deepEqual(f.port.firstError('C1_RUNTIME_FAILURE'),{phase:'UNLOCK',source:'console',frame:'vault-child',tag:'PWA',host:null});
+  assert.deepEqual(f.port.firstError('C1_RUNTIME_FAILURE'),{phase:'UNLOCK',source:'console',frame:'vault-child',tag:'PWA',host:null,
+   kind:'OTHER',origin:'other',hasArgs:true,firebaseComponent:null});
  }finally{await f.context.close();}
 });
 
@@ -382,7 +402,8 @@ test('console from the real child keeps only known tag or OTHER and the original
     f.page.frameLocator('#vault-frame').locator('body').evaluate((_node,message)=>console.error(message),message)]);
    await f.page.evaluate(()=>null);
    const detail=f.port.firstError('C1_RUNTIME_FAILURE');
-   assert.deepEqual(detail,{phase:'CASE',source:'console',frame:'vault-child',tag,host:null});
+   assert.deepEqual(detail,{phase:'CASE',source:'console',frame:'vault-child',tag,host:null,
+    kind:'OTHER',origin:'none',hasArgs:true,firebaseComponent:null});
    await assert.rejects(()=>f.port.collectDiag(),/^Error: C1_RUNTIME_FAILURE$/);
    f.port.freezeErrors();
    await f.page.evaluate(()=>console.error('[BLINDA] later synthetic-private'));
@@ -398,8 +419,20 @@ test('native pageerror from the real child keeps unknown frame without exporting
   await Promise.all([f.page.waitForEvent('pageerror'),f.page.frameLocator('#vault-frame').locator('body').evaluate(()=>{
    setTimeout(()=>{throw new Error('synthetic-private-uid-token-url');},0);
   })]);
-  assert.deepEqual(f.port.firstError('C1_RUNTIME_FAILURE'),{phase:'CASE',source:'pageerror',frame:'other',tag:null,host:null});
+  assert.deepEqual(f.port.firstError('C1_RUNTIME_FAILURE'),{phase:'CASE',source:'pageerror',frame:'other',tag:null,host:null,
+   kind:null,origin:'none',hasArgs:null,firebaseComponent:null});
   await assert.rejects(()=>f.port.collectDiag(),/^Error: C1_RUNTIME_FAILURE$/);
+ }finally{await f.context.close();}
+});
+test('real unhandled promise keeps pageerror metadata unavailable rather than guessing a console kind',async()=>{
+ const f=await fixture();
+ try{
+  await f.port.start();f.port.beginCases();
+  await Promise.all([f.page.waitForEvent('pageerror'),f.page.frameLocator('#vault-frame').locator('body').evaluate(()=>{
+   void Promise.reject(new Error('synthetic-private-unhandled'));
+  })]);
+  assert.deepEqual(f.port.firstError('C1_RUNTIME_FAILURE'),{phase:'CASE',source:'pageerror',frame:'other',tag:null,host:null,
+   kind:null,origin:'none',hasArgs:null,firebaseComponent:null});
  }finally{await f.context.close();}
 });
 
@@ -424,7 +457,8 @@ test('real resource 404 retains only HTTP host category and frame',async()=>{
   await Promise.all([f.page.waitForEvent('response',{predicate:r=>r.status()===404}),f.page.evaluate(()=>{
    const img=document.createElement('img');img.src='/synthetic-missing?token=synthetic-private';document.body.append(img);
   })]);
-  assert.deepEqual(f.port.firstError('C1_HTTP_FAILURE_OTHER'),{phase:'CASE',source:'http',frame:'top',tag:null,host:'other'});
+  assert.deepEqual(f.port.firstError('C1_HTTP_FAILURE_OTHER'),{phase:'CASE',source:'http',frame:'top',tag:null,host:'other',
+   kind:null,origin:'other',hasArgs:null,firebaseComponent:null});
   await assert.rejects(()=>f.port.collectDiag(),/^Error: C1_HTTP_FAILURE_OTHER$/);
  }finally{await f.context.close();}
 });

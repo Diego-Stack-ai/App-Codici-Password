@@ -14,11 +14,12 @@ const good=()=>({GITHUB_ACTIONS:'true',GITHUB_EVENT_NAME:'workflow_dispatch',GIT
  C1_EXECUTION_ORDER:'https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-1',
  C1_PREFLIGHT_CONFIRMED:'true',C1_EFFECTS_CONFIRMED:'true',C1_ACCEPT_D02_LIMIT:'true',
  C1_PROFILE:'chrome-desktop',C1_RELEASE_SHA:'b'.repeat(40),C1_RELEASE_VERSION:'1.2.270'});
-const reportV2=()=>({schemaVersion:2,profile:'chrome-desktop',platform:'win32',engineVersion:'156.0',runnerSha:'a'.repeat(40),
+const reportV3=()=>({schemaVersion:3,profile:'chrome-desktop',platform:'win32',engineVersion:'156.0',runnerSha:'a'.repeat(40),
  release:{version:'1.2.270',sourceSha:'b'.repeat(40),publicTreeSha256:'c'.repeat(64)},productionExecuted:true,possibleAppWrites:true,
  network:true,diagSource:'getter',cases:[{id:'SETUP',status:'FAIL',code:'C1_RUNTIME_FAILURE',diag:null}],code:'C1_RUNTIME_FAILURE',
  failureDiagCode:'C1_DIAG_UNAVAILABLE',offRequired:true,timeoutRestoreRequired:false,
- firstError:{phase:'FRAME_ENTRY',source:'console',frame:'top',tag:'BLINDA',host:null}});
+ firstError:{phase:'FRAME_ENTRY',source:'console',frame:'top',tag:'BLINDA',host:null,
+  kind:'OTHER',origin:'app',hasArgs:true,firebaseComponent:null}});
 test('execution requires dispatch/master/reviewed SHA/operator/order and all separate attestations',()=>{
  assert.equal(authorizeC1(good(),'win32').version,'1.2.270');
  for(const key of ['GITHUB_ACTIONS','GITHUB_EVENT_NAME','GITHUB_REPOSITORY','GITHUB_REF','GITHUB_SHA',
@@ -27,6 +28,15 @@ test('execution requires dispatch/master/reviewed SHA/operator/order and all sep
  }
  assert.throws(()=>authorizeC1({...good(),DEBUG:'pw:api'},'win32'),/^Error: C1_EXECUTION_NOT_AUTHORIZED$/);
  assert.throws(()=>authorizeC1(good(),'linux'),/^Error: C1_PLATFORM_UNSUPPORTED$/);
+});
+test('v3 diagnostic report accepts only the extended closed metadata',()=>{
+ const report={...reportV3(),schemaVersion:3,firstError:{...reportV3().firstError,
+  kind:'OTHER',origin:'app',hasArgs:true,firebaseComponent:null}};
+ assert.deepEqual(sanitizeC1Report(report),report);
+ for(const delta of [{kind:'private-kind'},{origin:'https://never-export.invalid'},{hasArgs:'true'},
+  {firebaseComponent:'private-component'},{kind:'CSP',firebaseComponent:'auth'},{url:'https://never-export.invalid'}])
+  assert.throws(()=>sanitizeC1Report({...report,firstError:{...report.firstError,...delta}}),/^Error: C1_REPORT_INVALID$/);
+ assert.throws(()=>sanitizeC1Report({...report,schemaVersion:2}),/^Error: C1_REPORT_INVALID$/);
 });
 test('direct runner import also rejects an unauthorized call before any network',async()=>{
  await assert.rejects(()=>runAuthorizedC1({}, {}, {}),/^Error: C1_EXECUTION_NOT_AUTHORIZED$/);
@@ -98,15 +108,15 @@ test('browser receives system environment only, reports refuse extra case data a
  assert.throws(()=>sanitizeCase({id:'SETUP',status:'BLOCKED',code:'C1_AUTH_HTTP_OTHER synthetic-private',diag:null}),/^Error: C1_REPORT_INVALID$/);
 });
 
-test('v2 report rejects sensitive additions, malformed metadata and v1 instead of silently spreading',()=>{
- assert.deepEqual(sanitizeC1Report(reportV2()),reportV2());
+test('v3 report rejects sensitive additions, malformed metadata and legacy versions instead of silently spreading',()=>{
+ assert.deepEqual(sanitizeC1Report(reportV3()),reportV3());
  for(const mutate of [r=>r.uid='synthetic-private',r=>r.firstError.message='synthetic-private',
   r=>r.firstError.frame='private-frame',r=>r.firstError.tag='private-tag',r=>r.release.url='https://synthetic.invalid/private',
   r=>r.cases[0].value='private',r=>r.code='private-error',r=>r.schemaVersion=1,r=>delete r.firstError,
   r=>r[Symbol('private')]=true,r=>r.firstError[Symbol('private')]=true,r=>r.cases[0][Symbol('private')]=true]){
-  const r=reportV2();mutate(r);assert.throws(()=>sanitizeC1Report(r),/^Error: C1_REPORT_INVALID$/);
+  const r=reportV3();mutate(r);assert.throws(()=>sanitizeC1Report(r),/^Error: C1_REPORT_INVALID$/);
  }
- const serialized=JSON.stringify(sanitizeC1Report(reportV2()));
+ const serialized=JSON.stringify(sanitizeC1Report(reportV3()));
  assert.doesNotMatch(serialized,/uid|email|password|token|https?:|synthetic-private/);
 });
 
@@ -136,7 +146,8 @@ test('response handler preserves the first HTTP host code and stops before crede
   assert.equal(port.timerRestoreRequired(),false);
   const first=port.firstError(expected);
   assert.equal(port.failureCode(new Error('C1_READINESS')),expected);
-  assert.deepEqual(first,{phase:'LOGIN_READY',source:'http',frame:'other',tag:null,host:code.slice('C1_AUTH_HTTP_'.length).toLowerCase()});
+  assert.deepEqual(first,{phase:'LOGIN_READY',source:'http',frame:'other',tag:null,host:code.slice('C1_AUTH_HTTP_'.length).toLowerCase(),
+   kind:null,origin:code.endsWith('_OTHER')?'other':'firebase',hasArgs:null,firebaseComponent:null});
   port.beginCases();handlers.get('pageerror')(new Error('later synthetic-private'));
   assert.deepEqual(port.firstError(expected),first);
  }
@@ -169,11 +180,34 @@ test('pending or absent console realm stays OTHER without delaying failure or re
    goto:async()=>{handlers.get('console')(message);},locator:()=>{throw Error('MUST_NOT_FILL');}};
   const port=await createLocalFixturePort(page,{},{});
   await assert.rejects(()=>port.start(),/^Error: C1_RUNTIME_FAILURE$/);
-  const first={phase:'LOGIN_READY',source:'console',frame:'other',tag:'RESOURCE',host:'firestore'};
+  const first={phase:'LOGIN_READY',source:'console',frame:'other',tag:'RESOURCE',host:'firestore',
+   kind:'OTHER',origin:'firebase',hasArgs:pending,firebaseComponent:null};
   assert.deepEqual(port.firstError('C1_RUNTIME_FAILURE'),first);
   port.beginCases();handlers.get('pageerror')(new Error('later synthetic-private'));
   assert.deepEqual(port.firstError('C1_RUNTIME_FAILURE'),first);
   assert.equal(port.firstError('C1_TARGET_DENIED'),null);
+ }
+});
+test('console metadata counts handles once without reading their values or delaying first fatal',async()=>{
+ for(const mode of ['empty','pending','destroyed','unavailable']){
+  const handlers=new Map();let argsReads=0,valueReads=0,fills=0;
+  const handle={evaluate:()=>mode==='destroyed'?Promise.reject(Error('synthetic-private')):new Promise(()=>{}),
+   jsonValue:()=>{valueReads++;throw Error('MUST_NOT_READ');},getProperties:()=>{valueReads++;throw Error('MUST_NOT_READ');}};
+  const message={type:()=> 'error',text:()=> 'Permissions policy violation: synthetic-private',
+   location:()=>({url:'https://www.google.com/recaptcha/private?key=synthetic-private'}),
+   args:()=>{argsReads++;if(mode==='unavailable')throw Error('synthetic-private');return mode==='empty'?[]:[handle];}};
+  const page={url:()=> 'http://127.0.0.1:9191/login.html',on:(event,callback)=>handlers.set(event,callback),
+   context:()=>({serviceWorkers:()=>[],route:async()=>{},on:()=>{}}),addInitScript:async()=>{},setDefaultTimeout:()=>{},
+   goto:async()=>{handlers.get('console')(message);},locator:()=>{fills++;throw Error('MUST_NOT_FILL');}};
+  const port=await createLocalFixturePort(page,{},{});
+  await assert.rejects(()=>port.start(),/^Error: C1_RUNTIME_FAILURE$/);
+  const detail=port.firstError('C1_RUNTIME_FAILURE');
+  assert.deepEqual(detail,{phase:'LOGIN_READY',source:'console',frame:'other',tag:'OTHER',host:null,
+   kind:'PERMISSIONS_POLICY',origin:'google',hasArgs:mode==='unavailable'?null:mode!=='empty',firebaseComponent:null});
+  assert.equal(argsReads,1);assert.equal(valueReads,0);assert.equal(fills,0);
+  assert.doesNotMatch(JSON.stringify(detail),/synthetic-private|recaptcha|https?:|key=/);
+  port.beginCases();handlers.get('console')(message);port.freezeErrors();handlers.get('pageerror')(Error('later private'));
+  assert.deepEqual(port.firstError('C1_RUNTIME_FAILURE'),detail);assert.equal(argsReads,1);
  }
 });
 
@@ -190,12 +224,12 @@ test('artifact flag is set only for a newly written report, never for a stale wx
  const env={RUNNER_TEMP:dir,GITHUB_OUTPUT:output},file=join(dir,'c1-qa2-report.json');
  try{
   await writeFile(output,'');
-  await writeSanitizedReport(reportV2(),env);
+  await writeSanitizedReport(reportV3(),env);
   assert.equal(await readFile(output,'utf8'),'report_written=true\n');
   await writeFile(output,'');
-  await assert.rejects(()=>writeSanitizedReport(reportV2(),env),/^Error: C1_REPORT_WRITE$/);
+  await assert.rejects(()=>writeSanitizedReport(reportV3(),env),/^Error: C1_REPORT_WRITE$/);
   assert.equal(await readFile(output,'utf8'),'');
-  assert.equal(JSON.parse(await readFile(file,'utf8')).schemaVersion,2);
+  assert.equal(JSON.parse(await readFile(file,'utf8')).schemaVersion,3);
  }finally{await unlink(file).catch(()=>{});await unlink(output).catch(()=>{});await rmdir(dir);}
 });
 test('installed workflow is manual-only, pinned, without cloud roles, and uploads only current report',async()=>{
