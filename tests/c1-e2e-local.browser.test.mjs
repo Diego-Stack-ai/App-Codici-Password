@@ -89,6 +89,61 @@ async function fixture(fault=''){
  await page.waitForFunction(()=>window.started&&document.querySelector('iframe').style.visibility==='visible');
  return {context,page,driver:await createLocalC1Driver(page)};
 }
+// Test-only interception: arm the synthetic delay at the actual click, then
+// delegate to Playwright with the driver's options unchanged. No forced click.
+function withLocalClick(page,onClick){
+ return new Proxy(page,{get(target,key){
+  if(key==='frameLocator')return selector=>{
+   const frame=target.frameLocator(selector);
+   return new Proxy(frame,{get(target,key){
+    if(key==='locator')return selector=>{
+     const locator=target.locator(selector);
+     return new Proxy(locator,{get(target,key){
+      if(key==='click')return options=>onClick({selector,locator:target,options});
+      const value=Reflect.get(target,key,target);return typeof value==='function'?value.bind(target):value;
+     }});
+    };
+    const value=Reflect.get(target,key,target);return typeof value==='function'?value.bind(target):value;
+   }});
+  };
+  const value=Reflect.get(target,key,target);return typeof value==='function'?value.bind(target):value;
+ }});
+}
+
+test('local click completes the real navigation after a synthetic delay beyond 3 seconds',async()=>{
+ const f=await fixture();let privateClicks=0;
+ try{
+  const page=withLocalClick(f.page,async({selector,locator,options})=>{
+   if(selector==='a[href="area_privata.html"]'){
+    privateClicks++;
+    await locator.evaluate(link=>{
+     link.hidden=true;
+     setTimeout(()=>{link.hidden=false;parent.fixture.delayedClickReleased=true;},4000);
+    });
+   }
+   return locator.click(options);
+  });
+  const driver=await createLocalC1Driver(page);
+  await driver.navigationCore();await driver.historyCore();
+  assert.equal(privateClicks,1);
+  assert.equal(await f.page.evaluate(()=>window.fixture.delayedClickReleased),true);
+  assert.equal(await f.page.evaluate(()=>window.fixture.unlocks),1);
+ }finally{await f.context.close();}
+});
+
+test('local click with an absent target stays a failure with the fixed step',async()=>{
+ const f=await fixture();let privateClicks=0;
+ try{
+  const page=withLocalClick(f.page,async({selector,locator,options})=>{
+   if(selector==='a[href="area_privata.html"]'){privateClicks++;await locator.evaluate(link=>link.remove());}
+   return locator.click(options);
+  });
+  const driver=await createLocalC1Driver(page);
+  await assert.rejects(()=>driver.navigationCore(),/^Error: C1_LOCAL_CLICK_PRIVATE$/);
+  assert.equal(privateClicks,1);assert.equal(await f.page.evaluate(()=>window.fixture.unlocks),1);
+ }finally{await f.context.close();}
+});
+
 test('real local broker: UI links, browser Back/Forward, app Back preserve query and one unlock',async()=>{
  const f=await fixture();
  try{
