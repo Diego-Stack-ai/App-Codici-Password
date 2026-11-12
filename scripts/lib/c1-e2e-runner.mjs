@@ -1,7 +1,7 @@
 import {writeFile,appendFile} from 'node:fs/promises';
 import {isAbsolute,join,relative} from 'node:path';
 import {C1_PRIORITY_CASES,verifyC1Release,authorizeC1,readQa2Secrets} from './c1-e2e-execution.mjs';
-import {C1_CODES,safeFailure,validateDiag,fail} from './c1-e2e-contract.mjs';
+import {C1_CODES,C1_AUTH_CODES,safeFailure,validateDiag,fail} from './c1-e2e-contract.mjs';
 import {createProductionPort} from './c1-e2e-production-port.mjs';
 import {runPriorityC1} from './c1-e2e-priority.mjs';
 
@@ -69,7 +69,7 @@ export async function runAuthorizedC1(config,secrets,env){
   console.log(JSON.stringify({signal:'OFF_REQUIRED',code:failure}));
   const diag=await port?.tryFailureDiag()??null;
   if(!diag)failureDiagCode='C1_DIAG_UNAVAILABLE';
-  const blocked=['C1_MFA_BLOCKED','C1_AUTH_BLOCKED','C1_TARGET_DENIED','C1_BOOTSTRAP_MISMATCH','C1_FIXTURE_MISSING','C1_TIMEOUT_BASELINE'].includes(failure);
+  const blocked=C1_AUTH_CODES.includes(failure)||['C1_MFA_BLOCKED','C1_TARGET_DENIED','C1_BOOTSTRAP_MISMATCH','C1_FIXTURE_MISSING','C1_TIMEOUT_BASELINE'].includes(failure);
   cases.push(sanitizeCase({id:current,status:blocked?'BLOCKED':'FAIL',code:failure,diag}));
  }
  finally{await context?.close().catch(()=>{});await browser?.close().catch(()=>{});}

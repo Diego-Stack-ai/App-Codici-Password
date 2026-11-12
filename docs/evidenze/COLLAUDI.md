@@ -1,5 +1,25 @@
 # Collaudi
 
+<a id="cornice-c1-primo-giro-2026-11-12"></a>
+
+## C1 #1 — SETUP BLOCKED, OFF confermato e seguito diagnostico, 12/11/2026
+
+Dopo GO Claude e ordine di merge, #293 integrata in `cd05b44e26792a70fe7f37e43be5172dfc75f81d`, albero identico al candidato revisionato. Diego ordina il primo giro QA2/Chrome desktop, conferma nuovamente il preflight dopo aver annullato una risposta accidentale, accende personalmente il singleton e approva il job. [Ordine e perimetro](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/293#issuecomment-6818708873), [run C1 #1](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43183551202).
+
+Fixture locali verdi; la sequenza reale si ferma in **SETUP BLOCKED / C1_AUTH_BLOCKED**, con C1_DIAG_UNAVAILABLE, diag null e timeoutRestoreRequired=false. D02/D04-core/D05-A/D06-1/D06-3/D08-local non eseguiti: nessun nuovo PASS C1. Windows/Chrome 156.0.8078.80; manifest metadata coerente con 1.2.270, sorgente `cb48b7196a3816a62dda05d11e11ff4ca7c51d26` e publicTreeSha256 `5689f9de7059c9733f6ad5fd5d4c598982e4a3c2aece1767e148942b18bdb735`. Non sono stati riverificati tutti i payload del rilascio.
+
+Il rapporto sanitizzato originale nel log ha schema chiuso e una sola riga SETUP; l'artifact omonimo è conservato per sette giorni. [Trascrizione completa e limiti](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/293#issuecomment-6819644107). I flag productionExecuted/possibleAppWrites sono conservativi, impostati prima del setup: non provano login riuscito o una specifica scrittura. Il codice originario aggrega 401/403, email non verificata e utente/bootstrap non pronto: non identifica credenziali errate, provider o difetto della cornice. Nessuna evidenza che la Master sia stata raggiunta/inviata; DIAG non ricostruita. D06 non raggiunto, quindi nessuna modifica timeout tentata; il flag falso non certifica baseline o OFF.
+
+Prima azione operativa richiesta: OFF personale. Diego conferma **Spento e salvato**, [registrato sulla #293](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/293#issuecomment-6819737541); nessuna rilettura amministrativa Firebase o retry. [Claude accetta la ricevuta](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/293#issuecomment-6819787795), propone diagnostica e considera App Check solo un'ipotesi. Diego ordina la PR con sottocodici fissi e valutazione A: nessuna nuova esecuzione prima della revisione e del suo ordine.
+
+### Verifiche della candidata diagnostica
+
+**Seguito alla revisione 079c6ed2:** test di regressione locale prima della correzione, 400 sull'host App Check del bundle: atteso C1_HTTP_FAILURE_APPCHECK, ottenuto C1_HTTP_FAILURE, quindi FAIL rilevato. La correzione classifica tutti gli status almeno 400 per la stessa mappa host: 401/403 conservano Auth/BLOCKED, gli altri usano quattro C1_HTTP_FAILURE_* e restano FAIL. Event double senza browser o rete per 400/401/403/404/429/500/503, alias esatti e host ingannevoli; nessun input credenziale o Master raggiunto e primo errore conservato. Test puri anche per risposte senza errore e campi/codici estranei. Suite locale finale **31/31**, QA **14/14**, docs **12/12**, sintassi e whitespace verdi; revisione consultiva readonly del seguito senza rilievi. Nessun nuovo giro reale. Nuovo SHA da rivedere con Claude; il GO precedente resta riferito a 079c6ed2 e alla sua CI. Il paragrafo successivo conserva le prove della candidata iniziale.
+
+Test locali del mapping per host esatto, 401/403, spoofing e input non analizzabile; niente URL o campi extra nel rapporto. Il primo HTTP prevale su un successivo errore runtime. Fixture browser loopback per pannello email, email non verificata nel bootstrap QA2 e autenticazione non pronta: sottocodici distinti, un solo tentativo di login e zero invii Master. Guardie, oracoli, continuità, cronologia, reload, timer e logout restano nel banco locale con rete esterna bloccata. Suite C1 finale **30/30**, QA/inventario **14/14**, documentazione **12/12** con elenco invariato a 34 MD; sintassi dei moduli, version:check 1.2.270 (275 riferimenti asset) e git diff --check verdi. Il primo lancio browser nel sandbox non raggiungeva nemmeno loopback (ERR_NETWORK_ACCESS_DENIED); esecuzione locale consentita fuori sandbox, con lo stesso blocco della rete esterna, verde senza modificare l'app. Revisione consultiva readonly: aggiunto l'alias esatto content-firebaseappcheck effettivamente usato dal bundle, coperto anche dai negativi. Nessun provider reale o nuovo giro produttivo da questi test. CI della PR e revisione Claude restano distinte. [Contratto diagnostico e valutazione A](../procedure/COLLAUDI.md#cornice-c1-auth-codici-2026-11-12).
+
+I paragrafi successivi conservano la preparazione precedente al primo giro reale.
+
 <a id="cornice-c1-e2e-locale-2026-11-12"></a>
 
 ## C1 — preparazione E2E, verifiche locali e limiti, 12/11/2026

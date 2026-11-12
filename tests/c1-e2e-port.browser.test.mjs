@@ -11,7 +11,7 @@ import {assertCaseDiagnostics,browserEnvironment} from '../scripts/lib/c1-e2e-ru
 // timeout differ. All Auth/admission/DIAG/UI content is synthetic; real owner and
 // transport run on loopback. No production host is opened or contacted.
 const authModule=`const user={uid:sessionStorage.getItem('fault')==='identity'?'other-fixture':'fixture-qa2-only',
- email:'codex.qa2@appcodici-password.invalid',emailVerified:true,
+ email:'codex.qa2@appcodici-password.invalid',emailVerified:sessionStorage.getItem('fault')!=='email-unverified-guard',
  getIdTokenResult:async()=>{
   const fault=sessionStorage.getItem('fault');
   if(fault==='identity-during-token'||fault==='identity-after-fill'&&document.querySelector('#protocol-input-modal-input')?.value.length>0)sessionStorage.removeItem('fixture-auth');
@@ -27,6 +27,8 @@ if(location.pathname==='/login.html'){
  document.querySelector('#login-submit-btn').onclick=e=>{
   e.preventDefault();
   if(fault==='mfa'){document.querySelector('#totp-form-group').hidden=false;return;}
+  if(fault==='email-unverified-panel'){document.querySelector('#email-verification-panel').hidden=false;return;}
+  if(fault==='not-ready')return;
   sessionStorage.setItem('fixture-auth','yes');location.replace('/home_page.html');
  };
 }else if(!auth.currentUser){location.replace('/login.html');}
@@ -115,7 +117,7 @@ const diagModule=`export async function loadFrameDiagnostics(){return {
    events:JSON.parse(sessionStorage.getItem('app_frame_diag_events_v1')||'[]')};
  }};}`;
 const rootHtml=login=>'<html data-i18n="ready"><head><link rel="stylesheet" href="/assets/css/vault-frame.css"><script type="module" src="/fixture-root.mjs"></script></head><body'+(login?'':' hidden inert')+'>'+
- (login?'<input id="email"><input id="password" type="password"><input id="remember-device" type="checkbox" checked><button id="login-submit-btn">Login</button><section id="totp-form-group" hidden><input id="totp-code"></section>':
+ (login?'<input id="email"><input id="password" type="password"><input id="remember-device" type="checkbox" checked><button id="login-submit-btn">Login</button><section id="totp-form-group" hidden><input id="totp-code"></section><section id="email-verification-panel" hidden>Verify synthetic email</section>':
  '<main id="frame-status"><a id="frame-resume">Unlock</a></main><div data-frame-safe-area class="frame-safe-area"></div><iframe id="vault-frame" class="vault-frame" hidden inert></iframe>')+'</body></html>';
 const childHtml='<html data-i18n="ready"><head><script type="module" src="/fixture-child.mjs"></script></head><body><header id="header-left"><button class="btn-icon-header">Back</button></header>'+
  '<div id="header-right"><a href="home_page.html">Home</a></div><button id="header-user-avatar">Profile</button><button id="header-logout-btn">Logout</button>'+
@@ -186,6 +188,23 @@ test('MFA, wrong identity and Master creation dialogs stop before any Master sub
    await assert.rejects(()=>f.port.start(),new RegExp('^Error: '+code+'$'));
    assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('master-submits')||0)),0);
    if(fault==='identity-after-fill')assert.equal(await f.page.locator('#protocol-input-modal-input').evaluate(node=>node.value===''),true);
+  }finally{await f.context.close();}
+ }
+});
+
+test('unverified email and absent Auth readiness have distinct codes before Master, with no retry',async()=>{
+ for(const [fault,code]of [['email-unverified-panel','C1_AUTH_EMAIL_UNVERIFIED'],
+  ['email-unverified-guard','C1_AUTH_EMAIL_UNVERIFIED'],['not-ready','C1_AUTH_NOT_READY']]){
+  const f=await fixture(fault);let logins=0;
+  try{
+   await f.page.exposeFunction('fixtureLoginAttempt',()=>{logins++;});
+   await f.page.addInitScript(()=>addEventListener('click',event=>{
+    if(event.target.id==='login-submit-btn')void window.fixtureLoginAttempt();
+   },true));
+   await assert.rejects(()=>f.port.start(),new RegExp('^Error: '+code+'$'));
+   assert.equal(logins,1);
+   assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('master-submits')||0)),0);
+   assert.equal(f.port.timerRestoreRequired(),false);
   }finally{await f.context.close();}
  }
 });

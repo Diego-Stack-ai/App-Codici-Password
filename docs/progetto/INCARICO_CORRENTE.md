@@ -1,5 +1,15 @@
 # Incarico corrente
 
+<a id="cornice-c1-auth-diagnostica-2026-11-12"></a>
+
+## C1 — sottocodici diagnostici dopo il primo giro bloccato, 12/11/2026
+
+Diego ordina una PR diagnostica dopo la [revisione Claude della ricevuta C1 #1](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/293#issuecomment-6819787795): sostituire il generico C1_AUTH_BLOCKED con sei sottocodici fissi, test locali e valutazione dell'opzione A (runner self-hosted sul PC con Chrome visibile). Base master `cd05b44e26792a70fe7f37e43be5172dfc75f81d`; ramo separato codex/c1-auth-diagnostics-20261112. La preparazione comprende commit, PR in bozza e avviso a Claude, non merge o nuova esecuzione.
+
+Perimetro eseguibile: soltanto contratto dei codici C1, classificazione degli errori HTTP per host esatto, email non verificata/utente non pronto, stati e relativi test. Dopo il [GO Claude su 079c6ed2](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/294#issuecomment-6820120068), condizionato alla CI, Diego riporta e fa proseguire la raccomandazione: anche un 400 App Check deve mantenere la categoria, con quattro C1_HTTP_FAILURE_* per gli altri status almeno 400. I 401/403 restano Auth/BLOCKED, gli altri HTTP restano FAIL. Il nuovo delta richiede riesame Claude; il GO precedente non copre automaticamente il seguito. Nessun URL, identificativo o messaggio libero aggiunto al rapporto; prima anomalia e nessun retry conservati. Frontend/cornice, workflow, headless, credenziali, timeout, versione, Rules/Functions, header, manifest e precache restano invariati. L'opzione A è [solo valutata](../procedure/COLLAUDI.md#cornice-c1-self-hosted-valutazione-2026-11-12), senza installazione o registrazione di runner.
+
+Il primo giro, autorizzato separatamente e approvato personalmente da Diego, è **SETUP BLOCKED**, nessun caso C1 completato; [ricevuta, OFF e limiti](../evidenze/COLLAUDI.md#cornice-c1-primo-giro-2026-11-12). Canary OFF confermato da Diego, nessuna rilettura amministrativa. **Nessun nuovo giro prima della revisione Claude di questa PR e di un nuovo ordine personale di Diego.** Nessun deploy o operazione Firebase. Le sezioni successive conservano i checkpoint precedenti.
+
 <a id="cornice-c1-e2e-incarico-2026-11-12"></a>
 
 ## C1 — PR dedicata al workflow manuale, 12/11/2026
