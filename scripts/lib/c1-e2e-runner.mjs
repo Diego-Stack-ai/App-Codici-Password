@@ -1,7 +1,7 @@
 import {writeFile,appendFile} from 'node:fs/promises';
 import {isAbsolute,join,relative} from 'node:path';
 import {C1_PRIORITY_CASES,verifyC1Release,authorizeC1,readQa2Secrets} from './c1-e2e-execution.mjs';
-import {C1_CODES,C1_AUTH_CODES,C1_PROFILES,safeFailure,validateDiag,validateFirstError,fail} from './c1-e2e-contract.mjs';
+import {C1_CODES,C1_AUTH_CODES,C1_PROFILES,safeFailure,validateDiag,validateFirstError,validateThirdPartyConsole,fail} from './c1-e2e-contract.mjs';
 import {createProductionPort} from './c1-e2e-production-port.mjs';
 import {runPriorityC1} from './c1-e2e-priority.mjs';
 
@@ -19,10 +19,10 @@ export function sanitizeCase(row){
 export function sanitizeC1Report(value){
  const exact=(v,keys)=>v&&Object.getPrototypeOf(v)===Object.prototype&&Reflect.ownKeys(v).every(key=>typeof key==='string')&&Reflect.ownKeys(v).sort().join(',')===[...keys].sort().join(',');
  const keys=['schemaVersion','profile','platform','engineVersion','runnerSha','release','productionExecuted',
-  'possibleAppWrites','network','diagSource','cases','code','failureDiagCode','offRequired','timeoutRestoreRequired','firstError'];
+  'possibleAppWrites','network','diagSource','cases','code','failureDiagCode','offRequired','timeoutRestoreRequired','firstError','thirdPartyConsole'];
  const sha=v=>typeof v==='string'&&/^[a-f0-9]{40}$/.test(v);
  const version=v=>typeof v==='string'&&/^\d{1,3}\.\d{1,3}\.\d{1,6}$/.test(v);
- if(!exact(value,keys)||value.schemaVersion!==3||!C1_PROFILES.includes(value.profile)||
+ if(!exact(value,keys)||value.schemaVersion!==4||!C1_PROFILES.includes(value.profile)||
   !['win32','darwin'].includes(value.platform)||!sha(value.runnerSha)||
   !(value.engineVersion===null||typeof value.engineVersion==='string'&&/^[0-9.]{1,40}$/.test(value.engineVersion))||
   !['productionExecuted','possibleAppWrites','network','timeoutRestoreRequired'].every(key=>typeof value[key]==='boolean')||
@@ -36,11 +36,12 @@ export function sanitizeC1Report(value){
   release={version:r.version,sourceSha:r.sourceSha,publicTreeSha256:r.publicTreeSha256};
  }
  const firstError=validateFirstError(value.firstError);
+ const thirdPartyConsole=validateThirdPartyConsole(value.thirdPartyConsole);
  if(firstError&&(firstError.source==='http'?!/^(C1_AUTH_HTTP_|C1_HTTP_FAILURE_)/.test(value.code):value.code!=='C1_RUNTIME_FAILURE'))fail('C1_REPORT_INVALID');
- return {schemaVersion:3,profile:value.profile,platform:value.platform,engineVersion:value.engineVersion,runnerSha:value.runnerSha,
+ return {schemaVersion:4,profile:value.profile,platform:value.platform,engineVersion:value.engineVersion,runnerSha:value.runnerSha,
   release,productionExecuted:value.productionExecuted,possibleAppWrites:value.possibleAppWrites,network:value.network,
   diagSource:'getter',cases:value.cases.map(sanitizeCase),code:value.code,failureDiagCode:value.failureDiagCode,
-  offRequired:true,timeoutRestoreRequired:value.timeoutRestoreRequired,firstError};
+  offRequired:true,timeoutRestoreRequired:value.timeoutRestoreRequired,firstError,thirdPartyConsole};
 }
 export function assertCaseDiagnostics(id,diag,startedAt){
  if(diag.events.length>=200)fail('C1_DIAG_TRUNCATED');
@@ -69,6 +70,7 @@ export async function runAuthorizedC1(config,secrets,env){
   fail('C1_EXECUTION_NOT_AUTHORIZED');
  let browser,context,port,network=false,possibleAppWrites=false,publicRelease=null,failure=null,current='SETUP',failureDiagCode=null,firstError=null,startedAt=Date.now(),engineVersion=null;
  const cases=[];
+ let thirdPartyConsole={count:0,firstPhase:null,googlePath:null};
  try{
   network=true;publicRelease=await verifyC1Release(config);
   const {chromium,webkit,devices}=await import('playwright');
@@ -103,13 +105,14 @@ export async function runAuthorizedC1(config,secrets,env){
  }
  finally{
   port?.freezeErrors();firstError=port?.firstError(failure)??null;
+  thirdPartyConsole=port?.thirdPartyConsole()??thirdPartyConsole;
   await context?.close().catch(()=>{});await browser?.close().catch(()=>{});
  }
  const report=sanitizeC1Report({
-  schemaVersion:3,profile:config.profile,platform:process.platform,engineVersion,runnerSha:config.runnerSha,
+  schemaVersion:4,profile:config.profile,platform:process.platform,engineVersion,runnerSha:config.runnerSha,
   release:publicRelease,productionExecuted:possibleAppWrites,possibleAppWrites,network,
   diagSource:'getter',cases,code:failure,failureDiagCode,offRequired:true,
-  timeoutRestoreRequired:port?.timerRestoreRequired()===true,firstError
+  timeoutRestoreRequired:port?.timerRestoreRequired()===true,firstError,thirdPartyConsole
  });
  // Always OFF after an authorized run, including success; no administrative write is attempted.
  try{await writeSanitizedReport(report,env);}catch{report.code??='C1_REPORT_WRITE';}

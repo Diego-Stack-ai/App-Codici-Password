@@ -2,6 +2,16 @@
 
 <a id="stato-corrente"></a>
 
+<a id="cornice-c1-recaptcha-eccezione-2026-11-12"></a>
+
+## C1 #5 FAIL, strada A autorizzata e candidata v4 — 12/11/2026
+
+La #297 è integrata in master `b2028a158e2374eff2e6069c663271064d62b129`. Quinto giro: 60 test locali superati, SETUP FAIL / C1_RUNTIME_FAILURE, primo segnale console FRAME_ENTRY/OTHER con origin Google e args vuoti; DIAG indisponibile, nessun caso D o cambio timeout. OFF personale confermato, nessun retry. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-c1-recaptcha-eccezione-2026-11-12).
+
+Diego autorizza la strada A proposta da Claude: PR in bozza del solo runner/test con eccezione reCAPTCHA stretta e registrata, banco RED → GREEN e negativi. Base b2028a15, ramo codex/c1-recaptcha-native-exception-20261112; stato DA_VERIFICARE. Rapporto candidato v4 con contatore limitato, prima fase e percorso chiuso; nessuna prova che il messaggio #5 sia innocuo o soddisfi la deroga. Nuova revisione sul candidato richiesta, nessuna auto-approvazione.
+
+Canary OFF secondo Diego, nessuna rilettura amministrativa. Hosting invariato **1.2.270 / cb48b7196a3816a62dda05d11e11ff4ca7c51d26**; UI/caratteri #283 dopo C1. Nessun nuovo giro, merge, deploy o modifica applicativa/cloud. Le sezioni sotto conservano i checkpoint e formati precedenti.
+
 <a id="cornice-c1-console-classificazione-2026-11-12"></a>
 
 ## C1 #4 FAIL, manuale non riprodotto e candidata v3 — 12/11/2026

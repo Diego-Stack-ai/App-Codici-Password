@@ -1,5 +1,21 @@
 # Collaudi
 
+<a id="cornice-c1-recaptcha-eccezione-2026-11-12"></a>
+
+## C1 #5 FAIL e strada A candidata del solo runner, 12/11/2026
+
+La #297 è unita in `b2028a158e2374eff2e6069c663271064d62b129` dopo GO Claude e CI verde, albero identico a bb023da1. Quinto giro QA2/Chrome desktop [43272937654](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43272937654), tentativo 1: **60/60 fixture locali PASS; SETUP FAIL / C1_RUNTIME_FAILURE**. Rapporto v3: FRAME_ENTRY/console/other/OTHER, kind OTHER, origin google, hasArgs false, host/firebaseComponent null. DIAG indisponibile con C1_DIAG_UNAVAILABLE; nessun caso D o cambio timeout, timeoutRestoreRequired=false. OFF chiesto prima dei log e poi confermato personalmente da Diego; nessun retry o rilettura amministrativa. [Ricevuta completa](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/297#issuecomment-6832249109).
+
+origin Google non espone il dominio o percorso esatto; args vuoti spiegano l'assenza dell'handle realm, non provano autore o innocuità. FRAME_ENTRY può comprendere rivalidazione dopo contesto Home sostituito: non certifica tutte le guardie Home concluse. Il codice uguale al #4 non prova la stessa causa; il manuale senza errori è un contesto diverso. Nessuna causa identificata o PASS C1.
+
+Dopo la [revisione Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/297#issuecomment-6832293781), Diego autorizza esplicitamente la [strada A](../progetto/DECISIONI.md#cornice-c1-recaptcha-eccezione-2026-11-12). Base b2028a15, ramo codex/c1-recaptcha-native-exception-20261112. Il percorso sconosciuto del #5 non viene classificato retroattivamente come reCAPTCHA né si promette che sarà esentato.
+
+**RED significativo sul runner di master esatto: quattro nuovi test falliscono** per sottocategoria assente, evento ancora fatale, rapporto v4 rifiutato e setup interrotto. **GREEN candidato 4/4**: evento API controllato, con args vuoti e location reCAPTCHA sintetica, registrato durante il vero wait Home → app; setup reale della fixture completato con un login, un ingresso applicativo, una Master e un consenso DIAG. Proxy del solo test conserva/delega il listener e osserva l'attesa; nessun hook nel port produttivo, fetch Google o nuova attesa. È un modello dell'evento API, non una riproduzione della causa #5.
+
+Negativi: console con argomenti anche undefined, API non verificabili/testo vuoto, Google non reCAPTCHA/app/imitatori, RESOURCE, tag app BLINDA, CSP/CORS/Permissions-Policy riconosciuti o con marcatori non canonici, SDK e promessa; HTTP App Check 400, Identity 401, Firestore 503 e reCAPTCHA 400, pageerror, requestfailed (regola preesistente ERR_ABORTED esclusa), dialog/download/popup. Primo fatal/codice invariato e zero compilazioni dopo il fatal. Conteggio saturato a 20 (almeno 20), primo contesto conservato, copia indipendente e nessun incremento dopo freeze. Banco reale con eccezione e target diverso/standalone non concede la Master o forza l'ingresso. Verifiche locali finali: **68/68 C1, 14/14 QA/inventario, 12/12 documentali** (34 MD, 957 collegamenti), sintassi su 249 moduli, whitespace e version:check **1.2.270 / 275 riferimenti** verdi. Ulteriori vettori negativi unitari di tag/path/counter verificati 34/34 dopo il riscontro readonly. Inventario rigenerato senza cambi HTML; CI del candidato e GO Claude ancora richiesti.
+
+Solo runner/test e sei MD esistenti, elenco chiuso di 34 invariato. Nessun Frontend/cornice, workflow, versione, header, manifest/precache, Rules/Functions, logger, segreto o cloud modificato. Hosting 1.2.270/cb48b719 e canary OFF secondo Diego; UI dopo C1. Nessun sesto giro, merge o deploy. Riscontri readonly consultivi distinti dal GO esterno richiesto sul candidato. Rapporti precedenti sotto conservati come storico.
+
 <a id="cornice-c1-console-classificazione-2026-11-12"></a>
 
 ## C1 #4 FAIL, manuale non riprodotto e banco v3, 12/11/2026

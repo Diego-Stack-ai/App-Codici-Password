@@ -1,5 +1,34 @@
 # Collaudi
 
+<a id="cornice-c1-recaptcha-eccezione-2026-11-12"></a>
+
+## C1 — strada A e rapporto candidato v4, 12/11/2026
+
+[Ordine e decisione](../progetto/DECISIONI.md#cornice-c1-recaptcha-eccezione-2026-11-12). L'eccezione riguarda esclusivamente il runner; la causa del #5 resta indeterminata e il suo pathname non è noto. Solo una futura esecuzione ordinata potrà attestare se quell'evento soddisfa il predicato. Nessun sesto giro da questa preparazione.
+
+Il nuovo involucro v4 ha i 16 campi v3 più thirdPartyConsole, sempre presente anche senza browser/DIAG. firstError resta null oppure oggetto esatto con phase, source, frame, tag, host, kind, origin, hasArgs, firebaseComponent e googlePath: 10 campi. I primi nove mantengono [enum e combinazioni v3](#cornice-c1-console-classificazione-2026-11-12); googlePath è una delle quattro categorie sotto solo per console/origin Google, null negli altri casi, anche HTTP Google. Il writer candidato accetta soltanto v4, senza riscrivere le ricevute storiche.
+
+| Categoria googlePath | Host/path ammessi, dopo verifica origin=google |
+|---|---|
+| recaptcha-api | www.google.com, www.recaptcha.net o recaptcha.google.com; pathname esattamente /recaptcha/api.js oppure /recaptcha/enterprise.js |
+| recaptcha-frame | Gli stessi tre host; /recaptcha/api2/ oppure /recaptcha/enterprise/ con almeno un discendente |
+| gstatic-recaptcha | Solo www.gstatic.com; /recaptcha/ con almeno un discendente |
+| other | Ogni altra location Google; non ammessa all'eccezione |
+
+Solo URL HTTPS canonici senza userinfo/porta non standard. Si usa il pathname normalizzato dal parser URL: se contiene codifiche percentuali residue resta other; segmenti punto già risolti dal parser seguono invece il percorso canonico risultante. Query/hash sono ignorati, mai copiati. Host imitatori, API con suffissi diversi, prefissi senza confine / o radici prive di discendente non sono ammessi. Una location non Google produce googlePath=null nel metadato console; non si deriva il percorso dal testo.
+
+Predicato congiunto: type error, hasArgs esattamente false ricavato da array vuoto, origin google, una delle tre categorie reCAPTCHA, kind/tag OTHER, testo stringa leggibile e non vuoto dopo trim. Esclusione conservativa dei marcatori CSP o CORS come parole, Content Security Policy e Permissions Policy con spazi/trattini, indipendentemente dalle maiuscole. Nessuna nuova categoria libera: i marcatori mantengono il fatal anche se kind resta OTHER. RESOURCE e API text/location/args non verificabili restano fatali; un array con elemento undefined non è vuoto.
+
+| Campo thirdPartyConsole | Vincolo esatto |
+|---|---|
+| count | Intero 0–20, saturante; 20 = almeno 20 |
+| firstPhase | null se zero; prima fase C1 valida se positivo |
+| googlePath | null se zero; prima delle tre categorie reCAPTCHA se positivo, mai other |
+
+Il primo contesto non viene sostituito. Conteggio solo prima del fatal/freeze, getter restituisce copia validata, snapshot prima di chiudere il browser; nessun testo/URL o valore dell'handle registrato. La policy non altera altri listener, classificazioni fatal, guardie, timer o deadline. Un successivo HTTP/pageerror resta fatale anche dopo un'eccezione. Una deroga registrata non è prova della salute di reCAPTCHA o un PASS C1.
+
+Banco solo loopback: doubles di ConsoleMessage nell'attesa reale Home → app, delegando listener/wait al vero Page. Non contatta Google e non riproduce il messaggio nativo reale #5. Negativi per argomenti/dati indisponibili, risorse, sicurezza, altri percorsi/origini, HTTP, pageerror e guardia pre-Master. [Esiti](../evidenze/COLLAUDI.md#cornice-c1-recaptcha-eccezione-2026-11-12). Canary OFF; PR/CI/GO Claude e ordini personali distinti prima di merge e nuovo giro.
+
 <a id="cornice-c1-console-classificazione-2026-11-12"></a>
 
 ## C1 — rapporto candidato v3 e classificazione della console, 12/11/2026
