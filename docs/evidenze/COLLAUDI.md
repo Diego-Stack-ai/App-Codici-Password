@@ -4,6 +4,20 @@
 
 ## C1 — preparazione E2E, verifiche locali e limiti, 12/11/2026
 
+<a id="cornice-c1-workflow-config-2026-11-12"></a>
+
+### Configurazione GitHub osservata e nuova PR workflow — nessuna run reale
+
+La #292 è unita su ordine di Diego in master `6dd80df1ee7be63550583b89bde6b326ad8122b5`, dopo [GO Claude sul codice 45f50a9e](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6812002019) e [CI verde](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6812127683); [ricevuta del merge](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6816335473). Il successivo ordine di Diego autorizza una PR dedicata al workflow e l'avviso a Claude, **non merge, dispatch, produzione o accensione**.
+
+Diego ha configurato privatamente GitHub, con riscontri UI di Codex: environment `c1-qa2-production`; Required reviewers attivo con il suo account; bypass amministratori disattivato; Prevent self-review non selezionato per il suo avvio/clic; **solo branch master, un ramo e zero tag**. Variabile C1_ALLOWED_OPERATOR presente e coincidente con il login GitHub dell'operatore. Presenti i quattro nomi C1_QA2_EMAIL, C1_QA2_EXPECTED_UID, C1_QA2_PASSWORD e C1_QA2_MASTER_PASSWORD negli Environment secrets. L'ultima verifica ha cercato solo nomi e booleani delle protezioni, con modulo segreti chiuso: **nessun valore letto o copiato da Codex, nessun contenuto sensibile nel rapporto**. Presenza non significa correttezza di UID/password/Master, identità QA2, stato MFA o riuscita del login: restano da verificare solo nel futuro giro autorizzato.
+
+Il nuovo ramo parte dal master sopra e sposta il solo YAML revisionato da scripts/workflows a .github/workflows: corpo eseguibile identico, cambiano soltanto due commenti iniziali. Nuovo percorso **candidato in PR**, non installazione su master o esecuzione. Test del workflow aggiornato per leggere il file riconosciuto da Actions, rifiutare la vecchia copia e ammettere come unico trigger workflow_dispatch; nessun trigger automatico, modifica di adapter/Frontend o accesso ai segreti. Prima dello spostamento il nuovo test fallisce per file mancante (gli altri otto test puri passano): il controllo non valida una copia rimasta fuori da Actions.
+
+Verifiche locali del seguito: test:qa-automation **14/14 QA e 27/27 C1** su fixture loopback, test:docs **12/12** (34 Markdown, 916 collegamenti locali), YAML parsato e confronto del corpo eseguibile con il template revisionato identico. Nessun nuovo provider, motore emulato o ambiente produttivo provato. I risultati CI e la revisione sullo SHA candidato saranno riportati nell'avviso della PR.
+
+Restano tutti i limiti della matrice: D02 Configurazione documenti NE senza link UI reale, D08 multischeda non implementato, provider/attese produttive/dispositivi non provati, nessun nuovo PASS C1. Canary OFF secondo Diego, senza rilettura Firebase. Nuovo GO sullo SHA della PR dedicata e CI verde precedono un eventuale ordine di merge; dispatch ancora separato. I checkpoint seguenti conservano la preparazione precedente alla configurazione.
+
 ### Seguito al GO sul piano f2ad012d — adapter mai eseguito in produzione
 
 Il [GO Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6810738784) copre piano e primo prototipo. Il seguito prepara adapter con gate CI/manuali, QA2 privata, dialogo Master validato (sopra iframe, inert e focus), contatore DOM senza valori, itinerari reali, reload, timer e logout; proposta YAML fuori da .github. Nessun segreto reale letto, provider chiamato, workflow avviato o nuovo PASS C1. Frontend/Rules/Functions/versione/header/precache invariati; canary OFF secondo Diego.
