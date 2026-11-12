@@ -1,8 +1,8 @@
 # Programma
 
-## C1 — revisione piano E2E QA2, poi adapter e ordine di esecuzione
+## C1 — revisione adapter QA2, poi ordini personali di configurazione ed esecuzione
 
-[Piano proposto e prototipo soltanto locale](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12): consegna in una bozza, test locali e GO Claude sull'ultimo SHA. Dopo l'approvazione del piano, completare adapter/workflow e sottocasi scelti, con nuova revisione prima dell'ordine di Diego alla produzione. Emulazioni Android/iPhone separate dalle quattro colonne fisiche; nessuna riduzione del contratto o chiusura C1 implicita. Restano prove fisiche Safari/PWA/camera/push, D15 personale, D18 con secondo rilascio reale, fase personale e C2. UI #283 soltanto revisione readonly; sicurezza e grafica restano fuori produzione fino a C1 completata. Canary OFF, nessun cloud/merge/deploy da questa preparazione. I checkpoint sotto precedono l'ordine del 12/11 e i merge documentali #289–#291.
+[Piano e adapter preparato](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12): il piano/prototipo f2ad012d ha GO Claude; il seguito per D02/D04/D05-A/D06/D08 e workflow non attivo richiede nuovo GO sullo SHA finale e CI verde. Configurazione documenti resta sottocaso NE senza link UI canonico; non simulare il giro completo. Eventuale caricamento workflow/environment/segreti e dispatch solo su ordini di Diego, canary OFF fino al suo passo. Emulazioni non sostituiscono automaticamente le quattro colonne fisiche: criterio di riduzione ancora da decidere/registrare in DECISIONI. Restano Safari/PWA/camera/push, D15 personale, D18 con secondo rilascio, fase personale e C2. UI #283 con GO readonly su ae529fa; grafica/sicurezza fuori produzione fino a C1 completata e ordine di Diego. I checkpoint sotto sono precedenti.
 
 ## #285 — revisione opzione A, poi singoli passi autorizzati
 

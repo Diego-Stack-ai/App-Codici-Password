@@ -2,11 +2,11 @@
 
 <a id="stato-corrente"></a>
 
-## C1 — piano E2E e prototipo locale da rivedere, 12/11/2026
+## C1 — adapter candidato dopo GO sul piano, nessuna esecuzione — 12/11/2026
 
-Ordine notturno di Diego in preparazione su base master `8afadf8e80ff8b52e789530a6619698d7b4f7869`: [piano E2E QA2 e limiti](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12), con nucleo locale D02/D04/D05-A e guardie identità/DIAG; adapter e workflow produttivi assenti. Test locali distinti dalla matrice fisica: nessun nuovo PASS C1. Le ricevute #289, #290 e #291 sono già unite in ordine, [avviso e SHA finale](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6809075057); nessun codice distribuito da quei merge.
+Preparazione autorizzata da Diego, base master `8afadf8e80ff8b52e789530a6619698d7b4f7869`: [piano E2E QA2 e limiti](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12). [GO Claude sul piano/prototipo f2ad012d](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6810738784); adapter per D02/D04/D05-A/D06/D08 e workflow proposto fuori da .github ora preparati, da rivedere sul nuovo SHA. CLI senza autorizzazioni CI si ferma prima di segreti/rete; nessun giro reale o nuovo PASS C1. D02 Configurazione documenti rimane NE se manca il link UI canonico, senza URL diretto sostitutivo. Ricevute #289–#291 già unite in ordine, [SHA finale e avviso](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6809075057), senza rilascio.
 
-Produzione resta **1.2.270** da `cb48b7196a3816a62dda05d11e11ff4ca7c51d26`; ultimo stato canary **OFF confermato da Diego**, senza rilettura amministrativa. Fase personale/C2, D rimanenti e dispositivi reali aperti. Revisione readonly della #283 separata; nessuna pubblicazione grafica/sicurezza. Si prepara una sola bozza per Claude: nessun merge, deploy, secret o operazione cloud in questo incarico. I checkpoint sotto sono storici.
+Produzione osservata **1.2.270** da `cb48b7196a3816a62dda05d11e11ff4ca7c51d26`; ultimo canary **OFF confermato da Diego**, senza rilettura amministrativa. Fase personale/C2 e matrice fisica restano aperte. [GO readonly UI #283 su ae529fa](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/283#issuecomment-6810651505), nessun rilascio grafica/sicurezza. Una sola bozza #292, nessun merge/deploy, segreto configurato o operazione cloud; il GO del piano non copre il nuovo codice. I checkpoint sotto sono storici.
 
 ## Produzione 1.2.270 verificata, D05-A Chrome PASS e canary OFF — 11/11/2026
 

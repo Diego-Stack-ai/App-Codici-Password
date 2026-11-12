@@ -4,6 +4,7 @@ import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {createLocalC1Driver} from '../scripts/lib/c1-e2e-cases.mjs';
+import {browserEnvironment} from '../scripts/lib/c1-e2e-runner.mjs';
 
 // Real owner/broker/transport, synthetic UI/admission/material only. No Firebase.
 const parent = `<!doctype html><link rel="stylesheet" href="/assets/css/vault-frame.css">
@@ -76,7 +77,7 @@ test.before(async()=>{
  });
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  base='http://127.0.0.1:'+server.address().port;
- browser=await chromium.launch({channel:'chrome',headless:true});
+ browser=await chromium.launch({channel:'chrome',headless:true,env:browserEnvironment(process.env)});
 });
 test.after(async()=>{await browser?.close();await new Promise(resolve=>server?.close(resolve));});
 async function fixture(fault=''){

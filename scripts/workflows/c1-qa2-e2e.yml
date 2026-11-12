@@ -1,0 +1,129 @@
+# PROPOSTA NON ATTIVA: fuori da .github/workflows.
+# Caricamento/configurazione e qualunque dispatch richiedono GO sullo SHA finale e ordine di Diego.
+name: C1 QA2 controlled browser checks
+'on':
+  workflow_dispatch:
+    inputs:
+      reviewed_runner_sha:
+        description: SHA completo del runner revisionato, uguale al master selezionato
+        type: string
+        required: true
+      release_sha:
+        description: SHA sorgente del rilascio Hosting da verificare
+        type: string
+        required: true
+        default: cb48b7196a3816a62dda05d11e11ff4ca7c51d26
+      release_version:
+        description: Versione Hosting attesa
+        type: string
+        required: true
+        default: 1.2.270
+      profile:
+        description: Un solo ambiente per dispatch, emulazioni distinte dai dispositivi
+        type: choice
+        required: true
+        default: chrome-desktop
+        options:
+          - chrome-desktop
+          - android-emulated
+          - iphone-emulated
+      execution_order:
+        description: Link al commento con ordine personale di Diego per questo giro
+        type: string
+        required: true
+      preflight_confirmed:
+        description: QA2 solo fittizia, attiva e verificata, 2FA OFF verificata privatamente, fixture e italiano pronti
+        type: boolean
+        required: true
+        default: false
+      effects_confirmed:
+        description: Autorizzati login/bootstrap, DIAG, timeout 1 e 3 minuti e logout QA2; Diego presente per OFF
+        type: boolean
+        required: true
+        default: false
+      accept_d02_limit:
+        description: Accettato D02 LIMITE se manca il link UI a Configurazione documenti, nessun PASS 19x4
+        type: boolean
+        required: true
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: c1-qa2-exclusive
+  cancel-in-progress: false
+jobs:
+  qa2:
+    environment: c1-qa2-production
+    runs-on: ${{ inputs.profile == 'iphone-emulated' && 'macos-latest' || 'windows-latest' }}
+    timeout-minutes: 35
+    steps:
+      - name: Reject unauthorized inputs before checkout
+        shell: pwsh
+        env:
+          C1_DISPATCH_REF: ${{ github.ref }}
+          C1_DISPATCH_SHA: ${{ github.sha }}
+          C1_REVIEWED_RUNNER_SHA: ${{ inputs.reviewed_runner_sha }}
+          C1_PREFLIGHT_CONFIRMED: ${{ inputs.preflight_confirmed }}
+          C1_EFFECTS_CONFIRMED: ${{ inputs.effects_confirmed }}
+          C1_ACCEPT_D02_LIMIT: ${{ inputs.accept_d02_limit }}
+        run: |
+          if ($env:C1_DISPATCH_REF -ne 'refs/heads/master' -or
+              $env:C1_DISPATCH_SHA -ne $env:C1_REVIEWED_RUNNER_SHA -or
+              $env:C1_REVIEWED_RUNNER_SHA -notmatch '^[a-f0-9]{40}$' -or
+              $env:C1_PREFLIGHT_CONFIRMED -ne 'true' -or
+              $env:C1_EFFECTS_CONFIRMED -ne 'true' -or
+              $env:C1_ACCEPT_D02_LIMIT -ne 'true') {
+            Write-Output '{"signal":"OFF_REQUIRED","code":"C1_EXECUTION_NOT_AUTHORIZED"}'
+            exit 1
+          }
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install reviewed dependencies
+        run: npm ci --ignore-scripts --include=dev
+      - name: Install selected Playwright engine
+        shell: pwsh
+        env:
+          C1_SELECTED_PROFILE: ${{ inputs.profile }}
+        run: |
+          if ($env:C1_SELECTED_PROFILE -eq 'iphone-emulated') {
+            npx playwright install webkit
+          } else {
+            npx playwright install chromium
+          }
+      - name: Verify local fixtures before the real target
+        run: npm run test:c1-e2e-local
+      - name: Execute the individually authorized QA2 sequence
+        id: c1
+        env:
+          C1_ALLOWED_OPERATOR: ${{ vars.C1_ALLOWED_OPERATOR }}
+          C1_REVIEWED_RUNNER_SHA: ${{ inputs.reviewed_runner_sha }}
+          C1_RELEASE_SHA: ${{ inputs.release_sha }}
+          C1_RELEASE_VERSION: ${{ inputs.release_version }}
+          C1_PROFILE: ${{ inputs.profile }}
+          C1_EXECUTION_ORDER: ${{ inputs.execution_order }}
+          C1_PREFLIGHT_CONFIRMED: ${{ inputs.preflight_confirmed }}
+          C1_EFFECTS_CONFIRMED: ${{ inputs.effects_confirmed }}
+          C1_ACCEPT_D02_LIMIT: ${{ inputs.accept_d02_limit }}
+          C1_QA2_EMAIL: ${{ secrets.C1_QA2_EMAIL }}
+          C1_QA2_EXPECTED_UID: ${{ secrets.C1_QA2_EXPECTED_UID }}
+          C1_QA2_PASSWORD: ${{ secrets.C1_QA2_PASSWORD }}
+          C1_QA2_MASTER_PASSWORD: ${{ secrets.C1_QA2_MASTER_PASSWORD }}
+        run: node scripts/c1-e2e.mjs --production
+      - name: Preserve only the sanitized report
+        if: ${{ always() && steps.c1.outputs.report_written == 'true' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: c1-qa2-${{ inputs.profile }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/c1-qa2-report.json
+          retention-days: 7
+          if-no-files-found: ignore
+          include-hidden-files: false
+      - name: Manual OFF reminder
+        if: always()
+        run: echo "OFF_REQUIRED - Diego spegne personalmente il singleton anche dopo un esito positivo."

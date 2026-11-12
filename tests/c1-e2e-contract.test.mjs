@@ -48,11 +48,11 @@ test('driver rechecks origin before reload and callback, and guards outgoing req
   }
   assert.equal(aborted,1);assert.equal(continued,1);
 });
-test('CLI default and production request fail closed before any adapter exists',()=>{
+test('CLI default and unauthorized production request fail before browser, secrets or network',()=>{
   for(const args of [[],['--production'],['--url','https://appcodici-password.web.app']]) {
     const run=spawnSync(process.execPath,['scripts/c1-e2e.mjs',...args],{encoding:'utf8'});
     assert.equal(run.status,2);assert.equal(run.stderr,'');
-    assert.deepEqual(JSON.parse(run.stdout),{code:'C1_PRODUCTION_NOT_IMPLEMENTED',wrote:false,network:false});
+    assert.deepEqual(JSON.parse(run.stdout),{code:args[0]==='--url'?'C1_OPTIONS_INVALID':'C1_EXECUTION_NOT_AUTHORIZED',wrote:false,network:false});
   }
   const list=spawnSync(process.execPath,['scripts/c1-e2e.mjs','--list'],{encoding:'utf8'});
   assert.equal(list.status,0);assert.equal(JSON.parse(list.stdout).productionReady,false);
