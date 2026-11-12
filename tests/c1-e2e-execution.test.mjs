@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {authorizeC1,readQa2Secrets,verifyC1Release} from '../scripts/lib/c1-e2e-execution.mjs';
 import {timerCase} from '../scripts/lib/c1-e2e-priority.mjs';
-import {browserEnvironment,sanitizeCase,assertCaseDiagnostics,writeSanitizedReport,runAuthorizedC1} from '../scripts/lib/c1-e2e-runner.mjs';
+import {browserEnvironment,sanitizeCase,sanitizeC1Report,assertCaseDiagnostics,writeSanitizedReport,runAuthorizedC1} from '../scripts/lib/c1-e2e-runner.mjs';
 import {createLocalFixturePort} from '../scripts/lib/c1-e2e-production-port.mjs';
 import {C1_AUTH_CODES,C1_HTTP_FAILURE_CODES} from '../scripts/lib/c1-e2e-contract.mjs';
 import {access,mkdtemp,readFile,writeFile,unlink,rmdir} from 'node:fs/promises';
@@ -14,6 +14,11 @@ const good=()=>({GITHUB_ACTIONS:'true',GITHUB_EVENT_NAME:'workflow_dispatch',GIT
  C1_EXECUTION_ORDER:'https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-1',
  C1_PREFLIGHT_CONFIRMED:'true',C1_EFFECTS_CONFIRMED:'true',C1_ACCEPT_D02_LIMIT:'true',
  C1_PROFILE:'chrome-desktop',C1_RELEASE_SHA:'b'.repeat(40),C1_RELEASE_VERSION:'1.2.270'});
+const reportV2=()=>({schemaVersion:2,profile:'chrome-desktop',platform:'win32',engineVersion:'156.0',runnerSha:'a'.repeat(40),
+ release:{version:'1.2.270',sourceSha:'b'.repeat(40),publicTreeSha256:'c'.repeat(64)},productionExecuted:true,possibleAppWrites:true,
+ network:true,diagSource:'getter',cases:[{id:'SETUP',status:'FAIL',code:'C1_RUNTIME_FAILURE',diag:null}],code:'C1_RUNTIME_FAILURE',
+ failureDiagCode:'C1_DIAG_UNAVAILABLE',offRequired:true,timeoutRestoreRequired:false,
+ firstError:{phase:'FRAME_ENTRY',source:'console',frame:'top',tag:'BLINDA',host:null}});
 test('execution requires dispatch/master/reviewed SHA/operator/order and all separate attestations',()=>{
  assert.equal(authorizeC1(good(),'win32').version,'1.2.270');
  for(const key of ['GITHUB_ACTIONS','GITHUB_EVENT_NAME','GITHUB_REPOSITORY','GITHUB_REF','GITHUB_SHA',
@@ -93,6 +98,18 @@ test('browser receives system environment only, reports refuse extra case data a
  assert.throws(()=>sanitizeCase({id:'SETUP',status:'BLOCKED',code:'C1_AUTH_HTTP_OTHER synthetic-private',diag:null}),/^Error: C1_REPORT_INVALID$/);
 });
 
+test('v2 report rejects sensitive additions, malformed metadata and v1 instead of silently spreading',()=>{
+ assert.deepEqual(sanitizeC1Report(reportV2()),reportV2());
+ for(const mutate of [r=>r.uid='synthetic-private',r=>r.firstError.message='synthetic-private',
+  r=>r.firstError.frame='private-frame',r=>r.firstError.tag='private-tag',r=>r.release.url='https://synthetic.invalid/private',
+  r=>r.cases[0].value='private',r=>r.code='private-error',r=>r.schemaVersion=1,r=>delete r.firstError,
+  r=>r[Symbol('private')]=true,r=>r.firstError[Symbol('private')]=true,r=>r.cases[0][Symbol('private')]=true]){
+  const r=reportV2();mutate(r);assert.throws(()=>sanitizeC1Report(r),/^Error: C1_REPORT_INVALID$/);
+ }
+ const serialized=JSON.stringify(sanitizeC1Report(reportV2()));
+ assert.doesNotMatch(serialized,/uid|email|password|token|https?:|synthetic-private/);
+});
+
 test('response handler preserves the first HTTP host code and stops before credentials or Master',async()=>{
  // Event doubles only: no browser, DNS, request, provider or production access.
  for(const status of [400,401,403,404,429,500,503])for(const [host,code] of [
@@ -117,6 +134,11 @@ test('response handler preserves the first HTTP host code and stops before crede
   await assert.rejects(()=>port.start(),new RegExp('^Error: '+expected+'$'));
   assert.equal(inputs,0);
   assert.equal(port.timerRestoreRequired(),false);
+  const first=port.firstError(expected);
+  assert.equal(port.failureCode(new Error('C1_READINESS')),expected);
+  assert.deepEqual(first,{phase:'LOGIN_READY',source:'http',frame:'other',tag:null,host:code.slice('C1_AUTH_HTTP_'.length).toLowerCase()});
+  port.beginCases();handlers.get('pageerror')(new Error('later synthetic-private'));
+  assert.deepEqual(port.firstError(expected),first);
  }
 });
 
@@ -135,17 +157,45 @@ test('HTTP failure during language inspection remains first and never clicks or 
   assert.equal(actions,0);
  }
 });
+
+test('pending or absent console realm stays OTHER without delaying failure or replacing its first phase',async()=>{
+ for(const pending of [false,true]){
+  const handlers=new Map();
+  const message={type:()=> 'error',text:()=> 'Failed to load resource: synthetic-private',
+   location:()=>({url:'https://firestore.googleapis.com/private?token=synthetic-private'}),
+   args:()=>pending?[{evaluate:()=>new Promise(()=>{})}]:[]};
+  const page={url:()=> 'http://127.0.0.1:9191/login.html',on:(event,callback)=>handlers.set(event,callback),
+   context:()=>({serviceWorkers:()=>[],route:async()=>{},on:()=>{}}),addInitScript:async()=>{},setDefaultTimeout:()=>{},
+   goto:async()=>{handlers.get('console')(message);},locator:()=>{throw Error('MUST_NOT_FILL');}};
+  const port=await createLocalFixturePort(page,{},{});
+  await assert.rejects(()=>port.start(),/^Error: C1_RUNTIME_FAILURE$/);
+  const first={phase:'LOGIN_READY',source:'console',frame:'other',tag:'RESOURCE',host:'firestore'};
+  assert.deepEqual(port.firstError('C1_RUNTIME_FAILURE'),first);
+  port.beginCases();handlers.get('pageerror')(new Error('later synthetic-private'));
+  assert.deepEqual(port.firstError('C1_RUNTIME_FAILURE'),first);
+  assert.equal(port.firstError('C1_TARGET_DENIED'),null);
+ }
+});
+
+test('errors during failure collection and cleanup cannot create metadata for a different failure',async()=>{
+ const handlers=new Map();
+ const page={url:()=> 'http://127.0.0.1:9191/login.html',on:(event,callback)=>handlers.set(event,callback),
+  context:()=>({serviceWorkers:()=>[],route:async()=>{},on:()=>{}}),addInitScript:async()=>{},setDefaultTimeout:()=>{}};
+ const port=await createLocalFixturePort(page,{},{});port.freezeErrors();
+ handlers.get('pageerror')(new Error('synthetic-private'));
+ assert.equal(port.firstError('C1_RUNTIME_FAILURE'),null);
+});
 test('artifact flag is set only for a newly written report, never for a stale wx file',async()=>{
  const dir=await mkdtemp(join(tmpdir(),'c1-sanitized-report-')),output=join(dir,'output');
  const env={RUNNER_TEMP:dir,GITHUB_OUTPUT:output},file=join(dir,'c1-qa2-report.json');
  try{
   await writeFile(output,'');
-  await writeSanitizedReport({schemaVersion:1,cases:[]},env);
+  await writeSanitizedReport(reportV2(),env);
   assert.equal(await readFile(output,'utf8'),'report_written=true\n');
   await writeFile(output,'');
-  await assert.rejects(()=>writeSanitizedReport({schemaVersion:2,cases:[]},env),/^Error: C1_REPORT_WRITE$/);
+  await assert.rejects(()=>writeSanitizedReport(reportV2(),env),/^Error: C1_REPORT_WRITE$/);
   assert.equal(await readFile(output,'utf8'),'');
-  assert.equal(JSON.parse(await readFile(file,'utf8')).schemaVersion,1);
+  assert.equal(JSON.parse(await readFile(file,'utf8')).schemaVersion,2);
  }finally{await unlink(file).catch(()=>{});await unlink(output).catch(()=>{});await rmdir(dir);}
 });
 test('installed workflow is manual-only, pinned, without cloud roles, and uploads only current report',async()=>{

@@ -2,6 +2,16 @@
 
 <a id="stato-corrente"></a>
 
+<a id="cornice-c1-frame-entry-runtime-2026-11-12"></a>
+
+## C1 #3 FAIL, OFF confermato e nuova PR diagnostica — 12/11/2026
+
+La #295 è unita in `9ba1a034d75c034260ccd31fb10cfa1d317bc80a` dopo GO Claude e ordine personale. Il [terzo giro QA2/Chrome desktop](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43215037304) supera 39 test locali e si ferma in SETUP / FAIL / C1_RUNTIME_FAILURE, senza casi D eseguiti. DIAG acquisita: cornice attiva e permesso valido; non certifica sblocco o continuità. [Ricevuta e OFF personale confermato](../evidenze/COLLAUDI.md#cornice-c1-frame-entry-runtime-2026-11-12).
+
+Diego autorizza banco locale e PR secondo la [revisione Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/295#issuecomment-6823455981): attesa dell'ingresso applicativo senza goto concorrente del runner, codice per standalone persistente e rapporto v2 con primo errore a enum chiusi. Banco RED sul port precedente e GREEN candidato; causa produttiva ancora non dimostrata, incluso il limite del logger silenzioso. Ramo codex/c1-frame-runtime-diagnostics-20261112, base 9ba1a034, stato DA_VERIFICARE.
+
+Canary OFF secondo Diego, senza rilettura amministrativa. Hosting invariato 1.2.270 / cb48b7196a3816a62dda05d11e11ff4ca7c51d26; UI/caratteri #283 dopo C1. Nessun nuovo giro, modifica applicativa, workflow, versione, merge o deploy. Quarto giro soltanto dopo PR, CI verde, revisione Claude e merge, con ordini personali distinti di Diego. I checkpoint seguenti conservano le fasi antecedenti.
+
 ## C1 #2 BLOCKED, banco locale RED/GREEN e PR readiness — 12/11/2026
 
 #294 integrata con CI verde e GO Claude su 6e5ad52c: master `25eb94fb571bb1ba8d235f77215b4eca51b141e4`. Il secondo giro diagnostico, avviato e approvato personalmente da Diego, si ferma in SETUP BLOCKED / C1_AUTH_NOT_READY, DIAG assente: nessun caso C1 completato o cambio timeout. Diego conferma OFF; [ricevuta](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/294#issuecomment-6821089857). Nessun retry o rilettura amministrativa.

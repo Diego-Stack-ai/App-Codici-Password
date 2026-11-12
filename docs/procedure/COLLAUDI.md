@@ -1,5 +1,27 @@
 # Collaudi
 
+<a id="cornice-c1-frame-entry-runtime-2026-11-12"></a>
+
+## C1 — ingresso autonomo e rapporto v2 del primo errore, 12/11/2026
+
+Seguito candidato alla [ricevuta #3 e revisione](../evidenze/COLLAUDI.md#cornice-c1-frame-entry-runtime-2026-11-12). Dopo l'unico submit di login il runner non esegue goto(app.html): sulla Home attende l'ingresso autonomo dell'app nel budget iniziale residuo, poi rivalida il documento della cornice. Se l'app resta standalone con Auth pronta, C1_FRAME_NOT_ENTERED / BLOCKED, senza invio Master. Solo il segnale framework Playwright di contesto distrutto, riconosciuto con firma completa nella guardia iniziale campionata sulla Home, può indicare la sostituzione del documento mentre la lettura Auth è pendente. L'osservazione non dipende dal nuovo URL già visibile: si attende app entro la stessa deadline, poi si esegue la guardia completa del nuovo documento. Un normale errore del token, una stringa simile lanciata dall'app o lo stesso segnale su app non concede questa transizione: C1_BOOTSTRAP_MISMATCH. Mai un secondo login o un import privo dell'entry Resource Timing. La guardia privata immediatamente prima della Master resta obbligatoria.
+
+Il rapporto nuovo ha schemaVersion=2 e gli stessi campi v1 più firstError: null oppure oggetto esatto phase/source/frame/tag/host. I rapporti v1 già prodotti restano storici e non vengono riscritti. Il nuovo validatore ricostruisce l'intero involucro v2 e respinge campi/codici estranei prima di scrivere l'artefatto.
+
+Se le letture UI del ciclo consumano il budget, non avviare una nuova guardia Auth oltre la deadline: resta l'ultima osservazione chiusa già ottenuta. Una guardia effettivamente iniziata ma non verificabile entro il limite resta C1_BOOTSTRAP_MISMATCH; la race con il timer e il controllo finale continuano a rifiutare successi tardivi. Nessun tempo aggiuntivo o nuovo tentativo di login.
+
+| Campo firstError | Valori ammessi |
+|---|---|
+| phase | LOGIN_READY, LOGIN_SUBMIT, AUTH_WAIT, FRAME_ENTRY, UNLOCK, SETTINGS, DIAG_OPT_IN, CASE |
+| source | console, pageerror, http |
+| frame | top, vault-child, other |
+| tag | Solo console: 32 prefissi letterali inventariati nel repository più RESOURCE/OTHER; null negli altri canali |
+| host | appcheck, identity, firestore, other per HTTP o console RESOURCE; null negli altri casi |
+
+Il primo fatal prenota subito codice e fase. Errori successivi non cambiano la priorità; un timeout successivo conserva il fatal nei catch e nella selezione del codice del rapporto. Errori di raccolta DIAG/cleanup non diventano la causa iniziale. Il messaggio console viene classificato transitoriamente nel processo runner: soltanto prefisso letterale chiuso o OTHER; nessun suffisso viene conservato. Failed to load resource diventa RESOURCE, con host esatto della location classificato subito. URL del file sorgente non viene usato per dedurre il frame. Per console si può osservare il realm dell'handle senza leggerne il valore; contesto assente, scaricato o ancora pendente al rapporto resta other, senza attesa aggiuntiva. Il listener nativo pageerror non fornisce un Frame: si registra other anche se il banco sa che l'errore proviene dal figlio. Nessuna nuova binding o intercettazione di error/unhandledrejection, nessuna correlazione inventata o alterazione dei canali fatal preesistenti.
+
+Nessun URL, testo libero, stack, frame name, identificativo o valore sensibile nel rapporto. Nessun cambiamento di Auth/App Check, tempi, timer, app o workflow. La suite resta locale/loopback con rete esterna bloccata. Quarto giro soltanto dopo PR, CI verde, revisione Claude e merge con ordini personali; OFF alla prima anomalia o al termine. Canary OFF. Le descrizioni sotto dello stesso schema si riferiscono al contratto v1 precedente.
+
 <a id="cornice-c1-bootstrap-readiness-2026-11-12"></a>
 
 ## C1 — bootstrap del login e osservazioni NOT_READY, 12/11/2026

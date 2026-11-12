@@ -20,7 +20,7 @@ export const C1_CODES = Object.freeze([
   'C1_UNLOCK_REPEATED', 'C1_TECHNICAL', 'C1_PRODUCTION_NOT_IMPLEMENTED',
   'C1_EXECUTION_NOT_AUTHORIZED','C1_PLATFORM_UNSUPPORTED','C1_RELEASE_MISMATCH',
   ...C1_AUTH_CODES,...C1_HTTP_FAILURE_CODES,'C1_MFA_BLOCKED','C1_BOOTSTRAP_MISMATCH','C1_READINESS',
-  'C1_NETWORK_FAILURE','C1_HTTP_FAILURE','C1_RUNTIME_FAILURE','C1_MODAL_UNEXPECTED',
+  'C1_NETWORK_FAILURE','C1_HTTP_FAILURE','C1_RUNTIME_FAILURE','C1_FRAME_NOT_ENTERED','C1_MODAL_UNEXPECTED',
   'C1_DIAG_UNAVAILABLE','C1_CONFIG_DOC_ROUTE_UNAVAILABLE','C1_TIMEOUT_NOT_LOCKED',
   'C1_TIMEOUT_BASELINE','C1_LOGOUT_FAILED','C1_REPORT_WRITE','C1_FIXTURE_MISSING','C1_ROUTE_UNAVAILABLE',
   'C1_UNEXPECTED_DIAG','C1_DIAG_TRUNCATED'
@@ -48,7 +48,35 @@ export function fail(code) {
   throw new Error(C1_CODES.includes(code) ? code : 'C1_TECHNICAL');
 }
 const exact = (value, keys) => value && Object.getPrototypeOf(value) === Object.prototype &&
-  Reflect.ownKeys(value).sort().join(',') === [...keys].sort().join(',');
+  Reflect.ownKeys(value).every(key=>typeof key==='string')&&Reflect.ownKeys(value).sort().join(',') === [...keys].sort().join(',');
+
+export const C1_ERROR_PHASES=Object.freeze(['LOGIN_READY','LOGIN_SUBMIT','AUTH_WAIT','FRAME_ENTRY','UNLOCK','SETTINGS','DIAG_OPT_IN','CASE']);
+export const C1_ERROR_TAGS=Object.freeze(['Titan-Lock','LOGIN','PWA','BLINDA','V3.1-DEBUG','V3.1-EXCEPTION',
+ 'NEW-PASS','REGISTER','RESET','Account note','V3.1-ERROR','CRYPTO-AUDIT','SECURITY-AUDIT','HOME',
+ 'ACCOUNTS','Accounts','AreaPrivata','addPhone','editPhone','addEmail','editEmail','Address','Utility',
+ 'Phone','Email','Doc','FRONTEND-ERROR','SHARED CREDENTIALS','COMPANY AREA','SETTINGS','PUSH TEST','PUSH',
+ 'RESOURCE','OTHER']);
+const errorHosts=Object.freeze(['appcheck','identity','firestore','other']);
+export function errorHostCategory(url){
+ return authHttpFailureCode(url).slice('C1_AUTH_HTTP_'.length).toLowerCase();
+}
+export function consoleErrorCategory(text,locationUrl){
+ // The original string is transient: return canonical enums, never its suffix.
+ if(typeof text==='string'&&/^Failed to load resource(?::|\s|$)/.test(text))
+  return {tag:'RESOURCE',host:errorHostCategory(locationUrl)};
+ const prefix=typeof text==='string'?text.match(/^\[([^\]\r\n]{1,40})\]/)?.[1]:null;
+ return {tag:C1_ERROR_TAGS.find(tag=>tag!=='RESOURCE'&&tag!=='OTHER'&&tag===prefix)||'OTHER',host:null};
+}
+export function validateFirstError(value){
+ if(value===null)return null;
+ if(!exact(value,['phase','source','frame','tag','host']))fail('C1_REPORT_INVALID');
+ const {phase,source,frame,tag,host}=value;
+ if(!C1_ERROR_PHASES.includes(phase)||!['console','pageerror','http'].includes(source)||
+  !['top','vault-child','other'].includes(frame)||
+  (source==='console'?!C1_ERROR_TAGS.includes(tag):tag!==null)||
+  (source==='http'||source==='console'&&tag==='RESOURCE'?!errorHosts.includes(host):host!==null))fail('C1_REPORT_INVALID');
+ return {phase,source,frame,tag,host};
+}
 
 // This prototype cannot accept a production URL, profile directory or credentials.
 export function assertLoopback(url) {
