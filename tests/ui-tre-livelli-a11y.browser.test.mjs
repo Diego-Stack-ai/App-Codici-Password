@@ -21,7 +21,7 @@ const fixture = theme => `<!doctype html><html lang="it" class="${theme === 'dar
   <body data-ui-revision="tre-livelli" data-ui-model="hub">
     <header class="base-header"><h1 class="header-title" id="title">Scadenze</h1></header>
     <div class="page-container">
-      <div class="field-header" data-manage="off"><input type="checkbox" class="qr-checkbox" id="qr" checked><label class="qr-mini-label" for="qr">QR</label></div>
+      <section data-manage="off"><div class="field-header"><input type="checkbox" class="qr-checkbox" id="qr" checked><label class="qr-mini-label" id="qr-label" for="qr">QR</label></div></section>
       <button type="button" class="profile-account-primary" id="link">Apri Account collegato</button>
       <button type="button" class="profile-deadline-link" id="deadline">Vai alla scadenza</button>
       <a class="matrix-card card-orange area-scadenze"><span class="badge-count" id="warn">2</span></a>
@@ -64,6 +64,7 @@ test('decorative CSS icons never enter accessible names (AX tree)', {timeout: 30
   try {
     // Le icone sono davvero renderizzate (B/C, link, QR): la verifica non è vacua.
     assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById('title'), '::before').content !== 'none'), true, 'symbol rendered next to the title');
+    assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById('qr-label'), '::before').content !== 'none'), true, 'QR indicator icon rendered in consultation');
     const nodes = await axNames(page);
     const heading = nodes.find(node => node.role === 'heading');
     assert.equal(heading?.name, 'Scadenze');
