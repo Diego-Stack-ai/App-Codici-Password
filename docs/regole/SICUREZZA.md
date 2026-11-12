@@ -1,5 +1,15 @@
 # Sicurezza
 
+<a id="cornice-c1-frame-entry-runtime-2026-11-12"></a>
+
+## C1 — contratto candidato del primo errore v2, 12/11/2026
+
+Il runner osserva l'ingresso della Home nella cornice senza anticiparlo con goto. App standalone persistente con Auth pronta è C1_FRAME_NOT_ENTERED, nessun invio Master. Budget iniziale complessivo, Resource Timing, identità/claim QA2 e guardia immediatamente prima della Master invariati; nessun nuovo login, retry o deroga ai gate.
+
+Il rapporto v2 aggiunge soltanto firstError, null o oggetto esatto phase/source/frame/tag/host con [enum chiusi e regole di combinazione](../procedure/COLLAUDI.md#cornice-c1-frame-entry-runtime-2026-11-12). Codice e fase sono prenotati al primo fatal; nessun errore successivo di DIAG o cleanup lo sostituisce. Prefissi console sconosciuti/dinamici restano OTHER; solo RESOURCE permette categoria host da location, mai URL o testo del messaggio. L'attribuzione frame può restare other quando il contesto non è verificabile; non si deduce dal nome del file sorgente e non si prolunga il budget per ottenerla.
+
+I canali nativi console/pageerror/HTTP restano invariati: nessuna nuova binding o intercettazione di error/unhandledrejection, nessun preventDefault o modifica al logger. Pageerror non fornisce un Frame verificabile: si registra other senza leggere messaggio/stack per inventare una correlazione. Per console l'eventuale handle serve solo a classificare il realm, senza leggerne il valore. Nessun messaggio, stack, URL, frame name, UID/email/record ID, valore, chiave o token in report/artefatti. Il validatore ricostruisce l'intero schema v2 e i casi/DIAG, rifiutando campi estranei prima della scrittura; ricevute v1 storiche immutate. [Banco e limiti](../evidenze/COLLAUDI.md#cornice-c1-frame-entry-runtime-2026-11-12). Il canary resta OFF; nessun quarto giro, self-hosted o deploy autorizzato dal banco.
+
 <a id="cornice-c1-qa2-segreti-2026-11-12"></a>
 
 ## C1 automatizzato — QA2 esclusivamente sintetica e segreti, 12/11/2026

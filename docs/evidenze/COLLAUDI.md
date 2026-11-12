@@ -1,5 +1,25 @@
 # Collaudi
 
+<a id="cornice-c1-frame-entry-runtime-2026-11-12"></a>
+
+## C1 #3 e banco locale di ingresso/errore — 12/11/2026
+
+La #295 è unita dopo GO Claude e ordine di Diego in master `9ba1a034d75c034260ccd31fb10cfa1d317bc80a`, tree identico al candidato. Diego conferma privatamente il preflight, ON, dispatch e approvazione della [run #3 / tentativo 1](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43215037304). Le fixture del job passano 39/39; sequenza reale SETUP / FAIL / C1_RUNTIME_FAILURE, nessun caso D eseguito. [Rapporto v1 originale completo](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/295#issuecomment-6823339007). Prima richiesta operativa OFF; [Diego conferma enabled=false](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/295#issuecomment-6823363370), senza rilettura amministrativa di Codex. Nessun retry.
+
+DIAG acquisita tramite getter: active=true, permitValid=true, versione v1.2.270, inattività 180000 ms, lastBlock=null. enabled=false è il registro DIAG locale, non lo stato del singleton; eventi vuoti non provano assenza di errori. Il getter delimita login/identità e ammissione alla cornice, ma non certifica lo sblocco o il completamento del setup. timeoutRestoreRequired=false e D06 non raggiunto: nessun cambio timeout del giro. I flag productionExecuted/possibleAppWrites/network sono conservativi, non attestano una scrittura specifica.
+
+La [revisione Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/295#issuecomment-6823455981) propone di togliere il goto concorrente del runner e distinguere il primo runtime error con uno schema v2 chiuso. Diego autorizza banco e PR. Il banco Home attende un'ammissione sintetica asincrona prima di replace(app.html); un proxy di test osserva il vecchio tentativo goto, completa l'ammissione con esito interrotto e attende la prosecuzione standalone che emette BLINDA prima di delegare la vera navigazione. Il nuovo port rilascia il gate all'ingresso nella sua attesa reale; condizione/risultato restano del browser. Nessun hook di test entra nel port produttivo, nessuna attesa arbitraria per aprire il gate.
+
+**RED verificato sul port master 9ba1a034 esatto, prima della correzione:** entrambi i nuovi test falliscono: ammissione asincrona → C1_RUNTIME_FAILURE; app persistente standalone → manca il rigetto atteso perché il vecchio port forza l'ingresso. **GREEN candidato 2/2:** nessun goto dopo login, un ingresso applicativo, un login, una Master e un opt-in DIAG; standalone → C1_FRAME_NOT_ENTERED, zero invii Master. Il modello è deterministico ma non riproduce direttamente un abort di rete produttivo. Inoltre main-v129 inoltra console.error a LOG_ERROR e logger.js è silenzioso per l'ambiente production predefinito: il particolare messaggio BLINDA potrebbe essere silenziato online. Non cambiato il logger/app. **Nessuna causa certa del giro #3 e nessun nuovo PASS C1.**
+
+Il rapporto candidato v2 aggiunge firstError con enum chiusi; verificati prefissi noti/sconosciuti e suffissi sensibili inventati esclusi, UNLOCK prima del checkpoint senza invio Master, console e pageerror nel vero iframe locale, risorsa 404, primo fatal invariabile, contesto assente/pendente senza nuova attesa e campi estranei respinti. Per pageerror si registra other: l'API nativa non espone il Frame e non vengono aggiunte binding o intercettazioni per dedurlo. Nessun errore libero o stack esportato; nessun preventDefault, modifica console, Auth o storage.
+
+La revisione consultiva readonly individua un secondo difetto preesistente: errore runtime durante wait di readiness, poi timeout che sostituisce il primo codice con C1_READINESS e perde i metadati. **RED aggiuntivo verificato:** il nuovo negativo fallisce con C1_READINESS al posto di C1_RUNTIME_FAILURE. Correzione nei catch e nella selezione del codice del rapporto, con fase originale mantenuta. Validatore completo prima dell'artefatto.
+
+Verifiche finali locali: **52/52 C1**, **14/14 QA/inventario**, **12/12 documentali** (34 MD, 942 collegamenti), sintassi dei tre moduli, whitespace e version:check **1.2.270 / 275 riferimenti** verdi. Inventario generato senza variazioni HTML. Due riscontri consultivi readonly sul codice/banco e uno sui documenti: rilievo sulla precedenza riprodotto/corretto, seguito senza nuovi rilievi concreti. Non sono un GO esterno né un collaudo produttivo. Nessun dato reale, credenziale o servizio Firebase usato dal banco locale.
+
+Canary OFF secondo Diego; Hosting 1.2.270 / cb48b719 e UI #283 invariati. Nessun Frontend, workflow, backend, versione, header, manifest o precache modificato. Quarto giro solo dopo PR/CI/revisione/merge, con nuovi ordini personali per merge e giro. I checkpoint successivi conservano lo schema v1 e le evidenze precedenti.
+
 <a id="cornice-c1-runner-readiness-2026-11-12"></a>
 
 ## C1 #2 e banco locale del bootstrap — 12/11/2026

@@ -1,5 +1,5 @@
 import {C1_ORIGIN} from './c1-e2e-execution.mjs';
-import {fail,validateDiag,assertLoopback,httpFailureCode} from './c1-e2e-contract.mjs';
+import {fail,validateDiag,assertLoopback,httpFailureCode,consoleErrorCategory,errorHostCategory,validateFirstError,safeFailure} from './c1-e2e-contract.mjs';
 
 // C1 requires Italian. The local fixture uses the actual onboarding module,
 // so changed application text cannot silently select a different action.
@@ -39,14 +39,36 @@ export async function createLocalFixturePort(page,config,secrets){
 }
 async function createPort(page,config,secrets,origin,operationTimeout=timeout){
  const timeout=operationTimeout;
- let fatal=null,expectedCount=0,timerChanged=false,timerStartedAt=0,lastActivityAt=0,timerIdle=180000;
+ let fatal=null,firstError=null,phase='LOGIN_READY',errorsOpen=true;
+ let expectedCount=0,timerChanged=false,timerStartedAt=0,lastActivityAt=0,timerIdle=180000;
  let notifyFatal;
  const fatalSignal=new Promise(resolve=>{notifyFatal=resolve;});
- const setFatal=code=>{if(fatal===null){fatal=code;notifyFatal(code);}};
- page.on('pageerror',()=>setFatal('C1_RUNTIME_FAILURE'));
- page.on('console',message=>{if(message.type()==='error')setFatal('C1_RUNTIME_FAILURE');});
+ const setFatal=(code,detail=null)=>{
+  if(!errorsOpen||fatal!==null)return false;
+  fatal=code;firstError=detail?validateFirstError({phase,...detail}):null;notifyFatal(code);return true;
+ };
+ const errorFrame=source=>{try{
+  if(source===page.mainFrame())return 'top';
+  if(source?.parentFrame()===page.mainFrame()&&source.name()==='vault-frame')return 'vault-child';
+ }catch{/* Unavailable realms are classified conservatively. */}return 'other';};
+ // Native pageerror has no Frame. Keep OTHER; do not introduce another error
+ // observer which could turn handled/synthetic events into new fatal signals.
+ page.on('pageerror',()=>setFatal('C1_RUNTIME_FAILURE',{source:'pageerror',frame:'other',tag:null,host:null}));
+ page.on('console',message=>{
+  if(message.type()!=='error'||fatal!==null||!errorsOpen)return;
+  const category=consoleErrorCategory(message.text(),message.location().url);
+  if(!setFatal('C1_RUNTIME_FAILURE',{source:'console',frame:'other',...category}))return;
+  const reserved=firstError;
+  // Resolve only this error's realm, without reading its argument. No new wait
+  // or budget: if the context is gone or still pending at report time, OTHER.
+  try{void message.args()[0]?.evaluate(()=>window===top?'top':
+   window.frameElement?.id==='vault-frame'&&parent===top?'vault-child':'other')
+   .then(value=>{if(['top','vault-child','other'].includes(value))reserved.frame=value;}).catch(()=>{});
+  }catch{/* Native resource messages can have no JavaScript handle. */}
+ });
  page.on('response',response=>{const status=response.status();
-   if(status>=400)setFatal(httpFailureCode(status,response.url()));});
+   if(status>=400){let source;try{source=response.frame();}catch{/* Service worker / detached frame. */}
+    setFatal(httpFailureCode(status,response.url()),{source:'http',frame:errorFrame(source),tag:null,host:errorHostCategory(response.url())});}});
  page.on('requestfailed',request=>{if(request.failure()?.errorText!=='net::ERR_ABORTED')setFatal('C1_NETWORK_FAILURE');});
  page.on('dialog',dialog=>{setFatal('C1_MODAL_UNEXPECTED');void dialog.dismiss().catch(()=>{});});
  page.on('download',download=>{setFatal('C1_MODAL_UNEXPECTED');void download.cancel().catch(()=>{});});
@@ -180,7 +202,7 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
     if(path==='/configurazione_documenti.html')return has('#container-types')&&has('#container-models')&&has('#container-templates');
     return false;
    },target,{timeout});
-  }catch{fail('C1_READINESS');}
+  }catch{checkpoint();fail('C1_READINESS');}
   try{await page.waitForFunction(target=>{
    const node=document.querySelector('#vault-frame');
    return !!node&&!node.hidden&&!node.inert&&getComputedStyle(node).visibility==='visible'&&
@@ -213,7 +235,7 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
  async function unlockExpectedOnce(){
   checkpoint();
   try{await page.locator('#protocol-input-modal-input').waitFor({state:'visible',timeout});}
-  catch{fail('C1_UNLOCK_MISSING');}
+  catch{checkpoint();fail('C1_UNLOCK_MISSING');}
   const valid=await page.locator('#protocol-input-modal').evaluate(modal=>
    modal.querySelector('input[name="vault-local-secret"]')?.id==='protocol-input-modal-input'&&
    modal.querySelector('.modal-title')?.textContent.trim().toUpperCase()==='SBLOCCO VAULT'&&window.__c1SecretPromptCount===1);
@@ -259,7 +281,7 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
     const {inactivityDiagnosticTimeout}=await import('/assets/js/inactivity-timer.js');
     return runtime.frameDiagnosticReport({idleMs:inactivityDiagnosticTimeout(),pushReady:await runtime.notificationWorkerReady()});
    });
-  }catch{fail('C1_DIAG_UNAVAILABLE');}
+  }catch{checkpoint();fail('C1_DIAG_UNAVAILABLE');}
   if(!value)fail('C1_DIAG_UNAVAILABLE');
   const result=validateDiag(value);
   if(result.state.version!=='v'+config.version)fail('C1_RELEASE_MISMATCH');
@@ -267,11 +289,16 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
   await noUnexpectedMaster();return result;
  }
  const port={
+  freezeErrors:()=>{errorsOpen=false;},
+  failureCode:error=>fatal??safeFailure(error),
+  firstError:code=>fatal===code?validateFirstError(firstError):null,
+  beginCases:()=>{phase='CASE';},
   timerRestoreRequired:()=>timerChanged,
   async start(){
    await page.goto(origin+'/login.html',{waitUntil:'domcontentloaded'});checkpoint();
    const deadline=Date.now()+timeout;
    await withinLoginBudget(()=>prepareLogin(deadline),deadline,'C1_AUTH_NOT_READY_LOGIN');
+   phase='LOGIN_SUBMIT';
    await page.locator('#email').fill(secrets.email,{timeout:remaining(deadline)});
    checkpoint();
    await page.locator('#password').fill(secrets.password,{timeout:remaining(deadline)});
@@ -279,6 +306,7 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
    await page.locator('#remember-device').setChecked(false,{timeout:remaining(deadline)});
    checkpoint();if(Date.now()>=deadline)fail('C1_AUTH_NOT_READY_LOGIN');
    await page.locator('#login-submit-btn').click({timeout:remaining(deadline)}); // exactly one login attempt
+   phase='AUTH_WAIT';
    let authenticated=false,pending='C1_AUTH_NOT_READY_LOGIN';
    while(Date.now()<deadline){
     checkpoint();
@@ -286,23 +314,44 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
     if(await page.locator('#email-verification-panel').isVisible())fail('C1_AUTH_EMAIL_UNVERIFIED');
     const path=new URL(page.url()).pathname;
     if(['/home_page.html','/app.html'].includes(path)){
-     const result=await withinLoginBudget(()=>guardQa2({refresh:true,allowPending:true}),deadline,'C1_BOOTSTRAP_MISMATCH');
-     if(result===true){authenticated=true;break;}pending=result;
+     let result;
+     try{result=await withinLoginBudget(()=>guardQa2({refresh:true,allowPending:true}),deadline,'C1_BOOTSTRAP_MISMATCH');}
+     catch(error){
+      checkpoint();
+      // The app may replace home while its pending guard is being evaluated.
+      // Observe the new document; never resubmit login or initiate navigation.
+      if(error.message==='C1_BOOTSTRAP_MISMATCH'&&path==='/home_page.html'&&new URL(page.url()).pathname==='/app.html')continue;
+      throw error;
+     }
+     if(result===true){
+      phase='FRAME_ENTRY';
+      if(path==='/home_page.html'){
+       if(new URL(page.url()).pathname==='/home_page.html'){
+        try{await withinLoginBudget(()=>page.waitForFunction(()=>location.pathname==='/app.html',null,{timeout:remaining(deadline)}),deadline,'C1_FRAME_NOT_ENTERED');}
+        catch{checkpoint();fail('C1_FRAME_NOT_ENTERED');}
+       }
+       continue; // Revalidate the app document's target before Master.
+      }
+      authenticated=true;break;
+     }pending=result;
     }else pending=path==='/login.html'?'C1_AUTH_NOT_READY_LOGIN':'C1_AUTH_NOT_READY_ROUTE';
     await delay(Math.min(150,remaining(deadline)));
    }
    if(!authenticated)fail(pending);
-   await page.goto(origin+'/app.html?route=%2Fhome_page.html',{waitUntil:'domcontentloaded'});
    checkpoint();
+   phase='UNLOCK';
    try{await page.locator('#protocol-input-modal-input').waitFor({state:'visible',timeout:Math.min(10000,timeout)});}
    catch{
+    checkpoint();
     if(!await page.locator('#protocol-input-modal-input').isVisible()){
      if(!await page.locator('#frame-resume').isVisible())fail('C1_UNLOCK_MISSING');
      await Promise.all([page.waitForEvent('domcontentloaded',{timeout}),page.locator('#frame-resume').click()]);
     }
    }
    await unlockExpectedOnce();
+   phase='SETTINGS';
    await ensureSettings();
+   phase='DIAG_OPT_IN';
    const toggle=child().locator('#frame-diagnostics-toggle');
    if(await toggle.isChecked())fail('C1_DIAG_UNAVAILABLE'); // fresh-context OFF is asserted
    await toggle.setChecked(true); // one explicit UI opt-in, never silently repeated after a cleanup
@@ -328,7 +377,7 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
    try{await f.waitForFunction(async()=>{
     const {t}=await import('/assets/js/translations.js');
     return document.querySelector('#toast.active .toast-content > span:last-child')?.textContent===t('dyn_inactivity_updated');
-   },null,{timeout});}catch{fail('C1_TIMEOUT_BASELINE');}
+   },null,{timeout});}catch{checkpoint();fail('C1_TIMEOUT_BASELINE');}
    const deadline=Date.now()+timeout;let saved=false;
    while(Date.now()<deadline){
     if((await collectDiag()).state.idleMs===minutes*60000){saved=true;break;}
@@ -390,7 +439,7 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
    await ensureHome();await child().locator('#header-logout-btn').click();
    await child().locator('#logout-modal-dynamic #btn-confirm-logout').click();
    try{await page.waitForURL(url=>url.origin===origin&&url.pathname==='/login.html',{timeout});}
-   catch{fail('C1_LOGOUT_FAILED');}
+   catch{checkpoint();fail('C1_LOGOUT_FAILED');}
    const cleared=await page.evaluate(()=>['app_frame_diag_consent_v1','app_frame_diag_events_v1'].every(key=>sessionStorage.getItem(key)===null));
    if(!cleared)fail('C1_LOGOUT_FAILED');
    await page.goBack({waitUntil:'domcontentloaded'});

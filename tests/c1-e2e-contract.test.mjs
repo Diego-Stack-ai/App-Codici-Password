@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
-import {assertLoopback,qa2IdentityAllowed,validateDiag,safeFailure,authHttpFailureCode,httpFailureCode,C1_AUTH_CODES,C1_HTTP_FAILURE_CODES,C1_CODES} from '../scripts/lib/c1-e2e-contract.mjs';
+import {assertLoopback,qa2IdentityAllowed,validateDiag,safeFailure,authHttpFailureCode,httpFailureCode,C1_AUTH_CODES,C1_HTTP_FAILURE_CODES,C1_CODES,
+ consoleErrorCategory,errorHostCategory,validateFirstError,C1_ERROR_PHASES,C1_ERROR_TAGS} from '../scripts/lib/c1-e2e-contract.mjs';
 import {createLocalC1Driver} from '../scripts/lib/c1-e2e-cases.mjs';
 const now=1794440000000;
 const report=()=>({state:{version:'v1.2.270',active:true,permitValid:true,permitExpiresAt:now+60000,idleMs:180000,pushReady:false,lastBlock:null},
@@ -15,6 +16,35 @@ test('closed DIAG reconstructs approved fields only',()=>{
     r=>r.state.lastBlock='private',r=>r.state.active='true',r=>r.state.version='private',
     r=>r.state.version={toString:()=> 'v1.2.270',toJSON:()=>({private:'never-export'})}
   ]) {const r=report();mutate(r);assert.throws(()=>validateDiag(r,now),/^Error: C1_REPORT_INVALID$/);}
+});
+
+test('first error accepts only closed phase/source/frame/tag/host combinations',()=>{
+ const value={phase:'FRAME_ENTRY',source:'console',frame:'top',tag:'BLINDA',host:null};
+ assert.equal(validateFirstError(null),null);
+ for(const phase of C1_ERROR_PHASES)assert.deepEqual(validateFirstError({...value,phase}),{...value,phase});
+ for(const tag of C1_ERROR_TAGS)assert.equal(validateFirstError({...value,tag,host:tag==='RESOURCE'?'other':null}).tag,tag);
+ for(const source of ['http','pageerror'])assert.deepEqual(validateFirstError({...value,source,tag:null,host:source==='http'?'identity':null}),
+  {...value,source,tag:null,host:source==='http'?'identity':null});
+ for(const extra of [{uid:'synthetic-private'},{url:'https://synthetic.invalid/private'},{message:'synthetic-private'},{stack:'synthetic-private'}])
+  assert.throws(()=>validateFirstError({...value,...extra}),/^Error: C1_REPORT_INVALID$/);
+ assert.throws(()=>validateFirstError({...value,[Symbol('synthetic-private')]:true}),/^Error: C1_REPORT_INVALID$/);
+ for(const delta of [{phase:'SECRET'},{source:'worker-private'},{frame:'private-frame-name'},
+  {tag:'BLINDA synthetic-private'},{host:'identitytoolkit.googleapis.com'},
+  {source:'pageerror'},{source:'http',tag:null,host:null},{tag:'RESOURCE',host:null}])
+  assert.throws(()=>validateFirstError({...value,...delta}),/^Error: C1_REPORT_INVALID$/);
+});
+
+test('console classification discards suffixes and uses exact resource hosts only',()=>{
+ assert.deepEqual(consoleErrorCategory('[BLINDA] synthetic uid/token/value/private-url'),{tag:'BLINDA',host:null});
+ for(const text of ['[UNLISTED] synthetic-private','[BLINDA-private] value','prefix [BLINDA] value','synthetic private'])
+  assert.deepEqual(consoleErrorCategory(text),{tag:'OTHER',host:null});
+ for(const [host,category]of [['content-firebaseappcheck.googleapis.com','appcheck'],['identitytoolkit.googleapis.com','identity'],
+  ['firestore.googleapis.com','firestore'],['firestore.googleapis.com.evil.invalid','other']]){
+  const url='https://synthetic:private@'+host+'/private?key=synthetic-secret#private';
+  assert.equal(errorHostCategory(url),category);
+  assert.deepEqual(consoleErrorCategory('Failed to load resource: synthetic free text',url),{tag:'RESOURCE',host:category});
+ }
+ assert.deepEqual(consoleErrorCategory({toString:()=>{throw Error('MUST_NOT_READ');}}),{tag:'OTHER',host:null});
 });
 test('prototype refuses production and URL tricks without echoing input',()=>{
   assert.equal(assertLoopback('http://127.0.0.1:9191/app.html'),'http://127.0.0.1:9191');

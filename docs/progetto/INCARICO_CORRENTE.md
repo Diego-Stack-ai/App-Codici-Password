@@ -1,5 +1,15 @@
 # Incarico corrente
 
+<a id="cornice-c1-frame-entry-runtime-2026-11-12"></a>
+
+## C1 — banco locale e PR dopo il runtime error del giro #3, 12/11/2026
+
+Diego ordina: leggere la [revisione Claude della ricevuta #3](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/295#issuecomment-6823455981), preparare banco locale e PR come proposto. Base master `9ba1a034d75c034260ccd31fb10cfa1d317bc80a`, ramo codex/c1-frame-runtime-diagnostics-20261112. [Esito #3, OFF e limiti](../evidenze/COLLAUDI.md#cornice-c1-frame-entry-runtime-2026-11-12).
+
+Perimetro: solo runner C1, suoi test e cinque documenti esistenti. Riprodurre in loopback il modello di ammissione asincrona interrotta da un goto concorrente; attendere invece la navigazione autonoma dell'app, mantenendo il budget iniziale e la guardia privata prima della Master. Aggiungere C1_FRAME_NOT_ENTERED e report v2 con fase/source/frame/tag/categoria host del primo errore, esclusivamente enum. Il modello locale non prova la causa produttiva; non modificare il logger per sostenere l'ipotesi.
+
+Consegna autorizzata: verifiche locali, commit/push del ramo, PR in bozza e avviso per Claude. Elenco chiuso di 34 MD invariato. Nessun Frontend/cornice, workflow, Rules/Functions, versione, header, manifest/precache, credenziale o cloud modificato. Nessun token debug, self-hosted, retry o timeout ampliato. Stato DA_VERIFICARE, nessuna auto-approvazione. Merge e quarto giro restano distinti ordini personali dopo CI verde e revisione Claude; ON/dispatch/approvazione/OFF restano di Diego. Canary OFF. Le sezioni sotto sono incarichi e checkpoint precedenti.
+
 <a id="cornice-c1-login-readiness-2026-11-12"></a>
 
 ## C1 — banco locale e PR del runner dopo NOT_READY, 12/11/2026
