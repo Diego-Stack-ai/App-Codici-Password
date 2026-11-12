@@ -1,5 +1,15 @@
 # Incarico corrente
 
+<a id="cornice-c1-login-readiness-2026-11-12"></a>
+
+## C1 — banco locale e PR del runner dopo NOT_READY, 12/11/2026
+
+Diego autorizza il banco locale e poi una PR separata del runner, dopo la [revisione Claude della diagnosi](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/294#issuecomment-6821487581). Base master `25eb94fb571bb1ba8d235f77215b4eca51b141e4`, ramo codex/c1-login-readiness-20261112. La #294 è già integrata; [secondo giro BLOCKED e OFF](../evidenze/COLLAUDI.md#cornice-c1-runner-readiness-2026-11-12). Il GO della diagnosi non approva automaticamente il nuovo codice.
+
+Perimetro: test RED del bootstrap ritardato con form reale e Auth inventata su loopback; attesa di body.revealed senza errori prima dell'unico submit; dialogo lingua reale gestito dal solo comando UI per utente esistente, senza scritture storage o reload del runner; codici chiusi distinti per login/route/risorsa/utente e dialogo non conforme. Guardia Resource Timing mantenuta. Budget iniziale unico di 30 secondi, anche per la verifica del token; errore precedente prevalente, OFF_REQUIRED e nessun retry. Test e documenti esistenti aggiornati, commit/bozza/avviso Claude autorizzati.
+
+Nessun file Frontend/cornice o workflow, versione, Rules/Functions, header, manifest o precache modificato. Nessuna credenziale reale, ADC, operazione Firebase, token debug App Check o self-hosted. Canary OFF secondo Diego. **Terzo giro soltanto dopo PR, CI verde, revisione Claude e merge; merge e giro richiedono ciascuno il nuovo ordine personale di Diego.** La pubblicazione UI/caratteri #283 resta dopo C1. I checkpoint seguenti sono precedenti a questo incarico.
+
 <a id="cornice-c1-auth-diagnostica-2026-11-12"></a>
 
 ## C1 — sottocodici diagnostici dopo il primo giro bloccato, 12/11/2026

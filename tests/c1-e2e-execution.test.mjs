@@ -119,6 +119,22 @@ test('response handler preserves the first HTTP host code and stops before crede
   assert.equal(port.timerRestoreRequired(),false);
  }
 });
+
+test('HTTP failure during language inspection remains first and never clicks or fills',async()=>{
+ for(const stage of ['count','evaluate']){
+  const handlers=new Map();let actions=0;
+  const rejected=()=>handlers.get('response')({status:()=>403,url:()=> 'https://content-firebaseappcheck.googleapis.com/synthetic'});
+  const overlay={count:async()=>{if(stage==='count')rejected();return 1;},
+   evaluate:async()=>{rejected();return false;},locator:()=>{actions++;throw Error('MUST_NOT_CLICK');}};
+  const page={url:()=> 'http://127.0.0.1:9191/login.html',on:(event,callback)=>handlers.set(event,callback),
+   context:()=>({serviceWorkers:()=>[],route:async()=>{},on:()=>{}}),addInitScript:async()=>{},setDefaultTimeout:()=>{},
+   goto:async()=>{},waitForFunction:async()=>true,locator:selector=>{
+    if(selector==='#initial-language-dialog')return overlay;actions++;throw Error('MUST_NOT_FILL');}};
+  const port=await createLocalFixturePort(page,{},{});
+  await assert.rejects(()=>port.start(),/^Error: C1_AUTH_HTTP_APPCHECK$/);
+  assert.equal(actions,0);
+ }
+});
 test('artifact flag is set only for a newly written report, never for a stale wx file',async()=>{
  const dir=await mkdtemp(join(tmpdir(),'c1-sanitized-report-')),output=join(dir,'output');
  const env={RUNNER_TEMP:dir,GITHUB_OUTPUT:output},file=join(dir,'c1-qa2-report.json');

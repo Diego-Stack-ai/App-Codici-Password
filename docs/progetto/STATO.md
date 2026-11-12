@@ -2,6 +2,14 @@
 
 <a id="stato-corrente"></a>
 
+## C1 #2 BLOCKED, banco locale RED/GREEN e PR readiness — 12/11/2026
+
+#294 integrata con CI verde e GO Claude su 6e5ad52c: master `25eb94fb571bb1ba8d235f77215b4eca51b141e4`. Il secondo giro diagnostico, avviato e approvato personalmente da Diego, si ferma in SETUP BLOCKED / C1_AUTH_NOT_READY, DIAG assente: nessun caso C1 completato o cambio timeout. Diego conferma OFF; [ricevuta](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/294#issuecomment-6821089857). Nessun retry o rilettura amministrativa.
+
+Dopo diagnosi statica e [concordanza di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/294#issuecomment-6821487581), Diego ordina banco locale e PR runner. Riprodotto sul vecchio port il clic prima del listener: GET nativo e poi NOT_READY, senza parametri dei campi; il test passa con readiness esplicita. Questo dimostra il difetto nel banco, **non la causa certa del giro produttivo**. La candidata attende bootstrap, chiude il dialogo lingua via UI per utente esistente e distingue quattro osservazioni NOT_READY. Nessuna modifica all'app o terzo giro; [prove e limiti](../evidenze/COLLAUDI.md#cornice-c1-runner-readiness-2026-11-12).
+
+Canary OFF secondo l'ultima conferma di Diego; produzione verificata ancora 1.2.270 / cb48b7196a3816a62dda05d11e11ff4ca7c51d26. Nuova UI/caratteri #283 ancora in bozza, non pubblicata: C1 prima del suo merge/rilascio. Nuovo codice da rivedere con Claude dopo CI; merge e terzo giro su ordini distinti di Diego. Nessun deploy, token debug, self-hosted o nuovo PASS C1. I checkpoint sotto conservano la cronologia precedente.
+
 ## C1 #1 bloccato, canary OFF e PR diagnostica — 12/11/2026
 
 La #293 è unita su ordine di Diego in master `cd05b44e26792a70fe7f37e43be5172dfc75f81d`. Il [primo giro reale QA2/Chrome desktop](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43183551202), con preflight e approvazione personale, supera le fixture locali e si ferma in **SETUP BLOCKED / C1_AUTH_BLOCKED**: nessun caso C1 completato, DIAG non disponibile e nessun cambio timeout tentato. [Ricevuta accettata da Claude e limiti](../evidenze/COLLAUDI.md#cornice-c1-primo-giro-2026-11-12). **Ultimo canary OFF confermato da Diego**, senza verifica amministrativa di Codex; nessun retry.

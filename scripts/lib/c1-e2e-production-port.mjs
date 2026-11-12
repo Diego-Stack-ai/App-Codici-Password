@@ -1,6 +1,12 @@
 import {C1_ORIGIN} from './c1-e2e-execution.mjs';
 import {fail,validateDiag,assertLoopback,httpFailureCode} from './c1-e2e-contract.mjs';
 
+// C1 requires Italian. The local fixture uses the actual onboarding module,
+// so changed application text cannot silently select a different action.
+const languageText=Object.freeze({title:'Scegli lingua · Choose language',
+ existing:'Se hai già un account puoi accedere subito: dopo il login verrà recuperata la lingua associata.',
+ confirm:'Conferma · Confirm',existing_action:'Ho già un account'});
+
 const routes=new Set(['home_page.html','area_privata.html','account_privati.html?type=standard',
  'profilo_privato.html','impostazioni.html','archivio_account.html','regole_scadenze.html',
  'gestione_destinatari.html','configurazione_documenti.html','scadenze.html?filter=in_scadenza']);
@@ -34,7 +40,9 @@ export async function createLocalFixturePort(page,config,secrets){
 async function createPort(page,config,secrets,origin,operationTimeout=timeout){
  const timeout=operationTimeout;
  let fatal=null,expectedCount=0,timerChanged=false,timerStartedAt=0,lastActivityAt=0,timerIdle=180000;
- const setFatal=code=>{fatal??=code;};
+ let notifyFatal;
+ const fatalSignal=new Promise(resolve=>{notifyFatal=resolve;});
+ const setFatal=code=>{if(fatal===null){fatal=code;notifyFatal(code);}};
  page.on('pageerror',()=>setFatal('C1_RUNTIME_FAILURE'));
  page.on('console',message=>{if(message.type()==='error')setFatal('C1_RUNTIME_FAILURE');});
  page.on('response',response=>{const status=response.status();
@@ -50,6 +58,58 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
   let url;try{url=new URL(page.url());}catch{fail('C1_DESTINATION_WRONG');}
   if(url.origin!==origin)fail('C1_DESTINATION_WRONG');
  }
+ const remaining=deadline=>Math.max(1,deadline-Date.now());
+ async function withinLoginBudget(operation,deadline,code){
+  checkpoint();if(Date.now()>=deadline)fail(code);
+  const expired=Symbol('login deadline');let timer;
+  try{
+   const value=await Promise.race([operation(),fatalSignal.then(code=>fail(code)),
+    new Promise(resolve=>{timer=setTimeout(()=>resolve(expired),remaining(deadline));})]);
+   checkpoint();if(value===expired||Date.now()>=deadline)fail(code);return value;
+  }finally{clearTimeout(timer);}
+ }
+ async function prepareLogin(deadline){
+  checkpoint();
+  try{
+   await withinLoginBudget(()=>page.waitForFunction(()=>document.body?.classList.contains('revealed'),null,{timeout:remaining(deadline)}),deadline,'C1_AUTH_NOT_READY_LOGIN');
+  }catch{checkpoint();fail('C1_AUTH_NOT_READY_LOGIN');}
+  checkpoint();
+  const overlay=page.locator('#initial-language-dialog'),count=await overlay.count();
+  checkpoint();
+  if(count){
+   if(count!==1)fail('C1_LANGUAGE_DIALOG');
+   const valid=await overlay.evaluate((node,expected)=>{
+    const dialog=node.querySelector(':scope > section.first-configuration-dialog');
+    const actions=dialog?.querySelector('.first-configuration-actions');
+    const primary=actions?.querySelector('.first-configuration-primary');
+    const secondary=actions?.querySelector('.first-configuration-secondary');
+    const codes=[...dialog?.querySelectorAll('.language-welcome-grid button')||[]].map(button=>button.dataset.code).sort().join(',');
+    return node.children.length===1&&dialog?.getAttribute('role')==='dialog'&&dialog.getAttribute('aria-modal')==='true'&&
+     dialog.getAttribute('aria-labelledby')==='initial-language-title'&&
+     dialog.querySelector('#initial-language-title')?.textContent===expected.title&&dialog.querySelector('p')?.textContent===expected.existing&&
+     dialog.querySelectorAll('button').length===10&&codes==='de,en,es,fr,hi,it,pt,zh'&&
+     actions?.children.length===2&&primary?.type==='button'&&secondary?.type==='button'&&
+     [...dialog.querySelectorAll('.language-welcome-grid button')].every(button=>button.type==='button')&&
+     primary.textContent===expected.confirm&&secondary.textContent===expected.existing_action&&
+     !dialog.querySelector('input,form,iframe,a');
+   },languageText);
+   checkpoint();
+   if(!valid)fail('C1_LANGUAGE_DIALOG');
+   let navigated=false;
+   const onNavigation=frame=>{if(frame===page.mainFrame())navigated=true;};
+   page.on('framenavigated',onNavigation);
+   try{
+    await overlay.locator('.first-configuration-secondary').click({timeout:remaining(deadline)});
+    await overlay.waitFor({state:'detached',timeout:remaining(deadline)});
+    checkpoint();if(navigated)fail('C1_LANGUAGE_DIALOG');
+   }catch{checkpoint();fail('C1_LANGUAGE_DIALOG');}
+   finally{page.off('framenavigated',onNavigation);}
+  }
+  checkpoint();
+  if(await page.locator('[role="dialog"],[role="alertdialog"],.modal-overlay').filter({visible:true}).count())fail('C1_MODAL_UNEXPECTED');
+  if(new URL(page.url()).pathname!=='/login.html')fail('C1_AUTH_NOT_READY_ROUTE');
+  if(Date.now()>=deadline)fail('C1_AUTH_NOT_READY_LOGIN');
+ }
  const child=()=>page.frameLocator('#vault-frame');
  async function frame(){
   checkpoint();
@@ -64,9 +124,9 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
   try{
    result=await page.evaluate(async expected=>{
     const moduleUrl=new URL('/assets/js/firebase-config.js?v='+expected.version,location.origin).href;
-    if(!performance.getEntriesByType('resource').some(entry=>entry.name===moduleUrl))return {ready:false};
+    if(!performance.getEntriesByType('resource').some(entry=>entry.name===moduleUrl))return {ready:false,reason:'resource'};
     const {auth}=await import(moduleUrl),user=auth.currentUser;
-    if(!user)return {ready:false};
+    if(!user)return {ready:false,reason:'user'};
     if(auth.app.options.projectId!=='appcodici-password'||user.uid!==expected.uid||
       user.email!==expected.email)return {ready:true,target:false};
     if(user.emailVerified!==true)return {ready:true,emailUnverified:true};
@@ -74,8 +134,13 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
     return {ready:true,target:auth.currentUser===user&&user.uid===expected.uid&&
       user.email===expected.email&&user.emailVerified===true&&token.claims.vault_frame_canary===true};
    },{uid:secrets.uid,email:secrets.email,version:config.version,refresh});
-  }catch{fail('C1_BOOTSTRAP_MISMATCH');}
-  if(result?.ready!==true){if(allowPending)return false;fail('C1_AUTH_NOT_READY');}
+  }catch{checkpoint();fail('C1_BOOTSTRAP_MISMATCH');}
+  checkpoint();
+  if(result?.ready!==true){
+   const code=result?.reason==='resource'?'C1_AUTH_NOT_READY_RESOURCE':result?.reason==='user'?'C1_AUTH_NOT_READY_USER':null;
+   if(!code)fail('C1_BOOTSTRAP_MISMATCH');
+   if(allowPending)return code;fail(code);
+  }
   if(result.emailUnverified===true)fail('C1_AUTH_EMAIL_UNVERIFIED');
   if(result.target!==true)fail('C1_TARGET_DENIED');
   checkpoint();return true;
@@ -205,21 +270,28 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
   timerRestoreRequired:()=>timerChanged,
   async start(){
    await page.goto(origin+'/login.html',{waitUntil:'domcontentloaded'});checkpoint();
-   await page.locator('#email').fill(secrets.email);
-   await page.locator('#password').fill(secrets.password);
-   await page.locator('#remember-device').setChecked(false);
-   await page.locator('#login-submit-btn').click(); // exactly one login attempt
-   const deadline=Date.now()+timeout;let authenticated=false;
+   const deadline=Date.now()+timeout;
+   await withinLoginBudget(()=>prepareLogin(deadline),deadline,'C1_AUTH_NOT_READY_LOGIN');
+   await page.locator('#email').fill(secrets.email,{timeout:remaining(deadline)});
+   checkpoint();
+   await page.locator('#password').fill(secrets.password,{timeout:remaining(deadline)});
+   checkpoint();
+   await page.locator('#remember-device').setChecked(false,{timeout:remaining(deadline)});
+   checkpoint();if(Date.now()>=deadline)fail('C1_AUTH_NOT_READY_LOGIN');
+   await page.locator('#login-submit-btn').click({timeout:remaining(deadline)}); // exactly one login attempt
+   let authenticated=false,pending='C1_AUTH_NOT_READY_LOGIN';
    while(Date.now()<deadline){
     checkpoint();
     if(await page.locator('#totp-form-group').isVisible()||await page.locator('#totp-code').isVisible())fail('C1_MFA_BLOCKED');
     if(await page.locator('#email-verification-panel').isVisible())fail('C1_AUTH_EMAIL_UNVERIFIED');
-    if(['/home_page.html','/app.html'].includes(new URL(page.url()).pathname)){
-     if(await guardQa2({refresh:true,allowPending:true})){authenticated=true;break;}
-    }
-    await delay(150);
+    const path=new URL(page.url()).pathname;
+    if(['/home_page.html','/app.html'].includes(path)){
+     const result=await withinLoginBudget(()=>guardQa2({refresh:true,allowPending:true}),deadline,'C1_BOOTSTRAP_MISMATCH');
+     if(result===true){authenticated=true;break;}pending=result;
+    }else pending=path==='/login.html'?'C1_AUTH_NOT_READY_LOGIN':'C1_AUTH_NOT_READY_ROUTE';
+    await delay(Math.min(150,remaining(deadline)));
    }
-   if(!authenticated)fail('C1_AUTH_NOT_READY');
+   if(!authenticated)fail(pending);
    await page.goto(origin+'/app.html?route=%2Fhome_page.html',{waitUntil:'domcontentloaded'});
    checkpoint();
    try{await page.locator('#protocol-input-modal-input').waitFor({state:'visible',timeout:Math.min(10000,timeout)});}
