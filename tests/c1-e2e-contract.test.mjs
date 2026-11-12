@@ -207,6 +207,69 @@ test('driver rechecks origin before reload and callback, and guards outgoing req
   }
   assert.equal(aborted,1);assert.equal(continued,1);
 });
+async function localClickHarness({rejectClick=null,masterVisible=false,rejectDestination=false}={}){
+ let route='/home_page.html';
+ const calls={clicks:[],destinations:[],unlockWaits:[]};
+ const context={serviceWorkers:()=>[],route:async()=>{}};
+ const page={
+  context:()=>context,url:()=> 'http://127.0.0.1:9191/app.html?route='+encodeURIComponent(route),
+  locator:selector=>selector==='#vault-frame'?{evaluate:async()=>{
+   const url=new URL(route,'http://127.0.0.1:9191');
+   return {path:url.pathname.slice(1),query:url.search,hash:url.hash};
+  }}:{isVisible:async()=>masterVisible,waitFor:async options=>{calls.unlockWaits.push(options);}},
+  frameLocator:()=>({locator:selector=>({click:async options=>{
+   calls.clicks.push({selector,options});
+   if(selector===rejectClick)throw new Error('SYNTHETIC_PRIVATE_CLICK_DETAIL');
+   route=selector.includes('account_privati')?'/account_privati.html?type=standard':'/area_privata.html';
+  }})}),
+  waitForFunction:async(_predicate,expected,options)=>{
+   calls.destinations.push(options);
+   if(rejectDestination&&route==='/area_privata.html')throw new Error('SYNTHETIC_PRIVATE_DESTINATION_DETAIL');
+   const url=new URL(route,'http://127.0.0.1:9191');
+   assert.equal(url.pathname,'/'+expected.path);assert.equal(url.search,expected.query);
+  },
+  goBack:async()=>{route='/area_privata.html';},
+  goForward:async()=>{route='/account_privati.html?type=standard';},
+  reload:async()=>{masterVisible=true;},evaluate:async()=>{}
+ };
+ return {driver:await createLocalC1Driver(page),calls,unlock:async()=>{masterVisible=false;}};
+}
+
+test('local click budget grows alone; destination and reload waits remain 3 seconds',async()=>{
+ const f=await localClickHarness();
+ await f.driver.navigationCore();await f.driver.historyCore();await f.driver.reloadOwner(f.unlock);
+ assert.equal(f.calls.clicks.length,3);
+ for(const call of f.calls.clicks)assert.deepEqual(call.options,{timeout:10000});
+ assert.ok(f.calls.destinations.length>0);
+ for(const options of f.calls.destinations)assert.deepEqual(options,{timeout:3000});
+ assert.deepEqual(f.calls.unlockWaits,[{state:'visible',timeout:3000}]);
+});
+
+test('local click failures expose only the fixed step and discard the original error',async()=>{
+ for(const [selector,code] of [
+  ['a[href="area_privata.html"]','C1_LOCAL_CLICK_PRIVATE'],
+  ['a[href="account_privati.html?type=standard"]','C1_LOCAL_CLICK_ACCOUNTS'],
+  ['#header-left .btn-icon-header','C1_LOCAL_CLICK_APP_BACK']
+ ]){
+  const f=await localClickHarness({rejectClick:selector});
+  await assert.rejects(async()=>{await f.driver.navigationCore();await f.driver.historyCore();},error=>{
+   assert.equal(error.message,code);assert.equal(Object.hasOwn(error,'cause'),false);
+   assert.doesNotMatch(String(error),/SYNTHETIC_PRIVATE/);return true;
+  });
+  assert.equal(f.calls.clicks.filter(call=>call.selector===selector).length,1);
+  assert.equal(C1_CODES.includes(code),false); // Local labels do not expand the production report.
+ }
+});
+
+test('local click labels preserve Master and destination failures',async()=>{
+ const locked=await localClickHarness({masterVisible:true});
+ await assert.rejects(()=>locked.driver.navigationCore(),/^Error: C1_CONTINUITY_BROKEN$/);
+ assert.equal(locked.calls.clicks.length,0);
+ const wrong=await localClickHarness({rejectDestination:true});
+ await assert.rejects(()=>wrong.driver.navigationCore(),/^Error: C1_DESTINATION_WRONG$/);
+ assert.equal(wrong.calls.clicks.length,1);
+});
+
 test('CLI default and unauthorized production request fail before browser, secrets or network',()=>{
   for(const args of [[],['--production'],['--url','https://appcodici-password.web.app']]) {
     const run=spawnSync(process.execPath,['scripts/c1-e2e.mjs',...args],{encoding:'utf8'});
