@@ -4,7 +4,8 @@ export const C1_CASES = Object.freeze(['D02-core', 'D04-core', 'D05-A']);
 export const C1_PROFILES = Object.freeze(['chrome-desktop', 'android-emulated', 'iphone-emulated']);
 export const C1_AUTH_CODES = Object.freeze([
   'C1_AUTH_HTTP_APPCHECK', 'C1_AUTH_HTTP_IDENTITY', 'C1_AUTH_HTTP_FIRESTORE', 'C1_AUTH_HTTP_OTHER',
-  'C1_AUTH_EMAIL_UNVERIFIED', 'C1_AUTH_NOT_READY'
+  'C1_AUTH_EMAIL_UNVERIFIED', 'C1_AUTH_NOT_READY_LOGIN', 'C1_AUTH_NOT_READY_ROUTE',
+  'C1_AUTH_NOT_READY_RESOURCE', 'C1_AUTH_NOT_READY_USER', 'C1_LANGUAGE_DIALOG'
 ]);
 const httpFailureByAuth = Object.freeze({
   C1_AUTH_HTTP_APPCHECK: 'C1_HTTP_FAILURE_APPCHECK',

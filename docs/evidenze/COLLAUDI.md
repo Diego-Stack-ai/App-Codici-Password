@@ -1,5 +1,21 @@
 # Collaudi
 
+<a id="cornice-c1-runner-readiness-2026-11-12"></a>
+
+## C1 #2 e banco locale del bootstrap — 12/11/2026
+
+La #294 è unita nel merge `25eb94fb571bb1ba8d235f77215b4eca51b141e4` dopo GO Claude su 6e5ad52c e CI verde, tree identico al candidato. Diego conferma preflight e ON, avvia e approva la [run C1 #2](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43198520517). Esito SETUP BLOCKED / C1_AUTH_NOT_READY, DIAG null, timeoutRestoreRequired=false; D02/D04/D05/D06/D08 non eseguiti. Prima richiesta operativa OFF, Diego conferma Spento e salvato. [Rapporto originale completo e limiti](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/294#issuecomment-6821089857). Nessun nuovo PASS; i flag produttivi sono conservativi e non dimostrano login o scritture specifiche. Nessuna rilettura amministrativa, modifica timeout o retry.
+
+[Diagnosi statica Codex](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/294#issuecomment-6821365952) e [revisione Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/294#issuecomment-6821487581) individuano il disallineamento tra DOMContentLoaded e handler asincrono del form, oltre al dialogo lingua e alla guardia Resource Timing. Diego autorizza il banco, poi la PR runner; nessun nuovo giro.
+
+**RED sul port precedente:** il banco usa il vero frammento form di login.html, input senza name, listener sintetico trattenuto da un gate server nell'handler asincrono di DOMContentLoaded. Il vecchio runner clicca prima del listener: secondo GET del login e C1_AUTH_NOT_READY dopo il limite locale, senza parametri dei campi. L'oracolo atteso (nessun GET nativo, un solo submit applicativo dopo bootstrap) fallisce. Nessuna attesa temporale arbitraria per aprire il gate: il test osserva GET nativo oppure ingresso nell'attesa reale, poi rilascia il server. Il proxy Page notifica l'attesa ma ne delega condizione e risultato senza falsificarli; rigetto/completamento prematuro e finally rilasciano il gate e chiudono il contesto.
+
+**GREEN candidato:** readiness prima di compilare e cliccare, con errore precedente prevalente; dialogo e testi della vera first-configuration/onboarding, chiuso dal secondario via UI. Verificate assenza di preferenze lingua scritte e un solo login, stop per dialogo alterato/duplicato/senza secondario o con navigazione; errore bootstrap anche con revealed; quattro codici distinti per login, route, risorsa e utente. Un filtro Resource Timing **solo della fixture** simula l'entry mancante con Auth valida; non è una misura o causa produttiva. Ripristino Auth inventato senza secondo login e token pendente che non supera il budget o raggiunge la Master. Errori HTTP durante la validazione del dialogo restano primi, senza clic o compilazione successivi.
+
+Tutto il banco è loopback con rete esterna bloccata, Auth/materiale/dati inventati e nessun segreto reale. Suite finale **39/39 C1**, QA/inventario **14/14**, documentazione **12/12** (34 MD e 937 collegamenti locali), sintassi/whitespace e version:check 1.2.270 (275 riferimenti asset) verdi. Correzioni del banco durante lo sviluppo non sono prove produttive. Il limite UI locale è 3 secondi; in produzione restano 30 secondi iniziali complessivi, senza accelerazioni o aumento. Check non verificabile entro il budget = C1_BOOTSTRAP_MISMATCH, senza dedurre utente assente. Due riscontri consultivi readonly hanno rilevato budget token e primo errore durante dialogo/gate; le correzioni sono coperte dai negativi e il seguito è senza nuovi rilievi. **Nessuna causa certa del giro #2 e nessun PASS C1 ricavati dal banco.**
+
+Produzione ancora 1.2.270, canary OFF secondo Diego, UI #283 non pubblicata. Nessun Frontend/cornice, workflow, backend, credenziale, header, manifest o precache cambiato. Terzo giro dopo PR/CI/revisione/merge, con nuovi ordini personali per merge e giro. I paragrafi successivi sono checkpoint precedenti.
+
 <a id="cornice-c1-primo-giro-2026-11-12"></a>
 
 ## C1 #1 — SETUP BLOCKED, OFF confermato e seguito diagnostico, 12/11/2026

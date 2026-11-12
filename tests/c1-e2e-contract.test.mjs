@@ -52,7 +52,8 @@ test('Auth HTTP diagnostics classify exact hosts only and never echo private URL
     'https://firebaseappcheck.googleapis.com@other.invalid/private',
     'https://other.invalid/firebaseappcheck.googleapis.com?host=firestore.googleapis.com'])
     assert.equal(authHttpFailureCode(url),'C1_AUTH_HTTP_OTHER');
-  assert.equal(C1_AUTH_CODES.length,6);
+  assert.equal(C1_AUTH_CODES.length,10);
+  assert.equal(C1_CODES.includes('C1_AUTH_NOT_READY'),false);
   assert.equal(C1_CODES.includes('C1_AUTH_BLOCKED'),false);
   for(const code of C1_AUTH_CODES){
     assert.equal(safeFailure(new Error(code)),code);

@@ -1,10 +1,32 @@
 # Collaudi
 
+<a id="cornice-c1-bootstrap-readiness-2026-11-12"></a>
+
+## C1 — bootstrap del login e osservazioni NOT_READY, 12/11/2026
+
+Seguito alla diagnosi del secondo giro e all'ordine di Diego: [banco locale e limiti](../evidenze/COLLAUDI.md#cornice-c1-runner-readiness-2026-11-12). Nel runner candidato DOMContentLoaded non basta per autorizzare il clic. Attendere body.revealed, controllare l'assenza di errori registrati e gestire l'eventuale dialogo lingua prima di compilare. data-i18n=ready è già nel markup e non è readiness del listener. Nessun file applicativo viene modificato per far passare l'oracolo.
+
+Se compare initial-language-dialog, validare unicità, struttura canonica, ruolo/modalità/titolo, testi italiani, otto lingue e due comandi. Usare soltanto il secondario Ho già un account via clic UI; mai remove via evaluate, conferma lingua, scrittura storage o profilo persistente. Verificare rimozione e assenza di navigazione; dialogo non conforme = C1_LANGUAGE_DIALOG, senza login. Conservare il primo errore anche se arriva durante la validazione.
+
+Budget iniziale unico di 30 secondi da DOMContentLoaded per bootstrap, UI e conferma Auth, con tempo residuo nelle azioni e deadline anche attorno alla verifica del token. Un risultato tardivo non diventa successo. Check Auth non verificabile entro il limite = C1_BOOTSTRAP_MISMATCH; nessun aumento o retry. La Master conserva guardia privata immediatamente prima del solo invio ammesso.
+
+| Osservazione che impedisce l'avvio | Codice chiuso, BLOCKED |
+|---|---|
+| Bootstrap non pronto o login ancora visibile dopo l'unico submit | C1_AUTH_NOT_READY_LOGIN |
+| Destinazione diversa da login/Home/cornice attesi | C1_AUTH_NOT_READY_ROUTE |
+| Entry Resource Timing esatta non osservata | C1_AUTH_NOT_READY_RESOURCE |
+| Modulo osservato ma utente Auth assente | C1_AUTH_NOT_READY_USER |
+| Dialogo lingua inatteso, non conforme o con navigazione | C1_LANGUAGE_DIALOG |
+
+La guardia Resource Timing resta attiva; nessun import forzato se manca il prerequisito. Questi codici descrivono osservazioni, non provano credenziali errate, App Check o una causa del vecchio giro. Rapporto con lo stesso schema chiuso, nessun URL, conteggio aggiuntivo, testo libero, identificativo o valore di campo. Il codice generico NOT_READY resta soltanto nei rapporti storici, non viene riclassificato retroattivamente. Codici HTTP della #294, OFF_REQUIRED, nessun retry, timeout D06 e gate personali invariati.
+
+Il banco riproduce il submit prematuro sul port precedente e prova la candidata solo con dati inventati; non autentica provider reali. Approvazione Claude sulla diagnosi distinta da revisione del nuovo SHA. Canary OFF, nessun terzo giro prima di PR, CI verde, riesame e merge; merge e giro ciascuno su ordine personale di Diego. Opzione A resta soltanto valutata.
+
 <a id="cornice-c1-auth-codici-2026-11-12"></a>
 
 ## C1 — diagnostica Auth dopo il primo giro bloccato, 12/11/2026
 
-Il [primo giro reale](../evidenze/COLLAUDI.md#cornice-c1-primo-giro-2026-11-12) non ha superato SETUP; canary OFF confermato da Diego. La nuova PR sostituisce il generico C1_AUTH_BLOCKED con sei codici chiusi. Il seguito alla revisione di 079c6ed2 aggiunge quattro C1_HTTP_FAILURE_* per classificare anche gli altri status almeno 400, senza ampliare lo schema del rapporto o modificare login, attese, protezioni e browser. Nessun nuovo giro prima del riesame Claude e di un nuovo ordine personale.
+Checkpoint #294, ora integrata: il [primo giro reale](../evidenze/COLLAUDI.md#cornice-c1-primo-giro-2026-11-12) non ha superato SETUP. La PR sostituisce il generico C1_AUTH_BLOCKED con sei codici chiusi; il seguito alla revisione di 079c6ed2 aggiunge quattro C1_HTTP_FAILURE_* per gli altri status almeno 400. La tabella sotto conserva quel checkpoint; nel seguito corrente il NOT_READY aggregato è distinto nelle quattro osservazioni definite sopra. Schema chiuso e guardie HTTP restano invariati.
 
 | Segnale osservato | Sottocodice fisso |
 |---|---|
