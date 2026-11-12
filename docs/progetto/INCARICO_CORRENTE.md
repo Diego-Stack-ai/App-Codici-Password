@@ -1,5 +1,15 @@
 # Incarico corrente
 
+<a id="cornice-c1-e2e-incarico-2026-11-12"></a>
+
+## C1 — piano E2E in una bozza e revisione UI readonly, 12/11/2026
+
+Diego autorizza una sola PR in bozza con piano E2E della matrice C1, solo QA2 con futuri segreti GitHub e mai account personali, e codice se verificabile localmente. Nessuna esecuzione in produzione, merge, deploy, operazione Firebase o cambio interruttore; canary OFF. Non attendere Claude fra i passi di preparazione locale: Claude rivede la consegna complessiva. In parallelo revisione readonly della #283, grafica e tipografia, con GO/NO-GO sulla PR; nessuna modifica UI di Codex.
+
+Il [piano e adapter candidato](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12) distingue codice, test locali e prove fisiche. Dopo il [GO Claude sul solo piano/prototipo f2ad012d](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6810738784), Codex prosegue la preparazione già autorizzata: adapter QA2, proposta workflow non attiva, CI locale integrale e vincolo QA2 solo sintetica. Il nuovo codice richiede nuova revisione sullo SHA finale; nessuna autorità produttiva discende dal primo GO. Nessuna versione o cornice modificata. Avviso a Claude nella medesima bozza #292 e monitoraggio della revisione; produzione/merge restano riservati a un nuovo ordine di Diego.
+
+Le ricevute #289 → #290 → #291 sono già unite nell'ordine autorizzato, master finale `8afadf8e80ff8b52e789530a6619698d7b4f7869`, [ricevuta GitHub](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/278#issuecomment-6809075057). Solo documenti, nessun rilascio. I checkpoint sottostanti precedono questi merge.
+
 ## C1 QA2 — D05-A Chrome, ricarica con nuovo sblocco e OFF — 11/11/2026
 
 Diego chiede tutti i passi del prossimo test prima di iniziare. Riceve D05-A, limitato alla ricarica dell'intera cornice sulla pagina Account Personali: ON personale, sblocco iniziale, ricarica dal pulsante Chrome, un nuovo sblocco, copia DIAG e OFF. Conferma **stessa pagina e categoria dopo la ricarica, una sola Master dopo Ricarica, sempre app.html e Spento**. Il rapporto di 66 eventi conserva i 47 precedenti e comprende il PAGEHIDE intenzionale del padre seguito dal nuovo ingresso Account, senza altri blocchi/errori nel segmento. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-c1-d05a-ricarica-270-2026-11-11).

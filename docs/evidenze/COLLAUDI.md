@@ -1,5 +1,27 @@
 # Collaudi
 
+<a id="cornice-c1-e2e-locale-2026-11-12"></a>
+
+## C1 — preparazione E2E, verifiche locali e limiti, 12/11/2026
+
+### Seguito al GO sul piano f2ad012d — adapter mai eseguito in produzione
+
+Il [GO Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6810738784) copre piano e primo prototipo. Il seguito prepara adapter con gate CI/manuali, QA2 privata, dialogo Master validato (sopra iframe, inert e focus), contatore DOM senza valori, itinerari reali, reload, timer e logout; proposta YAML fuori da .github. Nessun segreto reale letto, provider chiamato, workflow avviato o nuovo PASS C1. Frontend/Rules/Functions/versione/header/precache invariati; canary OFF secondo Diego.
+
+Suite locale C1 ampliata: **27/27** fra guardie, oracoli e browser Chrome su 127.0.0.1 con richieste esterne bloccate. Owner/broker/transport/focus reali, Auth/UI/DIAG/dati inventati. Il medesimo core del port attraversa il sottoinsieme di nove pagine, cronologia e ricarica, ferma MFA/identità errata/dialogo di creazione prima della conferma, rileva finestre transitorie, distingue ACK timeout da selector ottimistico, gestisce iframe rimosso al blocco e verifica DIAG cancellata/Back chiuso al logout. Test puri negativi per manifest, autorizzazione anche all'import diretto del runner, errori DIAG, ambiente browser senza segreti e artifact precedente non caricabile. Algoritmo 1/3 minuti verificato con clock sintetico: nessuna attesa reale di produzione eseguita.
+
+L'intera suite C1 entra in test:qa-automation/pretest e quindi validate. Restano da verificare provider reali, App Check/MFA effettivi, persistenza cloud, attese fisiche, runner GitHub protetto e motori emulati; Chromium/WebKit Playwright non sono installati su questa postazione (Chrome presente). Configurazione documenti NE se il vero link UI manca; nessun URL diretto o facade al suo posto. Getter distinto dagli appunti; nessuna prova di RAM, PRF, camera, Push o PWA/Safari reali.
+
+### Primo checkpoint f2ad012d — storico approvato, prima dell'adapter
+
+Base master `8afadf8e80ff8b52e789530a6619698d7b4f7869`; [piano proposto, copertura e gate](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12). Nessun adapter/workflow produttivo, credenziale letta, richiesta di produzione o intervento Firebase. Ultimo canary OFF riferito da Diego, senza rilettura amministrativa. Frontend, versione 1.2.270, Rules, Functions, header, manifest e precache invariati.
+
+- `npm run test:c1-e2e-local`: **12/12**, di cui 6 puri e 6 browser Chrome locale. Owner/broker/transport reali, ammissione/materiale e UI sintetici su 127.0.0.1, richieste esterne bloccate. Link Home/Privato/Account, query, Back/Forward browser e freccia interna conservano lo sblocco; reload padre richiede un nuovo invio e conserva pagina/categoria.
+- Negativi intenzionali rilevati: nuova Master in navigazione, destinazione sbagliata, reload senza Master e seconda Master immediata dopo reload. Nessun secondo invio automatico. Guardie pure rifiutano origine produttiva prima di reload/callback, traffico esterno e schema DIAG con campi/codici estranei, query, eventi scaduti/oltre 200 e versione non stringa; errori liberi ricondotti a codice chiuso.
+- `npm run test:qa-automation`: **20/20** e inventario 31 pagine invariato. `npm run test:docs`: **12/12**, elenco 34 Markdown conservato. Sintassi dei tre moduli nuovi e whitespace verificati.
+
+Limiti: i nuclei locali D02/D04 e D05-A non chiudono i D complessivi o colonne fisiche; osservazione di ripetizioni post-reload limitata a due frame grafici, non prova di assenza tardiva. Nessuna leggibilità di dati reali, login/MFA/App Check, PRF, appunti, camera, Push, OS/PWA o RAM direttamente misurata. `validateDiag` controlla il formato di un rapporto sintetico, non raccoglie ancora quello dell'app. CLI senza argomenti e richiesta di produzione si fermano senza rete; nessun nuovo PASS C1 e nessun rilascio dedotti da questi verdi.
+
 <a id="cornice-c1-d05a-ricarica-270-2026-11-11"></a>
 
 ## C1 QA2 — D05-A ricarica del padre, destinazione e nuovo sblocco PASS — 11/11/2026
