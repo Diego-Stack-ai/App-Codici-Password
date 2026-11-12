@@ -22,7 +22,7 @@ export function sanitizeC1Report(value){
   'possibleAppWrites','network','diagSource','cases','code','failureDiagCode','offRequired','timeoutRestoreRequired','firstError'];
  const sha=v=>typeof v==='string'&&/^[a-f0-9]{40}$/.test(v);
  const version=v=>typeof v==='string'&&/^\d{1,3}\.\d{1,3}\.\d{1,6}$/.test(v);
- if(!exact(value,keys)||value.schemaVersion!==2||!C1_PROFILES.includes(value.profile)||
+ if(!exact(value,keys)||value.schemaVersion!==3||!C1_PROFILES.includes(value.profile)||
   !['win32','darwin'].includes(value.platform)||!sha(value.runnerSha)||
   !(value.engineVersion===null||typeof value.engineVersion==='string'&&/^[0-9.]{1,40}$/.test(value.engineVersion))||
   !['productionExecuted','possibleAppWrites','network','timeoutRestoreRequired'].every(key=>typeof value[key]==='boolean')||
@@ -37,7 +37,7 @@ export function sanitizeC1Report(value){
  }
  const firstError=validateFirstError(value.firstError);
  if(firstError&&(firstError.source==='http'?!/^(C1_AUTH_HTTP_|C1_HTTP_FAILURE_)/.test(value.code):value.code!=='C1_RUNTIME_FAILURE'))fail('C1_REPORT_INVALID');
- return {schemaVersion:2,profile:value.profile,platform:value.platform,engineVersion:value.engineVersion,runnerSha:value.runnerSha,
+ return {schemaVersion:3,profile:value.profile,platform:value.platform,engineVersion:value.engineVersion,runnerSha:value.runnerSha,
   release,productionExecuted:value.productionExecuted,possibleAppWrites:value.possibleAppWrites,network:value.network,
   diagSource:'getter',cases:value.cases.map(sanitizeCase),code:value.code,failureDiagCode:value.failureDiagCode,
   offRequired:true,timeoutRestoreRequired:value.timeoutRestoreRequired,firstError};
@@ -106,7 +106,7 @@ export async function runAuthorizedC1(config,secrets,env){
   await context?.close().catch(()=>{});await browser?.close().catch(()=>{});
  }
  const report=sanitizeC1Report({
-  schemaVersion:2,profile:config.profile,platform:process.platform,engineVersion,runnerSha:config.runnerSha,
+  schemaVersion:3,profile:config.profile,platform:process.platform,engineVersion,runnerSha:config.runnerSha,
   release:publicRelease,productionExecuted:possibleAppWrites,possibleAppWrites,network,
   diagSource:'getter',cases,code:failure,failureDiagCode,offRequired:true,
   timeoutRestoreRequired:port?.timerRestoreRequired()===true,firstError

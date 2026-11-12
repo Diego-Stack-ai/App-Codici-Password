@@ -1,5 +1,5 @@
 import {C1_ORIGIN} from './c1-e2e-execution.mjs';
-import {fail,validateDiag,assertLoopback,httpFailureCode,consoleErrorCategory,errorHostCategory,validateFirstError,safeFailure} from './c1-e2e-contract.mjs';
+import {fail,validateDiag,assertLoopback,httpFailureCode,consoleErrorCategory,errorHostCategory,errorOriginCategory,validateFirstError,safeFailure} from './c1-e2e-contract.mjs';
 
 // C1 requires Italian. The local fixture uses the actual onboarding module,
 // so changed application text cannot silently select a different action.
@@ -54,22 +54,30 @@ async function createPort(page,config,secrets,origin,operationTimeout=timeout){
  }catch{/* Unavailable realms are classified conservatively. */}return 'other';};
  // Native pageerror has no Frame. Keep OTHER; do not introduce another error
  // observer which could turn handled/synthetic events into new fatal signals.
- page.on('pageerror',()=>setFatal('C1_RUNTIME_FAILURE',{source:'pageerror',frame:'other',tag:null,host:null}));
+ page.on('pageerror',()=>setFatal('C1_RUNTIME_FAILURE',{source:'pageerror',frame:'other',tag:null,host:null,
+  kind:null,origin:'none',hasArgs:null,firebaseComponent:null}));
  page.on('console',message=>{
   if(message.type()!=='error'||fatal!==null||!errorsOpen)return;
-  const category=consoleErrorCategory(message.text(),message.location().url);
-  if(!setFatal('C1_RUNTIME_FAILURE',{source:'console',frame:'other',...category}))return;
+  let text,locationUrl,firstArg,hasArgs=null;
+  try{text=message.text();}catch{/* Unavailable text stays OTHER. */}
+  try{locationUrl=message.location().url;}catch{/* Unavailable location stays NONE. */}
+  try{const args=message.args();if(Array.isArray(args)){hasArgs=args.length>0;firstArg=args[0];}}
+  catch{/* Count and realm can be unavailable; never read argument values. */}
+  const category=consoleErrorCategory(text,locationUrl);
+  if(!setFatal('C1_RUNTIME_FAILURE',{source:'console',frame:'other',...category,hasArgs}))return;
   const reserved=firstError;
   // Resolve only this error's realm, without reading its argument. No new wait
   // or budget: if the context is gone or still pending at report time, OTHER.
-  try{void message.args()[0]?.evaluate(()=>window===top?'top':
+  try{void firstArg?.evaluate(()=>window===top?'top':
    window.frameElement?.id==='vault-frame'&&parent===top?'vault-child':'other')
    .then(value=>{if(['top','vault-child','other'].includes(value))reserved.frame=value;}).catch(()=>{});
   }catch{/* Native resource messages can have no JavaScript handle. */}
  });
  page.on('response',response=>{const status=response.status();
    if(status>=400){let source;try{source=response.frame();}catch{/* Service worker / detached frame. */}
-    setFatal(httpFailureCode(status,response.url()),{source:'http',frame:errorFrame(source),tag:null,host:errorHostCategory(response.url())});}});
+    const url=response.url();
+    setFatal(httpFailureCode(status,url),{source:'http',frame:errorFrame(source),tag:null,host:errorHostCategory(url),
+     kind:null,origin:errorOriginCategory(url),hasArgs:null,firebaseComponent:null});}});
  page.on('requestfailed',request=>{if(request.failure()?.errorText!=='net::ERR_ABORTED')setFatal('C1_NETWORK_FAILURE');});
  page.on('dialog',dialog=>{setFatal('C1_MODAL_UNEXPECTED');void dialog.dismiss().catch(()=>{});});
  page.on('download',download=>{setFatal('C1_MODAL_UNEXPECTED');void download.cancel().catch(()=>{});});

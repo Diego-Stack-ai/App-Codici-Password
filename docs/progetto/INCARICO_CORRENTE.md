@@ -1,5 +1,15 @@
 # Incarico corrente
 
+<a id="cornice-c1-console-classificazione-2026-11-12"></a>
+
+## C1 — classificazione chiusa dopo il quarto giro e la prova manuale, 12/11/2026
+
+Diego ordina **«Pubblica la ricevuta e prepara la PR»**, dopo la [revisione Claude del quarto giro](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/296#issuecomment-6827859961) e la prova manuale autorizzata. [Ricevuta manuale pubblicata](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/296#issuecomment-6828585233); errore non riprodotto, nessun PASS C1. Base master `f5f0e0db1e4881c89a6b0ba4054aab3bd2d67634`, ramo codex/c1-console-categories-20261112.
+
+Perimetro: solo runner C1, test locali RED → GREEN e i cinque documenti esistenti pertinenti. Rapporto candidato v3 con kind, origin, hasArgs e firebaseComponent chiusi: nessun messaggio, URL, stack, identificativo o valore degli argomenti. Preservare primo errore, fase, priorità, guardia prima della Master, timeout, arresto e assenza di retry. Gli indizi non provano origine o causa. Commit/push del ramo, PR in bozza e avviso per la revisione Claude autorizzati.
+
+Nessun Frontend/cornice, workflow, versione, Rules/Functions, header, manifest/precache, segreto o cloud modificato. Elenco chiuso di 34 Markdown invariato. Canary OFF secondo Diego; nessuna rilettura amministrativa. Nessun merge, nuovo giro o deploy: ciascuno resta soggetto ai propri gate e a un nuovo ordine personale. Stato DA_VERIFICARE, nessuna auto-approvazione. I blocchi seguenti sono checkpoint precedenti.
+
 <a id="cornice-c1-frame-entry-runtime-2026-11-12"></a>
 
 ## C1 — banco locale e PR dopo il runtime error del giro #3, 12/11/2026

@@ -1,5 +1,17 @@
 # Sicurezza
 
+<a id="cornice-c1-console-classificazione-2026-11-12"></a>
+
+## C1 — contratto candidato della classificazione v3, 12/11/2026
+
+Il nuovo ordine dopo [quarto giro e prova manuale](../evidenze/COLLAUDI.md#cornice-c1-console-classificazione-2026-11-12) abilita solo runner/test/documenti. Rapporto candidato schemaVersion=3: involucro di 16 campi conservato, firstError nullo o oggetto esatto a nove campi, con kind, origin, hasArgs e firebaseComponent aggiunti ai cinque precedenti. [Enum e combinazioni](../procedure/COLLAUDI.md#cornice-c1-console-classificazione-2026-11-12). Le ricevute v1/v2 restano storiche; il writer candidato accetta solo v3.
+
+Classificazione sincrona prima della prenotazione del primo fatal, senza nuovi canali, attese, retry o variazioni di deadline/guardie. Solo prefissi riconosciuti e host esatti; CSP richiede anche la stringa letterale Content Security Policy. Per console origin classifica message.location().url; per HTTP classifica l'URL della risposta, non uno script o initiator; pageerror mantiene none. Mai URL citati nel messaggio. Host imitatori, userinfo, porte non standard e protocolli non HTTPS restano other. URL e testo sono transitori e non vengono esportati. I messaggi JS possono imitare prefissi nativi: kind/origin/hasArgs non provano autore, causa o provenienza dal browser.
+
+args() è letto una volta: conteggio degli handle e sola valutazione del realm già prevista sul primo handle, mai valori/proprietà/jsonValue. hasArgs nullo indica API indisponibile, non assenza di argomenti. Per HTTP e pageerror kind, hasArgs e firebaseComponent sono null; pageerror mantiene origin=none senza leggere errore/stack per dedurla. Contesti persi/pendenti non prolungano il budget. Validatore ricostruttivo, campi estranei e combinazioni incoerenti rifiutati prima dell'artefatto; nessun identificativo, chiave, contenuto Vault, URL o testo libero nei rapporti.
+
+Nessuna modifica ad app, workflow, logger, versione, header, manifest/precache, Auth/App Check o cloud. Canary OFF secondo Diego. Nessun nuovo giro, merge o deploy da questo contratto candidato; nuovo GO Claude e ordini personali restano distinti. Il blocco v2 seguente conserva il contratto precedente.
+
 <a id="cornice-c1-frame-entry-runtime-2026-11-12"></a>
 
 ## C1 — contratto candidato del primo errore v2, 12/11/2026
