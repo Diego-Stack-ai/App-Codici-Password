@@ -1,18 +1,149 @@
 # Collaudi
 
+<a id="cornice-c1-recaptcha-eccezione-2026-11-12"></a>
+
+## C1 — strada A e rapporto candidato v4, 12/11/2026
+
+[Ordine e decisione](../progetto/DECISIONI.md#cornice-c1-recaptcha-eccezione-2026-11-12). L'eccezione riguarda esclusivamente il runner; la causa del #5 resta indeterminata e il suo pathname non è noto. Solo una futura esecuzione ordinata potrà attestare se quell'evento soddisfa il predicato. Nessun sesto giro da questa preparazione.
+
+Il nuovo involucro v4 ha i 16 campi v3 più thirdPartyConsole, sempre presente anche senza browser/DIAG. firstError resta null oppure oggetto esatto con phase, source, frame, tag, host, kind, origin, hasArgs, firebaseComponent e googlePath: 10 campi. I primi nove mantengono [enum e combinazioni v3](#cornice-c1-console-classificazione-2026-11-12); googlePath è una delle quattro categorie sotto solo per console/origin Google, null negli altri casi, anche HTTP Google. Il writer candidato accetta soltanto v4, senza riscrivere le ricevute storiche.
+
+| Categoria googlePath | Host/path ammessi, dopo verifica origin=google |
+|---|---|
+| recaptcha-api | www.google.com, www.recaptcha.net o recaptcha.google.com; pathname esattamente /recaptcha/api.js oppure /recaptcha/enterprise.js |
+| recaptcha-frame | Gli stessi tre host; /recaptcha/api2/ oppure /recaptcha/enterprise/ con almeno un discendente |
+| gstatic-recaptcha | Solo www.gstatic.com; /recaptcha/ con almeno un discendente |
+| other | Ogni altra location Google; non ammessa all'eccezione |
+
+Solo URL HTTPS canonici senza userinfo/porta non standard. Si usa il pathname normalizzato dal parser URL: se contiene codifiche percentuali residue resta other; segmenti punto già risolti dal parser seguono invece il percorso canonico risultante. Query/hash sono ignorati, mai copiati. Host imitatori, API con suffissi diversi, prefissi senza confine / o radici prive di discendente non sono ammessi. Una location non Google produce googlePath=null nel metadato console; non si deriva il percorso dal testo.
+
+Predicato congiunto: type error, hasArgs esattamente false ricavato da array vuoto, origin google, una delle tre categorie reCAPTCHA, kind/tag OTHER, testo stringa leggibile e non vuoto dopo trim. Esclusione conservativa dei marcatori CSP o CORS come parole, Content Security Policy e Permissions Policy con spazi/trattini, indipendentemente dalle maiuscole. Nessuna nuova categoria libera: i marcatori mantengono il fatal anche se kind resta OTHER. RESOURCE e API text/location/args non verificabili restano fatali; un array con elemento undefined non è vuoto.
+
+| Campo thirdPartyConsole | Vincolo esatto |
+|---|---|
+| count | Intero 0–20, saturante; 20 = almeno 20 |
+| firstPhase | null se zero; prima fase C1 valida se positivo |
+| googlePath | null se zero; prima delle tre categorie reCAPTCHA se positivo, mai other |
+
+Il primo contesto non viene sostituito. Conteggio solo prima del fatal/freeze, getter restituisce copia validata, snapshot prima di chiudere il browser; nessun testo/URL o valore dell'handle registrato. La policy non altera altri listener, classificazioni fatal, guardie, timer o deadline. Un successivo HTTP/pageerror resta fatale anche dopo un'eccezione. Una deroga registrata non è prova della salute di reCAPTCHA o un PASS C1.
+
+Banco solo loopback: doubles di ConsoleMessage nell'attesa reale Home → app, delegando listener/wait al vero Page. Non contatta Google e non riproduce il messaggio nativo reale #5. Negativi per argomenti/dati indisponibili, risorse, sicurezza, altri percorsi/origini, HTTP, pageerror e guardia pre-Master. [Esiti](../evidenze/COLLAUDI.md#cornice-c1-recaptcha-eccezione-2026-11-12). Canary OFF; PR/CI/GO Claude e ordini personali distinti prima di merge e nuovo giro.
+
+<a id="cornice-c1-console-classificazione-2026-11-12"></a>
+
+## C1 — rapporto candidato v3 e classificazione della console, 12/11/2026
+
+Seguito autorizzato della [prova manuale dopo il quarto giro](../evidenze/COLLAUDI.md#cornice-c1-console-classificazione-2026-11-12). Solo runner/test; nessun nuovo giro produttivo. Il rapporto v3 mantiene i 16 campi dell'involucro v2 e rende firstError nullo oppure oggetto esatto con questi nove campi. Il writer candidato rifiuta versioni precedenti, senza riscrivere le ricevute storiche.
+
+| Campo firstError | Valori ammessi nel candidato v3 |
+|---|---|
+| phase | LOGIN_READY, LOGIN_SUBMIT, AUTH_WAIT, FRAME_ENTRY, UNLOCK, SETTINGS, DIAG_OPT_IN, CASE |
+| source | console, pageerror, http |
+| frame | top, vault-child, other; limiti del realm invariati |
+| tag | 32 prefissi app chiusi più RESOURCE/OTHER solo console; null altrimenti |
+| host | appcheck, identity, firestore, other solo HTTP/console RESOURCE; null altrimenti |
+| kind | Solo console: CSP, CORS, PERMISSIONS_POLICY, FIREBASE_SDK, UNCAUGHT_PROMISE, OTHER; null altrimenti |
+| origin | app, google, firebase, none, other; console: location del messaggio; HTTP: URL della risposta, non script/initiator; pageerror: none |
+| hasArgs | Solo console: booleano se args() disponibile, null se indisponibile; null negli altri canali |
+| firebaseComponent | app-check, auth, firestore, messaging, installations, app solo per FIREBASE_SDK; null negli altri casi |
+
+Un kind diverso da OTHER richiede tag OTHER. Prefissi CSP classici/moderni richiedono anche Content Security Policy; un generico Refused to set unsafe header resta OTHER. CORS richiede Access to e blocked by CORS policy; Permissions-Policy usa prefissi letterali. Firebase riconosce soltanto @firebase/componente chiuso, anche dopo timestamp ISO; nessun componente arbitrario. Uncaught (in promise) è classificato solo se presente nel messaggio console: una promessa rilevata dal solo pageerror non riceve un kind inventato.
+
+origin usa soltanto URL HTTPS standard senza userinfo e con host esatti: message.location().url per console e URL della risposta per HTTP, senza dedurne lo script o initiator. app è l'origine Hosting canonica; google comprende www.google.com, www.gstatic.com, www.recaptcha.net e recaptcha.google.com; firebase comprende gli host esatti Auth/App Check/Firestore già riconosciuti, firebase.googleapis.com, firebaseinstallations.googleapis.com, fcmregistrations.googleapis.com, fcm.googleapis.com e il percorso /firebasejs/ di www.gstatic.com. Location assente = none; sconosciuta/non valida/non HTTPS = other. URL, path, query, hash e testo originali non entrano nell'artefatto. Classificazioni e hasArgs non certificano che il messaggio sia nativo: JavaScript può imitare i prefissi.
+
+Tutti i dati sincroni vengono raccolti prima di setFatal; args() una sola volta e nessuna lettura dei valori. L'eventuale risoluzione realm resta senza attesa aggiuntiva. Primo errore, codice, fase, guardia pre-Master, timer/stop/freeze e gate personali invariati. Banco solo loopback con rete esterna bloccata: CSP nativo reale, promessa non gestita reale e doubles per categorie/assenza API. Non è una prova produttiva o la causa dimostrata del giro #4. Canary OFF; nuovo giro solo dopo PR/CI/revisione/merge e ordine di Diego. Le sezioni v2/v1 successive restano storiche.
+
+<a id="cornice-c1-frame-entry-runtime-2026-11-12"></a>
+
+## C1 — ingresso autonomo e rapporto v2 del primo errore, 12/11/2026
+
+Seguito candidato alla [ricevuta #3 e revisione](../evidenze/COLLAUDI.md#cornice-c1-frame-entry-runtime-2026-11-12). Dopo l'unico submit di login il runner non esegue goto(app.html): sulla Home attende l'ingresso autonomo dell'app nel budget iniziale residuo, poi rivalida il documento della cornice. Se l'app resta standalone con Auth pronta, C1_FRAME_NOT_ENTERED / BLOCKED, senza invio Master. Solo il segnale framework Playwright di contesto distrutto, riconosciuto con firma completa nella guardia iniziale campionata sulla Home, può indicare la sostituzione del documento mentre la lettura Auth è pendente. L'osservazione non dipende dal nuovo URL già visibile: si attende app entro la stessa deadline, poi si esegue la guardia completa del nuovo documento. Un normale errore del token, una stringa simile lanciata dall'app o lo stesso segnale su app non concede questa transizione: C1_BOOTSTRAP_MISMATCH. Mai un secondo login o un import privo dell'entry Resource Timing. La guardia privata immediatamente prima della Master resta obbligatoria.
+
+Il rapporto nuovo ha schemaVersion=2 e gli stessi campi v1 più firstError: null oppure oggetto esatto phase/source/frame/tag/host. I rapporti v1 già prodotti restano storici e non vengono riscritti. Il nuovo validatore ricostruisce l'intero involucro v2 e respinge campi/codici estranei prima di scrivere l'artefatto.
+
+Se le letture UI del ciclo consumano il budget, non avviare una nuova guardia Auth oltre la deadline: resta l'ultima osservazione chiusa già ottenuta. Una guardia effettivamente iniziata ma non verificabile entro il limite resta C1_BOOTSTRAP_MISMATCH; la race con il timer e il controllo finale continuano a rifiutare successi tardivi. Nessun tempo aggiuntivo o nuovo tentativo di login.
+
+| Campo firstError | Valori ammessi |
+|---|---|
+| phase | LOGIN_READY, LOGIN_SUBMIT, AUTH_WAIT, FRAME_ENTRY, UNLOCK, SETTINGS, DIAG_OPT_IN, CASE |
+| source | console, pageerror, http |
+| frame | top, vault-child, other |
+| tag | Solo console: 32 prefissi letterali inventariati nel repository più RESOURCE/OTHER; null negli altri canali |
+| host | appcheck, identity, firestore, other per HTTP o console RESOURCE; null negli altri casi |
+
+Il primo fatal prenota subito codice e fase. Errori successivi non cambiano la priorità; un timeout successivo conserva il fatal nei catch e nella selezione del codice del rapporto. Errori di raccolta DIAG/cleanup non diventano la causa iniziale. Il messaggio console viene classificato transitoriamente nel processo runner: soltanto prefisso letterale chiuso o OTHER; nessun suffisso viene conservato. Failed to load resource diventa RESOURCE, con host esatto della location classificato subito. URL del file sorgente non viene usato per dedurre il frame. Per console si può osservare il realm dell'handle senza leggerne il valore; contesto assente, scaricato o ancora pendente al rapporto resta other, senza attesa aggiuntiva. Il listener nativo pageerror non fornisce un Frame: si registra other anche se il banco sa che l'errore proviene dal figlio. Nessuna nuova binding o intercettazione di error/unhandledrejection, nessuna correlazione inventata o alterazione dei canali fatal preesistenti.
+
+Nessun URL, testo libero, stack, frame name, identificativo o valore sensibile nel rapporto. Nessun cambiamento di Auth/App Check, tempi, timer, app o workflow. La suite resta locale/loopback con rete esterna bloccata. Quarto giro soltanto dopo PR, CI verde, revisione Claude e merge con ordini personali; OFF alla prima anomalia o al termine. Canary OFF. Le descrizioni sotto dello stesso schema si riferiscono al contratto v1 precedente.
+
+<a id="cornice-c1-bootstrap-readiness-2026-11-12"></a>
+
+## C1 — bootstrap del login e osservazioni NOT_READY, 12/11/2026
+
+Seguito alla diagnosi del secondo giro e all'ordine di Diego: [banco locale e limiti](../evidenze/COLLAUDI.md#cornice-c1-runner-readiness-2026-11-12). Nel runner candidato DOMContentLoaded non basta per autorizzare il clic. Attendere body.revealed, controllare l'assenza di errori registrati e gestire l'eventuale dialogo lingua prima di compilare. data-i18n=ready è già nel markup e non è readiness del listener. Nessun file applicativo viene modificato per far passare l'oracolo.
+
+Se compare initial-language-dialog, validare unicità, struttura canonica, ruolo/modalità/titolo, testi italiani, otto lingue e due comandi. Usare soltanto il secondario Ho già un account via clic UI; mai remove via evaluate, conferma lingua, scrittura storage o profilo persistente. Verificare rimozione e assenza di navigazione; dialogo non conforme = C1_LANGUAGE_DIALOG, senza login. Conservare il primo errore anche se arriva durante la validazione.
+
+Budget iniziale unico di 30 secondi da DOMContentLoaded per bootstrap, UI e conferma Auth, con tempo residuo nelle azioni e deadline anche attorno alla verifica del token. Un risultato tardivo non diventa successo. Check Auth non verificabile entro il limite = C1_BOOTSTRAP_MISMATCH; nessun aumento o retry. La Master conserva guardia privata immediatamente prima del solo invio ammesso.
+
+| Osservazione che impedisce l'avvio | Codice chiuso, BLOCKED |
+|---|---|
+| Bootstrap non pronto o login ancora visibile dopo l'unico submit | C1_AUTH_NOT_READY_LOGIN |
+| Destinazione diversa da login/Home/cornice attesi | C1_AUTH_NOT_READY_ROUTE |
+| Entry Resource Timing esatta non osservata | C1_AUTH_NOT_READY_RESOURCE |
+| Modulo osservato ma utente Auth assente | C1_AUTH_NOT_READY_USER |
+| Dialogo lingua inatteso, non conforme o con navigazione | C1_LANGUAGE_DIALOG |
+
+La guardia Resource Timing resta attiva; nessun import forzato se manca il prerequisito. Questi codici descrivono osservazioni, non provano credenziali errate, App Check o una causa del vecchio giro. Rapporto con lo stesso schema chiuso, nessun URL, conteggio aggiuntivo, testo libero, identificativo o valore di campo. Il codice generico NOT_READY resta soltanto nei rapporti storici, non viene riclassificato retroattivamente. Codici HTTP della #294, OFF_REQUIRED, nessun retry, timeout D06 e gate personali invariati.
+
+Il banco riproduce il submit prematuro sul port precedente e prova la candidata solo con dati inventati; non autentica provider reali. Approvazione Claude sulla diagnosi distinta da revisione del nuovo SHA. Canary OFF, nessun terzo giro prima di PR, CI verde, riesame e merge; merge e giro ciascuno su ordine personale di Diego. Opzione A resta soltanto valutata.
+
+<a id="cornice-c1-auth-codici-2026-11-12"></a>
+
+## C1 — diagnostica Auth dopo il primo giro bloccato, 12/11/2026
+
+Checkpoint #294, ora integrata: il [primo giro reale](../evidenze/COLLAUDI.md#cornice-c1-primo-giro-2026-11-12) non ha superato SETUP. La PR sostituisce il generico C1_AUTH_BLOCKED con sei codici chiusi; il seguito alla revisione di 079c6ed2 aggiunge quattro C1_HTTP_FAILURE_* per gli altri status almeno 400. La tabella sotto conserva quel checkpoint; nel seguito corrente il NOT_READY aggregato è distinto nelle quattro osservazioni definite sopra. Schema chiuso e guardie HTTP restano invariati.
+
+| Segnale osservato | Sottocodice fisso |
+|---|---|
+| HTTP 401/403, host esatto firebaseappcheck.googleapis.com oppure content-firebaseappcheck.googleapis.com | C1_AUTH_HTTP_APPCHECK |
+| HTTP 401/403, host esatto identitytoolkit.googleapis.com oppure securetoken.googleapis.com | C1_AUTH_HTTP_IDENTITY |
+| HTTP 401/403, host esatto firestore.googleapis.com | C1_AUTH_HTTP_FIRESTORE |
+| HTTP 401/403, qualsiasi altro host o URL non analizzabile | C1_AUTH_HTTP_OTHER |
+| Pannello di verifica email visibile, oppure email non verificata nel bootstrap dopo il confronto privato QA2 | C1_AUTH_EMAIL_UNVERIFIED |
+| Utente/bootstrap non pronto al controllo richiesto o autenticazione non confermata entro il limite esistente | C1_AUTH_NOT_READY |
+| Altri HTTP almeno 400, stesse quattro categorie host | C1_HTTP_FAILURE_APPCHECK / C1_HTTP_FAILURE_IDENTITY / C1_HTTP_FAILURE_FIRESTORE / C1_HTTP_FAILURE_OTHER |
+
+I servizi canonici sono documentati da [Firebase](https://firebase.google.com/docs/projects/api-keys); l'alias content-firebaseappcheck è presente nel bundle Firebase distribuito dall'app. Nessun suffisso, substring, path o query decide la categoria. L'URL serve transitoriamente a leggere hostname, poi resta solo il codice; nessun host arbitrario, URL, header, body, testo del provider o identificativo entra in log, DIAG o rapporto. Un codice HTTP identifica il servizio osservato, **non la causa del diniego** e non prova un punteggio reCAPTCHA. Email/utente non pronto non dimostrano credenziali errate. Il vecchio rapporto C1 #1 conserva il codice storico: nessuna riclassificazione retroattiva.
+
+I sei sottocodici Auth restano BLOCKED; i quattro C1_HTTP_FAILURE_* restano FAIL come il precedente HTTP generico. Tutti emettono OFF_REQUIRED e mantengono l'arresto senza retry. Anche un 400, 429 o 5xx conserva la categoria del servizio, senza concludere quale causa abbia prodotto la risposta. Il primo errore resta prevalente; un errore runtime successivo non lo sostituisce. MFA, identità/progetto/claim errati e bootstrap non verificabile conservano i propri codici e guardie. DIAG assente resta null, non un rapporto vuoto inventato. Nessun dato aggiuntivo né prova positiva deriva dal verde dei test locali.
+
+<a id="cornice-c1-self-hosted-valutazione-2026-11-12"></a>
+
+### Opzione A — self-hosted sul PC con Chrome visibile, solo valutata
+
+**Fattibile tecnicamente, non attivata e non dimostrata come soluzione al blocco.** Chrome visibile sulla connessione di Diego consentirebbe l'osservazione del giro. Il diverso ambiente potrebbe cambiare il comportamento del provider, ma il primo rapporto non ne identifica la causa. Il runner attuale resta headless:true: una futura modalità esplicita headless:false e il relativo targeting del job richiedono progetto/revisione separati. Playwright supporta [Chrome e modalità visibile](https://playwright.dev/docs/browsers); [headless](https://playwright.dev/docs/api/class-browsertype#browser-type-launch-option-headless) non implica riuso di profili. Context nuovo obbligatorio, nessun collegamento al Chrome già aperto o al profilo personale. Policy aziendali possono interferire.
+
+Per vedere la finestra servirebbe avviare il runner nella sessione Windows interattiva con Diego presente, senza servizio: i [servizi Windows sono isolati dal desktop utente](https://learn.microsoft.com/en-us/windows/win32/services/interactive-services). Non è consigliato registrare la sessione di lavoro del PC personale come runner del repository pubblico: GitHub segnala il rischio di compromissione e persistenza nei [self-hosted](https://docs.github.com/en/actions/reference/security/secure-use). Environment, branch gate nel nostro YAML e label non isolano il computer né impediscono da soli ad altri workflow di raggiungerlo. Il filtro delle variabili del browser non protegge i file accessibili a Node e agli altri step.
+
+Variante da valutare: **VM Windows dedicata e temporanea sul PC**, visibile in una finestra, utente standard, senza OneDrive, cartelle/clipboard condivise, profili personali, credenziali Git/gh, ADC/gcloud, chiavi cloud o accesso alla rete aziendale. Isolare l'intero ambiente, non soltanto il context browser. Occorre anche verificare un vincolo effettivo al solo workflow revisionato: le restrizioni dei [runner group](https://docs.github.com/en/enterprise-cloud%40latest/actions/how-tos/manage-runners/self-hosted-runners/manage-access) dipendono dalle funzionalità dell'account/piano, qui non verificate. Senza tale vincolo, l'opzione resta sospesa; un harness privato separato richiederebbe una distinta decisione di Diego.
+
+Lifecycle proposto, non eseguito: runner per un solo job e una sola finestra concordata, poi rimozione e distruzione/ripristino della VM pulita. La [registrazione effimera](https://docs.github.com/en/actions/reference/runners/self-hosted-runners) si annulla dopo un job ma non ripulisce il sistema; fermare il processo lascia invece il runner registrato offline. La [rimozione GitHub](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/remove-runners) revoca l'associazione. Nessuna registrazione, installazione, credenziale o modifica di protezioni in questa PR.
+
+Restano QA2 soltanto sintetica, segreti nell'environment, SHA esatto, dispatch manuale, approvazione personale, OFF alla prima anomalia e a fine giro, nessun retry e nuovo ordine per ogni esecuzione. Nessun debug token App Check, bypass Auth/Rules, esportazione sessioni, trace, video, HAR o screenshot automatici. Una futura estensione del rapporto dovrebbe distinguere hosted/self-hosted con soli valori fissi, senza nome del PC. Chrome visibile non certifica Safari iPhone, PWA, camera, push o dispositivi reali. **Gate: scelta di Diego, progetto tecnico e revisione Claude prima di attivare A; poi ordine personale per il giro.**
+
 <a id="cornice-c1-e2e-piano-2026-11-12"></a>
 
 ## C1 — adapter integrato e PR dedicata al workflow manuale, 12/11/2026
 
-**Stato: nuova PR del workflow, nessuna esecuzione produttiva.** La #292 ha [GO Claude sul codice 45f50a9e](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6812002019) e [CI verde](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6812127683); Diego ne ha ordinato il merge, master `6dd80df1ee7be63550583b89bde6b326ad8122b5`, [ricevuta](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6816335473). Ha poi configurato l'environment e autorizzato una PR separata per spostare il workflow nel percorso riconosciuto da Actions, con nuovo avviso a Claude. **Nessun merge o dispatch della nuova PR senza nuovo ordine di Diego.** Produzione osservata 1.2.270 da `cb48b7196a3816a62dda05d11e11ff4ca7c51d26`; canary **OFF secondo Diego**, senza rilettura amministrativa; scadenza 18/11/2026 alle 23:59 italiane invariata.
+**Stato: primo giro SETUP BLOCKED, nuova PR soltanto diagnostica.** #292 e #293 sono unite dopo GO e ordini di Diego; master del runner `cd05b44e26792a70fe7f37e43be5172dfc75f81d`. La [ricevuta C1 #1](../evidenze/COLLAUDI.md#cornice-c1-primo-giro-2026-11-12) distingue tentativo reale ed esiti non eseguiti. La PR corrente aggiunge i sottocodici descritti sopra e valuta A, senza nuovo dispatch: prima revisione Claude e nuovo ordine personale di Diego. Produzione osservata 1.2.270 da `cb48b7196a3816a62dda05d11e11ff4ca7c51d26`; canary **OFF secondo Diego**, senza rilettura amministrativa; scadenza 18/11/2026 alle 23:59 italiane invariata.
 
 ### Adapter integrato e nuova PR workflow
 
-Piano completo e adapter **preparato ma mai eseguito contro produzione**: avvio Auth normale, confronto privato QA2/progetto/claim prima di ogni Master prevista, singolo invio solo nel dialogo semanticamente Sblocco Vault, contatore DOM di nuove finestre senza leggerne i valori; nessuna riapertura automatica per mascherare regressioni. Priorità concordata con Claude: D02, D04, D05-A, D06 a 1/3 minuti e D08 locale. Lo schema DIAG è chiuso e il rapporto viene raccolto tramite getter delimitato, non tramite clipboard; codice/segmento del caso controllati anche semanticamente per errori, dinieghi e blocchi inattesi.
+Piano completo e adapter integrato; il primo tentativo produttivo si è fermato prima dei casi, come documentato sopra. Avvio Auth normale, confronto privato QA2/progetto/claim prima di ogni Master prevista, singolo invio solo nel dialogo semanticamente Sblocco Vault, contatore DOM di nuove finestre senza leggerne i valori; nessuna riapertura automatica per mascherare regressioni. Priorità concordata con Claude: D02, D04, D05-A, D06 a 1/3 minuti e D08 locale. Lo schema DIAG è chiuso e il rapporto viene raccolto tramite getter delimitato, non tramite clipboard; codice/segmento del caso controllati anche semanticamente per errori, dinieghi e blocchi inattesi.
 
 `npm run qa:c1:e2e -- --help` e `--list` sono inerti. Nessun argomento significa arresto; `--production` richiede contesto GitHub manuale/master/SHA esatto, operatore approvato, ordine personale, attestazioni private e quattro segreti QA2; senza questi si ferma prima di leggere credenziali, importare Playwright o fare rete. Non accetta URL, UID, profili persistenti, credenziali o accelerazioni temporali come argomenti. Il manifest pubblico deve coincidere con versione/SHA di rilascio prima del login. Gli errori sono solo codici fissi, mai stack o messaggi originali.
 
-Il [workflow candidato](../../.github/workflows/c1-qa2-e2e.yml) è ora nel percorso .github/workflows del **solo ramo della nuova PR**; la copia scripts/workflows è rimossa. Dopo un eventuale merge autorizzato sarà disponibile in Actions, esclusivamente tramite workflow_dispatch: nessun trigger push, PR, schedule o altro avvio automatico. Non è stato avviato. Environment, reviewer, variabile e quattro nomi di segreti sono stati osservati nella UI; i valori non sono stati letti o verificati. [Ricevuta e limiti della configurazione](../evidenze/COLLAUDI.md#cornice-c1-workflow-config-2026-11-12). I tre profili restano dispatch esclusivi; provider reali, MFA/App Check e WebKit/macOS non sono certificati localmente. Nessun adapter, Frontend/cornice, versione, Rules, Functions, header, manifest pubblico o precache cambia in questa PR.
+Il [workflow](../../.github/workflows/c1-qa2-e2e.yml) è disponibile su master dopo il merge autorizzato della #293, esclusivamente tramite workflow_dispatch: nessun trigger push, PR, schedule o altro avvio automatico. Un solo giro autorizzato eseguito, fermo al setup; nessun retry. Environment, reviewer, variabile e quattro nomi di segreti sono stati osservati nella UI; i valori non sono stati letti da Codex. [Ricevuta e limiti della configurazione](../evidenze/COLLAUDI.md#cornice-c1-workflow-config-2026-11-12). I tre profili restano dispatch esclusivi; provider reali, MFA/App Check e WebKit/macOS non sono certificati dal banco locale. La PR diagnostica cambia solo codici/adapter/test/documenti: Frontend/cornice, workflow, headless, versione, Rules, Functions, header, manifest pubblico e precache invariati.
 
 `npm run test:c1-e2e-local` esegue guardie, oracoli e fixture browser su 127.0.0.1, con ogni richiesta esterna bloccata; il medesimo core dell'adapter è usato tramite un wrapper esclusivamente loopback e timeout UI ridotto. Auth, UI, DIAG e dati sono inventati; owner/broker/transport sono reali. L'intera suite entra ora in `test:qa-automation`, quindi in pretest/npm test e nella validate esistente. [Esiti locali e limiti](../evidenze/COLLAUDI.md#cornice-c1-e2e-locale-2026-11-12). I timer 1/3 sono provati localmente come algoritmo con clock sintetico e come selezione/ACK UI; le attese reali e i provider non sono ancora eseguiti. Nessun nuovo PASS C1.
 
@@ -32,7 +163,7 @@ Le righe sotto descrivono la **copertura proposta finale** e il codice preparato
 
 | Caso | Copertura proposta | Codice presente e controlli che restano |
 |---|---|---|
-| D01 avvio | P: login QA2 reale, Auth/App Check, identità e ammissione, uno sblocco iniziale | Adapter SETUP preparato, MFA/email non verificata = BLOCKED prima della Master. Nessun provider reale provato; non è il PASS completo D01. |
+| D01 avvio | P: login QA2 reale, Auth/App Check, identità e ammissione, uno sblocco iniziale | Primo giro SETUP BLOCKED, causa non determinata e DIAG assente; nessun PASS D01. MFA/email non verificata restano BLOCKED prima della Master. |
 | D02 dieci pagine | A: dieci destinazioni canoniche via UI, padre app.html, dati pronti e nessuna nuova Master | Nove percorsi UI preparati; Configurazione documenti NE se manca il link reale, D02 LIMITE. Account richiede card di fixture; mancanza/caricamento/errore non diventano PASS. |
 | D03 sezioni/parità | P: tab/query/anchor, copia di solo valore sintetico, annullamento editor e confronto standalone | Non implementato. Visibilità e confronto fisico restano necessari; nessun salvataggio o automatismo verso fixture mancanti. Appunti Safari/PWA manuali. |
 | D04 cronologia | A per percorsi fissati, Back/Forward browser e freccia app, query/anchor, nessun doppio salto o ripristino sensibile | Preparati i sette comandi Home/Profilo/Home/Privato/Account/Back/Forward/freccia interna, query categoria e conteggio finestre. Anchor e ripristino form sensibili restano fuori dal nucleo. |
@@ -77,7 +208,7 @@ Alla prima anomalia: emissione immediata di OFF_REQUIRED con codice fisso; **Die
 
 ### Residuo fisico e sequenza di approvazione
 
-Configurazione GitHub già eseguita da Diego e [osservata nella UI](../evidenze/COLLAUDI.md#cornice-c1-workflow-config-2026-11-12): environment c1-qa2-production, reviewer personale, solo master, bypass disattivato, variabile C1_ALLOWED_OPERATOR e quattro nomi di segreti presenti nell'environment. Nessun contenuto letto, nessuna prova del loro funzionamento; nessuna chiave JSON o ADC. L'incarico corrente prepara soltanto la PR di spostamento del workflow con test e nuovo avviso a Claude; non ne autorizza merge o dispatch.
+Configurazione GitHub già eseguita da Diego e [osservata nella UI](../evidenze/COLLAUDI.md#cornice-c1-workflow-config-2026-11-12): environment c1-qa2-production, reviewer personale, solo master, bypass disattivato, variabile C1_ALLOWED_OPERATOR e quattro nomi di segreti presenti nell'environment. Nessun contenuto letto, nessuna prova di login riuscito dal primo giro; nessuna chiave JSON o ADC. L'incarico corrente prepara soltanto la PR diagnostica con test e valutazione A, senza autorizzare un secondo giro.
 
 Il dispatch futuro richiede SHA del runner esatto, versione/SHA Hosting attesi, un profilo, link al commento con ordine personale e tre attestazioni false di default: preflight privato completato (QA2 fittizia, email verificata, MFA OFF, fixture/italiano/timeout), effetti accettati e limite D02 accettato se presente. Non verificano da sole la verità dell'ordine: valgono insieme alle protezioni dell'environment e all'approvazione personale. Nessun accesso ai segreti o al cloud per tentare il codice durante la revisione.
 

@@ -17,6 +17,13 @@ export async function createLocalC1Driver(page) {
     guardedContexts.set(context, origin);
   }
   const timeout = 3000;
+  const clickTimeout = 10000;
+  // Closed labels for the synthetic local bank only, not production report codes.
+  const clickCodes = Object.freeze({
+    private: 'C1_LOCAL_CLICK_PRIVATE',
+    accounts: 'C1_LOCAL_CLICK_ACCOUNTS',
+    appBack: 'C1_LOCAL_CLICK_APP_BACK'
+  });
   const assertOwner = () => {
     assertLoopback(page.url());
     const url = new URL(page.url());
@@ -41,10 +48,11 @@ export async function createLocalC1Driver(page) {
     assertOwner();
     if (new URL(page.url()).searchParams.get('route') !== '/' + path + query + hash) fail('C1_DESTINATION_WRONG');
   }
-  async function click(selector, path, options) {
+  async function click(step, selector, path, options) {
     assertOwner();
     if (await master().isVisible()) fail('C1_CONTINUITY_BROKEN');
-    await child().locator(selector).click({timeout});
+    try { await child().locator(selector).click({timeout:clickTimeout}); }
+    catch { throw new Error(clickCodes[step]); }
     await destination(path, options);
   }
   async function history(action, path, options) {
@@ -58,14 +66,14 @@ export async function createLocalC1Driver(page) {
     destination,
     async navigationCore() {
       await destination('home_page.html');
-      await click('a[href="area_privata.html"]', 'area_privata.html');
-      await click('a[href="account_privati.html?type=standard"]', 'account_privati.html', {query:'?type=standard'});
+      await click('private', 'a[href="area_privata.html"]', 'area_privata.html');
+      await click('accounts', 'a[href="account_privati.html?type=standard"]', 'account_privati.html', {query:'?type=standard'});
     },
     async historyCore() {
       await destination('account_privati.html', {query:'?type=standard'});
       await history('back', 'area_privata.html');
       await history('forward', 'account_privati.html', {query:'?type=standard'});
-      await click('#header-left .btn-icon-header', 'area_privata.html');
+      await click('appBack', '#header-left .btn-icon-header', 'area_privata.html');
     },
     async reloadOwner(unlockOnce) {
       assertOwner();

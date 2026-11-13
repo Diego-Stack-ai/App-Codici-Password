@@ -1,5 +1,17 @@
 # Decisioni
 
+<a id="cornice-c1-recaptcha-eccezione-2026-11-12"></a>
+
+## 12/11/2026 — C1 strada A: eccezione reCAPTCHA del solo runner
+
+Fonte: dopo la [revisione Claude della ricevuta #5](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/297#issuecomment-6832293781), Diego autorizza esplicitamente la strada A, PR del solo runner con eccezione stretta e registrata, banco RED → GREEN e negativi; **nessun giro senza suo ordine**. Cambia il criterio d'arresto del runner, non le protezioni dell'app o il contratto Auth/App Check.
+
+Solo la congiunzione console error, argomenti JS effettivamente assenti, origine Google con sottocategoria reCAPTCHA chiusa e kind OTHER può diventare non fatale e deve essere contata nel rapporto. L'implementazione restringe ancora la deroga a tag OTHER, testo leggibile/non vuoto e assenza di indicatori di risorsa/sicurezza. App/console con argomenti, pageerror, CSP/CORS/Permissions-Policy riconosciuti o con marcatori espliciti, HTTP almeno 400 anche App Check/Identity/Firestore, requestfailed e dialoghi/popup restano soggetti ai fatal preesistenti. Niente retry o attese aggiuntive; guardia privata prima della Master invariata.
+
+Il predicato non prova che un messaggio sia nativo o innocuo. Il percorso esatto del giro #5 è sconosciuto: non è dimostrato che la deroga lo copra. Varianti di sicurezza prive anche dei marcatori riconosciuti possono restare OTHER: rischio residuo della scelta, non attestazione di innocuità. Il contatore chiuso rende la deroga visibile; nessun testo, URL o identificativo esportato. [Contratto candidato](../regole/SICUREZZA.md#cornice-c1-recaptcha-eccezione-2026-11-12), [banco e ricevute](../evidenze/COLLAUDI.md#cornice-c1-recaptcha-eccezione-2026-11-12).
+
+Canary OFF; nessun merge, sesto giro o deploy autorizzato dalla scelta. La nuova PR richiede CI e revisione Claude sul candidato esatto; UI/caratteri restano dopo C1. Le decisioni sotto conservano i gate già approvati.
+
 <a id="cornice-c1-auto-giro-breve-2026-11-12"></a>
 
 ## 12/11/2026 — C1 con prove automatiche e giro breve sui dispositivi

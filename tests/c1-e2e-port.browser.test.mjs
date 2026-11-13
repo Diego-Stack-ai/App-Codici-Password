@@ -10,25 +10,59 @@ import {assertCaseDiagnostics,browserEnvironment} from '../scripts/lib/c1-e2e-ru
 // Same port as the future production adapter; only the origin wrapper and 3s UI
 // timeout differ. All Auth/admission/DIAG/UI content is synthetic; real owner and
 // transport run on loopback. No production host is opened or contacted.
-const authModule=`const user={uid:sessionStorage.getItem('fault')==='identity'?'other-fixture':'fixture-qa2-only',
- email:'codex.qa2@appcodici-password.invalid',emailVerified:true,
+const authModule=`const wrongTarget=sessionStorage.getItem('fault')==='identity'||
+ ['guard-navigation-target','context-home-target'].includes(sessionStorage.getItem('fault'))&&location.pathname==='/app.html';
+const user={uid:wrongTarget?'other-fixture':'fixture-qa2-only',
+ email:'codex.qa2@appcodici-password.invalid',emailVerified:sessionStorage.getItem('fault')!=='email-unverified-guard',
  getIdTokenResult:async()=>{
   const fault=sessionStorage.getItem('fault');
+  if(fault==='token-pending')return new Promise(()=>{});
+  if(fault==='guard-token-error')throw Error('Synthetic token failure');
+  if(fault==='guard-error-spoof')throw Error('Execution context was destroyed, most likely because of a navigation');
+  if(fault.startsWith('guard-navigation')&&location.pathname==='/home_page.html'){
+   void fetch('/fixture-token-pending');return new Promise(()=>{});
+  }
   if(fault==='identity-during-token'||fault==='identity-after-fill'&&document.querySelector('#protocol-input-modal-input')?.value.length>0)sessionStorage.removeItem('fixture-auth');
   return {claims:{vault_frame_canary:true}};
  }};
  export const auth={app:{options:{projectId:'appcodici-password'}},get currentUser(){
+ const fault=sessionStorage.getItem('fault');
+ if(location.pathname==='/home_page.html'){
+  if(fault==='user-null')return null;
+  if(fault==='user-delayed'){
+   const reads=Number(sessionStorage.getItem('auth-reads')||0)+1;sessionStorage.setItem('auth-reads',String(reads));
+   if(reads<3)return null;
+   if(reads===3)queueMicrotask(()=>dispatchEvent(new Event('fixture-auth-ready')));
+  }
+ }
  return sessionStorage.getItem('fixture-auth')==='yes'?user:null;}};`;
 const rootModule=`import {auth} from '/assets/js/firebase-config.js?v=1.2.270';
 import {createVaultFrameOwner} from '/assets/js/modules/core/vault-frame-owner.mjs';
 import {beginFrameModalFocus} from '/assets/js/modules/core/frame-modal-focus.js';
 const fault=sessionStorage.getItem('fault')||'';
 if(location.pathname==='/login.html'){
- document.querySelector('#login-submit-btn').onclick=e=>{
+ document.addEventListener('DOMContentLoaded',async()=>{
+ if(fault==='delayed-bootstrap')await fetch('/fixture-bootstrap-gate');
+ if(fault==='bootstrap-error'){console.error('Synthetic bootstrap failure');document.body.classList.add('revealed');return;}
+ if(fault==='never-ready')return;
+ if(fault.startsWith('language')){
+  const {openInitialLanguageDialog}=await import('/assets/js/modules/settings/first-configuration.js');
+  await openInitialLanguageDialog({required:false});
+  if(fault==='language-wrong')document.querySelector('.first-configuration-secondary').textContent='Unexpected action';
+  if(fault==='language-duplicate')document.body.append(document.querySelector('#initial-language-dialog').cloneNode(true));
+  if(fault==='language-missing')document.querySelector('.first-configuration-secondary').remove();
+  if(fault==='language-navigate')document.querySelector('.first-configuration-secondary').onclick=()=>location.reload();
+ }
+ document.querySelector('#login-form').onsubmit=e=>{
   e.preventDefault();
-  if(fault==='mfa'){document.querySelector('#totp-form-group').hidden=false;return;}
-  sessionStorage.setItem('fixture-auth','yes');location.replace('/home_page.html');
+  sessionStorage.setItem('login-attempts',String(Number(sessionStorage.getItem('login-attempts')||0)+1));
+  if(fault==='mfa'){document.querySelector('#totp-form-group').classList.remove('hidden');return;}
+  if(fault==='email-unverified-panel'){document.querySelector('#email-verification-panel').hidden=false;return;}
+  if(fault==='not-ready')return;
+  sessionStorage.setItem('fixture-auth','yes');location.replace(fault==='route-other'?'/area_privata.html':'/home_page.html');
  };
+ document.body.classList.add('revealed');
+ },{once:true});
 }else if(!auth.currentUser){location.replace('/login.html');}
 else{
  document.body.hidden=false;document.body.inert=false;
@@ -45,8 +79,11 @@ else{
    modal.style='position:fixed;inset:0;background:white;z-index:999999';
    modal.innerHTML='<h3 class="modal-title">'+(fault==='semantic'?'CONFERMA MASTER PASSWORD':'SBLOCCO VAULT')+'</h3><input name="vault-local-secret" id="protocol-input-modal-input"><button id="modal-confirm-btn">Confirm</button>';
    document.body.append(modal);
+   if(fault==='runtime-unlock')modal.querySelector('input').addEventListener('input',()=>
+    console.error('[BLINDA] synthetic uid/token/contents never exported'),{once:true});
    const focus=beginFrameModalFocus({modal,dialog:modal,onCancel:()=>{},window});
    modal.querySelector('button').onclick=()=>{
+    void window.__fixtureMasterAttempt(); // Fixed event only; no input value.
     sessionStorage.setItem('master-submits',String(Number(sessionStorage.getItem('master-submits')||0)+1));
     modal.remove();focus?.close();resolve('SYNTHETIC-MATERIAL');
    };
@@ -64,8 +101,31 @@ else{
 }`;
 const childModule=`import {auth} from '/assets/js/firebase-config.js?v=1.2.270';
 import {createFrameTransport} from '/assets/js/modules/core/vault-frame-transport.mjs';
+if(parent===window&&location.pathname==='/home_page.html'){
+ const fault=sessionStorage.getItem('fault');
+ await new Promise(resolve=>{
+  const ready=()=>{if(auth.currentUser)resolve();else addEventListener('fixture-auth-ready',ready,{once:true});};ready();
+ });
+ if(!['standalone','resource-absent','token-pending','guard-token-error','guard-error-spoof'].includes(fault)){
+  const result=await(await fetch('/fixture-admission-gate')).text();
+  if(result==='interrupted'){
+   console.error('[BLINDA] Synthetic standalone continuation after interrupted admission');
+   await fetch('/fixture-home-error');
+  }else{
+   sessionStorage.setItem('fixture-app-entries',String(Number(sessionStorage.getItem('fixture-app-entries')||0)+1));
+   location.replace('/app.html?route=%2Fhome_page.html');
+  }
+ }
+}else{
 const transport=createFrameTransport({window,release:'fixture',enabled:true});
 if(parent!==window)await transport.request('key');
+if(sessionStorage.getItem('fault')==='runtime-readiness'&&location.pathname==='/home_page.html'){
+ let emitted=false;
+ document.querySelector('#header-user-avatar').getClientRects=()=>{
+  if(!emitted){emitted=true;console.error('[PWA] synthetic first runtime during unready page');}
+  return [];
+ };
+}
 document.querySelectorAll('a').forEach(a=>a.onclick=e=>{
  e.preventDefault();const url=new URL(a.href);
  parent.vaultFrameNavigation.navigateFromChild(window,document,url.pathname+url.search,false);
@@ -75,7 +135,8 @@ nav('#header-user-avatar','/profilo_privato.html');nav('#header-left .btn-icon-h
 nav('#btn-expiry-rules','/regole_scadenze.html');nav('#btn-account-archive','/archivio_account.html');
 document.querySelector('#frame-diagnostics-toggle').checked=!!sessionStorage.getItem('app_frame_diag_consent_v1');
 document.querySelector('#frame-diagnostics-toggle').onchange=e=>{
- if(e.target.checked)sessionStorage.setItem('app_frame_diag_consent_v1','yes');
+ if(e.target.checked){sessionStorage.setItem('app_frame_diag_consent_v1','yes');
+  sessionStorage.setItem('fixture-diag-opt-ins',String(Number(sessionStorage.getItem('fixture-diag-opt-ins')||0)+1));}
  else{sessionStorage.removeItem('app_frame_diag_consent_v1');sessionStorage.removeItem('app_frame_diag_events_v1');}
 };
 const minutes=Number(sessionStorage.getItem('fixture-timeout')||3);
@@ -103,7 +164,8 @@ document.querySelector('#header-logout-btn').onclick=()=>{
   parent.location.replace('/login.html');
  };
 };
-addEventListener('pagehide',()=>parent.fixtureEvent?.('FRAME_EXIT',location.pathname.slice(1)),{once:true});`;
+addEventListener('pagehide',()=>parent.fixtureEvent?.('FRAME_EXIT',location.pathname.slice(1)),{once:true});
+}`;
 const diagModule=`export async function loadFrameDiagnostics(){return {
  frameDiagnosticContext:()=>({ready:true}),
  notificationWorkerReady:async()=>false,
@@ -114,8 +176,9 @@ const diagModule=`export async function loadFrameDiagnostics(){return {
    enabled:!!sessionStorage.getItem('app_frame_diag_consent_v1'),available:true,
    events:JSON.parse(sessionStorage.getItem('app_frame_diag_events_v1')||'[]')};
  }};}`;
-const rootHtml=login=>'<html data-i18n="ready"><head><link rel="stylesheet" href="/assets/css/vault-frame.css"><script type="module" src="/fixture-root.mjs"></script></head><body'+(login?'':' hidden inert')+'>'+
- (login?'<input id="email"><input id="password" type="password"><input id="remember-device" type="checkbox" checked><button id="login-submit-btn">Login</button><section id="totp-form-group" hidden><input id="totp-code"></section>':
+let loginMarkup;
+const rootHtml=login=>'<html data-i18n="ready"><head><style>.hidden{display:none!important}</style><link rel="stylesheet" href="/assets/css/vault-frame.css"><script type="module" src="/fixture-root.mjs"></script></head><body'+(login?'':' hidden inert')+'>'+
+ (login?loginMarkup+'<section id="email-verification-panel" hidden>Verify synthetic email</section>':
  '<main id="frame-status"><a id="frame-resume">Unlock</a></main><div data-frame-safe-area class="frame-safe-area"></div><iframe id="vault-frame" class="vault-frame" hidden inert></iframe>')+'</body></html>';
 const childHtml='<html data-i18n="ready"><head><script type="module" src="/fixture-child.mjs"></script></head><body><header id="header-left"><button class="btn-icon-header">Back</button></header>'+
  '<div id="header-right"><a href="home_page.html">Home</a></div><button id="header-user-avatar">Profile</button><button id="header-logout-btn">Logout</button>'+
@@ -128,15 +191,27 @@ const childHtml='<html data-i18n="ready"><head><script type="module" src="/fixtu
  '<div id="lock-timer-selector"><button class="timer-btn" data-val="1">1</button><button class="timer-btn" data-val="3">3</button></div>'+
  '<input id="frame-diagnostics-toggle" type="checkbox"></main></body></html>';
 const privatePages=new Set(['area_privata.html','account_privati.html','profilo_privato.html','impostazioni.html','archivio_account.html','regole_scadenze.html','gestione_destinatari.html','configurazione_documenti.html','scadenze.html']);
-let browser,server,base;
+let browser,server,base,bootstrapHarness=null,admissionHarness=null;
 test.before(async()=>{
+ const source=await readFile(new URL('../Frontend/public/login.html',import.meta.url),'utf8');
+ loginMarkup=source.match(/<form id="login-form">[\s\S]*?<\/form>/)[0];
  server=createServer(async(req,res)=>{
   const url=new URL(req.url,'http://fixture.invalid'),path=url.pathname;
   try{
    let body,type='text/html';
    if(path==='/favicon.ico'){res.writeHead(204);res.end();return;}
    if(path==='/fixture-start.html')body='<script>sessionStorage.setItem("fault",new URL(location.href).searchParams.get("fault")||"")</script>';
-   else if(path==='/login.html')body=rootHtml(true);
+   else if(path==='/login.html'){
+    if(bootstrapHarness){bootstrapHarness.gets++;bootstrapHarness.queryEmpty&&=url.search==='';
+     if(bootstrapHarness.gets>1)bootstrapHarness.signal('native');}
+    body=rootHtml(true);
+   }
+   else if(path==='/fixture-bootstrap-gate'){await bootstrapHarness.gate;body='';}
+   else if(path==='/fixture-admission-gate')body=admissionHarness?await admissionHarness.gate:'allowed';
+   else if(path==='/fixture-token-pending'){
+    admissionHarness.tokenPending++;admissionHarness.release('allowed');body='';
+   }
+   else if(path==='/fixture-home-error'){admissionHarness?.error();body='';}
    else if(path==='/app.html')body=rootHtml(false);
    else if(path==='/home_page.html'||privatePages.has(path.slice(1)))body=childHtml;
    else if(path==='/fixture-root.mjs'){type='text/javascript';body=rootModule;}
@@ -144,7 +219,10 @@ test.before(async()=>{
    else if(path==='/assets/js/firebase-config.js'){type='text/javascript';body=authModule;}
    else if(path==='/assets/js/frame-navigation.js'){type='text/javascript';body=diagModule;}
    else if(path==='/assets/js/inactivity-timer.js'){type='text/javascript';body='export const inactivityDiagnosticTimeout=()=>180000;';}
-   else if(path==='/assets/js/translations.js'){type='text/javascript';body='export const t=()=> "Saved synthetic timeout";';}
+   else if(path==='/assets/js/translations.js'){type='text/javascript';body='export const t=()=> "Saved synthetic timeout"; export const getCurrentLanguage=()=> "it";';}
+   else if(path==='/assets/js/modules/settings/first-configuration.js'||path==='/assets/js/translations/onboarding.js'||path==='/assets/css/first-configuration.css'){
+    type=path.endsWith('.css')?'text/css':'text/javascript';body=await readFile(new URL('../Frontend/public'+path,import.meta.url));
+   }
    else if(/^\/assets\/js\/modules\/core\/vault-frame-[a-z-]+\.mjs$/.test(path)||
     path==='/assets/js/modules/core/frame-modal-focus.js'||path==='/assets/css/vault-frame.css'){
     type=path.endsWith('.css')?'text/css':'text/javascript';body=await readFile(new URL('../Frontend/public'+path,import.meta.url));
@@ -156,15 +234,333 @@ test.before(async()=>{
  base='http://127.0.0.1:'+server.address().port;browser=await chromium.launch({channel:'chrome',headless:true,env:browserEnvironment(process.env)});
 });
 test.after(async()=>{await browser?.close();await new Promise(resolve=>server?.close(resolve));});
-async function fixture(fault=''){
- const context=await browser.newContext({serviceWorkers:'block'});
+async function fixture(fault='',onWait=null){
+ const context=await browser.newContext({serviceWorkers:'block',locale:'it-IT'});
  await context.route('**/*',route=>new URL(route.request().url()).origin===base?route.continue():route.abort());
- const page=await context.newPage();await page.goto(base+'/fixture-start.html?fault='+fault);
- const port=await createLocalFixturePort(page,{version:'1.2.270'},{
+ const page=await context.newPage();
+ let masterAttempts=0;
+ await page.exposeFunction('__fixtureMasterAttempt',()=>{masterAttempts++;});
+ if(fault==='resource-absent')await page.addInitScript(()=>{
+  const entries=performance.getEntriesByType.bind(performance);
+  performance.getEntriesByType=type=>entries(type).filter(entry=>!entry.name.includes('firebase-config.js'));
+ });
+ await page.goto(base+'/fixture-start.html?fault='+fault);
+ // Test-only observation of real waits/navigation; never fake their result.
+ // The race models an interrupted admission when the OLD runner requests goto.
+ // It is not evidence that this particular abort occurred in production.
+ let interrupted=false,consoleListener=null;
+ const observed=new Proxy(page,{get(target,key){
+  if(key==='on')return(event,callback)=>{if(event==='console')consoleListener=callback;return target.on(event,callback);};
+  if(key==='evaluate')return async(...args)=>{
+   if(!interrupted&&String(args[0]).includes('getIdTokenResult')&&fault.startsWith('context-')&&
+    new URL(target.url()).pathname===(fault==='context-app'?'/app.html':'/home_page.html')){
+    interrupted=true;throw Error('page.evaluate: Execution context was destroyed, most likely because of a navigation');
+   }
+   return target.evaluate(...args);
+  };
+  if(key==='waitForFunction')return(...args)=>{
+   onWait?.({predicate:String(args[0]),emitConsole:message=>consoleListener?.(message)});
+   if((fault==='admission-race'||admissionHarness?.releaseOnWait)&&String(args[0]).includes("location.pathname==='/app.html'"))admissionHarness.release('allowed');
+   return target.waitForFunction(...args);
+  };
+  if(key==='goto')return async(...args)=>{
+   if(admissionHarness&&new URL(args[0]).pathname==='/app.html'){
+    admissionHarness.forced++;admissionHarness.release('interrupted');
+    let timer;
+    try{await Promise.race([admissionHarness.errored,new Promise((_,reject)=>{
+     timer=setTimeout(()=>reject(Error('SYNTHETIC_ADMISSION_ACK_MISSING')),5000);
+    })]);}finally{clearTimeout(timer);}
+   }
+   return target.goto(...args);
+  };
+  const value=Reflect.get(target,key);return typeof value==='function'?value.bind(target):value;
+ }});
+ const port=await createLocalFixturePort(observed,{version:'1.2.270'},{
   uid:'fixture-qa2-only',email:'codex.qa2@appcodici-password.invalid',
   password:'Synthetic-login-only-123!',master:'Synthetic-master-only-456!'});
- return {page,context,port};
+ return {page,context,port,masterAttempts:()=>masterAttempts};
 }
+
+function entryGate({releaseOnWait=false}={}){
+ let release,error;
+ return {gate:new Promise(r=>{release=r;}),release:value=>release(value),releaseOnWait,
+  errored:new Promise(r=>{error=r;}),error:()=>error(),forced:0,tokenPending:0};
+}
+
+test('delayed real login form waits for bootstrap instead of native GET, then submits once',async()=>{
+ let release,signal;
+ bootstrapHarness={gets:0,queryEmpty:true,gate:new Promise(r=>{release=r;}),signal:value=>signal(value)};
+ const first=new Promise(r=>{signal=r;});
+ const f=await fixture('delayed-bootstrap',()=>signal('readiness'));let run;
+ try{
+  run=f.port.start();void run.catch(()=>{});
+  const observed=await Promise.race([first,run.then(()=>{throw Error('PORT_COMPLETED_WITHOUT_BOOTSTRAP_SIGNAL');})]);release();
+  if(observed==='native')await assert.rejects(run,/^Error: C1_AUTH_NOT_READY$/);
+  assert.equal(observed,'readiness','premature native GET then NOT_READY before the app listener');
+  assert.equal(bootstrapHarness.gets,1);assert.equal(bootstrapHarness.queryEmpty,true);
+  await run;
+  assert.equal(bootstrapHarness.gets,1);
+  assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('login-attempts')||0)),1);
+ }finally{release();await f.context.close();await run?.catch(()=>{});bootstrapHarness=null;}
+});
+
+test('asynchronous app admission enters the frame without a competing runner goto',{timeout:10000},async()=>{
+ let release,error;
+ admissionHarness={gate:new Promise(r=>{release=r;}),release:value=>release(value),
+  errored:new Promise(r=>{error=r;}),error:()=>error(),forced:0};
+ const f=await fixture('admission-race');let run;
+ try{
+  run=f.port.start();void run.catch(()=>{});
+  await run;
+  assert.equal(admissionHarness.forced,0,'the application alone replaces the home document');
+  assert.deepEqual(await f.page.evaluate(()=>Object.fromEntries(
+   ['login-attempts','master-submits','fixture-app-entries','fixture-diag-opt-ins']
+    .map(key=>[key,Number(sessionStorage.getItem(key)||0)]))),
+   {'login-attempts':1,'master-submits':1,'fixture-app-entries':1,'fixture-diag-opt-ins':1});
+ }finally{release('allowed');error();await f.context.close();await run?.catch(()=>{});admissionHarness=null;}
+});
+test('recaptcha console exception allows the real local setup while recording its entry phase',async()=>{
+ admissionHarness=entryGate({releaseOnWait:true});let emitted=false;
+ const f=await fixture('admission-race',({predicate,emitConsole})=>{
+  if(emitted||!predicate.includes("location.pathname==='/app.html'"))return;
+  emitted=true;emitConsole({type:()=> 'error',text:()=> 'Synthetic native third-party notice',
+   location:()=>({url:'https://www.google.com/recaptcha/api2/anchor?key=synthetic-private'}),args:()=>[]});
+ });
+ try{
+  await f.port.start();assert.equal(emitted,true);assert.equal(admissionHarness.forced,0);
+  assert.deepEqual(f.port.thirdPartyConsole(),{count:1,firstPhase:'FRAME_ENTRY',googlePath:'recaptcha-frame'});
+  assert.deepEqual(await f.page.evaluate(()=>Object.fromEntries(
+   ['login-attempts','master-submits','fixture-app-entries','fixture-diag-opt-ins'].map(key=>[key,Number(sessionStorage.getItem(key)||0)]))),
+   {'login-attempts':1,'master-submits':1,'fixture-app-entries':1,'fixture-diag-opt-ins':1});
+ }finally{admissionHarness.release('allowed');admissionHarness.error();await f.context.close();admissionHarness=null;}
+});
+test('recaptcha exception cannot admit another target or force entry from standalone',async()=>{
+ for(const [fault,code]of [['context-home-target','C1_TARGET_DENIED'],['context-home-stuck','C1_FRAME_NOT_ENTERED']]){
+  admissionHarness=entryGate({releaseOnWait:fault!=='context-home-stuck'});let emitted=false;
+  const f=await fixture(fault,({predicate,emitConsole})=>{
+   if(emitted||!predicate.includes("location.pathname==='/app.html'"))return;
+   emitted=true;emitConsole({type:()=> 'error',text:()=> 'Synthetic native third-party notice',
+    location:()=>({url:'https://www.google.com/recaptcha/api2/anchor'}),args:()=>[]});
+  });
+  try{
+   await assert.rejects(()=>f.port.start(),new RegExp('^Error: '+code+'$'));
+   assert.equal(emitted,true);assert.equal(f.masterAttempts(),0);assert.equal(admissionHarness.forced,0);
+   assert.deepEqual(f.port.thirdPartyConsole(),{count:1,firstPhase:'FRAME_ENTRY',googlePath:'recaptcha-frame'});
+  }finally{admissionHarness.release('allowed');admissionHarness.error();await f.context.close();admissionHarness=null;}
+ }
+});
+
+test('standalone app is reported without forced entry or Master submission',async()=>{
+ const f=await fixture('standalone');
+ try{
+  await assert.rejects(()=>f.port.start(),/^Error: C1_FRAME_NOT_ENTERED$/);
+  assert.equal(new URL(f.page.url()).pathname,'/home_page.html');
+  assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('master-submits')||0)),0);
+ }finally{await f.context.close();}
+});
+
+test('real app replacement destroys pending token observation and rechecks the new document target',async()=>{
+ for(const wrong of [false,true]){
+  admissionHarness=entryGate();const f=await fixture(wrong?'guard-navigation-target':'guard-navigation');
+  try{
+   if(wrong){await assert.rejects(()=>f.port.start(),/^Error: C1_TARGET_DENIED$/);assert.equal(f.masterAttempts(),0);}
+   else{await f.port.start();assert.equal(f.masterAttempts(),1);}
+   assert.equal(admissionHarness.tokenPending,1);assert.equal(admissionHarness.forced,0);
+  }finally{admissionHarness.release('allowed');admissionHarness.error();await f.context.close();admissionHarness=null;}
+ }
+});
+
+test('only initial HOME framework context loss may wait for entry within the existing budget',async()=>{
+ for(const [fault,code]of [['context-home',null],['context-home-target','C1_TARGET_DENIED'],
+  ['context-home-stuck','C1_FRAME_NOT_ENTERED'],['context-app','C1_BOOTSTRAP_MISMATCH'],
+  ['guard-token-error','C1_BOOTSTRAP_MISMATCH'],['guard-error-spoof','C1_BOOTSTRAP_MISMATCH']]){
+  admissionHarness=entryGate({releaseOnWait:fault!=='context-home-stuck'});const f=await fixture(fault);
+  try{
+   if(code){await assert.rejects(()=>f.port.start(),new RegExp('^Error: '+code+'$'));assert.equal(f.masterAttempts(),0);}
+   else{await f.port.start();assert.equal(f.masterAttempts(),1);}
+   assert.equal(admissionHarness.forced,0);
+  }finally{admissionHarness.release('allowed');admissionHarness.error();await f.context.close();admissionHarness=null;}
+ }
+});
+
+test('runtime console failure captures UNLOCK before checkpoint and never submits Master',async()=>{
+ const f=await fixture('runtime-unlock');
+ try{
+  await assert.rejects(()=>f.port.start(),/^Error: C1_RUNTIME_FAILURE$/);
+  await f.page.evaluate(()=>null); // Drain the reserved error's realm inspection.
+  const detail=f.port.firstError('C1_RUNTIME_FAILURE');
+  assert.deepEqual(detail,{phase:'UNLOCK',source:'console',frame:'top',tag:'BLINDA',host:null,
+   kind:'OTHER',origin:'other',hasArgs:true,firebaseComponent:null,googlePath:null});
+  assert.doesNotMatch(JSON.stringify(detail),/uid|token|contents|exported/);
+  assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('master-submits')||0)),0);
+  assert.equal(await f.page.locator('#protocol-input-modal-input').evaluate(node=>node.value===''),true);
+ }finally{await f.context.close();}
+});
+test('native CSP diagnostic is closed and distinguishes missing JavaScript args',async()=>{
+ const f=await fixture();
+ try{
+  await f.port.start();f.port.beginCases();
+  await Promise.all([f.page.waitForEvent('console',{predicate:event=>event.type()==='error'}),f.page.evaluate(()=>{
+   const policy=document.createElement('meta');policy.httpEquiv='Content-Security-Policy';policy.content="script-src 'self'";
+   document.head.append(policy);
+   const script=document.createElement('script');script.textContent='window.syntheticPrivateMarker="never-run"';document.body.append(script);
+  })]);
+  const detail=f.port.firstError('C1_RUNTIME_FAILURE');
+  assert.equal(detail.kind,'CSP');assert.equal(detail.hasArgs,false);assert.equal(detail.phase,'CASE');
+  assert.equal(detail.tag,'OTHER');assert.equal(detail.firebaseComponent,null);
+  assert.ok(['none','other'].includes(detail.origin));
+  assert.equal(await f.page.evaluate(()=>window.syntheticPrivateMarker??null),null);
+  assert.doesNotMatch(JSON.stringify(detail),/syntheticPrivateMarker|never-run|https?:|127\.0\.0\.1/);
+  await assert.rejects(()=>f.port.collectDiag(),/^Error: C1_RUNTIME_FAILURE$/);
+ }finally{await f.context.close();}
+});
+
+test('first runtime during readiness remains first after the readiness wait rejects',async()=>{
+ const f=await fixture('runtime-readiness');
+ try{
+  await assert.rejects(()=>f.port.start(),/^Error: C1_RUNTIME_FAILURE$/);
+  assert.deepEqual(f.port.firstError('C1_RUNTIME_FAILURE'),{phase:'UNLOCK',source:'console',frame:'vault-child',tag:'PWA',host:null,
+   kind:'OTHER',origin:'other',hasArgs:true,firebaseComponent:null,googlePath:null});
+ }finally{await f.context.close();}
+});
+
+test('console from the real child keeps only known tag or OTHER and the original CASE phase',async()=>{
+ for(const [message,tag]of [['[PWA] synthetic-private-value','PWA'],['[NOT-LISTED] synthetic-private-value','OTHER']]){
+  const f=await fixture();
+  try{
+   await f.port.start();f.port.beginCases();
+   await Promise.all([f.page.waitForEvent('console',{predicate:event=>event.type()==='error'}),
+    f.page.frameLocator('#vault-frame').locator('body').evaluate((_node,message)=>console.error(message),message)]);
+   await f.page.evaluate(()=>null);
+   const detail=f.port.firstError('C1_RUNTIME_FAILURE');
+   assert.deepEqual(detail,{phase:'CASE',source:'console',frame:'vault-child',tag,host:null,
+    kind:'OTHER',origin:'none',hasArgs:true,firebaseComponent:null,googlePath:null});
+   await assert.rejects(()=>f.port.collectDiag(),/^Error: C1_RUNTIME_FAILURE$/);
+   f.port.freezeErrors();
+   await f.page.evaluate(()=>console.error('[BLINDA] later synthetic-private'));
+   assert.deepEqual(f.port.firstError('C1_RUNTIME_FAILURE'),detail);
+  }finally{await f.context.close();}
+ }
+});
+
+test('native pageerror from the real child keeps unknown frame without exporting message or stack',async()=>{
+ const f=await fixture();
+ try{
+  await f.port.start();f.port.beginCases();
+  await Promise.all([f.page.waitForEvent('pageerror'),f.page.frameLocator('#vault-frame').locator('body').evaluate(()=>{
+   setTimeout(()=>{throw new Error('synthetic-private-uid-token-url');},0);
+  })]);
+  assert.deepEqual(f.port.firstError('C1_RUNTIME_FAILURE'),{phase:'CASE',source:'pageerror',frame:'other',tag:null,host:null,
+   kind:null,origin:'none',hasArgs:null,firebaseComponent:null,googlePath:null});
+  await assert.rejects(()=>f.port.collectDiag(),/^Error: C1_RUNTIME_FAILURE$/);
+ }finally{await f.context.close();}
+});
+test('real unhandled promise keeps pageerror metadata unavailable rather than guessing a console kind',async()=>{
+ const f=await fixture();
+ try{
+  await f.port.start();f.port.beginCases();
+  await Promise.all([f.page.waitForEvent('pageerror'),f.page.frameLocator('#vault-frame').locator('body').evaluate(()=>{
+   void Promise.reject(new Error('synthetic-private-unhandled'));
+  })]);
+  assert.deepEqual(f.port.firstError('C1_RUNTIME_FAILURE'),{phase:'CASE',source:'pageerror',frame:'other',tag:null,host:null,
+   kind:null,origin:'none',hasArgs:null,firebaseComponent:null,googlePath:null});
+ }finally{await f.context.close();}
+});
+
+test('handled and synthetic DOM errors do not introduce a new fatal channel',async()=>{
+ const f=await fixture();
+ try{
+  await f.port.start();f.port.beginCases();
+  await f.page.frameLocator('#vault-frame').locator('body').evaluate(()=>{
+   dispatchEvent(new ErrorEvent('error',{message:'synthetic-private-handled'}));
+   addEventListener('error',event=>event.preventDefault(),{once:true});
+   setTimeout(()=>{throw new Error('synthetic-private-handled');},0);
+  });
+  await f.port.assertUnlocked('impostazioni.html');
+  assert.equal(f.port.firstError('C1_RUNTIME_FAILURE'),null);
+ }finally{await f.context.close();}
+});
+
+test('real resource 404 retains only HTTP host category and frame',async()=>{
+ const f=await fixture();
+ try{
+  await f.port.start();f.port.beginCases();
+  await Promise.all([f.page.waitForEvent('response',{predicate:r=>r.status()===404}),f.page.evaluate(()=>{
+   const img=document.createElement('img');img.src='/synthetic-missing?token=synthetic-private';document.body.append(img);
+  })]);
+  assert.deepEqual(f.port.firstError('C1_HTTP_FAILURE_OTHER'),{phase:'CASE',source:'http',frame:'top',tag:null,host:'other',
+   kind:null,origin:'other',hasArgs:null,firebaseComponent:null,googlePath:null});
+  await assert.rejects(()=>f.port.collectDiag(),/^Error: C1_HTTP_FAILURE_OTHER$/);
+ }finally{await f.context.close();}
+});
+
+test('actual language dialog uses only the existing-account UI, with no language storage or reload',async()=>{
+ const f=await fixture('language');
+ try{
+  await f.port.start();
+  assert.equal(await f.page.locator('#initial-language-dialog').count(),0);
+  assert.deepEqual(await f.page.evaluate(()=>({attempts:Number(sessionStorage.getItem('login-attempts')||0),
+   explicit:localStorage.getItem('app_language_explicit_v1'),language:localStorage.getItem('app_language')})),
+   {attempts:1,explicit:null,language:null});
+ }finally{await f.context.close();}
+});
+
+test('unrecognized or navigating language dialogs stop before login and Master',async()=>{
+ for(const fault of ['language-wrong','language-missing','language-duplicate','language-navigate']){
+  const f=await fixture(fault);
+  try{
+   await assert.rejects(()=>f.port.start(),/^Error: C1_LANGUAGE_DIALOG$/);
+   assert.deepEqual(await f.page.evaluate(()=>({attempts:Number(sessionStorage.getItem('login-attempts')||0),
+    master:Number(sessionStorage.getItem('master-submits')||0),explicit:localStorage.getItem('app_language_explicit_v1')})),
+    {attempts:0,master:0,explicit:null});
+  }finally{await f.context.close();}
+ }
+});
+
+test('bootstrap error remains first even when revealed, missing readiness never submits',async()=>{
+ for(const [fault,code]of [['bootstrap-error','C1_RUNTIME_FAILURE'],['never-ready','C1_AUTH_NOT_READY_LOGIN']]){
+  const f=await fixture(fault);
+  try{
+   await assert.rejects(()=>f.port.start(),new RegExp('^Error: '+code+'$'));
+   assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('login-attempts')||0)),0);
+   assert.equal(f.masterAttempts(),0);
+  }finally{await f.context.close();}
+ }
+});
+
+test('resource observation, user absence and other route remain distinct closed failures',async()=>{
+ for(const [fault,code]of [['resource-absent','C1_AUTH_NOT_READY_RESOURCE'],['user-null','C1_AUTH_NOT_READY_USER'],['route-other','C1_AUTH_NOT_READY_ROUTE']]){
+  const f=await fixture(fault);
+  try{
+   await assert.rejects(()=>f.port.start(),new RegExp('^Error: '+code+'$'));
+   assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('login-attempts')||0)),1);
+   assert.equal(f.masterAttempts(),0);
+   if(fault==='resource-absent'){
+    // Auth exists in the loaded module; the Resource Timing guard is retained.
+    assert.equal(await f.page.evaluate(async()=>!!(await import('/assets/js/firebase-config.js?v=1.2.270')).auth.currentUser),true);
+    assert.equal(await f.page.evaluate(()=>performance.getEntriesByType('resource').filter(e=>e.name.includes('firebase-config.js')).length),0);
+   }
+  }finally{await f.context.close();}
+ }
+});
+
+test('pending synthetic Auth can become ready without a second login',async()=>{
+ const f=await fixture('user-delayed');
+ try{
+  await f.port.start();
+  assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('login-attempts')||0)),1);
+  assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('master-submits')||0)),1);
+ }finally{await f.context.close();}
+});
+
+test('a pending token check cannot outlive the initial login budget or reach Master',async()=>{
+ const f=await fixture('token-pending');
+ try{
+  await assert.rejects(()=>f.port.start(),/^Error: C1_BOOTSTRAP_MISMATCH$/);
+  assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('login-attempts')||0)),1);
+  assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('master-submits')||0)),0);
+ }finally{await f.context.close();}
+});
 test('real local port drives setup + 9-page UI subset/history/reload, keeps absent configuration NE',async()=>{
  const f=await fixture();const rows=[];let startedAt=Date.now();
  try{
@@ -184,8 +580,25 @@ test('MFA, wrong identity and Master creation dialogs stop before any Master sub
   const f=await fixture(fault);
   try{
    await assert.rejects(()=>f.port.start(),new RegExp('^Error: '+code+'$'));
-   assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('master-submits')||0)),0);
+   assert.equal(f.masterAttempts(),0);
    if(fault==='identity-after-fill')assert.equal(await f.page.locator('#protocol-input-modal-input').evaluate(node=>node.value===''),true);
+  }finally{await f.context.close();}
+ }
+});
+
+test('unverified email and absent Auth readiness have distinct codes before Master, with no retry',async()=>{
+ for(const [fault,code]of [['email-unverified-panel','C1_AUTH_EMAIL_UNVERIFIED'],
+  ['email-unverified-guard','C1_AUTH_EMAIL_UNVERIFIED'],['not-ready','C1_AUTH_NOT_READY_LOGIN']]){
+  const f=await fixture(fault);let logins=0;
+  try{
+   await f.page.exposeFunction('fixtureLoginAttempt',()=>{logins++;});
+   await f.page.addInitScript(()=>addEventListener('click',event=>{
+    if(event.target.closest?.('#login-submit-btn'))void window.fixtureLoginAttempt();
+   },true));
+   await assert.rejects(()=>f.port.start(),new RegExp('^Error: '+code+'$'));
+   assert.equal(logins,1);
+   assert.equal(f.masterAttempts(),0);
+   assert.equal(f.port.timerRestoreRequired(),false);
   }finally{await f.context.close();}
  }
 });

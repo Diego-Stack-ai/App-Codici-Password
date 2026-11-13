@@ -1,5 +1,41 @@
 # Sicurezza
 
+<a id="cornice-c1-recaptcha-eccezione-2026-11-12"></a>
+
+## C1 — strada A, eccezione reCAPTCHA registrata, candidata 12/11/2026
+
+[Decisione esplicita di Diego](../progetto/DECISIONI.md#cornice-c1-recaptcha-eccezione-2026-11-12), limitata al runner. Non altera Auth/App Check o le protezioni dell'app. La deroga richiede contemporaneamente: console type=error, args() disponibile e array realmente vuoto, origin=google, sottocategoria reCAPTCHA ammessa da host/path canonici, kind=OTHER, tag=OTHER, testo primitivo leggibile/non vuoto e assenza dei marcatori di sicurezza descritti nella [procedura](../procedure/COLLAUDI.md#cornice-c1-recaptcha-eccezione-2026-11-12). RESOURCE e dati indisponibili non sono esentati.
+
+Pageerror, console dell'app o con argomenti, messaggi di sicurezza riconosciuti o con marcatori espliciti, HTTP almeno 400 inclusi App Check/Identity/Firestore, requestfailed e dialoghi/download/popup conservano i fatal preesistenti. Primo errore, deadline, guardia privata prima della Master, freeze e assenza di retry invariati. La deroga non concede ammissione né forza la cornice; target diverso o app standalone restano rifiutati.
+
+Ogni deroga ammessa incrementa thirdPartyConsole, oggetto chiuso nel rapporto candidato v4: count intero 0–20, prima fase e categoria del primo percorso. A 20 il conteggio è saturato e significa **almeno 20**, non esattamente 20. Stato per singolo port in RAM, getter ricostruttivo e snapshot congelato prima del cleanup; nessun evento successivo a fatal/freeze modifica il contatore. Zero ha contesti null, positivo soltanto enum ammessi. firstError aggiunge googlePath chiuso/null: 10 campi esatti, senza rendere retroattiva la deroga sul rapporto #5.
+
+Nessun testo, URL, query/hash, frame name, valore di argomento, stack o identificativo esportato. La policy usa transitoriamente solo la location dell'API per il percorso canonico, mai URL nel testo; codifiche percentuali residue nel pathname normalizzato o host imitatori restano esclusi. Registro nel solo artefatto C1 già previsto, nessuna telemetria applicativa o chiamata extra. Rapporto v4 ricostruito con 17 campi, versioni precedenti conservate come ricevute storiche.
+
+La combinazione non prova un messaggio nativo o innocuo: resta possibile OTHER per una variante priva anche dei marcatori riconosciuti. Non si afferma che la deroga copra il giro #5 o che ogni errore reCAPTCHA si manifesti necessariamente negli altri canali. [Banco e limiti](../evidenze/COLLAUDI.md#cornice-c1-recaptcha-eccezione-2026-11-12). Canary OFF; nessun nuovo giro o deploy autorizzato dal candidato. Il contratto v3 sotto è storico.
+
+<a id="cornice-c1-console-classificazione-2026-11-12"></a>
+
+## C1 — contratto candidato della classificazione v3, 12/11/2026
+
+Il nuovo ordine dopo [quarto giro e prova manuale](../evidenze/COLLAUDI.md#cornice-c1-console-classificazione-2026-11-12) abilita solo runner/test/documenti. Rapporto candidato schemaVersion=3: involucro di 16 campi conservato, firstError nullo o oggetto esatto a nove campi, con kind, origin, hasArgs e firebaseComponent aggiunti ai cinque precedenti. [Enum e combinazioni](../procedure/COLLAUDI.md#cornice-c1-console-classificazione-2026-11-12). Le ricevute v1/v2 restano storiche; il writer candidato accetta solo v3.
+
+Classificazione sincrona prima della prenotazione del primo fatal, senza nuovi canali, attese, retry o variazioni di deadline/guardie. Solo prefissi riconosciuti e host esatti; CSP richiede anche la stringa letterale Content Security Policy. Per console origin classifica message.location().url; per HTTP classifica l'URL della risposta, non uno script o initiator; pageerror mantiene none. Mai URL citati nel messaggio. Host imitatori, userinfo, porte non standard e protocolli non HTTPS restano other. URL e testo sono transitori e non vengono esportati. I messaggi JS possono imitare prefissi nativi: kind/origin/hasArgs non provano autore, causa o provenienza dal browser.
+
+args() è letto una volta: conteggio degli handle e sola valutazione del realm già prevista sul primo handle, mai valori/proprietà/jsonValue. hasArgs nullo indica API indisponibile, non assenza di argomenti. Per HTTP e pageerror kind, hasArgs e firebaseComponent sono null; pageerror mantiene origin=none senza leggere errore/stack per dedurla. Contesti persi/pendenti non prolungano il budget. Validatore ricostruttivo, campi estranei e combinazioni incoerenti rifiutati prima dell'artefatto; nessun identificativo, chiave, contenuto Vault, URL o testo libero nei rapporti.
+
+Nessuna modifica ad app, workflow, logger, versione, header, manifest/precache, Auth/App Check o cloud. Canary OFF secondo Diego. Nessun nuovo giro, merge o deploy da questo contratto candidato; nuovo GO Claude e ordini personali restano distinti. Il blocco v2 seguente conserva il contratto precedente.
+
+<a id="cornice-c1-frame-entry-runtime-2026-11-12"></a>
+
+## C1 — contratto candidato del primo errore v2, 12/11/2026
+
+Il runner osserva l'ingresso della Home nella cornice senza anticiparlo con goto. App standalone persistente con Auth pronta è C1_FRAME_NOT_ENTERED, nessun invio Master. Budget iniziale complessivo, Resource Timing, identità/claim QA2 e guardia immediatamente prima della Master invariati; nessun nuovo login, retry o deroga ai gate.
+
+Il rapporto v2 aggiunge soltanto firstError, null o oggetto esatto phase/source/frame/tag/host con [enum chiusi e regole di combinazione](../procedure/COLLAUDI.md#cornice-c1-frame-entry-runtime-2026-11-12). Codice e fase sono prenotati al primo fatal; nessun errore successivo di DIAG o cleanup lo sostituisce. Prefissi console sconosciuti/dinamici restano OTHER; solo RESOURCE permette categoria host da location, mai URL o testo del messaggio. L'attribuzione frame può restare other quando il contesto non è verificabile; non si deduce dal nome del file sorgente e non si prolunga il budget per ottenerla.
+
+I canali nativi console/pageerror/HTTP restano invariati: nessuna nuova binding o intercettazione di error/unhandledrejection, nessun preventDefault o modifica al logger. Pageerror non fornisce un Frame verificabile: si registra other senza leggere messaggio/stack per inventare una correlazione. Per console l'eventuale handle serve solo a classificare il realm, senza leggerne il valore. Nessun messaggio, stack, URL, frame name, UID/email/record ID, valore, chiave o token in report/artefatti. Il validatore ricostruisce l'intero schema v2 e i casi/DIAG, rifiutando campi estranei prima della scrittura; ricevute v1 storiche immutate. [Banco e limiti](../evidenze/COLLAUDI.md#cornice-c1-frame-entry-runtime-2026-11-12). Il canary resta OFF; nessun quarto giro, self-hosted o deploy autorizzato dal banco.
+
 <a id="cornice-c1-qa2-segreti-2026-11-12"></a>
 
 ## C1 automatizzato — QA2 esclusivamente sintetica e segreti, 12/11/2026
@@ -7,6 +43,14 @@
 L'account QA2 del runner C1 deve contenere **sempre e soltanto dati inventati: mai dati reali**, personali o aziendali. La Master e le credenziali restano segreti da proteggere anche per un account sintetico. L'uso nei segreti GitHub è limitato a QA2 approvata, environment protetto con approvazione personale e ordine di esecuzione; nessun account personale entra nel runner. Se la natura sintetica non è verificata, oppure vengono introdotti dati reali, sospendere le run, mantenere il canary OFF e rivedere gestione/accessi ai segreti prima di riprendere.
 
 UID/email vengono confrontati privatamente e non riportati; password, Master, token e claim estranei non entrano in log, screenshot, trace, HAR, storageState o artefatti. Il browser non eredita i segreti del processo Node; report ricostruiti da schema chiuso, solo codici e DIAG sanificata. L'adapter non crea/ruota credenziali, non usa ADC/SDK Admin e non scrive singleton, claim, Rules o Functions.
+
+La diagnostica Auth C1 usa soltanto C1_AUTH_HTTP_APPCHECK, C1_AUTH_HTTP_IDENTITY, C1_AUTH_HTTP_FIRESTORE, C1_AUTH_HTTP_OTHER, C1_AUTH_EMAIL_UNVERIFIED, C1_AUTH_NOT_READY_LOGIN, C1_AUTH_NOT_READY_ROUTE, C1_AUTH_NOT_READY_RESOURCE, C1_AUTH_NOT_READY_USER e C1_LANGUAGE_DIALOG. Per 401/403 si confronta il solo hostname con l'elenco esatto documentato nel [piano](../procedure/COLLAUDI.md#cornice-c1-auth-codici-2026-11-12); l'URL è transitorio e non viene conservato né riportato. Nessun suffisso, path, query, header, body, nome host arbitrario o messaggio del provider entra nel rapporto. Categoria del servizio o osservazione di readiness non significa causa del diniego. Tutti questi sottocodici restano BLOCKED, con OFF_REQUIRED e nessun retry; il primo errore resta prevalente. Il controllo email del bootstrap segue il confronto privato dell'identità QA2 e precede la Master.
+
+Il runner deve attendere il bootstrap reale e gestire soltanto il comando UI canonico per utente esistente del dialogo lingua, senza forzare DOM/storage o inizializzare un'Auth diversa. Budget iniziale di 30 secondi, anche con check token pendente; check non verificabile = C1_BOOTSTRAP_MISMATCH. Nessun risultato tardivo o segnale di visibilità da solo concede l'invio della Master. [Readiness e gate](../procedure/COLLAUDI.md#cornice-c1-bootstrap-readiness-2026-11-12).
+
+Gli altri status HTTP almeno 400 usano la stessa mappa esatta con C1_HTTP_FAILURE_APPCHECK, C1_HTTP_FAILURE_IDENTITY, C1_HTTP_FAILURE_FIRESTORE o C1_HTTP_FAILURE_OTHER. Restano FAIL, con OFF_REQUIRED e nessun retry, senza aggiungere lo status, URL o payload al rapporto. Anche un 400 App Check conserva così la categoria; non prova un rifiuto reCAPTCHA né una causa particolare. Risposte senza errore non emettono un codice di fallimento.
+
+L'opzione self-hosted con Chrome visibile è soltanto [una valutazione](../procedure/COLLAUDI.md#cornice-c1-self-hosted-valutazione-2026-11-12). I segreti dell'environment e il filtro dell'ambiente browser non isolano il PC dai job: nessuna registrazione del computer personale o concessione di accesso è autorizzata da questo documento. Restano vietati debug token App Check e riduzioni di Auth/Rules per ottenere un test verde.
 
 2FA/MFA non viene indebolita per il test: se QA2 richiede TOTP, stato BLOCKED e decisione di Diego, senza recupero o disattivazione automatica. L'ammissione server e i controlli dell'app restano effettivi. Login/bootstrap, preferenze timeout 1/3 e logout possono scrivere: richiedono l'ordine esplicito con gli effetti elencati nel [piano C1](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12). Un verde locale o GO sul piano non autorizza produzione, merge, deploy o attivazione.
 

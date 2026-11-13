@@ -2,6 +2,48 @@
 
 <a id="stato-corrente"></a>
 
+<a id="cornice-c1-recaptcha-eccezione-2026-11-12"></a>
+
+## C1 #5 FAIL, strada A autorizzata e candidata v4 — 12/11/2026
+
+La #297 è integrata in master `b2028a158e2374eff2e6069c663271064d62b129`. Quinto giro: 60 test locali superati, SETUP FAIL / C1_RUNTIME_FAILURE, primo segnale console FRAME_ENTRY/OTHER con origin Google e args vuoti; DIAG indisponibile, nessun caso D o cambio timeout. OFF personale confermato, nessun retry. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-c1-recaptcha-eccezione-2026-11-12).
+
+Diego autorizza la strada A proposta da Claude: PR in bozza del solo runner/test con eccezione reCAPTCHA stretta e registrata, banco RED → GREEN e negativi. Base b2028a15, ramo codex/c1-recaptcha-native-exception-20261112; stato DA_VERIFICARE. Rapporto candidato v4 con contatore limitato, prima fase e percorso chiuso; nessuna prova che il messaggio #5 sia innocuo o soddisfi la deroga. Nuova revisione sul candidato richiesta, nessuna auto-approvazione.
+
+Canary OFF secondo Diego, nessuna rilettura amministrativa. Hosting invariato **1.2.270 / cb48b7196a3816a62dda05d11e11ff4ca7c51d26**; UI/caratteri #283 dopo C1. Nessun nuovo giro, merge, deploy o modifica applicativa/cloud. Le sezioni sotto conservano i checkpoint e formati precedenti.
+
+<a id="cornice-c1-console-classificazione-2026-11-12"></a>
+
+## C1 #4 FAIL, manuale non riprodotto e candidata v3 — 12/11/2026
+
+La #296 è integrata in master `f5f0e0db1e4881c89a6b0ba4054aab3bd2d67634` dopo GO Claude, CI verde e ordine personale. Il quarto giro QA2/Chrome desktop supera 54 test locali ma si ferma in SETUP / FAIL / C1_RUNTIME_FAILURE: primo segnale FRAME_ENTRY/console/other/OTHER, DIAG non disponibile, nessun caso D o cambio timeout. Dopo la revisione Claude, prova manuale autorizzata in Chrome Incognito: Console vuota prima/dopo, registro mantenuto secondo Diego, richiesta di sblocco raggiunta. Errore non riprodotto, causa non identificata; [ricevute e limiti](../evidenze/COLLAUDI.md#cornice-c1-console-classificazione-2026-11-12).
+
+Nuovo ordine: PR in bozza del solo runner/test con classificazione chiusa più precisa e rapporto v3, banco RED → GREEN. Base f5f0e0db, ramo codex/c1-console-categories-20261112, stato DA_VERIFICARE; nessuna auto-approvazione. Canary OFF confermato da Diego, senza rilettura amministrativa. Hosting invariato **1.2.270 / cb48b7196a3816a62dda05d11e11ff4ca7c51d26**, UI/caratteri #283 dopo C1. Nessun app/workflow/versione/manifest/precache/cloud modificato; nessun merge, nuovo giro o deploy. Le sezioni sotto conservano i checkpoint precedenti e i vecchi formati dei rapporti.
+
+<a id="cornice-c1-frame-entry-runtime-2026-11-12"></a>
+
+## C1 #3 FAIL, OFF confermato e nuova PR diagnostica — 12/11/2026
+
+La #295 è unita in `9ba1a034d75c034260ccd31fb10cfa1d317bc80a` dopo GO Claude e ordine personale. Il [terzo giro QA2/Chrome desktop](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43215037304) supera 39 test locali e si ferma in SETUP / FAIL / C1_RUNTIME_FAILURE, senza casi D eseguiti. DIAG acquisita: cornice attiva e permesso valido; non certifica sblocco o continuità. [Ricevuta e OFF personale confermato](../evidenze/COLLAUDI.md#cornice-c1-frame-entry-runtime-2026-11-12).
+
+Diego autorizza banco locale e PR secondo la [revisione Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/295#issuecomment-6823455981): attesa dell'ingresso applicativo senza goto concorrente del runner, codice per standalone persistente e rapporto v2 con primo errore a enum chiusi. Banco RED sul port precedente e GREEN candidato; causa produttiva ancora non dimostrata, incluso il limite del logger silenzioso. Ramo codex/c1-frame-runtime-diagnostics-20261112, base 9ba1a034, stato DA_VERIFICARE.
+
+Canary OFF secondo Diego, senza rilettura amministrativa. Hosting invariato 1.2.270 / cb48b7196a3816a62dda05d11e11ff4ca7c51d26; UI/caratteri #283 dopo C1. Nessun nuovo giro, modifica applicativa, workflow, versione, merge o deploy. Quarto giro soltanto dopo PR, CI verde, revisione Claude e merge, con ordini personali distinti di Diego. I checkpoint seguenti conservano le fasi antecedenti.
+
+## C1 #2 BLOCKED, banco locale RED/GREEN e PR readiness — 12/11/2026
+
+#294 integrata con CI verde e GO Claude su 6e5ad52c: master `25eb94fb571bb1ba8d235f77215b4eca51b141e4`. Il secondo giro diagnostico, avviato e approvato personalmente da Diego, si ferma in SETUP BLOCKED / C1_AUTH_NOT_READY, DIAG assente: nessun caso C1 completato o cambio timeout. Diego conferma OFF; [ricevuta](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/294#issuecomment-6821089857). Nessun retry o rilettura amministrativa.
+
+Dopo diagnosi statica e [concordanza di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/294#issuecomment-6821487581), Diego ordina banco locale e PR runner. Riprodotto sul vecchio port il clic prima del listener: GET nativo e poi NOT_READY, senza parametri dei campi; il test passa con readiness esplicita. Questo dimostra il difetto nel banco, **non la causa certa del giro produttivo**. La candidata attende bootstrap, chiude il dialogo lingua via UI per utente esistente e distingue quattro osservazioni NOT_READY. Nessuna modifica all'app o terzo giro; [prove e limiti](../evidenze/COLLAUDI.md#cornice-c1-runner-readiness-2026-11-12).
+
+Canary OFF secondo l'ultima conferma di Diego; produzione verificata ancora 1.2.270 / cb48b7196a3816a62dda05d11e11ff4ca7c51d26. Nuova UI/caratteri #283 ancora in bozza, non pubblicata: C1 prima del suo merge/rilascio. Nuovo codice da rivedere con Claude dopo CI; merge e terzo giro su ordini distinti di Diego. Nessun deploy, token debug, self-hosted o nuovo PASS C1. I checkpoint sotto conservano la cronologia precedente.
+
+## C1 #1 bloccato, canary OFF e PR diagnostica — 12/11/2026
+
+La #293 è unita su ordine di Diego in master `cd05b44e26792a70fe7f37e43be5172dfc75f81d`. Il [primo giro reale QA2/Chrome desktop](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43183551202), con preflight e approvazione personale, supera le fixture locali e si ferma in **SETUP BLOCKED / C1_AUTH_BLOCKED**: nessun caso C1 completato, DIAG non disponibile e nessun cambio timeout tentato. [Ricevuta accettata da Claude e limiti](../evidenze/COLLAUDI.md#cornice-c1-primo-giro-2026-11-12). **Ultimo canary OFF confermato da Diego**, senza verifica amministrativa di Codex; nessun retry.
+
+Ordine corrente: PR diagnostica #294 con sei sottocodici Auth chiusi e [valutazione A](../procedure/COLLAUDI.md#cornice-c1-self-hosted-valutazione-2026-11-12). Dopo il GO Claude su 079c6ed2 subordinato alla CI, il seguito raccoglie la raccomandazione sugli altri status HTTP almeno 400: quattro C1_HTTP_FAILURE_* conservano la categoria del servizio anche per 400/429/5xx. Auth resta BLOCKED, gli altri HTTP restano FAIL; nuovo delta da rivedere. La candidata modifica solo runner/test/documenti: nessun workflow, browser visibile o self-hosted attivato. La causa del primo blocco resta indeterminata; l'ipotesi App Check non è certificata. Nuovo giro subordinato a revisione Claude e nuovo ordine di Diego. Produzione ancora **1.2.270 / cb48b7196a3816a62dda05d11e11ff4ca7c51d26**; UI #283 e sicurezza restano fuori dalla pubblicazione fino a C1. Nessun merge, deploy, intervento Firebase o nuovo PASS da questa preparazione. I checkpoint sotto precedono il giro reale.
+
 ## C1 — adapter integrato, configurazione GitHub e PR workflow — 12/11/2026
 
 La #292 ha [GO Claude sul codice 45f50a9e](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6812002019) e CI verde; merge ordinato da Diego, master `6dd80df1ee7be63550583b89bde6b326ad8122b5`, [ricevuta](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/292#issuecomment-6816335473). Adapter D02/D04/D05-A/D06/D08 integrato, mai eseguito in produzione. Diego ha configurato l'environment protetto, la variabile operatore e quattro segreti: Codex ha verificato solo nomi/presenza e protezioni UI, **non valori o funzionamento**. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-c1-workflow-config-2026-11-12).
