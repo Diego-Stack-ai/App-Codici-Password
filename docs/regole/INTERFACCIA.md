@@ -298,6 +298,25 @@ Il controllo Stylelint ha namespace di progetto `app-codici-password/valid-accen
 
 La modalità luminosa (`chiaro`, `automatico`, `scuro`) e la palette cromatica sono preferenze indipendenti. Le palette ammesse sono `blue`, `green`, `red`, `sand`, `petrol`, `lavender` e `dusty-rose`; `blue` è il fallback per valori assenti o non validi. La preferenza locale viene applicata da `theme-init.js` prima del rendering per evitare il cambio colore visibile all’avvio. `core.css` resta l’autorità dei token d’identità; colori funzionali di successo, avviso ed errore e colori di categoria non cambiano significato con la palette. I controlli in Impostazioni devono esporre selezione visiva e stato accessibile `aria-pressed`.
 
+<a id="ui-color-contract-2026-11-13"></a>
+
+### Abbinamenti dei colori e regressioni — 13/11/2026
+
+Per l'ordine di Diego «Procedi», gli abbinamenti verificati della grafica Nuova si conservano nei ruoli CSS e nei test, non soltanto nelle schermate o nella memoria degli agenti. `core.css` resta la fonte dei colori d'identità; `core_ui.css` definisce una sola volta i ruoli `--rev-*`. Il registro di prova [ui-color-contract.json](../../scripts/ui-color-contract.json) collega componenti, selettori, fogli della pagina e coppie di ruoli: non duplica i valori esadecimali delle palette e non viene caricato dall'app.
+
+| Uso coperto dal registro | Coppia da conservare | Contesto reale del controllo |
+| --- | --- | --- |
+| Card delle Impostazioni | `--rev-surface` con `--text-secondary` | Fogli della pagina, compresa l'opacità effettiva del testo secondario. |
+| Popup e pannello Ricerca | `--rev-popup` con `--text-primary` o `--text-secondary` | Fogli comuni più il foglio specifico del componente, anche se caricato dopo; verificare la cascata effettiva. |
+| Bolla utente, microfono, azione Fine premuta e pastiglie piene coperte | `--rev-fill` con il testo/icona bianco dichiarato nel CSS | Non sostituire il riempimento con il solo `--accent`: una palette scura può avere un accento chiaro. Per i gradienti controllare l'abbinamento nel punto meno favorevole. |
+| Icone neutre su pastiglia | `--rev-icon-bg` con `--rev-icon` | Preservare i colori funzionali di stato e le eccezioni esplicite. |
+
+Ogni nuova correzione di un abbinamento aggiunge o aggiorna un caso riproducibile nel registro e nel banco browser, con CSS realmente applicati nell'ordine della pagina, senza mescolare famiglie diverse. Le sette palette, inclusa quella blu predefinita, si provano in chiaro e in scuro. Il contrasto va valutato dopo trasparenze, opacità e sfondi effettivi; per testo ordinario il minimo è 4,5:1, per icone funzionali e bordi necessari al riconoscimento 3:1. Il banco corrente compone l'opacità del foreground su superfici opache e controlla entrambi gli estremi dei gradienti a due tappe con testo bianco; antenati con opacità di gruppo, superfici non opache o gradienti diversi richiedono una fixture dedicata e fanno fallire il controllo, senza un PASS presunto. Un rapporto tra due token isolati non certifica il componente. Conservare almeno un controllo negativo per dimostrare che il banco rileva l'abbinamento difettoso.
+
+La copertura resta quella dei componenti censiti: non certifica tutti i pulsanti dell'app, tutti i colori scritti nelle pagine o i dispositivi fisici. La voce `pending` del registro conserva gli abbinamenti ancora da verificare, senza considerarli casi approvati: include testi secondari e placeholder della Ricerca, linguette attive e altri stati dei pulsanti. Il ruolo `--rev-surface-2` resta disponibile nel CSS ma i suoi abbinamenti non sono certificati automaticamente dai casi sul solo `--rev-surface`. Nuova/Classica e colori di successo, avviso, errore e azioni distruttive conservano i rispettivi contratti. Eventuali ulteriori migrazioni si aggiungono progressivamente con il loro diff e la loro revisione.
+
+**Limite della mappa Graphify:** il percorso automatico code-only attualmente in uso non indicizza i CSS; un suo aggiornamento non ricostruisce questi abbinamenti né valuta la cascata o il contrasto. La mappa aiuta a trovare codice e dipendenze, ma le relazioni cromatiche si verificano nel sorgente e nel browser usando il registro. Nessun arco va inventato per colmare un'assenza. Estendere l'estrazione CSS è un intervento distinto; non si avviano estrazione semantica, hook o pubblicazione degli artefatti generati per questo contratto. [Verifiche e limiti della candidata](../evidenze/COLLAUDI.md#ui-color-contract-verifiche-2026-11-13).
+
 ## Indice delle fonti conservate
 
 - [GUIDA.md](#fonte-frontend-guida-md-l1)

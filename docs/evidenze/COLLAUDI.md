@@ -1,5 +1,21 @@
 # Collaudi
 
+<a id="ui-color-contract-verifiche-2026-11-13"></a>
+
+## Abbinamenti dei colori — banco locale e limiti, 13/11/2026
+
+L'[ordine corrente](../progetto/INCARICO_CORRENTE.md#ui-color-contract-incarico-2026-11-13) prepara una candidata separata su `codex/ui-color-contract-20261113`, base **`0f448a33311ef29da1e73bd93e5a691588914b04`**, correttivo di Claude successivo al [NO-GO Codex su ab69c71](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/283#issuecomment-6864081439). L'oggetto è conservare gli abbinamenti scoperti nel [contratto](../regole/INTERFACCIA.md#ui-color-contract-2026-11-13), nel registro di prova `scripts/ui-color-contract.json` e nei test che lo consumano. Non si sostituiscono i colori di identità con copie nel registro.
+
+**Stato della candidata: test locali PASS, revisione di Claude e CI dello SHA finale DA_VERIFICARE.** Eseguiti su Windows / Chrome 157.0.8103.52 / Node 24.22.1: `test:ui-foundations` **33/33 PASS**, incluso il banco colori **10/10**; `test:docs` **12/12 PASS**, 34 Markdown e 994 collegamenti locali; sintassi del test e `git diff --check` PASS. La CI usa il proprio ambiente e deve confermare questi risultati sul commit della PR. I test dichiarati da Claude nel [commento del correttivo](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/283#issuecomment-6864165228) restano una fonte distinta: questi conteggi provengono da esecuzioni Codex della nuova candidata.
+
+Perimetro della verifica locale: **9 componenti**, con applicabilità distinta a Impostazioni, Profilo privato e Dati azienda; **42 fixture** (3 pagine × 7 palette × 2 temi), per **224 abbinamenti**. Fogli e classi del body si leggono dai rispettivi HTML; il foglio Ricerca viene aggiunto per ultimo come componente lazy, senza app JS o account. Il banco verifica coppie di ruoli e contrasto effettivo, compone l'opacità del foreground su sfondo opaco e misura entrambi gli estremi dei gradienti pieni a due tappe con testo bianco; opacità di gruppo negli antenati o pitture non supportate causano un errore, non una stima favorevole. Un controllo strutturale impedisce la scomparsa delle nove coperture minime o l'abbassamento delle soglie.
+
+**Quattro negativi browser PASS:** il verificatore rifiuta il ripristino di bianco su accento chiaro, `opacity: .7` sul secondario, un secondo estremo chiaro nel gradiente azienda e il vecchio gradiente del pannello Ricerca. Ogni alterazione è applicata solo alla fixture e viene rimossa chiudendo la pagina; nessun file CSS applicativo viene mutato dal test.
+
+La copertura non si estende ai colori di pagina non censiti, alle prove fisiche o alla matrice C1. La voce `pending` conserva senza PASS presunto testi secondari/placeholder della Ricerca, linguette attive e altri stati/pulsanti per le successive revisioni; nessun risultato globale viene dedotto dai nove casi. Graphify automatico code-only non include i CSS: il registro è una fonte esplicita per il banco, non una mappa generata o una prova di contrasto per l'intera app. Il suo aggiornamento strutturale resta locale, senza artefatti generati nel commit.
+
+La [ricevuta della 1.2.271 distribuita](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6861098889) e le ricevute ancora in revisione sulla #301 sono distinte da questi controlli. Nessun nuovo accesso a QA2, prova produttiva, cambio versione, manifest/precache, workflow, cornice, Firebase/Google Cloud, merge o deploy. Canary **OFF secondo Diego**, senza rilettura amministrativa; nessun UID o credenziale nel banco o nel rapporto. I checkpoint seguenti conservano gli esiti e i limiti delle rispettive basi.
+
 <a id="rilascio-ui-1271-verifiche-2026-11-13"></a>
 
 ## Candidata APP 1.2.271 — verifiche locali per la revisione, 13/11/2026

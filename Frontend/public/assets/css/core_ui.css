@@ -1161,3 +1161,101 @@ select.shared-account-select-control optgroup {
         font-size: var(--fs-base) !important;
     }
 }
+
+/* === Ventaglio tonale della grafica Nuova (13/11/2026) ===
+   Un'unica scala di ruoli per ogni colore, derivata da --accent: sfondo pagina e
+   gradiente restano quelli della palette; cambiano solo le superfici sopra di esso.
+   Chiaro: il bianco tende al colore base. Scuro: le superfici sono più chiare dello
+   sfondo, su un grigio neutro (non bluastro) per non falsare i colori caldi. La grafica Classica rimuove data-ui-revision
+   e non è toccata. Le percentuali sono i soli punti da ritoccare. */
+[data-ui-revision="tre-livelli"] {
+    --rev-surface: color-mix(in srgb, var(--accent) 12%, #fff);
+    --rev-surface-2: color-mix(in srgb, var(--accent) 18%, #fff);
+    --rev-popup: color-mix(in srgb, var(--accent) 14%, #fff);
+    --rev-border: color-mix(in srgb, var(--accent) 28%, #e2e8f0);
+    --rev-icon-bg: color-mix(in srgb, var(--accent) 22%, #fff);
+    --rev-icon: color-mix(in srgb, var(--accent) 85%, #0f172a);
+    /* Riempimento pieno con testo bianco: scurito quanto basta per ≥ 4,5:1 su ogni palette. */
+    --rev-fill: color-mix(in srgb, var(--accent) 85%, #0f172a);
+    --rev-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.08);
+    --rev-popup-shadow: 0 24px 56px -16px rgba(var(--accent-rgb), 32%);
+}
+
+.dark [data-ui-revision="tre-livelli"] {
+    --rev-surface: color-mix(in srgb, var(--accent) 16%, #262a32);
+    --rev-surface-2: color-mix(in srgb, var(--accent) 19%, #2e323b);
+    --rev-popup: color-mix(in srgb, var(--accent) 19%, #2a2e37);
+    --rev-border: color-mix(in srgb, var(--accent) 34%, #3c414c);
+    --rev-icon-bg: color-mix(in srgb, var(--accent) 28%, #2e323b);
+    --rev-icon: color-mix(in srgb, var(--accent) 45%, #fff);
+    /* Gli accenti scuri sono chiari: il riempimento con testo bianco va scurito di più. */
+    --rev-fill: color-mix(in srgb, var(--accent) 45%, #0f172a);
+    /* In scuro gli accenti sono chiari: percentuali più basse; il grigio secondario
+       si schiarisce per restare ≥ 4,5:1 su ogni superficie. */
+    --text-secondary: #c3cddb;
+    --text-placeholder: #c3cddb;
+    --rev-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 6px 16px rgba(0, 0, 0, 0.3);
+    --rev-popup-shadow: 0 28px 60px -18px rgba(0, 0, 0, 0.75);
+}
+
+/* Popup, menu e avvisi seguono il colore scelto (prima: bianco, azzurro o blu fissi). */
+[data-ui-revision="tre-livelli"] :is(.modal-box, .modal-box-source, .custom-select-menu, .datepicker-card,
+    .first-configuration-dialog, .documentation-panel, .documentation-walkthrough-panel),
+html body[data-ui-revision="tre-livelli"] .vault-assistant-panel {
+    background: var(--rev-popup);
+    border-color: var(--rev-border);
+    color: var(--text-primary);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+[data-ui-revision="tre-livelli"] :is(.modal-box, .modal-box-source, .first-configuration-dialog),
+html body[data-ui-revision="tre-livelli"] .vault-assistant-panel {
+    border: 1px solid var(--rev-border);
+    box-shadow: var(--rev-popup-shadow);
+}
+
+[data-ui-revision="tre-livelli"] .toast-content {
+    background: var(--rev-popup);
+    border: 1px solid var(--rev-border);
+    color: var(--text-primary);
+}
+
+/* Il foglio Ricerca usa html.dark .vault-assistant-* (0,2,1): html body[…] (0,2,2) prevale. */
+html body[data-ui-revision="tre-livelli"] :is(.vault-assistant-microphone, .vault-assistant-bubble.user) {
+    background: var(--rev-fill);
+    color: #fff;
+}
+
+html body[data-ui-revision="tre-livelli"] :is(.vault-assistant-input, .vault-assistant-result, .vault-assistant-conversation, .vault-assistant-bubble.assistant, .vault-assistant-send) {
+    background: var(--rev-surface-2);
+    border-color: var(--rev-border);
+    color: var(--text-primary);
+}
+
+/* Icone nelle card: i contenitori neutri (pensati per il vetro scuro) e le pastiglie
+   decorative viola seguono il ventaglio del colore scelto. Restano invariate le pastiglie
+   di stato (rosso, ambra, arancio, verde), che hanno un significato. */
+body[data-ui-revision="tre-livelli"] :is(.settings-icon-box, .archive-icon-box, .hero-page-icon-box, .account-icon-box,
+    .icon-box, .card-icon-box, .upload-icon, .attachment-icon-badge, .glass-btn-icon, .btn-icon-add):not(.icon-red, .icon-amber, .icon-orange, .icon-emerald, .icon-green, .icon-purple) {
+    background: var(--rev-icon-bg);
+    border-color: var(--rev-border);
+    color: var(--rev-icon);
+}
+
+body[data-ui-revision="tre-livelli"] :is(.icon-purple, .email-icon-box):not(.matrix-icon-box) {
+    background: var(--rev-icon-bg);
+    color: color-mix(in srgb, var(--rev-icon) 75%, var(--text-primary));
+}
+
+body[data-ui-revision="tre-livelli"] .matrix-icon-box:is(.icon-purple, .icon-blue),
+body[data-ui-revision="tre-livelli"].company-profile-page :is(.icon-purple, .icon-blue) {
+    background: linear-gradient(135deg, var(--rev-fill) 0%, color-mix(in srgb, var(--rev-fill) 80%, #000) 100%);
+    color: #fff;
+}
+
+/* Il secondario delle Impostazioni aveva opacity 0.7 sopra il colore: nella grafica Nuova
+   il grigio è già calibrato per 4,5:1, quindi l'opacità aggiuntiva va tolta. */
+[data-ui-revision="tre-livelli"] .settings-desc {
+    opacity: 1;
+}

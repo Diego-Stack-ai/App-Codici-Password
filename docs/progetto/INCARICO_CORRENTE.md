@@ -1,5 +1,17 @@
 # Incarico corrente
 
+<a id="ui-color-contract-incarico-2026-11-13"></a>
+
+## Abbinamenti dei colori — contratto e banco locale, 13/11/2026
+
+Diego chiede come conservare gli abbinamenti dei colori quando Graphify non li rappresenta e ordina **«Procedi»** alla proposta di ruoli CSS condivisi, contratto esistente e regressioni browser. Il lavoro parte dal correttivo di Claude per la #283, **`0f448a33311ef29da1e73bd93e5a691588914b04`**, su ramo separato **`codex/ui-color-contract-20261113`**; non modifica il ramo di Claude né considera il correttivo già approvato da Codex.
+
+Perimetro: [contratto degli abbinamenti](../regole/INTERFACCIA.md#ui-color-contract-2026-11-13), registro di prova `scripts/ui-color-contract.json` e test locali che lo consumano con i fogli reali dei componenti censiti, sette palette × chiaro/scuro, composizione delle opacità e verifica dei gradienti. Conservare le sorgenti CSS dei valori e i controlli negativi; non duplicare le palette nel registro. Aggiornare i soli Markdown esistenti pertinenti, mantenendo l'elenco chiuso di 34. Nessuna estensione automatica di Graphify, estrazione semantica o installazione di hook è compresa.
+
+Consegnare diff, risultati effettivi e limiti sulla candidata esatta per la revisione di Claude; stato **DA_VERIFICARE**, senza auto-approvazione. La 1.2.271 è già [pubblicata e verificata](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6861098889); le ricevute della #301 restano una PR distinta in revisione. Questo incarico non ripete C1, non trasferisce PASS ai nuovi colori e non prepara un cambio versione. Canary **OFF secondo Diego**, senza nuova rilettura amministrativa. Nessun merge, deploy, dispatch produttivo, operazione Firebase/Google Cloud, singleton, claim, credenziale o file della cornice. [Stato](STATO.md#ui-color-contract-stato-2026-11-13) e [verifiche](../evidenze/COLLAUDI.md#ui-color-contract-verifiche-2026-11-13).
+
+I checkpoint sottostanti conservano la cronologia; non riaprono incarichi conclusi o autorizzazioni di rilascio.
+
 <a id="rilascio-ui-1271-incarico-2026-11-13"></a>
 
 ## Candidata APP 1.2.271 — preparazione e revisione, 13/11/2026

@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "scope": "Local CSS fixtures only; not a certification of every page, state or device",
+  "paletteSource": "Frontend/public/assets/css/core.css",
+  "roleSource": "Frontend/public/assets/css/core_ui.css",
+  "palettes": ["", "green", "red", "sand", "petrol", "lavender", "dusty-rose"],
+  "themes": ["light", "dark"],
+  "lazyStylesheets": ["assets/css/vault-assistant.css"],
+  "pages": ["impostazioni.html", "profilo_privato.html", "dati_azienda.html"],
+  "components": [
+    {
+      "id": "settings-secondary",
+      "pages": ["impostazioni.html"],
+      "selector": ".settings-item .settings-desc",
+      "markup": "<div class=\"settings-item\"><span class=\"settings-desc\">Descrizione sintetica</span></div>",
+      "foregroundRole": "--text-secondary",
+      "backgroundRole": "--rev-surface",
+      "minContrast": 4.5
+    },
+    {
+      "id": "settings-popup-secondary",
+      "pages": ["impostazioni.html"],
+      "selector": ".modal-box .settings-desc",
+      "markup": "<div class=\"modal-box\"><span class=\"settings-desc\">Conferma sintetica</span></div>",
+      "foregroundRole": "--text-secondary",
+      "backgroundRole": "--rev-popup",
+      "minContrast": 4.5
+    },
+    {
+      "id": "settings-icon",
+      "pages": ["impostazioni.html"],
+      "selector": ".settings-icon-box",
+      "markup": "<div class=\"settings-icon-box\">x</div>",
+      "foregroundRole": "--rev-icon",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 3
+    },
+    {
+      "id": "company-purple",
+      "pages": ["dati_azienda.html"],
+      "selector": ".settings-icon-box.icon-purple",
+      "markup": "<div class=\"settings-icon-box icon-purple\">x</div>",
+      "foregroundRole": "white",
+      "backgroundRole": "--rev-fill",
+      "minContrast": 4.5
+    },
+    {
+      "id": "company-blue",
+      "pages": ["dati_azienda.html"],
+      "selector": ".settings-icon-box.icon-blue",
+      "markup": "<div class=\"settings-icon-box icon-blue\">x</div>",
+      "foregroundRole": "white",
+      "backgroundRole": "--rev-fill",
+      "minContrast": 4.5
+    },
+    {
+      "id": "manage-pressed",
+      "pages": ["profilo_privato.html", "dati_azienda.html"],
+      "selector": ".manage-toggle[aria-pressed=true]",
+      "markup": "<button class=\"manage-toggle\" type=\"button\" aria-pressed=\"true\">Fine</button>",
+      "foregroundRole": "white",
+      "backgroundRole": "--rev-fill",
+      "minContrast": 4.5
+    },
+    {
+      "id": "search-panel",
+      "selector": ".vault-assistant-panel",
+      "markup": "<section class=\"vault-assistant-panel\">Ricerca sintetica</section>",
+      "foregroundRole": "--text-primary",
+      "backgroundRole": "--rev-popup",
+      "backgroundImage": "none",
+      "minContrast": 4.5
+    },
+    {
+      "id": "search-user-bubble",
+      "selector": ".vault-assistant-bubble.user",
+      "markup": "<div class=\"vault-assistant-panel\"><div class=\"vault-assistant-bubble user\">Domanda sintetica</div></div>",
+      "foregroundRole": "white",
+      "backgroundRole": "--rev-fill",
+      "minContrast": 4.5
+    },
+    {
+      "id": "search-microphone",
+      "selector": ".vault-assistant-microphone",
+      "markup": "<div class=\"vault-assistant-panel\"><button class=\"vault-assistant-microphone\" type=\"button\">m</button></div>",
+      "foregroundRole": "white",
+      "backgroundRole": "--rev-fill",
+      "minContrast": 4.5
+    }
+  ],
+  "pending": [
+    {"selector": ".vault-assistant-header p, .vault-assistant-status", "reason": "Fixed secondary colors; separate page alignment and contrast verification required"},
+    {"selector": ".vault-assistant-result small", "reason": "Secondary result text not covered by the fill regression"},
+    {"selector": ".vault-assistant-input::placeholder", "reason": "Placeholder foreground requires its own contrast check"},
+    {"selector": ".profile-tab.is-active", "reason": "Active tab foreground/background remain outside this registry's passing cases"},
+    {"selector": ".manage-toggle[aria-pressed=false], .btn-primary", "reason": "Normal, hover, focus and disabled states require separate page-by-page review"}
+  ]
+}

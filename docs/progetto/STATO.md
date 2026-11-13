@@ -2,6 +2,16 @@
 
 <a id="stato-corrente"></a>
 
+<a id="ui-color-contract-stato-2026-11-13"></a>
+
+## Abbinamenti dei colori — candidata locale per la revisione, 13/11/2026
+
+Ordine corrente di Diego **«Procedi»** alla conservazione degli abbinamenti nei ruoli CSS, nel contratto e nei test browser. Ramo separato `codex/ui-color-contract-20261113`, base correttivo Claude della #283 **`0f448a33311ef29da1e73bd93e5a691588914b04`**. Registro di prova e contratto collegano ruoli, componenti e fogli reali senza duplicare i valori delle palette. **Test locali PASS; revisione di Claude e CI dello SHA finale DA_VERIFICARE.** I [controlli locali e i limiti](../evidenze/COLLAUDI.md#ui-color-contract-verifiche-2026-11-13) non sono un GO automatico al correttivo o alla pubblicazione.
+
+Produzione **1.2.271 / `fb6e9e361687fd3c8f502fe687766e81a21181e0`**, secondo la [ricevuta Hosting #1136](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6861098889). La distinta #301 raccoglie ricevute e giro breve proposto per revisione: non viene dichiarata approvata o unita da questo aggiornamento. I nuovi colori della #283 restano candidati, non online; i checkpoint più vecchi sotto conservano il proprio stato storico.
+
+La mappa Graphify code-only non indicizza i CSS nel percorso attuale: aggiornamento della mappa e verifica cromatica sono controlli distinti. Il [contratto](../regole/INTERFACCIA.md#ui-color-contract-2026-11-13) delimita il registro e le regressioni; non è una certificazione dell'intera app o dei dispositivi fisici. [Incarico](INCARICO_CORRENTE.md#ui-color-contract-incarico-2026-11-13). Canary **OFF secondo Diego**, senza rilettura amministrativa; nessun nuovo C1, merge, versione, deploy, operazione cloud o modifica alla cornice.
+
 <a id="rilascio-ui-1271-stato-2026-11-13"></a>
 
 ## Candidata APP 1.2.271 — preparazione di UI, tipografia e pacchetto cornice — 13/11/2026
