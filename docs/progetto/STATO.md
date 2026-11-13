@@ -2,6 +2,30 @@
 
 <a id="stato-corrente"></a>
 
+<a id="giro-breve-1271-qa2-stato-2026-11-13"></a>
+
+## Giro breve QA2 / Chrome Windows / 1.2.271 eseguito — revisione attesa, 13/11/2026
+
+Su ordine di Diego **«facciamo il giro QA2»**, e stato eseguito il giro manuale della **1.2.271 online**, con grafica Nuova, inattivita a tre minuti e DIAG iniziale vuoto. Diego conferma tre frecce corrette senza doppi salti, indirizzo sempre `app.html`, nessuna Master inattesa durante le navigazioni, Contatti e Documenti leggibili con Modifica/Fine funzionanti, ricarica allo stesso punto con una Master, blocco dopo «3 minuti giusti» con una Master alla ripresa e logout/Indietro protetti sul login. Nessuna anomalia funzionale riferita. Sono dichiarate navigazioni aggiuntive: non e una ripetizione stretta dei sette passaggi D04.
+
+Esito del solo giro breve: **PASS OSSERVATO PROPOSTO / DA_REVISIONARE da Claude**, senza GO autonomo. Le [evidenze](../evidenze/COLLAUDI.md#giro-breve-1271-qa2-evidenze-2026-11-13) separano conferme di Diego, DIAG PRE-logout di 36 eventi, correlazioni e limiti. Il giro breve non e piu NE; l'accettazione del revisore resta attesa. Su ordine di Diego **«Pubblica sulla #301»** e stata pubblicata la [ricevuta completa con DIAG](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/301#issuecomment-6862206357), ora disponibile al revisore.
+
+Canary **OFF salvato confermato due volte da Diego**, senza rilettura amministrativa. Il report PRE-logout conserva stato attivo/permesso valido: non prova l'OFF successivo. Restano non misurati l'istante iniziale del timeout, la pulizia precisa dello storage dopo logout, D15, fase personale e altri ambienti. Il giro non sostituisce i sei PASS formali limitati alla 1.2.270 e non chiude D04/D08 completi, C1/C2 o CORNICE CHIUSA. Hosting resta **1.2.271 / fb6e9e361687fd3c8f502fe687766e81a21181e0**.
+
+Il [seguito corrente](INCARICO_CORRENTE.md#giro-breve-1271-qa2-incarico-2026-11-13) e soltanto la pubblicazione autorizzata della ricevuta e dei quattro documenti nella #301, con commit/push e controlli CI, senza nuovo giro, codice applicativo, merge o deploy. I checkpoint sottostanti fotografano rilascio e preparazione precedenti: le loro diciture «giro breve non eseguito» descrivono quel momento e sono superate dal presente esito ancora da revisionare.
+
+<a id="hosting-1271-online-stato-2026-11-13"></a>
+
+## Hosting 1.2.271 online — UI e tipografia pubblicate, cornice conservata — 13/11/2026
+
+L'ordine **«Pubblica»** di Diego e stato eseguito dopo il [GO di Claude sulla #300](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6859938971): merge in master `fb6e9e361687fd3c8f502fe687766e81a21181e0` e rilascio **Hosting 1.2.271 concluso** con la [run #1136](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43472275913). L'approvazione personale di Diego e stata osservata nella UI GitHub; deploy riuscito, scope `hosting`, senza pubblicazione di backend, Rules o Functions.
+
+Sono online UI e tipografia della nuova versione, con la cornice gia presente nel pacchetto precedente conservata. La verifica post-deploy in CI e la successiva verifica indipendente di Codex sono PASS per hash dei 365 file, route e alias, header per pagina e tre probe. Manifest remoto e locale coincidono integralmente; verificati anche cinque asset UI rappresentativi. La [ricevuta pubblica](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6861098889) e le [evidenze di rilascio](../evidenze/COLLAUDI.md#hosting-1271-online-evidenze-2026-11-13) riportano SHA, digest e limiti.
+
+Canary **OFF secondo l'ultima conferma di Diego**, senza rilettura amministrativa: pubblicare il pacchetto non attiva il singleton, il claim o la fase personale. Nessun nuovo giro QA2 o collaudo funzionale della UI online e stato eseguito in questo seguito. I sei PASS prioritari restano circoscritti a QA2 / Chrome Windows / 1.2.270; non si trasferiscono automaticamente alla 1.2.271. Restano aperti giro breve del nuovo pacchetto, D15, altri ambienti e sottocasi C1, fase personale/C2 e D18; nessuna dichiarazione C1 completa o CORNICE CHIUSA.
+
+Il [seguito corrente](INCARICO_CORRENTE.md#hosting-1271-online-incarico-2026-11-13) e soltanto la registrazione documentale della ricevuta sul ramo `codex/release-1.2.271-receipts-20261113`, base del merge rilasciato. I checkpoint di preparazione sottostanti, compresi i loro **DA_VERIFICARE** e i riferimenti alla produzione 1.2.270, descrivono lo stato prima del GO e del rilascio: non sono lo stato online corrente e non autorizzano nuove operazioni.
+
 <a id="rilascio-ui-1271-stato-2026-11-13"></a>
 
 ## Candidata APP 1.2.271 — preparazione di UI, tipografia e pacchetto cornice — 13/11/2026

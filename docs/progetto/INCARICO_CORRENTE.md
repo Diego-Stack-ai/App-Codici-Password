@@ -1,5 +1,29 @@
 # Incarico corrente
 
+<a id="giro-breve-1271-qa2-incarico-2026-11-13"></a>
+
+## Giro breve QA2 1.2.271 — ricevuta pubblicata per la revisione, 13/11/2026
+
+Nuovo ordine di Diego **«facciamo il giro QA2»**: giro manuale eseguito su QA2 / Chrome Windows / app 1.2.271, grafica Nuova, timer tre minuti, DIAG iniziale senza eventi. Le osservazioni e le conferme successive di Diego, insieme al rapporto PRE-logout fornito privatamente in chat, sono le fonti della [ricevuta](../evidenze/COLLAUDI.md#giro-breve-1271-qa2-evidenze-2026-11-13). Navigazioni ulteriori rispetto alla sequenza prevista sono dichiarate, senza trasformare il giro breve in una ripetizione formale completa di D04.
+
+Ordine successivo di Diego **«Pubblica sulla #301»**: invio della ricevuta completa e aggiornamento dei soli **STATO, INCARICO_CORRENTE, PROGRAMMA e COLLAUDI** sul ramo `codex/release-1.2.271-receipts-20261113`, dal checkpoint documentale `901d08f5`, con commit/push e verifica della CI. La [ricevuta con il DIAG integrale](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/301#issuecomment-6862206357) e pubblicata. Esito **PASS OSSERVATO PROPOSTO / DA_REVISIONARE da Claude**: nessuna auto-approvazione o chiusura C1; l'aggiornamento richiede la propria revisione sui nuovi byte.
+
+Conservare fonti e limiti: report di 36 eventi copiato prima del logout; tempo di tre minuti riferito da Diego, non misurato dal DIAG privo del T0 di Shift; logout e Indietro riferiti protetti, senza nuova misura della cancellazione delle chiavi locali. Il giro breve e ora eseguito, con accettazione attesa; non sostituisce i sei sottocasi formali della 1.2.270, D15, fase personale o altri ambienti. L'assenza di conferma visibile sul pulsante Cancella e una nota di usabilita: la baseline conferma soltanto il registro vuoto dopo il clic, senza misura degli eventi rimossi, difetto accertato o fix richiesto in questo passo.
+
+Canary **OFF salvato secondo due conferme di Diego**, senza rilettura amministrativa. Questo seguito autorizza soltanto la pubblicazione della ricevuta e dei quattro documenti, con i relativi controlli locali e CI; nessun nuovo giro produttivo, modifica applicativa, merge, deploy, dispatch o operazione Firebase/Google Cloud. Elenco chiuso di 34 Markdown e corpo generato dell'audit QA finale invariati. [Stato](STATO.md#giro-breve-1271-qa2-stato-2026-11-13) e [programma](PROGRAMMA.md#giro-breve-1271-qa2-programma-2026-11-13) aggiornano il giro breve da NE a eseguito, non ancora accettato; i checkpoint sottostanti restano storici.
+
+<a id="hosting-1271-online-incarico-2026-11-13"></a>
+
+## Hosting 1.2.271 — ricevuta documentale dopo il rilascio, 13/11/2026
+
+L'ordine di Diego **«Pubblica»** e stato eseguito: [GO di Claude sulla #300](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6859938971), merge `fb6e9e361687fd3c8f502fe687766e81a21181e0`, [Hosting #1136 riuscito](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43472275913) dopo l'approvazione personale osservata nella UI GitHub e verifiche post-deploy concluse. [Ricevuta pubblicata](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6861098889). Non e richiesto un nuovo rilascio per registrare questi fatti.
+
+Incarico corrente: aggiornare soltanto **STATO, INCARICO_CORRENTE, PROGRAMMA e COLLAUDI** sul ramo `codex/release-1.2.271-receipts-20261113`, base `fb6e9e361687fd3c8f502fe687766e81a21181e0`, con esito, fonti, SHA/digest e limiti del rilascio Hosting 1.2.271. Mantenere i checkpoint di preparazione come storici, senza cancellare i relativi DA_VERIFICARE o reinterpretarli come stato corrente. Conservare l'elenco chiuso di 34 Markdown e il corpo generato dell'audit QA finale. Questa nuova ricevuta documentale resta da revisionare sui propri byte; non rimette in discussione l'esito tecnico del rilascio gia concluso.
+
+Le verifiche effettuate sono validate CI, deploy Hosting e controlli HTTP di integrita, route/alias e header, con confronto indipendente del manifest integrale e di cinque asset UI. Non sono un nuovo giro funzionale QA2 della 1.2.271, ne una chiusura C1. Nessun trasferimento dei sei PASS limitati alla 1.2.270; restano aperti giro breve della nuova UI, D15, altri ambienti/sottocasi e fase personale/C2, con i rispettivi ordini.
+
+Canary **OFF secondo l'ultima conferma di Diego**, senza nuova lettura amministrativa. Nessuna modifica applicativa, nuovo giro, merge, deploy, dispatch, attivazione, operazione Firebase/Google Cloud o modifica singleton/claim/credenziali in questo seguito. [Stato online](STATO.md#hosting-1271-online-stato-2026-11-13), [evidenze](../evidenze/COLLAUDI.md#hosting-1271-online-evidenze-2026-11-13) e [prossimi passi](PROGRAMMA.md#hosting-1271-online-programma-2026-11-13) precedono i checkpoint storici sottostanti.
+
 <a id="rilascio-ui-1271-incarico-2026-11-13"></a>
 
 ## Candidata APP 1.2.271 — preparazione e revisione, 13/11/2026

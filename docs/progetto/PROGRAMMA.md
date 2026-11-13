@@ -1,5 +1,29 @@
 # Programma
 
+<a id="giro-breve-1271-qa2-programma-2026-11-13"></a>
+
+## Dopo il giro breve QA2 1.2.271 — prima revisione della ricevuta, 13/11/2026
+
+Il giro breve manuale autorizzato da Diego su **QA2 / Chrome Windows / 1.2.271 / grafica Nuova / timer tre minuti** e stato eseguito. Il suo stato non e piu NE: le [evidenze](../evidenze/COLLAUDI.md#giro-breve-1271-qa2-evidenze-2026-11-13) propongono **PASS OSSERVATO / DA_REVISIONARE da Claude**, con tre frecce confermate corrette senza doppi salti, navigazioni e nuova UI utilizzabili, ricarica con una Master, timeout osservato e logout/Indietro protetti. Le navigazioni aggiuntive sono dichiarate; non si promuove il giro a ripetizione formale completa di D04 o D08.
+
+Su ordine di Diego **«Pubblica sulla #301»**, la [ricevuta sanificata con il DIAG completo](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/301#issuecomment-6862206357) e ora pubblicata; questo seguito aggiorna i soli quattro documenti esistenti della stessa PR e ne verifica la CI. Resta attesa la revisione di Claude sulle evidenze e sui nuovi byte documentali, senza merge o deploy impliciti. Non ripetere automaticamente il giro e non dichiararlo accettato prima della revisione. Il rapporto e le conferme dell'operatore sono riprodotti nel commento pubblico, con fonti e limiti distinti.
+
+Canary **OFF salvato confermato due volte da Diego**, senza rilettura amministrativa. Restano aperti D15, fase personale/C2, altri browser/dispositivi e gli altri sottocasi della matrice. La pulizia precisa delle chiavi locali non e stata misurata in questo giro e `pushReady=true` non e una prova di invio push. I sei PASS prioritari della 1.2.270 restano nel loro perimetro originale; nessuna chiusura C1 o CORNICE CHIUSA.
+
+Annotare l'assenza di feedback visibile su Cancella come osservazione di usabilita, insieme alla baseline `events: []` che conferma il registro vuoto dopo il clic, senza misura degli eventi rimossi; nessun bug accertato e nessuna correzione in questo seguito. Restano pianificati separatamente enum DIAG e ricariche standalone. L'[incarico corrente](INCARICO_CORRENTE.md#giro-breve-1271-qa2-incarico-2026-11-13) non comprende nuovo codice, giro, merge, deploy o cloud. Le diciture di giro breve ancora da fare nei checkpoint sottostanti descrivono lo stato anteriore alla prova ora eseguita.
+
+<a id="hosting-1271-online-programma-2026-11-13"></a>
+
+## Dopo Hosting 1.2.271 — ricevuta e verifiche funzionali ancora distinte, 13/11/2026
+
+Pubblicazione dell'app conclusa su ordine di Diego: [GO #300](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6859938971), merge `fb6e9e361687fd3c8f502fe687766e81a21181e0`, [run Hosting #1136](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43472275913) e post-verifica PASS. UI e tipografia sono online nella **1.2.271**; cornice conservata, scope solo Hosting. La [ricevuta pubblica](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6861098889) contiene l'esito tecnico e le [evidenze](../evidenze/COLLAUDI.md#hosting-1271-online-evidenze-2026-11-13) distinguono CI, approvazione personale, deploy e controlli indipendenti.
+
+Il passo corrente e documentare tale ricevuta nei soli quattro Markdown esistenti sul ramo `codex/release-1.2.271-receipts-20261113`, base del merge rilasciato. Non comporta nuovo codice, merge o deploy. I precedenti piani di composizione e i loro DA_VERIFICARE restano checkpoint storici anteriori alla pubblicazione, non istruzioni da rieseguire.
+
+Il giro breve funzionale della nuova UI/cornice su 1.2.271 resta **non eseguito** e richiede ambiente, perimetro e ordine propri. I sei PASS prioritari gia accettati su QA2 / Chrome Windows / 1.2.270 non si trasferiscono al pacchetto nuovo. Restano aperti D15, gli altri ambienti e sottocasi della matrice, fase personale/C2 e D18; le verifiche HTTP del rilascio non li completano. Canary **OFF secondo l'ultima conferma di Diego**, senza rilettura amministrativa; nessuna accensione o nuova prova e implicita nella pubblicazione.
+
+I seguiti sicurezza/efficienza sul motivo del rifiuto tramite enum DIAG e sulle ricariche standalone restano pianificati e non implementati. Nuovi interventi e collaudi seguono ordini e revisioni propri, senza dichiarare C1 completa o CORNICE CHIUSA. Il [perimetro corrente](INCARICO_CORRENTE.md#hosting-1271-online-incarico-2026-11-13) precede i checkpoint seguenti.
+
 <a id="rilascio-ui-1271-programma-2026-11-13"></a>
 
 ## Candidata APP 1.2.271 — preparazione prima del rilascio, 13/11/2026
