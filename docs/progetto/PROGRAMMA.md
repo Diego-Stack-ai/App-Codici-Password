@@ -1,5 +1,17 @@
 # Programma
 
+<a id="hosting-1271-online-programma-2026-11-13"></a>
+
+## Dopo Hosting 1.2.271 — ricevuta e verifiche funzionali ancora distinte, 13/11/2026
+
+Pubblicazione dell'app conclusa su ordine di Diego: [GO #300](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6859938971), merge `fb6e9e361687fd3c8f502fe687766e81a21181e0`, [run Hosting #1136](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43472275913) e post-verifica PASS. UI e tipografia sono online nella **1.2.271**; cornice conservata, scope solo Hosting. La [ricevuta pubblica](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6861098889) contiene l'esito tecnico e le [evidenze](../evidenze/COLLAUDI.md#hosting-1271-online-evidenze-2026-11-13) distinguono CI, approvazione personale, deploy e controlli indipendenti.
+
+Il passo corrente e documentare tale ricevuta nei soli quattro Markdown esistenti sul ramo `codex/release-1.2.271-receipts-20261113`, base del merge rilasciato. Non comporta nuovo codice, merge o deploy. I precedenti piani di composizione e i loro DA_VERIFICARE restano checkpoint storici anteriori alla pubblicazione, non istruzioni da rieseguire.
+
+Il giro breve funzionale della nuova UI/cornice su 1.2.271 resta **non eseguito** e richiede ambiente, perimetro e ordine propri. I sei PASS prioritari gia accettati su QA2 / Chrome Windows / 1.2.270 non si trasferiscono al pacchetto nuovo. Restano aperti D15, gli altri ambienti e sottocasi della matrice, fase personale/C2 e D18; le verifiche HTTP del rilascio non li completano. Canary **OFF secondo l'ultima conferma di Diego**, senza rilettura amministrativa; nessuna accensione o nuova prova e implicita nella pubblicazione.
+
+I seguiti sicurezza/efficienza sul motivo del rifiuto tramite enum DIAG e sulle ricariche standalone restano pianificati e non implementati. Nuovi interventi e collaudi seguono ordini e revisioni propri, senza dichiarare C1 completa o CORNICE CHIUSA. Il [perimetro corrente](INCARICO_CORRENTE.md#hosting-1271-online-incarico-2026-11-13) precede i checkpoint seguenti.
+
 <a id="rilascio-ui-1271-programma-2026-11-13"></a>
 
 ## Candidata APP 1.2.271 — preparazione prima del rilascio, 13/11/2026

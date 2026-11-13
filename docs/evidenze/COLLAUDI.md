@@ -1,5 +1,25 @@
 # Collaudi
 
+<a id="hosting-1271-online-evidenze-2026-11-13"></a>
+
+## Hosting 1.2.271 — ricevuta del rilascio e verifica online, 13/11/2026
+
+Fonte pubblica: [ricevuta sulla #300](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6861098889), dopo il [GO di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6859938971) e l'ordine **«Pubblica»** di Diego. La #300 e stata unita in master **`fb6e9e361687fd3c8f502fe687766e81a21181e0`**; [run Hosting #1136 / 43472275913](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43472275913) sullo stesso SHA, scope **`hosting`**, versione **1.2.271**. UI e tipografia sono online; la cornice presente nella 1.2.270 e conservata.
+
+| Evidenza del rilascio | Esito e limite |
+| --- | --- |
+| Validate CI | PASS: 3654 test, 3643 PASS, 0 FAIL, 11 SKIP, 65 gruppi. I casi saltati restano tali. |
+| Approvazione production | Clic personale di Diego osservato nella UI GitHub prima dell'esecuzione del deploy. |
+| Deploy | SUCCESS; job Deploy Firebase production concluso in 39 secondi. Backend, Rules e Functions saltati per lo scope selezionato. |
+| Verifica post-deploy CI | PASS: integrita dei 365 file del manifest, route e alias, header per pagina e tre probe richiesti. |
+| Rilettura indipendente Codex | PASS sugli stessi controlli HTTP dopo la CI; confronto integrale del manifest remoto con il JSON locale immutabile del merge e verifica di cinque asset UI rappresentativi. |
+
+Digest dei **365 file** contenuto nel manifest: **`e1e2fcc1edba669eb8814384e1204159b879573319e6c126e8be3788fcd3a6ad`**. SHA-256 del **file JSON del manifest**: **`384aa842fb404ead9dfc470b873190b47c0cede01e18fdfbca3fb05faddbcdf3`**. Sono valori distinti: il primo riepiloga l'inventario dei file, il secondo identifica i byte del JSON. Il manifest remoto coincide integralmente con il JSON locale verificato sul merge rilasciato.
+
+Questi PASS riguardano la pipeline di rilascio e la corrispondenza HTTP dei file/header, non un nuovo giro funzionale nell'app. Nessun login o nuovo test QA2, giro breve della UI online, prova D15, passaggio all'account personale o collaudo degli altri browser/dispositivi e stato eseguito in questo seguito. I sei PASS prioritari precedenti restano limitati a **QA2 / Chrome Windows / 1.2.270**; non si trasferiscono automaticamente alla 1.2.271 e non chiudono C1/C2 o CORNICE CHIUSA.
+
+Canary **OFF secondo l'ultima conferma di Diego**, senza rilettura amministrativa di singleton, claim o account. Il presente seguito, ramo `codex/release-1.2.271-receipts-20261113` sulla base rilasciata, aggiorna soltanto quattro documenti esistenti. I checkpoint della candidata sottostanti conservano i loro esiti e DA_VERIFICARE precedenti al GO e al deploy; non descrivono la produzione corrente e non autorizzano una nuova operazione cloud.
+
 <a id="rilascio-ui-1271-verifiche-2026-11-13"></a>
 
 ## Candidata APP 1.2.271 — verifiche locali per la revisione, 13/11/2026

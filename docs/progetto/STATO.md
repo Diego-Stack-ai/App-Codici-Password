@@ -2,6 +2,18 @@
 
 <a id="stato-corrente"></a>
 
+<a id="hosting-1271-online-stato-2026-11-13"></a>
+
+## Hosting 1.2.271 online — UI e tipografia pubblicate, cornice conservata — 13/11/2026
+
+L'ordine **«Pubblica»** di Diego e stato eseguito dopo il [GO di Claude sulla #300](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6859938971): merge in master `fb6e9e361687fd3c8f502fe687766e81a21181e0` e rilascio **Hosting 1.2.271 concluso** con la [run #1136](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43472275913). L'approvazione personale di Diego e stata osservata nella UI GitHub; deploy riuscito, scope `hosting`, senza pubblicazione di backend, Rules o Functions.
+
+Sono online UI e tipografia della nuova versione, con la cornice gia presente nel pacchetto precedente conservata. La verifica post-deploy in CI e la successiva verifica indipendente di Codex sono PASS per hash dei 365 file, route e alias, header per pagina e tre probe. Manifest remoto e locale coincidono integralmente; verificati anche cinque asset UI rappresentativi. La [ricevuta pubblica](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6861098889) e le [evidenze di rilascio](../evidenze/COLLAUDI.md#hosting-1271-online-evidenze-2026-11-13) riportano SHA, digest e limiti.
+
+Canary **OFF secondo l'ultima conferma di Diego**, senza rilettura amministrativa: pubblicare il pacchetto non attiva il singleton, il claim o la fase personale. Nessun nuovo giro QA2 o collaudo funzionale della UI online e stato eseguito in questo seguito. I sei PASS prioritari restano circoscritti a QA2 / Chrome Windows / 1.2.270; non si trasferiscono automaticamente alla 1.2.271. Restano aperti giro breve del nuovo pacchetto, D15, altri ambienti e sottocasi C1, fase personale/C2 e D18; nessuna dichiarazione C1 completa o CORNICE CHIUSA.
+
+Il [seguito corrente](INCARICO_CORRENTE.md#hosting-1271-online-incarico-2026-11-13) e soltanto la registrazione documentale della ricevuta sul ramo `codex/release-1.2.271-receipts-20261113`, base del merge rilasciato. I checkpoint di preparazione sottostanti, compresi i loro **DA_VERIFICARE** e i riferimenti alla produzione 1.2.270, descrivono lo stato prima del GO e del rilascio: non sono lo stato online corrente e non autorizzano nuove operazioni.
+
 <a id="rilascio-ui-1271-stato-2026-11-13"></a>
 
 ## Candidata APP 1.2.271 — preparazione di UI, tipografia e pacchetto cornice — 13/11/2026
