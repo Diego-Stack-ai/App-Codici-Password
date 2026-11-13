@@ -97,24 +97,55 @@ for (const theme of ['light', 'dark']) {
   });
 }
 
-// Ventaglio tonale (13/11/2026): per ognuno dei 7 colori, in chiaro e in scuro, card e popup
-// prendono il colore scelto e il testo secondario resta leggibile (≥ 4,5:1); l'icona ≥ 3:1.
+// Ventaglio tonale (13/11/2026): per ognuno dei 7 colori, in chiaro e in scuro, con i fogli REALI
+// di Impostazioni, Profilo azienda e Ricerca. Il secondario compone l'opacità effettiva; i
+// riempimenti pieni con testo bianco (bolla utente, microfono, pastiglie azienda, Modifica premuto)
+// restano ≥ 4,5:1; il pannello Ricerca segue il colore anche in scuro.
+const realCss = ['core.css', 'core_fonts.css', 'core_fascie.css', 'core_ui.css', 'impostazioni.css', 'dati_azienda.css',
+  'ui-tre-livelli.css', 'ui-tre-livelli-moduli.css', 'vault-assistant.css']
+  .map(file => `<link rel="stylesheet" href="/assets/css/${file}">`).join('');
+const fanFixture = (theme, color) => `<!doctype html><html lang="it" class="${theme === 'dark' ? 'dark' : ''}"${color ? ` data-color-theme="${color}"` : ''}><head>${realCss}</head>
+  <body class="company-profile-page" data-ui-revision="tre-livelli">
+    <div class="settings-item" id="card"><div class="settings-icon-box icon-purple" id="icon">x</div><span class="settings-desc" id="desc">Descrizione</span></div>
+    <div class="modal-box" id="popup"><span class="settings-desc" id="popup-desc">Testo</span></div>
+    <div class="settings-icon-box icon-purple" id="company-purple">x</div><div class="settings-icon-box icon-blue" id="company-blue">x</div>
+    <button type="button" class="manage-toggle" aria-pressed="true" id="toggle">Fine</button>
+    <div class="vault-assistant-panel" id="panel"><div class="vault-assistant-bubble user" id="bubble">Domanda</div>
+      <button type="button" class="vault-assistant-microphone" id="mic">m</button></div>
+  </body></html>`;
+const blend = (fg, bg, alpha) => {
+  const parse = value => { const n = value.match(/\d*\.?\d+(e-?\d+)?/g).map(Number); return value.startsWith('color(') ? n.slice(0, 3).map(v => v * 255) : n.slice(0, 3); };
+  const [f, b] = [parse(fg), parse(bg)];
+  return `rgb(${f.map((v, i) => v * alpha + b[i] * (1 - alpha)).join(', ')})`;
+};
 const palettes = ['', 'green', 'red', 'sand', 'petrol', 'lavender', 'dusty-rose'];
 for (const theme of ['light', 'dark']) {
-  test(`tonal fan keeps cards, popups and icons readable for every palette in ${theme} theme`, {timeout: 60000}, async () => {
+  test(`tonal fan keeps real cards, popups, fills and icons readable for every palette in ${theme} theme`, {timeout: 90000}, async () => {
     for (const color of palettes) {
-      const page = await open(theme, color);
+      const page = await browser.newPage();
+      await page.route('**/*', route => route.request().url().startsWith(base) ? route.continue() : route.abort());
+      await page.route(`${base}/fan.html`, route => route.fulfill({contentType: 'text/html', body: fanFixture(theme, color)}));
+      await page.goto(`${base}/fan.html`);
       try {
         const read = await page.evaluate(() => {
-          const get = (id, prop) => getComputedStyle(document.getElementById(id))[prop];
-          return {card: get('card', 'backgroundColor'), desc: get('desc', 'color'), popup: get('popup', 'backgroundColor'),
-            popupDesc: get('popup-desc', 'color'), iconBg: get('icon', 'backgroundColor'), icon: get('icon', 'color')};
+          const st = id => getComputedStyle(document.getElementById(id));
+          const pick = id => ({fg: st(id).color, bg: st(id).backgroundColor, image: st(id).backgroundImage, opacity: Number(st(id).opacity)});
+          return {card: st('card').backgroundColor, desc: pick('desc'), popup: st('popup').backgroundColor, popupDesc: pick('popup-desc'),
+            icon: pick('icon'), purple: pick('company-purple'), blue: pick('company-blue'), toggle: pick('toggle'),
+            bubble: pick('bubble'), mic: pick('mic'), panel: pick('panel')};
         });
         const label = `${color || 'default'} ${theme}`;
+        // Il gradiente usa due tappe di --rev-fill: la più chiara è il primo colore del gradiente.
+        const fill = item => item.image !== 'none' ? item.image.match(/(rgb|color)\([^)]*\)/)[0] : item.bg;
         assert.notEqual(read.card, 'rgb(255, 255, 255)', `${label}: card tinted, not plain white`);
-        assert.ok(contrast(read.desc, read.card) >= 4.5, `${label}: secondary text on card ${contrast(read.desc, read.card).toFixed(2)}`);
-        assert.ok(contrast(read.popupDesc, read.popup) >= 4.5, `${label}: secondary text on popup ${contrast(read.popupDesc, read.popup).toFixed(2)}`);
-        assert.ok(contrast(read.icon, read.iconBg) >= 3, `${label}: icon on its chip ${contrast(read.icon, read.iconBg).toFixed(2)}`);
+        assert.ok(contrast(blend(read.desc.fg, read.card, read.desc.opacity), read.card) >= 4.5, `${label}: secondary text (with opacity) on card`);
+        assert.ok(contrast(blend(read.popupDesc.fg, read.popup, read.popupDesc.opacity), read.popup) >= 4.5, `${label}: secondary text on popup`);
+        assert.ok(contrast(read.icon.fg, read.icon.bg) >= 3, `${label}: icon on its chip ${contrast(read.icon.fg, read.icon.bg).toFixed(2)}`);
+        for (const key of ['purple', 'blue', 'toggle', 'bubble', 'mic']) {
+          const ratio = contrast(read[key].fg, fill(read[key]));
+          assert.ok(ratio >= 4.5, `${label}: white on ${key} fill ${ratio.toFixed(2)}`);
+        }
+        assert.equal(read.panel.image, 'none', `${label}: Ricerca panel no longer keeps the fixed blue gradient`);
       } finally { await page.close(); }
     }
   });

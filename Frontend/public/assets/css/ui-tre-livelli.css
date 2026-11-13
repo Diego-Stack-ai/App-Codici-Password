@@ -39,12 +39,8 @@
 }
 
 .manage-toggle[aria-pressed="true"] {
-    background: var(--accent);
+    background: var(--rev-fill, var(--accent));
     color: #fff;
-}
-
-.dark .manage-toggle[aria-pressed="true"] {
-    color: #0b0f17;
 }
 
 .manage-toggle:focus-visible {

@@ -1175,6 +1175,8 @@ select.shared-account-select-control optgroup {
     --rev-border: color-mix(in srgb, var(--accent) 28%, #e2e8f0);
     --rev-icon-bg: color-mix(in srgb, var(--accent) 22%, #fff);
     --rev-icon: color-mix(in srgb, var(--accent) 85%, #0f172a);
+    /* Riempimento pieno con testo bianco: scurito quanto basta per ≥ 4,5:1 su ogni palette. */
+    --rev-fill: color-mix(in srgb, var(--accent) 85%, #0f172a);
     --rev-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.08);
     --rev-popup-shadow: 0 24px 56px -16px rgba(var(--accent-rgb), 32%);
 }
@@ -1186,6 +1188,8 @@ select.shared-account-select-control optgroup {
     --rev-border: color-mix(in srgb, var(--accent) 34%, #3c414c);
     --rev-icon-bg: color-mix(in srgb, var(--accent) 28%, #2e323b);
     --rev-icon: color-mix(in srgb, var(--accent) 45%, #fff);
+    /* Gli accenti scuri sono chiari: il riempimento con testo bianco va scurito di più. */
+    --rev-fill: color-mix(in srgb, var(--accent) 45%, #0f172a);
     /* In scuro gli accenti sono chiari: percentuali più basse; il grigio secondario
        si schiarisce per restare ≥ 4,5:1 su ogni superficie. */
     --text-secondary: #c3cddb;
@@ -1196,7 +1200,8 @@ select.shared-account-select-control optgroup {
 
 /* Popup, menu e avvisi seguono il colore scelto (prima: bianco, azzurro o blu fissi). */
 [data-ui-revision="tre-livelli"] :is(.modal-box, .modal-box-source, .custom-select-menu, .datepicker-card,
-    .first-configuration-dialog, .documentation-panel, .documentation-walkthrough-panel, .vault-assistant-panel) {
+    .first-configuration-dialog, .documentation-panel, .documentation-walkthrough-panel),
+html body[data-ui-revision="tre-livelli"] .vault-assistant-panel {
     background: var(--rev-popup);
     border-color: var(--rev-border);
     color: var(--text-primary);
@@ -1204,7 +1209,8 @@ select.shared-account-select-control optgroup {
     backdrop-filter: none;
 }
 
-[data-ui-revision="tre-livelli"] :is(.modal-box, .modal-box-source, .first-configuration-dialog, .vault-assistant-panel) {
+[data-ui-revision="tre-livelli"] :is(.modal-box, .modal-box-source, .first-configuration-dialog),
+html body[data-ui-revision="tre-livelli"] .vault-assistant-panel {
     border: 1px solid var(--rev-border);
     box-shadow: var(--rev-popup-shadow);
 }
@@ -1215,11 +1221,13 @@ select.shared-account-select-control optgroup {
     color: var(--text-primary);
 }
 
-[data-ui-revision="tre-livelli"] :is(.vault-assistant-microphone, .vault-assistant-bubble.user) {
-    background: var(--accent);
+/* Il foglio Ricerca usa html.dark .vault-assistant-* (0,2,1): html body[…] (0,2,2) prevale. */
+html body[data-ui-revision="tre-livelli"] :is(.vault-assistant-microphone, .vault-assistant-bubble.user) {
+    background: var(--rev-fill);
+    color: #fff;
 }
 
-[data-ui-revision="tre-livelli"] :is(.vault-assistant-input, .vault-assistant-result, .vault-assistant-conversation, .vault-assistant-bubble.assistant, .vault-assistant-send) {
+html body[data-ui-revision="tre-livelli"] :is(.vault-assistant-input, .vault-assistant-result, .vault-assistant-conversation, .vault-assistant-bubble.assistant, .vault-assistant-send) {
     background: var(--rev-surface-2);
     border-color: var(--rev-border);
     color: var(--text-primary);
@@ -1240,8 +1248,14 @@ body[data-ui-revision="tre-livelli"] :is(.icon-purple, .email-icon-box):not(.mat
     color: color-mix(in srgb, var(--rev-icon) 75%, var(--text-primary));
 }
 
-body[data-ui-revision="tre-livelli"] .matrix-icon-box.icon-purple,
-body[data-ui-revision="tre-livelli"] .company-profile-page .icon-purple {
-    background: linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 70%, #000) 100%);
+body[data-ui-revision="tre-livelli"] .matrix-icon-box:is(.icon-purple, .icon-blue),
+body[data-ui-revision="tre-livelli"].company-profile-page :is(.icon-purple, .icon-blue) {
+    background: linear-gradient(135deg, var(--rev-fill) 0%, color-mix(in srgb, var(--rev-fill) 80%, #000) 100%);
     color: #fff;
+}
+
+/* Il secondario delle Impostazioni aveva opacity 0.7 sopra il colore: nella grafica Nuova
+   il grigio è già calibrato per 4,5:1, quindi l'opacità aggiuntiva va tolta. */
+[data-ui-revision="tre-livelli"] .settings-desc {
+    opacity: 1;
 }
