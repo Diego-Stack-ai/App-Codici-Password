@@ -2,15 +2,14 @@
 
 <a id="rilascio-ui-1272-programma-2026-11-13"></a>
 
-## APP 1.2.272 — sequenza del rilascio colori, 13/11/2026
+## APP 1.2.272 — rilascio concluso e seguito documentale, 13/11/2026
 
-La [scelta di intensità graduale e l'ordine di rilascio](DECISIONI.md#colori-intensita-rilascio-2026-11-13) seguono il merge della #302 in `0ffc0a39`; la #283 è chiusa come confluita. Il perimetro è il [confezionamento 1.2.272 solo Hosting](INCARICO_CORRENTE.md#rilascio-ui-1272-incarico-2026-11-13), senza nuovi aggiustamenti dei colori o attivazione della cornice.
+Il rilascio colori **1.2.272 / `0d2e3cfcbc94346834995aab01bd05307dcd43a9`** è concluso: #303 revisionata da Claude, integrata e distribuita tramite Hosting #1145 con approvazione production personale di Diego e verifica online di manifest, hash e intestazioni. [Ricevuta del rilascio](../evidenze/COLLAUDI.md#rilascio-ui-1272-ricevuta-2026-11-13). L'[intensità graduale scelta](DECISIONI.md#colori-intensita-rilascio-2026-11-13) resta invariata; il deploy non attiva la cornice.
 
-1. Bump canonico e riesame del catalogo aiuti; controlli locali, manifest/hash e modello degli header sulla candidata pulita, registrando esiti reali e limiti nelle [evidenze](../evidenze/COLLAUDI.md#rilascio-ui-1272-verifiche-2026-11-13).
-2. Revisione di Claude e CI verde sullo SHA finale; poi integrazione e dispatch Hosting già autorizzati. Il GO della #302 non sostituisce quello del confezionamento. L'approvazione production resta personale di Diego.
-3. Dopo Hosting, verifica online di versione, manifest, hash e intestazioni per pagina e ricevuta del rilascio. Il successivo giro breve QA2 sulla 1.2.272 resta da autorizzare separatamente; le prove precedenti non gli attribuiscono PASS automatici.
+1. Consolidare soltanto la ricevuta nei quattro Markdown esistenti del ramo `codex/release-1.2.272-receipts-20261113`, base `0d2e3cfc`, con controllo documentale e revisione di Claude sullo SHA della PR; nessun altro Hosting è necessario.
+2. Attendere un ordine proprio di Diego per il giro breve QA2 sulla 1.2.272, con ambiente, sequenza e ricevuta dichiarati. Nessuna prova sul nuovo pacchetto è eseguita da questo rilascio e nessun PASS precedente si trasferisce automaticamente.
 
-Canary **OFF secondo Diego**. Nessuna ulteriore operazione cloud, prova QA2/personale, Rules, Functions o modifica della cornice. Restano aperti gli altri ambienti e sottocasi C1, D15, fase personale/C2 e D18; nessuna chiusura globale. I checkpoint sotto conservano il contesto storico.
+Canary **OFF secondo Diego**, senza rilettura amministrativa. Il [seguito corrente](INCARICO_CORRENTE.md#rilascio-ui-1272-incarico-2026-11-13) non autorizza operazioni cloud, prove QA2/personali, Rules, Functions o modifica della cornice. Restano aperti gli altri ambienti e sottocasi C1, D15, fase personale/C2 e D18; nessuna chiusura globale. La #301 resta distinta in revisione; i checkpoint sotto conservano il contesto storico.
 
 <a id="rilascio-ui-1271-programma-2026-11-13"></a>
 
