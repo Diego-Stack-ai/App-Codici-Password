@@ -1,5 +1,34 @@
 # Collaudi
 
+<a id="rilascio-ui-1272-verifiche-2026-11-13"></a>
+
+## APP 1.2.272 — confezionamento del rilascio colori, 13/11/2026
+
+Candidata sul ramo **`codex/release-ui-1.2.272-20261113`**, base master **`0ffc0a3947f5131409053e2d0885cc904e57cfef`**: merge della #302 revisionata da [Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/302#issuecomment-6865151130) su `d65871aa`, con CI verde. La #283 è chiusa come confluita. Diego mantiene l'intensità corrente e ordina la preparazione e il deploy, secondo [decisione](../progetto/DECISIONI.md#colori-intensita-rilascio-2026-11-13) e [incarico](../progetto/INCARICO_CORRENTE.md#rilascio-ui-1272-incarico-2026-11-13); l'ordine non salta la revisione del pacchetto finale né l'approvazione personale di production.
+
+**Stato: controlli locali del confezionamento PASS; CI completa, manifest dello SHA pulito e GO finale DA_VERIFICARE.** Il bump canonico porta **1.2.271 → 1.2.272**, con 303 riferimenti asset uniformati in 111 file applicativi. Sono stati confrontati tutti i 365 file Frontend della base: i 115 modificati (31 HTML, 83 JS, un JSON) sono identici dopo normalizzazione della sola versione e dei terminatori di riga. CSS e logica applicativa, inclusa la cornice, restano identici al merge della #302; i moduli della cornice cambiano soltanto riferimenti di versione. Package e lock cambiano soltanto la versione del progetto, non le dipendenze.
+
+Catalogo aiuti riesaminato: solo `reviewedAppVersion=1.2.272`, con `contentVersion=13`, 31 pagine, 126 istruzioni e 111 target; contenuti, percorsi e otto lingue invariati. La verifica delle traduzioni conserva esplicito il fallback italiano della guida nelle altre lingue, senza dichiararle interamente tradotte. Build offline locale: 61 export e 345 risorse, con `offline-assets.js` ricostruito e identico alla base. Nessuna modifica a workflow, configurazione Hosting, Rules, indici o Functions.
+
+Controlli eseguiti su Windows, Chrome 157.0.8103.52 e Node 24.22.1, senza app/account produttivi; la CI usa Node 22 e deve completare la propria suite sullo SHA della candidata:
+
+| Controllo locale | Esito |
+| --- | --- |
+| Versione canonica e inventario QA | 1.2.272 coerente, 303 riferimenti; 31 pagine, 126 istruzioni, 111 target, 167 campi |
+| Fondazioni UI e registro degli abbinamenti | 33/33 PASS, inclusi 224 abbinamenti e 4 negativi del banco colori |
+| Offline | 16/16 PASS |
+| Riferimenti statici e sintassi | 341 file e 250 moduli: PASS |
+| Guida, i18n e topologia traduzioni | 12/12, 19/19 e 5/5 PASS |
+| Stylelint e budget delle pagine | PASS e 4/4 PASS |
+| Hardening del confezionamento | 71/71 PASS dopo installazione delle dipendenze Functions del lockfile, come nella CI |
+| Documenti e diff | 12/12 PASS, 34 Markdown e 1008 collegamenti; `git diff --check` PASS |
+
+La prima esecuzione locale dell'hardening era 70/71: il worktree non aveva ancora `functions/node_modules` e risolveva l'Admin SDK transitivo del tool CLI (13.10.0) anziché quello fissato dalle Functions (14.5.0). Dopo `npm ci --prefix functions`, senza cambiare codice, test o lockfile, il solo gruppo è stato rieseguito ed è 71/71. I trasporti del test ADC restano sintetici/bloccati: nessun claim o servizio cloud è stato letto o scritto. I risultati del banco colori sotto conservano la loro base storica e non assegnano PASS ai dispositivi fisici.
+
+Lo stato produttivo di partenza è **1.2.271 / `fb6e9e361687fd3c8f502fe687766e81a21181e0`**, con [ricevuta precedente](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6861098889); qui non si dichiara già distribuita la 1.2.272. Dopo GO finale, CI e Hosting con clic personale di Diego, la ricevuta dovrà riportare run/SHA effettivi, manifest, hash e intestazioni online per pagina. Le ricevute della #301 e le prove C1 restano distinte: nessun nuovo giro QA2 o PASS sulla candidata 1.2.272 è incluso.
+
+Canary **OFF secondo Diego**, senza nuova rilettura amministrativa. Nessuna modifica della cornice, Rules, Functions, workflow, singleton, claim o credenziali; nessuna operazione cloud ulteriore al futuro Hosting CI autorizzato. Nessun UID o dato personale nel rapporto. I checkpoint seguenti conservano fonti, risultati e limiti delle rispettive basi.
+
 <a id="ui-color-contract-verifiche-2026-11-13"></a>
 
 ## Abbinamenti dei colori — banco locale e limiti, 13/11/2026

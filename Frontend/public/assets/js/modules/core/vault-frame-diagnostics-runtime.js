@@ -1,5 +1,5 @@
 import {APP_VERSION} from '../../app-env.js';
-import {auth} from '../../firebase-config.js?v=1.2.271';
+import {auth} from '../../firebase-config.js?v=1.2.272';
 import {authSessionFence} from '../../auth-session-fence.js';
 import {createFrameDiagnostics, FRAME_DIAG_CODES, FRAME_DIAG_OPTION, FRAME_DIAG_EVENTS} from './vault-frame-diagnostics.mjs';
 import {messagingRegistration} from './vault-frame-push.mjs';

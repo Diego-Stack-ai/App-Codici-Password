@@ -6,7 +6,7 @@
 export const APP_ENV = document.documentElement.dataset.env || 'production';
 // A2 is publishable but cannot activate; B1 must add a server-only admission adapter.
 export const VAULT_FRAME_ENABLED = true;
-export const APP_VERSION = 'v1.2.271';
+export const APP_VERSION = 'v1.2.272';
 
 // Explicit intent always selects a safe screen, including while unavailable.
 // No storage, environment, hostname or query parameter may enable the feature.

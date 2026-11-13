@@ -5,7 +5,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * Gestione liste account: personali, condivisi, memorandum.
  */
 
-import { db, functions } from '../../firebase-config.js?v=1.2.271';
+import { db, functions } from '../../firebase-config.js?v=1.2.272';
 import { LOG } from '../../logger.js';
 import { updateDoc, doc, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';

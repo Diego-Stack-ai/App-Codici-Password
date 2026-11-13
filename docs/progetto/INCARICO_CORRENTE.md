@@ -1,5 +1,17 @@
 # Incarico corrente
 
+<a id="rilascio-ui-1272-incarico-2026-11-13"></a>
+
+## APP 1.2.272 — confezionamento e rilascio Hosting autorizzato, 13/11/2026
+
+Diego mantiene l'intensità corrente della palette con **«Proviamo così, saliamo poco alla volta»** e ordina **«Procedi»**, poi **«Fai anche deploy»**. La [decisione](DECISIONI.md#colori-intensita-rilascio-2026-11-13) autorizza la preparazione e il successivo rilascio solo Hosting CI, conservando revisione finale, check verdi e approvazione production personale. La #302 revisionata su `d65871aa` è unita in master **`0ffc0a3947f5131409053e2d0885cc904e57cfef`**; la #283 è chiusa come confluita. Base della candidata e ramo: `0ffc0a39`, **`codex/release-ui-1.2.272-20261113`**.
+
+Preparare **1.2.272** con il bump canonico, riferimenti versione/cache/precache e confezionamento del manifest; nessun aumento dell'intensità o altra modifica grafica rispetto al merge revisionato. Riesaminare il catalogo aiuti e allineare `reviewedAppVersion`: il contenuto è invariato, con `contentVersion=13`, 31 pagine, 126 istruzioni e 111 target. Registrare i risultati effettivi dei controlli locali pertinenti e della verifica del manifest/header sullo SHA pulito; la candidata resta **DA_VERIFICARE** fino a nuova revisione di Claude e CI sul proprio SHA, senza auto-approvazione.
+
+Dopo il GO finale e i check richiesti verdi, integrare la candidata e avviare il workflow Hosting già autorizzato, verificando SHA e scope; il clic **Approve and deploy** resta di Diego. Seguire il rilascio e verificarne online versione, manifest, hash e intestazioni per pagina, poi pubblicare la ricevuta. Nessun deploy dal PC, modifica workflow, Rules, Functions, claim, singleton, credenziali o cornice. Canary **OFF secondo Diego**, senza nuova rilettura amministrativa; nessun accesso QA2 o account personale. Il giro breve post-rilascio richiede un proprio ordine e non è incluso. [Stato](STATO.md#rilascio-ui-1272-stato-2026-11-13), [sequenza](PROGRAMMA.md#rilascio-ui-1272-programma-2026-11-13), [verifiche](../evidenze/COLLAUDI.md#rilascio-ui-1272-verifiche-2026-11-13).
+
+I checkpoint sottostanti conservano i propri ordini ed esiti storici; non dichiarano lo stato della nuova candidata o della produzione.
+
 <a id="ui-color-contract-incarico-2026-11-13"></a>
 
 ## Abbinamenti dei colori — contratto e banco locale, 13/11/2026
