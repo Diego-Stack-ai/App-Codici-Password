@@ -1,23 +1,7 @@
 /* === Revisione UI a tre livelli — base condivisa (stile «Rifinita», 10–11/11/2026) ===
    Caricato solo dalle pagine migrate, che dichiarano body[data-ui-revision="tre-livelli"].
-   Token di superficie derivati dalla palette attiva e comando «Modifica/Fine» per sezione.
+   Comando «Modifica/Fine» per sezione; i token --rev-* (ventaglio tonale) sono in core_ui.css.
    Le regole specifiche di ogni famiglia restano nel CSS della famiglia. */
-[data-ui-revision="tre-livelli"] {
-    --rev-surface: color-mix(in srgb, var(--accent) 3%, #fff);
-    --rev-border: color-mix(in srgb, var(--accent) 14%, #e2e8f0);
-}
-
-.dark [data-ui-revision="tre-livelli"] {
-    /* Più chiaro dello sfondo: le schede non devono sembrare nere (riscontro di Diego). */
-    --rev-surface: color-mix(in srgb, var(--accent) 12%, #1b2333);
-    --rev-border: color-mix(in srgb, var(--accent) 30%, #2a3346);
-    --rev-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 6px 16px rgba(0, 0, 0, 0.3);
-}
-
-[data-ui-revision="tre-livelli"] {
-    --rev-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.07);
-}
-
 /* Profondità comune: ombra leggera su schede e campi delle pagine migrate. */
 [data-ui-revision="tre-livelli"] :is(.form-card, .profile-data-card, .profile-contact-card, .glass-field, .detail-field-box, .detail-info-item, .detail-notes-box) {
     box-shadow: var(--rev-shadow);

@@ -14,9 +14,9 @@ const launchBrowser = () => chromium.launch({headless: true,
   ...(process.env.CHROME_PATH ? {executablePath: process.env.CHROME_PATH}
     : existsSync(chromium.executablePath()) ? {} : {channel: 'chrome'})});
 
-const css = ['core.css', 'core_fonts.css', 'core_fascie.css', 'core_ui.css', 'core_pagine.css', 'profile-layout.css', 'ui-tre-livelli.css']
+const css = ['core.css', 'core_fonts.css', 'core_fascie.css', 'core_ui.css', 'core_pagine.css', 'profile-layout.css', 'ui-tre-livelli.css', 'ui-tre-livelli-moduli.css']
   .map(file => `<link rel="stylesheet" href="/assets/css/${file}">`).join('');
-const fixture = theme => `<!doctype html><html lang="it" class="${theme === 'dark' ? 'dark' : ''}"><head>${css}
+const fixture = (theme, color) => `<!doctype html><html lang="it" class="${theme === 'dark' ? 'dark' : ''}"${color ? ` data-color-theme="${color}"` : ''}><head>${css}
   <style>body[data-ui-revision="tre-livelli"]{--page-symbol:'event'}</style></head>
   <body data-ui-revision="tre-livelli" data-ui-model="hub">
     <header class="base-header"><h1 class="header-title" id="title">Scadenze</h1></header>
@@ -26,6 +26,8 @@ const fixture = theme => `<!doctype html><html lang="it" class="${theme === 'dar
       <button type="button" class="profile-deadline-link" id="deadline">Vai alla scadenza</button>
       <a class="matrix-card card-orange area-scadenze"><span class="badge-count" id="warn">2</span></a>
       <a class="matrix-card card-red area-urgenze"><span class="badge-count" id="err">1</span></a>
+      <div class="settings-item" id="card"><div class="settings-icon-box icon-purple" id="icon">x</div><span class="settings-desc" id="desc">Descrizione</span></div>
+      <div class="modal-box" id="popup"><span class="settings-desc" id="popup-desc">Testo</span></div>
     </div>
   </body></html>`;
 
@@ -34,7 +36,7 @@ test.before(async () => {
   server = createServer(async (req, res) => {
     try {
       const url = new URL(req.url, 'http://fixture.invalid');
-      if (url.pathname === '/fixture.html') { res.writeHead(200, {'Content-Type': 'text/html'}); res.end(fixture(url.searchParams.get('theme'))); return; }
+      if (url.pathname === '/fixture.html') { res.writeHead(200, {'Content-Type': 'text/html'}); res.end(fixture(url.searchParams.get('theme'), url.searchParams.get('color'))); return; }
       const file = path.join(publicRoot, decodeURIComponent(url.pathname));
       if (!file.startsWith(publicRoot)) throw Error('outside');
       res.writeHead(200, {'Content-Type': file.endsWith('.css') ? 'text/css' : 'application/octet-stream'}); res.end(await readFile(file));
@@ -46,10 +48,10 @@ test.before(async () => {
 });
 test.after(async () => { await browser?.close(); await new Promise(done => server?.close(done)); });
 
-async function open(theme = 'light') {
+async function open(theme = 'light', color = '') {
   const page = await browser.newPage();
   await page.route('**/*', route => route.request().url().startsWith(base) ? route.continue() : route.abort());
-  await page.goto(`${base}/fixture.html?theme=${theme}`);
+  await page.goto(`${base}/fixture.html?theme=${theme}&color=${color}`);
   return page;
 }
 
@@ -76,7 +78,9 @@ test('decorative CSS icons never enter accessible names (AX tree)', {timeout: 30
 });
 
 const contrast = (fg, bg) => {
-  const lum = rgb => { const c = rgb.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number).map(v => v / 255).map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+  // color-mix() può essere serializzato come color(srgb r g b) con canali 0–1.
+  const channels = value => { const n = value.match(/\d*\.?\d+(e-?\d+)?/g).map(Number); return value.startsWith('color(') ? n.slice(0, 3) : n.slice(0, 3).map(v => v / 255); };
+  const lum = rgb => { const c = channels(rgb).map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
   const [a, b] = [lum(fg), lum(bg)];
   return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 };
@@ -90,5 +94,28 @@ for (const theme of ['light', 'dark']) {
         assert.ok(contrast(color, background) >= 4.5, `${id} ${theme}: ${color} on ${background} = ${contrast(color, background).toFixed(2)}`);
       }
     } finally { await page.close(); }
+  });
+}
+
+// Ventaglio tonale (13/11/2026): per ognuno dei 7 colori, in chiaro e in scuro, card e popup
+// prendono il colore scelto e il testo secondario resta leggibile (≥ 4,5:1); l'icona ≥ 3:1.
+const palettes = ['', 'green', 'red', 'sand', 'petrol', 'lavender', 'dusty-rose'];
+for (const theme of ['light', 'dark']) {
+  test(`tonal fan keeps cards, popups and icons readable for every palette in ${theme} theme`, {timeout: 60000}, async () => {
+    for (const color of palettes) {
+      const page = await open(theme, color);
+      try {
+        const read = await page.evaluate(() => {
+          const get = (id, prop) => getComputedStyle(document.getElementById(id))[prop];
+          return {card: get('card', 'backgroundColor'), desc: get('desc', 'color'), popup: get('popup', 'backgroundColor'),
+            popupDesc: get('popup-desc', 'color'), iconBg: get('icon', 'backgroundColor'), icon: get('icon', 'color')};
+        });
+        const label = `${color || 'default'} ${theme}`;
+        assert.notEqual(read.card, 'rgb(255, 255, 255)', `${label}: card tinted, not plain white`);
+        assert.ok(contrast(read.desc, read.card) >= 4.5, `${label}: secondary text on card ${contrast(read.desc, read.card).toFixed(2)}`);
+        assert.ok(contrast(read.popupDesc, read.popup) >= 4.5, `${label}: secondary text on popup ${contrast(read.popupDesc, read.popup).toFixed(2)}`);
+        assert.ok(contrast(read.icon, read.iconBg) >= 3, `${label}: icon on its chip ${contrast(read.icon, read.iconBg).toFixed(2)}`);
+      } finally { await page.close(); }
+    }
   });
 }
