@@ -1,5 +1,26 @@
 # Collaudi
 
+<a id="rilascio-ui-1272-ricevuta-2026-11-13"></a>
+
+## APP 1.2.272 — ricevuta Hosting #1145 e verifica online, 13/11/2026
+
+**Produzione verificata: 1.2.272 / `0d2e3cfcbc94346834995aab01bd05307dcd43a9`.** La #303 riceve il [GO finale di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/303#issuecomment-6866009237) ed è integrata dopo i controlli richiesti. Il merge ha lo stesso albero Git della candidata revisionata, **`3c08ecc5c7d96caac1511bd3aef958cea99e788f`**: nessun delta applicativo introdotto dal merge. La #302 è già integrata e la #283 è chiusa come confluita; l'intensità dei colori resta quella approvata da Diego.
+
+Fonte primaria dell'esecuzione: [GitHub Actions, Hosting #1145 / run 43517358282](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43517358282), esito **SUCCESS**; [ricevuta pubblicata sulla #303](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/303#issuecomment-6866619601). Validazione completata in **13 min 46 s**: **65 gruppi, 3661 casi, 3650 PASS, 0 FAIL e 11 skip**. Il job di distribuzione dura **34 s complessivi**, di cui 7 s per lo step Hosting e 10 s per la verifica remota; non sono 34 s di solo upload. Fine job **13/11/2026 alle 23:31:18 CET** (`2026-11-13T22:31:18Z`).
+
+Scope **`--only hosting`**, SHA esatto riportato sopra; gli step backend, dipendenze backend, recovery/Rules e MFA sono **SKIPPED**. L'approvazione dell'ambiente **production** è personale di Diego, confermata da lui in chat e dalla risposta API GitHub, stato `approved`, revisore `Diego-Stack-ai`; nessuna approvazione attribuita all'agente. UI, font e pacchetto della cornice erano già presenti nella 1.2.271: la 1.2.272 li conserva e distribuisce l'aggiornamento dei colori e del contrasto revisionato, senza attivare la cornice.
+
+Verifica online Codex eseguita con la CLI dal checkout pulito dello SHA pubblicato, **exit 0**: versione 1.2.272, manifest esattamente corrispondente al sorgente, **365 file e tutti gli hash**, **41 profili di intestazioni per route** e **tre probe della normalizzazione Hosting**. Verificati anche redirect del login legacy, rewrite Home e cache del manifest. Il risultato riguarda byte e risposte HTTP osservate: non certifica un nuovo giro applicativo QA2 o la matrice C1.
+
+| Impronta osservata del rilascio | SHA-256 |
+| --- | --- |
+| Albero pubblico censito dal manifest | `4dc3ea44141ae3fcb688d9ba313ae152ae0c6442a866a5970544d7ad02497725` |
+| File JSON del manifest | `1b132f8963ccf4d51fbbb8a27518c5e06ada7600bab4847f5c9dfbfb54365662` |
+
+Il confezionamento e le equivalenze rispetto al merge UI sono documentati nel [checkpoint locale seguente](#rilascio-ui-1272-verifiche-2026-11-13), che conserva la propria data e base. Nessun nuovo cambio a CSS o logica della cornice, workflow, Rules, Functions, claim, singleton o credenziali durante la distribuzione; l'operazione autorizzata è soltanto Hosting CI. Nessun UID o dato personale nei rapporti.
+
+Canary **OFF secondo Diego**, senza nuova rilettura amministrativa. **Nessuna prova QA2/C1 sulla 1.2.272 e nessuna attivazione personale eseguita.** Il giro breve post-rilascio richiede un proprio ordine; i PASS della 1.2.270/1.2.271 non vengono trasferiti. La #301 rimane una revisione distinta, senza dedurne GO o merge. Il nuovo ramo `codex/release-1.2.272-receipts-20261113`, base `0d2e3cfc`, consolida soltanto questa ricevuta nei quattro Markdown esistenti per revisione; nessun ulteriore Hosting è necessario. [Stato](../progetto/STATO.md#rilascio-ui-1272-stato-2026-11-13), [incarico](../progetto/INCARICO_CORRENTE.md#rilascio-ui-1272-incarico-2026-11-13) e [seguito](../progetto/PROGRAMMA.md#rilascio-ui-1272-programma-2026-11-13).
+
 <a id="rilascio-ui-1272-verifiche-2026-11-13"></a>
 
 ## APP 1.2.272 — confezionamento del rilascio colori, 13/11/2026
