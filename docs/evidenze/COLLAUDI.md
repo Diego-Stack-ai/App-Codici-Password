@@ -1,5 +1,74 @@
 # Collaudi
 
+<a id="rilascio-ui-1271-verifiche-2026-11-13"></a>
+
+## Candidata APP 1.2.271 — verifiche locali per la revisione, 13/11/2026
+
+Candidata locale sul ramo `codex/release-ui-1.2.271-20261113`, base master `0a599364e6c1f269fddf5f5601949170c4e0dbf7`, fonte UI #283 `9764c5906ef16d69daa1b8580da3ee248f84e737` e test merge GitHub `d2bd4a4fdfd593638358e714b4b4654298dd2be5`. Include il raccordo documentale dei sei sottocasi prioritari dal checkpoint `0f39df3c6bbe6b8cc8f6757d327187ee2c1a54cd`. Stato **DA_VERIFICARE** sullo SHA finale della consegna, ancora da registrare; nessun GO automatico dell'integrazione. L'[incarico](../progetto/INCARICO_CORRENTE.md#rilascio-ui-1271-incarico-2026-11-13) e limitato a preparazione e revisione.
+
+La fonte UI conserva il Frontend approvato su `8a30920b037d51fd74990c35ef1faca17994a040`; il delta successivo fino a `9764c590` non cambia Frontend. Nel candidato composto le differenze applicative ulteriori sono il versionamento canonico a **1.2.271** e il riesame del catalogo testuale degli aiuti: `contentVersion=13`, riferimenti a Modifica/Fine e Nuova/Classica e istruzioni della cornice allineate a Sblocca e riprendi nelle otto lingue. Nessuna nuova gestione video. Il catalogo ha ancora 31 pagine, 126 istruzioni e 111 target univoci. Workflow, runner C1, configurazione Hosting, Rules e runtime della cornice sono conservati rispetto a master, salvo i riferimenti di versione negli import applicativi.
+
+Verifiche **locali**, eseguite su Windows con Chrome 157.0.8103.52, Node 24.22.1 e Java 21.0.10; la CI usa Node 22 e dovra confermare la suite completa sullo SHA finale. Nessun accesso all'app produttiva o alle credenziali QA2:
+
+| Controllo | Esito locale |
+| --- | --- |
+| UI foundations, incluse le tre suite browser della #283 | 26/26 PASS |
+| Runtime cornice, modal Master, inert/focus, media, header Hosting locale, push e DIAG | 248/248 PASS |
+| Release hardening, manifest e credenziali solo sintetiche con trasporti offline | 71/71 PASS |
+| Offline e precache | 16/16 PASS; 345 risorse locali uniche, incluse le due CSS UI e manage-mode |
+| Navigazione e Profilo | 198/198 e 183/183 PASS |
+| Guida e lingue | 12/12 e 19/19 PASS |
+| Budget prestazioni | 4/4 PASS; 31 pagine entro budget |
+| Topologia UI, traduzioni UI, shell pagina, icone, lightweight, CSS, purezza HTML, sintassi JS e riferimenti statici | PASS; riferimenti verificati in 341 file |
+| Documenti | 12/12 PASS; elenco chiuso di 34 Markdown conservato |
+| Bump, build runtime offline e inventario QA finale | PASS; 303 riferimenti versione, 61 export Firebase locali, 167 campi statici |
+
+I primi tentativi browser erano impediti dal sandbox (`ERR_NETWORK_ACCESS_DENIED`/loopback); le stesse suite sono poi passate fuori dal sandbox su fixture locali, senza cambiare test o codice. Il controllo Admin iniziale risolveva la dipendenza root perche mancava l'installazione Functions nel nuovo checkout: dopo `npm ci --prefix functions --ignore-scripts`, con il lockfile invariato, il test offline sullo SDK fissato e passato. Non sono regressioni riparate nell'app. Il manifest con hash dei file va generato e verificato sul commit pulito finale, riportando lo SHA e l'esito nella PR; il file e un artefatto ignorato, non un documento da commettere. CI e GO di Claude restano richiesti, senza auto-approvazione.
+
+Ultima produzione qui osservata **1.2.270 / cb48b7196a3816a62dda05d11e11ff4ca7c51d26**. Le [sei ricevute prioritarie accettate](#cornice-c1-fase1-prioritari-2026-11-13) restano limitate a QA2 / Chrome desktop Windows / 1.2.270. Non sono nuove prove sulla candidata 1.2.271 e non le attribuiscono copertura su altri browser, dispositivi o account; il giro breve del nuovo pacchetto richiede un proprio ambiente e ordine. Nessuna prova produttiva o lettura amministrativa e inclusa qui. Canary **OFF secondo Diego**; nessun merge, deploy o attivazione. I checkpoint seguenti conservano risultati, fonti e limiti storici senza estenderli.
+
+<a id="cornice-c1-fase1-prioritari-2026-11-13"></a>
+
+## C1 fase 1 — sei sottocasi prioritari consolidati, QA2 / Chrome Windows — 13/11/2026
+
+Il [GO consolidato di Claude sulla #299](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/299#issuecomment-6857416470) conferma i sei PASS circoscritti gia raccolti manualmente su **QA2 / Google Chrome reale Windows / app v1.2.270**, sorgente Hosting `cb48b7196a3816a62dda05d11e11ff4ca7c51d26`. Corregge il precedente riepilogo che dava ancora da eseguire D02, D04-core e D05-A: le relative ricevute erano gia revisionate e integrate. Nessuna ripetizione dei sei sottocasi e richiesta da questo raccordo. Versione esatta Chrome e build Windows non raccolte; le prove automatiche headless restano fonti distinte.
+
+**Questo aggiornamento documentale e DA_VERIFICARE sul futuro SHA della candidata da parte di Claude.** Il GO citato riguarda le evidenze raccolte, non approva preventivamente questi nuovi byte, non chiude tutta la fase 1/C1 e non autorizza merge, deploy o nuova attivazione. Ultimo stato del canary **OFF confermato da Diego**, senza nuova rilettura amministrativa di Codex.
+
+| Sottocaso | Esito nel solo perimetro QA2 / Chrome Windows / 1.2.270 | Copertura e limite | Fonte della revisione |
+|---|---|---|---|
+| D02 | PASS | Dieci destinazioni canoniche, pagine leggibili, continuita senza nuova Master nelle navigazioni interne, padre app.html. | [GO #289](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/289#issuecomment-6807634504), [ricevuta locale](#cornice-c1-d02-270-2026-11-11) |
+| D04-core | PASS | Continuita del percorso e tre comandi di cronologia; D04 complessivo resta LIMITE. | [GO #291 su 5ca66ce0](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/291#issuecomment-6808682194), [ricevuta locale](#cornice-c1-d04-continuita-270-2026-11-11) |
+| D05-A | PASS | Ricarica dell'intera cornice, stessa pagina/categoria e una sola nuova Master attesa; D05 complessivo resta LIMITE. | [GO esteso #291 su 3bf3f8c7](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/291#issuecomment-6808941055), [ricevuta locale](#cornice-c1-d05a-ricarica-270-2026-11-11) |
+| D06-1 | PASS | Inattivita a un minuto: attivita reale che rinnova, Indietro di Chrome che non rinnova, blocco e una ripresa. | [GO #299](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/299#issuecomment-6838017267) |
+| D06-3 | PASS | Sottocaso a tre minuti; secondo ciclo con deviazione iniziale dichiarata e accettata dal revisore. | [GO #299](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/299#issuecomment-6846567198) |
+| D08-local | PASS | Logout di questa sessione, login principale, assenza delle due chiavi DIAG e Back protetto; verifica storage successiva a Back/OFF dichiarata. | [Ricevuta #299](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/299#issuecomment-6853561633), [GO #299](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/299#issuecomment-6853876684) |
+
+### Evidenze aggiunte dopo le ricevute dell'11/11
+
+- **D06-1:** rapporto iniziale di 36 eventi e finale di 49, con prefisso di 36 identico. Conferme dell'operatore su attivita, tempi e singola Master di ripresa; segmento DIAG compatibile con il blocco. Timeout iniziale 60000 ms, ripristino a 180000 ms e OFF confermati. Il PASS combina dichiarazioni manuali e DIAG, non una misura diretta dei tasti o della RAM.
+- **D06-3:** i due rapporti completi hanno 200 eventi ciascuno; suffisso iniziale e prefisso finale coincidono per 194 eventi, seguiti da sei nuovi. Il primo avvio con Alt tenuto premuto e la ripartenza sono dichiarati; Diego conferma il nuovo zero con Alt rilasciato, Shift a 0:00/1:48, solo Back a 3:36 e assenza di altri input. Claude accetta la deviazione e il secondo ciclo. Il registro pieno non certifica assenza di errori in qualunque intervallo precedente non marcato. I rapporti originali sono nelle [parti 1](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/299#issuecomment-6846529314) e [2](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/299#issuecomment-6846538883), senza ricopiarli qui. Lo stato finale ancora attivo non prova l'OFF: la fonte dello spegnimento e la conferma separata di Diego.
+- **D08-local finale:** PRE valido di sei eventi, nessun `ERROR_*`, active/permitValid a true e idleMs 180000. L'inversione di tre millisecondi fra due eventi resta nell'ordine originale ammesso dal contratto. Le due chiavi DIAG erano presenti prima secondo Diego; Codex ne osserva l'assenza nella stessa scheda/origine dopo Back e dopo OFF, senza misurare l'istante della rimozione. `codex_explicit_logout` e il marker previsto, distinto dalle due chiavi DIAG. Diego riferisce login e Back protetti per almeno tre secondi, nessun contenuto privato utilizzabile e OFF salvato. Il revisore accetta questo limite temporale; nessuna misura diretta della cancellazione delle chiavi Vault dalla RAM, revoca globale o PASS D15.
+
+### ERROR_FRAME_OPERATION — tre occorrenze richiamate dalla revisione, non inventario completo
+
+Il [registro separato del 13/11](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/299#issuecomment-6855446696) conserva il precedente PRE di nove eventi, distinto dal PRE finale D08 accettato. La richiesta parte dal figlio verso il broker del padre; il padre registra il codice quando costruisce una risposta d'errore, prima della consegna rivalidata. Comando, sottocodice e causa non sono nel DIAG; la vicinanza del blocco non misura direttamente la RAM o prova da sola la causalita.
+
+| Occorrenza richiamata, orari Europe/Rome | Classificazione attuale | Limite |
+|---|---|---|
+| 13/11, Home, 10:54:10.210 | Diego conferma di ricordare un annullamento o una Master errata. Applicato nel registro separato il criterio della [revisione Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/299#issuecomment-6855725272): rifiuto gestito, fail-closed; comportamento atteso, senza difetto accertato. | Il ricordo non distingue azione o sottocodice preciso. Non si attribuisce UNLOCK_FAILED come causa provata e non si estende questa conferma agli altri episodi. |
+| 11/11, account_privati, 22:59:14.450 e 22:59:26.814: at 1794434354450 e 1794434366814 nei JSON originali | DA_CHIARIRE: il ricordo dell'operatore per quei momenti non e acquisito. | La ricorrenza giustifica una futura diagnosi con motivo del rifiuto da enum chiuso. Nessuna nuova prova o modifica e eseguita da questo aggiornamento. |
+
+Per i due episodi dell'11/11 prevalgono i timestamp dei rapporti originali della #291 ([prima fonte](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/291#issuecomment-6808672324), [seconda fonte](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/291#issuecomment-6808951044)), che riportano la stessa coppia. La revisione consolidata indica invece 23:12:34 e 23:12:46: **discordanza di orario da allineare nella revisione**, non prova di una coppia aggiuntiva e non motivo per alterare i JSON o ricostruire una causa.
+
+La tabella distingue **le tre occorrenze richiamate nella revisione consolidata**; non e un conteggio globale degli errori e non sostituisce o riclassifica le altre segnalazioni conservate nello storico. Il ricordo per i due episodi dell'11/11 resta da acquisire: non si dichiara che Diego non li ricordi. Secondo Claude non cambiano i sei PASS circoscritti, ma rimangono tra i punti da trattare con diagnosi piu fine nella fase sicurezza. Nessuna attribuzione automatica al logout finale, ad App Check o a un difetto della cornice.
+
+### Copertura residua e gate
+
+Nella matrice mantenuta della fase 1 si conservano D02 PASS e D04/D05 LIMITE; D06 e D08 diventano LIMITE con rinvio ai sottocasi PASS, senza attribuire PASS ai casi complessivi. I precedenti checkpoint che riportano prove ancora NE restano cronologia dei rispettivi passi; la matrice della fase personale rimane NE perche non eseguita. **Altri browser/dispositivi, fase personale, D15, resto della matrice e C1/C2 complessivi restano aperti.** Nessun PASS sintetico viene trasferito all'account personale o a un ambiente diverso.
+
+I risultati su 1.2.270 non si trasferiscono al futuro candidato UI/font della #283: il GO consolidato richiede almeno un nuovo giro breve sul candidato grafico, con ambiente, ordine di esecuzione, perimetro e ricevute propri. Questo checkpoint e soltanto documentale: nessun aggiornamento app/cornice, nuova versione, merge, rilascio, modifica del singleton/claim o nuova esecuzione. Non si dichiara **CORNICE CHIUSA**.
+
 <a id="cornice-c1-recaptcha-eccezione-2026-11-12"></a>
 
 ## C1 #5 FAIL e strada A candidata del solo runner, 12/11/2026
@@ -568,9 +637,9 @@ Prima delle prove scegliere volontariamente se attivare Impostazioni → Diagnos
 | D03 | NE | NE | NE | NE |
 | D04 | LIMITE — [continuita del percorso PASS](#cornice-c1-d04-continuita-270-2026-11-11) | NE | NE | NE |
 | D05 | LIMITE — [ricarica padre D05-A PASS](#cornice-c1-d05a-ricarica-270-2026-11-11) | NE | NE | NE |
-| D06 | NE | NE | NE | NE |
+| D06 | LIMITE — [D06-1 e D06-3 PASS circoscritti](#cornice-c1-fase1-prioritari-2026-11-13) | NE | NE | NE |
 | D07 | NE | NE | NE | NE |
-| D08 | NE | NE | NE | NE |
+| D08 | LIMITE — [D08-local PASS circoscritto](#cornice-c1-fase1-prioritari-2026-11-13) | NE | NE | NE |
 | D09 | NE | NE | NE | NE |
 | D10 | NE | NE | NE | NE |
 | D11 | NE | NE | NE | NE |

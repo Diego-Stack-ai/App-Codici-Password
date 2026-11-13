@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "contentVersion": 12,
-  "reviewedAppVersion": "1.2.270",
+  "contentVersion": 13,
+  "reviewedAppVersion": "1.2.271",
   "fallbackLocale": "it",
   "pages": [
     {
@@ -1187,7 +1187,7 @@
       "guide.pages.area_privata.purpose": "Scegli fra Account, Account condivisi, memorandum privati e memorandum condivisi.",
       "guide.pages.area_privata.step-1": "Apri la categoria adatta: un memorandum conserva informazioni senza i campi Utente, Account/Codice e Password.",
       "guide.pages.area_privata.step-2": "Gli elementi più usati sono scorciatoie verso gli Account; non sono una seconda copia dei dati.",
-      "guide.pages.area_privata.step-3": "Il comando di azzeramento riguarda le statistiche di visualizzazione. Leggi la conferma prima di eseguirlo.",
+      "guide.pages.area_privata.step-3": "Il comando di azzeramento riguarda le statistiche di visualizzazione. Con la grafica Nuova, apri prima Modifica nella sezione. Leggi la conferma prima di eseguirlo.",
       "guide.pages.account_privati.title": "Account privati",
       "guide.pages.account_privati.purpose": "Cerca e consulta gli Account della categoria scelta.",
       "guide.pages.account_privati.step-1": "Usa la ricerca per restringere l’elenco. Se non trovi un elemento, verifica anche la categoria e l’Archivio.",
@@ -1203,7 +1203,7 @@
       "guide.pages.form_account_privato.step-6": "Gestisci destinatari e canali nel modulo. Condivisione e invio richiedono la tua azione e le conferme dell’app.",
       "guide.pages.form_account_privato.step-7": "Salva dal comando dell’app e attendi lo stato indicato. Una bozza o una modifica offline in attesa non equivale a una scrittura confermata.",
       "guide.pages.dettaglio_account_privato.title": "Dettaglio Account privato",
-      "guide.pages.dettaglio_account_privato.purpose": "Consulta credenziali, note, Widget e allegati dell’Account selezionato.",
+      "guide.pages.dettaglio_account_privato.purpose": "Consulta credenziali, note, Widget e allegati dell’Account selezionato. Con la grafica Nuova, usa Modifica nella sezione per mostrarne i comandi di gestione e Fine per tornare alla consultazione.",
       "guide.pages.dettaglio_account_privato.step-1": "Mostra o copia un valore protetto soltanto quando ti serve. Non inserirlo nelle domande della guida.",
       "guide.pages.dettaglio_account_privato.step-2": "Apri i dati bancari se presenti. I valori protetti mantengono i loro comandi dedicati.",
       "guide.pages.dettaglio_account_privato.step-3": "Consulta i Widget e i loro campi; i controlli disponibili dipendono dai permessi dell’elemento.",
@@ -1212,7 +1212,7 @@
       "guide.pages.dettaglio_account_privato.step-6": "La sezione Condivisione del dettaglio è di consultazione; tipologia, destinatari e canali si gestiscono in Crea/Modifica Account.",
       "guide.pages.profilo_privato.title": "Profilo utente",
       "guide.pages.profilo_privato.purpose": "Organizza e aggiungi i dati di identità, contatti, indirizzi, documenti e tessera digitale.",
-      "guide.pages.profilo_privato.step-1": "Scegli la sezione del Profilo. Il riepilogo e la tessera digitale mostrano proiezioni diverse degli stessi dati.",
+      "guide.pages.profilo_privato.step-1": "Scegli la sezione del Profilo. Con la grafica Nuova, usa Modifica nella sezione per mostrarne i comandi di gestione e Fine per tornare alla consultazione. Il riepilogo e la tessera digitale mostrano proiezioni diverse degli stessi dati.",
       "guide.pages.profilo_privato.step-2": "Gestisci la foto dal relativo comando. L’aiuto non legge l’immagine o i dati del Profilo.",
       "guide.pages.profilo_privato.step-3": "Telefoni ed email possono essere autonomi o collegati a un Account; il collegamento non è una nuova copia delle credenziali.",
       "guide.pages.profilo_privato.step-4": "Organizza indirizzi e utenze dalle sezioni dedicate e controlla il risultato delle modifiche.",
@@ -1224,7 +1224,7 @@
       "guide.pages.lista_aziende.step-2": "Per aggiornare un’azienda passa al suo modulo di modifica; la guida non cambia o cancella dati.",
       "guide.pages.dati_azienda.title": "Dati azienda",
       "guide.pages.dati_azienda.purpose": "Consulta il profilo aziendale, i contatti e le proiezioni condivisibili.",
-      "guide.pages.dati_azienda.step-1": "Consulta il riepilogo e le sezioni dell’azienda scelta.",
+      "guide.pages.dati_azienda.step-1": "Consulta il riepilogo e le sezioni dell’azienda scelta. Con la grafica Nuova, usa Modifica nella sezione per mostrarne i comandi di gestione e Fine per tornare alla consultazione.",
       "guide.pages.dati_azienda.step-2": "Seleziona i dati ammessi nella tessera digitale e nel QR; non includere segreti.",
       "guide.pages.dati_azienda.step-3": "Prepara il riepilogo PDF e controllane il contenuto prima di salvarlo o condividerlo.",
       "guide.pages.dati_azienda.step-4": "Contatti e sedi possono richiamare Account collegati. Modifica i dati nel percorso previsto dall’app.",
@@ -1251,7 +1251,7 @@
       "guide.pages.form_account_azienda.step-6": "Configura destinatari e canali dal modulo; ogni invio resta un’azione esplicita.",
       "guide.pages.form_account_azienda.step-7": "Salva dal comando dell’app e attendi l’esito. Le istruzioni non inviano il modulo.",
       "guide.pages.dettaglio_account_azienda.title": "Dettaglio Account aziendale",
-      "guide.pages.dettaglio_account_azienda.purpose": "Consulta le informazioni dell’Account nell’azienda corrente.",
+      "guide.pages.dettaglio_account_azienda.purpose": "Consulta le informazioni dell’Account nell’azienda corrente. Con la grafica Nuova, usa Modifica nella sezione per mostrarne i comandi di gestione e Fine per tornare alla consultazione.",
       "guide.pages.dettaglio_account_azienda.step-1": "Mostra o copia i valori protetti soltanto quando necessari, senza riportarli nella guida.",
       "guide.pages.dettaglio_account_azienda.step-2": "Consulta conti e carte se presenti, preservando la protezione dei singoli valori.",
       "guide.pages.dettaglio_account_azienda.step-3": "Apri Widget e dati collegati secondo i permessi dell’Account.",
@@ -1300,7 +1300,7 @@
       "guide.pages.impostazioni.title": "Impostazioni",
       "guide.pages.impostazioni.purpose": "Configura aspetto, servizi, sicurezza e gestione dei dati dal centro di controllo.",
       "guide.pages.impostazioni.step-1": "Scegli la lingua dell’app. I nomi, le note e i valori che hai creato non vengono tradotti automaticamente.",
-      "guide.pages.impostazioni.step-2": "Tema luminoso e colore sono preferenze separate. Scegli la combinazione che rende leggibili i controlli.",
+      "guide.pages.impostazioni.step-2": "Tema luminoso, colore e grafica Nuova o Classica sono preferenze separate. Scegli la combinazione che rende leggibili i controlli.",
       "guide.pages.impostazioni.step-4": "Mostra o nascondi l’area Azienda senza eliminare i suoi dati.",
       "guide.pages.impostazioni.step-5": "Apri l’Archivio per ripristino e cancellazione definitiva degli Account, con le conferme previste.",
       "guide.pages.impostazioni.step-6": "Gestisci le Credenziali comuni richiamabili da più Account.",
@@ -1348,44 +1348,44 @@
       "guide.journeys.deadline.title": "Prima Scadenza",
       "guide.journeys.sharing.title": "Condividere consapevolmente",
       "guide.journeys.security-and-recovery.title": "Sicurezza e recupero",
-      "guide.pages.app.title": "Cornice Vault (non attiva)",
-      "guide.pages.app.purpose": "Pagina preparatoria della navigazione persistente: la funzione non è ancora disponibile.",
-      "guide.pages.app.step-1": "Usa Home per tornare alla navigazione attuale."
+      "guide.pages.app.title": "Cornice Vault",
+      "guide.pages.app.purpose": "La cornice gestisce la navigazione persistente per gli account ammessi.",
+      "guide.pages.app.step-1": "Quando il Vault è bloccato, usa Sblocca e riprendi e segui l’esito dell’app. Inserisci la Master Password soltanto nella finestra dell’app."
     },
     "en": {
-      "guide.pages.app.title": "Vault frame (inactive)",
-      "guide.pages.app.purpose": "Preparation page for persistent navigation: this feature is not available yet.",
-      "guide.pages.app.step-1": "Use Home to return to the current navigation."
+      "guide.pages.app.title": "Vault frame",
+      "guide.pages.app.purpose": "The frame manages persistent navigation for admitted accounts.",
+      "guide.pages.app.step-1": "When the Vault is locked, use Unlock and resume and follow the app’s response. Enter the Master Password only in the app’s dialog."
     },
     "es": {
-      "guide.pages.app.title": "Marco de la bóveda (inactivo)",
-      "guide.pages.app.purpose": "Página de preparación de la navegación persistente: esta función aún no está disponible.",
-      "guide.pages.app.step-1": "Usa Inicio para volver a la navegación actual."
+      "guide.pages.app.title": "Marco de la bóveda",
+      "guide.pages.app.purpose": "El marco gestiona la navegación persistente para las cuentas admitidas.",
+      "guide.pages.app.step-1": "Cuando la bóveda esté bloqueada, usa Desbloquear y continuar y sigue la respuesta de la app. Introduce la Master Password solo en el diálogo de la app."
     },
     "fr": {
-      "guide.pages.app.title": "Cadre du coffre (inactif)",
-      "guide.pages.app.purpose": "Page de préparation de la navigation persistante : cette fonction n’est pas encore disponible.",
-      "guide.pages.app.step-1": "Utilisez Accueil pour revenir à la navigation actuelle."
+      "guide.pages.app.title": "Cadre du coffre",
+      "guide.pages.app.purpose": "Le cadre gère la navigation persistante pour les comptes autorisés.",
+      "guide.pages.app.step-1": "Lorsque le coffre est verrouillé, utilisez Déverrouiller et reprendre et suivez la réponse de l’app. Saisissez la Master Password uniquement dans la boîte de dialogue de l’app."
     },
     "de": {
-      "guide.pages.app.title": "Tresorrahmen (inaktiv)",
-      "guide.pages.app.purpose": "Vorbereitungsseite für die dauerhafte Navigation: Diese Funktion ist noch nicht verfügbar.",
-      "guide.pages.app.step-1": "Verwenden Sie die Startseite, um zur bisherigen Navigation zurückzukehren."
+      "guide.pages.app.title": "Tresorrahmen",
+      "guide.pages.app.purpose": "Der Rahmen verwaltet die dauerhafte Navigation für zugelassene Konten.",
+      "guide.pages.app.step-1": "Wenn der Tresor gesperrt ist, verwenden Sie Entsperren und fortsetzen und folgen Sie der Rückmeldung der App. Geben Sie die Master Password nur im Dialog der App ein."
     },
     "pt": {
-      "guide.pages.app.title": "Estrutura do cofre (inativa)",
-      "guide.pages.app.purpose": "Página de preparação da navegação persistente: esta função ainda não está disponível.",
-      "guide.pages.app.step-1": "Use Início para voltar à navegação atual."
+      "guide.pages.app.title": "Estrutura do cofre",
+      "guide.pages.app.purpose": "A estrutura gere a navegação persistente para as contas autorizadas.",
+      "guide.pages.app.step-1": "Quando o cofre estiver bloqueado, use Desbloquear e retomar e siga a resposta da app. Introduza a Master Password apenas na caixa de diálogo da app."
     },
     "zh": {
-      "guide.pages.app.title": "保险库框架（未启用）",
-      "guide.pages.app.purpose": "持久导航的准备页面：此功能尚不可用。",
-      "guide.pages.app.step-1": "使用主页返回当前导航。"
+      "guide.pages.app.title": "保险库框架",
+      "guide.pages.app.purpose": "框架为获准的账户管理持久导航。",
+      "guide.pages.app.step-1": "保险库锁定时，使用“解锁并继续”，然后按应用的提示操作。仅在应用的对话框中输入 Master Password。"
     },
     "hi": {
-      "guide.pages.app.title": "वॉल्ट फ़्रेम (निष्क्रिय)",
-      "guide.pages.app.purpose": "स्थायी नेविगेशन का तैयारी पृष्ठ: यह सुविधा अभी उपलब्ध नहीं है।",
-      "guide.pages.app.step-1": "वर्तमान नेविगेशन पर लौटने के लिए होम का उपयोग करें।"
+      "guide.pages.app.title": "वॉल्ट फ़्रेम",
+      "guide.pages.app.purpose": "फ़्रेम अनुमत खातों के लिए स्थायी नेविगेशन का प्रबंधन करता है।",
+      "guide.pages.app.step-1": "वॉल्ट लॉक होने पर अनलॉक करके जारी रखें का उपयोग करें और ऐप के निर्देशों का पालन करें। Master Password केवल ऐप के संवाद में दर्ज करें।"
     }
   }
 }

@@ -1,5 +1,32 @@
 # Incarico corrente
 
+<a id="rilascio-ui-1271-incarico-2026-11-13"></a>
+
+## Candidata APP 1.2.271 — preparazione e revisione, 13/11/2026
+
+Ordine corrente di Diego: **«procedi»**, dopo aver precisato che vuole pubblicare l'app con UI, font e cornice ed e consapevole che le evidenze raccolte riguardano Chrome Windows, mentre gli altri browser restano da verificare. E autorizzata la preparazione completa e verificabile della candidata APP e della PR in bozza per Claude. L'ordine non sostituisce i gate di revisione e non autorizza il merge, il deploy o l'attivazione personale. Il checkpoint solo documentale sottostante e il predecessore incorporato, non il perimetro della preparazione corrente.
+
+Base `0a599364e6c1f269fddf5f5601949170c4e0dbf7`, ramo `codex/release-ui-1.2.271-20261113`. Comporre la UI della #283 alla fonte `9764c5906ef16d69daa1b8580da3ee248f84e737` con master, preservando runner e workflow C1 correnti, e includere il consolidamento delle ricevute `0f39df3c6bbe6b8cc8f6757d327187ee2c1a54cd`. Predisporre versione **1.2.271**, relativi riferimenti di cache/precache e manifest di rilascio; verificare coerenza, hash e modello degli header senza pubblicare. La cornice resta quella gia presente nella 1.2.270, salvo le modifiche UI revisionate della fonte.
+
+Eseguire i controlli locali pertinenti, compresi quelli documentali e il banco browser locale, poi consegnare diff, esiti effettivi e limiti sulla candidata esatta. Stato **DA_VERIFICARE** fino alla revisione di Claude sullo SHA finale e ai check richiesti; nessuna auto-approvazione e nessun esito inventato. I sei PASS QA2 / Chrome Windows / 1.2.270 restano evidenze della vecchia versione: il giro breve del nuovo pacchetto richiede ambiente e ordine propri e non e compreso come prova produttiva automatica.
+
+Canary **OFF secondo Diego**. Nessuna prova su produzione, merge, dispatch, approvazione production, deploy, operazione Firebase/Google Cloud, modifica singleton/claim/credenziali o passaggio all'account personale. Nessuna implementazione dei seguiti sicurezza/efficienza su enum DIAG o ricariche standalone. Conservare i contratti e i gate C1/UI, l'elenco chiuso di 34 Markdown e il corpo generato dell'audit QA finale; aggiornare soltanto i documenti esistenti pertinenti. [Stato](STATO.md#rilascio-ui-1271-stato-2026-11-13), [verifiche](../evidenze/COLLAUDI.md#rilascio-ui-1271-verifiche-2026-11-13) e [sequenza](PROGRAMMA.md#rilascio-ui-1271-programma-2026-11-13) distinguono questa preparazione dai successivi ordini.
+
+<a id="cornice-c1-fase1-incarico-2026-11-13"></a>
+
+## C1 fase 1 — consolidamento delle ricevute prioritarie, 13/11/2026
+
+Seguito della verifica e del consolidamento richiesti da Diego, dopo la [correzione e conferma di Claude sulla #299](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/299#issuecomment-6857416470): predisporre la candidata documentale dei sei sottocasi prioritari gia accettati su QA2 / Chrome Windows / v1.2.270. La richiesta di riesaminare gli esiti storici non autorizza a ripetere D02, D04-core o D05-A; il riscontro di Claude conferma che non occorre farlo.
+
+Base master `0a599364e6c1f269fddf5f5601949170c4e0dbf7`, ramo `codex/c1-phase1-receipts-20261113`. Perimetro: contenuto di quattro Markdown esistenti, **COLLAUDI, STATO, INCARICO_CORRENTE e PROGRAMMA**. Elenco chiuso a 34 invariato. Le [evidenze](../evidenze/COLLAUDI.md#cornice-c1-fase1-prioritari-2026-11-13) riportano i GO individuali e consolidato, distinguono osservazioni di Diego/verifica Codex/rapporti PRE, mantengono i tentativi esclusi o limitati separati e attribuiscono l'OFF all'operatore. Nessun dato personale, identificativo di account, credenziale o testo libero di errore nei documenti.
+
+Registrare separatamente il gruppo di occorrenze storiche `ERROR_FRAME_OPERATION`: il ricordo acquisito riguarda soltanto Home del 13/11; per i due episodi dell'11/11 non e ancora acquisito. La diagnosi piu precisa tramite enum chiuso e il rilievo sulle ricariche standalone sono [seguiti pianificati](PROGRAMMA.md#cornice-c1-fase1-seguito-2026-11-13), non implementazioni autorizzate da questa consegna. Gli orari originali prevalgono sulle sintesi: eventuali discordanze sono esplicite nelle evidenze e da riallineare in revisione, senza inventare causalita o cambiare i sei PASS.
+
+Consegna: diff documentale, controllo di coerenza e `npm run test:docs`, candidata per revisione Claude sullo SHA esatto, stato **DA_VERIFICARE**, senza auto-approvazione. Pubblicazione della PR e passi successivi restano nei rispettivi ordini di Diego. La candidata non dichiara C1/C2 complete o CORNICE CHIUSA; conserva D15, altri ambienti/sottocasi, fase personale e D18 aperti. Il successivo candidato UI/font #283 richiede controlli e almeno un giro breve propri: nessun trasferimento dei PASS.
+
+Canary **OFF secondo Diego**. Nessuna modifica a Frontend/cornice, workflow, versione, header, manifest/precache, Rules/Functions, claim, singleton, credenziali o servizi cloud; nessun nuovo giro, merge o deploy. I checkpoint sotto conservano le autorizzazioni e gli esiti precedenti, senza renderli nuovamente eseguibili.
+
+
 <a id="cornice-c1-recaptcha-eccezione-2026-11-12"></a>
 
 ## C1 — strada A, eccezione reCAPTCHA stretta e registrata, 12/11/2026

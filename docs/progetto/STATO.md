@@ -2,6 +2,33 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-ui-1271-stato-2026-11-13"></a>
+
+## Candidata APP 1.2.271 — preparazione di UI, tipografia e pacchetto cornice — 13/11/2026
+
+Diego ha chiarito che intende preparare la pubblicazione dell'app con UI, font e cornice e ha ordinato **«procedi»**. L'[incarico corrente](INCARICO_CORRENTE.md#rilascio-ui-1271-incarico-2026-11-13) autorizza la preparazione della candidata e della PR in bozza per la revisione; merge, rilascio e attivazione restano passi distinti. Il precedente consolidamento dei soli documenti, riportato sotto come checkpoint storico, confluisce in questa candidata APP.
+
+Base master `0a599364e6c1f269fddf5f5601949170c4e0dbf7`, ramo `codex/release-ui-1.2.271-20261113`; fonte UI #283 `9764c5906ef16d69daa1b8580da3ee248f84e737`, allineata mediante il test merge GitHub `d2bd4a4fdfd593638358e714b4b4654298dd2be5`. La UI conserva i byte Frontend revisionati su `8a30920b037d51fd74990c35ef1faca17994a040`: da quel GO alla fonte UI non vi sono modifiche Frontend. Sono inclusi i quattro documenti di raccordo C1 dal checkpoint locale `0f39df3c6bbe6b8cc8f6757d327187ee2c1a54cd`. La candidata **1.2.271 locale e DA_VERIFICARE** sul proprio SHA finale, ancora da consegnare; i [controlli della candidata](../evidenze/COLLAUDI.md#rilascio-ui-1271-verifiche-2026-11-13) non sono sostituiti dai GO precedenti.
+
+Ultima produzione qui osservata e collaudata **1.2.270 / cb48b7196a3816a62dda05d11e11ff4ca7c51d26**. La cornice e gia nel pacchetto 1.2.270; preparare il nuovo Hosting non equivale ad attivarla sull'account personale. I sei PASS prioritari riguardano QA2 / Chrome desktop Windows / 1.2.270 e non si trasferiscono alla nuova candidata UI: resta previsto almeno un giro breve sul nuovo pacchetto, con ambiente e ordine propri. Altri browser e dispositivi restano non verificati, non dichiarati incompatibili. Restano aperti D15, gli altri sottocasi C1, la fase personale/C2 e D18; nessuna dichiarazione CORNICE CHIUSA.
+
+Canary **OFF secondo Diego**, senza nuova rilettura amministrativa. Nessun merge, deploy, dispatch produttivo, modifica cloud, singleton o claim in questa preparazione. La diagnosi a enum chiuso e le ricariche standalone restano seguiti futuri non implementati. Il [programma corrente](PROGRAMMA.md#rilascio-ui-1271-programma-2026-11-13) precede i checkpoint storici seguenti, che non riaprono incarichi o autorizzazioni.
+
+<a id="cornice-c1-fase1-stato-2026-11-13"></a>
+
+## C1 fase 1 — sei sottocasi prioritari accettati, consolidamento documentale — 13/11/2026
+
+La [revisione consolidata di Claude sulla #299](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/299#issuecomment-6857416470) conferma **D02, D04-core, D05-A, D06-1, D06-3 e D08-local PASS**, ciascuno nel perimetro **QA2 / Chrome desktop Windows / v1.2.270**. D02/D04-core/D05-A erano gia approvati nelle #289/#291, poi unite; non sono nuove prove da ripetere. Le [evidenze correnti](../evidenze/COLLAUDI.md#cornice-c1-fase1-prioritari-2026-11-13) conservano fonti, deviazioni accettate e limiti dei singoli sottocasi.
+
+Il quadro riguarda i sei casi prioritari, non tutta C1: D04/D05/D06/D08 complessivi restano limitati ai sottocasi provati. Restano aperti D15 con prova dedicata, gli altri ambienti e controlli della matrice, la fase personale e C2; D18 richiede il proprio secondo rilascio. Non si dichiara **CORNICE CHIUSA**. In D08-local Codex ha verificato le due chiavi DIAG assenti dopo Indietro e dopo l'OFF dichiarato; non e una misura della cancellazione immediata o della RAM.
+
+La candidata corrente e solo documentale: base master `0a599364e6c1f269fddf5f5601949170c4e0dbf7`, ramo `codex/c1-phase1-receipts-20261113`, quattro Markdown esistenti, stato **DA_VERIFICARE** sullo SHA della consegna. Il GO agli esiti produttivi non e un GO automatico alla nuova candidata documentale o alla #283. Nessun nuovo test produttivo, codice applicativo o rilascio da questa preparazione.
+
+Le occorrenze storiche di `ERROR_FRAME_OPERATION` sono [tracciate separatamente](../evidenze/COLLAUDI.md#cornice-c1-fase1-prioritari-2026-11-13): il ricordo di Diego su annullamento/Master errata consente di classificare l'episodio Home del 13/11 come rifiuto gestito secondo il criterio di Claude; i due episodi dell'11/11 richiamati nel raccordo restano da chiarire. Il [programma del seguito](PROGRAMMA.md#cornice-c1-fase1-seguito-2026-11-13) registra diagnosi futura a enum chiuso e rilievo sulle ricariche standalone, senza implementarli ora e senza cambiare i sei PASS.
+
+Ultima produzione qui collaudata **1.2.270 / cb48b7196a3816a62dda05d11e11ff4ca7c51d26**. La futura candidata UI/font #283 richiedera allineamento, versione e verifica propria, almeno un giro breve e revisione sullo SHA esatto: i PASS precedenti non vi si trasferiscono. Restano i gate C1/UI e l'ordine personale di Diego prima di merge o pubblicazione. Canary **OFF secondo Diego**, senza nuova rilettura amministrativa. I checkpoint seguenti sono storici e non riaprono gli incarichi precedenti.
+
+
 <a id="cornice-c1-recaptcha-eccezione-2026-11-12"></a>
 
 ## C1 #5 FAIL, strada A autorizzata e candidata v4 — 12/11/2026
