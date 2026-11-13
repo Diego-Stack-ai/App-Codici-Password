@@ -97,56 +97,133 @@ for (const theme of ['light', 'dark']) {
   });
 }
 
-// Ventaglio tonale (13/11/2026): per ognuno dei 7 colori, in chiaro e in scuro, con i fogli REALI
-// di Impostazioni, Profilo azienda e Ricerca. Il secondario compone l'opacità effettiva; i
-// riempimenti pieni con testo bianco (bolla utente, microfono, pastiglie azienda, Modifica premuto)
-// restano ≥ 4,5:1; il pannello Ricerca segue il colore anche in scuro.
-const realCss = ['core.css', 'core_fonts.css', 'core_fascie.css', 'core_ui.css', 'impostazioni.css', 'dati_azienda.css',
-  'ui-tre-livelli.css', 'ui-tre-livelli-moduli.css', 'vault-assistant.css']
-  .map(file => `<link rel="stylesheet" href="/assets/css/${file}">`).join('');
-const fanFixture = (theme, color) => `<!doctype html><html lang="it" class="${theme === 'dark' ? 'dark' : ''}"${color ? ` data-color-theme="${color}"` : ''}><head>${realCss}</head>
-  <body class="company-profile-page" data-ui-revision="tre-livelli">
-    <div class="settings-item" id="card"><div class="settings-icon-box icon-purple" id="icon">x</div><span class="settings-desc" id="desc">Descrizione</span></div>
-    <div class="modal-box" id="popup"><span class="settings-desc" id="popup-desc">Testo</span></div>
-    <div class="settings-icon-box icon-purple" id="company-purple">x</div><div class="settings-icon-box icon-blue" id="company-blue">x</div>
-    <button type="button" class="manage-toggle" aria-pressed="true" id="toggle">Fine</button>
-    <div class="vault-assistant-panel" id="panel"><div class="vault-assistant-bubble user" id="bubble">Domanda</div>
-      <button type="button" class="vault-assistant-microphone" id="mic">m</button></div>
-  </body></html>`;
-const blend = (fg, bg, alpha) => {
-  const parse = value => { const n = value.match(/\d*\.?\d+(e-?\d+)?/g).map(Number); return value.startsWith('color(') ? n.slice(0, 3).map(v => v * 255) : n.slice(0, 3); };
-  const [f, b] = [parse(fg), parse(bg)];
-  return `rgb(${f.map((v, i) => v * alpha + b[i] * (1 - alpha)).join(', ')})`;
-};
-const palettes = ['', 'green', 'red', 'sand', 'petrol', 'lavender', 'dusty-rose'];
-for (const theme of ['light', 'dark']) {
-  test(`tonal fan keeps real cards, popups, fills and icons readable for every palette in ${theme} theme`, {timeout: 90000}, async () => {
-    for (const color of palettes) {
-      const page = await browser.newPage();
-      await page.route('**/*', route => route.request().url().startsWith(base) ? route.continue() : route.abort());
-      await page.route(`${base}/fan.html`, route => route.fulfill({contentType: 'text/html', body: fanFixture(theme, color)}));
-      await page.goto(`${base}/fan.html`);
-      try {
-        const read = await page.evaluate(() => {
-          const st = id => getComputedStyle(document.getElementById(id));
-          const pick = id => ({fg: st(id).color, bg: st(id).backgroundColor, image: st(id).backgroundImage, opacity: Number(st(id).opacity)});
-          return {card: st('card').backgroundColor, desc: pick('desc'), popup: st('popup').backgroundColor, popupDesc: pick('popup-desc'),
-            icon: pick('icon'), purple: pick('company-purple'), blue: pick('company-blue'), toggle: pick('toggle'),
-            bubble: pick('bubble'), mic: pick('mic'), panel: pick('panel')};
-        });
-        const label = `${color || 'default'} ${theme}`;
-        // Il gradiente usa due tappe di --rev-fill: la più chiara è il primo colore del gradiente.
-        const fill = item => item.image !== 'none' ? item.image.match(/(rgb|color)\([^)]*\)/)[0] : item.bg;
-        assert.notEqual(read.card, 'rgb(255, 255, 255)', `${label}: card tinted, not plain white`);
-        assert.ok(contrast(blend(read.desc.fg, read.card, read.desc.opacity), read.card) >= 4.5, `${label}: secondary text (with opacity) on card`);
-        assert.ok(contrast(blend(read.popupDesc.fg, read.popup, read.popupDesc.opacity), read.popup) >= 4.5, `${label}: secondary text on popup`);
-        assert.ok(contrast(read.icon.fg, read.icon.bg) >= 3, `${label}: icon on its chip ${contrast(read.icon.fg, read.icon.bg).toFixed(2)}`);
-        for (const key of ['purple', 'blue', 'toggle', 'bubble', 'mic']) {
-          const ratio = contrast(read[key].fg, fill(read[key]));
-          assert.ok(ratio >= 4.5, `${label}: white on ${key} fill ${ratio.toFixed(2)}`);
-        }
-        assert.equal(read.panel.image, 'none', `${label}: Ricerca panel no longer keeps the fixed blue gradient`);
-      } finally { await page.close(); }
+// Registro verificabile, separato dalla mappa strutturale Graphify (che non indicizza i CSS).
+// Ogni pagina mantiene i propri fogli nell'ordine HTML; la Ricerca è aggiunta come foglio lazy.
+const colorContract = JSON.parse(await readFile(new URL('../scripts/ui-color-contract.json', import.meta.url), 'utf8'));
+assert.ok(colorContract.components.length > 0, 'color registry is not empty');
+assert.equal(new Set(colorContract.components.map(item => item.id)).size, colorContract.components.length, 'color case identifiers are unique');
+test('color registry preserves the reviewed matrix and minimum coverage', () => {
+  assert.equal(colorContract.schemaVersion, 1);
+  assert.deepEqual(colorContract.palettes, ['', 'green', 'red', 'sand', 'petrol', 'lavender', 'dusty-rose']);
+  assert.deepEqual(colorContract.themes, ['light', 'dark']);
+  assert.deepEqual(colorContract.pages, ['impostazioni.html', 'profilo_privato.html', 'dati_azienda.html']);
+  for (const [id, minimum] of Object.entries({'settings-secondary': 4.5, 'settings-popup-secondary': 4.5, 'settings-icon': 3,
+    'company-purple': 4.5, 'company-blue': 4.5, 'manage-pressed': 4.5, 'search-panel': 4.5, 'search-user-bubble': 4.5, 'search-microphone': 4.5})) {
+    assert.ok(colorContract.components.some(item => item.id === id && item.minContrast >= minimum), `reviewed coverage cannot disappear or weaken: ${id}`);
+  }
+  for (const item of colorContract.components) {
+    assert.ok(item.selector && item.markup && item.foregroundRole && item.backgroundRole, `${item.id}: complete color pair`);
+    assert.ok(Number.isFinite(item.minContrast) && item.minContrast >= 3, `${item.id}: numeric minimum`);
+    if (item.pages) assert.ok(item.pages.length > 0 && item.pages.every(file => colorContract.pages.includes(file)), `${item.id}: valid page subset`);
+  }
+});
+const pageSources = new Map(await Promise.all(colorContract.pages.map(async file => [file, await readFile(path.join(publicRoot, file), 'utf8')])));
+const attributes = tag => Object.fromEntries([...tag.matchAll(/([\w-]+)="([^"]*)"/g)].map(match => [match[1], match[2]]));
+function colorFixture(file, theme, palette) {
+  const source = pageSources.get(file);
+  const links = [...source.matchAll(/<link\b[^>]*>/gi)].map(match => attributes(match[0])).filter(attr => attr.rel === 'stylesheet');
+  assert.ok(links.length > 0, `${file}: real stylesheet stack exists`);
+  const sheets = [...links.map(attr => attr.href), ...colorContract.lazyStylesheets];
+  const body = attributes(source.match(/<body\b[^>]*>/i)[0]);
+  const components = colorContract.components.filter(item => !item.pages || item.pages.includes(file));
+  assert.ok(components.length > 0, `${file}: registered cases exist`);
+  return `<!doctype html><html lang="it" class="${theme === 'dark' ? 'dark' : ''}" data-color-theme="${palette}"><head><meta charset="utf-8">${sheets.map(href => `<link rel="stylesheet" href="/${href}">`).join('')}</head>
+    <body class="${body.class}" data-ui-model="${body['data-ui-model']}" data-ui-revision="tre-livelli">${components.map(item => `<section data-color-case="${item.id}">${item.markup}</section>`).join('')}</body></html>`;
+}
+async function openColorFixture(file, theme, palette) {
+  const page = await browser.newPage();
+  await page.route('**/*', route => route.request().url().startsWith(base) ? route.continue() : route.abort());
+  await page.route(`${base}/colors.html`, route => route.fulfill({contentType: 'text/html', body: colorFixture(file, theme, palette)}));
+  await page.goto(`${base}/colors.html`);
+  return page;
+}
+async function readColorCases(page, file) {
+  return page.evaluate(components => {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 1;
+    const context = canvas.getContext('2d', {willReadFrequently: true});
+    const rgba = value => {
+      context.clearRect(0, 0, 1, 1);
+      context.fillStyle = value;
+      context.fillRect(0, 0, 1, 1);
+      const result = [...context.getImageData(0, 0, 1, 1).data];
+      return [...result.slice(0, 3), result[3] / 255];
+    };
+    const roleColor = (element, role) => {
+      if (role.startsWith('--') && !getComputedStyle(element).getPropertyValue(role).trim()) throw Error(`Missing color role: ${role}`);
+      const probe = document.createElement('span');
+      probe.style.color = role.startsWith('--') ? `var(${role})` : role;
+      element.append(probe);
+      const result = rgba(getComputedStyle(probe).color);
+      probe.remove();
+      return result;
+    };
+    return components.map(item => {
+      const element = document.querySelector(`[data-color-case="${item.id}"] ${item.selector}`);
+      if (!element) throw Error(`Missing color fixture: ${item.id}`);
+      const style = getComputedStyle(element);
+      let surface = element;
+      while (surface && getComputedStyle(surface).backgroundImage === 'none' && rgba(getComputedStyle(surface).backgroundColor)[3] === 0) surface = surface.parentElement;
+      if (!surface) throw Error(`Missing opaque surface: ${item.id}`);
+      const paint = getComputedStyle(surface);
+      // Registered gradients are opaque two-stop fills with white foreground. Both ends
+      // are measured: selecting just the first stop would miss a reversed bright gradient.
+      const stops = paint.backgroundImage === 'none' ? [rgba(paint.backgroundColor)]
+        : [...paint.backgroundImage.matchAll(/(?:rgba?|color)\([^)]*\)/g)].map(match => rgba(match[0]));
+      const ancestorsOpaque = [...(function* () { for (let node = element.parentElement; node; node = node.parentElement) yield node; })()].every(node => Number(getComputedStyle(node).opacity) === 1);
+      return {id: item.id, foreground: rgba(style.color), stops, image: paint.backgroundImage,
+        opacity: Number(style.opacity), ancestorsOpaque, foregroundRole: roleColor(element, item.foregroundRole), backgroundRole: roleColor(element, item.backgroundRole)};
+    });
+  }, colorContract.components.filter(item => !item.pages || item.pages.includes(file)));
+}
+const near = (a, b) => a.slice(0, 3).every((value, index) => Math.abs(value - b[index]) <= 1);
+function verifyColorCases(values, label) {
+  for (const value of values) {
+    const item = colorContract.components.find(component => component.id === value.id);
+    const name = `${label} ${item.id}`;
+    assert.ok(value.ancestorsOpaque, `${name}: grouped ancestor opacity needs an explicit fixture`);
+    assert.ok(value.stops.length > 0 && value.stops.every(stop => stop[3] === 1), `${name}: never treat transparent as black`);
+    assert.ok(near(value.foreground, value.foregroundRole), `${name}: foreground uses ${item.foregroundRole}`);
+    assert.ok(value.stops.some(stop => near(stop, value.backgroundRole)), `${name}: background uses ${item.backgroundRole}`);
+    if (item.backgroundImage) assert.equal(value.image, item.backgroundImage, `${name}: no fixed legacy gradient`);
+    if (value.image !== 'none') {
+      assert.ok(value.image.startsWith('linear-gradient(') && value.stops.length === 2 && near(value.foreground, [255, 255, 255]), `${name}: unsupported gradient must not pass silently`);
     }
+    const ratios = value.stops.map(bg => {
+      const alpha = value.opacity * value.foreground[3];
+      const fg = value.foreground.slice(0, 3).map((channel, index) => channel * alpha + bg[index] * (1 - alpha));
+      return contrast(`rgb(${fg.join(',')})`, `rgb(${bg.slice(0, 3).join(',')})`);
+    });
+    assert.ok(Math.min(...ratios) >= item.minContrast, `${name}: effective contrast ${Math.min(...ratios).toFixed(3)} < ${item.minContrast}`);
+  }
+}
+for (const theme of colorContract.themes) {
+  test(`registered color pairs keep their roles and contrast on each real page stack in ${theme}`, {timeout: 120000}, async () => {
+    for (const file of colorContract.pages) for (const palette of colorContract.palettes) {
+      const page = await openColorFixture(file, theme, palette);
+      try {
+        const values = await readColorCases(page, file);
+        assert.equal(values.length, colorContract.components.filter(item => !item.pages || item.pages.includes(file)).length, `${file}: no missing color samples`);
+        verifyColorCases(values, `${file}/${palette || 'default'}/${theme}`);
+      }
+      finally { await page.close(); }
+    }
+  });
+}
+// Browser negatives reproduce the faults that motivated the contract. No app JS,
+// accounts, external requests or production origin participate in these local checks.
+for (const [name, file, brokenCss, expected] of [
+  ['white on a bright accent', 'impostazioni.html', 'html body[data-ui-revision] .vault-assistant-bubble.user{background:var(--accent)!important}', /search-user-bubble/],
+  ['extra secondary opacity', 'impostazioni.html', 'html body[data-ui-revision] .settings-desc{opacity:.7!important}', /settings-secondary.*effective contrast/],
+  ['bright second gradient stop', 'dati_azienda.html', 'html body[data-ui-revision].company-profile-page .icon-purple{background:linear-gradient(135deg,var(--rev-fill),var(--accent))!important}', /company-purple.*effective contrast/],
+  ['legacy search panel gradient', 'impostazioni.html', 'html body[data-ui-revision] .vault-assistant-panel{background-image:linear-gradient(white,white)!important}', /search-panel/],
+]) {
+  test(`color contract detects ${name}`, {timeout: 30000}, async () => {
+    const page = await openColorFixture(file, 'dark', 'petrol');
+    try {
+      await page.addStyleTag({content: brokenCss});
+      const values = await readColorCases(page, file);
+      assert.throws(() => verifyColorCases(values, `${file}/petrol/dark`), expected);
+    } finally { await page.close(); }
   });
 }
