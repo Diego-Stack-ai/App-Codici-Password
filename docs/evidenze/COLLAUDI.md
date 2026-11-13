@@ -1,5 +1,36 @@
 # Collaudi
 
+<a id="giro-breve-1271-qa2-evidenze-2026-11-13"></a>
+
+## Giro breve QA2 / Chrome Windows / 1.2.271 — eseguito, DA_REVISIONARE, 13/11/2026
+
+Ordine di Diego **«facciamo il giro QA2»**, app online **1.2.271 / fb6e9e361687fd3c8f502fe687766e81a21181e0**, grafica **Nuova**, inattivita iniziale **180000 ms**, DIAG baseline **`events: []`**. Fonti: rapporto originale fornito privatamente in chat e narrativa/conferme esplicite di Diego, ora riprodotti nella [ricevuta completa con DIAG sulla #301](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/301#issuecomment-6862206357), pubblicata su suo ordine **«Pubblica sulla #301»**. SHA-256 del file originale del rapporto: **`4951334bd7501d89e618ee1e8749bddfff3b92beaff0add66698a840b7c32d2a`**. La ricevuta e disponibile per la revisione di Claude, ancora attesa.
+
+Esito del solo giro breve **PASS OSSERVATO PROPOSTO / DA_REVISIONARE da Claude**. Non e un GO autonomo, una nuova esecuzione formale dei sei sottocasi accettati sulla 1.2.270 o una chiusura C1. La prova e ora eseguita, mentre l'accettazione del revisore resta attesa.
+
+| Controllo osservato | Conferma di Diego e limite |
+| --- | --- |
+| Navigazione e tre frecce | Destinazioni dei tre comandi corrette, senza doppi salti, sempre `app.html`, nessuna Master inattesa. Sono state aperte anche altre pagine: deviazione dichiarata, non sequenza stretta dei sette passaggi D04. |
+| Nuova UI Profilo | Contatti e Documenti leggibili; comandi Modifica/Fine funzionanti secondo l'osservazione manuale. Nessuna copertura di altri ambienti implicita. |
+| Ctrl+R | Stessa pagina/categoria dopo la ricarica e una sola Master. Il DIAG e coerente con la ricarica soltanto insieme alla conferma manuale. |
+| Inattivita e ripresa | Blocco a «3 minuti giusti» secondo Diego e una sola Master alla ripresa. T0 di Shift non registrato: il tempo non e misurabile dal solo DIAG. |
+| Logout e Indietro | Login protetto, nessuna anomalia funzionale riferita. Non e una nuova verifica delle due chiavi DIAG/storage e non costituisce D08 completo. |
+| Spegnimento | OFF salvato confermato due volte da Diego; nessuna rilettura amministrativa. Il rapporto era stato copiato prima del logout e dello spegnimento. |
+
+### Rapporto DIAG e correlazioni
+
+Rapporto valido di **36 eventi**: **30 FRAME_EXIT, 3 FRAME_ENTER, 2 LOCK_PAGEHIDE e 1 LOCK_EXPIRED**; nessun ERROR, diniego o revoca nel segmento copiato. Stato PRE-logout: `active=true`, `permitValid=true`, `idleMs=180000`, `pushReady=true`. Questo stato non documenta il logout o l'OFF successivi; la disponibilita del worker non dimostra un invio push. Tredici eventi precedono il primo FRAME_ENTER: segmento di preparazione, senza poter attribuire dal solo registro un valore certo all'interruttore server.
+
+Orari del **13/11/2026, Europe/Rome**:
+
+- FRAME_ENTER Home alle **19:38:51.175**.
+- LOCK_PAGEHIDE alle **19:42:19.078**, poi FRAME_ENTER su Account alle **19:42:20.855**: intervallo **1,777 secondi**, compatibile con Ctrl+R insieme alla narrativa di Diego, non prova autonoma del comando usato.
+- LOCK_EXPIRED su Home alle **19:46:00.782**, poi FRAME_ENTER Home alle **19:46:19.510**: **18,728 secondi** fra blocco e rientro. Non essendo registrato il T0 di Shift, questi eventi non misurano i tre minuti d'inattivita dichiarati.
+
+**Cancella:** Diego non vede una conferma visibile; la baseline `events: []` conferma che il registro era vuoto dopo il clic. Senza una misura precedente non si quantificano gli eventi rimossi. E una nota di usabilita, non un difetto accertato; nessun fix e incluso.
+
+Restano non misurati pulizia precisa dello storage dopo logout, D15/revoca a sessione aperta, fase personale, altri browser/dispositivi e sottocasi non osservati. Non si trasferiscono o ampliano i sei PASS formali della 1.2.270. Nessun nuovo codice o deploy e collegato alla ricevuta. I checkpoint sottostanti conservano gli esiti precedenti: il loro giro breve ancora NE e superato dall'esecuzione ora documentata, con revisione ancora attesa.
+
 <a id="hosting-1271-online-evidenze-2026-11-13"></a>
 
 ## Hosting 1.2.271 — ricevuta del rilascio e verifica online, 13/11/2026

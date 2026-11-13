@@ -2,6 +2,18 @@
 
 <a id="stato-corrente"></a>
 
+<a id="giro-breve-1271-qa2-stato-2026-11-13"></a>
+
+## Giro breve QA2 / Chrome Windows / 1.2.271 eseguito — revisione attesa, 13/11/2026
+
+Su ordine di Diego **«facciamo il giro QA2»**, e stato eseguito il giro manuale della **1.2.271 online**, con grafica Nuova, inattivita a tre minuti e DIAG iniziale vuoto. Diego conferma tre frecce corrette senza doppi salti, indirizzo sempre `app.html`, nessuna Master inattesa durante le navigazioni, Contatti e Documenti leggibili con Modifica/Fine funzionanti, ricarica allo stesso punto con una Master, blocco dopo «3 minuti giusti» con una Master alla ripresa e logout/Indietro protetti sul login. Nessuna anomalia funzionale riferita. Sono dichiarate navigazioni aggiuntive: non e una ripetizione stretta dei sette passaggi D04.
+
+Esito del solo giro breve: **PASS OSSERVATO PROPOSTO / DA_REVISIONARE da Claude**, senza GO autonomo. Le [evidenze](../evidenze/COLLAUDI.md#giro-breve-1271-qa2-evidenze-2026-11-13) separano conferme di Diego, DIAG PRE-logout di 36 eventi, correlazioni e limiti. Il giro breve non e piu NE; l'accettazione del revisore resta attesa. Su ordine di Diego **«Pubblica sulla #301»** e stata pubblicata la [ricevuta completa con DIAG](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/301#issuecomment-6862206357), ora disponibile al revisore.
+
+Canary **OFF salvato confermato due volte da Diego**, senza rilettura amministrativa. Il report PRE-logout conserva stato attivo/permesso valido: non prova l'OFF successivo. Restano non misurati l'istante iniziale del timeout, la pulizia precisa dello storage dopo logout, D15, fase personale e altri ambienti. Il giro non sostituisce i sei PASS formali limitati alla 1.2.270 e non chiude D04/D08 completi, C1/C2 o CORNICE CHIUSA. Hosting resta **1.2.271 / fb6e9e361687fd3c8f502fe687766e81a21181e0**.
+
+Il [seguito corrente](INCARICO_CORRENTE.md#giro-breve-1271-qa2-incarico-2026-11-13) e soltanto la pubblicazione autorizzata della ricevuta e dei quattro documenti nella #301, con commit/push e controlli CI, senza nuovo giro, codice applicativo, merge o deploy. I checkpoint sottostanti fotografano rilascio e preparazione precedenti: le loro diciture «giro breve non eseguito» descrivono quel momento e sono superate dal presente esito ancora da revisionare.
+
 <a id="hosting-1271-online-stato-2026-11-13"></a>
 
 ## Hosting 1.2.271 online — UI e tipografia pubblicate, cornice conservata — 13/11/2026

@@ -1,5 +1,17 @@
 # Incarico corrente
 
+<a id="giro-breve-1271-qa2-incarico-2026-11-13"></a>
+
+## Giro breve QA2 1.2.271 — ricevuta pubblicata per la revisione, 13/11/2026
+
+Nuovo ordine di Diego **«facciamo il giro QA2»**: giro manuale eseguito su QA2 / Chrome Windows / app 1.2.271, grafica Nuova, timer tre minuti, DIAG iniziale senza eventi. Le osservazioni e le conferme successive di Diego, insieme al rapporto PRE-logout fornito privatamente in chat, sono le fonti della [ricevuta](../evidenze/COLLAUDI.md#giro-breve-1271-qa2-evidenze-2026-11-13). Navigazioni ulteriori rispetto alla sequenza prevista sono dichiarate, senza trasformare il giro breve in una ripetizione formale completa di D04.
+
+Ordine successivo di Diego **«Pubblica sulla #301»**: invio della ricevuta completa e aggiornamento dei soli **STATO, INCARICO_CORRENTE, PROGRAMMA e COLLAUDI** sul ramo `codex/release-1.2.271-receipts-20261113`, dal checkpoint documentale `901d08f5`, con commit/push e verifica della CI. La [ricevuta con il DIAG integrale](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/301#issuecomment-6862206357) e pubblicata. Esito **PASS OSSERVATO PROPOSTO / DA_REVISIONARE da Claude**: nessuna auto-approvazione o chiusura C1; l'aggiornamento richiede la propria revisione sui nuovi byte.
+
+Conservare fonti e limiti: report di 36 eventi copiato prima del logout; tempo di tre minuti riferito da Diego, non misurato dal DIAG privo del T0 di Shift; logout e Indietro riferiti protetti, senza nuova misura della cancellazione delle chiavi locali. Il giro breve e ora eseguito, con accettazione attesa; non sostituisce i sei sottocasi formali della 1.2.270, D15, fase personale o altri ambienti. L'assenza di conferma visibile sul pulsante Cancella e una nota di usabilita: la baseline conferma soltanto il registro vuoto dopo il clic, senza misura degli eventi rimossi, difetto accertato o fix richiesto in questo passo.
+
+Canary **OFF salvato secondo due conferme di Diego**, senza rilettura amministrativa. Questo seguito autorizza soltanto la pubblicazione della ricevuta e dei quattro documenti, con i relativi controlli locali e CI; nessun nuovo giro produttivo, modifica applicativa, merge, deploy, dispatch o operazione Firebase/Google Cloud. Elenco chiuso di 34 Markdown e corpo generato dell'audit QA finale invariati. [Stato](STATO.md#giro-breve-1271-qa2-stato-2026-11-13) e [programma](PROGRAMMA.md#giro-breve-1271-qa2-programma-2026-11-13) aggiornano il giro breve da NE a eseguito, non ancora accettato; i checkpoint sottostanti restano storici.
+
 <a id="hosting-1271-online-incarico-2026-11-13"></a>
 
 ## Hosting 1.2.271 — ricevuta documentale dopo il rilascio, 13/11/2026

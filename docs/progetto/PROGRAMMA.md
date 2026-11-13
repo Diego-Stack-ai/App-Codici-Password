@@ -1,5 +1,17 @@
 # Programma
 
+<a id="giro-breve-1271-qa2-programma-2026-11-13"></a>
+
+## Dopo il giro breve QA2 1.2.271 — prima revisione della ricevuta, 13/11/2026
+
+Il giro breve manuale autorizzato da Diego su **QA2 / Chrome Windows / 1.2.271 / grafica Nuova / timer tre minuti** e stato eseguito. Il suo stato non e piu NE: le [evidenze](../evidenze/COLLAUDI.md#giro-breve-1271-qa2-evidenze-2026-11-13) propongono **PASS OSSERVATO / DA_REVISIONARE da Claude**, con tre frecce confermate corrette senza doppi salti, navigazioni e nuova UI utilizzabili, ricarica con una Master, timeout osservato e logout/Indietro protetti. Le navigazioni aggiuntive sono dichiarate; non si promuove il giro a ripetizione formale completa di D04 o D08.
+
+Su ordine di Diego **«Pubblica sulla #301»**, la [ricevuta sanificata con il DIAG completo](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/301#issuecomment-6862206357) e ora pubblicata; questo seguito aggiorna i soli quattro documenti esistenti della stessa PR e ne verifica la CI. Resta attesa la revisione di Claude sulle evidenze e sui nuovi byte documentali, senza merge o deploy impliciti. Non ripetere automaticamente il giro e non dichiararlo accettato prima della revisione. Il rapporto e le conferme dell'operatore sono riprodotti nel commento pubblico, con fonti e limiti distinti.
+
+Canary **OFF salvato confermato due volte da Diego**, senza rilettura amministrativa. Restano aperti D15, fase personale/C2, altri browser/dispositivi e gli altri sottocasi della matrice. La pulizia precisa delle chiavi locali non e stata misurata in questo giro e `pushReady=true` non e una prova di invio push. I sei PASS prioritari della 1.2.270 restano nel loro perimetro originale; nessuna chiusura C1 o CORNICE CHIUSA.
+
+Annotare l'assenza di feedback visibile su Cancella come osservazione di usabilita, insieme alla baseline `events: []` che conferma il registro vuoto dopo il clic, senza misura degli eventi rimossi; nessun bug accertato e nessuna correzione in questo seguito. Restano pianificati separatamente enum DIAG e ricariche standalone. L'[incarico corrente](INCARICO_CORRENTE.md#giro-breve-1271-qa2-incarico-2026-11-13) non comprende nuovo codice, giro, merge, deploy o cloud. Le diciture di giro breve ancora da fare nei checkpoint sottostanti descrivono lo stato anteriore alla prova ora eseguita.
+
 <a id="hosting-1271-online-programma-2026-11-13"></a>
 
 ## Dopo Hosting 1.2.271 — ricevuta e verifiche funzionali ancora distinte, 13/11/2026
