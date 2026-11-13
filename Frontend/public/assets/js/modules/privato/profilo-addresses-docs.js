@@ -82,7 +82,7 @@ export function renderAddressesView() {
     if (!container) return;
     clearElement(container);
 
-    const btnAdd = createElement('button', { className: 'btn-upload-trigger' }, [
+    const btnAdd = createElement('button', { className: 'btn-upload-trigger profile-add-trigger' }, [
         createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add_location_alt' }),
         createElement('span', { textContent: t('add_address') })
     ]);
@@ -145,7 +145,7 @@ function _createAddressCard(addr, idx) {
     card.appendChild(utilsList);
 
     const btnAddUtil = createElement('button', {
-        className: 'btn-upload-trigger',
+        className: 'btn-upload-trigger profile-add-trigger',
         dataset: { action: 'add-utility', idx }
     }, [
         createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add_circle' }),
@@ -199,7 +199,7 @@ export function renderDocumentiView() {
     const btnAdd = createElement('button', {
         id: 'btn-add-profile-document',
         type: 'button',
-        className: 'btn-upload-trigger profile-document-add-trigger',
+        className: 'btn-upload-trigger profile-add-trigger profile-document-add-trigger',
         ariaLabel: t('add_doc')
     }, [
         createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add_card' }),
@@ -307,7 +307,7 @@ export function renderDocumentiView() {
                             ...accountManagementButtons(docItem,'document')
                         ]),
                         createElement('button', {
-                            className: 'btn-upload-trigger',
+                            className: 'btn-upload-trigger profile-deadline-link',
                             textContent: definitiveDeadlineId
                                 ? t('profile_deadline_card_open')
                                 : t('profile_deadline_card_configure'),
@@ -323,5 +323,5 @@ export function renderDocumentiView() {
 
 function accountManagementButtons(contact,type,parentAddressId='') {
     if(!contact.linkedAccountId) return [];
-    return [createElement('button',{className:'btn-upload-trigger',textContent:t('company_change_account'),onclick:()=>_callbacks.changeProfileAccount({contact,type,parentAddressId})}),createElement('button',{className:'btn-upload-trigger',textContent:t('company_unlink_account'),onclick:()=>_callbacks.unlinkProfileAccount({contact,type,parentAddressId})})];
+    return [createElement('button',{className:'btn-upload-trigger profile-account-manage',textContent:t('company_change_account'),onclick:()=>_callbacks.changeProfileAccount({contact,type,parentAddressId})}),createElement('button',{className:'btn-upload-trigger profile-account-manage',textContent:t('company_unlink_account'),onclick:()=>_callbacks.unlinkProfileAccount({contact,type,parentAddressId})})];
 }

@@ -8,7 +8,7 @@ import { canReadCachedAccount } from '../shared/cached-account-access.js';
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.270';
+import { auth, db } from '../../firebase-config.js?v=1.2.271';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -51,6 +51,8 @@ function clearDetail(document = globalThis.document) {
 
 // --- INITIALIZATION ---
 export async function initDettaglioAccountAzienda(user, options = {}) {
+    // Gestione delle sezioni dietro «Modifica» (UI a tre livelli), caricata a parte.
+    import('../shared/manage-mode.js').then(module => module.installManageMode?.(document)).catch(() => {});
     mounted?.destroy();
     if (!user) return {destroy() {}};
     currentUid = user.uid;
@@ -287,7 +289,7 @@ async function loadAccount(mount = mounted) {
         if (!active()) return;
         const widgetContext = {compactView: true, uid: loadViewerId, context: 'company', accountId, companyId, readOnly: isReadOnly, active: actionActive, signal};
         for (const [path, initializer] of [['account-shared-credentials', 'initAccountSharedCredentials'], ['account-embedded-widgets', 'initAccountEmbeddedWidgets']]) {
-            import(`../shared/${path}.js?v=1.2.270`).then(async module => {
+            import(`../shared/${path}.js?v=1.2.271`).then(async module => {
                 if (!active()) return;
                 const controller = await module[initializer](widgetContext);
                 if (!active()) controller?.destroy();

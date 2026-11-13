@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.270';
+import { auth, db } from '../../firebase-config.js?v=1.2.271';
 import { collection, doc, runTransaction, deleteField, Timestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
@@ -37,7 +37,7 @@ export async function readLinkedAccountName(contact) {
 export function createLinkedAccountButton(contact, open, connect) {
     const linked = Boolean(contact.linkedAccountId);
     const button = createElement('button', {
-        className: linked ? 'btn-upload-trigger profile-account-primary' : 'btn-upload-trigger',
+        className: linked ? 'btn-upload-trigger profile-account-primary' : 'btn-upload-trigger profile-account-connect',
         textContent: linked ? 'Apri Account collegato' : 'Collega o crea Account',
         onclick: linked ? open : connect
     });
@@ -259,7 +259,7 @@ export async function createDeadlineFromDocument(documentItem, syncData, profile
 
     await syncData?.();
     if (auth.currentUser?.uid !== user.uid) return {action: 'cancelled-account-changed'};
-    const {buildLinkedDocumentDeadlineDraft} = await import('./profile-document-deadline-link.js?v=1.2.270');
+    const {buildLinkedDocumentDeadlineDraft} = await import('./profile-document-deadline-link.js?v=1.2.271');
     const draft = await buildLinkedDocumentDeadlineDraft(user.uid, documentItem, profile);
     if (auth.currentUser?.uid !== user.uid) return {action: 'cancelled-account-changed'};
     sessionStorage.setItem('profile-deadline-link-draft', JSON.stringify({...draft, ownerUid: user.uid}));

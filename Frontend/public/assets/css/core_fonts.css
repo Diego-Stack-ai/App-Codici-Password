@@ -51,6 +51,13 @@
     --icon-sm: 18px;
     --icon-md: 20px;
     --icon-lg: 24px;
+    --icon-xl: 32px;
+    --icon-2xl: 48px;
+    /* Simboli decorativi: misure storiche invariate (anche con «Grafica classica»). */
+    --icon-deco-mark: 72px;
+    --icon-deco-card: 120px;
+    --icon-deco-page-rules: 500px;
+    --icon-deco-page: 600px;
 
     /* LINE HEIGHTS (Phase 4) */
     --lh-tight: 1.2;
@@ -121,7 +128,7 @@ textarea {
     font-family: 'Material Symbols Outlined' !important;
     font-weight: normal;
     font-style: normal;
-    font-size: 24px;
+    font-size: var(--icon-lg);
     line-height: 1;
     display: inline-block;
     white-space: nowrap;

@@ -10,7 +10,7 @@ import {confirmFrameAction} from '../core/vault-frame-client.js';
  * - Espone initAreaPrivata(user) come entry point unico.
  */
 
-import { db, functions } from '../../firebase-config.js?v=1.2.270';
+import { db, functions } from '../../firebase-config.js?v=1.2.271';
 import { LOG } from '../../logger.js';
 import { collection, doc, addDoc, updateDoc, writeBatch, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -33,6 +33,8 @@ let _currentUserStart = null;
  * @param {Object} user - Oggetto User di Firebase Auth
  */
 export async function initAreaPrivata(user) {
+    // UI a tre livelli: «Azzera statistiche» dietro «Modifica» della sezione Top 10.
+    import('../shared/manage-mode.js').then(module => module.installManageMode?.(document)).catch(() => {});
     if (!user) return;
 
     // Evita re-inizializzazione se l'utente è lo stesso

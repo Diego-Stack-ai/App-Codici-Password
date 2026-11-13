@@ -226,7 +226,7 @@
 }
 
 .detail-list-item-arrow {
-    font-size: 14px;
+    font-size: var(--icon-xs);
     opacity: 0.2;
 }
 
@@ -346,3 +346,25 @@
 }
 
 /* .hidden è definito in core.css — non duplicare */
+
+/* === Revisione UI a tre livelli — dettaglio Scadenza (tappa 3, 11/11/2026) ===
+   Solo aspetto «Rifinita»: la pagina è già in sola consultazione. «Elimina» resta
+   nel piè di pagina con conferma fino alla fase sicurezza (decisione di Diego). */
+[data-ui-revision="tre-livelli"] :is(.detail-info-item, .detail-notes-box) {
+    background: var(--rev-surface);
+    border-color: var(--rev-border);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+[data-ui-revision="tre-livelli"] .detail-section-title {
+    font: var(--font-label);
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+[data-ui-revision="tre-livelli"] :is(.detail-info-label, .detail-page-label) {
+    color: var(--text-secondary);
+    text-transform: none;
+    letter-spacing: normal;
+}

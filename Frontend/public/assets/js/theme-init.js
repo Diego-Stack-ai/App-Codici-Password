@@ -3,6 +3,20 @@
 
 (function () {
     try {
+        // Interruttore «Grafica: Nuova / Classica» (Impostazioni → Tema visivo).
+        // Classica: la revisione UI a tre livelli non si applica su questo dispositivo.
+        // Il body è ancora nascosto (private-auth) quando il segno viene rimosso.
+        if (localStorage.getItem('ui_graphics') === 'classic') {
+            document.documentElement.dataset.uiGraphics = 'classic';
+            const strip = () => { document.body?.removeAttribute('data-ui-revision'); };
+            if (document.body) strip();
+            else {
+                const observer = new MutationObserver(() => { if (document.body) { strip(); observer.disconnect(); } });
+                observer.observe(document.documentElement, { childList: true });
+                document.addEventListener('DOMContentLoaded', strip, { once: true });
+            }
+        }
+
         const savedColorTheme = localStorage.getItem('color_theme');
         const colorTheme = ['blue', 'green', 'red', 'sand', 'petrol', 'lavender', 'dusty-rose'].includes(savedColorTheme) ? savedColorTheme : 'blue';
         document.documentElement.dataset.colorTheme = colorTheme;

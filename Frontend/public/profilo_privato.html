@@ -13,24 +13,25 @@
     <title data-t="page_title_profile">Profilo Utente - PROTOCOLLO BASE V5.0</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.270" />
+    <link rel="manifest" href="manifest.json?v=1.2.271" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
 
     <!-- CSS Modular System V5.0 -->
     <!-- 1. Modulo specifico Base -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.270">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.271">
     <!-- 2. Estensioni Core -->
-    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.270">
-    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.270">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.270">
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.271">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.271">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.271">
     <!-- 3. Stile di Pagina -->
-    <link rel="stylesheet" href="assets/css/profilo_privato.css?v=1.2.270&touch=20261017b">
-    <link rel="stylesheet" href="assets/css/profile-contacts.css?v=1.2.270">
-    <link rel="stylesheet" href="assets/css/profile-layout.css?v=1.2.270">
-    <link rel="stylesheet" href="assets/css/profile-document-attachments.css?v=1.2.270">
+    <link rel="stylesheet" href="assets/css/profilo_privato.css?v=1.2.271&touch=20261017b">
+    <link rel="stylesheet" href="assets/css/profile-contacts.css?v=1.2.271">
+    <link rel="stylesheet" href="assets/css/profile-layout.css?v=1.2.271">
+    <link rel="stylesheet" href="assets/css/ui-tre-livelli.css?v=1.2.271">
+    <link rel="stylesheet" href="assets/css/profile-document-attachments.css?v=1.2.271">
 </head>
 
-<body data-private-auth hidden inert class="base-bg" data-ui-model="detail">
+<body data-private-auth hidden inert class="base-bg" data-ui-model="detail" data-ui-revision="tre-livelli">
     <!-- CORE JS (Body-Start) -->
     <!-- CORE JS (Body-Start removed, moved to HEAD) -->
     <div class="base-container">
@@ -87,7 +88,7 @@
                     <section id="profile-overview" class="profile-tab-panel" role="tabpanel" data-profile-tab="overview"></section>
 
                     <!-- 1. ANAGRAFICA -->
-                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="personal">
+                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="personal" data-manageable>
                         <div class="form-section-header">
                             <div class="section-title-wrapper">
                                 <div class="settings-icon-box icon-blue">
@@ -160,7 +161,7 @@
                     </div>
 
                     <!-- 2. RESIDENZA & UTENZE -->
-                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="addresses">
+                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="addresses" data-manageable>
                         <div class="form-section-header collapsible-header collapsed" data-section="indirizzi">
                             <div class="section-title-wrapper">
                                 <div class="settings-icon-box icon-amber">
@@ -177,7 +178,7 @@
                     </div>
 
                     <!-- 3. CONTATTI -->
-                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="contacts">
+                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="contacts" data-manageable>
                         <div class="form-section-header collapsible-header collapsed" data-section="telefoni">
                             <div class="section-title-wrapper">
                                 <div class="settings-icon-box icon-emerald">
@@ -193,7 +194,7 @@
                     </div>
 
                     <!-- 4. EMAIL -->
-                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="contacts">
+                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="contacts" data-manageable>
                         <div class="form-section-header collapsible-header collapsed" data-section="email">
                             <div class="section-title-wrapper">
                                 <div class="settings-icon-box icon-blue">
@@ -209,7 +210,7 @@
                     </div>
 
                     <!-- 5. DOCUMENTI -->
-                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="documents">
+                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="documents" data-manageable>
                         <div class="form-section-header collapsible-header collapsed" data-section="documenti">
                             <div class="section-title-wrapper">
                                 <div class="settings-icon-box icon-purple">
@@ -226,7 +227,7 @@
 
 
                     <!-- 8. NOTE ANAGRAFICA -->
-                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="personal">
+                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="personal" data-manageable>
                         <div class="form-section-header">
                             <div class="section-title-wrapper">
                                 <div class="settings-icon-box icon-red">

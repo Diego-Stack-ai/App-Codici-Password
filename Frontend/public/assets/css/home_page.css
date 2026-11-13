@@ -202,7 +202,7 @@
 
 .deadline-inbox-heading > .material-symbols-outlined {
     color: var(--status-warning);
-    font-size: 2rem;
+    font-size: var(--icon-xl);
 }
 
 .deadline-inbox-heading h2,
