@@ -1,5 +1,13 @@
 # Decisioni
 
+<a id="colori-intensita-rilascio-2026-11-13"></a>
+
+## 13/11/2026 — intensità dei colori graduale e rilascio 1.2.272
+
+Fonte: dopo il GO di Claude e la CI verde della #302, Diego sceglie **«Proviamo così, saliamo poco alla volta»**, poi ordina **«Procedi»** e **«Fai anche deploy»**. Si conserva l'intensità attuale dei colori approvati, senza un aumento ulteriore in questo rilascio. Le variazioni future si valutano progressivamente con il [registro degli abbinamenti e i test](../regole/INTERFACCIA.md#ui-color-contract-2026-11-13).
+
+La #302, head `d65871aa`, è integrata in master **`0ffc0a3947f5131409053e2d0885cc904e57cfef`**; la #283 è chiusa come confluita. Il [GO di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/302#issuecomment-6865151130) riguarda quel candidato, non approva automaticamente il confezionamento della nuova versione. È autorizzato il rilascio **1.2.272 solo Hosting CI**, dopo GO sul candidato finale e check verdi; il clic di approvazione dell'ambiente production resta personale di Diego. Canary **OFF secondo Diego**. Nessuna prova QA2, attivazione, Rules, Functions o operazione cloud ulteriore è autorizzata da questa decisione. [Incarico e gate](INCARICO_CORRENTE.md#rilascio-ui-1272-incarico-2026-11-13).
+
 <a id="cornice-c1-recaptcha-eccezione-2026-11-12"></a>
 
 ## 12/11/2026 — C1 strada A: eccezione reCAPTCHA del solo runner

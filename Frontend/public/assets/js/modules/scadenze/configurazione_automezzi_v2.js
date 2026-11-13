@@ -1,5 +1,5 @@
 import {confirmFrameAction} from '../core/vault-frame-client.js';
-import {db} from '../../firebase-config.js?v=1.2.271';
+import {db} from '../../firebase-config.js?v=1.2.272';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {clearElement, createElement, setChildren} from '../../dom-utils.js';
 import {showConfirmModal, showToast} from '../../ui-core-v129.js';

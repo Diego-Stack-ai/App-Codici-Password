@@ -2,6 +2,16 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-ui-1272-stato-2026-11-13"></a>
+
+## APP 1.2.272 — candidata Hosting, non ancora distribuita, 13/11/2026
+
+La #302, head revisionato `d65871aa`, è integrata in master **`0ffc0a3947f5131409053e2d0885cc904e57cfef`** dopo [GO Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/302#issuecomment-6865151130), CI verde e ordine di Diego. La #283 è chiusa come confluita. L'intensità dei colori resta quella approvata: Diego sceglie di procedere gradualmente e ordina anche il deploy. Il nuovo ramo **`codex/release-ui-1.2.272-20261113`**, base `0ffc0a39`, confeziona **1.2.272** senza ulteriori cambi grafici; nuova revisione finale, test e manifest **DA_VERIFICARE** sullo SHA della candidata.
+
+Produzione ancora **1.2.271 / `fb6e9e361687fd3c8f502fe687766e81a21181e0`**, secondo la [ricevuta Hosting #1136](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6861098889). Merge della #302 non equivale a deploy: i nuovi colori e il correttivo di contrasto non sono qui dichiarati online. Le ricevute della #301 restano distinte, senza attribuirle approvazione o merge da questo raccordo.
+
+L'[incarico corrente](INCARICO_CORRENTE.md#rilascio-ui-1272-incarico-2026-11-13) autorizza il solo Hosting CI dopo GO e check verdi del candidato finale, con clic production personale di Diego e verifica online successiva. [Prove e limiti](../evidenze/COLLAUDI.md#rilascio-ui-1272-verifiche-2026-11-13), [sequenza](PROGRAMMA.md#rilascio-ui-1272-programma-2026-11-13). Canary **OFF secondo Diego**, senza nuova rilettura amministrativa; nessuna prova QA2, operazione cloud ulteriore o attivazione personale. C1 residua e giro breve sul futuro pacchetto richiedono propri ordini; nessun PASS trasferito e nessuna dichiarazione CORNICE CHIUSA. Le sezioni seguenti sono checkpoint storici.
+
 <a id="ui-color-contract-stato-2026-11-13"></a>
 
 ## Abbinamenti dei colori — candidata locale per la revisione, 13/11/2026

@@ -5,7 +5,7 @@ import {confirmFrameAction} from '../core/vault-frame-client.js';
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.271';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.272';
 import { getFooterReady } from '../../footer-state.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
@@ -14,7 +14,7 @@ import { updateDoc, deleteDoc, doc, onAuthStateChanged, runTransaction, serverTi
 import {deleteObject, ref} from "/assets/js/vendor/firebase-runtime.js";
 import { deadlineDate, deadlineBucket, deadlinePresentation } from './deadline-model.js';
 import { t } from '../../translations.js';
-import { initComponents } from '../../components-v129.js?v=1.2.271';
+import { initComponents } from '../../components-v129.js?v=1.2.272';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import {listDeadlines, listReceivedDeadlines} from '../data/vault-repository.js';

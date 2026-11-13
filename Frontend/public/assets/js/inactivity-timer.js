@@ -1,6 +1,6 @@
 import {vaultFrameClient} from './modules/core/vault-frame-client.js';
 import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
-import { auth, db } from './firebase-config.js?v=1.2.271';
+import { auth, db } from './firebase-config.js?v=1.2.272';
 import { LOG } from './logger.js';
 import { getVaultSessionExpiry, touchVaultSession } from './modules/core/vault-session.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";

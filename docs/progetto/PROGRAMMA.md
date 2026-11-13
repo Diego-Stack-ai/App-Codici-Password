@@ -1,5 +1,17 @@
 # Programma
 
+<a id="rilascio-ui-1272-programma-2026-11-13"></a>
+
+## APP 1.2.272 — sequenza del rilascio colori, 13/11/2026
+
+La [scelta di intensità graduale e l'ordine di rilascio](DECISIONI.md#colori-intensita-rilascio-2026-11-13) seguono il merge della #302 in `0ffc0a39`; la #283 è chiusa come confluita. Il perimetro è il [confezionamento 1.2.272 solo Hosting](INCARICO_CORRENTE.md#rilascio-ui-1272-incarico-2026-11-13), senza nuovi aggiustamenti dei colori o attivazione della cornice.
+
+1. Bump canonico e riesame del catalogo aiuti; controlli locali, manifest/hash e modello degli header sulla candidata pulita, registrando esiti reali e limiti nelle [evidenze](../evidenze/COLLAUDI.md#rilascio-ui-1272-verifiche-2026-11-13).
+2. Revisione di Claude e CI verde sullo SHA finale; poi integrazione e dispatch Hosting già autorizzati. Il GO della #302 non sostituisce quello del confezionamento. L'approvazione production resta personale di Diego.
+3. Dopo Hosting, verifica online di versione, manifest, hash e intestazioni per pagina e ricevuta del rilascio. Il successivo giro breve QA2 sulla 1.2.272 resta da autorizzare separatamente; le prove precedenti non gli attribuiscono PASS automatici.
+
+Canary **OFF secondo Diego**. Nessuna ulteriore operazione cloud, prova QA2/personale, Rules, Functions o modifica della cornice. Restano aperti gli altri ambienti e sottocasi C1, D15, fase personale/C2 e D18; nessuna chiusura globale. I checkpoint sotto conservano il contesto storico.
+
 <a id="rilascio-ui-1271-programma-2026-11-13"></a>
 
 ## Candidata APP 1.2.271 — preparazione prima del rilascio, 13/11/2026

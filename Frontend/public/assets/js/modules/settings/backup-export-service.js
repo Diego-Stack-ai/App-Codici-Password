@@ -1,5 +1,5 @@
 import {confirmFrameAction} from '../core/vault-frame-client.js';
-import {auth, storage} from '../../firebase-config.js?v=1.2.271';
+import {auth, storage} from '../../firebase-config.js?v=1.2.272';
 import {createBackupExportBuffer, createBackupRecordBuffer} from './backup-export-buffer.js';
 import {getBytes, ref, onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {
