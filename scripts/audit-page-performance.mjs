@@ -134,7 +134,8 @@ for (const row of rows) {
   if (gzipKb > gzipCeiling) violations.push(`${row.name}: ${gzipKb.toFixed(1)} KB gzip > ${gzipCeiling} KB`);
   const jsCeiling = ceilings.maxJsModulesByPage?.[row.name] ?? ceilings.maxJsModules;
   if (row.js.size > jsCeiling) violations.push(`${row.name}: ${row.js.size} moduli JS > ${jsCeiling}`);
-  if (row.css.size > ceilings.maxCssFiles) violations.push(`${row.name}: ${row.css.size} CSS > ${ceilings.maxCssFiles}`);
+  const cssCeiling = ceilings.maxCssFilesByPage?.[row.name] ?? ceilings.maxCssFiles;
+  if (row.css.size > cssCeiling) violations.push(`${row.name}: ${row.css.size} CSS > ${cssCeiling}`);
 }
 
 if (!checkOnly) {

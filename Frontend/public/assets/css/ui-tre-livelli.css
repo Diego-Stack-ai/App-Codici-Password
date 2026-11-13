@@ -1,0 +1,122 @@
+/* === Revisione UI a tre livelli — base condivisa (stile «Rifinita», 10–11/11/2026) ===
+   Caricato solo dalle pagine migrate, che dichiarano body[data-ui-revision="tre-livelli"].
+   Token di superficie derivati dalla palette attiva e comando «Modifica/Fine» per sezione.
+   Le regole specifiche di ogni famiglia restano nel CSS della famiglia. */
+[data-ui-revision="tre-livelli"] {
+    --rev-surface: color-mix(in srgb, var(--accent) 3%, #fff);
+    --rev-border: color-mix(in srgb, var(--accent) 14%, #e2e8f0);
+}
+
+.dark [data-ui-revision="tre-livelli"] {
+    /* Più chiaro dello sfondo: le schede non devono sembrare nere (riscontro di Diego). */
+    --rev-surface: color-mix(in srgb, var(--accent) 12%, #1b2333);
+    --rev-border: color-mix(in srgb, var(--accent) 30%, #2a3346);
+    --rev-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+[data-ui-revision="tre-livelli"] {
+    --rev-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.07);
+}
+
+/* Profondità comune: ombra leggera su schede e campi delle pagine migrate. */
+[data-ui-revision="tre-livelli"] :is(.form-card, .profile-data-card, .profile-contact-card, .glass-field, .detail-field-box, .detail-info-item, .detail-notes-box) {
+    box-shadow: var(--rev-shadow);
+}
+
+/* Solo ciò che porta altrove si solleva al passaggio; le schede di soli dati no. */
+[data-ui-revision="tre-livelli"] :is(.profile-account-primary, .profile-deadline-link):is(:hover, :focus-visible) {
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    border-radius: 10px;
+}
+
+/* Comando «Modifica/Fine» per sezione (modules/shared/manage-mode.js). */
+.manage-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-height: 36px;
+    margin-left: auto;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(var(--accent-rgb), 0.12);
+    color: var(--accent);
+    font: var(--font-button);
+    cursor: pointer;
+}
+
+/* Area di tocco di 44 px senza ingrandire il pulsante visibile. */
+.manage-toggle::after {
+    content: '';
+    position: absolute;
+    inset: -4px -2px;
+}
+
+.manage-toggle[aria-pressed="true"] {
+    background: var(--accent);
+    color: #fff;
+}
+
+.dark .manage-toggle[aria-pressed="true"] {
+    color: #0b0f17;
+}
+
+.manage-toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* Filigrane «B + C» (decisione di Diego, 10/11/2026). Ogni famiglia dichiara il
+   simbolo della pagina in --page-symbol (stesso simbolo di .archive-watermark).
+   B: piccola icona decorativa accanto al titolo dell'intestazione.
+   C: filigrana ridotta e tenue in fondo al contenuto, nel flusso della pagina:
+      non si sovrappone mai a testi, campi o pulsanti, neppure scorrendo.
+   La grande filigrana centrata resta nel markup (gate page-shells) ma è nascosta. */
+[data-ui-revision="tre-livelli"] .archive-watermark {
+    display: none;
+}
+
+[data-ui-revision="tre-livelli"] .header-title::before,
+[data-ui-revision="tre-livelli"] .page-container::after {
+    /* Decorativo: testo alternativo vuoto, la ligatura non entra nel nome accessibile. */
+    content: var(--page-symbol, none) / "";
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+}
+
+[data-ui-revision="tre-livelli"] .header-title::before {
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    margin-right: var(--space-2, 0.5rem);
+    border-radius: 9px;
+    background: rgba(var(--accent-rgb), 0.12);
+    color: var(--accent);
+    font-size: var(--icon-md);
+    vertical-align: middle;
+}
+
+[data-ui-revision="tre-livelli"] .page-container::after {
+    display: block;
+    margin-top: var(--space-6, 1.5rem);
+    text-align: right;
+    font-size: var(--icon-deco-mark, 72px);
+    color: var(--text-primary);
+    opacity: 0.06;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* «Azzera statistiche» è gestione: visibile solo dopo «Modifica» della sezione. */
+body[data-ui-revision="tre-livelli"] [data-manage="off"] #btn-reset-views {
+    display: none;
+}

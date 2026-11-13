@@ -4,12 +4,12 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/auth/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.270';
+import { auth } from '../../firebase-config.js?v=1.2.271';
 import { updatePassword, confirmPasswordReset, signOut, verifyPasswordResetCode } from "/assets/js/vendor/firebase-runtime.js";
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
-import { db } from '../../firebase-config.js?v=1.2.270';
+import { db } from '../../firebase-config.js?v=1.2.271';
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { ACCOUNT_PASSWORD_POLICY_VERSION, bindPasswordChecklist, evaluatePassword, firstPasswordPolicyError, generateSecurePassword } from '../core/password-policy.js';
 import { authSessionFence } from '../../auth-session-fence.js';
@@ -31,6 +31,8 @@ async function updateAuthenticatedPassword(newPassword) {
 }
 
 export async function initImpostaNuovaPassword() {
+    // Famiglia Accesso: stesso «?» del login, prima del modulo pagina e indipendente dalla Vault.
+    import('../../guide.js').then(({ init }) => init()).catch(() => {});
     
 
     try {

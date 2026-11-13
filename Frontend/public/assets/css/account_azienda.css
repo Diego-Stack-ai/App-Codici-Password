@@ -46,8 +46,8 @@
     margin-bottom: 2rem;
 }
 
-.account-pin-icon { font-size: 18px; }
-.account-action-icon { font-size: 16px; }
+.account-pin-icon { font-size: var(--icon-sm); }
+.account-action-icon { font-size: var(--icon-xs); }
 
 .search-container-spacing {
     margin-top: 0.5rem;
@@ -77,7 +77,7 @@
 }
 
 .sort-icon {
-    font-size: 1.2rem;
+    font-size: var(--icon-md);
 }
 
 .glass-btn-icon {
@@ -448,7 +448,7 @@ html:not(.dark) .account-card-subtitle {
 }
 
 .loading-spinner-icon {
-    font-size: 3rem;
+    font-size: var(--icon-2xl);
     animation: spin 2s linear infinite;
 }
 
@@ -506,4 +506,9 @@ html:not(.dark) .account-card-subtitle {
     .micro-account-list > .empty-state {
         grid-column: 1 / -1;
     }
+}
+
+/* Revisione UI a tre livelli: simbolo della pagina per le filigrane B + C (ui-tre-livelli.css). */
+body[data-ui-revision="tre-livelli"] {
+    --page-symbol: 'business_center';
 }

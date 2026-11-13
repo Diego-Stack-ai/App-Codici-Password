@@ -11,6 +11,8 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 
 export async function initResetPassword() {
+    // Famiglia Accesso: stesso «?» del login, prima del modulo pagina e indipendente dalla Vault.
+    import('../../guide.js').then(({ init }) => init()).catch(() => {});
     
 
     try {

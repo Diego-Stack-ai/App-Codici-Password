@@ -18,6 +18,59 @@ La cornice carica i CSS comuni dei modali nel proprio documento: quelli della fi
 
 Il guard e limitato al documento padre; le pagine standalone conservano la UI ordinaria. Test di regressione con modale reale e controllo negativo, poi prove fisiche separate nei quattro ambienti C1. [Evidenze e limiti](../evidenze/COLLAUDI.md#cornice-dialogo-fix-2026-11-10). La candidata non autorizza accensione o rilascio.
 
+<a id="ui-tre-livelli-2026-11-10"></a>
+
+## Gerarchia a tre livelli — contratto UI, 10/11/2026
+
+> **Autorità:** [decisione di Diego](../progetto/DECISIONI.md#ui-tre-livelli-decisione-2026-11-10). **Esecutore:** Claude, con revisione di Codex. **Stato:** contratto adottato, applicazione a tappe non ancora iniziata.
+
+Per le famiglie di pagine migrate con questa revisione, la regola storica «consolidamento senza variazioni grafiche intenzionali» è superata dalle regole seguenti. Le famiglie non ancora migrate restano invariate finché non vengono toccate dalla propria tappa.
+
+### Livelli di importanza
+
+1. **Contenuto:** il dato (numero, indirizzo, documento, scadenza, credenziale mascherata) è l'elemento più visibile della sezione.
+2. **Azioni rapide sul dato:** copia, chiama, scrivi, apri mappe, mostra/nascondi, apri allegato. Icone neutre accanto al valore, sempre disponibili in consultazione, area di tocco minima 44 px e nome accessibile.
+3. **Gestione:** aggiungi, collega/cambia/scollega account, modifica, includi nel QR, elimina. Nascosta in consultazione; compare soltanto dopo il comando **Modifica** dell'intestazione di sezione o della pagina e scompare con **Fine**.
+
+### Componenti
+
+- **Quattro tipi di pulsante:** principale pieno (al massimo uno per vista), secondario tenue, testo (intestazioni e righe di gestione), icona. Nessun rilievo decorativo: profondità e colore derivano dai token di `core.css`.
+- **Tratteggio** riservato all'invito ad aggiungere in una sezione vuota o in modalità Modifica; mai per aprire, cambiare o scollegare.
+- **Comandi distruttivi** (eliminare, svuotare) in rosso, visibili soltanto in modalità Modifica, con conferma esplicita (secondo tocco o dialogo esistente) e senza scorciatoie. La regola riguarda i comandi: restano ammessi il rosso funzionale di errore, urgenza e scaduto e la palette `red` già prevista.
+- **Account collegato** come riga-link discreta; l'appartenenza al biglietto QR come indicatore, modificabile solo in Modifica.
+- **Scadenze** come etichetta di stato (valido, in scadenza, scaduto) con colori funzionali indipendenti dalla palette.
+- Etichette in tono neutro, non nel colore d'accento; il colore d'accento identifica ciò che si tocca. Niente testo in maiuscolo continuo per titoli o paragrafi; tipografia dai token di `core_fonts.css`.
+
+### Stile «Rifinita» e palette
+
+- Il colore d'accento, le superfici tenui e lo sfondo sfumato derivano dai token della palette attiva di `core.css`; nessun colore d'identità fisso nelle pagine migrate. Durante lo sviluppo di ogni tappa si controllano almeno tre palette, in chiaro e in scuro; prima del rilascio la verifica copre **tutte e sette le palette × chiaro/scuro**.
+- Colori funzionali (valido, in scadenza, scaduto, errore, eliminazione) restano indipendenti dalla palette.
+- Vetro e sfocatura soltanto su intestazione e piè di pagina; card e righe usano superfici piene con un solo livello d'ombra dai token.
+
+### Filigrane: simbolo nel titolo e filigrana discreta
+
+- **Titolo:** il simbolo semantico della pagina (stesse famiglie già censite: configurazione, informazione, liste) compare come piccola icona accanto al titolo dell'intestazione, decorativa (`aria-hidden`), senza alterare il nome accessibile del titolo.
+- **Filigrana discreta:** lo stesso simbolo resta in un angolo inferiore, ridotto e tenue, su un livello decorativo arretrato ma **senza alcuna sovrapposizione con testi, campi o pulsanti**, verificata anche durante lo scorrimento e sui dispositivi; non intercetta input, non cambia le dimensioni del documento e rispetta `prefers-reduced-motion`.
+- La filigrana grande centrata e ruotata dietro al contenuto non viene più usata nelle pagine migrate. Il gate `test:page-shells` continua a verificare presenza, simbolo e `aria-hidden`; posizione e dimensione seguono questa sezione.
+
+### Vincoli
+
+Le regole di sicurezza restano prevalenti: mascheramento dei campi sensibili, conferme sensibili della cornice, Vault bloccata e confini dati non cambiano. Nessuna funzione viene rimossa: ogni azione di oggi resta raggiungibile al massimo con un tocco in più. Ogni testo nuovo entra nelle otto lingue; stati vuoto/caricamento/errore usano `createUiState()`. Tema chiaro/scuro e tutte le palette vanno verificati; `prefers-reduced-motion` rispettato. Budget, purezza HTML, test UI e gate fisico iPhone/Windows del contratto restano obbligatori.
+
+### Ordine delle tappe
+
+0. Decisione e contratto (questa sezione).
+1–2. Componenti nati con il **pilota Profilo privato** (Contatti, Indirizzi, Documenti), dopo l'integrazione della cornice.
+3. Dettagli: Profilo azienda, dettagli Account privato/azienda, dettaglio Scadenza.
+4. Elenchi e Home: Account, Aziende, Scadenze, Archivio, Area privata.
+5. Impostazioni, configurazioni, Regole, Destinatari e form.
+
+**Interruttore «Grafica: Nuova / Classica» (decisione di Diego, 11/11/2026):** in Impostazioni → Tema visivo. Preferenza solo locale al dispositivo (`ui_graphics`), predefinita «Nuova». Con «Classica» `theme-init.js` rimuove `data-ui-revision` prima della visualizzazione e `manage-mode.js` non installa «Modifica»: tutte le pagine tornano all'aspetto e ai comandi precedenti, senza cambiare dati, cornice o sicurezza. Serve a confrontare e a tornare indietro senza deploy; si rimuove dopo la decisione definitiva. Grafica, tipografia e lingue restano lavori e rilasci separati, annullabili indipendentemente.
+
+**Eccezione dichiarata (11/11/2026):** nel dettaglio Scadenza «Elimina» resta nel piè di pagina con la sua conferma fino alla fase sicurezza, dove verrà spostato nel modulo di modifica ([decisione](../progetto/PROGRAMMA.md#scadenza-elimina-decisione-2026-11-11)).
+
+**Modalità di rilascio scelta da Diego (10/11/2026):** le tappe 1–5 si sviluppano sulla stessa PR #283, **un commit per famiglia di pagine**, ciascuno con avviso e revisione GO/NO-GO di Codex. Dopo il pilota Profilo, Diego valuta le schermate (palette, chiaro/scuro, modalità Modifica) **prima** dell'estensione alle altre famiglie. Segue **un solo rilascio Hosting** finale, dopo la pubblicazione e la prova C1 della cornice, con suite completa, sette palette × chiaro/scuro, otto lingue, prova fisica di Diego e approvazione personale; la versione dell'app viene incrementata solo da quel rilascio. La tappa 0, soltanto documentale, non richiede prova fisica, versione o deploy.
+
 <a id="cornice-diag-ui-2026-11-10"></a>
 
 ## DIAG — sezione Cornice in Impostazioni

@@ -1,5 +1,32 @@
 # Programma
 
+<a id="rilascio-ui-1271-programma-2026-11-13"></a>
+
+## Candidata APP 1.2.271 — preparazione prima del rilascio, 13/11/2026
+
+L'[ordine corrente](INCARICO_CORRENTE.md#rilascio-ui-1271-incarico-2026-11-13) avvia la preparazione dell'app con UI e tipografia della #283, cornice gia presente nella 1.2.270 e ricevute C1 consolidate. Il precedente passo solo documentale e incorporato e resta sotto come checkpoint storico. Base master `0a599364`, fonte UI `9764c590`, ramo `codex/release-ui-1.2.271-20261113`; candidata locale **1.2.271 / DA_VERIFICARE**, non ancora produzione.
+
+1. Comporre il candidato preservando master e il runner C1 corrente, versionare il pacchetto e allineare cache/precache, manifest e riferimenti di rilascio. Eseguire e registrare soltanto i controlli locali pertinenti: coerenza documentale, build, hash, modello degli header e banco browser locale.
+2. Consegnare una sola PR in bozza per Claude con SHA esatto, differenze, risultati effettivi e limiti. Il GO UI precedente non approva automaticamente l'integrazione o i nuovi byte di confezionamento; attendere revisione e check richiesti senza auto-approvazione.
+3. Dopo la revisione, sottoporre a Diego il candidato concreto e i successivi passi di merge, rilascio CI e giro breve. Ciascuno resta soggetto al proprio ordine; il giro breve deve dichiarare versione, ambiente e copertura. I sei PASS su QA2 / Chrome Windows / 1.2.270 non si trasferiscono automaticamente alla 1.2.271.
+
+Canary **OFF secondo Diego** durante questa preparazione; nessun nuovo giro produttivo, merge, deploy o operazione cloud. Il perimetro gia verificato e Chrome desktop Windows: Edge, Safari, PWA e altri dispositivi restano da verificare, non esclusi per incompatibilita dimostrata. Restano aperti D15, gli altri sottocasi/ambienti C1, fase personale/C2 e D18 con secondo rilascio; niente CORNICE CHIUSA. I seguiti diagnostici ed efficienza descritti sotto restano pianificati e non implementati.
+
+<a id="cornice-c1-fase1-seguito-2026-11-13"></a>
+
+## C1 fase 1 — ricevute prioritarie consolidate e seguito da rivedere, 13/11/2026
+
+La [conferma consolidata di Claude sulla #299](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/299#issuecomment-6857416470) riconosce i sei PASS prioritari **D02, D04-core, D05-A, D06-1, D06-3 e D08-local**, limitati a **QA2 / Chrome desktop Windows / v1.2.270**: nessuna ripetizione necessaria di questi sottocasi. Le [ricevute e i limiti](../evidenze/COLLAUDI.md#cornice-c1-fase1-prioritari-2026-11-13) distinguono i PASS circoscritti da D04/D05 complessivi LIMITE e dalle prove non eseguite. Il passo corrente e soltanto la PR documentale sui quattro Markdown esistenti, da sottoporre a Claude sullo SHA esatto; nessuna chiusura globale C1/C2 o CORNICE CHIUSA.
+
+L'eventuale candidato UI/font della #283 richiedera allineamento a master, versione dedicata e verifica finale, conservando i gate UI e C1 e l'ordine personale di Diego. I PASS della 1.2.270 non si trasferiscono al candidato grafico: resta previsto almeno un giro breve sul candidato futuro. Questa preparazione documentale non avvia tale lavoro, un nuovo giro o il rilascio. Restano aperti D15 con prova dedicata, gli altri ambienti e sottocasi della matrice, la fase personale/C2 e D18 subordinato a un secondo rilascio; nessun PASS automatico. Canary **OFF secondo Diego**, senza rilettura amministrativa.
+
+### Approfondimenti rinviati alla fase SICUREZZA
+
+- **Motivo del rifiuto nella DIAG:** pianificare un enum chiuso per distinguere i rifiuti oggi aggregati in `ERROR_FRAME_OPERATION`, senza URL, UID, altri identificativi o testi liberi. Il gruppo delle tre specifiche occorrenze richiamate dalla nuova revisione comprende due eventi su `account_privati.html` l'11/11 alle **22:59:14.450 e 22:59:26.814 Europe/Rome**, secondo i JSON originali, per i quali il ricordo di Diego non e stato acquisito, e un evento sulla Home il 13/11 alle 10:54. Gli orari 23:12:34 e 23:12:46 indicati da Claude discordano dai JSON: il [dettaglio nelle evidenze](../evidenze/COLLAUDI.md#cornice-c1-fase1-prioritari-2026-11-13) conserva le fonti, da allineare nella revisione senza cambiare i PASS. Per l'episodio Home Diego ricorda un annullamento o una Master errata: il [criterio di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/299#issuecomment-6855725272) e il [registro aggiornato](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/299#issuecomment-6855446696) lo classificano come rifiuto gestito, fail-closed, comportamento atteso senza difetto accertato. Il ricordo non identifica il sottocodice tecnico; le due occorrenze precedenti restano da chiarire. La ricorrenza giustifica il seguito diagnostico, senza cambiare i sei PASS. Nessun enum o cambiamento applicativo implementato in questa consegna.
+- **Ricariche standalone con canary OFF:** valutare dopo C1 il [rilievo non bloccante di Claude](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/299#issuecomment-6846567198) sul ciclo di ricarica di Impostazioni circa ogni tre minuti a Vault gia bloccata, con consumo di rete e saturazione del registro. L'obiettivo proposto e evitare che il timer si riarmi e ricarichi una pagina gia bloccata. La valutazione di Claude resta distinta da una verifica indipendente di sicurezza o efficienza; nessuna correzione o prova aggiuntiva e svolta qui.
+
+I checkpoint sottostanti conservano gli ordini e le fotografie precedenti; non riaprono i sei sottocasi accettati e non autorizzano esecuzioni.
+
 ## C1 — revisione PR workflow manuale, poi ordini separati di merge ed esecuzione
 
 [Piano e adapter](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12) integrati con #292 su master 6dd80df1, dopo GO Claude 45f50a9e/CI e ordine personale. Configurazione GitHub eseguita da Diego, [verifica UI limitata a nomi e protezioni](../evidenze/COLLAUDI.md#cornice-c1-workflow-config-2026-11-12). Ora #293 per il workflow in .github/workflows, con corpo eseguibile invariato, test del nuovo percorso, CI e nuovo GO sullo SHA; nella stessa PR si registra il [criterio AUTO + giro breve approvato da Diego](DECISIONI.md#cornice-c1-auto-giro-breve-2026-11-12). Poi, solo su ordine di Diego, eventuale merge e registrazione master; dispatch ancora separato, inizialmente chrome-desktop con Diego presente per ON/OFF e ripristino timeout se interrotto. Nessun giro reale autorizzato ora, canary OFF. D02 Configurazione documenti NE senza link UI reale; nessun PASS simulato. Emulazioni separate, matrice19×4 mantenuta come indice delle evidenze per fase, senza sottocasi mancanti promossi dal giro breve. Restano Safari/PWA/camera/push, D15 personale, D18 con secondo rilascio, fase personale/C2. UI #283 con GO readonly 8a30920b, grafica/sicurezza fuori produzione fino a C1 completata e ordine di Diego. I checkpoint sotto sono precedenti.
@@ -175,6 +202,19 @@ Il primo lotto locale della candidata 1.2.259 è rendicontato in [STATO](STATO.m
 7. aggiungere WhatsApp soltanto dopo disponibilità di un'integrazione Business ufficiale.
 
 Questo blocco accompagna la bonifica pre-finale e prosegue dopo il rilascio: non sostituisce aggiornamenti automatici del sistema operativo o dei browser, audit indipendente, test fisici e gestione incidenti.
+
+<a id="scadenza-elimina-decisione-2026-11-11"></a>
+
+**Decisione di Diego, 11/11/2026 — «Elimina» nel dettaglio Scadenza.** Per la revisione UI resta nel piè di pagina del dettaglio, con la conferma esistente (scelta C): eccezione dichiarata al contratto a tre livelli. Nella **fase sicurezza** si passa alla scelta A: «Elimina» spostato nel modulo di modifica della scadenza, insieme alla revisione dei percorsi di cancellazione (documento del Profilo collegato, allegati, purge), con test e revisione incrociata. L'elenco Scadenze conserva l'eliminazione con scorrimento e conferma.
+
+<a id="pentagi-nota-2026-11-10"></a>
+
+**Nota di Diego, 10/11/2026 — prova PentAGI a fine lavori.** Dopo la chiusura della cornice e della fase sicurezza successiva (notifiche dopo il logout, MIME, AAD, purge, COOP, vulnerabilità npm, token e Node), provare lo strumento open source di penetration testing con agenti AI PentAGI come controllo finale. Vincoli già concordati:
+- mai contro la produzione o account con dati reali, ma solo contro gli emulatori locali o un progetto Firebase di prova con account inventati;
+- esecuzione soltanto sul PC di Diego, in Docker, dopo la lettura del codice da parte di Claude;
+- ogni segnalazione è un'ipotesi da validare da Claude e Codex prima di qualsiasi correzione, che segue il normale ciclo di ramo, revisione e rilascio.
+
+Non è un incarico attivo e non autorizza installazioni.
 
 ## COLLAUDO-QA-FINALE-01 — matrice funzionale e linguistica — 03/11/2026
 

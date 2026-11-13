@@ -1,0 +1,48 @@
+/* === Revisione UI a tre livelli — configurazione e moduli (tappa 5, 11/11/2026) ===
+   Caricato dalle sole pagine di configurazione (Impostazioni, Configurazioni,
+   Regole, Destinatari) e dai moduli di modifica, dopo ui-tre-livelli.css.
+   Sono già pagine di gestione: i comandi restano visibili, cambia solo l'aspetto
+   «Rifinita» (superfici piene, ombra comune, etichette neutre non in maiuscolo). */
+/* Token Rifinita ripetuti qui per i moduli, che non caricano ui-tre-livelli.css
+   (niente filigrane né «Modifica»): stessi valori del foglio comune. */
+[data-ui-revision="tre-livelli"] {
+    --rev-surface: color-mix(in srgb, var(--accent) 3%, #fff);
+    --rev-border: color-mix(in srgb, var(--accent) 14%, #e2e8f0);
+    --rev-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.07);
+}
+
+.dark [data-ui-revision="tre-livelli"] {
+    --rev-surface: color-mix(in srgb, var(--accent) 12%, #1b2333);
+    --rev-border: color-mix(in srgb, var(--accent) 30%, #2a3346);
+    --rev-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+[data-ui-revision="tre-livelli"] :is(.settings-item, .glass-card, .glass-field, .detail-field-box, .form-section, .deadline-domain-panel) {
+    background: var(--rev-surface);
+    border-color: var(--rev-border);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: var(--rev-shadow);
+}
+
+[data-ui-revision="tre-livelli"] .settings-item:is(:hover, :focus-within) {
+    background: var(--rev-surface);
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+[data-ui-revision="tre-livelli"] :is(.glass-field, .detail-field-box).border-glow::after {
+    display: none;
+}
+
+[data-ui-revision="tre-livelli"] :is(.settings-desc, .settings-subsection-label, .view-label, .label-sm, .detail-section-title, .form-section-title) {
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+[data-ui-revision="tre-livelli"] :is(.settings-desc, .settings-subsection-label, .view-label, .label-sm) {
+    color: var(--text-secondary);
+}
+
+[data-ui-revision="tre-livelli"] :is(.glass-field, .detail-field-box) {
+    gap: var(--space-3, 0.75rem);
+}

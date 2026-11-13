@@ -431,3 +431,36 @@ html:not(.dark) .deadline-card-subtitle {
         -webkit-backdrop-filter: none;
     }
 }
+
+/* Revisione UI a tre livelli: simbolo della pagina per le filigrane B + C (ui-tre-livelli.css). */
+body[data-ui-revision="tre-livelli"] {
+    --page-symbol: 'event';
+}
+
+/* Revisione UI a tre livelli — schede degli elenchi (tappa 4, 11/11/2026).
+   Superficie piena e opaca (copre le azioni di scorrimento), ombra comune;
+   al passaggio bordo accentato e ombra più ampia. Niente traslazione sulle righe
+   a scorrimento: il loro transform è gestito dal gesto. */
+body[data-ui-revision="tre-livelli"] :is(.account-card, .deadline-card, .archive-row-container) .swipe-content,
+body[data-ui-revision="tre-livelli"] .azienda-card {
+    background: var(--rev-surface);
+    border-color: var(--rev-border);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: var(--rev-shadow);
+}
+
+body[data-ui-revision="tre-livelli"] :is(.account-card, .deadline-card, .archive-row-container):hover .swipe-content,
+body[data-ui-revision="tre-livelli"] .azienda-card:is(:hover, :focus-visible) {
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.08), 0 12px 24px rgba(15, 23, 42, 0.12);
+}
+
+body[data-ui-revision="tre-livelli"] .azienda-card:is(:hover, :focus-visible) {
+    transform: translateY(-2px);
+}
+
+body[data-ui-revision="tre-livelli"] :is(.account-data-label, .account-card-category, .deadline-card-category) {
+    text-transform: none;
+    letter-spacing: normal;
+}

@@ -97,7 +97,7 @@
 }
 
 .info-text {
-    font-size: 13px;
+    font-size: var(--fs-xs);
     font-weight: var(--font-weight-medium);
     color: #0f172a;
 }

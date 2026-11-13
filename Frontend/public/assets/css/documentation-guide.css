@@ -35,6 +35,28 @@
     margin: 0;
 }
 
+.documentation-entry-card {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    z-index: 50;
+    margin: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: calc(50% - 1.5rem);
+}
+
+.documentation-entry-card .documentation-entry-notice:empty {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    .documentation-entry-card {
+        top: max(var(--space-3, 0.75rem), env(safe-area-inset-top));
+        left: max(var(--space-3, 0.75rem), env(safe-area-inset-left));
+    }
+}
+
 .documentation-button-footer {
     display: grid;
     place-items: center;

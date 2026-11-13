@@ -44,7 +44,7 @@
 }
 
 .detail-avatar-placeholder {
-    font-size: calc(var(--icon-lg) * 2);
+    font-size: var(--icon-2xl);
     color: var(--text-secondary);
     opacity: 0.5;
 }
@@ -877,4 +877,17 @@ html:not(.dark) .location-tab-btn.active {
 @media (max-width: 600px) {
     .company-pdf-preview dl { grid-template-columns: 1fr; gap: 6px; }
     .company-pdf-preview dd { margin-bottom: 10px; }
+}
+
+/* === Revisione UI a tre livelli — Profilo azienda (tappa 3, 11/11/2026) ===
+   Solo con body[data-ui-revision="tre-livelli"]. In consultazione restano dati,
+   copia/mostra/chiama e «Apri Account collegato»; modifica di sezione o voce,
+   nota e collega/cambia/scollega compaiono dopo «Modifica». Le regole comuni
+   dei profili (superfici, etichette, account) vivono in profile-layout.css. */
+[data-ui-revision="tre-livelli"] [data-manage="off"] :is(.company-section-edit, .company-item-edit, #btn-edit-note) {
+    display: none;
+}
+
+[data-ui-revision="tre-livelli"] .profile-overview-heading > .manage-toggle {
+    margin-left: var(--space-2, 0.5rem);
 }

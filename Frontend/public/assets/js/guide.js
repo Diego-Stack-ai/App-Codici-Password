@@ -1,7 +1,7 @@
 // D0 help bootstrap: independent of authentication and the Vault.
 import { documentationLabel } from './modules/assistant/documentation-ui-labels.js';
 
-const CONTROLLER_URL = './modules/assistant/documentation-view.js?v=1.2.270';
+const CONTROLLER_URL = './modules/assistant/documentation-view.js?v=1.2.271';
 let activeHelp = null;
 
 export function initDocumentationHelp(pathname = window.location.pathname) {
@@ -25,7 +25,9 @@ export function mountDocumentationHelp({ pageId } = {}) {
     const pageHost = document.querySelector('.page-container') || document.querySelector('.vault')
         || document.querySelector('main.shared-contact-card');
     const footerHost = document.getElementById('footer-center-actions');
-    const host = footerHost || pageHost;
+    // Famiglia Accesso: «?» compatto dentro la card, a sinistra, simmetrico al selettore lingua.
+    const cardHost = footerHost ? null : document.querySelector('.vault > .card.border-glow');
+    const host = footerHost || cardHost || pageHost;
     if (!host) return null;
     let live = true;
     let loading = false;
@@ -34,7 +36,7 @@ export function mountDocumentationHelp({ pageId } = {}) {
     if (!document.querySelector('link[data-documentation-style]')) {
         const stylesheet = document.createElement('link');
         stylesheet.rel = 'stylesheet';
-        stylesheet.href = '/assets/css/documentation-guide.css?v=1.2.270';
+        stylesheet.href = '/assets/css/documentation-guide.css?v=1.2.271';
         stylesheet.dataset.documentationStyle = 'true';
         document.head.append(stylesheet);
     }
@@ -52,13 +54,13 @@ export function mountDocumentationHelp({ pageId } = {}) {
     notice.className = 'documentation-entry-notice';
     notice.setAttribute('role', 'status');
     entry.append(trigger, notice);
-    if (footerHost) {
-        entry.classList.add('documentation-entry-footer');
+    if (footerHost || cardHost) {
+        entry.classList.add(footerHost ? 'documentation-entry-footer' : 'documentation-entry-card');
         trigger.classList.add('documentation-button-footer');
         trigger.title = trigger.textContent;
         trigger.setAttribute('aria-label', trigger.textContent);
         trigger.textContent = '?';
-        host.append(entry);
+        if (footerHost) host.append(entry); else host.prepend(entry);
     } else {
         host.prepend(entry);
     }

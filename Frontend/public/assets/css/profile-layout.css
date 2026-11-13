@@ -61,9 +61,9 @@
 .profile-summary-card-action:focus-visible { border-color: var(--primary-color); outline: none; }
 .profile-document-value-button { display: inline-flex; align-items: center; gap: 0.4rem; min-width: 0; padding: 0; border: 0; color: inherit; font: inherit; text-align: left; background: transparent; cursor: pointer; }
 .profile-document-value-button .data-value { overflow-wrap: anywhere; }
-.profile-document-value-button .material-symbols-outlined { flex: 0 0 auto; color: var(--primary-color); font-size: 1.2rem; }
+.profile-document-value-button .material-symbols-outlined { flex: 0 0 auto; color: var(--primary-color); font-size: var(--icon-md); }
 .profile-document-value-button:focus-visible { border-radius: 0.35rem; outline: 2px solid var(--primary-color); outline-offset: 3px; }
-.profile-document-value-hint { display: block; margin-top: 0.25rem; color: var(--text-secondary); font-size: 0.78rem; }
+.profile-document-value-hint { display: block; margin-top: 0.25rem; color: var(--text-secondary); font-size: var(--fs-xs); }
 .profile-expiry-card { display: grid; gap: 0.75rem; }
 .profile-expiry-item { min-height: var(--touch-target-min); padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; background: var(--surface-glass); color: var(--text-primary); text-align: left; cursor: pointer; }
 
@@ -85,3 +85,132 @@
     .profile-tabs { margin-inline: -0.25rem; border-radius: 0.75rem; }
 }
 
+
+/* === Revisione UI a tre livelli — pilota Profilo, stile «Rifinita» (10/11/2026) ===
+   Ambito: solo pagine con body[data-ui-revision="tre-livelli"]. Le pagine non migrate
+   restano invariate. Consultazione: dati e azioni rapide. Gestione: solo con «Modifica». */
+/* Superfici piene: niente vetro sulle card, un solo bordo tenue. */
+[data-ui-revision="tre-livelli"] .form-card,
+[data-ui-revision="tre-livelli"] .profile-data-card,
+[data-ui-revision="tre-livelli"] .profile-contact-card {
+    background: var(--rev-surface);
+    border: 1px solid var(--rev-border);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+[data-ui-revision="tre-livelli"] .form-card:hover {
+    background: var(--rev-surface);
+}
+
+/* Etichette neutre; l'accento resta a ciò che si tocca. */
+[data-ui-revision="tre-livelli"] .data-label {
+    color: var(--text-secondary);
+    opacity: 1;
+}
+
+[data-ui-revision="tre-livelli"] .card-title-accent {
+    font: var(--font-label);
+    color: var(--text-secondary);
+    text-transform: none;
+}
+
+/* --- Consultazione: la gestione resta nascosta --- */
+[data-ui-revision="tre-livelli"] [data-manage="off"] :is(.btn-edit-section, .profile-account-manage, .profile-account-connect, .profile-document-inline-delete, .qr-checkbox, .profile-add-trigger) {
+    display: none;
+}
+
+/* Sezione vuota: l'invito ad aggiungere resta visibile anche in consultazione. */
+[data-ui-revision="tre-livelli"] [data-manage="off"] .guide-content-wrapper:not(:has(.form-card, .profile-data-card, .profile-contact-card)) > .profile-add-trigger {
+    display: flex;
+}
+
+/* QR: in consultazione solo un indicatore per i dati inclusi. */
+[data-ui-revision="tre-livelli"] [data-manage="off"] .qr-mini-label {
+    display: none;
+}
+
+[data-ui-revision="tre-livelli"] [data-manage="off"] :is(.field-header, .qr-check-badge):has(> .qr-checkbox:checked) > .qr-mini-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(var(--accent-rgb), 0.1);
+    color: var(--text-secondary);
+    cursor: default;
+    /* Indicatore passivo: il label resta associato al checkbox nascosto, ma in
+       consultazione non deve poterlo commutare né salvare la preferenza QR. */
+    pointer-events: none;
+    user-select: none;
+}
+
+[data-ui-revision="tre-livelli"] [data-manage="off"] :is(.field-header, .qr-check-badge):has(> .qr-checkbox:checked) > .qr-mini-label::before {
+    content: 'qr_code_2' / "";
+    font-family: 'Material Symbols Outlined';
+    font-size: var(--icon-sm);
+    font-weight: normal;
+    line-height: 1;
+    font-feature-settings: 'liga';
+}
+
+/* Account collegato e scadenza come righe-link discrete, non come riquadri tratteggiati. */
+[data-ui-revision="tre-livelli"] :is(.profile-account-primary, .profile-deadline-link) {
+    justify-content: flex-start;
+    min-height: 44px;
+    margin-top: 0.25rem;
+    padding: 0 0.25rem;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--accent);
+    font: var(--font-label);
+    text-align: left;
+}
+
+[data-ui-revision="tre-livelli"] :is(.profile-account-primary, .profile-deadline-link)::before {
+    font-family: 'Material Symbols Outlined';
+    font-size: var(--icon-sm);
+    font-weight: normal;
+    line-height: 1;
+    font-feature-settings: 'liga';
+}
+
+[data-ui-revision="tre-livelli"] .profile-account-primary::before { content: 'link' / ""; }
+[data-ui-revision="tre-livelli"] .profile-deadline-link::before { content: 'event' / ""; }
+
+[data-ui-revision="tre-livelli"] :is(.profile-account-primary, .profile-deadline-link)::after {
+    content: 'chevron_right' / "";
+    margin-left: auto;
+    font-family: 'Material Symbols Outlined';
+    font-size: var(--icon-sm);
+    font-weight: normal;
+    line-height: 1;
+    color: var(--text-secondary);
+    font-feature-settings: 'liga';
+}
+
+[data-ui-revision="tre-livelli"] :is(.profile-account-primary, .profile-deadline-link):hover {
+    background: rgba(var(--accent-rgb), 0.08);
+}
+
+[data-ui-revision="tre-livelli"] .profile-account-actions {
+    gap: 4px;
+    margin-top: 0.25rem;
+}
+
+/* --- Modifica: comandi secondari tenui, tratteggio solo per aggiungere --- */
+[data-ui-revision="tre-livelli"] :is(.profile-account-manage, .profile-account-connect, .profile-account-verify) {
+    border: 0;
+    background: rgba(var(--accent-rgb), 0.1);
+}
+
+[data-ui-revision="tre-livelli"] [data-manage="on"] .card-actions-row {
+    gap: 0.35rem;
+}
+
+/* Etichetta del dato sempre a sinistra; indicatore o scelta QR a destra. */
+[data-ui-revision="tre-livelli"] .field-header > .data-label {
+    order: -1;
+    margin-right: auto;
+}
