@@ -226,6 +226,7 @@ const hue = ([r, g, b]) => {
 // Rosso, arancio, ambra e verde fissi: probabili colori di stato (successo, avviso, errore).
 const statusHue = h => h < 50 || h >= 340 || (h >= 85 && h < 170);
 const hex = rgb => '#' + rgb.map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
+const parseHex = value => [1, 3, 5].map(i => parseInt(value.slice(i, i + 2), 16));
 
 const report = [];
 await mkdir(outDir, {recursive: true});
@@ -290,13 +291,21 @@ for (const [page, mode] of variants) {
     }
     // Schermata verde con evidenziati: magenta = non segue il tema, arancio = contrasto basso.
     const tab = runs.__tab;
-    const selectors = decisions.function.filter(group => group.page === page).map(group => group.selector);
-    const registered = new Set(await tab.evaluate(selectors => {
+    // Registrata solo la pittura dichiarata: stesso elemento (nessun sottoalbero in blocco),
+    // stessa proprietà e stessa tinta della decisione.
+    const revision = mode === 'nuova' ? 'tre-livelli' : mode === 'classica' ? 'classica' : '';
+    const paints = decisions.function.filter(group => group.page === page).flatMap(group => group.paints || [])
+      .filter(paint => !paint.revisions || paint.revisions.includes(revision));
+    const allowed = new Map(await tab.evaluate(paints => {
       const all = [...document.body.querySelectorAll('*')];
-      return all.flatMap((element, i) => selectors.some(selector => element.closest(selector)) ? [i] : []);
-    }, selectors));
-    const functional = status.filter(item => registered.has(item.index));
-    const unregistered = status.filter(item => !registered.has(item.index));
+      return all.flatMap((element, i) => { const match = paints.filter(paint => element.matches(paint.selector));
+        return match.length ? [[i, match.map(paint => ({properties: paint.properties, hue: paint.hue}))]] : []; });
+    }, paints));
+    const hueMatches = (h, name) => name === 'red' ? (h <= 12 || h >= 345) : name === 'amber' ? (h >= 20 && h <= 50) : false;
+    const isRegistered = item => (allowed.get(item.index) || []).some(paint =>
+      paint.properties.includes(item.prop) && hueMatches(hue(parseHex(item.value)).h, paint.hue));
+    const functional = status.filter(isRegistered);
+    const unregistered = status.filter(item => !isRegistered(item));
     const mark = (indexes, colour) => tab.evaluate(({indexes, colour}) => {
       const all = document.body.querySelectorAll('*');
       for (const i of indexes) { const el = all[i]; if (el) el.style.outline = `3px solid ${colour}`; }

@@ -211,6 +211,41 @@ test(`${label} glass header attenuates scrolled content and keeps its controls o
         // Prova peggiore: strisce rosse/nere ad alto contrasto. Misurato 10–28 di media su 255 (14/11/2026).
         assert.ok(diff.mean > 0, `${label}/${viewport.width}/${palette}/${dark}: the header is glass again, not an opaque band`);
         assert.ok(diff.mean <= 32, `${label}/${viewport.width}/${palette}/${dark}: content under title and controls is blurred and attenuated (${diff.mean.toFixed(1)})`);
+        // Revisione Codex su bc221f2: con contenuto chiaro o scuro sotto la fascia, titolo e
+        // comandi restano leggibili (testo 4,5:1, icone funzionali 3:1) a ogni larghezza.
+        // Colori letti una volta, prima di nasconderli (il titolo ha una transizione di colore).
+        const targets = await page.evaluate(() => [['.header-title', 4.5], ['#header-action', 3]].map(([selector, minimum]) => {
+            const element = document.querySelector(selector); const rect = element.getBoundingClientRect();
+            return {selector, minimum, color: getComputedStyle(element).color, rect: {x: Math.ceil(rect.left), y: Math.ceil(rect.top), width: Math.floor(rect.width), height: Math.floor(rect.height)}};
+          }));
+        for (const fill of ['#ffffff', '#000000']) {
+          // Pannello fisso pieno sotto l'header (sopra lo sfondo, sotto la fascia), più alto della
+          // fascia come nella prova Codex: la sfocatura non può «prendere» il buio dei bordi.
+          await page.evaluate(async fill => {
+            document.querySelector('#behind-header')?.remove();
+            const panel = document.createElement('div');
+            panel.id = 'behind-header';
+            Object.assign(panel.style, {position: 'fixed', top: '0', left: '0', right: '0', height: '320px', background: fill, zIndex: '1', pointerEvents: 'none'});
+            document.body.append(panel);
+            await new Promise(requestAnimationFrame); await new Promise(requestAnimationFrame);
+          }, fill);
+          await page.evaluate(() => { for (const element of document.querySelectorAll('.header-title, #header-action')) element.style.setProperty('color', 'transparent', 'important'); });
+          for (const target of targets) {
+            const shot = await page.screenshot({clip: target.rect, animations: 'disabled'});
+            const worst = await page.evaluate(async ([data, color]) => {
+              const image = await createImageBitmap(await (await fetch('data:image/png;base64,' + data)).blob());
+              const canvas = new OffscreenCanvas(image.width, image.height); const context = canvas.getContext('2d'); context.drawImage(image, 0, 0);
+              const pixels = context.getImageData(0, 0, image.width, image.height).data;
+              const lum = (r, g, b) => [r, g, b].map(v => v / 255).map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4).reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
+              const fg = lum(...color.match(/[\d.]+/g).slice(0, 3).map(Number));
+              let min = Infinity;
+              for (let i = 0; i < pixels.length; i += 4) { const bg = lum(pixels[i], pixels[i + 1], pixels[i + 2]); min = Math.min(min, (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05)); }
+              return min;
+            }, [shot.toString('base64'), target.color]);
+            assert.ok(worst >= target.minimum, `${label}/${viewport.width}/${palette}/${dark ? 'dark' : 'light'}/${fill}: ${target.selector} ${worst.toFixed(2)}:1 < ${target.minimum}`);
+          }
+          await page.evaluate(() => { for (const element of document.querySelectorAll('.header-title, #header-action')) element.style.removeProperty('color'); });
+        }
         await page.locator('#under-header').evaluate(button => {button.style.visibility = 'visible';});
         await page.locator('#header-action').click();
         assert.deepEqual(await page.evaluate(() => window.fixtureClicks), {header: 1, underlying: 0});

@@ -2,6 +2,17 @@
    Diego, 14/11/2026; prima era pieno dal correttivo 1.2.267). Il velo mobile resta
    dentro l'altezza dell'header, così non copre la fascia delle linguette che gli sta sotto;
    sotto titolo e comandi il contenuto passa sfocato e attenuato, non leggibile. */
+/* Protezione traslucida dietro titolo e comandi a ogni larghezza (revisione Codex su bc221f2):
+   vetro sfocato al colore di fondo, dissolvenza solo sul bordo inferiore. Contenuti chiari o
+   scuri che scorrono sotto non tolgono leggibilità (testo 4,5:1, icone 3:1). */
+#header-placeholder.base-header {
+    background: color-mix(in srgb, var(--bg-primary) 88%, transparent);
+    backdrop-filter: blur(14px) saturate(110%);
+    -webkit-backdrop-filter: blur(14px) saturate(110%);
+    mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
+}
+
 @media (max-width: 600px) {
     #header-placeholder.base-header::before {
         height: 100%;

@@ -98,13 +98,19 @@ for (const revision of ['tre-livelli', 'classica']) for (const theme of ['light'
         for (const group of registry.function.filter(item => item.page === page)) {
           const values = await read(tab, group.selector, group.property, '--rev-icon');
           assert.equal(values.length, group.count || 1, `${group.id}: element present`);
-          for (const [index, value] of values.entries()) {
-            assert.ok(hueOk(value.actual, group.hue), `${page}/${palette}/${theme}/${revision} ${group.id}: keeps ${group.hue} (${value.actual})`);
-            assert.notEqual(value.actual, value.expected, `${group.id}: not replaced by the palette icon role`);
-            const key = `${group.id}|${index}`;
-            if (!seen.has(key)) seen.set(key, value.actual);
-            assert.equal(value.actual, seen.get(key), `${group.id}: identical in every palette`);
+          // Ogni pittura dichiarata (selettore esatto, proprietà, tinta), discendenti compresi.
+          for (const [paintIndex, paint] of group.paints.entries()) if (!paint.revisions || paint.revisions.includes(revision)) for (const property of paint.properties) {
+            const css = {color: 'color', bg: 'backgroundColor', border: 'borderTopColor'}[property];
+            const actual = await tab.evaluate(([selector, css]) => [...document.querySelectorAll(selector)].map(element => getComputedStyle(element)[css]), [paint.selector, css]);
+            assert.ok(actual.length > 0, `${group.id}: declared paint ${paint.selector} present`);
+            for (const [index, value] of actual.entries()) {
+              assert.ok(hueOk(value, paint.hue), `${page}/${palette}/${theme}/${revision} ${group.id} ${paint.selector} ${property}: keeps ${paint.hue} (${value})`);
+              const key = `${group.id}|${paintIndex}|${property}|${index}`;
+              if (!seen.has(key)) seen.set(key, value);
+              assert.equal(value, seen.get(key), `${group.id} ${paint.selector}: identical in every palette`);
+            }
           }
+          for (const value of values) assert.notEqual(value.actual, value.expected, `${group.id}: not replaced by the palette icon role`);
         }
       } finally { await tab.close(); }
     }
