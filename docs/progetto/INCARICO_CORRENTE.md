@@ -2,15 +2,17 @@
 
 <a id="cornice-ordinaria-1275-incarico-2026-11-14"></a>
 
-## APP 1.2.275 — effetti Classica e cornice ordinaria, 14/11/2026
+## APP 1.2.275 — ordine eseguito, ricevuta 15/11/2026
+
+UI e cornice ordinaria pubblicate sul master **44a64edf7e9d3d15a041df50ca5c3d7d0349a06f**: Rules #1167, Hosting #1168, verifica pubblica e attivazione policy #2 riusciti; disponibilità ordinaria ON confermata il **14/11 alle 23:58:56 CET**. [Ricevuta e limiti](../evidenze/COLLAUDI.md#cornice-ordinaria-1275-verifiche-2026-11-14), [riscontro GitHub](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/311#issuecomment-6885570026). I clic production sono stati eseguiti da Codex su delega esplicita di Diego. Questo completamento non certifica né avvia automaticamente nuove prove fisiche.
 
 Diego ordina a Codex la correzione descritta nella relazione, l'aggiornamento GitHub, l'avviso a Claude e il deploy **senza attendere il GO di Claude**; chiarisce poi esplicitamente **«Anche cornice per tutti gli utenti»**. Sono autorizzati implementazione, prove pertinenti, commit/push/PR, merge con CI verde, Rules e Hosting sullo stesso master e attivazione finale della policy ordinaria verificata. Questa scelta supera l'attesa di Claude e l'OFF come destinazione finale, senza sostituire i controlli di sicurezza o inventare PASS fisici. Le protezioni production restano invariate; Codex conserva la delega esplicita a eseguire il clic per questo rilascio.
 
-Ramo operativo `codex/classic-effects-1.2.275-20261114`, produzione di partenza 1.2.274 / 51ff1673. Le ricevute già revisionate della #310 confluiscono nella candidata; #301/#304/#307 restano distinte. UI: attenuare ombre decorative, conservare riempimenti leggibili e palette, gradiente originale invariato, vetro più discreto in entrambe le grafiche. Cornice: tutte le 22 route private, utenti verificati ammessi dal fence, nessun filtro browser o prestito di chiavi fra UID; aggiornare insieme client e Rules.
+Preparazione eseguita sul ramo `codex/classic-effects-1.2.275-20261114`, produzione di partenza 1.2.274 / 51ff1673. Le ricevute già revisionate della #310 sono integrate nella #311; #301/#304/#307 restano distinte. UI: attenuare ombre decorative, conservare riempimenti leggibili e palette, gradiente originale invariato, vetro più discreto in entrambe le grafiche. Cornice: tutte le 22 route private, utenti verificati ammessi dal fence, nessun filtro browser o prestito di chiavi fra UID; aggiornare insieme client e Rules.
 
 Policy cloud ordinaria esatta `{schemaVersion:2, version:2, enabled:boolean}`, senza UID destinatario o claim pilot. Il permesso interno resta personale e finito: conferma server valida per cinque minuti, rinnovo server coalescente soltanto nell'ultimo minuto e mai da cache/attività; rinnovo dell'ammissione distinto da rinnovo dell'inattività. I vecchi client rifiutano v2 e i nuovi rifiutano il pilot v1. OFF, perdita di autorità, errori, cambio UID/fence e scadenza continuano a bloccare. Una sospensione che supera la lease richiede un nuovo sblocco.
 
-Distribuire prima Rules, poi Hosting verificato, infine policy tramite un'operazione amministrativa limitata al singleton, con precondizione e rilettura. Nessun nuovo utente, claim, ruolo IAM, migrazione Vault, Function, Storage o indice. Registrare esiti effettivi e limiti per Chrome PC, Android, iPhone e PWA; i sei PASS storici, D15 e D18 non diventano prove della nuova candidata per effetto del deploy.
+Distribuiti prima Rules, poi Hosting verificato, infine policy tramite l'operazione amministrativa limitata al singleton, con precondizione e rilettura. Nessun nuovo utente, claim, ruolo IAM, migrazione Vault, Function, Storage o indice. Il pilot è ritirato e la disponibilità ordinaria è attiva. Restano non attestati C1 residua, D15 in produzione, telefoni/PWA e D18 attraverso due rilasci; i sei PASS storici non diventano prove della 275 per effetto del deploy.
 
 <a id="rilascio-ui-1274-incarico-2026-11-14"></a>
 
