@@ -125,7 +125,9 @@ function collect() {
     if (stops.length < 2) return stops[0]?.color || null;
     if (stops[0].pos === null) stops[0].pos = 0;
     if (stops[stops.length - 1].pos === null) stops[stops.length - 1].pos = 1;
-    for (let i = 1; i < stops.length; i++) if (stops[i].pos !== null) stops[i].pos = Math.max(stops[i].pos, stops[i - 1].pos ?? -Infinity);
+    // Posizioni esplicite monotone rispetto al massimo esplicito precedente, anche attraverso le tappe implicite.
+    let maxPos = stops[0].pos;
+    for (let i = 1; i < stops.length; i++) if (stops[i].pos !== null) maxPos = stops[i].pos = Math.max(stops[i].pos, maxPos);
     for (let i = 1; i < stops.length - 1; i++) if (stops[i].pos === null) {
       let j = i; while (stops[j].pos === null) j++;
       const from = stops[i - 1].pos, to = stops[j].pos, n = j - i + 1;
@@ -268,9 +270,10 @@ for (const [page, mode] of variants) {
         (statusHue(h) ? status : fixed).push(item);
       }
       // Testo dietro una pittura non supportata: «non misurato», mai un PASS presunto.
-      if (ref.text && (!ref.effectiveBg || !ref.effectiveFg)) unmeasured.push({index, label: ref.label});
+      // Registrato per ogni palette interessata: lo zero non si attesta dal solo campione Blu.
       for (const palette of palettes) {
         const record = variants[palette];
+        if (record.text && (!record.effectiveFg || !record.effectiveBg)) unmeasured.push({index, label: record.label, palette: paletteName[palette]});
         if (!record.text || !record.effectiveFg || !record.effectiveBg) continue;
         // Testo grande e icone (Material Symbols) richiedono 3:1, il testo ordinario 4,5:1.
         const large = record.icon || record.fontSize >= 24 || (record.fontSize >= 18.6 && record.fontWeight >= 700);
@@ -336,7 +339,7 @@ table{border-collapse:collapse;width:100%;margin:6px 0 14px;font-size:13px}td,th
 .ok{color:var(--muted)}.legend{color:var(--muted)}img{max-width:200px;border:1px solid var(--line);margin-right:8px}
 .scroll{overflow-x:auto}</style></head><body>
 <h1>Mappa visiva — grafica Nuova e Classica</h1>
-<p>${report.length} varianti di pagina (le pagine migrate in Nuova e in Classica) × 7 colori × chiaro/scuro. <b>Non seguono il tema</b> (tinte non di stato): ${totals.fixedUnique.size} elementi unici (${totals.fixedPairs} proprietà × tema). <b>Verdi/ambra/rossi fissi da classificare</b>: ${totals.statusUnique.size} elementi unici (la tinta non stabilisce il ruolo). <b>Non misurati</b> (pittura non supportata dietro il testo): ${totals.unmeasuredUnique.size}. <b>Contrasto basso</b>: ${totals.lowUnique.size} elementi unici, ${totals.lowPairs.size} coppie elemento × tema, ${totals.lowOccurrences} occorrenze contando le palette. <b>Fuori scala</b>: ${totals.font} testi.</p>
+<p>${report.length} varianti di pagina (le pagine migrate in Nuova e in Classica) × 7 colori × chiaro/scuro. <b>Non seguono il tema</b> (tinte non di stato): ${totals.fixedUnique.size} elementi unici (${totals.fixedPairs} proprietà × tema). <b>Verdi/ambra/rossi fissi da classificare</b>: ${totals.statusUnique.size} elementi unici (la tinta non stabilisce il ruolo). <b>Non misurati</b> (pittura non supportata dietro il testo, in almeno una palette): ${totals.unmeasuredUnique.size} elementi unici. <b>Contrasto basso</b>: ${totals.lowUnique.size} elementi unici, ${totals.lowPairs.size} coppie elemento × tema, ${totals.lowOccurrences} occorrenze contando le palette. <b>Fuori scala</b>: ${totals.font} testi.</p>
 <p class="legend">Schermate nel colore Verde: <b style="color:#ff00ff">magenta</b> = colore fisso che non segue il tema; <b style="color:#ff8c00">arancio</b> = contrasto basso. I colori fissi rosso/arancio/ambra/verde sono elencati a parte, da classificare: possono essere stati o decorazioni. I contenuti costruiti dagli script dopo il login <b>non sono esaminati</b>.</p>
 <p class="legend"><b>Limiti</b>: solo viewport 390×844; pannelli, modali e dettagli chiusi non vengono aperti; niente stati hover/focus, pseudo-elementi, placeholder o SVG; sfumature lineari calcolate nel punto del testo (tappe, direzioni verso gli angoli, alpha premoltiplicata), radiali/immagini «non misurate»; la tinta non stabilisce la funzione (un verde fisso può essere decorativo). I conteggi sono coppie elemento × tema × palette, non guasti confermati: confrontare i giri con la stessa unità.</p>
 ${report.map(p => `<h2>${esc(p.label)}</h2>
