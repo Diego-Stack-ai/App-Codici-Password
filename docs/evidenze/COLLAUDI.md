@@ -1,5 +1,25 @@
 # Collaudi
 
+<a id="rilascio-1273-ricevuta-2026-11-14"></a>
+
+## APP 1.2.273 — Hosting pubblicato e verificato, 14/11/2026
+
+**Pubblicazione e verifica HTTP accertate.** Dopo il [GO di Codex alla #306](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/306#issuecomment-6874855811) sulla candidata **`53bce09cb4d639e3f12764584b74ebab6a96f57e`**, la PR è integrata in **`fa72c010507f713bc6014c89af5f45dd6185d91d`**. I due commit hanno lo stesso albero **`64c6fe3bc2d4b4c9457965da166c342637c7d070`**. Il confezionamento cambia soltanto versione 1.2.272 → 1.2.273 e riferimenti di versione/cache/catalogo, conservando UI e logica della #305; non chiude il successivo giro sul contrasto o C1.
+
+Diego ha ordinato il deploy e l'aggiornamento GitHub necessario. Avviato il solo workflow [Hosting #1152](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43579360260), id **43579360260**, branch **master**, sorgente **`fa72c010`**, scope **hosting**. La validazione è **SUCCESS in 13m21s**: **65 gruppi / 3668 casi / 3657 PASS / 0 FAIL / 11 skip / 0 cancellati / 0 todo**. Il checkpoint precedente attendeva validazione e clic personale; è superato dalla successiva delega descritta qui sotto, non da un'approvazione attribuita retroattivamente a Diego.
+
+**Approvazione, fonti UI e API:** Diego, dal telefono, ha chiesto esplicitamente **«Puoi cliccare tu attraverso questa task?»**. Codex ha premuto **Approve and deploy** per la sola #1152 e osservato GitHub mostrare **«The deployments have been approved»**. Operatore reale: **Codex su ordine diretto di Diego**, non Diego personalmente. Riscontro UI del 14/11 intorno alle 11:27 CET; l’API approvals conferma stato `approved`, environment `production`, account GitHub `Diego-Stack-ai` e commento «Approvazione eseguita da Codex su ordine esplicito…». L’API non espone un timestamp del clic: l’orario resta la lettura UI, distinto dall’avvio del job alle 10:27:33Z registrato dall’API. Nessun bypass o modifica alle protezioni production; nessuna delega generale per run future.
+
+**Deploy e run SUCCESS.** Job **132403789592**, dal 14/11/2026 **10:27:33Z al 10:28:03Z**, cioè **11:27:33–11:28:03 CET**: **30 secondi complessivi del job**, non il tempo del solo upload Hosting. Lo summary dichiara scope hosting e sorgente `fa72c010`; master dopo il deploy è ancora sullo stesso SHA. Step Hosting SUCCESS in circa **8,38 secondi**; postverify SUCCESS in circa **6,09 secondi**, concluso alle **10:28:00.746Z**. Tre step di deploy degli altri scope e le dipendenze backend risultano **skipped**. Firebase indica **366 file**: i **365 file del manifest piu il manifest generato**; il numero non altera i 365 hash verificati. Il controllo di rilascio online della CI è SUCCESS. La precedente ultima versione accertata 1.2.272 è ora superata dalla verifica della **1.2.273** descritta qui sotto. [Mandato](../progetto/INCARICO_CORRENTE.md#rilascio-1273-incarico-2026-11-14), [stato](../progetto/STATO.md#rilascio-1273-stato-2026-11-14).
+
+**Verifica HTTP indipendente di Codex, dal checkout pulito del merge:** `node scripts/release-manifest.mjs --verify-url https://appcodici-password.web.app --commit fa72c010507f713bc6014c89af5f45dd6185d91d --require-clean`, exit **0**, esito **«Release pubblica verificata: 1.2.273 @ fa72c010507f713bc6014c89af5f45dd6185d91d»**. Manifest con versione e sourceCommit attesi, **`sourceDirty=false`**, **365/365 file e tutti gli hash** corrispondenti; **41 profili header** per route, **3 probe della normalizzazione Hosting**, cache del manifest, root, redirect login e rewrite Home coperti dal contratto del verifier. Digest pubblico **`57fdf61ffdeb1cf67dfd376aab5cbf92938eecf8e4d623ee9f5447a1a8c52db8`**. Nessuno script dell'app è eseguito e nessun account QA2/personale è aperto.
+
+Un primo tentativo dello stesso controllo HTTP nel perimetro di rete ristretto ha restituito `fetch failed`, senza un esito di conformità del sito. Lo stesso comando con accesso HTTP consentito è poi concluso con successo; il fallimento ambientale non è contato come test applicativo fallito o come PASS. Il riscontro API dell'approvazione conferma lo stato del gate; non ne cambia l'operatore reale osservato via UI e dichiarato nella delega.
+
+[Ricevuta finale pubblicata e riletta identica sulla #306](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/306#issuecomment-6875939484), distinta dal successivo commit dei soli documenti.
+
+Canary **OFF secondo Diego**, senza rilettura amministrativa; nessun accesso ad account, nuovo C1 o attivazione personale. Il giro breve QA2 sulla 1.2.273 resta da ordinare. Rimangono **315 elementi unici** di contrasto da verificare (469 coppie elemento × tema), altri sottocasi/ambienti C1, D15, fase personale/C2 e D18; nessuna certificazione generale della UI o della cornice. Questa ricevuta modifica soltanto i quattro Markdown esistenti e non richiede un altro deploy. Le sezioni seguenti sono evidenze dei propri checkpoint, non esiti successivi della #1152.
+
 <a id="mappa-visiva-verifiche-2026-11-14"></a>
 
 ## Mappa visiva e colori fissi — verifiche locali, 14/11/2026

@@ -1,5 +1,17 @@
 # Incarico corrente
 
+<a id="rilascio-1273-incarico-2026-11-14"></a>
+
+## APP 1.2.273 — Hosting concluso, consolidamento della ricevuta, 14/11/2026
+
+Esecuzione conclusa dell'ordine di Diego per il deploy della **1.2.273** e l'aggiornamento GitHub necessario, dopo l'[ordine di merge/versione](DECISIONI.md#mappa-visiva-rilascio-1273-2026-11-14). La #306, [revisionata su `53bce09c`](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/306#issuecomment-6874855811), è integrata nel sorgente **`fa72c010507f713bc6014c89af5f45dd6185d91d`** conservando l'albero approvato. Il workflow [Hosting #1152](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43579360260), master e scope **hosting**, è SUCCESS sullo stesso SHA; `validate` SUCCESS in 13m21s, con 3657 PASS, 0 FAIL e 11 skip su 3668 casi, 65 gruppi. Deploy riuscito il 14/11 alle 11:28:03 CET, job di 30 secondi complessivi. Manifest e tutti i 365 hash, 41 profili header e gli altri controlli HTTP della [ricevuta](../evidenze/COLLAUDI.md#rilascio-1273-ricevuta-2026-11-14) sono verificati online; nessun accesso all'app o account da questi controlli.
+
+Il clic production era inizialmente riservato a Diego. Con un nuovo ordine esplicito, dal telefono, **«Puoi cliccare tu attraverso questa task?»**, Diego delega a Codex l'approvazione della sola **#1152**. Codex ha eseguito il clic via UI e osservato la conferma GitHub **«The deployments have been approved»**. L'operatore reale registrato e **Codex su delega diretta di Diego**, senza attribuirlo a Diego personalmente. L'API conferma `approved`, environment production e commento di delega, ma non espone l'orario del clic. Questa eccezione non si estende ad altre run e non modifica le protezioni production.
+
+Resta il consolidamento della ricevuta soltanto nei quattro Markdown esistenti **STATO, INCARICO_CORRENTE, PROGRAMMA e COLLAUDI**, sul ramo `codex/release-1.2.273-receipts-20261114`, base `fa72c010`; la [ricevuta finale e gia pubblicata e riletta sulla #306](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/306#issuecomment-6875939484), con approvazione verificata via API e clic attribuito a Codex su delega. Verificare documenti e coerenza prima di proporre la PR documentale. Nessun nuovo file Markdown o ulteriore contenuto applicativo è autorizzato da questo seguito documentale. La ricevuta mantiene separati risultati osservati, limiti e checkpoint; non comporta un altro Hosting.
+
+Versione online accertata **1.2.273**, senza trasferire i PASS UI/C1 precedenti al nuovo pacchetto. Canary **OFF secondo Diego**, senza rilettura amministrativa. Nessun bypass o modifica delle protezioni production, deploy dal PC, ulteriore dispatch produttivo, Rules, Functions, indici, claim, singleton o credenziale modificati. Il giro breve QA2 sulla nuova versione richiede un proprio ordine; C1 residua e i 315 rilievi di contrasto restano distinti. [Stato](STATO.md#rilascio-1273-stato-2026-11-14), [programma](PROGRAMMA.md#rilascio-1273-programma-2026-11-14), [evidenze](../evidenze/COLLAUDI.md#rilascio-1273-ricevuta-2026-11-14). I checkpoint seguenti conservano la cronologia e non riaprono gli incarichi precedenti.
+
 <a id="mappa-visiva-incarico-2026-11-14"></a>
 
 ## Mappa visiva e colori — passaggio a Claude, 14/11/2026

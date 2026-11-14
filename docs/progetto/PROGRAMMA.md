@@ -1,5 +1,18 @@
 # Programma
 
+<a id="rilascio-1273-programma-2026-11-14"></a>
+
+## APP 1.2.273 — Hosting concluso e seguito documentale, 14/11/2026
+
+Su [ordine corrente di Diego](INCARICO_CORRENTE.md#rilascio-1273-incarico-2026-11-14), la #306 è integrata in `fa72c010` e il solo Hosting [#1152](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43579360260) è **SUCCESS** sullo stesso SHA, branch master, scope hosting. Il pacchetto conserva i contenuti della #305 e cambia soltanto versione e riferimenti di confezionamento. Produzione accertata **1.2.273**: verifica CI e HTTP indipendente di manifest, 365 hash, 41 profili header/cache e tre probe Hosting superate, con dettagli nelle [evidenze](../evidenze/COLLAUDI.md#rilascio-1273-ricevuta-2026-11-14).
+
+1. **Gate acquisiti:** `validate` SUCCESS in 13m21s (65 gruppi, 3657 PASS / 0 FAIL / 11 skip su 3668 casi). Dopo il nuovo ordine esplicito di Diego dal telefono, Codex ha premuto Approve and deploy della sola #1152 via UI; conferma GitHub osservata. Operatore del clic **Codex su delega di Diego**, non Diego personalmente; stato approved/environment production e commento di delega verificati via API, che non espone un timestamp del clic; protezioni invariate.
+2. **Deploy e verifica online conclusi:** job SUCCESS in 30 secondi complessivi (11:27:33–11:28:03 CET del 14/11); verifier indipendente dal checkout pulito del sorgente di merge concluso con exit 0. Nessuna apertura dell'app o prova su account da questa verifica HTTP.
+3. Consolidare le [evidenze](../evidenze/COLLAUDI.md#rilascio-1273-ricevuta-2026-11-14) e il raccordo nei quattro Markdown esistenti, mantenendo l'operatore Codex su ordine di Diego e il riscontro API acquisito. La [ricevuta finale sulla #306](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/306#issuecomment-6875939484) e gia pubblicata e riletta identica; controllare la coerenza documentale e proporre la PR dei soli documenti separatamente dal sorgente distribuito. Nessun nuovo Hosting è necessario per i soli documenti.
+4. Con un successivo ordine, eseguire il giro breve della cornice su QA2 / nuova versione. Restano separati il giro sui **315 elementi** di contrasto da verificare, C1 residua, altri browser/dispositivi, D15, fase personale/C2 e D18; nessun trasferimento automatico dei PASS precedenti o dichiarazione CORNICE CHIUSA.
+
+Canary **OFF secondo Diego**. Nessuna nuova prova o attivazione, operazione Firebase estranea all'Hosting, modifica di backend o estensione della delega production da questa preparazione. [Stato corrente](STATO.md#rilascio-1273-stato-2026-11-14). Le sezioni seguenti conservano i checkpoint antecedenti.
+
 <a id="rilascio-ui-1272-programma-2026-11-13"></a>
 
 ## APP 1.2.272 — sequenza del rilascio colori, 13/11/2026
