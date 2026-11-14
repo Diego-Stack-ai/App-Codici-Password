@@ -2,13 +2,15 @@
 
 <a id="rilascio-ui-1274-incarico-2026-11-14"></a>
 
-## APP 1.2.274 — confezionamento e rilascio Hosting autorizzati, 14/11/2026
+## APP 1.2.274 — rilascio completato; seguito cornice da preparare, 14/11/2026
 
 Ordine diretto di Diego **«merge e deploy»**, dopo il [GO Codex](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/308#issuecomment-6883698758) e CI verde su c93cb4d. La #308 e gia integrata nel merge **a288023ca1287daa29f4c637160e6762404af090**. Codex prepara il solo pacchetto operativo sul ramo **codex/release-ui-1.2.274-20261114**: bump canonico 1.2.274, riferimenti asset/cache/precache, riesame del catalogo aiuti con reviewedAppVersion allineato, documenti esistenti e manifest generato su SHA pulito. Nessuna nuova modifica UI o funzionale rispetto alla fonte approvata; confronto indipendente del diff dopo normalizzazione delle versioni.
 
-L'ordine autorizza commit, push, PR, integrazione dopo revisione e check verdi, dispatch **hosting** sul master finale e verifica pubblica di versione, sorgente, tutti gli hash e intestazioni. L'approvazione production segue la protezione vigente e l'autorizzazione personale, senza bypass o modifiche ai permessi. Non pubblicare il merge a288023c ancora numerato 1.2.273; la run corretta deve contenere 1.2.274.
+L'ordine è completato: #309 revisionata sul candidato **8dab73d48d1892dacc89d03340e198b9710347b4**, check verdi e integrazione nel master **51ff1673b0ebddc0e2bdc52443a21d146d2835d3**; [Hosting #1163](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43640799691) riuscito. Codex ha eseguito l'approvazione production su delega esplicita di Diego nella sessione GitHub Diego-Stack-ai, conservando le protezioni e i permessi. [Verifica pubblica completa e ricevuta](../evidenze/COLLAUDI.md#rilascio-ui-1274-verifiche-2026-11-14).
 
-Canary **OFF secondo Diego**, senza rilettura amministrativa. La domanda sull'attivazione permanente della cornice non la accende: nessun account QA2/personale, claim, singleton, Rules, Functions, Storage, migrazione o nuovo collaudo C1. Conservare i limiti e registrare soltanto esiti effettivi; [verifiche](../evidenze/COLLAUDI.md#rilascio-ui-1274-verifiche-2026-11-14), [stato](STATO.md#rilascio-ui-1274-stato-2026-11-14) e [sequenza](PROGRAMMA.md#rilascio-ui-1274-programma-2026-11-14). Le ricevute documentali #301/#304/#307 restano PR distinte, senza merge implicito.
+Diego chiarisce il seguito: preparare la cornice ordinaria per **tutti gli utenti e tutte le pagine private**, indipendentemente dal numero attuale di utenti, conservando isolamento delle chiavi in RAM, inattività, logout e revoca. Chrome su PC, Android e iPhone sono i primi ambienti da collaudare; nessun blocco user-agent è richiesto. Il [percorso concreto](PROGRAMMA.md#rilascio-ui-1274-programma-2026-11-14) distingue l'ammissione ordinaria dal vecchio pilot e conserva i sei PASS QA2/Chrome Windows/1.2.270 senza ripetizioni automatiche.
+
+Canary **OFF secondo Diego**, senza rilettura amministrativa. La preparazione del seguito è distinta dall'attivazione e da nuove prove autenticate: nessun account QA2/personale, claim, singleton, Rules, Functions, Storage o nuovo collaudo C1 è stato modificato o eseguito da questo rilascio. [Stato](STATO.md#rilascio-ui-1274-stato-2026-11-14). Le ricevute documentali #301/#304/#307 restano PR distinte, senza merge implicito; la nuova ricevuta aggiorna soltanto i documenti esistenti e non richiede un altro deploy.
 
 <a id="mappa-visiva-incarico-2026-11-14"></a>
 
