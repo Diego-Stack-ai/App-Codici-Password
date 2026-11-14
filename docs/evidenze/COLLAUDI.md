@@ -1,5 +1,27 @@
 # Collaudi
 
+<a id="materiali-classica-verifiche-2026-11-14"></a>
+
+## Materiali Classica e colori in entrambe le grafiche — verifiche locali, 14/11/2026
+
+Candidata #308 dopo la [decisione](../progetto/DECISIONI.md#materiali-classica-entrambe-grafiche-2026-11-14), confrontata con la mappa di Codex su `338663e`. Non unita, non versionata, non pubblicata.
+
+**Materiali.** Le superfici delle pagine migrate sono vetro traslucido tinto dalla palette con sfocatura (`--rev-surface`, `--rev-surface-2`, `--rev-surface-hover`), al posto delle superfici piene; card di Home e Area privata con sfumatura traslucida, sfocatura e movimento della Classica, senza blu/verde/rosso d'identità; header e fascia delle linguette del Profilo in vetro; avvisi a pillola con una sola superficie; popup e conferme restano pannelli pieni come in Classica; schede degli elenchi piene (coprono le azioni a scorrimento). Il contrasto sul vetro non eredita i vecchi PASS: il registro compone la superficie traslucida sul caso peggiore della pagina (i due estremi della sfumatura, con e senza il picco del bagliore della palette), in Nuova e in Classica, 7 palette × chiaro/scuro. L'header del Profilo non è più opaco per scelta: con la prova peggiore (strisce rosse/nere) il contenuto sotto titolo e comandi risulta attenuato, differenza media 10–28 su 255 (tetto 32), e i comandi restano sopra.
+
+**Colori.** Registro `scripts/ui-color-decisions.json` dal registro Codex: 16 gruppi Tema verificati sui CSS reali delle pagine, in entrambe le grafiche, 7 palette × chiaro/scuro, con un negativo per gruppo che ripristina il colore fisso; icone delle pagine legali a palette senza modifiche ai testi; 8 gruppi Funzione (Svuota cestino, avviso destinatario in uso, Scadenze e Urgenze in Home, rimozione biometria, revoca sessioni, cancellazione diagnosi, uscita, Elimina email azienda) che conservano rosso/ambra identici in ogni palette. RED sul frontend precedente 17 test, GREEN dopo. «Salva» dei moduli Account per ID sul fill della palette, `btn-fab-scadenza` ambra per le vere Scadenze; stati a riposo, passaggio, focus da tastiera, pressione e disattivato verificati per Salva, interruttori e avvisi. I test che attestavano «Classica conserva indaco/verde storico» sono rovesciati per ordine di Diego.
+
+**Mappa prima/dopo** (stesse 53 varianti di pagina, 7 palette × chiaro/scuro, elementi unici; prima = `338663e` con la vecchia Classica senza segno):
+
+| | Nuova prima → dopo | Classica prima → dopo | Senza revisione prima → dopo |
+|---|---|---|---|
+| Colori fissi non di stato | 0 → 0 | 30 → 0 | 0 → 0 |
+| Rosso/ambra/verde fissi | 46 → 21 eccezioni registrate | 73 → 19 eccezioni registrate | 22 → 0 |
+| Non registrati | — → 0 | — → 0 | — → 0 |
+| Non misurati | 0 → 0 | 0 → 0 | 0 → 0 |
+| Contrasto basso | 157 → 148 | 278 → 162 | 39 → 39 |
+
+Il contrasto basso residuo è inventario da verificare (campi, segnaposto, testi su card con contenuti dopo il login), non guasti confermati. Non coperti: contenuti costruiti dagli script dopo il login, modali chiusi, pseudo-elementi, SVG; stati interattivi solo per i componenti con fixture dedicata. Verifiche: fondamenti UI 76/76, profilo 183/183, offline 16/16, Stylelint, purezza HTML, page shells, riferimenti statici, i18n, icone, budget 4/4 con sei tetti per pagina +1 KB motivati nel file dei budget.
+
 <a id="mappa-visiva-giro2-2026-11-14"></a>
 
 ## Mappa visiva — giro 2 sul contrasto e correttivo NO-GO #308, 14/11/2026

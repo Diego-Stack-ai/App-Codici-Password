@@ -25,6 +25,9 @@ const themes = ['light', 'dark'];
 const types = {'.html': 'text/html', '.css': 'text/css', '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.json': 'application/json'};
 
+// Registro delle decisioni (Codex, #308): i colori di stato rimasti sono «eccezioni funzionali
+// registrate» solo se l'elemento rientra in un gruppo Funzione; altrimenti «non registrati».
+const decisions = JSON.parse(await readFile(fileURLToPath(new URL('./ui-color-decisions.json', import.meta.url)), 'utf8').catch(() => '{"function":[]}'));
 const pages = process.argv[3] ? process.argv[3].split(',')
   : (await readdir(root)).filter(file => file.endsWith('.html')).sort();
 
@@ -287,6 +290,13 @@ for (const [page, mode] of variants) {
     }
     // Schermata verde con evidenziati: magenta = non segue il tema, arancio = contrasto basso.
     const tab = runs.__tab;
+    const selectors = decisions.function.filter(group => group.page === page).map(group => group.selector);
+    const registered = new Set(await tab.evaluate(selectors => {
+      const all = [...document.body.querySelectorAll('*')];
+      return all.flatMap((element, i) => selectors.some(selector => element.closest(selector)) ? [i] : []);
+    }, selectors));
+    const functional = status.filter(item => registered.has(item.index));
+    const unregistered = status.filter(item => !registered.has(item.index));
     const mark = (indexes, colour) => tab.evaluate(({indexes, colour}) => {
       const all = document.body.querySelectorAll('*');
       for (const i of indexes) { const el = all[i]; if (el) el.style.outline = `3px solid ${colour}`; }
@@ -297,7 +307,7 @@ for (const [page, mode] of variants) {
     await tab.screenshot({path: path.join(outDir, shot), fullPage: true});
     await tab.close();
     const dedupe = list => [...new Map(list.map(item => [`${item.index}|${item.prop || ''}|${item.palette || ''}`, item])).values()];
-    perPage.themes[theme] = {elements: byIndex.size, fixed: dedupe(fixed), status: dedupe(status), lowContrast: dedupe(lowContrast),
+    perPage.themes[theme] = {elements: byIndex.size, fixed: dedupe(fixed), status: dedupe(unregistered), functional: dedupe(functional), lowContrast: dedupe(lowContrast),
       offScale: dedupe(offScale), unmeasured: dedupe(unmeasured), scale, screenshot: shot};
   }
   } catch (error) {
@@ -320,11 +330,12 @@ const swatch = value => `<span style="display:inline-block;width:12px;height:12p
 const rows = (list, cols) => list.length ? `<table><tr>${cols.map(c => `<th>${c[0]}</th>`).join('')}</tr>${list.map(item =>
   `<tr>${cols.map(c => `<td>${c[1](item)}</td>`).join('')}</tr>`).join('')}</table>` : '<p class="ok">Nessuno</p>';
 // Unità esplicite (rilievo Codex): elementi unici, coppie elemento × tema, occorrenze × palette.
-const totals = {fixedUnique: new Set(), fixedPairs: 0, statusUnique: new Set(), unmeasuredUnique: new Set(), lowUnique: new Set(), lowPairs: new Set(), lowOccurrences: 0, font: 0};
+const totals = {fixedUnique: new Set(), fixedPairs: 0, statusUnique: new Set(), functionalUnique: new Set(), unmeasuredUnique: new Set(), lowUnique: new Set(), lowPairs: new Set(), lowOccurrences: 0, font: 0};
 for (const p of report) {
   for (const t of themes) {
     for (const item of p.themes[t].fixed) { totals.fixedUnique.add(`${p.label}|${item.index}`); totals.fixedPairs++; }
     for (const item of p.themes[t].status) totals.statusUnique.add(`${p.label}|${item.index}`);
+    for (const item of p.themes[t].functional || []) totals.functionalUnique.add(`${p.label}|${item.index}`);
     for (const item of p.themes[t].unmeasured) totals.unmeasuredUnique.add(`${p.label}|${item.index}`);
     for (const item of p.themes[t].lowContrast) { totals.lowUnique.add(`${p.label}|${item.index}`); totals.lowPairs.add(`${p.label}|${t}|${item.index}`); totals.lowOccurrences++; }
   }
@@ -340,8 +351,8 @@ table{border-collapse:collapse;width:100%;margin:6px 0 14px;font-size:13px}td,th
 .ok{color:var(--muted)}.legend{color:var(--muted)}img{max-width:200px;border:1px solid var(--line);margin-right:8px}
 .scroll{overflow-x:auto}</style></head><body>
 <h1>Mappa visiva — grafica Nuova e Classica</h1>
-<p>${report.length} varianti di pagina (le pagine migrate in Nuova e in Classica) × 7 colori × chiaro/scuro. <b>Non seguono il tema</b> (tinte non di stato): ${totals.fixedUnique.size} elementi unici (${totals.fixedPairs} proprietà × tema). <b>Verdi/ambra/rossi fissi da classificare</b>: ${totals.statusUnique.size} elementi unici (la tinta non stabilisce il ruolo). <b>Non misurati</b> (pittura non supportata dietro il testo, in almeno una palette): ${totals.unmeasuredUnique.size} elementi unici. <b>Contrasto basso</b>: ${totals.lowUnique.size} elementi unici, ${totals.lowPairs.size} coppie elemento × tema, ${totals.lowOccurrences} occorrenze contando le palette. <b>Fuori scala</b>: ${totals.font} testi.</p>
-<p class="legend">Schermate nel colore Verde: <b style="color:#ff00ff">magenta</b> = colore fisso che non segue il tema; <b style="color:#ff8c00">arancio</b> = contrasto basso. I colori fissi rosso/arancio/ambra/verde sono elencati a parte, da classificare: possono essere stati o decorazioni. I contenuti costruiti dagli script dopo il login <b>non sono esaminati</b>.</p>
+<p>${report.length} varianti di pagina (le pagine migrate in Nuova e in Classica) × 7 colori × chiaro/scuro. <b>Non seguono il tema</b> (tinte non di stato): ${totals.fixedUnique.size} elementi unici (${totals.fixedPairs} proprietà × tema). <b>Eccezioni funzionali registrate</b> (rosso/ambra di stato in scripts/ui-color-decisions.json): ${totals.functionalUnique.size} elementi unici. <b>Verdi/ambra/rossi fissi non registrati</b>: ${totals.statusUnique.size} (casi nuovi da decidere; la tinta non stabilisce il ruolo). <b>Non misurati</b> (pittura non supportata dietro il testo, in almeno una palette): ${totals.unmeasuredUnique.size} elementi unici. <b>Contrasto basso</b>: ${totals.lowUnique.size} elementi unici, ${totals.lowPairs.size} coppie elemento × tema, ${totals.lowOccurrences} occorrenze contando le palette. <b>Fuori scala</b>: ${totals.font} testi.</p>
+<p class="legend">Schermate nel colore Verde: <b style="color:#ff00ff">magenta</b> = colore fisso che non segue il tema; <b style="color:#ff8c00">arancio</b> = contrasto basso. I colori fissi rosso/arancio/ambra/verde sono elencati a parte: eccezioni funzionali se registrate in scripts/ui-color-decisions.json, altrimenti casi nuovi da decidere. I contenuti costruiti dagli script dopo il login <b>non sono esaminati</b>.</p>
 <p class="legend"><b>Limiti</b>: solo viewport 390×844; pannelli, modali e dettagli chiusi non vengono aperti; niente stati hover/focus, pseudo-elementi, placeholder o SVG; sfumature lineari calcolate nel punto del testo (tappe, direzioni verso gli angoli, alpha premoltiplicata), radiali/immagini «non misurate»; la tinta non stabilisce la funzione (un verde fisso può essere decorativo). I conteggi sono coppie elemento × tema × palette, non guasti confermati: confrontare i giri con la stessa unità.</p>
 ${report.map(p => `<h2>${esc(p.label)}</h2>
 <p><img src="${p.themes.light.screenshot}" alt="${esc(p.label)} chiaro"><img src="${p.themes.dark.screenshot}" alt="${esc(p.label)} scuro"></p>

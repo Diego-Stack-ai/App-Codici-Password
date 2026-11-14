@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+<a id="materiali-classica-stato-2026-11-14"></a>
+
+## Materiali Classica e colori in entrambe le grafiche — candidata in revisione, 14/11/2026
+
+Online **1.2.273**. Su [ordine di Diego](DECISIONI.md#materiali-classica-entrambe-grafiche-2026-11-14) la #308 porta vetro, sfocatura e movimento della Classica con i colori della palette in Nuova e Classica, header del Profilo trasparente, Salva dei moduli Account a palette e il registro Codex dei colori (131 casi a tema, 40 eccezioni funzionali). [Verifiche e limiti](../evidenze/COLLAUDI.md#materiali-classica-verifiche-2026-11-14). Nessun merge, versione o deploy; canary **OFF secondo Diego**.
+
 <a id="mappa-visiva-giro2-stato-2026-11-14"></a>
 
 ## Mappa visiva — giro 2 e correttivo #308, candidata in revisione, 14/11/2026

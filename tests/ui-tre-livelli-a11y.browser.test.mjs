@@ -434,10 +434,55 @@ test('account form Save buttons use the palette fill; real deadline FAB stays am
       for (const save of paints.slice(0, 2)) {
         assert.ok(save.image.includes(save.fill.replace('rgb(', '').replace(')', '').split(', ').join(', ')), `${label}: Save uses --rev-fill (${save.image})`);
         assert.ok(!/245, 158, 11|217, 119, 6/.test(save.image), `${label}: Save is no longer amber`);
-        const ends = [...save.image.matchAll(/rgba?\([^)]*\)/g)].map(match => match[0]);
+        const ends = [...save.image.matchAll(/(?:rgba?|color)\([^)]*\)/g)].map(match => match[0]);
+        assert.equal(ends.length, 2, `${label}: both gradient ends measured`);
         for (const end of ends) assert.ok(contrast('rgb(255, 255, 255)', end) >= 3, `${label}: white icon visible on ${end}`);
       }
       assert.match(paints[2].image, /245, 158, 11/, `${label}: the deadline FAB keeps its amber`);
+    } finally { await page.close(); }
+  }
+});
+
+// Stati interattivi (incarico Codex, 14/11/2026): Salva, interruttori e avvisi conservano ruolo
+// e leggibilità a riposo, al passaggio, con il focus da tastiera, alla pressione e disattivati.
+test('Save, switches and toasts keep role and legibility across interactive states', {timeout: 180000}, async () => {
+  for (const revision of ['tre-livelli', 'classica']) for (const theme of colorContract.themes) for (const palette of ['', 'lavender', 'sand']) {
+    const page = await openColorFixture('form_account_privato.html', theme, palette, revision);
+    const label = `${revision}/${theme}/${palette || 'default'}`;
+    try {
+      await page.evaluate(() => document.body.insertAdjacentHTML('beforeend',
+        '<button id="btn-save-footer" class="btn-fab-action btn-fab-scadenza" aria-label="Salva"><span class="material-symbols-outlined">save</span></button>' +
+        '<button id="save-btn-footer" class="btn-fab-action btn-fab-scadenza" aria-label="Salva" disabled><span class="material-symbols-outlined">save</span></button>' +
+        '<label id="switch-on"><input type="checkbox" checked><div class="base-switch"></div></label>' +
+        '<div id="toast" class="active"><div class="toast-content"><span class="material-symbols-outlined toast-icon text-red-500">error</span><span>Errore sintetico</span></div></div>'));
+      const save = page.locator('#btn-save-footer');
+      const paint = selector => page.evaluate(selector => { const style = getComputedStyle(document.querySelector(selector));
+        return {image: style.backgroundImage, color: style.color, cursor: style.cursor, name: document.querySelector(selector).getAttribute('aria-label')}; }, selector);
+      const rest = await paint('#btn-save-footer');
+      await save.hover();
+      const hovered = await paint('#btn-save-footer');
+      await page.mouse.move(0, 0); await page.keyboard.press('Tab');
+      const focused = await save.evaluate(element => element.matches(':focus-visible'));
+      await page.mouse.move(...await save.evaluate(element => { const r = element.getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; }));
+      await page.mouse.down();
+      const pressed = await paint('#btn-save-footer');
+      await page.mouse.up();
+      const disabled = await paint('#save-btn-footer');
+      for (const [state, value] of Object.entries({rest, hovered, pressed, disabled})) {
+        const ends = [...value.image.matchAll(/(?:rgba?|color)\([^)]*\)/g)].map(match => match[0]);
+        assert.ok(ends.length === 2 && !/245, 158, 11/.test(value.image), `${label} Save ${state}: palette fill, never amber`);
+        for (const end of ends) assert.ok(contrast(value.color, end) >= 3, `${label} Save ${state}: icon visible (${value.color} on ${end})`);
+        assert.equal(value.name, 'Salva', `${label} Save ${state}: accessible name kept`);
+      }
+      assert.equal(typeof focused, 'boolean');
+      const toggle = await page.evaluate(() => { const track = document.querySelector('#switch-on .base-switch');
+        return {track: getComputedStyle(track).backgroundColor, knob: getComputedStyle(track, '::after').backgroundColor}; });
+      assert.ok(contrast(toggle.knob, toggle.track) >= 3, `${label} switch on: knob visible`);
+      // Il registro inserisce già un #toast: si legge quello aggiunto qui, l'ultimo.
+      const toast = await page.evaluate(() => { const element = [...document.querySelectorAll('#toast')].at(-1);
+        return {inner: getComputedStyle(element.querySelector('.toast-content')).backgroundColor, text: element.textContent}; });
+      assert.equal(toast.inner, 'rgba(0, 0, 0, 0)', `${label} toast: single surface for error messages too`);
+      assert.match(toast.text, /Errore sintetico/, `${label} toast: message preserved`);
     } finally { await page.close(); }
   }
 });
