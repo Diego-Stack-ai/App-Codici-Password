@@ -1,5 +1,11 @@
 # Collaudi
 
+<a id="mappa-visiva-giro2-2026-11-14"></a>
+
+## Mappa visiva — giro 2 sul contrasto, 14/11/2026
+
+Su 1.2.273 online, ordine «procedi» di Diego. Prima di correggere, lo strumento elimina tre fonti di falsi allarmi, ciascuna coperta da `tests/visual-map.browser.test.mjs` con RED sullo strumento precedente: sfumature lineari misurate nel punto del testo e non sul primo colore; animazioni di comparsa ferme allo stato finale; testo solo per lettori di schermo escluso; pagine con `protocol-forced-dark` misurate solo in scuro. Correzioni reali: pulsanti primari e linguetta attiva con bianco su `--rev-fill` (prima 3,98:1 sul blu predefinito), registrate nel registro con i casi `primary-button` e `profile-tab-active` (RED senza la regola); grigio secondario delle pagine di accesso portato a `#c3cddb` sulla sfumatura scura. Esito: 315 → **196 elementi unici** (469 → 286 coppie elemento × tema), stesse unità; colori fissi 0. Il residuo comprende icone decorative attenuate, contenuti costruiti dopo il login e casi da verificare con fixture dedicate: non sono guasti confermati. Verifiche: fondamenti UI 40/40, Stylelint, offline 16/16, budget 4/4 senza nuovi aumenti, documenti 12/12.
+
 <a id="mappa-visiva-verifiche-2026-11-14"></a>
 
 ## Mappa visiva e colori fissi — verifiche locali, 14/11/2026

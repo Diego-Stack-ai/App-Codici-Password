@@ -113,7 +113,8 @@ test('color registry preserves the reviewed matrix and minimum coverage', () => 
     'config-badge-accent': 4.5, 'recipient-count': 4.5, 'account-option-icon': 3, 'rules-arrow': 3,
     'settings-maintenance-card': 4.5, 'settings-maintenance-standalone': 4.5,
     'settings-theme-icon-purple': 3, 'settings-theme-icon-blue': 3, 'settings-theme-icon-emerald': 3, 'settings-theme-icon-amber': 3, 'settings-theme-icon-red': 3,
-    'settings-selected-timer': 4.5, 'settings-selected-theme': 4.5, 'settings-selected-color-theme': 4.5})) {
+    'settings-selected-timer': 4.5, 'settings-selected-theme': 4.5, 'settings-selected-color-theme': 4.5,
+    'primary-button': 4.5, 'profile-tab-active': 4.5})) {
     assert.ok(colorContract.components.some(item => item.id === id && item.minContrast >= minimum), `reviewed coverage cannot disappear or weaken: ${id}`);
   }
   for (const item of colorContract.components) {

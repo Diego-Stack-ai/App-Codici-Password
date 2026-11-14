@@ -38,7 +38,9 @@ function prepare(html, theme, palette) {
       // data-i18n="ready" perché senza script la pagina resterebbe nello stato di caricamento.
       const kept = (attrs.match(/\sclass="([^"]*)"/)?.[1] || '').split(/\s+/).filter(name => name && name !== 'dark');
       const rest = attrs.replace(/\s(class|data-i18n|data-color-theme)="[^"]*"/g, '');
-      const classes = [...kept, ...(theme === 'dark' ? ['dark'] : [])].join(' ');
+      // Le pagine con protocol-forced-dark sono sempre scure: il tema chiaro non esiste.
+      const forcedDark = kept.includes('protocol-forced-dark');
+      const classes = [...kept, ...(theme === 'dark' || forcedDark ? ['dark'] : [])].join(' ');
       return `<html${rest} class="${classes}" data-i18n="ready"${palette ? ` data-color-theme="${palette}"` : ''}>`;
     });
 }
@@ -79,13 +81,47 @@ function collect() {
   // si mescola al retro con la sua opacità: o·contenuto + (1−o)·retro. Così un contenitore
   // semitrasparente con superficie propria attenua sia lo sfondo sia il testo (rilievo
   // Codex 14/11: nero a opacità 0,52 sul bianco → sfondo 122,4, testo bianco 4,27:1).
+  // Colore di una sfumatura lineare nel punto del testo (non più il solo primo colore):
+  // angolo CSS, lunghezza della linea |W·sinθ|+|H·cosθ|, tappe con o senza percentuale.
+  // Radiali e immagini non sono misurate (decorative): il calcolo usa il colore di fondo.
+  const splitTop = text => { const out = []; let depth = 0, start = 0;
+    for (let i = 0; i < text.length; i++) { const c = text[i]; if (c === '(') depth++; else if (c === ')') depth--;
+      else if (c === ',' && depth === 0) { out.push(text.slice(start, i).trim()); start = i + 1; } }
+    out.push(text.slice(start).trim()); return out; };
+  const gradientAt = (image, box, point) => {
+    const m = image && image.match(/^linear-gradient\((.*)\)$/);
+    if (!m) return null;
+    const parts = splitTop(m[1]);
+    let angle = 180;
+    const sides = {'to top': 0, 'to right': 90, 'to bottom': 180, 'to left': 270, 'to top right': 45, 'to right top': 45,
+      'to bottom right': 135, 'to right bottom': 135, 'to bottom left': 225, 'to left bottom': 225, 'to top left': 315, 'to left top': 315};
+    if (/^-?[\d.]+(deg|turn|rad)$/.test(parts[0])) {
+      const v = parseFloat(parts[0]); angle = parts[0].endsWith('turn') ? v * 360 : parts[0].endsWith('rad') ? v * 180 / Math.PI : v; parts.shift();
+    } else if (sides[parts[0]] !== undefined) angle = sides[parts.shift()];
+    const stops = parts.map(part => { const color = part.match(/(rgba?|color)\([^)]*\)/); const pos = part.match(/(-?[\d.]+)%\s*$/);
+      return color ? {color: parse(color[0]), pos: pos ? parseFloat(pos[1]) / 100 : null} : null; }).filter(Boolean);
+    if (stops.length < 2) return stops[0]?.color || null;
+    stops.forEach((stop, i) => { if (stop.pos === null) stop.pos = i / (stops.length - 1); });
+    const rad = angle * Math.PI / 180, length = Math.abs(box.width * Math.sin(rad)) + Math.abs(box.height * Math.cos(rad)) || 1;
+    const dx = point.x - (box.left + box.width / 2), dy = point.y - (box.top + box.height / 2);
+    const t = Math.min(1, Math.max(0, (dx * Math.sin(rad) - dy * Math.cos(rad)) / length + 0.5));
+    let k = 0; while (k < stops.length - 2 && t > stops[k + 1].pos) k++;
+    const [a, b] = [stops[k], stops[k + 1]], f = b.pos > a.pos ? Math.min(1, Math.max(0, (t - a.pos) / (b.pos - a.pos))) : 0;
+    return {rgb: a.color.rgb.map((v, c) => v + (b.color.rgb[c] - v) * f), alpha: a.color.alpha + (b.color.alpha - a.color.alpha) * f};
+  };
   const composite = (element, ink) => {
     const chain = [];
     for (let node = element; node && node.nodeType === 1; node = node.parentElement) chain.unshift(node);
+    const r = element.getBoundingClientRect(), point = {x: r.left + r.width / 2, y: r.top + r.height / 2};
     const paint = (i, backdrop) => {
-      const style = getComputedStyle(chain[i]);
-      const layer = firstStop(style.backgroundImage) || parse(style.backgroundColor);
-      let inner = layer && layer.alpha > 0 ? over(layer, backdrop) : backdrop;
+      const node = chain[i], style = getComputedStyle(node);
+      const root = node === document.documentElement || node === document.body;
+      const box = root ? {left: 0, top: 0, width: Math.max(innerWidth, node.scrollWidth), height: Math.max(innerHeight, node.scrollHeight)} : node.getBoundingClientRect();
+      let inner = backdrop;
+      const color = parse(style.backgroundColor);
+      if (color && color.alpha > 0) inner = over(color, inner);
+      const image = gradientAt(style.backgroundImage, box, point);
+      if (image && image.alpha > 0) inner = over(image, inner);
       inner = i === chain.length - 1 ? (ink ? over(ink, inner) : inner) : paint(i + 1, inner);
       const o = Number(style.opacity);
       return inner.map((v, c) => v * o + backdrop[c] * (1 - o));
@@ -113,6 +149,8 @@ function collect() {
     let groupOpacity = 1;
     for (let node = element; node && node.nodeType === 1; node = node.parentElement) groupOpacity *= Number(getComputedStyle(node).opacity);
     if (!rect.width || !rect.height || style.visibility !== 'visible' || style.display === 'none' || groupOpacity === 0) continue;
+    // Testo solo per lettori di schermo (sr-only, ritagliato a 1 px): non è visibile.
+    if ((rect.width <= 1 && rect.height <= 1) || /rect\(0(px)?,? 0(px)?,? 0(px)?,? 0(px)?\)|inset\(50%\)/.test(style.clip + ' ' + style.clipPath)) continue;
     const text = [...element.childNodes].some(node => node.nodeType === 3 && node.textContent.trim());
     const bg = firstStop(style.backgroundImage) || parse(style.backgroundColor);
     const border = parseFloat(style.borderTopWidth) > 0 ? parse(style.borderTopColor) : null;
@@ -153,6 +191,9 @@ for (const page of pages) {
       await tab.route('**/*', route => route.request().url().startsWith(base) ? route.continue() : route.abort());
       await tab.goto(`${base}/${page}?theme=${theme}&palette=${palette}`, {waitUntil: 'load'});
       await tab.evaluate(() => document.fonts?.ready);
+      // Animazioni di comparsa e transizioni ferme allo stato finale: altrimenti i testi
+      // verrebbero misurati a metà dissolvenza, come se fossero semitrasparenti.
+      await tab.addStyleTag({content: '*,*::before,*::after{animation:none!important;transition:none!important}'});
       runs[palette] = await tab.evaluate(collect);
       if (palette === 'green') runs.__tab = tab; else await tab.close();
     }

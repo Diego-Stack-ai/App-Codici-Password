@@ -7,7 +7,8 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {promisify} from 'node:util';
 
-// Mappa visiva: il contrasto deve corrispondere al compositing del browser, senza falsi PASS.
+// Mappa visiva: il contrasto deve corrispondere al compositing del browser, senza falsi PASS
+// e senza falsi allarmi sulle sfumature (colore calcolato nel punto del testo).
 // Pagina sintetica in loopback, nessuno script dell'app, nessuna rete esterna.
 const run = promisify(execFile);
 const tool = fileURLToPath(new URL('../scripts/visual-map.mjs', import.meta.url));
@@ -17,9 +18,15 @@ const page = `<!doctype html><html lang="it"><head><meta charset="utf-8"></head>
   <div style="opacity:.3"><p id="faded" style="color:#000">Figlio di un gruppo attenuato</p></div>
   <div style="background:#000;opacity:.52"><span id="group" style="color:#fff;font-size:16px;font-weight:400">Gruppo con superficie propria</span></div>
   <p id="solid" style="color:#000">Testo pieno</p>
+  <style>@keyframes vm-fade{from{opacity:.15}to{opacity:1}}</style>
+  <p id="animated" style="color:#000;animation:vm-fade 60s linear">Testo con animazione di comparsa</p>
+  <div style="height:1000px;position:relative;background:linear-gradient(to bottom,#fff,#000)">
+    <p id="grad-top" style="position:absolute;top:0;margin:0;color:#fff">Bianco in alto, su fondo chiaro</p>
+    <p id="grad-bottom" style="position:absolute;bottom:0;margin:0;color:#fff">Bianco in basso, su fondo scuro</p>
+  </div>
 </body></html>`;
 
-test('visual map composites text alpha and group opacity like the browser', {timeout: 120000}, async () => {
+test('visual map composites text alpha, group opacity and gradients like the browser', {timeout: 120000}, async () => {
   const dir = await mkdtemp(path.join(tmpdir(), 'visual-map-'));
   try {
     await writeFile(path.join(dir, 'casi.html'), page);
@@ -33,5 +40,9 @@ test('visual map composites text alpha and group opacity like the browser', {tim
     // Nero a opacità 0,52 sul bianco: sfondo 122,4 e testo bianco → 4,27:1, sotto 4,5 (era un falso PASS a 5,66).
     assert.ok(Math.abs(ratio('group') - 4.27) < 0.02, `group with own surface ${ratio('group')}`);
     assert.equal(ratio('solid'), undefined, 'readable solid text is not flagged');
+    assert.equal(ratio('animated'), undefined, 'fade-in animations are measured at their final state');
+    // Sfumatura misurata nel punto del testo, non sul solo primo colore.
+    assert.ok(ratio('grad-top') < 1.5, `white text on the light end is flagged (${ratio('grad-top')})`);
+    assert.equal(ratio('grad-bottom'), undefined, 'white text on the dark end is not a false alarm');
   } finally { await rm(dir, {recursive: true, force: true}); }
 });

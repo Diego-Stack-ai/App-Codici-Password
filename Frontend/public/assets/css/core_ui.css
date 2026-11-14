@@ -1275,3 +1275,9 @@ html:not(.dark) [data-ui-revision="tre-livelli"] :is(.icon-accent-amber, span.ma
 html:not(.dark) [data-ui-revision="tre-livelli"] .icon-accent-orange {
     color: #c2410c;
 }
+
+/* Pulsanti primari e linguetta attiva: bianco su --rev-fill (≥ 4,5:1 anche col blu chiaro). */
+body[data-ui-revision="tre-livelli"] :is(.btn-primary, .profile-tab.is-active) {
+    background: var(--rev-fill);
+    color: #fff;
+}

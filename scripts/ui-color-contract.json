@@ -287,6 +287,31 @@
       "backgroundRole": "--rev-fill",
       "backgroundImage": "none",
       "minContrast": 4.5
+    },
+    {
+      "id": "primary-button",
+      "pages": [
+        "gestione_destinatari.html"
+      ],
+      "selector": ".btn-primary",
+      "markup": "<button class=\"btn-primary\" type=\"button\">Salva</button>",
+      "foregroundRole": "white",
+      "backgroundRole": "--rev-fill",
+      "backgroundImage": "none",
+      "minContrast": 4.5
+    },
+    {
+      "id": "profile-tab-active",
+      "pages": [
+        "profilo_privato.html",
+        "dati_azienda.html"
+      ],
+      "selector": ".profile-tab.is-active",
+      "markup": "<div class=\"profile-tabs\"><button class=\"profile-tab is-active\" type=\"button\">Dati</button></div>",
+      "foregroundRole": "white",
+      "backgroundRole": "--rev-fill",
+      "backgroundImage": "none",
+      "minContrast": 4.5
     }
   ],
   "pending": [
