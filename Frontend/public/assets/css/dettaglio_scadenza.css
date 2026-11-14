@@ -305,7 +305,7 @@
     background: var(--accent);
     color: #fff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.3);
+    box-shadow: var(--ui-shadow-action-soft);
 }
 
 .btn-icon-test-push:active {

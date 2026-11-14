@@ -182,7 +182,7 @@
     justify-content: center;
     gap: 0.75rem;
     cursor: pointer;
-    box-shadow: 0 10px 20px rgba(var(--accent-rgb), 0.3 );
+    box-shadow: var(--ui-shadow-action-soft);
 }
 /* Casella persistente dei promemoria Scadenze, separata dagli inviti condivisi. */
 .deadline-inbox-box {

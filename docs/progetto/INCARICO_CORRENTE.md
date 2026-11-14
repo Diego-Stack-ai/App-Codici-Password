@@ -1,14 +1,28 @@
 # Incarico corrente
 
+<a id="cornice-ordinaria-1275-incarico-2026-11-14"></a>
+
+## APP 1.2.275 — effetti Classica e cornice ordinaria, 14/11/2026
+
+Diego ordina a Codex la correzione descritta nella relazione, l'aggiornamento GitHub, l'avviso a Claude e il deploy **senza attendere il GO di Claude**; chiarisce poi esplicitamente **«Anche cornice per tutti gli utenti»**. Sono autorizzati implementazione, prove pertinenti, commit/push/PR, merge con CI verde, Rules e Hosting sullo stesso master e attivazione finale della policy ordinaria verificata. Questa scelta supera l'attesa di Claude e l'OFF come destinazione finale, senza sostituire i controlli di sicurezza o inventare PASS fisici. Le protezioni production restano invariate; Codex conserva la delega esplicita a eseguire il clic per questo rilascio.
+
+Ramo operativo `codex/classic-effects-1.2.275-20261114`, produzione di partenza 1.2.274 / 51ff1673. Le ricevute già revisionate della #310 confluiscono nella candidata; #301/#304/#307 restano distinte. UI: attenuare ombre decorative, conservare riempimenti leggibili e palette, gradiente originale invariato, vetro più discreto in entrambe le grafiche. Cornice: tutte le 22 route private, utenti verificati ammessi dal fence, nessun filtro browser o prestito di chiavi fra UID; aggiornare insieme client e Rules.
+
+Policy cloud ordinaria esatta `{schemaVersion:2, version:2, enabled:boolean}`, senza UID destinatario o claim pilot. Il permesso interno resta personale e finito: conferma server valida per cinque minuti, rinnovo server coalescente soltanto nell'ultimo minuto e mai da cache/attività; rinnovo dell'ammissione distinto da rinnovo dell'inattività. I vecchi client rifiutano v2 e i nuovi rifiutano il pilot v1. OFF, perdita di autorità, errori, cambio UID/fence e scadenza continuano a bloccare. Una sospensione che supera la lease richiede un nuovo sblocco.
+
+Distribuire prima Rules, poi Hosting verificato, infine policy tramite un'operazione amministrativa limitata al singleton, con precondizione e rilettura. Nessun nuovo utente, claim, ruolo IAM, migrazione Vault, Function, Storage o indice. Registrare esiti effettivi e limiti per Chrome PC, Android, iPhone e PWA; i sei PASS storici, D15 e D18 non diventano prove della nuova candidata per effetto del deploy.
+
 <a id="rilascio-ui-1274-incarico-2026-11-14"></a>
 
-## APP 1.2.274 — confezionamento e rilascio Hosting autorizzati, 14/11/2026
+## APP 1.2.274 — rilascio completato; seguito cornice da preparare, 14/11/2026
 
 Ordine diretto di Diego **«merge e deploy»**, dopo il [GO Codex](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/308#issuecomment-6883698758) e CI verde su c93cb4d. La #308 e gia integrata nel merge **a288023ca1287daa29f4c637160e6762404af090**. Codex prepara il solo pacchetto operativo sul ramo **codex/release-ui-1.2.274-20261114**: bump canonico 1.2.274, riferimenti asset/cache/precache, riesame del catalogo aiuti con reviewedAppVersion allineato, documenti esistenti e manifest generato su SHA pulito. Nessuna nuova modifica UI o funzionale rispetto alla fonte approvata; confronto indipendente del diff dopo normalizzazione delle versioni.
 
-L'ordine autorizza commit, push, PR, integrazione dopo revisione e check verdi, dispatch **hosting** sul master finale e verifica pubblica di versione, sorgente, tutti gli hash e intestazioni. L'approvazione production segue la protezione vigente e l'autorizzazione personale, senza bypass o modifiche ai permessi. Non pubblicare il merge a288023c ancora numerato 1.2.273; la run corretta deve contenere 1.2.274.
+L'ordine è completato: #309 revisionata sul candidato **8dab73d48d1892dacc89d03340e198b9710347b4**, check verdi e integrazione nel master **51ff1673b0ebddc0e2bdc52443a21d146d2835d3**; [Hosting #1163](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43640799691) riuscito. Codex ha eseguito l'approvazione production su delega esplicita di Diego nella sessione GitHub Diego-Stack-ai, conservando le protezioni e i permessi. [Verifica pubblica completa e ricevuta](../evidenze/COLLAUDI.md#rilascio-ui-1274-verifiche-2026-11-14).
 
-Canary **OFF secondo Diego**, senza rilettura amministrativa. La domanda sull'attivazione permanente della cornice non la accende: nessun account QA2/personale, claim, singleton, Rules, Functions, Storage, migrazione o nuovo collaudo C1. Conservare i limiti e registrare soltanto esiti effettivi; [verifiche](../evidenze/COLLAUDI.md#rilascio-ui-1274-verifiche-2026-11-14), [stato](STATO.md#rilascio-ui-1274-stato-2026-11-14) e [sequenza](PROGRAMMA.md#rilascio-ui-1274-programma-2026-11-14). Le ricevute documentali #301/#304/#307 restano PR distinte, senza merge implicito.
+Diego chiarisce il seguito: preparare la cornice ordinaria per **tutti gli utenti e tutte le pagine private**, indipendentemente dal numero attuale di utenti, conservando isolamento delle chiavi in RAM, inattività, logout e revoca. Chrome su PC, Android e iPhone sono i primi ambienti da collaudare; nessun blocco user-agent è richiesto. Il [percorso concreto](PROGRAMMA.md#rilascio-ui-1274-programma-2026-11-14) distingue l'ammissione ordinaria dal vecchio pilot e conserva i sei PASS QA2/Chrome Windows/1.2.270 senza ripetizioni automatiche.
+
+Canary **OFF secondo Diego**, senza rilettura amministrativa. La preparazione del seguito è distinta dall'attivazione e da nuove prove autenticate: nessun account QA2/personale, claim, singleton, Rules, Functions, Storage o nuovo collaudo C1 è stato modificato o eseguito da questo rilascio. [Stato](STATO.md#rilascio-ui-1274-stato-2026-11-14). Le ricevute documentali #301/#304/#307 restano PR distinte, senza merge implicito; la nuova ricevuta aggiorna soltanto i documenti esistenti e non richiede un altro deploy.
 
 <a id="mappa-visiva-incarico-2026-11-14"></a>
 

@@ -1,5 +1,5 @@
 import {doc, onSnapshot, getDocFromServer} from '/assets/js/vendor/firebase-runtime.js';
-import {auth, db} from '../../firebase-config.js?v=1.2.274';
+import {auth, db} from '../../firebase-config.js?v=1.2.275';
 import {authSessionFence} from '../../auth-session-fence.js';
 import {FRAME_POLICY_PATH, createFramePermitWatcher} from './vault-frame-permit.mjs';
 export function createProductionFrameAdmission({user, fenceTicket, onDeny}) {
@@ -7,6 +7,7 @@ export function createProductionFrameAdmission({user, fenceTicket, onDeny}) {
   const reference = doc(db, ...FRAME_POLICY_PATH.split('/'));
   const watcher = createFramePermitWatcher({uid: user.uid, onDeny,
     isCurrent: () => auth.currentUser?.uid === user.uid && authSessionFence.isLocallyCurrent(fenceTicket),
+    canRefresh: () => !window.document.hidden,
     subscribe: (next, error) => onSnapshot(reference, {includeMetadataChanges: true}, next, error),
     readServer: () => getDocFromServer(reference)});
   const offline = () => watcher.deny();

@@ -98,7 +98,7 @@
     color: var(--text-primary);
     border-color: rgba(var(--accent-rgb), 0.45);
     background: rgba(var(--accent-rgb), 0.14);
-    box-shadow: 0 8px 20px rgba(var(--accent-rgb), 0.12);
+    box-shadow: var(--ui-shadow-selection-soft);
 }
 
 .deadline-domain-panel {

@@ -151,7 +151,7 @@
 
 .adaptive-shadow:hover {
     transform: translateY(-8px);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 20px rgba(var(--accent-rgb, 255, 255, 255), 0.2);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), var(--ui-shadow-selection-soft);
 }
 
 /* --- 3. DASHBOARD WIDGETS --- */
@@ -362,7 +362,7 @@ body[data-ui-revision][data-ui-model="hub"] .matrix-card:is(.card-blue, .card-gr
 /* Le card Classica fissano --accent-rgb a blu/verde/arancio/rosso: i due derivati visibili
    (bagliore al passaggio e fondo del contatore) usano invece --accent della palette. */
 body[data-ui-revision][data-ui-model="hub"] .matrix-card.adaptive-shadow:is(:hover, :focus-visible) {
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 20px color-mix(in srgb, var(--accent) 20%, transparent);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 2px 10px color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
 body[data-ui-revision][data-ui-model="hub"] .matrix-card:is(.card-blue, .card-green, .card-orange, .card-red) .badge-count {

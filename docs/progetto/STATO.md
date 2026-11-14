@@ -2,15 +2,23 @@
 
 <a id="stato-corrente"></a>
 
+<a id="cornice-ordinaria-1275-stato-2026-11-14"></a>
+
+## APP 1.2.275 — candidata UI e cornice ordinaria, 14/11/2026
+
+Produzione ancora **1.2.274 / 51ff1673** fino alle ricevute effettive. Sul ramo `codex/classic-effects-1.2.275-20261114`, [ordine esplicito di Diego](DECISIONI.md#cornice-ordinaria-1275-decisione-2026-11-14): aloni più discreti e cornice per tutti gli utenti, con merge/deploy senza attendere Claude. I quattro scope Firebase e le protezioni production sono invariati; l'attivazione finale ha un workflow amministrativo separato limitato al singleton.
+
+La candidata conserva palette e riempimenti leggibili, attenua le ombre ordinarie, assottiglia il vetro e lascia invariato il gradiente originale. Cornice con policy globale v2, permessi personali in RAM e rinnovo server finito; nessun claim pilot o filtro browser. [Contratto](../regole/VAULT.md#cornice-ordinaria-vault-2026-11-14), [verifiche locali](../evidenze/COLLAUDI.md#cornice-ordinaria-1275-verifiche-2026-11-14). Nessun esito online della 275 o attivazione anticipati. Gli esiti fisici precedenti restano circoscritti e gli altri ambienti/D15/D18 conservano i propri limiti.
+
 <a id="rilascio-ui-1274-stato-2026-11-14"></a>
 
-## APP 1.2.274 — confezionamento Hosting in corso, 14/11/2026
+## APP 1.2.274 — Hosting pubblicato e verificato, 14/11/2026
 
-Diego ordina [merge e deploy](DECISIONI.md#rilascio-ui-1274-decisione-2026-11-14). La #308 e unita in **a288023ca1287daa29f4c637160e6762404af090** dopo GO Codex e CI verde su c93cb4d. Il ramo **codex/release-ui-1.2.274-20261114** confeziona la 1.2.274 con soli riferimenti versione/cache e riesame del catalogo, preservando la UI approvata. Candidata **DA_VERIFICARE** fino ai controlli e alla revisione sullo SHA esatto.
+Online **1.2.274**, sorgente **51ff1673b0ebddc0e2bdc52443a21d146d2835d3**, sourceDirty=false. La #309 integra il confezionamento revisionato su **8dab73d48d1892dacc89d03340e198b9710347b4**; la UI proviene dalla #308, merge **a288023ca1287daa29f4c637160e6762404af090**, preservata dopo normalizzazione delle sole versioni. Completato l'[ordine di Diego](DECISIONI.md#rilascio-ui-1274-decisione-2026-11-14).
 
-Ultima produzione riletta dal manifest pubblico durante questa preparazione: **1.2.273 / fa72c010507f713bc6014c89af5f45dd6185d91d**, sourceDirty=false,365 file, albero SHA256 **57fdf61ffdeb1cf67dfd376aab5cbf92938eecf8e4d623ee9f5447a1a8c52db8**. La 1.2.274 non e ancora dichiarata online; [verifiche](../evidenze/COLLAUDI.md#rilascio-ui-1274-verifiche-2026-11-14).
+[Hosting #1163](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43640799691) riuscito, scope hosting, approvazione production eseguita da Codex su delega esplicita di Diego nella sessione GitHub Diego-Stack-ai. Verifica HTTP indipendente completata: **365 hash**, **41 profili di intestazioni** e tre probe di normalizzazione; albero SHA256 **1276eea81f67d38227ef6e0137165001997936265e357383f9488547a4fe16f8**. [Ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-ui-1274-verifiche-2026-11-14).
 
-Canary **OFF secondo Diego**. La cornice permanente non ha ancora il GO: restano i gate C1/C2, revoca live, fase personale, altri ambienti e D18. Nessuna nuova prova o modifica amministrativa da questo rilascio; i checkpoint sotto conservano il proprio stato storico.
+Canary **OFF secondo Diego**. Obiettivo successivo esplicito: cornice ordinaria per **tutti gli utenti e tutte le 22 pagine private**, con un solo sblocco durante la navigazione interna. Chrome su PC, Android e iPhone sono priorità di collaudo, senza filtri user-agent. Il singleton attuale resta un pilot per un solo UID: il [percorso C2](PROGRAMMA.md#rilascio-ui-1274-programma-2026-11-14) richiede una candidata distinta. I sei PASS QA2/Chrome Windows/1.2.270 conservano il proprio perimetro; C1 residua, revoca live, fase personale/C2, altri ambienti e D18 restano aperti. Nessuna attivazione o nuova prova autenticata deriva dal rilascio; i checkpoint sotto sono storici.
 
 <a id="materiali-classica-stato-2026-11-14"></a>
 

@@ -197,7 +197,7 @@ h3.settings-desc {
 
 .settings-toggle:checked {
     background: var(--accent);
-    box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.3 );
+    box-shadow: var(--ui-shadow-toggle-soft);
 }
 
 .settings-toggle::after {
@@ -241,7 +241,7 @@ h3.settings-desc {
     background: var(--accent);
     color: white;
     border-color: transparent;
-    box-shadow: 0 10px 20px rgba(var(--accent-rgb), 30%);
+    box-shadow: var(--ui-shadow-selection-soft);
 }
 
 .settings-subsection-label {

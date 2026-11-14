@@ -14,22 +14,24 @@ const proposal = () => buildVaultFrameWorkflowProposal(source());
 const yaml = value => dump(value, {lineWidth: -1, noRefs: true});
 const frame = value => value.jobs.deploy.steps.find(step => step.name === FRAME_RULES_STEP);
 
-test('B3 plans only a bounded Rules scope and separate Hosting, without cloud or executable provisioning', () => {
+test('C2 plans bounded Rules and separate Hosting, with protected ordinary policy activation last', () => {
     const plan = planVaultFrameRelease();
     assert.equal(plan.executable, false); assert.equal(plan.cloudCalls, false); assert.equal(plan.cloudReadsPerformed, false);
     assert.deepEqual(plan.operationsExecuted, []);
     assert.deepEqual(plan.target, {projectId: 'appcodici-password', databaseId: '(default)'});
     assert.deepEqual(plan.workflow.selectors, ['firestore:rules']);
     assert.equal(plan.workflow.followedBySeparateScope, 'hosting');
-    assert.equal(plan.workflow.applicationAuthorized, false);
+    assert.equal(plan.workflow.applicationAuthorized, true);
     assert.equal(plan.provisioning.executable, false); assert.equal(plan.provisioning.identitySelected, false);
     assert.equal(plan.provisioning.createUser, false); assert.equal(plan.provisioning.initialEnabled, false);
-    assert.equal(plan.provisioning.activationLast, true); assert.equal(plan.provisioning.claim.atomicMerge, false);
+    assert.equal(plan.provisioning.activationLast, true); assert.equal(plan.provisioning.claimOperation, 'none');
     assert.equal(plan.provisioning.authFirestoreTransaction, false);
-    assert.equal(plan.provisioning.claim.exclusiveWriterRequired, true);
+    assert.equal(plan.provisioning.personalLeaseMs, 300000);assert.equal(plan.provisioning.renewWindowMs,60000);
+    assert.equal(plan.provisioning.credentialCapabilityVerified,false);
     assert.equal(plan.rollback.disableSingletonFirst, true); assert.equal(plan.rollback.restoreWholeClaimsMap, false);
     assert.equal(plan.rollback.claimAloneIsKillSwitch, false);
-    assert.deepEqual(plan.provisioning.fields, ['schemaVersion','version','uid','enabled','expiresAt']);
+    assert.deepEqual(plan.provisioning.fields, ['schemaVersion','version','enabled']);
+    assert.equal(plan.provisioning.schemaVersion,2);assert.equal(plan.provisioning.version,2);
 });
 
 test('the complete proposal preserves every other workflow field and is reproducible and idempotent', () => {

@@ -293,7 +293,7 @@
     border-radius: 20px;
     background: var(--status-success);
     color: white;
-    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+    box-shadow: var(--ui-shadow-action-soft);
     border: none;
     cursor: pointer;
     display: flex;

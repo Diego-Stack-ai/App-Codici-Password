@@ -78,14 +78,13 @@ service cloud.firestore {
       return request.auth.uid in resource.data.get('sharedReadyRecipientUids', []);
     }
 
-    // Singleton cohort is provisioned only by an approved server operator.
+    // Global frame policy is provisioned only by an approved server operator.
     // It is intentionally outside the owner-writable users subtree.
     match /vaultFramePolicy/current {
       allow get: if hasVerifiedEmail()
-        && resource.data.keys().hasOnly(['schemaVersion', 'version', 'uid', 'enabled', 'expiresAt'])
-        && resource.data.schemaVersion == 1 && resource.data.version == 1
-        && resource.data.uid == request.auth.uid && resource.data.enabled == true
-        && resource.data.expiresAt is timestamp && request.time < resource.data.expiresAt
+        && resource.data.keys().hasOnly(['schemaVersion', 'version', 'enabled'])
+        && resource.data.schemaVersion == 2 && resource.data.version == 2
+        && resource.data.enabled == true
         && isRecoveryUnlocked(request.auth.uid);
       allow list, create, update, delete: if false;
     }

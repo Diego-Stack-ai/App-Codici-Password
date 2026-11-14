@@ -1,5 +1,15 @@
 # Vault
 
+<a id="cornice-ordinaria-vault-2026-11-14"></a>
+
+## Cornice ordinaria — candidata 1.2.275, 14/11/2026
+
+L'[ordine di Diego](../progetto/DECISIONI.md#cornice-ordinaria-1275-decisione-2026-11-14) supera la coorte pilot per il rilascio ordinario: tutte le 22 route private, utenti autenticati con email verificata e fence di recupero valido, senza filtro browser. La policy root server-only è esattamente `{schemaVersion:2, version:2, enabled:boolean}`. La v2 non contiene UID o scadenza del canary; le Rules negano elenco e ogni scrittura client. I client v1 rifiutano v2 e i nuovi rifiutano v1; nessuna concessione implicita durante la transizione.
+
+La disponibilità della funzionalità non rende permanente lo sblocco. Una conferma server valida genera solo in RAM il permesso interno v1, personale e legato all'UID corrente, con lease di **300000 ms**. Nell'ultimo minuto una lettura server coalescente può rinnovarla; cache, attività e semplici letture RAM non concedono un rinnovo. Il listener server resta autorevole; OFF, metadati non autorevoli dopo l'ammissione, errori, offline osservato, cambio UID/fence o scadenza negano terminalmente. Il rinnovo dell'ammissione non cambia inattività, generazione o materiale e non sblocca una sessione revocata.
+
+Il figlio corrente e già visibile riceve il limite aggiornato `min(inattività, lease)`; nessuna nuova visibilità o chiave deriva dal rinnovo periodico. Una sospensione che supera la lease richiede un nuovo sblocco; il ritorno visibile verifica nuovamente il server. Chiavi e dati rimangono nei confini personali già previsti: nessun nuovo storage delle chiavi o permesso di lettura dei dati di altri utenti. Le sezioni canary sottostanti conservano il contratto storico.
+
 ## Canary della cornice in due fasi — 10/11/2026
 
 Per il solo canary cambia l'ordine della coorte: prima un'identità sintetica approvata (QA2 popolata candidata, da confermare), poi Diego. Rimane **un solo UID per volta** nel singleton, nessuna lista di abilitati e nessuna nuova autorità del claim. Prima del cambio fase occorrono spegnimento/revoca verificati e distinta approvazione di identità, stato e scadenza. I risultati C1 appartengono alla rispettiva fase. Le diciture precedenti «solo Diego» descrivono il primo mandato, superato esclusivamente da questa [decisione](../progetto/DECISIONI.md#cornice-canary-due-fasi-2026-11-10); RAM, fence, schema, controlli del broker e contratti di blocco restano invariati. Preparazione del runner non concede alcun permesso o attivazione.

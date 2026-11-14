@@ -1,16 +1,33 @@
 # Programma
 
+<a id="cornice-ordinaria-1275-programma-2026-11-14"></a>
+
+## APP 1.2.275 — sequenza autorizzata UI e cornice ordinaria
+
+1. Comporre UI e runtime ordinario con i contratti aggiornati, prove locali negative e revisione tecnica indipendente. Le ricevute della #310 confluiscono senza ripubblicare la274.
+2. Confezionare 1.2.275, catalogo rivisto, cache/asset e manifest sullo SHA pulito; PR e CI richiesta verde. L'[ordine](INCARICO_CORRENTE.md#cornice-ordinaria-1275-incarico-2026-11-14) elimina l'attesa del GO Claude per questo rilascio, mantenendo i controlli.
+3. Integrare la candidata e avviare i run master degli scope **vault-frame-rules** e **hosting** sullo stesso SHA. Validazioni indipendenti possono procedere insieme; approvare ed eseguire prima le Rules, poi Hosting. Nessuna Function, Storage o indice.
+4. Verificare online manifest/hash/header e sorgente Rules realmente pubblicata; eseguire solo dopo il workflow **Ordinary Vault frame policy**, mode enable e SHA atteso, con production protetto. Migrazione da OFF e attivazione ultima con CAS e riletture prima/dopo; registrare lo stato effettivo.
+5. Conservare le prove storiche nel proprio perimetro. Il banco locale delle 22 route non è una prova fisica Android/iPhone/PWA, e la rilettura del singleton non è D15 con sessione aperta. D18 richiede due rilasci effettivi; nessuna chiusura globale inventata.
+
+[Procedura e rollback](../regole/RILASCIO.md#cornice-ordinaria-rilascio-2026-11-14), [evidenze](../evidenze/COLLAUDI.md#cornice-ordinaria-1275-verifiche-2026-11-14).
+
 <a id="rilascio-ui-1274-programma-2026-11-14"></a>
 
-## APP 1.2.274 — sequenza Hosting dopo la #308, 14/11/2026
+## APP 1.2.274 — rilascio concluso e percorso cornice ordinaria, 14/11/2026
 
-[Ordine di Diego](DECISIONI.md#rilascio-ui-1274-decisione-2026-11-14): merge e deploy. La UI e integrata in a288023c; il confezionamento operativo segue l'[incarico](INCARICO_CORRENTE.md#rilascio-ui-1274-incarico-2026-11-14).
+[Ordine di Diego](DECISIONI.md#rilascio-ui-1274-decisione-2026-11-14) completato: UI #308, confezionamento #309, master **51ff1673b0ebddc0e2bdc52443a21d146d2835d3**, [Hosting #1163](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43640799691) e [verifica pubblica](../evidenze/COLLAUDI.md#rilascio-ui-1274-verifiche-2026-11-14) riusciti. Nessun altro deploy per questa ricevuta.
 
-1. Bump canonico 1.2.274 e riesame del catalogo; confronto dei byte normalizzati con la fonte approvata, controlli locali e revisione indipendente sullo SHA esatto.
-2. CI verde della candidata, integrazione, verifica del master finale e manifest pulito; avvio del workflow manuale con release_scope=hosting. Protezione production e approvazione personale conservate, nessun bypass.
-3. Seguire la run e verificare online versione, sourceCommit/sourceDirty, tutti gli hash del payload,41 profili header e tre probe codificati; pubblicare la ricevuta effettiva.
+Il seguito richiesto è la cornice ordinaria per tutti gli utenti e tutte le **22 route private**, con un solo sblocco iniziale durante la navigazione interna. Preparazione distinta dal rilascio grafico:
 
-Canary **OFF secondo Diego**. Il seguito verso la cornice permanente richiede il completamento dei gate gia aperti; nessuna attivazione, nuovo giro QA2/personale o modifica backend implicita nella pubblicazione della UI.
+1. Comporre una candidata C2 che aggiorni insieme l'ammissione in `main-v129.js`, lo schema globale di `vault-frame-permit.mjs` e le Rules del singleton in `firestore.rules`: utenti autenticati, verificati e ammessi dal fence di recupero, senza dipendenza dal claim pilot e con scritture client sempre negate. Ogni permesso derivato resta legato all'UID corrente; nessuna assegnazione massiva di claim o filtro per browser.
+2. Definire transizione vecchio/nuovo schema, durata della policy ordinaria e interruttore generale OFF autorevole; aggiornare `scripts/plan-vault-frame-release.mjs` e i contratti esistenti pertinenti. Chiusura del vecchio pilot e revoca delle credenziali temporanee sono passi amministrativi distinti, non eseguiti ora.
+3. Aggiungere prove mirate: utente verificato senza claim, isolamento di due utenti, rifiuto su cambio UID/fence, policy assente/scaduta/disabilitata/non valida, revoca globale e compatibilità dei client; verificare che le pagine interne non introducano una nuova lettura della policy a ogni passaggio.
+4. Conservare i sei PASS C1 QA2/Chrome Windows/1.2.270 (D02, D04-core, D05-A, D06-1, D06-3, D08-local). D02 storico copriva dieci route: il giro della candidata ordinaria deve attraversarne 22. Non ripetere automaticamente i casi già verdi né attribuirli ai telefoni.
+5. Pianificare ricevute fisiche separate per Chrome Windows, Android e iPhone: un solo sblocco iniziale, navigazione delle 22 route con dati sintetici senza salvataggi, cronologia, ritorno da background/inattività, reload, logout e Indietro protetti. PWA/Home e altri browser sono modalità distinte, non esclusioni tecniche richieste da Diego. Login e pagine pubbliche restano fuori cornice.
+6. Raccordare i sottocasi C1 ancora NE e il passaggio personale/C2 nel GO del nuovo perimetro; eseguire D15 con OFF durante una sessione aperta e D18 attraverso due rilasci reali approvati. Il rilascio attuale a canary OFF non dimostra queste prove.
+
+Canary **OFF secondo Diego**. Questo percorso è preparato sul sorgente 51ff1673, senza patch applicativa, nuova prova autenticata o operazione amministrativa. La destinazione ordinaria è decisa; implementazione, revisione e prove effettive restano da completare secondo l'[incarico](INCARICO_CORRENTE.md#rilascio-ui-1274-incarico-2026-11-14).
 
 <a id="rilascio-ui-1272-programma-2026-11-13"></a>
 

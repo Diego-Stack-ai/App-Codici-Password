@@ -1,5 +1,11 @@
 # Guida
 
+## Navigazione con la cornice ordinaria — candidata 1.2.275
+
+Quando la cornice è disponibile e la connessione è attiva, sblocchi la Vault una volta e puoi passare tra le pagine private senza reinserire la Master Password a ogni passaggio. Dopo l'aggiornamento occorre ricaricare una volta l'app; nella navigazione con cornice l'indirizzo principale resta app.html.
+
+Il blocco per inattività, logout e revoca resta attivo. Ricaricare o chiudere l'intera app, oppure una sospensione lunga, può richiedere un nuovo sblocco: la Master Password non viene salvata permanentemente. La grafica Nuova/Classica non governa la cornice, e «Registra eventi della cornice» accende soltanto la diagnostica. La pubblicazione e i dispositivi effettivamente provati sono indicati nello [stato corrente](../progetto/STATO.md#stato-corrente); questa nota descrive la candidata e non anticipa l'attivazione.
+
 ## Schermata di blocco — produzione 1.2.270, 11/11/2026
 
 Nella 1.2.270, dopo il blocco della cornice compare **Vault bloccata** e il comando **Sblocca e riprendi**. Se la sessione e ancora ammessa, dopo il nuovo sblocco ritrovi la pagina precedente. Se l'accesso alla cornice non e piu disponibile, resta il normale percorso verso Home. La schermata comune puo comparire per motivi diversi: non indica sempre inattivita.

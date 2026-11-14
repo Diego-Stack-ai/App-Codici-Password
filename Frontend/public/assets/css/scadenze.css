@@ -116,7 +116,7 @@
     /* Accent tint */
     border-color: var(--accent);
     color: var(--accent);
-    box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.2 );
+    box-shadow: var(--ui-shadow-selection-soft);
 }
 
 .filter-chip:hover:not(.active) {

@@ -76,6 +76,39 @@ const hueOf = color => {
 };
 const hueOk = (color, hue) => { const h = hueOf(color); return h !== null && (hue === 'red' ? (h <= 12 || h >= 345) : (h >= 20 && h <= 50)); };
 
+test('ordinary actions and selections keep soft Classica shadows in both graphics', {timeout: 180000}, async () => {
+  for (const revision of ['tre-livelli', 'classica']) for (const theme of ['light', 'dark']) for (const palette of palettes) {
+    const tab = await open('impostazioni.html', {theme, palette, revision});
+    try {
+      await tab.evaluate(() => {
+        document.querySelector('#theme-settings-disclosure').open = true;
+        for (const selector of ['.theme-btn[data-theme="dark"]', '.ui-graphics-btn[data-ui-graphics="classic"]', '.color-theme-btn[data-color-theme="red"]'])
+          document.querySelector(selector).classList.add('active');
+        // The dynamically created Vault input uses these actual shared classes.
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay active';
+        overlay.innerHTML = '<div class="modal-box"><h3 class="modal-title">Sblocco Vault</h3><button id="modal-confirm-btn" class="btn-modal btn-primary">Conferma</button><button class="btn-modal btn-danger">Elimina</button></div>';
+        document.body.append(overlay);
+      });
+      const values = await tab.evaluate(() => ({
+        shadows: [...document.querySelectorAll('.theme-btn.active, .ui-graphics-btn.active, .color-theme-btn.active, #modal-confirm-btn')].map(element => getComputedStyle(element).boxShadow),
+        overlayBlur: getComputedStyle(document.querySelector('.modal-overlay')).backdropFilter,
+        danger: getComputedStyle(document.querySelector('.btn-modal.btn-danger')).boxShadow
+      }));
+      assert.equal(values.shadows.length, 4);
+      for (const shadow of values.shadows) {
+        const colors = [...shadow.matchAll(/rgba?\(([^)]+)\)/g)];
+        const lengths = shadow.replace(/rgba?\([^)]+\)/g, '').match(/-?[\d.]+px/g)?.map(Number.parseFloat);
+        assert.ok(colors.length && lengths?.length === 4, 'one painted shadow, not none or stacked glows');
+        assert.ok(Number(colors[0][1].split(',')[3] ?? 1) <= 0.12, 'decorative alpha at most 12%');
+        assert.ok(lengths[2] <= 10, 'decorative blur at most 10px');
+      }
+      assert.equal(values.overlayBlur, 'blur(8px)', 'original modal backdrop remains');
+      assert.match(values.danger, /0\.3\).*20px/, 'danger indication stays independent');
+    } finally { await tab.close(); }
+  }
+});
+
 for (const revision of ['tre-livelli', 'classica']) for (const theme of ['light', 'dark']) {
   test(`theme groups follow the palette roles (${revision}, ${theme})`, {timeout: 240000}, async () => {
     for (const palette of palettes) {
