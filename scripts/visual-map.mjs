@@ -74,16 +74,23 @@ function collect() {
   };
   const firstStop = image => { const m = image && image !== 'none' && image.match(/(rgba?|color)\([^)]*\)/); return m ? parse(m[0]) : null; };
   const over = (top, bottom) => top.rgb.map((v, i) => v * top.alpha + bottom[i] * (1 - top.alpha));
-  const effectiveBg = element => {
-    const layers = [];
-    for (let node = element; node && node.nodeType === 1; node = node.parentElement) {
-      const style = getComputedStyle(node);
+  // Compositing come il browser (sorgente-sopra), dalla radice al testo: ogni antenato
+  // dipinge il proprio sfondo sopra ciò che ha dietro, poi il suo gruppo (sfondo + figli)
+  // si mescola al retro con la sua opacità: o·contenuto + (1−o)·retro. Così un contenitore
+  // semitrasparente con superficie propria attenua sia lo sfondo sia il testo (rilievo
+  // Codex 14/11: nero a opacità 0,52 sul bianco → sfondo 122,4, testo bianco 4,27:1).
+  const composite = (element, ink) => {
+    const chain = [];
+    for (let node = element; node && node.nodeType === 1; node = node.parentElement) chain.unshift(node);
+    const paint = (i, backdrop) => {
+      const style = getComputedStyle(chain[i]);
       const layer = firstStop(style.backgroundImage) || parse(style.backgroundColor);
-      if (layer && layer.alpha > 0) { layers.push(layer); if (layer.alpha >= 0.99) break; }
-    }
-    let color = [255, 255, 255];
-    for (const layer of layers.reverse()) color = over(layer, color);
-    return color.map(Math.round);
+      let inner = layer && layer.alpha > 0 ? over(layer, backdrop) : backdrop;
+      inner = i === chain.length - 1 ? (ink ? over(ink, inner) : inner) : paint(i + 1, inner);
+      const o = Number(style.opacity);
+      return inner.map((v, c) => v * o + backdrop[c] * (1 - o));
+    };
+    return paint(0, [255, 255, 255]).map(v => Math.round(v * 10) / 10);
   };
   const probe = document.createElement('span');
   document.body.append(probe);
@@ -112,7 +119,9 @@ function collect() {
     if (!text && !(bg && bg.alpha > 0.05) && !(border && border.alpha > 0.05)) continue;
     records.push({index: own, label: label(element), text,
       color: text ? parse(style.color)?.rgb : null, colorAlpha: text ? (parse(style.color)?.alpha ?? 1) : 1, bg: bg && bg.alpha > 0.05 ? bg.rgb : null,
-      border: border && border.alpha > 0.05 ? border.rgb : null, effectiveBg: text ? effectiveBg(element) : null,
+      border: border && border.alpha > 0.05 ? border.rgb : null,
+      // Colori effettivi nel punto del testo: sfondo senza testo e testo sopra, entrambi composti.
+      effectiveBg: text ? composite(element, null) : null, effectiveFg: text ? composite(element, parse(style.color)) : null,
       opacity: groupOpacity, fontSize: Math.round(parseFloat(style.fontSize) * 10) / 10,
       fontWeight: Number(style.fontWeight), fontFamily: style.fontFamily.split(',')[0].replace(/["']/g, '').trim(),
       icon: /material-symbols/.test(element.className || '')});
@@ -122,7 +131,6 @@ function collect() {
 
 const luminance = rgb => { const c = rgb.map(v => v / 255).map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
 const contrast = (a, b) => { const [x, y] = [luminance(a), luminance(b)]; return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
-const blend = (fg, bg, alpha) => fg.map((v, i) => v * alpha + bg[i] * (1 - alpha));
 const hue = ([r, g, b]) => {
   const [R, G, B] = [r / 255, g / 255, b / 255], max = Math.max(R, G, B), min = Math.min(R, G, B), d = max - min;
   if (!d) return {h: 0, chroma: 0};
@@ -171,13 +179,13 @@ for (const page of pages) {
       }
       for (const palette of palettes) {
         const record = variants[palette];
-        if (!record.text || !record.color || !record.effectiveBg) continue;
+        if (!record.text || !record.effectiveFg || !record.effectiveBg) continue;
         // Testo grande e icone (Material Symbols) richiedono 3:1, il testo ordinario 4,5:1.
         const large = record.icon || record.fontSize >= 24 || (record.fontSize >= 18.6 && record.fontWeight >= 700);
-        // Il colore del testo viene composto con la sua alpha e con l'opacità di gruppo.
-        const ratio = contrast(blend(record.color, record.effectiveBg, record.opacity * record.colorAlpha), record.effectiveBg);
+        // Testo e sfondo sono già composti nel browser (alpha del testo e opacità di gruppo).
+        const ratio = contrast(record.effectiveFg, record.effectiveBg);
         if (ratio < (large ? 3 : 4.5)) lowContrast.push({index, label: record.label, palette: paletteName[palette], ratio: Math.round(ratio * 100) / 100,
-          color: hex(record.color), bg: hex(record.effectiveBg)});
+          color: hex(record.effectiveFg), bg: hex(record.effectiveBg)});
       }
       if (ref.text && !ref.icon && !scale.some(size => Math.abs(size - ref.fontSize) < 0.6)) offScale.push({index, label: ref.label, fontSize: ref.fontSize, fontFamily: ref.fontFamily});
     }
@@ -215,7 +223,15 @@ const esc = value => String(value).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': 
 const swatch = value => `<span style="display:inline-block;width:12px;height:12px;border:1px solid #999;background:${value};vertical-align:middle"></span> ${value}`;
 const rows = (list, cols) => list.length ? `<table><tr>${cols.map(c => `<th>${c[0]}</th>`).join('')}</tr>${list.map(item =>
   `<tr>${cols.map(c => `<td>${c[1](item)}</td>`).join('')}</tr>`).join('')}</table>` : '<p class="ok">Nessuno</p>';
-const totals = report.reduce((acc, p) => { for (const t of themes) { acc.fixed += p.themes[t].fixed.length; acc.low += p.themes[t].lowContrast.length; } acc.font += p.themes.light.offScale.length; return acc; }, {fixed: 0, low: 0, font: 0});
+// Unità esplicite (rilievo Codex): elementi unici, coppie elemento × tema, occorrenze × palette.
+const totals = {fixedUnique: new Set(), fixedPairs: 0, lowUnique: new Set(), lowPairs: new Set(), lowOccurrences: 0, font: 0};
+for (const p of report) {
+  for (const t of themes) {
+    for (const item of p.themes[t].fixed) { totals.fixedUnique.add(`${p.page}|${item.index}`); totals.fixedPairs++; }
+    for (const item of p.themes[t].lowContrast) { totals.lowUnique.add(`${p.page}|${item.index}`); totals.lowPairs.add(`${p.page}|${t}|${item.index}`); totals.lowOccurrences++; }
+  }
+  totals.font += p.themes.light.offScale.length;
+}
 const html = `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Mappa visiva</title><style>
 :root{color-scheme:light dark;--bg:#fff;--fg:#1f2430;--muted:#5b6474;--line:#d9dde4}
@@ -226,7 +242,7 @@ table{border-collapse:collapse;width:100%;margin:6px 0 14px;font-size:13px}td,th
 .ok{color:var(--muted)}.legend{color:var(--muted)}img{max-width:200px;border:1px solid var(--line);margin-right:8px}
 .scroll{overflow-x:auto}</style></head><body>
 <h1>Mappa visiva — grafica Nuova</h1>
-<p>${report.length} pagine × 7 colori × chiaro/scuro. Elementi che <b>non seguono il tema</b>: ${totals.fixed}; testi con <b>contrasto basso</b>: ${totals.low}; testi <b>fuori scala</b>: ${totals.font}.</p>
+<p>${report.length} pagine × 7 colori × chiaro/scuro. <b>Non seguono il tema</b>: ${totals.fixedUnique.size} elementi unici (${totals.fixedPairs} proprietà × tema). <b>Contrasto basso</b>: ${totals.lowUnique.size} elementi unici, ${totals.lowPairs.size} coppie elemento × tema, ${totals.lowOccurrences} occorrenze contando le palette. <b>Fuori scala</b>: ${totals.font} testi.</p>
 <p class="legend">Schermate nel colore Verde: <b style="color:#ff00ff">magenta</b> = colore fisso che non segue il tema; <b style="color:#ff8c00">arancio</b> = contrasto basso. I colori fissi rosso/arancio/ambra/verde sono elencati a parte come probabili colori di stato. Pagine con contenuti costruiti dopo il login: copertura parziale.</p>
 <p class="legend"><b>Limiti</b>: solo viewport 390×844; pannelli, modali e dettagli chiusi non vengono aperti; niente stati hover/focus, pseudo-elementi, placeholder o SVG; sui gradienti si misura il primo colore; la tinta non stabilisce la funzione (un verde fisso può essere decorativo). I conteggi sono coppie elemento × tema × palette, non guasti confermati: confrontare i giri con la stessa unità.</p>
 ${report.map(p => `<h2>${esc(p.page)}</h2>

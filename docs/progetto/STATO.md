@@ -6,7 +6,7 @@
 
 ## Mappa visiva e colori fissi — candidata in revisione, 14/11/2026
 
-Online resta **1.2.272**. Su richiesta di Diego, Claude ha aggiunto lo strumento `npm run audit:visual-map`, che confronta le 31 pagine statiche nelle 7 palette × chiaro/scuro, e un primo giro di correzioni: i colori fissi che non seguivano il tema scendono a zero fuori dal link nascosto di `index.html`. Codex ha consegnato a Claude la patch di Impostazioni e widget Profilo; la candidata unica sul ramo `claude/awesome-keller-kt4v9t` le comprende. [Verifiche e limiti](../evidenze/COLLAUDI.md#mappa-visiva-verifiche-2026-11-14). Restano circa 311 elementi con contrasto da verificare, oggetto del giro successivo. Nessun merge, deploy o cambio canary da questa preparazione; canary **OFF secondo Diego**.
+Online resta **1.2.272**. Su richiesta di Diego, Claude ha aggiunto lo strumento `npm run audit:visual-map`, che confronta le 31 pagine statiche nelle 7 palette × chiaro/scuro, e un primo giro di correzioni: i colori fissi che non seguivano il tema scendono a zero fuori dal link nascosto di `index.html`. Codex ha consegnato a Claude la patch di Impostazioni e widget Profilo; la candidata unica sul ramo `claude/awesome-keller-kt4v9t` le comprende. [Verifiche e limiti](../evidenze/COLLAUDI.md#mappa-visiva-verifiche-2026-11-14). Restano 315 elementi unici con contrasto da verificare (469 coppie elemento × tema), oggetto del giro successivo. Nessun merge, deploy o cambio canary da questa preparazione; canary **OFF secondo Diego**.
 
 <a id="rilascio-ui-1272-stato-2026-11-13"></a>
 
