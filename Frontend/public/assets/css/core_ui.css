@@ -1166,11 +1166,17 @@ select.shared-account-select-control optgroup {
    Un'unica scala di ruoli per ogni colore, derivata da --accent: sfondo pagina e
    gradiente restano quelli della palette; cambiano solo le superfici sopra di esso.
    Chiaro: il bianco tende al colore base. Scuro: le superfici sono più chiare dello
-   sfondo, su un grigio neutro (non bluastro) per non falsare i colori caldi. La grafica Classica rimuove data-ui-revision
-   e non è toccata. Le percentuali sono i soli punti da ritoccare. */
-[data-ui-revision="tre-livelli"] {
-    --rev-surface: color-mix(in srgb, var(--accent) 12%, #fff);
-    --rev-surface-2: color-mix(in srgb, var(--accent) 18%, #fff);
+   sfondo, su un grigio neutro (non bluastro) per non falsare i colori caldi. Valgono in entrambe le
+   grafiche (data-ui-revision «tre-livelli» o «classica», 14/11/2026). Le percentuali sono i soli punti da ritoccare. */
+[data-ui-revision] {
+    /* Materiali della Classica con i ruoli della palette (ordine di Diego, 14/11/2026):
+       superfici a vetro traslucido tinto e sfocato. Il contrasto si misura sullo sfondo
+       composto, nel caso peggiore della sfumatura di pagina e del bagliore. */
+    --rev-surface: color-mix(in srgb, var(--accent) 10%, rgb(255 255 255 / 0.74));
+    --rev-surface-hover: color-mix(in srgb, var(--accent) 14%, rgb(255 255 255 / 0.84));
+    --rev-surface-2: color-mix(in srgb, var(--accent) 16%, rgb(255 255 255 / 0.74));
+    --rev-glass-blur: blur(12px);
+    --rev-hub-gradient: linear-gradient(135deg, rgb(255 255 255 / 0.62), color-mix(in srgb, var(--accent) 30%, rgb(255 255 255 / 0.5)));
     --rev-popup: color-mix(in srgb, var(--accent) 14%, #fff);
     --rev-border: color-mix(in srgb, var(--accent) 28%, #e2e8f0);
     --rev-icon-bg: color-mix(in srgb, var(--accent) 22%, #fff);
@@ -1178,14 +1184,16 @@ select.shared-account-select-control optgroup {
     /* Riempimento pieno con testo bianco: scurito quanto basta per ≥ 4,5:1 su ogni palette. */
     --rev-fill: color-mix(in srgb, var(--accent) 85%, #0f172a);
     /* Testo su pastiglia tinta: ≥ 4,5:1 su --rev-icon-bg. */
-    --rev-text-accent: color-mix(in srgb, var(--accent) 70%, #0f172a);
+    --rev-text-accent: color-mix(in srgb, var(--accent) 60%, #0f172a);
     --rev-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.08);
     --rev-popup-shadow: 0 24px 56px -16px rgba(var(--accent-rgb), 32%);
 }
 
-.dark [data-ui-revision="tre-livelli"] {
-    --rev-surface: color-mix(in srgb, var(--accent) 16%, #262a32);
-    --rev-surface-2: color-mix(in srgb, var(--accent) 19%, #2e323b);
+.dark [data-ui-revision] {
+    --rev-surface: color-mix(in srgb, var(--accent) 12%, rgb(12 16 26 / 0.68));
+    --rev-surface-hover: color-mix(in srgb, var(--accent) 18%, rgb(12 16 26 / 0.52));
+    --rev-surface-2: color-mix(in srgb, var(--accent) 16%, rgb(24 28 38 / 0.68));
+    --rev-hub-gradient: linear-gradient(135deg, color-mix(in srgb, var(--rev-fill) 72%, transparent), color-mix(in srgb, var(--rev-fill) 48%, rgb(3 7 18 / 0.5)));
     --rev-popup: color-mix(in srgb, var(--accent) 19%, #2a2e37);
     --rev-border: color-mix(in srgb, var(--accent) 34%, #3c414c);
     --rev-icon-bg: color-mix(in srgb, var(--accent) 28%, #2e323b);
@@ -1202,9 +1210,9 @@ select.shared-account-select-control optgroup {
 }
 
 /* Popup, menu e avvisi seguono il colore scelto (prima: bianco, azzurro o blu fissi). */
-[data-ui-revision="tre-livelli"] :is(.modal-box, .modal-box-source, .custom-select-menu, .datepicker-card,
+[data-ui-revision] :is(.modal-box, .modal-box-source, .custom-select-menu, .datepicker-card,
     .first-configuration-dialog, .documentation-panel, .documentation-walkthrough-panel),
-html body[data-ui-revision="tre-livelli"] .vault-assistant-panel {
+html body[data-ui-revision] .vault-assistant-panel {
     background: var(--rev-popup);
     border-color: var(--rev-border);
     color: var(--text-primary);
@@ -1212,25 +1220,28 @@ html body[data-ui-revision="tre-livelli"] .vault-assistant-panel {
     backdrop-filter: none;
 }
 
-[data-ui-revision="tre-livelli"] :is(.modal-box, .modal-box-source, .first-configuration-dialog),
-html body[data-ui-revision="tre-livelli"] .vault-assistant-panel {
+[data-ui-revision] :is(.modal-box, .modal-box-source, .first-configuration-dialog),
+html body[data-ui-revision] .vault-assistant-panel {
     border: 1px solid var(--rev-border);
     box-shadow: var(--rev-popup-shadow);
 }
 
-[data-ui-revision="tre-livelli"] .toast-content {
+/* Avvisi: una sola superficie, la pillola #toast; il contenuto interno resta trasparente
+   (prima un rettangolo colorato dentro la pillola bianca). */
+[data-ui-revision] #toast {
     background: var(--rev-popup);
     border: 1px solid var(--rev-border);
     color: var(--text-primary);
+    box-shadow: var(--rev-popup-shadow);
 }
 
 /* Il foglio Ricerca usa html.dark .vault-assistant-* (0,2,1): html body[…] (0,2,2) prevale. */
-html body[data-ui-revision="tre-livelli"] :is(.vault-assistant-microphone, .vault-assistant-bubble.user) {
+html body[data-ui-revision] :is(.vault-assistant-microphone, .vault-assistant-bubble.user) {
     background: var(--rev-fill);
     color: #fff;
 }
 
-html body[data-ui-revision="tre-livelli"] :is(.vault-assistant-input, .vault-assistant-result, .vault-assistant-conversation, .vault-assistant-bubble.assistant, .vault-assistant-send) {
+html body[data-ui-revision] :is(.vault-assistant-input, .vault-assistant-result, .vault-assistant-conversation, .vault-assistant-bubble.assistant, .vault-assistant-send) {
     background: var(--rev-surface-2);
     border-color: var(--rev-border);
     color: var(--text-primary);
@@ -1239,39 +1250,105 @@ html body[data-ui-revision="tre-livelli"] :is(.vault-assistant-input, .vault-ass
 /* Icone nelle card: i contenitori neutri (pensati per il vetro scuro) e le pastiglie
    decorative viola seguono il ventaglio del colore scelto. Restano invariate le pastiglie
    di stato (rosso, ambra, arancio, verde), che hanno un significato. */
-body[data-ui-revision="tre-livelli"] :is(.settings-icon-box, .archive-icon-box, .hero-page-icon-box, .account-icon-box,
+body[data-ui-revision] :is(.settings-icon-box, .archive-icon-box, .hero-page-icon-box, .account-icon-box,
     .icon-box, .card-icon-box, .upload-icon, .attachment-icon-badge, .glass-btn-icon, .btn-icon-add):not(.icon-red, .icon-amber, .icon-orange, .icon-emerald, .icon-green, .icon-purple) {
     background: var(--rev-icon-bg);
     border-color: var(--rev-border);
     color: var(--rev-icon);
 }
 
-body[data-ui-revision="tre-livelli"] :is(.icon-purple, .email-icon-box):not(.matrix-icon-box) {
+body[data-ui-revision] :is(.icon-purple, .email-icon-box):not(.matrix-icon-box) {
     background: var(--rev-icon-bg);
     color: color-mix(in srgb, var(--rev-icon) 75%, var(--text-primary));
 }
 
-body[data-ui-revision="tre-livelli"] .matrix-icon-box:is(.icon-purple, .icon-blue),
-body[data-ui-revision="tre-livelli"].company-profile-page :is(.icon-purple, .icon-blue) {
+body[data-ui-revision] .matrix-icon-box:is(.icon-purple, .icon-blue),
+body[data-ui-revision].company-profile-page :is(.icon-purple, .icon-blue) {
     background: linear-gradient(135deg, var(--rev-fill) 0%, color-mix(in srgb, var(--rev-fill) 80%, #000) 100%);
     color: #fff;
 }
 
 /* Il secondario delle Impostazioni aveva opacity 0.7 sopra il colore: nella grafica Nuova
    il grigio è già calibrato per 4,5:1, quindi l'opacità aggiuntiva va tolta. */
-[data-ui-revision="tre-livelli"] .settings-desc {
+[data-ui-revision] .settings-desc {
     opacity: 1;
 }
 
 /* Icone di stato in chiaro: tinte scurite per ≥ 3:1 (mappa visiva 14/11/2026). */
-html:not(.dark) [data-ui-revision="tre-livelli"] :is(.icon-accent-emerald, .config-badge-emerald, span.material-symbols-outlined.icon-emerald) {
+html:not(.dark) [data-ui-revision] :is(.icon-accent-emerald, .config-badge-emerald, span.material-symbols-outlined.icon-emerald):not([data-icon-role="theme"]) {
     color: #047857;
 }
 
-html:not(.dark) [data-ui-revision="tre-livelli"] :is(.icon-accent-amber, span.material-symbols-outlined.icon-amber) {
+html:not(.dark) [data-ui-revision] :is(.icon-accent-amber, span.material-symbols-outlined.icon-amber):not([data-icon-role="theme"]) {
     color: #b45309;
 }
 
-html:not(.dark) [data-ui-revision="tre-livelli"] .icon-accent-orange {
+html:not(.dark) [data-ui-revision] .icon-accent-orange:not([data-icon-role="theme"]) {
     color: #c2410c;
+}
+
+/* Pulsanti primari e linguetta attiva: bianco su --rev-fill (≥ 4,5:1 anche col blu chiaro). */
+body[data-ui-revision] :is(.btn-primary, .profile-tab.is-active) {
+    background: var(--rev-fill);
+    color: #fff;
+}
+
+/* Icone decorative con un colore storico di stato (Profilo): il ruolo «theme» le fa seguire
+   il ventaglio; le icone senza ruolo dichiarato restano pastiglie di stato. */
+body[data-ui-revision] .settings-icon-box[data-icon-role="theme"] {
+    background: var(--rev-icon-bg);
+    border-color: var(--rev-border);
+    color: var(--rev-icon);
+}
+
+/* Coordinate bancarie (moduli e dettagli Account): i titoli verdi erano decorazione, non uno
+   stato. Superfici opache del ventaglio per un contrasto verificabile. */
+body[data-ui-revision] .bank-account-card {
+    background: var(--rev-surface-2);
+    border-color: var(--rev-border);
+    box-shadow: none;
+}
+
+body[data-ui-revision] .bank-account-card .card-entry {
+    background: var(--rev-surface);
+    border-color: var(--rev-border);
+}
+
+body[data-ui-revision] :is(.bank-title, .card-entry-label) {
+    color: var(--rev-text-accent);
+}
+
+body[data-ui-revision] :is(.bank-expand-icon, .card-entry-icon) {
+    color: var(--rev-icon);
+}
+
+/* «Salva» dei moduli Account (privato #btn-save-footer, azienda #save-btn-footer): azione
+   ordinaria, non una scadenza. Forma e profondità del FAB Classica, fill della palette.
+   Selezione per ID: .btn-fab-scadenza resta ambra per le vere Scadenze. */
+body[data-ui-revision] :is(#btn-save-footer, #save-btn-footer).btn-fab-scadenza {
+    background: linear-gradient(135deg, var(--rev-fill) 0%, color-mix(in srgb, var(--rev-fill) 82%, #000) 100%);
+    box-shadow: 0 10px 30px color-mix(in srgb, var(--accent) 40%, transparent);
+    color: #fff;
+}
+
+/* Registro Codex dei colori (14/11/2026): elementi decorativi con un colore storico di stato
+   (icone di sezione, campi data, TOP 10, segnaposto dei modelli email) dichiarano
+   data-icon-role="theme" nel markup e seguono la palette in entrambe le grafiche. Gli stati
+   reali (cancellazioni, uscita, revoca, avvisi, Scadenze/Urgenze) non hanno il ruolo. */
+html body[data-ui-revision] [data-icon-role="theme"]:not(.settings-icon-box) {
+    color: var(--rev-icon);
+}
+
+/* moduli.css dà a .icon-emerald/.icon-amber/.icon-red anche un fondo tenue fisso. */
+html body[data-ui-revision] [data-icon-role="theme"]:is(.icon-emerald, .icon-amber, .icon-red):not(.settings-icon-box) {
+    background-color: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+html body[data-ui-revision] :is(.mini-icon-box, .config-badge)[data-icon-role="theme"] {
+    background: var(--rev-icon-bg);
+    border-color: var(--rev-border);
+}
+
+html body[data-ui-revision] .config-badge[data-icon-role="theme"] {
+    color: var(--rev-text-accent);
 }

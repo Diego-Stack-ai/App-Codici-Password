@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="materiali-classica-entrambe-grafiche-2026-11-14"></a>
+
+## 14/11/2026 — materiali Classica e colori corretti in entrambe le grafiche
+
+Fonte: ordine di Diego trasmesso da Codex sulla [#308](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/308#issuecomment-6881634027) e confermato a Claude in chat («procedi»): effetti della Classica (vetro, sfocatura, ombre, movimento) con le sette palette, le correzioni cromatiche e i ruoli attuali dei pulsanti, in **entrambe** le grafiche; header del Profilo di nuovo trasparente. Supera il limite «sola Nuova / Classica invariata» e le superfici piene «Rifinita». Scelta tecnica dichiarata: in Classica il segno `data-ui-revision` diventa `classica` invece di sparire, così colori, ruoli e materiali sono condivisi mentre Modifica/Fine, filigrane e tipografia delle etichette restano della Nuova; la preferenza salvata (`ui_graphics`) e i flussi non cambiano. Eccezione motivata: le schede a scorrimento degli elenchi restano piene perché coprono le azioni sottostanti. Nessun merge, versione o deploy da questa decisione.
+
 <a id="mappa-visiva-rilascio-1273-2026-11-14"></a>
 
 ## 14/11/2026 — merge della #305 e versione 1.2.273

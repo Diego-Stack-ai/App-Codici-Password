@@ -3,7 +3,7 @@
    Comando «Modifica/Fine» per sezione; i token --rev-* (ventaglio tonale) sono in core_ui.css.
    Le regole specifiche di ogni famiglia restano nel CSS della famiglia. */
 /* Profondità comune: ombra leggera su schede e campi delle pagine migrate. */
-[data-ui-revision="tre-livelli"] :is(.form-card, .profile-data-card, .profile-contact-card, .glass-field, .detail-field-box, .detail-info-item, .detail-notes-box) {
+[data-ui-revision] :is(.form-card, .profile-data-card, .profile-contact-card, .glass-field, .detail-field-box, .detail-info-item, .detail-notes-box) {
     box-shadow: var(--rev-shadow);
 }
 

@@ -4,21 +4,18 @@
    Sono già pagine di gestione: i comandi restano visibili, cambia solo l'aspetto
    «Rifinita» (superfici piene, ombra comune, etichette neutre non in maiuscolo). */
 /* I token --rev-* (ventaglio tonale) sono definiti una sola volta in core_ui.css. */
-[data-ui-revision="tre-livelli"] :is(.settings-item, .glass-card, .glass-field, .detail-field-box, .form-section, .deadline-domain-panel) {
+/* Vetro tinto in entrambe le grafiche; al passaggio la Classica conserva sollevamento e ombra. */
+[data-ui-revision] :is(.settings-item, .glass-card, .glass-field, .detail-field-box, .form-section, .deadline-domain-panel) {
     background: var(--rev-surface);
     border-color: var(--rev-border);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    backdrop-filter: var(--rev-glass-blur);
+    -webkit-backdrop-filter: var(--rev-glass-blur);
     box-shadow: var(--rev-shadow);
 }
 
-[data-ui-revision="tre-livelli"] .settings-item:is(:hover, :focus-within) {
-    background: var(--rev-surface);
-    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-}
-
-[data-ui-revision="tre-livelli"] :is(.glass-field, .detail-field-box).border-glow::after {
-    display: none;
+[data-ui-revision] .settings-item:is(:hover, :focus-within) {
+    background: var(--rev-surface-hover);
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
 [data-ui-revision="tre-livelli"] :is(.settings-desc, .settings-subsection-label, .view-label, .label-sm, .detail-section-title, .form-section-title) {
@@ -26,31 +23,31 @@
     letter-spacing: normal;
 }
 
-[data-ui-revision="tre-livelli"] :is(.settings-desc, .settings-subsection-label, .view-label, .label-sm) {
+[data-ui-revision] :is(.settings-desc, .settings-subsection-label, .view-label, .label-sm) {
     color: var(--text-secondary);
 }
 
-[data-ui-revision="tre-livelli"] :is(.glass-field, .detail-field-box) {
+[data-ui-revision] :is(.glass-field, .detail-field-box) {
     gap: var(--space-3, 0.75rem);
 }
 
 /* Mappa visiva (14/11/2026): elementi che restavano blu o viola fissi in ogni palette. */
-[data-ui-revision="tre-livelli"] .config-badge-blue,
-[data-ui-revision="tre-livelli"] .recipient-count {
+[data-ui-revision] .config-badge-blue,
+[data-ui-revision] .recipient-count {
     background: var(--rev-icon-bg);
     border-color: var(--rev-border);
     color: var(--rev-text-accent);
 }
 
-[data-ui-revision="tre-livelli"] .icon-accent-purple {
+[data-ui-revision] .icon-accent-purple {
     color: var(--rev-icon);
 }
 
-[data-ui-revision="tre-livelli"] .bg-purple-soft {
+[data-ui-revision] .bg-purple-soft {
     background: var(--rev-icon-bg);
 }
 
 /* La classe .text-secondary non è definita nelle Regole: la freccia prendeva il blu dei link. */
-[data-ui-revision="tre-livelli"] .arrow-icon.text-secondary {
+[data-ui-revision] .arrow-icon.text-secondary {
     color: var(--text-secondary);
 }

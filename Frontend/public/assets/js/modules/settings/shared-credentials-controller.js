@@ -212,7 +212,7 @@ async function openEditor(record, refresh) {
         onclick: () => fieldList.appendChild(fieldEditor())
     }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'add'}), 'Aggiungi campo']);
     const save = createElement('button', {type: 'submit', className: 'btn-modal btn-primary', textContent: t('save')});
-    const actions = [createElement('button', {type: 'button', className: 'btn-modal', textContent: t('cancel'), onclick: close})];
+    const actions = [createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: t('cancel'), onclick: close})];
     if (record) actions.unshift(createElement('button', {
         type: 'button', className: 'btn-modal shared-credentials-delete', textContent: t('delete'),
         onclick: async () => {
@@ -308,7 +308,7 @@ export async function openSharedCredentialsSettings(user) {
         }
         shell.body.appendChild(list);
         shell.body.appendChild(createElement('div', {className: 'modal-actions'}, [
-            createElement('button', {type: 'button', className: 'btn-modal', textContent: t('close'), onclick: close}),
+            createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: t('close'), onclick: close}),
             createElement('button', {
                 type: 'button', className: 'btn-modal btn-primary', disabled: !navigator.onLine,
                 textContent: 'Nuova credenziale', onclick: () => openEditor(null, render)

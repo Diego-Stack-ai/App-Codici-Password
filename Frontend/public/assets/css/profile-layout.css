@@ -1,13 +1,24 @@
+/* Header dei profili a linguette: torna il vetro con dissolvenza della Classica (ordine di
+   Diego, 14/11/2026; prima era pieno dal correttivo 1.2.267). Il velo mobile resta
+   dentro l'altezza dell'header, così non copre la fascia delle linguette che gli sta sotto;
+   sotto titolo e comandi il contenuto passa sfocato e attenuato, non leggibile. */
+/* Protezione traslucida dietro titolo e comandi a ogni larghezza (revisione Codex su bc221f2):
+   vetro sfocato al colore di fondo, dissolvenza solo sul bordo inferiore. Contenuti chiari o
+   scuri che scorrono sotto non tolgono leggibilità (testo 4,5:1, icone 3:1). */
 #header-placeholder.base-header {
-    background: var(--bg-primary);
-    mask-image: none;
-    -webkit-mask-image: none;
+    background: color-mix(in srgb, var(--bg-primary) 88%, transparent);
+    backdrop-filter: blur(14px) saturate(110%);
+    -webkit-backdrop-filter: blur(14px) saturate(110%);
+    mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
 }
 
-/* This stylesheet belongs to the two tabbed profiles. The mobile glass veil
-   otherwise extends below their header and over the first part of the tabs. */
-#header-placeholder.base-header::before {
-    content: none;
+@media (max-width: 600px) {
+    #header-placeholder.base-header::before {
+        height: 100%;
+        -webkit-mask-image: linear-gradient(to bottom, black 70%, rgb(0 0 0 / 60%) 100%);
+        mask-image: linear-gradient(to bottom, black 70%, rgb(0 0 0 / 60%) 100%);
+    }
 }
 
 .profile-tabs {
@@ -21,7 +32,10 @@
     overflow-x: auto;
     border: 0;
     border-radius: 1rem;
-    background: var(--bg-primary);
+    /* Fascia in vetro coordinata con l'header: i contenuti che scorrono sotto restano sfocati. */
+    background: color-mix(in srgb, var(--bg-primary) 78%, transparent);
+    backdrop-filter: blur(14px) saturate(110%);
+    -webkit-backdrop-filter: blur(14px) saturate(110%);
     scrollbar-width: none;
 }
 
@@ -89,18 +103,18 @@
 /* === Revisione UI a tre livelli — pilota Profilo, stile «Rifinita» (10/11/2026) ===
    Ambito: solo pagine con body[data-ui-revision="tre-livelli"]. Le pagine non migrate
    restano invariate. Consultazione: dati e azioni rapide. Gestione: solo con «Modifica». */
-/* Superfici piene: niente vetro sulle card, un solo bordo tenue. */
-[data-ui-revision="tre-livelli"] .form-card,
-[data-ui-revision="tre-livelli"] .profile-data-card,
-[data-ui-revision="tre-livelli"] .profile-contact-card {
+/* Vetro tinto della palette in entrambe le grafiche (14/11/2026), un solo bordo tenue. */
+[data-ui-revision] .form-card,
+[data-ui-revision] .profile-data-card,
+[data-ui-revision] .profile-contact-card {
     background: var(--rev-surface);
     border: 1px solid var(--rev-border);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    backdrop-filter: var(--rev-glass-blur);
+    -webkit-backdrop-filter: var(--rev-glass-blur);
 }
 
-[data-ui-revision="tre-livelli"] .form-card:hover {
-    background: var(--rev-surface);
+[data-ui-revision] .form-card:hover {
+    background: var(--rev-surface-hover);
 }
 
 /* Etichette neutre; l'accento resta a ciò che si tocca. */

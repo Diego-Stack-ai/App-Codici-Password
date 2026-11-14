@@ -548,3 +548,9 @@ html[data-i18n="loading"] body {
         right: max(var(--space-3, 0.75rem), env(safe-area-inset-right));
     }
 }
+
+/* Pagine di accesso (scuro forzato): il grigio secondario sulla sfumatura di fondo
+   restava sotto 4,5:1 (mappa visiva 14/11/2026). */
+.protocol-forced-dark :is(.subtitle, .label) {
+    color: #c3cddb;
+}
