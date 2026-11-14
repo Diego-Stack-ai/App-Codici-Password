@@ -7,6 +7,7 @@ export function createProductionFrameAdmission({user, fenceTicket, onDeny}) {
   const reference = doc(db, ...FRAME_POLICY_PATH.split('/'));
   const watcher = createFramePermitWatcher({uid: user.uid, onDeny,
     isCurrent: () => auth.currentUser?.uid === user.uid && authSessionFence.isLocallyCurrent(fenceTicket),
+    canRefresh: () => !window.document.hidden,
     subscribe: (next, error) => onSnapshot(reference, {includeMetadataChanges: true}, next, error),
     readServer: () => getDocFromServer(reference)});
   const offline = () => watcher.deny();

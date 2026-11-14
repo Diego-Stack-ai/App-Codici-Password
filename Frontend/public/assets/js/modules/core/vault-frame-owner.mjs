@@ -162,8 +162,22 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
   resizeObserver?.observe(iframe);
   const timer = win.setInterval(() => {
     session.tick();
-    if (!locked && !checking && Date.now() >= nextCheck) { nextCheck = Date.now() + 10000; checking = admission().then(ok => {if (!disposed && !ok) session.lock('admission-revoked');})
-      .catch(() => {if (!disposed) session.lock('admission-unavailable');}).finally(() => {checking = null;}); }
+    if (!locked && !checking && Date.now() >= nextCheck) {
+      const epoch = visibilityEpoch, documentToken = nonce, documentObject = currentDocument();
+      nextCheck = Date.now() + 10000;
+      checking = admission().then(ok => {
+        if (disposed || epoch !== visibilityEpoch || win.document.hidden) return;
+        if (!ok) {session.lock('admission-revoked'); return;}
+        // Renew only the current, already visible child's finite lease. This
+        // does not unlock, unmask, create key material or renew user activity.
+        if (!masked && documentToken && nonce === documentToken && currentDocument() === documentObject) {
+          const state = session.state();
+          if (state.unlocked) post({kind: 'visible', leaseExpiresAt: state.expiresAt});
+        }
+      }).catch(() => {
+        if (!disposed && epoch === visibilityEpoch && !win.document.hidden) session.lock('admission-unavailable');
+      }).finally(() => {checking = null;});
+    }
   }, 1000);
   const diagnosticSnapshot = () => {
     const current = identity(), same = diagnosticIdentity && current?.uid === diagnosticIdentity.uid && current?.epoch === diagnosticIdentity.epoch;

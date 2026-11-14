@@ -284,7 +284,7 @@ async function bootstrapMain() {
                     }
                     if (navigator.onLine) {
                         const token = await auth.currentUser.getIdTokenResult();
-                        vaultFrameCandidateHint = auth.currentUser?.uid === user.uid && token.claims.email_verified === true && token.claims.vault_frame_canary === true;
+                        vaultFrameCandidateHint = auth.currentUser?.uid === user.uid && token.claims.email_verified === true;
                         if (token.claims.email_verified !== true) await auth.currentUser.getIdToken(true);
                     }
                 }
