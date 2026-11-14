@@ -164,6 +164,129 @@
       "foregroundRole": "--text-secondary",
       "backgroundRole": "--rev-surface",
       "minContrast": 3
+    },
+    {
+      "id": "settings-maintenance-card",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".btn-maintenance-accent",
+      "markup": "<div class=\"settings-item\"><button class=\"btn-maintenance-accent\" type=\"button\">Copia rapporto</button></div>",
+      "foregroundRole": "--settings-action-text",
+      "backgroundRole": "--rev-surface-2",
+      "backgroundImage": "none",
+      "minContrast": 4.5,
+      "states": [
+        "hover",
+        "focus"
+      ]
+    },
+    {
+      "id": "settings-maintenance-standalone",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".btn-maintenance-accent",
+      "markup": "<button class=\"btn-maintenance-accent\" type=\"button\">Copia rapporto</button>",
+      "foregroundRole": "--settings-action-text",
+      "backgroundRole": "--rev-surface-2",
+      "backgroundImage": "none",
+      "minContrast": 4.5,
+      "states": [
+        "hover",
+        "focus"
+      ]
+    },
+    {
+      "id": "settings-theme-icon-purple",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".settings-icon-box.icon-purple[data-icon-role=\"theme\"]",
+      "markup": "<div class=\"settings-icon-box icon-purple\" data-icon-role=\"theme\">x</div>",
+      "foregroundRole": "--rev-icon",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 3
+    },
+    {
+      "id": "settings-theme-icon-blue",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".settings-icon-box.icon-blue[data-icon-role=\"theme\"]",
+      "markup": "<div class=\"settings-icon-box icon-blue\" data-icon-role=\"theme\">x</div>",
+      "foregroundRole": "--rev-icon",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 3
+    },
+    {
+      "id": "settings-theme-icon-emerald",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".settings-icon-box.icon-emerald[data-icon-role=\"theme\"]",
+      "markup": "<div class=\"settings-icon-box icon-emerald\" data-icon-role=\"theme\">x</div>",
+      "foregroundRole": "--rev-icon",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 3
+    },
+    {
+      "id": "settings-theme-icon-amber",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".settings-icon-box.icon-amber[data-icon-role=\"theme\"]",
+      "markup": "<div class=\"settings-icon-box icon-amber\" data-icon-role=\"theme\">x</div>",
+      "foregroundRole": "--rev-icon",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 3
+    },
+    {
+      "id": "settings-theme-icon-red",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".settings-icon-box.icon-red[data-icon-role=\"theme\"]",
+      "markup": "<div class=\"settings-icon-box icon-red\" data-icon-role=\"theme\">x</div>",
+      "foregroundRole": "--rev-icon",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 3
+    },
+    {
+      "id": "settings-selected-timer",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".timer-btn.active",
+      "markup": "<button class=\"timer-btn active\" type=\"button\">Selezionato</button>",
+      "foregroundRole": "white",
+      "backgroundRole": "--rev-fill",
+      "backgroundImage": "none",
+      "minContrast": 4.5
+    },
+    {
+      "id": "settings-selected-theme",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".theme-btn.active",
+      "markup": "<button class=\"theme-btn active\" type=\"button\">Selezionato</button>",
+      "foregroundRole": "white",
+      "backgroundRole": "--rev-fill",
+      "backgroundImage": "none",
+      "minContrast": 4.5
+    },
+    {
+      "id": "settings-selected-color-theme",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".color-theme-btn.active",
+      "markup": "<button class=\"color-theme-btn active\" type=\"button\">Selezionato</button>",
+      "foregroundRole": "white",
+      "backgroundRole": "--rev-fill",
+      "backgroundImage": "none",
+      "minContrast": 4.5
     }
   ],
   "pending": [

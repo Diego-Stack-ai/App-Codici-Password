@@ -15,7 +15,9 @@ import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {chromium} from 'playwright';
 
-const root = fileURLToPath(new URL('../Frontend/public/', import.meta.url));
+// VISUAL_MAP_ROOT permette di provare lo strumento su pagine sintetiche, fuori dall'app.
+const root = process.env.VISUAL_MAP_ROOT ? path.resolve(process.env.VISUAL_MAP_ROOT) + path.sep
+  : fileURLToPath(new URL('../Frontend/public/', import.meta.url));
 const outDir = path.resolve(process.argv[2] || 'visual-map-out');
 const palettes = ['', 'green', 'red', 'sand', 'petrol', 'lavender', 'dusty-rose'];
 const paletteName = {'': 'Blu', green: 'Verde', red: 'Rosso', sand: 'Sabbia', petrol: 'Petrolio', lavender: 'Lavanda', 'dusty-rose': 'Rosa antico'};
@@ -100,15 +102,18 @@ function collect() {
     if (['SCRIPT', 'STYLE', 'TEMPLATE', 'NOSCRIPT', 'BR'].includes(element.tagName)) continue;
     const rect = element.getBoundingClientRect();
     const style = getComputedStyle(element);
-    if (!rect.width || !rect.height || style.visibility !== 'visible' || style.display === 'none' || Number(style.opacity) === 0) continue;
+    // Opacità effettiva = prodotto delle opacità dell'elemento e degli antenati (rilievo Codex 14/11).
+    let groupOpacity = 1;
+    for (let node = element; node && node.nodeType === 1; node = node.parentElement) groupOpacity *= Number(getComputedStyle(node).opacity);
+    if (!rect.width || !rect.height || style.visibility !== 'visible' || style.display === 'none' || groupOpacity === 0) continue;
     const text = [...element.childNodes].some(node => node.nodeType === 3 && node.textContent.trim());
     const bg = firstStop(style.backgroundImage) || parse(style.backgroundColor);
     const border = parseFloat(style.borderTopWidth) > 0 ? parse(style.borderTopColor) : null;
     if (!text && !(bg && bg.alpha > 0.05) && !(border && border.alpha > 0.05)) continue;
     records.push({index: own, label: label(element), text,
-      color: text ? parse(style.color)?.rgb : null, bg: bg && bg.alpha > 0.05 ? bg.rgb : null,
+      color: text ? parse(style.color)?.rgb : null, colorAlpha: text ? (parse(style.color)?.alpha ?? 1) : 1, bg: bg && bg.alpha > 0.05 ? bg.rgb : null,
       border: border && border.alpha > 0.05 ? border.rgb : null, effectiveBg: text ? effectiveBg(element) : null,
-      opacity: Number(style.opacity), fontSize: Math.round(parseFloat(style.fontSize) * 10) / 10,
+      opacity: groupOpacity, fontSize: Math.round(parseFloat(style.fontSize) * 10) / 10,
       fontWeight: Number(style.fontWeight), fontFamily: style.fontFamily.split(',')[0].replace(/["']/g, '').trim(),
       icon: /material-symbols/.test(element.className || '')});
   }
@@ -169,7 +174,8 @@ for (const page of pages) {
         if (!record.text || !record.color || !record.effectiveBg) continue;
         // Testo grande e icone (Material Symbols) richiedono 3:1, il testo ordinario 4,5:1.
         const large = record.icon || record.fontSize >= 24 || (record.fontSize >= 18.6 && record.fontWeight >= 700);
-        const ratio = contrast(blend(record.color, record.effectiveBg, record.opacity), record.effectiveBg);
+        // Il colore del testo viene composto con la sua alpha e con l'opacità di gruppo.
+        const ratio = contrast(blend(record.color, record.effectiveBg, record.opacity * record.colorAlpha), record.effectiveBg);
         if (ratio < (large ? 3 : 4.5)) lowContrast.push({index, label: record.label, palette: paletteName[palette], ratio: Math.round(ratio * 100) / 100,
           color: hex(record.color), bg: hex(record.effectiveBg)});
       }
@@ -222,6 +228,7 @@ table{border-collapse:collapse;width:100%;margin:6px 0 14px;font-size:13px}td,th
 <h1>Mappa visiva — grafica Nuova</h1>
 <p>${report.length} pagine × 7 colori × chiaro/scuro. Elementi che <b>non seguono il tema</b>: ${totals.fixed}; testi con <b>contrasto basso</b>: ${totals.low}; testi <b>fuori scala</b>: ${totals.font}.</p>
 <p class="legend">Schermate nel colore Verde: <b style="color:#ff00ff">magenta</b> = colore fisso che non segue il tema; <b style="color:#ff8c00">arancio</b> = contrasto basso. I colori fissi rosso/arancio/ambra/verde sono elencati a parte come probabili colori di stato. Pagine con contenuti costruiti dopo il login: copertura parziale.</p>
+<p class="legend"><b>Limiti</b>: solo viewport 390×844; pannelli, modali e dettagli chiusi non vengono aperti; niente stati hover/focus, pseudo-elementi, placeholder o SVG; sui gradienti si misura il primo colore; la tinta non stabilisce la funzione (un verde fisso può essere decorativo). I conteggi sono coppie elemento × tema × palette, non guasti confermati: confrontare i giri con la stessa unità.</p>
 ${report.map(p => `<h2>${esc(p.page)}</h2>
 <p><img src="${p.themes.light.screenshot}" alt="${esc(p.page)} chiaro"><img src="${p.themes.dark.screenshot}" alt="${esc(p.page)} scuro"></p>
 ${themes.map(t => `<h3>${t === 'light' ? 'Chiaro' : 'Scuro'} — non seguono il tema (${p.themes[t].fixed.length})</h3><div class="scroll">${rows(p.themes[t].fixed, [['Elemento', i => esc(i.label)], ['Proprietà', i => i.prop], ['Colore fisso', i => swatch(i.value)]])}</div>

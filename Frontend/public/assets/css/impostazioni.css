@@ -1560,3 +1560,28 @@ h3.settings-desc {
 body[data-ui-revision="tre-livelli"] {
     --page-symbol: 'settings';
 }
+
+/* Una classe cromatica storica non distingue decorazioni e stati: le icone
+   ordinarie delle Impostazioni dichiarano il ruolo; quelle distruttive lo conservano. */
+body[data-ui-revision="tre-livelli"][data-ui-model="configuration"] .settings-icon-box[data-icon-role="theme"] {
+    background: var(--rev-icon-bg);
+    border-color: var(--rev-border);
+    color: var(--rev-icon);
+}
+
+/* Diagnostica/Copia seguono la palette anche fuori dalle card, senza indaco fisso.
+   Superficie opaca per valutare il contrasto su entrambi gli sfondi di pagina. */
+body[data-ui-revision="tre-livelli"][data-ui-model="configuration"] .btn-maintenance-accent,
+body[data-ui-revision="tre-livelli"][data-ui-model="configuration"] .btn-maintenance-accent:is(:hover, :focus-visible) {
+    --settings-action-text: color-mix(in srgb, var(--rev-icon) 75%, var(--text-primary));
+
+    background: var(--rev-surface-2);
+    border-color: var(--rev-border);
+    color: var(--settings-action-text);
+}
+
+/* In scuro l'accento può essere chiaro: il bianco richiede il fill calibrato. */
+body[data-ui-revision="tre-livelli"][data-ui-model="configuration"] :is(.timer-btn, .theme-btn, .color-theme-btn).active {
+    background: var(--rev-fill);
+    color: #fff;
+}
