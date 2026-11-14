@@ -4,9 +4,13 @@
 
 <a id="rilascio-1273-stato-2026-11-14"></a>
 
-## APP 1.2.273 — candidata di confezionamento, 14/11/2026
+## APP 1.2.273 — pubblicata e verificata, 14/11/2026
 
-Su [ordine di Diego](DECISIONI.md#mappa-visiva-rilascio-1273-2026-11-14) la #305 è integrata e la candidata 1.2.273 cambia soltanto i riferimenti di versione (303 asset, service worker, package, catalogo aiuti). Online resta 1.2.272 fino al deploy approvato da Diego; dopo il rilascio è previsto il giro breve della cornice su QA2.
+Produzione **1.2.273 / `fa72c010507f713bc6014c89af5f45dd6185d91d`**: il solo Hosting CI [#1152](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43579360260) è **SUCCESS**, scope **hosting**, con master ancora sullo stesso SHA dopo il deploy. Il merge della #306 conserva l'albero della candidata `53bce09c`, [revisionata da Codex](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/306#issuecomment-6874855811). `Validate` SUCCESS in **13m21s**: 65 gruppi, **3668 casi / 3657 PASS / 0 FAIL / 11 skip**. Il job deploy è riuscito in **30 secondi complessivi**, concluso il 14/11 alle **11:28:03 CET**; non è una misura separata del solo upload.
+
+Diego, dal telefono, ha chiesto esplicitamente a Codex **«Puoi cliccare tu attraverso questa task?»**: Codex ha premuto **Approve and deploy** via UI per questa sola run, e GitHub ha mostrato **«The deployments have been approved»**. Operatore del clic **Codex su ordine di Diego**, non Diego personalmente; riscontro UI e stato `approved` su environment production confermati anche dall’API, che non espone un timestamp del clic. Nessun bypass o modifica delle protezioni e nessuna delega generale.
+
+[Ricevuta finale pubblicata e riletta sulla #306](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/306#issuecomment-6875939484). Verifica CI e successiva [verifica HTTP indipendente](../evidenze/COLLAUDI.md#rilascio-1273-ricevuta-2026-11-14) PASS: manifest 1.2.273 corrispondente allo SHA, `sourceDirty=false`, **365/365 hash**, **41 profili header**, tre probe di normalizzazione Hosting e controlli di cache, root, redirect login e rewrite Home. Il riscontro indipendente è eseguito dal checkout pulito del sorgente di merge, senza avviare l'app o accedere a QA2. [Mandato corrente](INCARICO_CORRENTE.md#rilascio-1273-incarico-2026-11-14) e [sequenza](PROGRAMMA.md#rilascio-1273-programma-2026-11-14) distinguono rilascio concluso e ricevuta documentale successiva. Canary **OFF secondo Diego**, senza rilettura amministrativa; nessun nuovo C1 o attivazione personale. I 315 rilievi di contrasto restano il giro successivo; il giro breve QA2 sulla 1.2.273 richiede ordine proprio. Gli altri ambienti/sottocasi C1, D15, fase personale/C2 e D18 non sono chiusi. Le sezioni seguenti conservano i rispettivi checkpoint storici.
 
 <a id="mappa-visiva-stato-2026-11-14"></a>
 
