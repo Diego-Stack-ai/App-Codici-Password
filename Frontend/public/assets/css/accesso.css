@@ -409,7 +409,7 @@ html[data-i18n="loading"] body {
 .auth-secondary-action:focus-visible {
     border-color: rgba(var(--accent-rgb), 0.58 );
     background: rgba(var(--accent-rgb), 0.15 );
-    color: #93c5fd;
+    color: color-mix(in srgb, var(--accent) 30%, #fff);
     outline: none;
 }
 
@@ -512,7 +512,7 @@ html[data-i18n="loading"] body {
     min-height: var(--touch-target-min, 44px);
     border: 0;
     background: transparent;
-    color: #60a5fa;
+    color: color-mix(in srgb, var(--accent) 45%, #fff);
     font: var(--font-label);
     cursor: pointer;
 }

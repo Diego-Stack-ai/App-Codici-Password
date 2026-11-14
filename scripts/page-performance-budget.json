@@ -10,9 +10,9 @@
     "maxInitialLocalGzipKbByPage": {
       "profilo_privato.html": 356,
       "form_account_azienda.html": 348,
-      "aggiungi_scadenza.html": 344,
+      "aggiungi_scadenza.html": 345,
       "form_account_privato.html": 346,
-      "impostazioni.html": 345,
+      "impostazioni.html": 346,
       "dettaglio_account_privato.html": 344,
       "dettaglio_account_azienda.html": 343
     },

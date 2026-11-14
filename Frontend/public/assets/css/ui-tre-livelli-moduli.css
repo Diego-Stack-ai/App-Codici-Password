@@ -33,3 +33,24 @@
 [data-ui-revision="tre-livelli"] :is(.glass-field, .detail-field-box) {
     gap: var(--space-3, 0.75rem);
 }
+
+/* Mappa visiva (14/11/2026): elementi che restavano blu o viola fissi in ogni palette. */
+[data-ui-revision="tre-livelli"] .config-badge-blue,
+[data-ui-revision="tre-livelli"] .recipient-count {
+    background: var(--rev-icon-bg);
+    border-color: var(--rev-border);
+    color: var(--rev-text-accent);
+}
+
+[data-ui-revision="tre-livelli"] .icon-accent-purple {
+    color: var(--rev-icon);
+}
+
+[data-ui-revision="tre-livelli"] .bg-purple-soft {
+    background: var(--rev-icon-bg);
+}
+
+/* La classe .text-secondary non è definita nelle Regole: la freccia prendeva il blu dei link. */
+[data-ui-revision="tre-livelli"] .arrow-icon.text-secondary {
+    color: var(--text-secondary);
+}

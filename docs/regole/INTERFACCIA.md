@@ -298,6 +298,12 @@ Il controllo Stylelint ha namespace di progetto `app-codici-password/valid-accen
 
 La modalità luminosa (`chiaro`, `automatico`, `scuro`) e la palette cromatica sono preferenze indipendenti. Le palette ammesse sono `blue`, `green`, `red`, `sand`, `petrol`, `lavender` e `dusty-rose`; `blue` è il fallback per valori assenti o non validi. La preferenza locale viene applicata da `theme-init.js` prima del rendering per evitare il cambio colore visibile all’avvio. `core.css` resta l’autorità dei token d’identità; colori funzionali di successo, avviso ed errore e colori di categoria non cambiano significato con la palette. I controlli in Impostazioni devono esporre selezione visiva e stato accessibile `aria-pressed`.
 
+<a id="mappa-visiva-2026-11-14"></a>
+
+### Mappa visiva — 14/11/2026
+
+Prima di ogni giro sui colori si esegue `npm run audit:visual-map` e se ne confronta l'esito con la stessa unità di misura. Un colore cromatico identico in tutte le palette non segue il tema, salvo colori semantici (stato, azioni distruttive) e scelte esplicite come i campioni del selettore colori. Ogni correzione entra nel registro degli abbinamenti con il suo caso e almeno un negativo. Per testo su pastiglia tinta si usa `--rev-text-accent`; per riempimenti con testo bianco `--rev-fill`. La mappa è un inventario, non una certificazione: i limiti sono quelli dichiarati nelle [evidenze](../evidenze/COLLAUDI.md#mappa-visiva-verifiche-2026-11-14).
+
 <a id="ui-color-contract-2026-11-13"></a>
 
 ### Abbinamenti dei colori e regressioni — 13/11/2026

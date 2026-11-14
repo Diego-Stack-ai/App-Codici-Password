@@ -100,3 +100,8 @@
 body[data-ui-revision="tre-livelli"] [data-manage="off"] #btn-reset-views {
     display: none;
 }
+
+/* Titoli h3 senza classe (Home, Destinatari) usavano la misura predefinita del browser. */
+[data-ui-revision="tre-livelli"] h3:not([class]) {
+    font-size: var(--fs-md);
+}

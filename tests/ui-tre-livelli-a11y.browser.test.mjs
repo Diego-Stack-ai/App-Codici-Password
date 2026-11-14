@@ -106,14 +106,20 @@ test('color registry preserves the reviewed matrix and minimum coverage', () => 
   assert.equal(colorContract.schemaVersion, 1);
   assert.deepEqual(colorContract.palettes, ['', 'green', 'red', 'sand', 'petrol', 'lavender', 'dusty-rose']);
   assert.deepEqual(colorContract.themes, ['light', 'dark']);
-  assert.deepEqual(colorContract.pages, ['impostazioni.html', 'profilo_privato.html', 'dati_azienda.html']);
+  assert.deepEqual(colorContract.pages, ['impostazioni.html', 'profilo_privato.html', 'dati_azienda.html',
+    'configurazione_documenti.html', 'gestione_destinatari.html', 'form_account_privato.html', 'regole_scadenze.html']);
   for (const [id, minimum] of Object.entries({'settings-secondary': 4.5, 'settings-popup-secondary': 4.5, 'settings-icon': 3,
-    'company-purple': 4.5, 'company-blue': 4.5, 'manage-pressed': 4.5, 'search-panel': 4.5, 'search-user-bubble': 4.5, 'search-microphone': 4.5})) {
+    'company-purple': 4.5, 'company-blue': 4.5, 'manage-pressed': 4.5, 'search-panel': 4.5, 'search-user-bubble': 4.5, 'search-microphone': 4.5,
+    'config-badge-accent': 4.5, 'recipient-count': 4.5, 'account-option-icon': 3, 'rules-arrow': 3,
+    'settings-maintenance-card': 4.5, 'settings-maintenance-standalone': 4.5,
+    'settings-theme-icon-purple': 3, 'settings-theme-icon-blue': 3, 'settings-theme-icon-emerald': 3, 'settings-theme-icon-amber': 3, 'settings-theme-icon-red': 3,
+    'settings-selected-timer': 4.5, 'settings-selected-theme': 4.5, 'settings-selected-color-theme': 4.5})) {
     assert.ok(colorContract.components.some(item => item.id === id && item.minContrast >= minimum), `reviewed coverage cannot disappear or weaken: ${id}`);
   }
   for (const item of colorContract.components) {
     assert.ok(item.selector && item.markup && item.foregroundRole && item.backgroundRole, `${item.id}: complete color pair`);
     assert.ok(Number.isFinite(item.minContrast) && item.minContrast >= 3, `${item.id}: numeric minimum`);
+    if (item.states) assert.deepEqual(item.states, ['hover', 'focus'], `${item.id}: reviewed interactive states`);
     if (item.pages) assert.ok(item.pages.length > 0 && item.pages.every(file => colorContract.pages.includes(file)), `${item.id}: valid page subset`);
   }
 });
@@ -127,7 +133,7 @@ function colorFixture(file, theme, palette) {
   const body = attributes(source.match(/<body\b[^>]*>/i)[0]);
   const components = colorContract.components.filter(item => !item.pages || item.pages.includes(file));
   assert.ok(components.length > 0, `${file}: registered cases exist`);
-  return `<!doctype html><html lang="it" class="${theme === 'dark' ? 'dark' : ''}" data-color-theme="${palette}"><head><meta charset="utf-8">${sheets.map(href => `<link rel="stylesheet" href="/${href}">`).join('')}</head>
+  return `<!doctype html><html lang="it" class="${theme === 'dark' ? 'dark' : ''}" data-color-theme="${palette}"><head><meta charset="utf-8">${sheets.map(href => `<link rel="stylesheet" href="/${href}">`).join('')}<style>*,*::before,*::after{transition:none!important;animation:none!important}</style></head>
     <body class="${body.class}" data-ui-model="${body['data-ui-model']}" data-ui-revision="tre-livelli">${components.map(item => `<section data-color-case="${item.id}">${item.markup}</section>`).join('')}</body></html>`;
 }
 async function openColorFixture(file, theme, palette) {
@@ -205,6 +211,17 @@ for (const theme of colorContract.themes) {
         const values = await readColorCases(page, file);
         assert.equal(values.length, colorContract.components.filter(item => !item.pages || item.pages.includes(file)).length, `${file}: no missing color samples`);
         verifyColorCases(values, `${file}/${palette || 'default'}/${theme}`);
+        for (const item of colorContract.components.filter(component => component.states && (!component.pages || component.pages.includes(file)))) {
+          const target = page.locator(`[data-color-case="${item.id}"] ${item.selector}`);
+          for (const state of item.states) {
+            await page.mouse.move(0, 0);
+            await page.evaluate(() => document.activeElement?.blur());
+            if (state === 'focus') await page.keyboard.press('Tab');
+            await target[state]();
+            assert.equal(await target.evaluate((element, pseudo) => element.matches(`:${pseudo === 'focus' ? 'focus-visible' : pseudo}`), state), true, `${item.id}: ${state} really active`);
+            verifyColorCases((await readColorCases(page, file)).filter(value => value.id === item.id), `${file}/${palette || 'default'}/${theme}/${state}`);
+          }
+        }
       }
       finally { await page.close(); }
     }
@@ -213,9 +230,12 @@ for (const theme of colorContract.themes) {
 // Browser negatives reproduce the faults that motivated the contract. No app JS,
 // accounts, external requests or production origin participate in these local checks.
 for (const [name, file, brokenCss, expected] of [
+  ['fixed indigo maintenance foreground', 'impostazioni.html', 'html body[data-ui-revision] .btn-maintenance-accent{color:#818cf8!important}', /settings-maintenance-.*foreground uses/],
+  ['bright selected timer', 'impostazioni.html', 'html body[data-ui-revision] .timer-btn.active{background:var(--accent)!important}', /settings-selected-timer/],
   ['white on a bright accent', 'impostazioni.html', 'html body[data-ui-revision] .vault-assistant-bubble.user{background:var(--accent)!important}', /search-user-bubble/],
   ['extra secondary opacity', 'impostazioni.html', 'html body[data-ui-revision] .settings-desc{opacity:.7!important}', /settings-secondary.*effective contrast/],
   ['bright second gradient stop', 'dati_azienda.html', 'html body[data-ui-revision].company-profile-page .icon-purple{background:linear-gradient(135deg,var(--rev-fill),var(--accent))!important}', /company-purple.*effective contrast/],
+  ['fixed blue badge', 'configurazione_documenti.html', 'html body[data-ui-revision] .config-badge-blue{color:#60a5fa!important}', /config-badge-accent/],
   ['legacy search panel gradient', 'impostazioni.html', 'html body[data-ui-revision] .vault-assistant-panel{background-image:linear-gradient(white,white)!important}', /search-panel/],
 ]) {
   test(`color contract detects ${name}`, {timeout: 30000}, async () => {
@@ -227,3 +247,75 @@ for (const [name, file, brokenCss, expected] of [
     } finally { await page.close(); }
   });
 }
+
+// Source guard: every static settings icon is classified by function, never only
+// by its old color class. DOMParser does not execute scripts in the real HTML.
+test('Settings markup classifies decorative icons and preserves destructive roles', {timeout: 30000}, async () => {
+  const page = await openColorFixture('impostazioni.html', 'light', 'green');
+  try {
+    const icons = await page.evaluate(source => {
+      const document = new DOMParser().parseFromString(source, 'text/html');
+      return [...document.querySelectorAll('.settings-icon-box')].map(element => ({
+        owner: element.closest('button')?.id || null,
+        themed: element.getAttribute('data-icon-role'),
+        red: element.classList.contains('icon-red')
+      }));
+    }, pageSources.get('impostazioni.html'));
+    assert.equal(icons.length, 26, 'all static Settings icons remain covered');
+    for (const icon of icons) {
+      if (['btn-reset-vault', 'btn-revoke-all-sessions'].includes(icon.owner)) {
+        assert.equal(icon.themed, null, `${icon.owner}: destructive icon must not be reclassified`);
+        assert.equal(icon.red, true, `${icon.owner}: destructive red retained`);
+      } else assert.equal(icon.themed, 'theme', `${icon.owner || 'ordinary setting'}: decorative icon follows palette`);
+    }
+    assert.equal(icons.filter(icon => icon.themed === null).length, 2, 'exactly two destructive icon exceptions');
+  } finally { await page.close(); }
+});
+
+test('Settings preserves Classic colors and semantic danger/status colors', {timeout: 120000}, async () => {
+  for (const theme of colorContract.themes) for (const palette of colorContract.palettes) {
+    const page = await openColorFixture('impostazioni.html', theme, palette);
+    try {
+      await page.evaluate(() => {
+        const container = document.createElement('section');
+        container.id = 'semantic-samples';
+        container.innerHTML = '<div class="settings-icon-box icon-red" id="danger-icon">x</div><button class="btn-maintenance-danger" id="danger-button">Cancella</button><span class="diagnostics-status-pass" id="status-pass">PASS</span><span class="diagnostics-status-warn" id="status-warn">WARN</span><span class="diagnostics-status-fail" id="status-fail">FAIL</span>';
+        document.body.append(container);
+      });
+      const read = () => page.evaluate(() => {
+        const paint = element => {
+          const style = getComputedStyle(element);
+          return {color: style.color, background: style.backgroundColor, image: style.backgroundImage, border: style.borderColor};
+        };
+        return {
+          semantic: [...document.querySelector('#semantic-samples').children].map(paint),
+          maintenance: paint(document.querySelector('[data-color-case="settings-maintenance-card"] button')),
+          legacyIcon: paint(document.querySelector('[data-color-case="settings-theme-icon-emerald"] div')),
+          selection: paint(document.querySelector('[data-color-case="settings-selected-timer"] button')),
+          accent: (() => {
+            const probe = document.createElement('span');
+            probe.style.backgroundColor = 'var(--accent)';
+            document.body.append(probe);
+            const color = getComputedStyle(probe).backgroundColor;
+            probe.remove();
+            return color;
+          })()
+        };
+      });
+      const revised = await read();
+      assert.equal(revised.semantic[0].color, revised.semantic[1].color, 'both danger controls use the same error foreground');
+      assert.equal(new Set(revised.semantic.slice(2).map(value => value.color)).size, 3, 'PASS/WARN/FAIL retain three distinct semantic colors');
+      assert.notEqual(revised.semantic[0].color, revised.semantic[2].color, 'danger is not rendered as success');
+      await page.evaluate(() => document.body.removeAttribute('data-ui-revision'));
+      const classic = await read();
+      assert.deepEqual(revised.semantic, classic.semantic, `${theme}/${palette}: danger and diagnostic status paints unchanged`);
+      assert.equal(classic.maintenance.color, 'rgb(129, 140, 248)', 'Classic keeps its previous indigo text');
+      assert.equal(classic.maintenance.background, 'rgba(99, 102, 241, 0.05)', 'Classic keeps its previous translucent surface');
+      assert.equal(classic.legacyIcon.background, 'rgba(16, 185, 129, 0.1)', 'Classic keeps its original emerald decoration');
+      assert.equal(classic.selection.background, classic.accent, 'Classic selected background remains the palette accent');
+      assert.equal(classic.selection.color, 'rgb(255, 255, 255)', 'Classic selected foreground unchanged');
+      await page.evaluate(() => document.body.setAttribute('data-ui-revision', 'tre-livelli'));
+      assert.deepEqual(await read(), revised, 'switching back restores the candidate paints');
+    } finally { await page.close(); }
+  }
+});

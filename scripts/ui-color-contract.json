@@ -3,14 +3,37 @@
   "scope": "Local CSS fixtures only; not a certification of every page, state or device",
   "paletteSource": "Frontend/public/assets/css/core.css",
   "roleSource": "Frontend/public/assets/css/core_ui.css",
-  "palettes": ["", "green", "red", "sand", "petrol", "lavender", "dusty-rose"],
-  "themes": ["light", "dark"],
-  "lazyStylesheets": ["assets/css/vault-assistant.css"],
-  "pages": ["impostazioni.html", "profilo_privato.html", "dati_azienda.html"],
+  "palettes": [
+    "",
+    "green",
+    "red",
+    "sand",
+    "petrol",
+    "lavender",
+    "dusty-rose"
+  ],
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "lazyStylesheets": [
+    "assets/css/vault-assistant.css"
+  ],
+  "pages": [
+    "impostazioni.html",
+    "profilo_privato.html",
+    "dati_azienda.html",
+    "configurazione_documenti.html",
+    "gestione_destinatari.html",
+    "form_account_privato.html",
+    "regole_scadenze.html"
+  ],
   "components": [
     {
       "id": "settings-secondary",
-      "pages": ["impostazioni.html"],
+      "pages": [
+        "impostazioni.html"
+      ],
       "selector": ".settings-item .settings-desc",
       "markup": "<div class=\"settings-item\"><span class=\"settings-desc\">Descrizione sintetica</span></div>",
       "foregroundRole": "--text-secondary",
@@ -19,7 +42,9 @@
     },
     {
       "id": "settings-popup-secondary",
-      "pages": ["impostazioni.html"],
+      "pages": [
+        "impostazioni.html"
+      ],
       "selector": ".modal-box .settings-desc",
       "markup": "<div class=\"modal-box\"><span class=\"settings-desc\">Conferma sintetica</span></div>",
       "foregroundRole": "--text-secondary",
@@ -28,7 +53,9 @@
     },
     {
       "id": "settings-icon",
-      "pages": ["impostazioni.html"],
+      "pages": [
+        "impostazioni.html"
+      ],
       "selector": ".settings-icon-box",
       "markup": "<div class=\"settings-icon-box\">x</div>",
       "foregroundRole": "--rev-icon",
@@ -37,7 +64,9 @@
     },
     {
       "id": "company-purple",
-      "pages": ["dati_azienda.html"],
+      "pages": [
+        "dati_azienda.html"
+      ],
       "selector": ".settings-icon-box.icon-purple",
       "markup": "<div class=\"settings-icon-box icon-purple\">x</div>",
       "foregroundRole": "white",
@@ -46,7 +75,9 @@
     },
     {
       "id": "company-blue",
-      "pages": ["dati_azienda.html"],
+      "pages": [
+        "dati_azienda.html"
+      ],
       "selector": ".settings-icon-box.icon-blue",
       "markup": "<div class=\"settings-icon-box icon-blue\">x</div>",
       "foregroundRole": "white",
@@ -55,7 +86,10 @@
     },
     {
       "id": "manage-pressed",
-      "pages": ["profilo_privato.html", "dati_azienda.html"],
+      "pages": [
+        "profilo_privato.html",
+        "dati_azienda.html"
+      ],
       "selector": ".manage-toggle[aria-pressed=true]",
       "markup": "<button class=\"manage-toggle\" type=\"button\" aria-pressed=\"true\">Fine</button>",
       "foregroundRole": "white",
@@ -86,13 +120,195 @@
       "foregroundRole": "white",
       "backgroundRole": "--rev-fill",
       "minContrast": 4.5
+    },
+    {
+      "id": "config-badge-accent",
+      "pages": [
+        "configurazione_documenti.html"
+      ],
+      "selector": ".config-badge.config-badge-blue",
+      "markup": "<span class=\"config-badge config-badge-blue\">[Doc]</span>",
+      "foregroundRole": "--rev-text-accent",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 4.5
+    },
+    {
+      "id": "recipient-count",
+      "pages": [
+        "gestione_destinatari.html"
+      ],
+      "selector": ".recipient-count",
+      "markup": "<span class=\"recipient-count\">3</span>",
+      "foregroundRole": "--rev-text-accent",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 4.5
+    },
+    {
+      "id": "account-option-icon",
+      "pages": [
+        "form_account_privato.html"
+      ],
+      "selector": ".icon-accent-purple.bg-purple-soft",
+      "markup": "<span class=\"material-symbols-outlined icon-accent-purple bg-purple-soft option-icon\">x</span>",
+      "foregroundRole": "--rev-icon",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 3
+    },
+    {
+      "id": "rules-arrow",
+      "pages": [
+        "regole_scadenze.html"
+      ],
+      "selector": ".arrow-icon.text-secondary",
+      "markup": "<div class=\"settings-item\"><a href=\"#\"><span class=\"material-symbols-outlined arrow-icon text-secondary\">x</span></a></div>",
+      "foregroundRole": "--text-secondary",
+      "backgroundRole": "--rev-surface",
+      "minContrast": 3
+    },
+    {
+      "id": "settings-maintenance-card",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".btn-maintenance-accent",
+      "markup": "<div class=\"settings-item\"><button class=\"btn-maintenance-accent\" type=\"button\">Copia rapporto</button></div>",
+      "foregroundRole": "--settings-action-text",
+      "backgroundRole": "--rev-surface-2",
+      "backgroundImage": "none",
+      "minContrast": 4.5,
+      "states": [
+        "hover",
+        "focus"
+      ]
+    },
+    {
+      "id": "settings-maintenance-standalone",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".btn-maintenance-accent",
+      "markup": "<button class=\"btn-maintenance-accent\" type=\"button\">Copia rapporto</button>",
+      "foregroundRole": "--settings-action-text",
+      "backgroundRole": "--rev-surface-2",
+      "backgroundImage": "none",
+      "minContrast": 4.5,
+      "states": [
+        "hover",
+        "focus"
+      ]
+    },
+    {
+      "id": "settings-theme-icon-purple",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".settings-icon-box.icon-purple[data-icon-role=\"theme\"]",
+      "markup": "<div class=\"settings-icon-box icon-purple\" data-icon-role=\"theme\">x</div>",
+      "foregroundRole": "--rev-icon",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 3
+    },
+    {
+      "id": "settings-theme-icon-blue",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".settings-icon-box.icon-blue[data-icon-role=\"theme\"]",
+      "markup": "<div class=\"settings-icon-box icon-blue\" data-icon-role=\"theme\">x</div>",
+      "foregroundRole": "--rev-icon",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 3
+    },
+    {
+      "id": "settings-theme-icon-emerald",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".settings-icon-box.icon-emerald[data-icon-role=\"theme\"]",
+      "markup": "<div class=\"settings-icon-box icon-emerald\" data-icon-role=\"theme\">x</div>",
+      "foregroundRole": "--rev-icon",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 3
+    },
+    {
+      "id": "settings-theme-icon-amber",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".settings-icon-box.icon-amber[data-icon-role=\"theme\"]",
+      "markup": "<div class=\"settings-icon-box icon-amber\" data-icon-role=\"theme\">x</div>",
+      "foregroundRole": "--rev-icon",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 3
+    },
+    {
+      "id": "settings-theme-icon-red",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".settings-icon-box.icon-red[data-icon-role=\"theme\"]",
+      "markup": "<div class=\"settings-icon-box icon-red\" data-icon-role=\"theme\">x</div>",
+      "foregroundRole": "--rev-icon",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 3
+    },
+    {
+      "id": "settings-selected-timer",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".timer-btn.active",
+      "markup": "<button class=\"timer-btn active\" type=\"button\">Selezionato</button>",
+      "foregroundRole": "white",
+      "backgroundRole": "--rev-fill",
+      "backgroundImage": "none",
+      "minContrast": 4.5
+    },
+    {
+      "id": "settings-selected-theme",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".theme-btn.active",
+      "markup": "<button class=\"theme-btn active\" type=\"button\">Selezionato</button>",
+      "foregroundRole": "white",
+      "backgroundRole": "--rev-fill",
+      "backgroundImage": "none",
+      "minContrast": 4.5
+    },
+    {
+      "id": "settings-selected-color-theme",
+      "pages": [
+        "impostazioni.html"
+      ],
+      "selector": ".color-theme-btn.active",
+      "markup": "<button class=\"color-theme-btn active\" type=\"button\">Selezionato</button>",
+      "foregroundRole": "white",
+      "backgroundRole": "--rev-fill",
+      "backgroundImage": "none",
+      "minContrast": 4.5
     }
   ],
   "pending": [
-    {"selector": ".vault-assistant-header p, .vault-assistant-status", "reason": "Fixed secondary colors; separate page alignment and contrast verification required"},
-    {"selector": ".vault-assistant-result small", "reason": "Secondary result text not covered by the fill regression"},
-    {"selector": ".vault-assistant-input::placeholder", "reason": "Placeholder foreground requires its own contrast check"},
-    {"selector": ".profile-tab.is-active", "reason": "Active tab foreground/background remain outside this registry's passing cases"},
-    {"selector": ".manage-toggle[aria-pressed=false], .btn-primary", "reason": "Normal, hover, focus and disabled states require separate page-by-page review"}
+    {
+      "selector": ".vault-assistant-header p, .vault-assistant-status",
+      "reason": "Fixed secondary colors; separate page alignment and contrast verification required"
+    },
+    {
+      "selector": ".vault-assistant-result small",
+      "reason": "Secondary result text not covered by the fill regression"
+    },
+    {
+      "selector": ".vault-assistant-input::placeholder",
+      "reason": "Placeholder foreground requires its own contrast check"
+    },
+    {
+      "selector": ".profile-tab.is-active",
+      "reason": "Active tab foreground/background remain outside this registry's passing cases"
+    },
+    {
+      "selector": ".manage-toggle[aria-pressed=false], .btn-primary",
+      "reason": "Normal, hover, focus and disabled states require separate page-by-page review"
+    }
   ]
 }

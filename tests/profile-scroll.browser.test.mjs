@@ -251,3 +251,69 @@ test('profile attachment metadata stays outside its delete control on narrow car
     }
   } finally {await browser.close();}
 });
+
+test('New profile widgets keep titles, descriptions and all six actions readable in narrow cards', {timeout: 120000}, async () => {
+  const browser = await launchBrowser();
+  try {
+    const page = await browser.newPage();
+    await page.route('**/*', route => route.abort());
+    const styles = await fixtureStyles();
+    const source = await pageSource('profilo_privato.html');
+    const bodyClass = source.match(/<body\b[^>]*class="([^"]+)"/)?.[1];
+    for (const width of [851, 320, 390, 1280]) for (const fontSize of [16, 32]) for (const dark of [false, true]) {
+      await page.setViewportSize({width, height: 900});
+      for (const longLabels of [false, true]) {
+        const labels = longLabels ? ['Sposta il widget precedente', 'Sposta il widget successivo', 'Comprimi tutti i campi', 'Modifica il widget', 'Duplica il widget', 'Elimina il widget'] : ['↑', '↓', 'Comprimi', 'Modifica', 'Duplica', 'Elimina'];
+        const header = `<header class="profile-widget-header"><span class="material-symbols-outlined notranslate" aria-hidden="true">◇</span><div class="profile-widget-title"><strong>Widget sintetico dimostrativo</strong><small>Descrizione sintetica completa del widget personalizzato.</small></div><div class="profile-widget-actions">${labels.map((label, index) => `<button type="button" data-widget-action="${index}">${label}</button>`).join('')}</div></header>`;
+        const field = `<div class="profile-widget-field"><span class="data-label">Campo sintetico</span><span class="data-value">${'valore'.repeat(12)}</span><div class="profile-widget-field-actions"><button type="button">Copia</button><button type="button">↑</button><button type="button">↓</button><button type="button">Modifica</button><button type="button">Elimina</button></div></div>`;
+        const widget = `<article class="form-card profile-widget profile-widget-medium">${header}<div class="profile-widget-body">${field}<button type="button" class="btn-upload-trigger">Aggiungi campo</button></div></article>`;
+        await page.setContent(`<!doctype html><html class="${dark ? 'dark' : ''}" style="font-size:${fontSize}px"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>${styles}*,*::before,*::after{transition:none!important;animation:none!important}</style></head><body class="${bodyClass}" data-ui-model="detail" data-ui-revision="tre-livelli"><div class="base-container"><main class="base-main"><div class="page-container"><section class="profile-widget-zone"><div class="profile-widget-grid">${widget}${widget}</div></section></div></main></div></body></html>`);
+        const geometries = await page.locator('.profile-widget').evaluateAll(widgets => widgets.map(widget => {
+          const rect = element => element.getBoundingClientRect().toJSON();
+          const title = widget.querySelector('.profile-widget-title');
+          const actions = [...widget.querySelectorAll('.profile-widget-actions button')];
+          const textRects = [...title.querySelectorAll('strong,small')].flatMap(element => {
+            const range = document.createRange(); range.selectNodeContents(element);
+            return [...range.getClientRects()].map(part => part.toJSON());
+          });
+          const card = rect(widget);
+          return {card, header: rect(widget.querySelector('.profile-widget-header')), title: rect(title),
+            text: textRects, actions: actions.map(rect),
+            clipped: [...widget.querySelectorAll('.profile-widget-title strong,.profile-widget-title small,.profile-widget-field')].some(element => element.scrollWidth > element.clientWidth + 1),
+            overflow: widget.scrollWidth - widget.clientWidth};
+        }));
+        const context = JSON.stringify({width, fontSize, dark, longLabels});
+        for (const geometry of geometries) {
+          assert.equal(geometry.actions.length, 6, context + ': preserve every widget command');
+          assert.ok(geometry.title.width >= geometry.header.width * 0.6, context + ': commands must not squeeze the title into a narrow strip: ' + JSON.stringify(geometry));
+          assert.equal(geometry.clipped, false, context + ': title, description and fields must not be clipped');
+          assert.ok(geometry.overflow <= 1, context + ': widget must not overflow horizontally');
+          for (const action of geometry.actions) {
+            assert.ok(action.width >= 44 && action.height >= 44, context + ': preserve a 44px action target');
+            assert.ok(action.left >= geometry.card.left && action.right <= geometry.card.right + 1, context + ': action stays inside its card');
+            assert.equal(geometry.text.some(part => part.left < action.right && part.right > action.left && part.top < action.bottom && part.bottom > action.top), false, context + ': actions cannot overlap title or description');
+          }
+          for (let index = 0; index < geometry.actions.length; index++) for (let next = index + 1; next < geometry.actions.length; next++) {
+            const a = geometry.actions[index], b = geometry.actions[next];
+            assert.equal(a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top, false, context + ': widget actions cannot overlap each other');
+          }
+        }
+        if (width === 851 && fontSize === 16) assert.equal(geometries[0].card.top, geometries[1].card.top, 'exercise the same two-column card layout as the desktop screenshot');
+        await page.evaluate(() => {
+          window.widgetFixtureClicks = [];
+          document.querySelector('.profile-widget').querySelectorAll('[data-widget-action]').forEach(button => {
+            button.onclick = () => window.widgetFixtureClicks.push(Number(button.dataset.widgetAction));
+          });
+        });
+        for (let index = 0; index < 6; index++) await page.locator('.profile-widget').first().locator(`[data-widget-action="${index}"]`).click();
+        assert.deepEqual(await page.evaluate(() => window.widgetFixtureClicks), [0, 1, 2, 3, 4, 5], context + ': all six synthetic controls remain reachable and distinct');
+        await page.evaluate(() => document.body.removeAttribute('data-ui-revision'));
+        const classic = await page.evaluate(() => ({
+          header: getComputedStyle(document.querySelector('.profile-widget-header')).display,
+          caption: getComputedStyle(document.querySelector('.profile-widget-title small')).whiteSpace
+        }));
+        assert.deepEqual(classic, {header: 'flex', caption: 'nowrap'}, 'Classica keeps the previous header and caption layout');
+      }
+    }
+  } finally {await browser.close();}
+});

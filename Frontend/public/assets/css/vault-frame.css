@@ -33,3 +33,34 @@ body {
 [hidden] {
   display: none;
 }
+
+/* Schermata di blocco (mappa visiva 14/11/2026): titolo nella scala e comando che
+   segue la palette, invece del link blu predefinito del browser. Riempimento scurito
+   per il testo bianco (≥ 4,5:1), come --rev-fill della grafica Nuova. */
+.frame-status h1 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--fs-xl, 1.5rem);
+}
+
+#frame-resume {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 1.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 85%, #0f172a);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.dark #frame-resume {
+  background: color-mix(in srgb, var(--accent) 45%, #0f172a);
+}
+
+#frame-resume:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}

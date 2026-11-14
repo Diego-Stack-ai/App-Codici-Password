@@ -1,5 +1,11 @@
 # Incarico corrente
 
+<a id="mappa-visiva-incarico-2026-11-14"></a>
+
+## Mappa visiva e colori — passaggio a Claude, 14/11/2026
+
+Diego ordina di affidare a Claude l'intero seguito di mappatura e correzione UI, incluse Impostazioni e widget: Codex consegna la sua patch sulla #283 e sospende le modifiche applicative. Claude prepara la candidata unica #305 (strumento `audit:visual-map`, giro 1 dei colori fissi, patch Codex integrata) e la sottopone alla revisione di Codex; merge, versione 1.2.273 e deploy restano ordini distinti di Diego. Il giro sui testi a contrasto basso segue in una candidata successiva. [Stato](STATO.md#mappa-visiva-stato-2026-11-14). Canary **OFF secondo Diego**.
+
 <a id="rilascio-ui-1272-incarico-2026-11-13"></a>
 
 ## APP 1.2.272 — confezionamento e rilascio Hosting autorizzato, 13/11/2026
