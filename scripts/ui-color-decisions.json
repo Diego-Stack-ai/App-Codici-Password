@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "source": "Registro Codex sulla #308 (14/11/2026): 171 occorrenze in 45 gruppi, 131 Tema e 40 Funzione. Ordine di Diego: entrambe le grafiche.",
+  "scope": "Markup statico delle pagine con i CSS reali, script esclusi. Contenuti generati dopo il login, hover/focus e modali chiusi non sono coperti da questo registro.",
+  "theme": [
+    {"id": "deadline_form_field_icons", "page": "aggiungi_scadenza.html", "selector": ".label-icon[data-icon-role=\"theme\"]", "count": 3, "property": "color", "role": "--rev-icon", "reason": "Icona fissa dell'etichetta di un campo: non segnala urgenza o errore."},
+    {"id": "private-top10-decoration", "page": "area_privata.html", "selector": ".mini-icon-box[data-icon-role=\"theme\"]", "count": 1, "property": "color", "role": "--rev-icon", "reason": "Introduce la classifica TOP 10: nessuno stato di avviso."},
+    {"id": "private-navigation-cards", "page": "area_privata.html", "selector": ".matrix-card:is(.card-blue, .card-red, .card-orange, .card-green)", "count": 4, "property": "backgroundImage", "role": "--rev-hub-gradient", "reason": "Account Standard, Condivisi, Note e Note condivise sono destinazioni, non esiti."},
+    {"id": "home-navigation-cards", "page": "home_page.html", "selector": ".matrix-card:is(.card-blue, .card-green):not(.area-scadenze, .area-urgenze)", "count": 2, "property": "backgroundImage", "role": "--rev-hub-gradient", "reason": "Privato e Azienda sono destinazioni; il verde dell'Azienda non è un successo."},
+    {"id": "configuration_section_icons", "page": "configurazione_documenti.html", "selector": ".settings-icon-box[data-icon-role=\"theme\"]", "count": 2, "property": "color", "role": "--rev-icon", "reason": "Decorazione delle categorie di configurazione."},
+    {"id": "template_placeholder_badges_documenti", "page": "configurazione_documenti.html", "selector": ".config-badge[data-icon-role=\"theme\"]", "count": 3, "property": "color", "role": "--rev-text-accent", "reason": "Segnaposto della sintassi email: il colore identifica il tipo di dato, non un esito."},
+    {"id": "template_placeholder_badges_generali", "page": "configurazione_generali.html", "selector": ".config-badge[data-icon-role=\"theme\"]", "count": 1, "property": "color", "role": "--rev-text-accent", "reason": "Segnaposto della sintassi email."},
+    {"id": "account-section-icons-form-privato", "page": "form_account_privato.html", "selector": ".detail-section-icon[data-icon-role=\"theme\"]", "count": 2, "property": "color", "role": "--rev-icon", "reason": "Referente e Note: sezioni di dati, nessuno stato."},
+    {"id": "account-section-icons-form-azienda", "page": "form_account_azienda.html", "selector": ".detail-section-icon[data-icon-role=\"theme\"]", "count": 2, "property": "color", "role": "--rev-icon", "reason": "Referente e Note: sezioni di dati, nessuno stato."},
+    {"id": "account-section-icons-dettaglio-privato", "page": "dettaglio_account_privato.html", "selector": ".detail-section-icon[data-icon-role=\"theme\"]", "count": 2, "property": "color", "role": "--rev-icon", "reason": "Coordinate e Note: sezioni di dati, nessuno stato."},
+    {"id": "account-section-icons-dettaglio-azienda", "page": "dettaglio_account_azienda.html", "selector": ".detail-section-icon[data-icon-role=\"theme\"]", "count": 3, "property": "color", "role": "--rev-icon", "reason": "Coordinate, Referente e Note: sezioni di dati, nessuno stato."},
+    {"id": "company-edit-section-icons", "page": "modifica_azienda.html", "selector": ".detail-section-icon[data-icon-role=\"theme\"]", "count": 4, "property": "color", "role": "--rev-icon", "reason": "Dati fiscali, referente, email e note: categorie di dati costanti."},
+    {"id": "company-profile-section-icons", "page": "dati_azienda.html", "selector": ".detail-section-icon[data-icon-role=\"theme\"]", "count": 3, "property": "color", "role": "--rev-icon", "reason": "Stessa funzione delle icone di sezione dei moduli Azienda."},
+    {"id": "deadline_detail_metadata_icons", "page": "dettaglio_scadenza.html", "selector": "[data-icon-role=\"theme\"]", "count": 3, "property": "color", "role": "--rev-icon", "reason": "Calendario, categoria e pianificazione statici: il render cambia solo il testo."},
+    {"id": "settings-menu-icons", "page": "impostazioni.html", "selector": ".settings-icon-box[data-icon-role=\"theme\"]", "count": 24, "property": "color", "role": "--rev-icon", "reason": "Voci del menu Impostazioni (anche le classic-settings-* del registro): icone di destinazione, non esiti."},
+    {"id": "profile-section-icons", "page": "profilo_privato.html", "selector": ".settings-icon-box[data-icon-role=\"theme\"]", "count": 6, "property": "color", "role": "--rev-icon", "reason": "Sezioni del Profilo."}
+  ],
+  "legal": {"pages": ["privacy.html", "termini.html"], "selector": ".settings-icon-box[data-icon-role=\"theme\"]", "counts": {"privacy.html": 11, "termini.html": 10}, "light": "color-mix(in srgb, var(--accent) 85%, #0f172a)", "dark": "var(--accent)", "reason": "Icone di argomento delle pagine legali, inclusa report_problem: testi legali e avviso «In sviluppo» invariati."},
+  "function": [
+    {"id": "archive-empty-trash", "page": "archivio_account.html", "selector": "#btn-empty-trash", "property": "color", "hue": "red", "reason": "Svuota Cestino elimina definitivamente dopo conferma testuale."},
+    {"id": "recipient-in-use-warning", "page": "gestione_destinatari.html", "selector": ".recipient-manager-warning", "property": "color", "hue": "amber", "reason": "Avviso sul vincolo di eliminazione di un destinatario in uso."},
+    {"id": "home-upcoming-deadlines", "page": "home_page.html", "selector": ".area-scadenze .matrix-icon-box", "property": "color", "hue": "amber", "reason": "Scadenze da oggi a 30 giorni: stato temporale."},
+    {"id": "home-overdue-deadlines", "page": "home_page.html", "selector": ".area-urgenze .matrix-icon-box", "property": "color", "hue": "red", "reason": "Urgenze: scadenze già passate."},
+    {"id": "settings-destructive-icons", "page": "impostazioni.html", "selector": ".settings-icon-box.icon-red:not([data-icon-role])", "count": 2, "property": "color", "hue": "red", "reason": "Rimozione accesso biometrico e revoca di tutte le sessioni."},
+    {"id": "settings-clear-frame-diagnostics", "page": "impostazioni.html", "selector": "#btn-clear-frame-diagnostics", "property": "color", "hue": "red", "reason": "Cancellazione del registro diagnostico, distinta da Copia rapporto."},
+    {"id": "settings-explicit-logout", "page": "impostazioni.html", "selector": "#logout-btn-settings", "property": "color", "hue": "red", "reason": "Uscita deliberata con conferma."},
+    {"id": "company-email-remove-actions", "page": "modifica_azienda.html", "selector": ".action-icon-compact", "count": 3, "property": "color", "hue": "red", "reason": "Comandi Elimina delle email aziendali."}
+  ]
+}

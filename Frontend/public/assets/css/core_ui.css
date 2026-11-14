@@ -1275,15 +1275,15 @@ body[data-ui-revision].company-profile-page :is(.icon-purple, .icon-blue) {
 }
 
 /* Icone di stato in chiaro: tinte scurite per ≥ 3:1 (mappa visiva 14/11/2026). */
-html:not(.dark) [data-ui-revision] :is(.icon-accent-emerald, .config-badge-emerald, span.material-symbols-outlined.icon-emerald) {
+html:not(.dark) [data-ui-revision] :is(.icon-accent-emerald, .config-badge-emerald, span.material-symbols-outlined.icon-emerald):not([data-icon-role="theme"]) {
     color: #047857;
 }
 
-html:not(.dark) [data-ui-revision] :is(.icon-accent-amber, span.material-symbols-outlined.icon-amber) {
+html:not(.dark) [data-ui-revision] :is(.icon-accent-amber, span.material-symbols-outlined.icon-amber):not([data-icon-role="theme"]) {
     color: #b45309;
 }
 
-html:not(.dark) [data-ui-revision] .icon-accent-orange {
+html:not(.dark) [data-ui-revision] .icon-accent-orange:not([data-icon-role="theme"]) {
     color: #c2410c;
 }
 
@@ -1329,4 +1329,26 @@ body[data-ui-revision] :is(#btn-save-footer, #save-btn-footer).btn-fab-scadenza 
     background: linear-gradient(135deg, var(--rev-fill) 0%, color-mix(in srgb, var(--rev-fill) 82%, #000) 100%);
     box-shadow: 0 10px 30px color-mix(in srgb, var(--accent) 40%, transparent);
     color: #fff;
+}
+
+/* Registro Codex dei colori (14/11/2026): elementi decorativi con un colore storico di stato
+   (icone di sezione, campi data, TOP 10, segnaposto dei modelli email) dichiarano
+   data-icon-role="theme" nel markup e seguono la palette in entrambe le grafiche. Gli stati
+   reali (cancellazioni, uscita, revoca, avvisi, Scadenze/Urgenze) non hanno il ruolo. */
+html body[data-ui-revision] [data-icon-role="theme"]:not(.settings-icon-box) {
+    color: var(--rev-icon);
+}
+
+/* moduli.css dà a .icon-emerald/.icon-amber/.icon-red anche un fondo tenue fisso. */
+html body[data-ui-revision] [data-icon-role="theme"]:is(.icon-emerald, .icon-amber, .icon-red):not(.settings-icon-box) {
+    background-color: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+html body[data-ui-revision] :is(.mini-icon-box, .config-badge)[data-icon-role="theme"] {
+    background: var(--rev-icon-bg);
+    border-color: var(--rev-border);
+}
+
+html body[data-ui-revision] .config-badge[data-icon-role="theme"] {
+    color: var(--rev-text-accent);
 }

@@ -248,3 +248,14 @@
 html:not(.dark) .icon-emerald { color: #047857; }
 html:not(.dark) .icon-amber { color: #b45309; }
 html:not(.dark) .icon-red { color: #b91c1c; }
+
+/* Registro Codex dei colori (14/11/2026): le icone delle sezioni legali sono argomenti, non
+   esiti; seguono la palette. Nessuna modifica ai testi legali. */
+html .settings-icon-box[data-icon-role="theme"] {
+    background: rgba(var(--accent-rgb), 0.12);
+    color: color-mix(in srgb, var(--accent) 85%, #0f172a);
+}
+
+.dark .settings-icon-box[data-icon-role="theme"] {
+    color: var(--accent);
+}
