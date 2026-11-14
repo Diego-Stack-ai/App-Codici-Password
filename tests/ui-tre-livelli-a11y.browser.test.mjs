@@ -106,9 +106,11 @@ test('color registry preserves the reviewed matrix and minimum coverage', () => 
   assert.equal(colorContract.schemaVersion, 1);
   assert.deepEqual(colorContract.palettes, ['', 'green', 'red', 'sand', 'petrol', 'lavender', 'dusty-rose']);
   assert.deepEqual(colorContract.themes, ['light', 'dark']);
-  assert.deepEqual(colorContract.pages, ['impostazioni.html', 'profilo_privato.html', 'dati_azienda.html']);
+  assert.deepEqual(colorContract.pages, ['impostazioni.html', 'profilo_privato.html', 'dati_azienda.html',
+    'configurazione_documenti.html', 'gestione_destinatari.html', 'form_account_privato.html', 'regole_scadenze.html']);
   for (const [id, minimum] of Object.entries({'settings-secondary': 4.5, 'settings-popup-secondary': 4.5, 'settings-icon': 3,
-    'company-purple': 4.5, 'company-blue': 4.5, 'manage-pressed': 4.5, 'search-panel': 4.5, 'search-user-bubble': 4.5, 'search-microphone': 4.5})) {
+    'company-purple': 4.5, 'company-blue': 4.5, 'manage-pressed': 4.5, 'search-panel': 4.5, 'search-user-bubble': 4.5, 'search-microphone': 4.5,
+    'config-badge-accent': 4.5, 'recipient-count': 4.5, 'account-option-icon': 3, 'rules-arrow': 3})) {
     assert.ok(colorContract.components.some(item => item.id === id && item.minContrast >= minimum), `reviewed coverage cannot disappear or weaken: ${id}`);
   }
   for (const item of colorContract.components) {
@@ -216,6 +218,7 @@ for (const [name, file, brokenCss, expected] of [
   ['white on a bright accent', 'impostazioni.html', 'html body[data-ui-revision] .vault-assistant-bubble.user{background:var(--accent)!important}', /search-user-bubble/],
   ['extra secondary opacity', 'impostazioni.html', 'html body[data-ui-revision] .settings-desc{opacity:.7!important}', /settings-secondary.*effective contrast/],
   ['bright second gradient stop', 'dati_azienda.html', 'html body[data-ui-revision].company-profile-page .icon-purple{background:linear-gradient(135deg,var(--rev-fill),var(--accent))!important}', /company-purple.*effective contrast/],
+  ['fixed blue badge', 'configurazione_documenti.html', 'html body[data-ui-revision] .config-badge-blue{color:#60a5fa!important}', /config-badge-accent/],
   ['legacy search panel gradient', 'impostazioni.html', 'html body[data-ui-revision] .vault-assistant-panel{background-image:linear-gradient(white,white)!important}', /search-panel/],
 ]) {
   test(`color contract detects ${name}`, {timeout: 30000}, async () => {

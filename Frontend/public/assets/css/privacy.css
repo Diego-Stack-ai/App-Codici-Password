@@ -103,8 +103,12 @@
 }
 
 .icon-purple {
-    background: rgba(168, 85, 247, 0.12);
-    color: #a855f7;
+    background: rgba(var(--accent-rgb), 0.12 );
+    color: color-mix(in srgb, var(--accent) 85%, #0f172a);
+}
+
+.dark .icon-purple {
+    color: var(--accent);
 }
 
 .icon-red {
@@ -239,3 +243,8 @@
         opacity: 0;
     }
 }
+
+/* Mappa visiva (14/11/2026): icone di stato troppo chiare sul fondo chiaro (< 3:1). */
+html:not(.dark) .icon-emerald { color: #047857; }
+html:not(.dark) .icon-amber { color: #b45309; }
+html:not(.dark) .icon-red { color: #b91c1c; }

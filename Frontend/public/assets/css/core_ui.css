@@ -1177,6 +1177,8 @@ select.shared-account-select-control optgroup {
     --rev-icon: color-mix(in srgb, var(--accent) 85%, #0f172a);
     /* Riempimento pieno con testo bianco: scurito quanto basta per ≥ 4,5:1 su ogni palette. */
     --rev-fill: color-mix(in srgb, var(--accent) 85%, #0f172a);
+    /* Testo su pastiglia tinta: ≥ 4,5:1 su --rev-icon-bg. */
+    --rev-text-accent: color-mix(in srgb, var(--accent) 70%, #0f172a);
     --rev-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.08);
     --rev-popup-shadow: 0 24px 56px -16px rgba(var(--accent-rgb), 32%);
 }
@@ -1190,6 +1192,7 @@ select.shared-account-select-control optgroup {
     --rev-icon: color-mix(in srgb, var(--accent) 45%, #fff);
     /* Gli accenti scuri sono chiari: il riempimento con testo bianco va scurito di più. */
     --rev-fill: color-mix(in srgb, var(--accent) 45%, #0f172a);
+    --rev-text-accent: color-mix(in srgb, var(--accent) 45%, #fff);
     /* In scuro gli accenti sono chiari: percentuali più basse; il grigio secondario
        si schiarisce per restare ≥ 4,5:1 su ogni superficie. */
     --text-secondary: #c3cddb;
@@ -1258,4 +1261,17 @@ body[data-ui-revision="tre-livelli"].company-profile-page :is(.icon-purple, .ico
    il grigio è già calibrato per 4,5:1, quindi l'opacità aggiuntiva va tolta. */
 [data-ui-revision="tre-livelli"] .settings-desc {
     opacity: 1;
+}
+
+/* Icone di stato in chiaro: tinte scurite per ≥ 3:1 (mappa visiva 14/11/2026). */
+html:not(.dark) [data-ui-revision="tre-livelli"] :is(.icon-accent-emerald, .config-badge-emerald, span.material-symbols-outlined.icon-emerald) {
+    color: #047857;
+}
+
+html:not(.dark) [data-ui-revision="tre-livelli"] :is(.icon-accent-amber, span.material-symbols-outlined.icon-amber) {
+    color: #b45309;
+}
+
+html:not(.dark) [data-ui-revision="tre-livelli"] .icon-accent-orange {
+    color: #c2410c;
 }
