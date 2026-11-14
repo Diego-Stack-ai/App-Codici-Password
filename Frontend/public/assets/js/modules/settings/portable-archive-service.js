@@ -1,5 +1,5 @@
 import {confirmFrameAction} from '../core/vault-frame-client.js';
-import {auth, storage} from '../../firebase-config.js?v=1.2.272';
+import {auth, storage} from '../../firebase-config.js?v=1.2.273';
 import {getBytes, ref} from '/assets/js/vendor/firebase-runtime.js';
 import {decryptRequiredValue, isEncryptedValue} from '../core/crypto-utils.js';
 import {

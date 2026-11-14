@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1273-stato-2026-11-14"></a>
+
+## APP 1.2.273 — candidata di confezionamento, 14/11/2026
+
+Su [ordine di Diego](DECISIONI.md#mappa-visiva-rilascio-1273-2026-11-14) la #305 è integrata e la candidata 1.2.273 cambia soltanto i riferimenti di versione (303 asset, service worker, package, catalogo aiuti). Online resta 1.2.272 fino al deploy approvato da Diego; dopo il rilascio è previsto il giro breve della cornice su QA2.
+
 <a id="mappa-visiva-stato-2026-11-14"></a>
 
 ## Mappa visiva e colori fissi — candidata in revisione, 14/11/2026

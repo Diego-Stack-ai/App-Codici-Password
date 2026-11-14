@@ -6,7 +6,7 @@ import {confirmFrameAction} from '../core/vault-frame-client.js';
  * Init: initAttachmentModule(ctx)
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.272';
+import { db, storage } from '../../firebase-config.js?v=1.2.273';
 import {decideAttachmentContent} from '../shared/attachment-content-policy.mjs';
 import { doc, collection, addDoc, setDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
