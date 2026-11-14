@@ -16,6 +16,7 @@
 [data-ui-revision] .settings-item:is(:hover, :focus-within) {
     background: var(--rev-surface-hover);
     border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 [data-ui-revision="tre-livelli"] :is(.settings-desc, .settings-subsection-label, .view-label, .label-sm, .detail-section-title, .form-section-title) {

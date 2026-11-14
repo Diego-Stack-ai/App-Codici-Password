@@ -5,6 +5,7 @@ import {readFile} from 'node:fs/promises';
 import {resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
+import {FRAME_ROUTES} from '../Frontend/public/assets/js/modules/core/vault-frame-policy.mjs';
 
 // Actual owner/transport/CSS with synthetic Auth/admission; no Firebase traffic.
 const root = fileURLToPath(new URL('../Frontend/public/', import.meta.url));
@@ -87,11 +88,18 @@ async function fixture() {
   await page.waitForFunction(() => window.fixtureStarted && window.fixture.unlocks === 1 && document.querySelector('iframe').style.visibility === 'visible');
   return {context, page, errors, child: () => page.frames().find(frame => frame !== page.mainFrame())};
 }
-test('real broker/transport: ten private documents use one unlock, queries/fragments and back/forward persist', async () => {
+test('real broker/transport: all 22 private routes use one unlock, queries/fragments and back/forward persist', async () => {
   const f = await fixture();
   try {
-    for (const path of ['/area_privata.html','/account_privati.html?type=standard','/profilo_privato.html?profileTab=documents#documenti-view-container',
-      '/lista_aziende.html','/scadenze.html?filter=urgenti','/archivio_account.html','/impostazioni.html','/regole_scadenze.html','/configurazione_documenti.html']) {
+    const paths = ['/area_privata.html','/account_privati.html?type=standard','/profilo_privato.html?profileTab=documents#documenti-view-container',
+      '/lista_aziende.html','/scadenze.html?filter=urgenti','/archivio_account.html','/impostazioni.html',
+      '/configurazione_generali.html','/form_account_privato.html','/dettaglio_account_privato.html',
+      '/account_azienda.html','/form_account_azienda.html','/dettaglio_account_azienda.html',
+      '/dati_azienda.html','/modifica_azienda.html','/aggiungi_scadenza.html','/dettaglio_scadenza.html',
+      '/configurazione_automezzi.html','/gestione_destinatari.html','/regole_scadenze.html','/configurazione_documenti.html'];
+    assert.deepEqual(['home_page',...paths.map(path=>new URL(path,base).pathname.slice(1,-5))].sort(),Object.keys(FRAME_ROUTES).sort());
+    assert.equal(paths.length + 1,22);
+    for (const path of paths) {
       await f.page.evaluate(target => {const frame=document.querySelector('iframe');window.vaultFrameNavigation.navigateFromChild(frame.contentWindow,frame.contentDocument,target,false);}, path);
       await f.child().waitForFunction(() => window.fixtureChild?.keys === 1);
       assert.equal(await f.page.evaluate(() => window.fixture.unlocks), 1);

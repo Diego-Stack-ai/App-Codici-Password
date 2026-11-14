@@ -156,7 +156,7 @@
     gap: 0.5rem;
     transition: all 0.2s;
     margin-top: 1rem;
-    box-shadow: 0 10px 20px -5px rgba(var(--accent-rgb), 0.4 );
+    box-shadow: var(--ui-shadow-action-soft);
 }
 
 .btn-primary:active {
@@ -344,7 +344,7 @@
     gap: 0.5rem;
     transition: all 0.2s;
     margin-top: 1rem;
-    box-shadow: 0 10px 20px -5px rgba(var(--accent-rgb), 0.4 );
+    box-shadow: var(--ui-shadow-action-soft);
 }
 
 /* --- 8. DROPDOWN SYSTEM (V5.0 Premium) --- */

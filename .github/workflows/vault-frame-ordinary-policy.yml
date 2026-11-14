@@ -1,0 +1,72 @@
+name: Ordinary Vault frame policy
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Fixed ordinary frame switch
+        type: choice
+        required: true
+        default: disable
+        options:
+          - disable
+          - enable
+      expected_commit:
+        description: Exact reviewed master SHA
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+      - name: Bind requested activation source
+        env:
+          MODE: ${{ inputs.mode }}
+          EXPECTED_COMMIT: ${{ inputs.expected_commit }}
+        run: |
+          if [ "$MODE" = "enable" ]; then
+            test "$GITHUB_SHA" = "$EXPECTED_COMMIT"
+          else
+            test "$MODE" = "disable"
+          fi
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node --test tests/vault-frame-ordinary-policy.test.mjs
+  policy:
+    needs: validate
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: firebase-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Verify exact source and change only the ordinary policy
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          MODE: ${{ inputs.mode }}
+          EXPECTED_COMMIT: ${{ inputs.expected_commit }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$MODE" = "enable" ]; then test "$GITHUB_SHA" = "$EXPECTED_COMMIT"; fi
+          node scripts/manage-vault-frame-policy.mjs --mode "$MODE" --commit "$GITHUB_SHA"

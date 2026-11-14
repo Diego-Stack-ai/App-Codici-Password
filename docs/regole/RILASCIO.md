@@ -1,5 +1,19 @@
 # Rilascio
 
+<a id="cornice-ordinaria-rilascio-2026-11-14"></a>
+
+## Cornice ordinaria e UI 1.2.275 — ordine del 14/11/2026
+
+L'[incarico](../progetto/INCARICO_CORRENTE.md#cornice-ordinaria-1275-incarico-2026-11-14) autorizza la candidata, merge e distribuzione senza attendere Claude, mantenendo CI e production protetto; Codex ha delega esplicita per i clic di questo rilascio. Il workflow Firebase e i quattro scope esistenti restano invariati. Le validazioni dei due run possono svolgersi in parallelo; l'esecuzione approvata deve distribuire prima **vault-frame-rules**, poi **hosting**, sullo stesso SHA master.
+
+L'attivazione è l'ultimo passo, distinto da entrambi i deploy: workflow manuale `vault-frame-ordinary-policy.yml`, mode predefinito **disable**, unica risorsa scrivibile `vaultFramePolicy/current`. Nessun input UID, path, progetto o selettore libero; nessuna operazione Auth, Function, Storage, indice o IAM. Environment production, dipendenza dalla validazione, ref master e serializzazione `firebase-production` restano protetti.
+
+Per ON: SHA atteso esatto, checkout pulito e master corrente; verifica integrale del manifest/hash/intestazioni pubblico e sorgente delle Rules realmente pubblicate. Migrazione consentita soltanto dal pilot OFF; sostituzione con precondizione che elimina anche uid/expiresAt. Documento assente creato prima OFF e riletto; ON eseguito per ultimo, senza retry ciechi. Manifest e Rules sono ricontrollati vicino alla scrittura e dopo ON, seguito da rilettura conclusiva della policy. Una risposta incerta non costituisce successo.
+
+OFF non dipende da Hosting/Rules o dal fatto che master non sia avanzato durante il run: resta vincolato al workflow attendibile avviato da master, al repository e HEAD pulito. Anche il pilot v1 acceso può essere portato OFF preservando i campi privati. Rete, credenziale, approvazione o coda possono impedire l'operazione: non si promette uno spegnimento immediato. Un rollback automatico usa CAS soltanto sul write posseduto dall'operazione; conflitti non vengono sovrascritti. Esito chiuso OFF_VERIFIED oppure OFF_REQUIRED, senza dati della policy o errori provider liberi.
+
+Si usa esclusivamente il secret CI FIREBASE_TOKEN già esistente, esplicito e non vuoto, con token derivato mascherato e mantenuto in RAM; niente fallback ADC o nuove credenziali. Il CLI amministrativo rifiuta l'esecuzione locale. La distribuzione e la rilettura della policy non certificano D15 fisico, D18 o piattaforme telefoniche: conservare le prove e i limiti effettivi.
+
 <a id="cornice-adc-impersonata-2026-11-10"></a>
 
 ## Cornice — opzione A: istruzioni da revisionare, non ancora eseguite

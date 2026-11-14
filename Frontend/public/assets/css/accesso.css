@@ -240,7 +240,7 @@ html[data-i18n="loading"] body {
     gap: 0.5rem;
     transition: all 0.2s;
     margin-top: 1rem;
-    box-shadow: 0 10px 20px -5px rgba(var(--accent-rgb), 0.4 );
+    box-shadow: var(--ui-shadow-action-soft);
 }
 
 .btn-primary:active {

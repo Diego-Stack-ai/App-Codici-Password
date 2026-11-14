@@ -1,5 +1,23 @@
 # Collaudi
 
+<a id="cornice-ordinaria-1275-verifiche-2026-11-14"></a>
+
+## APP 1.2.275 — effetti Classica e cornice ordinaria, candidata locale
+
+Base produzione **51ff1673** e ricevute #310; [mandato](../progetto/INCARICO_CORRENTE.md#cornice-ordinaria-1275-incarico-2026-11-14). Nessun deploy o attivazione sono attestati da questa sezione preparatoria.
+
+**UI.** Nuovo controllo sugli aloni: RED sulla274, GREEN dopo, 28 contesti (due grafiche × sette palette × chiaro/scuro), ombre delle selezioni/Conferma con alpha massimo12% e blur10px; overlay8px e ombra danger indipendenti. Banco colori/contrasto esistente con il nuovo controllo **51/51 PASS**, Stylelint PASS. Confronti visivi locali Impostazioni e popup fittizio: aloni attenuati, riempimenti/testo preservati, vetro più sottile e nessun clipping. CSS locali e font locali, nessun account o script applicativo; non è un collaudo autenticato.
+
+Mappa completa: stesse **53 varianti × sette palette × chiaro/scuro**. Confronto con il rapporto c93cb4d, fonte UI identica alla274 dopo normalizzazione delle versioni: colori fissi0, non registrati0 e non misurati0; eccezioni funzionali21 Nuova/19 Classica; contrasto basso148/162/39 elementi unici (Nuova/Classica/comuni), con **zero nuovi casi e zero casi risolti**. Il residuo rimane inventario statico, non guasti tutti confermati. Il gradiente e il bagliore ambientale di core.css non sono stati modificati.
+
+**Cornice.** Commit di implementazione separato004dad37 integrato in b911dbae: suite pura213/213 PASS; nel checkout principale banco browser locale45/45 e Rules Firestore Emulator109/109 PASS. Ulteriore test esplicito **22/22 route private con un solo sblocco**, query/frammenti e cronologia, PASS. Il banco usa Auth/ammissione sintetiche e il broker/trasporto reali; l'emulatore prova utenti verificati senza claim, fence, schema rigoroso, diniego scritture/list e revoca effettiva del listener. Non trasferire questi PASS alla produzione o ai telefoni fisici.
+
+**Controllo amministrativo.** Nuovo gestore limitato al singleton, 16/16 test locali PASS; pianificatore e gestore insieme21/21. La revisione indipendente ha rilevato due race: ricevuta ON dopo OFF concorrente e rollback impedito dall'avanzamento di master. Entrambi riprodotti RED2/2 e corretti GREEN: rilettura finale dopo l'ultima prova e fence OFF distinto. GO tecnico indipendente sui tre file gestore/test/workflow; nessuna API cloud chiamata da questi test. Il token CI esistente potrebbe ancora risultare privo delle capacità necessarie: nessuna espansione IAM o nuova credenziale è attestata.
+
+Restano distinti: versione candidata, CI dello SHA finale, Rules/Hosting pubblicati, policy realmente attivata, osservazione fisica di revoca e due rilasci D18. I sei PASS QA2/Chrome Windows/1.2.270 conservano il proprio contesto.
+
+Confezionamento locale275: versione coerente e303 riferimenti asset; documenti12/12 con34 MD e1043 collegamenti; offline16/16 e345 risorse; budget4/4 sulle31 pagine; guida12/12 (contentVersion13, reviewedAppVersion275,31 pagine/126 istruzioni/111 target); riferimenti statici342 file; sintassi250 moduli; fondazioni e diff-check PASS. Hardening di rilascio87/87 PASS: il primo giro aveva trovato Admin13.10 dal pacchetto padre per assenza delle dipendenze Functions dedicate; installato il lockfile senza modificarlo, controllo mirato4/4 e giro completo87/87 verdi. Nessun nuovo pacchetto o aggiornamento di dipendenze deriva da questa correzione d'ambiente.
+
 <a id="rilascio-ui-1274-verifiche-2026-11-14"></a>
 
 ## APP 1.2.274 — ricevuta Hosting, 14/11/2026

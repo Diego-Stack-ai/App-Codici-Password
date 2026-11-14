@@ -1,5 +1,17 @@
 # Programma
 
+<a id="cornice-ordinaria-1275-programma-2026-11-14"></a>
+
+## APP 1.2.275 — sequenza autorizzata UI e cornice ordinaria
+
+1. Comporre UI e runtime ordinario con i contratti aggiornati, prove locali negative e revisione tecnica indipendente. Le ricevute della #310 confluiscono senza ripubblicare la274.
+2. Confezionare 1.2.275, catalogo rivisto, cache/asset e manifest sullo SHA pulito; PR e CI richiesta verde. L'[ordine](INCARICO_CORRENTE.md#cornice-ordinaria-1275-incarico-2026-11-14) elimina l'attesa del GO Claude per questo rilascio, mantenendo i controlli.
+3. Integrare la candidata e avviare i run master degli scope **vault-frame-rules** e **hosting** sullo stesso SHA. Validazioni indipendenti possono procedere insieme; approvare ed eseguire prima le Rules, poi Hosting. Nessuna Function, Storage o indice.
+4. Verificare online manifest/hash/header e sorgente Rules realmente pubblicata; eseguire solo dopo il workflow **Ordinary Vault frame policy**, mode enable e SHA atteso, con production protetto. Migrazione da OFF e attivazione ultima con CAS e riletture prima/dopo; registrare lo stato effettivo.
+5. Conservare le prove storiche nel proprio perimetro. Il banco locale delle 22 route non è una prova fisica Android/iPhone/PWA, e la rilettura del singleton non è D15 con sessione aperta. D18 richiede due rilasci effettivi; nessuna chiusura globale inventata.
+
+[Procedura e rollback](../regole/RILASCIO.md#cornice-ordinaria-rilascio-2026-11-14), [evidenze](../evidenze/COLLAUDI.md#cornice-ordinaria-1275-verifiche-2026-11-14).
+
 <a id="rilascio-ui-1274-programma-2026-11-14"></a>
 
 ## APP 1.2.274 — rilascio concluso e percorso cornice ordinaria, 14/11/2026

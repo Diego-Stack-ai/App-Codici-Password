@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="cornice-ordinaria-1275-decisione-2026-11-14"></a>
+
+## 14/11/2026 — correzione degli effetti e cornice ordinaria per tutti
+
+Dopo la relazione sulla Classica 1.2.274, Diego chiede di applicare la modifica, aggiornare GitHub e Claude e pubblicare anche senza il GO di Claude; alla domanda sul perimetro risponde **«Anche cornice per tutti gli utenti»**. Codex esegue UI e cornice nella candidata 1.2.275, mantenendo CI e protezione production e senza attestazioni fisiche non osservate. L'[incarico](INCARICO_CORRENTE.md#cornice-ordinaria-1275-incarico-2026-11-14) distingue disponibilità ordinaria, lease server personale, inattività e distribuzione con attivazione finale. L'ordine supera la sola preparazione C2 e il precedente OFF come esito finale, non le protezioni della Vault.
+
 <a id="rilascio-ui-1274-decisione-2026-11-14"></a>
 
 ## 14/11/2026 — rilascio 1.2.274 e destinazione ordinaria della cornice

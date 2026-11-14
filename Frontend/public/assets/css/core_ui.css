@@ -1,3 +1,11 @@
+/* Azioni ordinarie: profondità Classica discreta, indipendente da riempimenti,
+   focus e colori di stato. Anche il popup Vault usa questi ruoli. */
+:root {
+    --ui-shadow-action-soft: 0 4px 10px rgba(var(--accent-rgb), 12%);
+    --ui-shadow-selection-soft: 0 2px 10px rgba(var(--accent-rgb), 12%);
+    --ui-shadow-toggle-soft: 0 0 8px rgba(var(--accent-rgb), 12%);
+}
+
 .qr-preview-box {
     position: relative;
     display: inline-block;
@@ -409,7 +417,7 @@
     background: var(--accent);
     color: white;
     border: 1px solid transparent;
-    box-shadow: 0 8px 20px rgba(var(--accent-rgb), 0.3 );
+    box-shadow: var(--ui-shadow-action-soft);
 }
 
 .btn-modal.btn-danger {
@@ -501,14 +509,14 @@
     background: var(--accent);
     width: 48px;
     height: 48px;
-    box-shadow: 0 8px 25px rgba(var(--accent-rgb), 0.3 );
+    box-shadow: var(--ui-shadow-action-soft);
 }
 
 .btn-fab-azienda {
     background: linear-gradient(135deg, var(--status-success) 0%, #059669 100%);
     width: 48px;
     height: 48px;
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+    box-shadow: var(--ui-shadow-action-soft);
 }
 
 .home-company-quick-menu {
@@ -623,7 +631,7 @@
 
 .btn-fab-archive {
     background: linear-gradient(135deg, var(--status-warning) 0%, #d97706 100%);
-    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.35);
+    box-shadow: var(--ui-shadow-action-soft);
     border-radius: 50%;
 }
 
@@ -1172,10 +1180,10 @@ select.shared-account-select-control optgroup {
     /* Materiali della Classica con i ruoli della palette (ordine di Diego, 14/11/2026):
        superfici a vetro traslucido tinto e sfocato. Il contrasto si misura sullo sfondo
        composto, nel caso peggiore della sfumatura di pagina e del bagliore. */
-    --rev-surface: color-mix(in srgb, var(--accent) 10%, rgb(255 255 255 / 0.74));
-    --rev-surface-hover: color-mix(in srgb, var(--accent) 14%, rgb(255 255 255 / 0.84));
-    --rev-surface-2: color-mix(in srgb, var(--accent) 16%, rgb(255 255 255 / 0.74));
-    --rev-glass-blur: blur(12px);
+    --rev-surface: color-mix(in srgb, var(--accent) 6%, rgb(255 255 255 / 0.70));
+    --rev-surface-hover: color-mix(in srgb, var(--accent) 10%, rgb(255 255 255 / 0.78));
+    --rev-surface-2: color-mix(in srgb, var(--accent) 10%, rgb(255 255 255 / 0.70));
+    --rev-glass-blur: blur(10px);
     --rev-hub-gradient: linear-gradient(135deg, rgb(255 255 255 / 0.62), color-mix(in srgb, var(--accent) 30%, rgb(255 255 255 / 0.5)));
     --rev-popup: color-mix(in srgb, var(--accent) 14%, #fff);
     --rev-border: color-mix(in srgb, var(--accent) 28%, #e2e8f0);
@@ -1185,14 +1193,14 @@ select.shared-account-select-control optgroup {
     --rev-fill: color-mix(in srgb, var(--accent) 85%, #0f172a);
     /* Testo su pastiglia tinta: ≥ 4,5:1 su --rev-icon-bg. */
     --rev-text-accent: color-mix(in srgb, var(--accent) 60%, #0f172a);
-    --rev-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.08);
-    --rev-popup-shadow: 0 24px 56px -16px rgba(var(--accent-rgb), 32%);
+    --rev-shadow: none;
+    --rev-popup-shadow: 0 16px 36px -12px rgba(var(--accent-rgb), 12%);
 }
 
 .dark [data-ui-revision] {
-    --rev-surface: color-mix(in srgb, var(--accent) 12%, rgb(12 16 26 / 0.68));
-    --rev-surface-hover: color-mix(in srgb, var(--accent) 18%, rgb(12 16 26 / 0.52));
-    --rev-surface-2: color-mix(in srgb, var(--accent) 16%, rgb(24 28 38 / 0.68));
+    --rev-surface: color-mix(in srgb, var(--accent) 6%, rgb(12 16 26 / 0.58));
+    --rev-surface-hover: color-mix(in srgb, var(--accent) 10%, rgb(12 16 26 / 0.62));
+    --rev-surface-2: color-mix(in srgb, var(--accent) 8%, rgb(24 28 38 / 0.60));
     --rev-hub-gradient: linear-gradient(135deg, color-mix(in srgb, var(--rev-fill) 72%, transparent), color-mix(in srgb, var(--rev-fill) 48%, rgb(3 7 18 / 0.5)));
     --rev-popup: color-mix(in srgb, var(--accent) 19%, #2a2e37);
     --rev-border: color-mix(in srgb, var(--accent) 34%, #3c414c);
@@ -1205,8 +1213,8 @@ select.shared-account-select-control optgroup {
        si schiarisce per restare ≥ 4,5:1 su ogni superficie. */
     --text-secondary: #c3cddb;
     --text-placeholder: #c3cddb;
-    --rev-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 6px 16px rgba(0, 0, 0, 0.3);
-    --rev-popup-shadow: 0 28px 60px -18px rgba(0, 0, 0, 0.75);
+    --rev-shadow: none;
+    --rev-popup-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.45);
 }
 
 /* Popup, menu e avvisi seguono il colore scelto (prima: bianco, azzurro o blu fissi). */
@@ -1327,7 +1335,7 @@ body[data-ui-revision] :is(.bank-expand-icon, .card-entry-icon) {
    Selezione per ID: .btn-fab-scadenza resta ambra per le vere Scadenze. */
 body[data-ui-revision] :is(#btn-save-footer, #save-btn-footer).btn-fab-scadenza {
     background: linear-gradient(135deg, var(--rev-fill) 0%, color-mix(in srgb, var(--rev-fill) 82%, #000) 100%);
-    box-shadow: 0 10px 30px color-mix(in srgb, var(--accent) 40%, transparent);
+    box-shadow: var(--ui-shadow-action-soft);
     color: #fff;
 }
 

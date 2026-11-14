@@ -1,5 +1,15 @@
 # Sicurezza
 
+<a id="cornice-ordinaria-sicurezza-2026-11-14"></a>
+
+## Cornice ordinaria — separazione delle autorità, candidata 14/11/2026
+
+La [policy globale v2](VAULT.md#cornice-ordinaria-vault-2026-11-14) governa la disponibilità della cornice e non concede dati o chiavi condivise. Email verificata, fence corrente e proprietà dei dati restano obbligatori per ciascun utente. Ogni permesso interno, chiave, grant, documento e risposta resta legato al proprio UID/epoca/generazione; nessun claim pilot può concedere la nuova ammissione.
+
+La lease server personale è finita e non è un timer di attività: il rinnovo verificato non sblocca, non cancella revoche e non estende l'inattività. Cache o rete silenziosa non rendono illimitata l'autorità. Il figlio non riceve un limite oltre il minimo fra inattività e lease corrente; sospensione, mutazione dell'identità e risposte tardive non devono riaprire documenti o mostrare contenuti.
+
+L'[attivazione amministrativa](RILASCIO.md#cornice-ordinaria-rilascio-2026-11-14) è limitata al solo singleton e avviene dopo la verifica del codice distribuito. Le evidenze del canary restano storiche; la nuova autorizzazione di Diego non trasforma casi NE o test sintetici in osservazioni fisiche.
+
 <a id="cornice-c1-recaptcha-eccezione-2026-11-12"></a>
 
 ## C1 — strada A, eccezione reCAPTCHA registrata, candidata 12/11/2026

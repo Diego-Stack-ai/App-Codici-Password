@@ -1,4 +1,4 @@
-// B3 preparation only: local files and pure planning, no Firebase client or deploy runner.
+// Read-only deployment plan. Actual policy operations use the separate protected C2 workflow.
 import assert from 'node:assert/strict';
 import {readFileSync, mkdirSync, writeFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
@@ -72,29 +72,30 @@ export function planVaultFrameRelease() {
     assert.equal(configuration.firestore.rules, 'firestore.rules');
     const installed = load(workflow).on.workflow_dispatch.inputs.release_scope.options.includes(FRAME_RULES_SCOPE);
     return {
-        schemaVersion: 1, executable: false, cloudCalls: false, cloudReadsPerformed: false,
+        schemaVersion: 2, executable: false, cloudCalls: false, cloudReadsPerformed: false,
         target: {projectId: 'appcodici-password', databaseId: '(default)'},
         workflow: {path: '.github/workflows/firebase-deploy.yml', installed,
             baseSha256: digest(workflow), proposalSha256: digest(proposal), scope: FRAME_RULES_SCOPE,
-            applicationAuthorized: false, selectors: ['firestore:rules'], excluded: ['functions', 'storage', 'firestore:indexes', 'hosting'],
-            followedBySeparateScope: 'hosting', environment: 'production', approvals: 'Diego personally, separately for each run'},
+            applicationAuthorized: true, selectors: ['firestore:rules'], excluded: ['functions', 'storage', 'firestore:indexes', 'hosting'],
+            followedBySeparateScope: 'hosting', environment: 'production', approvals: 'Protected gate; Diego delegated Codex for release 1.2.275'},
         sourceDigests: Object.fromEntries(['firestore.rules', 'firebase.json', '.firebaserc',
-            'scripts/plan-recovery-canary.mjs', 'scripts/plan-vault-frame-release.mjs'].map(name => [name, digest(read(name))])),
+            'scripts/plan-recovery-canary.mjs', 'scripts/plan-vault-frame-release.mjs',
+            'scripts/manage-vault-frame-policy.mjs', '.github/workflows/vault-frame-ordinary-policy.yml'].map(name => [name, digest(read(name))])),
         provisioning: {executable: false, performed: false, identitySelected: false, createUser: false,
-            policyPath: 'vaultFramePolicy/current', fields: ['schemaVersion', 'version', 'uid', 'enabled', 'expiresAt'],
-            schemaVersion: 1, version: 1, initialEnabled: false, activationLast: true,
-            uid: '<privately verified Diego UID>', expiresAt: '<explicitly approved UTC Firestore Timestamp>',
-            claim: {name: 'vault_frame_canary', value: true, preserveOthers: true, atomicMerge: false,
-                exclusiveWriterRequired: true, beforeAfterVerificationRequired: true},
-            authFirestoreTransaction: false, firestorePreconditionsRequired: true, administrativeChannelApproved: false,
-            refresh: 'Normal logout/login of the pilot after activation; never paste tokens'},
-        gates: ['Claude GO on the B3 package', 'Diego approval of workflow application and final reviewed source',
-            'Workflow applied only through the explicitly authorized owner channel, hash verified, checks and final Claude GO',
-            'Diego personal merge and bounded cloud approval, immutable master SHA',
-            'Rules CI approval and actual ruleset/source verification', 'Hosting CI approval on the same SHA and full manifest/hash/header verification',
-            'Private preflight/backup and approved administration channel, UID and UTC expiry',
-            'Disabled singleton with preconditions, preserve/verify other claims under exclusive writer, activate singleton last',
-            'C1 physical matrix remains NE; C2 is not inferred from deployment'],
+            executionWorkflow: '.github/workflows/vault-frame-ordinary-policy.yml',
+            policyPath: 'vaultFramePolicy/current', fields: ['schemaVersion', 'version', 'enabled'],
+            schemaVersion: 2, version: 2, initialEnabled: false, activationLast: true,
+            claimOperation: 'none', personalLeaseMs: 300000, renewWindowMs: 60000,
+            authFirestoreTransaction: false, firestorePreconditionsRequired: true, administrativeChannelApproved: true,
+            credentialCapabilityVerified: false,
+            refresh: 'Reload updated app once; ordinary routing remains bound to each authenticated verified UID'},
+        gates: ['Diego explicitly authorized UI and ordinary frame for all users, without waiting Claude',
+            'Independent technical review and required CI, immutable master SHA',
+            'Rules production gate and actual published ruleset/source verification',
+            'Hosting production gate on the same SHA and full manifest/hash/header verification',
+            'Separate protected policy workflow; existing credential capability must be verified, no IAM expansion',
+            'Migrate only from OFF, remove legacy fields with CAS, activate last and reread after final proofs',
+            'Historical C1 results and unobserved physical cases stay scoped; D18 needs two real releases'],
         rollback: {disableSingletonFirst: true, firestorePrecondition: true, claimAloneIsKillSwitch: false,
             restoreWholeClaimsMap: false, preserveOtherCurrentClaims: true, restoreOldRulesOrFunctions: false,
             hosting: 'Separate reviewed revert/disable PR, fresh release version and approved CI; no deploy from PC'},
@@ -113,6 +114,6 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         writeFileSync(resolve(dir, 'plan.json'), JSON.stringify(plan, null, 2) + '\n');
         console.log(`Local proposal only: ${dir} · sha256 ${plan.workflow.proposalSha256}`);
     } else console.log(args[0] === '--check'
-        ? `Vault frame B3: proposal ${plan.workflow.installed ? 'installed' : 'not installed'}; no cloud I/O; approval still required.`
+        ? `Vault frame C2: Rules scope ${plan.workflow.installed ? 'installed' : 'not installed'}, ordinary v2 planned; no cloud I/O; approval still required.`
         : JSON.stringify(plan, null, 2));
 }
