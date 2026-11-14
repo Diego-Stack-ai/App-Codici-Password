@@ -128,7 +128,7 @@ test('color registry preserves the reviewed matrix and minimum coverage', () => 
 });
 const pageSources = new Map(await Promise.all(colorContract.pages.map(async file => [file, await readFile(path.join(publicRoot, file), 'utf8')])));
 const attributes = tag => Object.fromEntries([...tag.matchAll(/([\w-]+)="([^"]*)"/g)].map(match => [match[1], match[2]]));
-function colorFixture(file, theme, palette) {
+function colorFixture(file, theme, palette, revision = 'tre-livelli') {
   const source = pageSources.get(file);
   const links = [...source.matchAll(/<link\b[^>]*>/gi)].map(match => attributes(match[0])).filter(attr => attr.rel === 'stylesheet');
   assert.ok(links.length > 0, `${file}: real stylesheet stack exists`);
@@ -137,12 +137,12 @@ function colorFixture(file, theme, palette) {
   const components = colorContract.components.filter(item => !item.pages || item.pages.includes(file));
   assert.ok(components.length > 0, `${file}: registered cases exist`);
   return `<!doctype html><html lang="it" class="${theme === 'dark' ? 'dark' : ''}" data-color-theme="${palette}"><head><meta charset="utf-8">${sheets.map(href => `<link rel="stylesheet" href="/${href}">`).join('')}<style>*,*::before,*::after{transition:none!important;animation:none!important}</style></head>
-    <body class="${body.class}" data-ui-model="${body['data-ui-model']}" data-ui-revision="tre-livelli">${components.map(item => `<section data-color-case="${item.id}">${item.markup}</section>`).join('')}</body></html>`;
+    <body class="${body.class}" data-ui-model="${body['data-ui-model']}" data-ui-revision="${revision}">${components.map(item => `<section data-color-case="${item.id}">${item.markup}</section>`).join('')}</body></html>`;
 }
-async function openColorFixture(file, theme, palette) {
+async function openColorFixture(file, theme, palette, revision = 'tre-livelli') {
   const page = await browser.newPage();
   await page.route('**/*', route => route.request().url().startsWith(base) ? route.continue() : route.abort());
-  await page.route(`${base}/colors.html`, route => route.fulfill({contentType: 'text/html', body: colorFixture(file, theme, palette)}));
+  await page.route(`${base}/colors.html`, route => route.fulfill({contentType: 'text/html', body: colorFixture(file, theme, palette, revision)}));
   await page.goto(`${base}/colors.html`);
   return page;
 }
@@ -172,15 +172,36 @@ async function readColorCases(page, file) {
       if (!element) throw Error(`Missing color fixture: ${item.id}`);
       const style = getComputedStyle(element);
       let surface = element;
-      while (surface && getComputedStyle(surface).backgroundImage === 'none' && rgba(getComputedStyle(surface).backgroundColor)[3] === 0) surface = surface.parentElement;
-      if (!surface) throw Error(`Missing opaque surface: ${item.id}`);
+      while (surface && surface !== document.body && getComputedStyle(surface).backgroundImage === 'none' && rgba(getComputedStyle(surface).backgroundColor)[3] === 0) surface = surface.parentElement;
+      if (!surface || surface === document.body) throw Error(`Missing painted surface: ${item.id}`);
       const paint = getComputedStyle(surface);
       // Registered gradients are opaque two-stop fills with white foreground. Both ends
       // are measured: selecting just the first stop would miss a reversed bright gradient.
       const stops = paint.backgroundImage === 'none' ? [rgba(paint.backgroundColor)]
         : [...paint.backgroundImage.matchAll(/(?:rgba?|color)\([^)]*\)/g)].map(match => rgba(match[0]));
+      // Vetro (materiali Classica, 14/11/2026): le superfici traslucide si compongono, dall'alto
+      // verso il basso, fino a una superficie piena oppure alla pagina. La pagina vale nel caso
+      // peggiore: i due estremi della sfumatura, con e senza il picco del bagliore della palette.
+      const layers = [];
+      let backdrop = null;
+      for (let node = surface; node; node = node.parentElement) {
+        const nodePaint = getComputedStyle(node);
+        if (node === document.body) {
+          const ends = [...nodePaint.backgroundImage.matchAll(/(?:rgba?|color)\([^)]*\)/g)].map(match => rgba(match[0]));
+          const glow = rgba(getComputedStyle(document.documentElement).getPropertyValue('--glow-color').match(/rgba?\([^)]*\)/)?.[0] || 'transparent');
+          const accent = rgba(getComputedStyle(document.body).getPropertyValue('--accent'));
+          const over = (top, alpha, bottom) => bottom.slice(0, 3).map((value, index) => top[index] * alpha + value * (1 - alpha)).concat(1);
+          backdrop = ends.flatMap(end => [end, over(accent, glow[3], end)]);
+          break;
+        }
+        if (nodePaint.backgroundImage !== 'none' && node !== surface) { backdrop = [...nodePaint.backgroundImage.matchAll(/(?:rgba?|color)\([^)]*\)/g)].map(match => rgba(match[0])); break; }
+        const color = rgba(nodePaint.backgroundColor);
+        if (node === surface && nodePaint.backgroundImage !== 'none') break;
+        if (color[3] > 0) layers.push(color);
+        if (color[3] === 1) break;
+      }
       const ancestorsOpaque = [...(function* () { for (let node = element.parentElement; node; node = node.parentElement) yield node; })()].every(node => Number(getComputedStyle(node).opacity) === 1);
-      return {id: item.id, foreground: rgba(style.color), stops, image: paint.backgroundImage,
+      return {id: item.id, foreground: rgba(style.color), stops, layers, backdrop, image: paint.backgroundImage,
         opacity: Number(style.opacity), ancestorsOpaque, foregroundRole: roleColor(element, item.foregroundRole), backgroundRole: roleColor(element, item.backgroundRole)};
     });
   }, colorContract.components.filter(item => !item.pages || item.pages.includes(file)));
@@ -191,14 +212,19 @@ function verifyColorCases(values, label) {
     const item = colorContract.components.find(component => component.id === value.id);
     const name = `${label} ${item.id}`;
     assert.ok(value.ancestorsOpaque, `${name}: grouped ancestor opacity needs an explicit fixture`);
-    assert.ok(value.stops.length > 0 && value.stops.every(stop => stop[3] === 1), `${name}: never treat transparent as black`);
+    const glass = value.image === 'none' && value.stops[0][3] < 1;
+    if (!glass) assert.ok(value.stops.length > 0 && value.stops.every(stop => stop[3] === 1), `${name}: never treat transparent as black`);
+    else assert.ok(value.backdrop?.length > 0 && value.backdrop.every(stop => stop[3] === 1), `${name}: glass is composed over a measured opaque backdrop`);
     assert.ok(near(value.foreground, value.foregroundRole), `${name}: foreground uses ${item.foregroundRole}`);
-    assert.ok(value.stops.some(stop => near(stop, value.backgroundRole)), `${name}: background uses ${item.backgroundRole}`);
+    assert.ok(value.stops.some(stop => near(stop, value.backgroundRole) && Math.abs(stop[3] - value.backgroundRole[3]) < 0.02), `${name}: background uses ${item.backgroundRole}`);
     if (item.backgroundImage) assert.equal(value.image, item.backgroundImage, `${name}: no fixed legacy gradient`);
     if (value.image !== 'none') {
       assert.ok(value.image.startsWith('linear-gradient(') && value.stops.length === 2 && near(value.foreground, [255, 255, 255]), `${name}: unsupported gradient must not pass silently`);
     }
-    const ratios = value.stops.map(bg => {
+    // Sfondo effettivo: per il vetro, ogni estremo della pagina con gli strati traslucidi sopra.
+    const compose = (bottom, layers) => layers.slice().reverse().reduce((under, top) => under.map((channel, index) => top[index] * top[3] + channel * (1 - top[3])), bottom.slice(0, 3));
+    const backgrounds = glass ? value.backdrop.map(bottom => compose(bottom, value.layers)) : value.stops;
+    const ratios = backgrounds.map(bg => {
       const alpha = value.opacity * value.foreground[3];
       const fg = value.foreground.slice(0, 3).map((channel, index) => channel * alpha + bg[index] * (1 - alpha));
       return contrast(`rgb(${fg.join(',')})`, `rgb(${bg.slice(0, 3).join(',')})`);
@@ -206,14 +232,15 @@ function verifyColorCases(values, label) {
     assert.ok(Math.min(...ratios) >= item.minContrast, `${name}: effective contrast ${Math.min(...ratios).toFixed(3)} < ${item.minContrast}`);
   }
 }
-for (const theme of colorContract.themes) {
-  test(`registered color pairs keep their roles and contrast on each real page stack in ${theme}`, {timeout: 120000}, async () => {
+// Entrambe le grafiche (ordine di Diego, 14/11/2026): Nuova «tre-livelli» e Classica «classica».
+for (const revision of ['tre-livelli', 'classica']) for (const theme of colorContract.themes) {
+  test(`registered color pairs keep their roles and contrast on each real page stack in ${theme} (${revision})`, {timeout: 180000}, async () => {
     for (const file of colorContract.pages) for (const palette of colorContract.palettes) {
-      const page = await openColorFixture(file, theme, palette);
+      const page = await openColorFixture(file, theme, palette, revision);
       try {
         const values = await readColorCases(page, file);
         assert.equal(values.length, colorContract.components.filter(item => !item.pages || item.pages.includes(file)).length, `${file}: no missing color samples`);
-        verifyColorCases(values, `${file}/${palette || 'default'}/${theme}`);
+        verifyColorCases(values, `${file}/${palette || 'default'}/${theme}/${revision}`);
         for (const item of colorContract.components.filter(component => component.states && (!component.pages || component.pages.includes(file)))) {
           const target = page.locator(`[data-color-case="${item.id}"] ${item.selector}`);
           for (const state of item.states) {
@@ -277,7 +304,7 @@ test('Settings markup classifies decorative icons and preserves destructive role
   } finally { await page.close(); }
 });
 
-test('Settings preserves Classic colors and semantic danger/status colors', {timeout: 120000}, async () => {
+test('Settings: Classica shares the palette roles; semantic danger/status colors are preserved in both', {timeout: 120000}, async () => {
   for (const theme of colorContract.themes) for (const palette of colorContract.palettes) {
     const page = await openColorFixture('impostazioni.html', theme, palette);
     try {
@@ -311,14 +338,15 @@ test('Settings preserves Classic colors and semantic danger/status colors', {tim
       assert.equal(revised.semantic[0].color, revised.semantic[1].color, 'both danger controls use the same error foreground');
       assert.equal(new Set(revised.semantic.slice(2).map(value => value.color)).size, 3, 'PASS/WARN/FAIL retain three distinct semantic colors');
       assert.notEqual(revised.semantic[0].color, revised.semantic[2].color, 'danger is not rendered as success');
-      await page.evaluate(() => document.body.removeAttribute('data-ui-revision'));
+      // Ordine di Diego (14/11/2026): la Classica riceve gli stessi ruoli colore della Nuova.
+      await page.evaluate(() => document.body.setAttribute('data-ui-revision', 'classica'));
       const classic = await read();
-      assert.deepEqual(revised.semantic, classic.semantic, `${theme}/${palette}: danger and diagnostic status paints unchanged`);
-      assert.equal(classic.maintenance.color, 'rgb(129, 140, 248)', 'Classic keeps its previous indigo text');
-      assert.equal(classic.maintenance.background, 'rgba(99, 102, 241, 0.05)', 'Classic keeps its previous translucent surface');
-      assert.equal(classic.legacyIcon.background, 'rgba(16, 185, 129, 0.1)', 'Classic keeps its original emerald decoration');
-      assert.equal(classic.selection.background, classic.accent, 'Classic selected background remains the palette accent');
-      assert.equal(classic.selection.color, 'rgb(255, 255, 255)', 'Classic selected foreground unchanged');
+      assert.deepEqual(classic.semantic, revised.semantic, `${theme}/${palette}: danger and diagnostic status paints identical in both graphics`);
+      assert.notEqual(classic.maintenance.color, 'rgb(129, 140, 248)', 'Classica no longer uses the fixed indigo text');
+      assert.notEqual(classic.legacyIcon.background, 'rgba(16, 185, 129, 0.1)', 'Classica no longer uses the fixed emerald decoration');
+      assert.equal(classic.maintenance.color, revised.maintenance.color, 'maintenance action shares the palette role');
+      assert.equal(classic.legacyIcon.background, revised.legacyIcon.background, 'decorative icon shares the palette role');
+      assert.equal(classic.selection.background, revised.selection.background, 'selected fill shares the readable palette fill');
       await page.evaluate(() => document.body.setAttribute('data-ui-revision', 'tre-livelli'));
       assert.deepEqual(await read(), revised, 'switching back restores the candidate paints');
     } finally { await page.close(); }
@@ -337,7 +365,7 @@ async function paintOf(page, selector) {
       fill: probe('--rev-fill'), popup: probe('--rev-popup'), success: probe('--status-success')};
   }, selector);
 }
-const classic = page => page.evaluate(() => document.body.removeAttribute('data-ui-revision'));
+const classic = page => page.evaluate(() => document.body.setAttribute('data-ui-revision', 'classica'));
 
 test('toast messages have a single surface that follows the palette', {timeout: 60000}, async () => {
   for (const theme of colorContract.themes) for (const palette of ['', 'petrol']) {
@@ -349,13 +377,14 @@ test('toast messages have a single surface that follows the palette', {timeout: 
       assert.equal(inner.background, 'rgba(0, 0, 0, 0)', `${theme}/${palette}: no second rectangle inside the toast`);
       assert.equal(inner.border, '0px', `${theme}/${palette}: no inner border`);
       await classic(page);
-      assert.equal((await paintOf(page, '[data-color-case="toast-message"] #toast')).background, 'rgb(255, 255, 255)', 'Classic toast unchanged');
-      assert.equal((await paintOf(page, '[data-color-case="toast-message"] .toast-content')).background, 'rgba(0, 0, 0, 0)', 'Classic content unchanged');
+      const classicOuter = await paintOf(page, '[data-color-case="toast-message"] #toast');
+      assert.equal(classicOuter.background, classicOuter.popup, 'Classica toast follows the palette too');
+      assert.equal((await paintOf(page, '[data-color-case="toast-message"] .toast-content')).background, 'rgba(0, 0, 0, 0)', 'Classica: still a single surface');
     } finally { await page.close(); }
   }
 });
 
-test('account form switches use the palette fill when on; Classic keeps success green', {timeout: 60000}, async () => {
+test('account form switches use the palette fill when on in both graphics', {timeout: 60000}, async () => {
   for (const theme of colorContract.themes) for (const palette of colorContract.palettes) {
     const page = await openColorFixture('form_account_privato.html', theme, palette);
     try {
@@ -367,7 +396,7 @@ test('account form switches use the palette fill when on; Classic keeps success 
       assert.ok(contrast(knob, on.background) >= 3, `${theme}/${palette || 'default'}: knob visible on the fill`);
       await classic(page);
       const old = await paintOf(page, '#switch-case .base-switch');
-      assert.equal(old.background, old.success, 'Classic switch keeps the success green');
+      assert.equal(old.background, old.fill, 'Classica switch follows --rev-fill too');
     } finally { await page.close(); }
   }
 });
@@ -382,4 +411,33 @@ test('Profile section icons are decorative and declare the theme role', {timeout
 test('shared credentials secondary actions declare the secondary role', async () => {
   const source = await readFile(path.join(publicRoot, 'assets/js/modules/settings/shared-credentials-controller.js'), 'utf8');
   assert.doesNotMatch(source, /className: 'btn-modal'/, 'Close/Cancel must not render as an unstyled modal button');
+});
+
+// «Salva» dei moduli Account: azione ordinaria, non una scadenza. Fill della palette in entrambe
+// le grafiche, selezionato per ID: btn-fab-scadenza resta ambra per le vere Scadenze.
+test('account form Save buttons use the palette fill; real deadline FAB stays amber', {timeout: 120000}, async () => {
+  for (const revision of ['tre-livelli', 'classica']) for (const theme of colorContract.themes) for (const palette of colorContract.palettes) {
+    const page = await openColorFixture('form_account_privato.html', theme, palette, revision);
+    try {
+      await page.evaluate(() => document.body.insertAdjacentHTML('beforeend',
+        '<button id="btn-save-footer" class="btn-fab-action btn-fab-scadenza"><span class="material-symbols-outlined">save</span></button>' +
+        '<button id="save-btn-footer" class="btn-fab-action btn-fab-scadenza"><span class="material-symbols-outlined">save</span></button>' +
+        '<button id="deadline-fab" class="btn-fab-action btn-fab-scadenza"><span class="material-symbols-outlined">event</span></button>'));
+      const paints = await page.evaluate(() => ['#btn-save-footer', '#save-btn-footer', '#deadline-fab'].map(selector => {
+        const element = document.querySelector(selector);
+        const probe = document.createElement('span'); probe.style.color = 'var(--rev-fill)'; document.body.append(probe);
+        const fill = getComputedStyle(probe).color; probe.remove();
+        const style = getComputedStyle(element);
+        return {image: style.backgroundImage, color: style.color, fill};
+      }));
+      const label = `${revision}/${theme}/${palette || 'default'}`;
+      for (const save of paints.slice(0, 2)) {
+        assert.ok(save.image.includes(save.fill.replace('rgb(', '').replace(')', '').split(', ').join(', ')), `${label}: Save uses --rev-fill (${save.image})`);
+        assert.ok(!/245, 158, 11|217, 119, 6/.test(save.image), `${label}: Save is no longer amber`);
+        const ends = [...save.image.matchAll(/rgba?\([^)]*\)/g)].map(match => match[0]);
+        for (const end of ends) assert.ok(contrast('rgb(255, 255, 255)', end) >= 3, `${label}: white icon visible on ${end}`);
+      }
+      assert.match(paints[2].image, /245, 158, 11/, `${label}: the deadline FAB keeps its amber`);
+    } finally { await page.close(); }
+  }
 });

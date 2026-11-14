@@ -266,23 +266,28 @@ html:not(.dark) .dashboard-list-item {
 }
 
 /* === Revisione UI a tre livelli — base condivisa in ui-tre-livelli.css === */
-/* Pagine hub (Home, Area privata) — tappa 4, 11/11/2026.
-   Schede piene in tinta tenue dalla palette attiva; nessun colore d'identità fisso.
-   I colori funzionali restano solo dove indicano uno stato (Scadenze, Urgenze). */
-body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card:is(.card-blue, .card-green, .card-orange, .card-red) {
-    background: var(--rev-surface);
+/* Pagine hub (Home, Area privata) — tappa 4, 11/11/2026; materiali Classica in entrambe
+   le grafiche dal 14/11/2026 (ordine di Diego): sfumatura traslucida e sfocatura della
+   Classica, tinta dalla palette attiva al posto dei blu/verdi/rossi d'identità fissi.
+   Scadenze e Urgenze conservano il colore funzionale su icona e contatore. */
+body[data-ui-revision][data-ui-model="hub"] .matrix-card:is(.card-blue, .card-green, .card-orange, .card-red) {
+    background: var(--rev-hub-gradient);
     border: 1px solid var(--rev-border);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    backdrop-filter: var(--rev-glass-blur);
+    -webkit-backdrop-filter: var(--rev-glass-blur);
     color: var(--text-primary);
 }
 
+/* Classica: icona grande al centro della scheda, colore del testo. */
+body[data-ui-revision="classica"][data-ui-model="hub"] .matrix-card .matrix-icon-box {
+    color: var(--text-primary);
+}
+
+/* Nuova: icona in un piccolo riquadro accentato, non più filigrana a tutta scheda. */
 body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card.border-glow::after {
     display: none;
 }
 
-/* Icona della scheda: piccolo riquadro accentato, non più filigrana a tutta scheda. */
 body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card .matrix-icon-box {
     position: static;
     transform: none;
@@ -294,9 +299,9 @@ body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card .matrix-i
     height: 48px;
     margin: 0 0 var(--space-2, 0.5rem);
     border-radius: 14px;
-    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    background: var(--rev-icon-bg);
     box-shadow: none;
-    color: var(--accent);
+    color: var(--rev-icon);
 }
 
 body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card .matrix-icon-box span {
@@ -308,23 +313,37 @@ body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card .card-tex
     height: auto;
 }
 
-/* Stato: Scadenze in arrivo e Urgenze conservano il colore funzionale su icona e contatore. */
-body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card.area-scadenze {
+/* Stato: Scadenze in arrivo (oggi → 30 giorni) e Urgenze (scadute) — eccezione funzionale. */
+body[data-ui-revision][data-ui-model="hub"] .matrix-card.area-scadenze {
     --accent-rgb: 249, 115, 22;
 }
 
-body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card.area-urgenze {
+body[data-ui-revision][data-ui-model="hub"] .matrix-card.area-urgenze {
     --accent-rgb: 239, 68, 68;
+}
+
+html:not(.dark) body[data-ui-revision][data-ui-model="hub"] .area-scadenze .matrix-icon-box {
+    color: #b45309;
+}
+
+html:not(.dark) body[data-ui-revision][data-ui-model="hub"] .area-urgenze .matrix-icon-box {
+    color: #b91c1c;
+}
+
+.dark body[data-ui-revision][data-ui-model="hub"] .area-scadenze .matrix-icon-box {
+    color: var(--status-warning);
+}
+
+.dark body[data-ui-revision][data-ui-model="hub"] .area-urgenze .matrix-icon-box {
+    color: var(--status-error);
 }
 
 body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .area-scadenze .matrix-icon-box {
     background: color-mix(in srgb, var(--status-warning) 16%, transparent);
-    color: var(--status-warning);
 }
 
 body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .area-urgenze .matrix-icon-box {
     background: color-mix(in srgb, var(--status-error) 14%, transparent);
-    color: var(--status-error);
 }
 
 body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .top10-title {
@@ -334,31 +353,24 @@ body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .top10-title {
     color: var(--text-secondary);
 }
 
-
-/* Hub: profondità e risposta al passaggio (riscontro di Diego, 11/11/2026). */
-body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card:is(.card-blue, .card-green, .card-orange, .card-red) {
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 6px 16px rgba(15, 23, 42, 0.08);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+/* Profondità e movimento della Classica (adaptive-shadow): sollevamento al passaggio,
+   compressione alla pressione; il bagliore usa la palette. */
+body[data-ui-revision][data-ui-model="hub"] .matrix-card:is(.card-blue, .card-green, .card-orange, .card-red):is(:hover, :focus-visible) {
+    border-color: color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
-.dark body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card:is(.card-blue, .card-green, .card-orange, .card-red) {
-    background: color-mix(in srgb, var(--accent) 16%, #1b2333);
-    border-color: color-mix(in srgb, var(--accent) 34%, #2a3346);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 20px rgba(0, 0, 0, 0.35);
+/* Le card Classica fissano --accent-rgb a blu/verde/arancio/rosso: i due derivati visibili
+   (bagliore al passaggio e fondo del contatore) usano invece --accent della palette. */
+body[data-ui-revision][data-ui-model="hub"] .matrix-card.adaptive-shadow:is(:hover, :focus-visible) {
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 20px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
-body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card:is(.card-blue, .card-green, .card-orange, .card-red):is(:hover, :focus-visible) {
-    transform: translateY(-3px);
-    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.08), 0 14px 28px rgba(15, 23, 42, 0.14);
+body[data-ui-revision][data-ui-model="hub"] .matrix-card:is(.card-blue, .card-green, .card-orange, .card-red) .badge-count {
+    background: color-mix(in srgb, var(--rev-fill) 85%, transparent);
+    color: #fff;
 }
 
-.dark body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card:is(.card-blue, .card-green, .card-orange, .card-red):is(:hover, :focus-visible) {
-    background: color-mix(in srgb, var(--accent) 22%, #1f2839);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), 0 14px 30px rgba(0, 0, 0, 0.45);
-}
-
-body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card:focus-visible {
+body[data-ui-revision][data-ui-model="hub"] .matrix-card:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
 }
@@ -366,17 +378,17 @@ body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card:focus-vis
 /* Contatori di stato: contrasto almeno 4,5:1 (testo piccolo), significato del colore conservato.
    Arancio: testo scuro (#111827 su #f59e0b = 8,3:1). Rosso: bianco su #b91c1c (6,5:1) nel
    chiaro, testo scuro su #f87171 (6,4:1) nello scuro. */
-body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .area-scadenze .badge-count {
+body[data-ui-revision][data-ui-model="hub"] .matrix-card.area-scadenze .badge-count {
     background: var(--status-warning);
     color: #111827;
 }
 
-body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .area-urgenze .badge-count {
+body[data-ui-revision][data-ui-model="hub"] .matrix-card.area-urgenze .badge-count {
     background: #b91c1c;
     color: #fff;
 }
 
-.dark body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .area-urgenze .badge-count {
+.dark body[data-ui-revision][data-ui-model="hub"] .matrix-card.area-urgenze .badge-count {
     background: #f87171;
     color: #111827;
 }

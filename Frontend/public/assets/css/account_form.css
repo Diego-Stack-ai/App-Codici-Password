@@ -960,7 +960,7 @@ input:checked+.base-switch::after {
 
 /* Grafica Nuova: l'interruttore acceso segue il colore scelto (era verde fisso in ogni palette).
    La Classica conserva il verde. */
-body[data-ui-revision="tre-livelli"] input:checked + .base-switch {
+body[data-ui-revision] input:checked + .base-switch {
     background: var(--rev-fill);
     border-color: var(--rev-fill);
 }

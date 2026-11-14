@@ -59,12 +59,12 @@ test('default «Nuova» keeps the three-level revision and installs Modifica', {
   } finally { await context.close(); }
 });
 
-test('«Classica» removes the revision before display and installs no Modifica', {timeout: 30000}, async () => {
+test('«Classica» marks the revision as classica before display and installs no Modifica', {timeout: 30000}, async () => {
   const {page, context} = await open('fixture.html', 'classic');
   try {
     await page.waitForFunction(() => window.ready === true);
     assert.equal(await page.getAttribute('html', 'data-ui-graphics'), 'classic');
-    assert.equal(await page.getAttribute('body', 'data-ui-revision'), null);
+    assert.equal(await page.getAttribute('body', 'data-ui-revision'), 'classica', 'shared colors and roles stay; Nuova-only features do not');
     assert.equal(await page.locator('.manage-toggle').count(), 0);
     assert.equal(await page.getAttribute('#s', 'data-manage'), null, 'no hidden management state');
   } finally { await context.close(); }
@@ -73,7 +73,7 @@ test('«Classica» removes the revision before display and installs no Modifica'
 test('«Classica» applies to a real migrated page before any script reveals it', {timeout: 30000}, async () => {
   const {page, context} = await open('profilo_privato.html', 'classic');
   try {
-    assert.equal(await page.evaluate(() => document.body.hasAttribute('data-ui-revision')), false);
+    assert.equal(await page.evaluate(() => document.body.getAttribute('data-ui-revision')), 'classica');
     assert.equal(await page.evaluate(() => document.body.hidden), true, 'private page still hidden by the auth gate');
   } finally { await context.close(); }
 });

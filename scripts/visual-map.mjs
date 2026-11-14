@@ -29,8 +29,9 @@ const pages = process.argv[3] ? process.argv[3].split(',')
   : (await readdir(root)).filter(file => file.endsWith('.html')).sort();
 
 function prepare(html, theme, palette, mode) {
-  // Classica = come theme-init.js: l'attributo data-ui-revision viene tolto dal body.
-  if (mode === 'classica') html = html.replace(/(<body[^>]*?)\sdata-ui-revision="[^"]*"/i, '$1');
+  // Classica = come theme-init.js: il segno della revisione diventa «classica» (colori e
+  // materiali condivisi, nessuna funzione esclusiva della Nuova).
+  if (mode === 'classica') html = html.replace(/(<body[^>]*?\sdata-ui-revision=)"[^"]*"/i, '$1"classica"');
   return html
     .replace(/<script\b[\s\S]*?<\/script>/gi, '')
     .replace(/<meta[^>]+http-equiv=["']?refresh[^>]*>/gi, '')

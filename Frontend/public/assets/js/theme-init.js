@@ -4,11 +4,12 @@
 (function () {
     try {
         // Interruttore «Grafica: Nuova / Classica» (Impostazioni → Tema visivo).
-        // Classica: la revisione UI a tre livelli non si applica su questo dispositivo.
-        // Il body è ancora nascosto (private-auth) quando il segno viene rimosso.
+        // Classica: le funzioni della revisione a tre livelli (Modifica/Fine, filigrane,
+        // tipografia delle etichette) non si applicano; colori, ruoli e materiali condivisi sì.
+        // Il segno passa da «tre-livelli» a «classica» mentre il body è ancora nascosto.
         if (localStorage.getItem('ui_graphics') === 'classic') {
             document.documentElement.dataset.uiGraphics = 'classic';
-            const strip = () => { document.body?.removeAttribute('data-ui-revision'); };
+            const strip = () => { if (document.body?.hasAttribute('data-ui-revision')) document.body.setAttribute('data-ui-revision', 'classica'); };
             if (document.body) strip();
             else {
                 const observer = new MutationObserver(() => { if (document.body) { strip(); observer.disconnect(); } });

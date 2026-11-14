@@ -122,7 +122,7 @@ const recordVisual = async (page, name) => {
 };
 
 for (const [name, label] of [['profilo_privato.html', 'private profile'], ['dati_azienda.html', 'company profile']]) {
-test(`${label} header occludes text and controls while scrolling`, {timeout: 120000}, async () => {
+test(`${label} glass header attenuates scrolled content and keeps its controls on top`, {timeout: 120000}, async () => {
   const browser = await launchBrowser();
   try {
     const page = await browser.newPage();
@@ -194,8 +194,23 @@ test(`${label} header occludes text and controls while scrolling`, {timeout: 120
         await recordVisual(page, `header-${label.replaceAll(' ', '-')}-${viewport.width}-${palette}-${dark ? 'dark' : 'light'}`);
         await page.locator('#under-header').evaluate(button => {button.style.visibility = 'hidden';});
         const hidden = await page.screenshot({clip, animations: 'disabled'});
-        assert.equal(shown.equals(hidden), true,
-          `${label}/${viewport.width}/${palette}/${dark}: underlying content must not change any header pixel`);
+        // Vetro della Classica (ordine di Diego, 14/11/2026): sotto l'header il contenuto passa
+        // sfocato e attenuato. Si misura la differenza nella riga di titolo e comandi.
+        const row = await page.locator('.header-balanced-container').evaluate(element => element.getBoundingClientRect().toJSON());
+        const diff = await page.evaluate(async ([a, b, row, bar]) => {
+          const load = async data => { const image = await createImageBitmap(await (await fetch('data:image/png;base64,' + data)).blob());
+            const canvas = new OffscreenCanvas(image.width, image.height); const context = canvas.getContext('2d'); context.drawImage(image, 0, 0);
+            return context.getImageData(0, 0, image.width, image.height); };
+          const [one, two] = [await load(a), await load(b)];
+          const top = Math.max(0, Math.round(row.top - bar.top)), bottom = Math.min(one.height, Math.round(row.bottom - bar.top));
+          let sum = 0, max = 0, count = 0;
+          for (let y = top; y < bottom; y++) for (let x = 0; x < one.width; x++) for (let c = 0; c < 3; c++) {
+            const i = (y * one.width + x) * 4 + c, d = Math.abs(one.data[i] - two.data[i]); sum += d; max = Math.max(max, d); count++; }
+          return {mean: sum / count, max};
+        }, [shown.toString('base64'), hidden.toString('base64'), row, geometry.bar]);
+        // Prova peggiore: strisce rosse/nere ad alto contrasto. Misurato 10–28 di media su 255 (14/11/2026).
+        assert.ok(diff.mean > 0, `${label}/${viewport.width}/${palette}/${dark}: the header is glass again, not an opaque band`);
+        assert.ok(diff.mean <= 32, `${label}/${viewport.width}/${palette}/${dark}: content under title and controls is blurred and attenuated (${diff.mean.toFixed(1)})`);
         await page.locator('#under-header').evaluate(button => {button.style.visibility = 'visible';});
         await page.locator('#header-action').click();
         assert.deepEqual(await page.evaluate(() => window.fixtureClicks), {header: 1, underlying: 0});
