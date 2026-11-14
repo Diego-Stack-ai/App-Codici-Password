@@ -1218,10 +1218,13 @@ html body[data-ui-revision="tre-livelli"] .vault-assistant-panel {
     box-shadow: var(--rev-popup-shadow);
 }
 
-[data-ui-revision="tre-livelli"] .toast-content {
+/* Avvisi: una sola superficie, la pillola #toast; il contenuto interno resta trasparente
+   (prima un rettangolo colorato dentro la pillola bianca). */
+[data-ui-revision="tre-livelli"] #toast {
     background: var(--rev-popup);
     border: 1px solid var(--rev-border);
     color: var(--text-primary);
+    box-shadow: var(--rev-popup-shadow);
 }
 
 /* Il foglio Ricerca usa html.dark .vault-assistant-* (0,2,1): html body[…] (0,2,2) prevale. */
@@ -1280,4 +1283,33 @@ html:not(.dark) [data-ui-revision="tre-livelli"] .icon-accent-orange {
 body[data-ui-revision="tre-livelli"] :is(.btn-primary, .profile-tab.is-active) {
     background: var(--rev-fill);
     color: #fff;
+}
+
+/* Icone decorative con un colore storico di stato (Profilo): il ruolo «theme» le fa seguire
+   il ventaglio; le icone senza ruolo dichiarato restano pastiglie di stato. */
+body[data-ui-revision="tre-livelli"] .settings-icon-box[data-icon-role="theme"] {
+    background: var(--rev-icon-bg);
+    border-color: var(--rev-border);
+    color: var(--rev-icon);
+}
+
+/* Coordinate bancarie (moduli e dettagli Account): i titoli verdi erano decorazione, non uno
+   stato. Superfici opache del ventaglio per un contrasto verificabile. */
+body[data-ui-revision="tre-livelli"] .bank-account-card {
+    background: var(--rev-surface-2);
+    border-color: var(--rev-border);
+    box-shadow: none;
+}
+
+body[data-ui-revision="tre-livelli"] .bank-account-card .card-entry {
+    background: var(--rev-surface);
+    border-color: var(--rev-border);
+}
+
+body[data-ui-revision="tre-livelli"] :is(.bank-title, .card-entry-label) {
+    color: var(--rev-text-accent);
+}
+
+body[data-ui-revision="tre-livelli"] :is(.bank-expand-icon, .card-entry-icon) {
+    color: var(--rev-icon);
 }

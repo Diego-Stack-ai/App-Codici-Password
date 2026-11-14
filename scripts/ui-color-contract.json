@@ -26,7 +26,8 @@
     "configurazione_documenti.html",
     "gestione_destinatari.html",
     "form_account_privato.html",
-    "regole_scadenze.html"
+    "regole_scadenze.html",
+    "dettaglio_account_privato.html"
   ],
   "components": [
     {
@@ -311,6 +312,71 @@
       "foregroundRole": "white",
       "backgroundRole": "--rev-fill",
       "backgroundImage": "none",
+      "minContrast": 4.5
+    },
+    {
+      "id": "toast-message",
+      "selector": ".toast-content .toast-text",
+      "markup": "<div id=\"toast\" class=\"active\"><div class=\"toast-content\"><span class=\"toast-text\">Salvato</span></div></div>",
+      "foregroundRole": "--text-primary",
+      "backgroundRole": "--rev-popup",
+      "minContrast": 4.5
+    },
+    {
+      "id": "profile-theme-icon-emerald",
+      "pages": [
+        "profilo_privato.html"
+      ],
+      "selector": ".settings-icon-box.icon-emerald",
+      "markup": "<div class=\"settings-icon-box icon-emerald\" data-icon-role=\"theme\">x</div>",
+      "foregroundRole": "--rev-icon",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 3
+    },
+    {
+      "id": "profile-theme-icon-amber",
+      "pages": [
+        "profilo_privato.html"
+      ],
+      "selector": ".settings-icon-box.icon-amber",
+      "markup": "<div class=\"settings-icon-box icon-amber\" data-icon-role=\"theme\">x</div>",
+      "foregroundRole": "--rev-icon",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 3
+    },
+    {
+      "id": "profile-theme-icon-red",
+      "pages": [
+        "profilo_privato.html"
+      ],
+      "selector": ".settings-icon-box.icon-red",
+      "markup": "<div class=\"settings-icon-box icon-red\" data-icon-role=\"theme\">x</div>",
+      "foregroundRole": "--rev-icon",
+      "backgroundRole": "--rev-icon-bg",
+      "minContrast": 3
+    },
+    {
+      "id": "bank-title",
+      "pages": [
+        "form_account_privato.html",
+        "dettaglio_account_privato.html"
+      ],
+      "selector": ".bank-title",
+      "markup": "<div class=\"bank-account-card\"><span class=\"bank-title\">Conto 1</span></div>",
+      "foregroundRole": "--rev-text-accent",
+      "backgroundRole": "--rev-surface-2",
+      "minContrast": 4.5
+    },
+    {
+      "id": "bank-card-label",
+      "pages": [
+        "form_account_privato.html",
+        "dettaglio_account_privato.html"
+      ],
+      "selector": ".card-entry-label",
+      "markup": "<div class=\"bank-account-card\"><div class=\"card-entry\"><span class=\"card-entry-label\">Carta 1</span></div></div>",
+      "foregroundRole": "--rev-text-accent",
+      "backgroundRole": "--rev-surface",
       "minContrast": 4.5
     }
   ],

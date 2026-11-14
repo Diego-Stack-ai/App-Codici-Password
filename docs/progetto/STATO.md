@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+<a id="mappa-visiva-giro2-stato-2026-11-14"></a>
+
+## Mappa visiva — giro 2 e correttivo #308, candidata in revisione, 14/11/2026
+
+Online **1.2.273**. La candidata #308 corregge lo strumento dopo il NO-GO Codex (sfumature conformi al browser, esiti «non misurati», asse Nuova/Classica) e, nella sola grafica Nuova, i verdi fuori tema (icone del Profilo, coordinate bancarie, interruttori del modulo Account) e la doppia superficie degli avvisi. [Verifiche e limiti](../evidenze/COLLAUDI.md#mappa-visiva-giro2-2026-11-14). Nessun merge, versione o deploy da questa preparazione; canary **OFF secondo Diego**.
+
 <a id="rilascio-1273-stato-2026-11-14"></a>
 
 ## APP 1.2.273 — candidata di confezionamento, 14/11/2026

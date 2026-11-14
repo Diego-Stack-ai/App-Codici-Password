@@ -107,14 +107,16 @@ test('color registry preserves the reviewed matrix and minimum coverage', () => 
   assert.deepEqual(colorContract.palettes, ['', 'green', 'red', 'sand', 'petrol', 'lavender', 'dusty-rose']);
   assert.deepEqual(colorContract.themes, ['light', 'dark']);
   assert.deepEqual(colorContract.pages, ['impostazioni.html', 'profilo_privato.html', 'dati_azienda.html',
-    'configurazione_documenti.html', 'gestione_destinatari.html', 'form_account_privato.html', 'regole_scadenze.html']);
+    'configurazione_documenti.html', 'gestione_destinatari.html', 'form_account_privato.html', 'regole_scadenze.html',
+    'dettaglio_account_privato.html']);
   for (const [id, minimum] of Object.entries({'settings-secondary': 4.5, 'settings-popup-secondary': 4.5, 'settings-icon': 3,
     'company-purple': 4.5, 'company-blue': 4.5, 'manage-pressed': 4.5, 'search-panel': 4.5, 'search-user-bubble': 4.5, 'search-microphone': 4.5,
     'config-badge-accent': 4.5, 'recipient-count': 4.5, 'account-option-icon': 3, 'rules-arrow': 3,
     'settings-maintenance-card': 4.5, 'settings-maintenance-standalone': 4.5,
     'settings-theme-icon-purple': 3, 'settings-theme-icon-blue': 3, 'settings-theme-icon-emerald': 3, 'settings-theme-icon-amber': 3, 'settings-theme-icon-red': 3,
     'settings-selected-timer': 4.5, 'settings-selected-theme': 4.5, 'settings-selected-color-theme': 4.5,
-    'primary-button': 4.5, 'profile-tab-active': 4.5})) {
+    'primary-button': 4.5, 'profile-tab-active': 4.5, 'toast-message': 4.5,
+    'profile-theme-icon-emerald': 3, 'profile-theme-icon-amber': 3, 'profile-theme-icon-red': 3, 'bank-title': 4.5, 'bank-card-label': 4.5})) {
     assert.ok(colorContract.components.some(item => item.id === id && item.minContrast >= minimum), `reviewed coverage cannot disappear or weaken: ${id}`);
   }
   for (const item of colorContract.components) {
@@ -237,6 +239,8 @@ for (const [name, file, brokenCss, expected] of [
   ['extra secondary opacity', 'impostazioni.html', 'html body[data-ui-revision] .settings-desc{opacity:.7!important}', /settings-secondary.*effective contrast/],
   ['bright second gradient stop', 'dati_azienda.html', 'html body[data-ui-revision].company-profile-page .icon-purple{background:linear-gradient(135deg,var(--rev-fill),var(--accent))!important}', /company-purple.*effective contrast/],
   ['fixed blue badge', 'configurazione_documenti.html', 'html body[data-ui-revision] .config-badge-blue{color:#60a5fa!important}', /config-badge-accent/],
+  ['fixed green bank title', 'dettaglio_account_privato.html', 'html body[data-ui-revision] .bank-title{color:#22c55e!important}', /bank-title.*foreground uses/],
+  ['fixed emerald profile icon', 'profilo_privato.html', 'html body[data-ui-revision] .icon-emerald{background:#10b981!important}', /profile-theme-icon-emerald.*background uses/],
   ['legacy search panel gradient', 'impostazioni.html', 'html body[data-ui-revision] .vault-assistant-panel{background-image:linear-gradient(white,white)!important}', /search-panel/],
 ]) {
   test(`color contract detects ${name}`, {timeout: 30000}, async () => {
@@ -319,4 +323,63 @@ test('Settings preserves Classic colors and semantic danger/status colors', {tim
       assert.deepEqual(await read(), revised, 'switching back restores the candidate paints');
     } finally { await page.close(); }
   }
+});
+
+// Verdi fuori tema e superficie doppia dei messaggi (mappa visiva, 14/11/2026).
+// Solo grafica Nuova; la Classica resta com'era ed è verificata esplicitamente.
+async function paintOf(page, selector) {
+  return page.evaluate(selector => {
+    const element = document.querySelector(selector);
+    const style = getComputedStyle(element);
+    const probe = role => { const span = document.createElement('span'); span.style.backgroundColor = `var(${role})`; element.append(span);
+      const value = getComputedStyle(span).backgroundColor; span.remove(); return value; };
+    return {background: style.backgroundColor, image: style.backgroundImage, border: style.borderTopWidth, color: style.color,
+      fill: probe('--rev-fill'), popup: probe('--rev-popup'), success: probe('--status-success')};
+  }, selector);
+}
+const classic = page => page.evaluate(() => document.body.removeAttribute('data-ui-revision'));
+
+test('toast messages have a single surface that follows the palette', {timeout: 60000}, async () => {
+  for (const theme of colorContract.themes) for (const palette of ['', 'petrol']) {
+    const page = await openColorFixture('impostazioni.html', theme, palette);
+    try {
+      const outer = await paintOf(page, '[data-color-case="toast-message"] #toast');
+      const inner = await paintOf(page, '[data-color-case="toast-message"] .toast-content');
+      assert.equal(outer.background, outer.popup, `${theme}/${palette}: the toast itself is the popup surface`);
+      assert.equal(inner.background, 'rgba(0, 0, 0, 0)', `${theme}/${palette}: no second rectangle inside the toast`);
+      assert.equal(inner.border, '0px', `${theme}/${palette}: no inner border`);
+      await classic(page);
+      assert.equal((await paintOf(page, '[data-color-case="toast-message"] #toast')).background, 'rgb(255, 255, 255)', 'Classic toast unchanged');
+      assert.equal((await paintOf(page, '[data-color-case="toast-message"] .toast-content')).background, 'rgba(0, 0, 0, 0)', 'Classic content unchanged');
+    } finally { await page.close(); }
+  }
+});
+
+test('account form switches use the palette fill when on; Classic keeps success green', {timeout: 60000}, async () => {
+  for (const theme of colorContract.themes) for (const palette of colorContract.palettes) {
+    const page = await openColorFixture('form_account_privato.html', theme, palette);
+    try {
+      await page.evaluate(() => document.body.insertAdjacentHTML('beforeend',
+        '<label id="switch-case"><input type="checkbox" checked><div class="base-switch"></div></label>'));
+      const on = await paintOf(page, '#switch-case .base-switch');
+      assert.equal(on.background, on.fill, `${theme}/${palette || 'default'}: switch on follows --rev-fill`);
+      const knob = await page.evaluate(() => getComputedStyle(document.querySelector('#switch-case .base-switch'), '::after').backgroundColor);
+      assert.ok(contrast(knob, on.background) >= 3, `${theme}/${palette || 'default'}: knob visible on the fill`);
+      await classic(page);
+      const old = await paintOf(page, '#switch-case .base-switch');
+      assert.equal(old.background, old.success, 'Classic switch keeps the success green');
+    } finally { await page.close(); }
+  }
+});
+
+test('Profile section icons are decorative and declare the theme role', {timeout: 30000}, async () => {
+  const source = await readFile(path.join(publicRoot, 'profilo_privato.html'), 'utf8');
+  const boxes = [...source.matchAll(/<div class="settings-icon-box[^"]*"[^>]*>/g)].map(match => match[0]);
+  assert.equal(boxes.length, 6, 'all static Profile section icons remain covered');
+  for (const box of boxes) assert.match(box, /data-icon-role="theme"/, `${box}: decorative section icon follows the palette`);
+});
+
+test('shared credentials secondary actions declare the secondary role', async () => {
+  const source = await readFile(path.join(publicRoot, 'assets/js/modules/settings/shared-credentials-controller.js'), 'utf8');
+  assert.doesNotMatch(source, /className: 'btn-modal'/, 'Close/Cancel must not render as an unstyled modal button');
 });

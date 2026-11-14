@@ -8,10 +8,10 @@
   "absoluteStaticCeilings": {
     "maxInitialLocalGzipKb": 338,
     "maxInitialLocalGzipKbByPage": {
-      "profilo_privato.html": 356,
+      "profilo_privato.html": 357,
       "form_account_azienda.html": 348,
       "aggiungi_scadenza.html": 345,
-      "form_account_privato.html": 346,
+      "form_account_privato.html": 347,
       "impostazioni.html": 346,
       "dettaglio_account_privato.html": 344,
       "dettaglio_account_azienda.html": 343
