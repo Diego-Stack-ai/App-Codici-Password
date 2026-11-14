@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="mappa-visiva-rilascio-1273-2026-11-14"></a>
+
+## 14/11/2026 — merge della #305 e versione 1.2.273
+
+Fonte: dopo il [GO di Codex sulla #305](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/305#issuecomment-6874586559), Diego ordina **«procedi con merge e versione 1.2.273»**. La #305 si unisce con i check richiesti verdi sul suo SHA; la 1.2.273 confeziona la stessa UI cambiando solo il numero di versione e la versione rivista del catalogo aiuti. Il deploy Hosting resta un passo distinto con il clic di Diego su production. Canary **OFF secondo Diego**.
+
 <a id="colori-intensita-rilascio-2026-11-13"></a>
 
 ## 13/11/2026 — intensità dei colori graduale e rilascio 1.2.272

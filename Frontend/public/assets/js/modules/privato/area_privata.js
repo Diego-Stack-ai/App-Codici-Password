@@ -10,7 +10,7 @@ import {confirmFrameAction} from '../core/vault-frame-client.js';
  * - Espone initAreaPrivata(user) come entry point unico.
  */
 
-import { db, functions } from '../../firebase-config.js?v=1.2.272';
+import { db, functions } from '../../firebase-config.js?v=1.2.273';
 import { LOG } from '../../logger.js';
 import { collection, doc, addDoc, updateDoc, writeBatch, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
