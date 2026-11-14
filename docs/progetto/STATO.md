@@ -4,11 +4,11 @@
 
 <a id="cornice-ordinaria-1275-stato-2026-11-14"></a>
 
-## APP 1.2.275 — candidata UI e cornice ordinaria, 14/11/2026
+## APP 1.2.275 — pubblicata e cornice ordinaria attiva, ricevuta 15/11/2026
 
-Produzione ancora **1.2.274 / 51ff1673** fino alle ricevute effettive. Sul ramo `codex/classic-effects-1.2.275-20261114`, [ordine esplicito di Diego](DECISIONI.md#cornice-ordinaria-1275-decisione-2026-11-14): aloni più discreti e cornice per tutti gli utenti, con merge/deploy senza attendere Claude. I quattro scope Firebase e le protezioni production sono invariati; l'attivazione finale ha un workflow amministrativo separato limitato al singleton.
+Online **1.2.275**, sorgente **44a64edf7e9d3d15a041df50ca5c3d7d0349a06f**, sourceDirty=false. La #311 integra la candidata 0829ad2e, con CI verde, secondo l'[ordine di Diego](DECISIONI.md#cornice-ordinaria-1275-decisione-2026-11-14). Rules #1167, Hosting #1168 e verifica pubblica completa sono riusciti sullo stesso SHA; il workflow policy **#2** ha poi confermato **enabled=true** il 14/11 alle **23:58:56 CET**. Approvazioni production eseguite da Codex nella sessione GitHub Diego-Stack-ai su delega esplicita di Diego; quattro scope Firebase e protezioni invariati. [Ricevuta GitHub](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/311#issuecomment-6885570026).
 
-La candidata conserva palette e riempimenti leggibili, attenua le ombre ordinarie, assottiglia il vetro e lascia invariato il gradiente originale. Cornice con policy globale v2, permessi personali in RAM e rinnovo server finito; nessun claim pilot o filtro browser. [Contratto](../regole/VAULT.md#cornice-ordinaria-vault-2026-11-14), [verifiche locali](../evidenze/COLLAUDI.md#cornice-ordinaria-1275-verifiche-2026-11-14). Nessun esito online della 275 o attivazione anticipati. Gli esiti fisici precedenti restano circoscritti e gli altri ambienti/D15/D18 conservano i propri limiti.
+La UI conserva palette e riempimenti leggibili, attenua le ombre ordinarie, assottiglia il vetro e lascia invariato il gradiente originale. Il pilot è ritirato: la cornice ordinaria è disponibile agli utenti autenticati, verificati e ammessi dal fence, sulle 22 route private, senza claim pilot o filtro browser. La policy globale v2 non rende permanente lo sblocco: permessi personali in RAM, lease server di cinque minuti, inattività, logout e revoca restano distinti. [Contratto](../regole/VAULT.md#cornice-ordinaria-vault-2026-11-14), [verifiche e limiti](../evidenze/COLLAUDI.md#cornice-ordinaria-1275-verifiche-2026-11-14). I sei PASS storici restano circoscritti; C1 residua, D15 in produzione, telefoni/PWA e D18 attraverso due rilasci non sono attestati da questa ricevuta. I checkpoint sotto conservano lo stato storico.
 
 <a id="rilascio-ui-1274-stato-2026-11-14"></a>
 
