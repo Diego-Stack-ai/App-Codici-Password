@@ -28,7 +28,9 @@ const types = {'.html': 'text/html', '.css': 'text/css', '.woff2': 'font/woff2',
 const pages = process.argv[3] ? process.argv[3].split(',')
   : (await readdir(root)).filter(file => file.endsWith('.html')).sort();
 
-function prepare(html, theme, palette) {
+function prepare(html, theme, palette, mode) {
+  // Classica = come theme-init.js: l'attributo data-ui-revision viene tolto dal body.
+  if (mode === 'classica') html = html.replace(/(<body[^>]*?)\sdata-ui-revision="[^"]*"/i, '$1');
   return html
     .replace(/<script\b[\s\S]*?<\/script>/gi, '')
     .replace(/<meta[^>]+http-equiv=["']?refresh[^>]*>/gi, '')
@@ -52,7 +54,7 @@ const server = createServer(async (req, res) => {
     if (!file.startsWith(root)) throw Error('outside');
     let body = await readFile(file);
     const ext = path.extname(file);
-    if (ext === '.html') body = prepare(body.toString(), url.searchParams.get('theme'), url.searchParams.get('palette') || '');
+    if (ext === '.html') body = prepare(body.toString(), url.searchParams.get('theme'), url.searchParams.get('palette') || '', url.searchParams.get('mode'));
     res.writeHead(200, {'Content-Type': types[ext] || 'application/octet-stream'});
     res.end(body);
   } catch { res.writeHead(404); res.end(); }
@@ -88,28 +90,62 @@ function collect() {
     for (let i = 0; i < text.length; i++) { const c = text[i]; if (c === '(') depth++; else if (c === ')') depth--;
       else if (c === ',' && depth === 0) { out.push(text.slice(start, i).trim()); start = i + 1; } }
     out.push(text.slice(start).trim()); return out; };
+  // Restituisce null (nessuna sfumatura), {unmeasured:true} per sintassi non supportate
+  // (mai un PASS approssimato) oppure il colore nel punto, come da specifica CSS:
+  // - posizioni mancanti distribuite fra le tappe esplicite vicine, posizioni monotone;
+  // - direzioni verso un angolo calcolate sulla geometria del box («magic corners»);
+  // - interpolazione in spazio premoltiplicato per l'alpha.
   const gradientAt = (image, box, point) => {
-    const m = image && image.match(/^linear-gradient\((.*)\)$/);
-    if (!m) return null;
+    if (!image || image === 'none') return null;
+    const m = image.match(/^linear-gradient\((.*)\)$/);
+    if (!m) return {unmeasured: true}; // radiali, coniche, ripetute, immagini url()
     const parts = splitTop(m[1]);
+    const W = box.width, H = box.height;
     let angle = 180;
-    const sides = {'to top': 0, 'to right': 90, 'to bottom': 180, 'to left': 270, 'to top right': 45, 'to right top': 45,
-      'to bottom right': 135, 'to right bottom': 135, 'to bottom left': 225, 'to left bottom': 225, 'to top left': 315, 'to left top': 315};
-    if (/^-?[\d.]+(deg|turn|rad)$/.test(parts[0])) {
-      const v = parseFloat(parts[0]); angle = parts[0].endsWith('turn') ? v * 360 : parts[0].endsWith('rad') ? v * 180 / Math.PI : v; parts.shift();
+    const sides = {'to top': 0, 'to right': 90, 'to bottom': 180, 'to left': 270};
+    const corner = parts[0].match(/^to (top|bottom) (left|right)$|^to (left|right) (top|bottom)$/);
+    if (/^-?[\d.]+(deg|turn|rad|grad)$/.test(parts[0])) {
+      const v = parseFloat(parts[0]), u = parts[0].replace(/^-?[\d.]+/, '');
+      angle = u === 'turn' ? v * 360 : u === 'rad' ? v * 180 / Math.PI : u === 'grad' ? v * 0.9 : v; parts.shift();
     } else if (sides[parts[0]] !== undefined) angle = sides[parts.shift()];
-    const stops = parts.map(part => { const color = part.match(/(rgba?|color)\([^)]*\)/); const pos = part.match(/(-?[\d.]+)%\s*$/);
-      return color ? {color: parse(color[0]), pos: pos ? parseFloat(pos[1]) / 100 : null} : null; }).filter(Boolean);
+    else if (corner) {
+      const vertical = corner[1] || corner[4], horizontal = corner[2] || corner[3];
+      const sx = horizontal === 'right' ? 1 : -1, sy = vertical === 'bottom' ? 1 : -1;
+      // Linea perpendicolare alla diagonale fra i due angoli adiacenti: vettore (sx·H, sy·W).
+      angle = Math.atan2(sx * H, -sy * W) * 180 / Math.PI; parts.shift();
+    } else if (/^to\b/.test(parts[0])) return {unmeasured: true};
+    const stops = [];
+    for (const part of parts) {
+      const color = part.match(/^((?:rgba?|color)\([^)]*\))(?:\s+(-?[\d.]+)%)?$/);
+      if (!color) return {unmeasured: true}; // lunghezze, doppie posizioni, suggerimenti, calc()
+      const c = parse(color[1]);
+      if (!c) return {unmeasured: true};
+      stops.push({color: c, pos: color[2] === undefined ? null : parseFloat(color[2]) / 100});
+    }
     if (stops.length < 2) return stops[0]?.color || null;
-    stops.forEach((stop, i) => { if (stop.pos === null) stop.pos = i / (stops.length - 1); });
-    const rad = angle * Math.PI / 180, length = Math.abs(box.width * Math.sin(rad)) + Math.abs(box.height * Math.cos(rad)) || 1;
-    const dx = point.x - (box.left + box.width / 2), dy = point.y - (box.top + box.height / 2);
-    const t = Math.min(1, Math.max(0, (dx * Math.sin(rad) - dy * Math.cos(rad)) / length + 0.5));
+    if (stops[0].pos === null) stops[0].pos = 0;
+    if (stops[stops.length - 1].pos === null) stops[stops.length - 1].pos = 1;
+    for (let i = 1; i < stops.length; i++) if (stops[i].pos !== null) stops[i].pos = Math.max(stops[i].pos, stops[i - 1].pos ?? -Infinity);
+    for (let i = 1; i < stops.length - 1; i++) if (stops[i].pos === null) {
+      let j = i; while (stops[j].pos === null) j++;
+      const from = stops[i - 1].pos, to = stops[j].pos, n = j - i + 1;
+      for (let k = i; k < j; k++) stops[k].pos = from + (to - from) * (k - i + 1) / n;
+    }
+    const rad = angle * Math.PI / 180, length = Math.abs(W * Math.sin(rad)) + Math.abs(H * Math.cos(rad)) || 1;
+    const dx = point.x - (box.left + W / 2), dy = point.y - (box.top + H / 2);
+    const t = (dx * Math.sin(rad) - dy * Math.cos(rad)) / length + 0.5;
+    if (t <= stops[0].pos) return stops[0].color;
+    if (t >= stops[stops.length - 1].pos) return stops[stops.length - 1].color;
     let k = 0; while (k < stops.length - 2 && t > stops[k + 1].pos) k++;
-    const [a, b] = [stops[k], stops[k + 1]], f = b.pos > a.pos ? Math.min(1, Math.max(0, (t - a.pos) / (b.pos - a.pos))) : 0;
-    return {rgb: a.color.rgb.map((v, c) => v + (b.color.rgb[c] - v) * f), alpha: a.color.alpha + (b.color.alpha - a.color.alpha) * f};
+    const [a, b] = [stops[k], stops[k + 1]], f = b.pos > a.pos ? (t - a.pos) / (b.pos - a.pos) : 1;
+    const alpha = a.color.alpha + (b.color.alpha - a.color.alpha) * f;
+    if (alpha <= 0) return {rgb: [0, 0, 0], alpha: 0};
+    const rgb = a.color.rgb.map((v, c) => (v * a.color.alpha + (b.color.rgb[c] * b.color.alpha - v * a.color.alpha) * f) / alpha);
+    return {rgb, alpha};
   };
+  // null = non misurato: almeno uno strato dietro il testo ha una pittura non supportata.
   const composite = (element, ink) => {
+    let unmeasured = false;
     const chain = [];
     for (let node = element; node && node.nodeType === 1; node = node.parentElement) chain.unshift(node);
     const r = element.getBoundingClientRect(), point = {x: r.left + r.width / 2, y: r.top + r.height / 2};
@@ -120,13 +156,19 @@ function collect() {
       let inner = backdrop;
       const color = parse(style.backgroundColor);
       if (color && color.alpha > 0) inner = over(color, inner);
-      const image = gradientAt(style.backgroundImage, box, point);
-      if (image && image.alpha > 0) inner = over(image, inner);
+      // Più strati: si dipingono dal fondo (ultimo) al primo, come il browser.
+      const layers = style.backgroundImage && style.backgroundImage !== 'none' ? splitTop(style.backgroundImage).reverse() : [];
+      for (const layer of layers) {
+        const image = gradientAt(layer, box, point);
+        if (image?.unmeasured) unmeasured = true;
+        else if (image && image.alpha > 0) inner = over(image, inner);
+      }
       inner = i === chain.length - 1 ? (ink ? over(ink, inner) : inner) : paint(i + 1, inner);
       const o = Number(style.opacity);
       return inner.map((v, c) => v * o + backdrop[c] * (1 - o));
     };
-    return paint(0, [255, 255, 255]).map(v => Math.round(v * 10) / 10);
+    const result = paint(0, [255, 255, 255]).map(v => Math.round(v * 10) / 10);
+    return unmeasured ? null : result;
   };
   const probe = document.createElement('span');
   document.body.append(probe);
@@ -181,15 +223,22 @@ const hex = rgb => '#' + rgb.map(v => Math.round(v).toString(16).padStart(2, '0'
 
 const report = [];
 await mkdir(outDir, {recursive: true});
-for (const page of pages) {
-  const perPage = {page, themes: {}};
+// Asse Nuova/Classica: le pagine migrate si misurano in entrambe le grafiche.
+const variants = [];
+for (const file of pages) {
+  const source = await readFile(path.join(root, file), 'utf8').catch(() => '');
+  if (/<body[^>]*data-ui-revision=/i.test(source)) variants.push([file, 'nuova'], [file, 'classica']);
+  else variants.push([file, 'unica']);
+}
+for (const [page, mode] of variants) {
+  const perPage = {page, mode, label: mode === 'unica' ? page : `${page} [${mode === 'nuova' ? 'Nuova' : 'Classica'}]`, themes: {}};
   try {
   for (const theme of themes) {
     const runs = {};
     for (const palette of palettes) {
       const tab = await browser.newPage({viewport: {width: 390, height: 844}});
       await tab.route('**/*', route => route.request().url().startsWith(base) ? route.continue() : route.abort());
-      await tab.goto(`${base}/${page}?theme=${theme}&palette=${palette}`, {waitUntil: 'load'});
+      await tab.goto(`${base}/${page}?theme=${theme}&palette=${palette}&mode=${mode}`, {waitUntil: 'load'});
       await tab.evaluate(() => document.fonts?.ready);
       // Animazioni di comparsa e transizioni ferme allo stato finale: altrimenti i testi
       // verrebbero misurati a metà dissolvenza, come se fossero semitrasparenti.
@@ -202,7 +251,7 @@ for (const page of pages) {
       if (!byIndex.has(record.index)) byIndex.set(record.index, {});
       byIndex.get(record.index)[palette] = record;
     }
-    const fixed = [], status = [], lowContrast = [], offScale = [];
+    const fixed = [], status = [], lowContrast = [], offScale = [], unmeasured = [];
     const scale = runs[''].scale;
     for (const [index, variants] of byIndex) {
       const ref = variants[''];
@@ -218,6 +267,8 @@ for (const page of pages) {
         const item = {index, label: ref.label, prop, value: hex(values[0])};
         (statusHue(h) ? status : fixed).push(item);
       }
+      // Testo dietro una pittura non supportata: «non misurato», mai un PASS presunto.
+      if (ref.text && (!ref.effectiveBg || !ref.effectiveFg)) unmeasured.push({index, label: ref.label});
       for (const palette of palettes) {
         const record = variants[palette];
         if (!record.text || !record.effectiveFg || !record.effectiveBg) continue;
@@ -238,12 +289,12 @@ for (const page of pages) {
     }, {indexes, colour});
     await mark([...new Set(lowContrast.filter(item => item.palette === 'Verde').map(item => item.index))], '#ff8c00');
     await mark([...new Set(fixed.map(item => item.index))], '#ff00ff');
-    const shot = `${page.replace('.html', '')}-${theme}-verde.png`;
+    const shot = `${page.replace('.html', '')}-${mode}-${theme}-verde.png`;
     await tab.screenshot({path: path.join(outDir, shot), fullPage: true});
     await tab.close();
     const dedupe = list => [...new Map(list.map(item => [`${item.index}|${item.prop || ''}|${item.palette || ''}`, item])).values()];
     perPage.themes[theme] = {elements: byIndex.size, fixed: dedupe(fixed), status: dedupe(status), lowContrast: dedupe(lowContrast),
-      offScale: dedupe(offScale), scale, screenshot: shot};
+      offScale: dedupe(offScale), unmeasured: dedupe(unmeasured), scale, screenshot: shot};
   }
   } catch (error) {
     // Pagina che cambia da sola (redirect) o non analizzabile senza script: la si segnala e si prosegue.
@@ -252,7 +303,7 @@ for (const page of pages) {
     continue;
   }
   report.push(perPage);
-  process.stdout.write(`${page}: fissi ${perPage.themes.light.fixed.length}/${perPage.themes.dark.fixed.length}, ` +
+  process.stdout.write(`${perPage.label}: fissi ${perPage.themes.light.fixed.length}/${perPage.themes.dark.fixed.length}, ` +
     `contrasto ${perPage.themes.light.lowContrast.length}/${perPage.themes.dark.lowContrast.length}, ` +
     `caratteri ${perPage.themes.light.offScale.length}\n`);
 }
@@ -265,11 +316,13 @@ const swatch = value => `<span style="display:inline-block;width:12px;height:12p
 const rows = (list, cols) => list.length ? `<table><tr>${cols.map(c => `<th>${c[0]}</th>`).join('')}</tr>${list.map(item =>
   `<tr>${cols.map(c => `<td>${c[1](item)}</td>`).join('')}</tr>`).join('')}</table>` : '<p class="ok">Nessuno</p>';
 // Unità esplicite (rilievo Codex): elementi unici, coppie elemento × tema, occorrenze × palette.
-const totals = {fixedUnique: new Set(), fixedPairs: 0, lowUnique: new Set(), lowPairs: new Set(), lowOccurrences: 0, font: 0};
+const totals = {fixedUnique: new Set(), fixedPairs: 0, statusUnique: new Set(), unmeasuredUnique: new Set(), lowUnique: new Set(), lowPairs: new Set(), lowOccurrences: 0, font: 0};
 for (const p of report) {
   for (const t of themes) {
-    for (const item of p.themes[t].fixed) { totals.fixedUnique.add(`${p.page}|${item.index}`); totals.fixedPairs++; }
-    for (const item of p.themes[t].lowContrast) { totals.lowUnique.add(`${p.page}|${item.index}`); totals.lowPairs.add(`${p.page}|${t}|${item.index}`); totals.lowOccurrences++; }
+    for (const item of p.themes[t].fixed) { totals.fixedUnique.add(`${p.label}|${item.index}`); totals.fixedPairs++; }
+    for (const item of p.themes[t].status) totals.statusUnique.add(`${p.label}|${item.index}`);
+    for (const item of p.themes[t].unmeasured) totals.unmeasuredUnique.add(`${p.label}|${item.index}`);
+    for (const item of p.themes[t].lowContrast) { totals.lowUnique.add(`${p.label}|${item.index}`); totals.lowPairs.add(`${p.label}|${t}|${item.index}`); totals.lowOccurrences++; }
   }
   totals.font += p.themes.light.offScale.length;
 }
@@ -282,12 +335,12 @@ h1{font-size:22px}h2{font-size:18px;margin-top:32px;border-top:1px solid var(--l
 table{border-collapse:collapse;width:100%;margin:6px 0 14px;font-size:13px}td,th{border:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}
 .ok{color:var(--muted)}.legend{color:var(--muted)}img{max-width:200px;border:1px solid var(--line);margin-right:8px}
 .scroll{overflow-x:auto}</style></head><body>
-<h1>Mappa visiva — grafica Nuova</h1>
-<p>${report.length} pagine × 7 colori × chiaro/scuro. <b>Non seguono il tema</b>: ${totals.fixedUnique.size} elementi unici (${totals.fixedPairs} proprietà × tema). <b>Contrasto basso</b>: ${totals.lowUnique.size} elementi unici, ${totals.lowPairs.size} coppie elemento × tema, ${totals.lowOccurrences} occorrenze contando le palette. <b>Fuori scala</b>: ${totals.font} testi.</p>
-<p class="legend">Schermate nel colore Verde: <b style="color:#ff00ff">magenta</b> = colore fisso che non segue il tema; <b style="color:#ff8c00">arancio</b> = contrasto basso. I colori fissi rosso/arancio/ambra/verde sono elencati a parte come probabili colori di stato. Pagine con contenuti costruiti dopo il login: copertura parziale.</p>
-<p class="legend"><b>Limiti</b>: solo viewport 390×844; pannelli, modali e dettagli chiusi non vengono aperti; niente stati hover/focus, pseudo-elementi, placeholder o SVG; sui gradienti si misura il primo colore; la tinta non stabilisce la funzione (un verde fisso può essere decorativo). I conteggi sono coppie elemento × tema × palette, non guasti confermati: confrontare i giri con la stessa unità.</p>
-${report.map(p => `<h2>${esc(p.page)}</h2>
-<p><img src="${p.themes.light.screenshot}" alt="${esc(p.page)} chiaro"><img src="${p.themes.dark.screenshot}" alt="${esc(p.page)} scuro"></p>
+<h1>Mappa visiva — grafica Nuova e Classica</h1>
+<p>${report.length} varianti di pagina (le pagine migrate in Nuova e in Classica) × 7 colori × chiaro/scuro. <b>Non seguono il tema</b> (tinte non di stato): ${totals.fixedUnique.size} elementi unici (${totals.fixedPairs} proprietà × tema). <b>Verdi/ambra/rossi fissi da classificare</b>: ${totals.statusUnique.size} elementi unici (la tinta non stabilisce il ruolo). <b>Non misurati</b> (pittura non supportata dietro il testo): ${totals.unmeasuredUnique.size}. <b>Contrasto basso</b>: ${totals.lowUnique.size} elementi unici, ${totals.lowPairs.size} coppie elemento × tema, ${totals.lowOccurrences} occorrenze contando le palette. <b>Fuori scala</b>: ${totals.font} testi.</p>
+<p class="legend">Schermate nel colore Verde: <b style="color:#ff00ff">magenta</b> = colore fisso che non segue il tema; <b style="color:#ff8c00">arancio</b> = contrasto basso. I colori fissi rosso/arancio/ambra/verde sono elencati a parte, da classificare: possono essere stati o decorazioni. I contenuti costruiti dagli script dopo il login <b>non sono esaminati</b>.</p>
+<p class="legend"><b>Limiti</b>: solo viewport 390×844; pannelli, modali e dettagli chiusi non vengono aperti; niente stati hover/focus, pseudo-elementi, placeholder o SVG; sfumature lineari calcolate nel punto del testo (tappe, direzioni verso gli angoli, alpha premoltiplicata), radiali/immagini «non misurate»; la tinta non stabilisce la funzione (un verde fisso può essere decorativo). I conteggi sono coppie elemento × tema × palette, non guasti confermati: confrontare i giri con la stessa unità.</p>
+${report.map(p => `<h2>${esc(p.label)}</h2>
+<p><img src="${p.themes.light.screenshot}" alt="${esc(p.label)} chiaro"><img src="${p.themes.dark.screenshot}" alt="${esc(p.label)} scuro"></p>
 ${themes.map(t => `<h3>${t === 'light' ? 'Chiaro' : 'Scuro'} — non seguono il tema (${p.themes[t].fixed.length})</h3><div class="scroll">${rows(p.themes[t].fixed, [['Elemento', i => esc(i.label)], ['Proprietà', i => i.prop], ['Colore fisso', i => swatch(i.value)]])}</div>
 <h3>${t === 'light' ? 'Chiaro' : 'Scuro'} — contrasto basso (${p.themes[t].lowContrast.length})</h3><div class="scroll">${rows(p.themes[t].lowContrast.slice(0, 40), [['Elemento', i => esc(i.label)], ['Colore', i => i.palette], ['Rapporto', i => i.ratio], ['Testo', i => swatch(i.color)], ['Sfondo', i => swatch(i.bg)]])}</div>
 <details><summary>${t === 'light' ? 'Chiaro' : 'Scuro'} — colori di stato fissi (${p.themes[t].status.length})</summary>${rows(p.themes[t].status, [['Elemento', i => esc(i.label)], ['Proprietà', i => i.prop], ['Colore', i => swatch(i.value)]])}</details>`).join('')}
