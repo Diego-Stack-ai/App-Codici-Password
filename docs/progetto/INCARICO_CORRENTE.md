@@ -1,5 +1,15 @@
 # Incarico corrente
 
+<a id="rilascio-ui-1274-incarico-2026-11-14"></a>
+
+## APP 1.2.274 — confezionamento e rilascio Hosting autorizzati, 14/11/2026
+
+Ordine diretto di Diego **«merge e deploy»**, dopo il [GO Codex](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/308#issuecomment-6883698758) e CI verde su c93cb4d. La #308 e gia integrata nel merge **a288023ca1287daa29f4c637160e6762404af090**. Codex prepara il solo pacchetto operativo sul ramo **codex/release-ui-1.2.274-20261114**: bump canonico 1.2.274, riferimenti asset/cache/precache, riesame del catalogo aiuti con reviewedAppVersion allineato, documenti esistenti e manifest generato su SHA pulito. Nessuna nuova modifica UI o funzionale rispetto alla fonte approvata; confronto indipendente del diff dopo normalizzazione delle versioni.
+
+L'ordine autorizza commit, push, PR, integrazione dopo revisione e check verdi, dispatch **hosting** sul master finale e verifica pubblica di versione, sorgente, tutti gli hash e intestazioni. L'approvazione production segue la protezione vigente e l'autorizzazione personale, senza bypass o modifiche ai permessi. Non pubblicare il merge a288023c ancora numerato 1.2.273; la run corretta deve contenere 1.2.274.
+
+Canary **OFF secondo Diego**, senza rilettura amministrativa. La domanda sull'attivazione permanente della cornice non la accende: nessun account QA2/personale, claim, singleton, Rules, Functions, Storage, migrazione o nuovo collaudo C1. Conservare i limiti e registrare soltanto esiti effettivi; [verifiche](../evidenze/COLLAUDI.md#rilascio-ui-1274-verifiche-2026-11-14), [stato](STATO.md#rilascio-ui-1274-stato-2026-11-14) e [sequenza](PROGRAMMA.md#rilascio-ui-1274-programma-2026-11-14). Le ricevute documentali #301/#304/#307 restano PR distinte, senza merge implicito.
+
 <a id="mappa-visiva-incarico-2026-11-14"></a>
 
 ## Mappa visiva e colori — passaggio a Claude, 14/11/2026

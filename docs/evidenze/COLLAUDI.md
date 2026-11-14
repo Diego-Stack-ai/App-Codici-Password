@@ -1,5 +1,15 @@
 # Collaudi
 
+<a id="rilascio-ui-1274-verifiche-2026-11-14"></a>
+
+## APP 1.2.274 — preparazione Hosting, 14/11/2026
+
+Fonte UI: #308 revisionata su **c93cb4dec2eb1b5fea3710f7bbb3c93678670f84**, GO Codex e CI verde; merge master **a288023ca1287daa29f4c637160e6762404af090**. [Ordine e limiti](../progetto/INCARICO_CORRENTE.md#rilascio-ui-1274-incarico-2026-11-14): solo confezionamento canonico 1.2.274 e Hosting, nessuna modifica UI o attivazione della cornice.
+
+Manifest pubblico precedente riletto:1.2.273, sorgente fa72c010507f713bc6014c89af5f45dd6185d91d pulita,365 file, albero SHA256 57fdf61ffdeb1cf67dfd376aab5cbf92938eecf8e4d623ee9f5447a1a8c52db8. Questa e la produzione di partenza, non un esito della futura pubblicazione.
+
+La candidata aggiorna versione package/lock, APP_VERSION, Home, chiave cache SW e 303 riferimenti asset; il riesame del catalogo allinea reviewedAppVersion a 1.2.274, con contentVersion 13 e contenuti invariati. Controlli locali della preparazione: versione coerente; documenti 12/12 (34 MD, 1026 collegamenti); guida 12/12 (31 pagine, 126 istruzioni, 111 target); offline 16/16 (345 risorse); riferimenti statici OK in 341 file; budget 4/4 senza aumento dei tetti; verificatore del manifest e governance Git 12/12. Il primo tentativo dei due test HTTP locali era bloccato dal sandbox sul loopback (EACCES), senza esito applicativo; il giro valido con loopback disponibile e tutto verde. Revisione indipendente del contenuto: 365/365 file Frontend identici alla fonte approvata dopo la sola normalizzazione 1.2.274 verso 1.2.273, tutte le 51 CSS identiche, package/lock limitati ai metadati e catalogo limitato a reviewedAppVersion. Il GO va ancorato allo SHA finale; CI **DA_VERIFICARE** e manifest/hash/header da ricomputare sul master finale pulito. Nessun PASS online della 1.2.274 o QA2 anticipato. Canary OFF secondo Diego.
+
 <a id="materiali-classica-verifiche-2026-11-14"></a>
 
 ## Materiali Classica e colori in entrambe le grafiche — verifiche locali, 14/11/2026

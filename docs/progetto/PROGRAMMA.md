@@ -1,5 +1,17 @@
 # Programma
 
+<a id="rilascio-ui-1274-programma-2026-11-14"></a>
+
+## APP 1.2.274 — sequenza Hosting dopo la #308, 14/11/2026
+
+[Ordine di Diego](DECISIONI.md#rilascio-ui-1274-decisione-2026-11-14): merge e deploy. La UI e integrata in a288023c; il confezionamento operativo segue l'[incarico](INCARICO_CORRENTE.md#rilascio-ui-1274-incarico-2026-11-14).
+
+1. Bump canonico 1.2.274 e riesame del catalogo; confronto dei byte normalizzati con la fonte approvata, controlli locali e revisione indipendente sullo SHA esatto.
+2. CI verde della candidata, integrazione, verifica del master finale e manifest pulito; avvio del workflow manuale con release_scope=hosting. Protezione production e approvazione personale conservate, nessun bypass.
+3. Seguire la run e verificare online versione, sourceCommit/sourceDirty, tutti gli hash del payload,41 profili header e tre probe codificati; pubblicare la ricevuta effettiva.
+
+Canary **OFF secondo Diego**. Il seguito verso la cornice permanente richiede il completamento dei gate gia aperti; nessuna attivazione, nuovo giro QA2/personale o modifica backend implicita nella pubblicazione della UI.
+
 <a id="rilascio-ui-1272-programma-2026-11-13"></a>
 
 ## APP 1.2.272 — sequenza del rilascio colori, 13/11/2026

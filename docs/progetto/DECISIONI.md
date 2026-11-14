@@ -1,5 +1,13 @@
 # Decisioni
 
+<a id="rilascio-ui-1274-decisione-2026-11-14"></a>
+
+## 14/11/2026 — rilascio Hosting 1.2.274 dopo la #308
+
+Diego ordina **«merge e deploy»** dopo il [GO tecnico Codex su c93cb4d](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/308#issuecomment-6883698758). La CI dello stesso SHA e interamente verde; la #308 e unita in master **a288023ca1287daa29f4c637160e6762404af090**. L'ordine comprende il confezionamento canonico 1.2.274, commit/push/PR, revisione e integrazione della candidata, workflow manuale del solo Hosting e verifica pubblica. Codex esegue il confezionamento operativo; la UI di Claude resta identica dopo normalizzazione delle sole versioni. L'[incarico](INCARICO_CORRENTE.md#rilascio-ui-1274-incarico-2026-11-14) conserva CI, revisione e protezione production senza bypass.
+
+La successiva domanda sulla cornice riguarda la prontezza per un uso permanente: non e un ordine di attivazione. Canary **OFF secondo Diego**; C1 residua, revoca live, fase personale/C2 e D18 restano aperti. Nessuna nuova prova su account, Rules, Functions, Storage, claim o singleton. [Stato](STATO.md#rilascio-ui-1274-stato-2026-11-14).
+
 <a id="materiali-classica-entrambe-grafiche-2026-11-14"></a>
 
 ## 14/11/2026 — materiali Classica e colori corretti in entrambe le grafiche

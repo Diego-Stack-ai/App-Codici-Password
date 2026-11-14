@@ -2,6 +2,16 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-ui-1274-stato-2026-11-14"></a>
+
+## APP 1.2.274 — confezionamento Hosting in corso, 14/11/2026
+
+Diego ordina [merge e deploy](DECISIONI.md#rilascio-ui-1274-decisione-2026-11-14). La #308 e unita in **a288023ca1287daa29f4c637160e6762404af090** dopo GO Codex e CI verde su c93cb4d. Il ramo **codex/release-ui-1.2.274-20261114** confeziona la 1.2.274 con soli riferimenti versione/cache e riesame del catalogo, preservando la UI approvata. Candidata **DA_VERIFICARE** fino ai controlli e alla revisione sullo SHA esatto.
+
+Ultima produzione riletta dal manifest pubblico durante questa preparazione: **1.2.273 / fa72c010507f713bc6014c89af5f45dd6185d91d**, sourceDirty=false,365 file, albero SHA256 **57fdf61ffdeb1cf67dfd376aab5cbf92938eecf8e4d623ee9f5447a1a8c52db8**. La 1.2.274 non e ancora dichiarata online; [verifiche](../evidenze/COLLAUDI.md#rilascio-ui-1274-verifiche-2026-11-14).
+
+Canary **OFF secondo Diego**. La cornice permanente non ha ancora il GO: restano i gate C1/C2, revoca live, fase personale, altri ambienti e D18. Nessuna nuova prova o modifica amministrativa da questo rilascio; i checkpoint sotto conservano il proprio stato storico.
+
 <a id="materiali-classica-stato-2026-11-14"></a>
 
 ## Materiali Classica e colori in entrambe le grafiche — candidata in revisione, 14/11/2026
