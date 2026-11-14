@@ -394,12 +394,8 @@
       "reason": "Placeholder foreground requires its own contrast check"
     },
     {
-      "selector": ".profile-tab.is-active",
-      "reason": "Active tab foreground/background remain outside this registry's passing cases"
-    },
-    {
-      "selector": ".manage-toggle[aria-pressed=false], .btn-primary",
-      "reason": "Normal, hover, focus and disabled states require separate page-by-page review"
+      "selector": ".manage-toggle[aria-pressed=false], .btn-primary:is(:hover, :focus-visible, :disabled), .profile-tab.is-active:is(:hover, :focus-visible)",
+      "reason": "Resting states are registered (primary-button, profile-tab-active); hover, focus and disabled states and the unpressed toggle still require page-by-page review"
     }
   ]
 }
