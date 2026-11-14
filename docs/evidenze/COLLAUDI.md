@@ -1,5 +1,13 @@
 # Collaudi
 
+<a id="mappa-visiva-verifiche-2026-11-14"></a>
+
+## Mappa visiva e colori fissi — verifiche locali, 14/11/2026
+
+Strumento `scripts/visual-map.mjs`: pagine statiche servite in loopback, senza script dell'app né rete esterna, viewport 390×844, 7 palette × chiaro/scuro. Confronta i valori calcolati dal browser e segnala colori cromatici identici in tutte le palette, contrasto sotto 4,5:1 (3:1 per testo grande e icone) con alpha del testo e opacità di gruppo composte, e caratteri fuori dalla scala `--fs-*`. Limiti dichiarati nel rapporto: pannelli e modali chiusi, stati hover/focus, pseudo-elementi, placeholder, SVG e gradienti oltre il primo colore non sono misurati; la tinta non stabilisce la funzione. I conteggi sono coppie elemento × tema, non guasti confermati. Correzioni dei rilievi di Codex sull'opacità verificate su una pagina sintetica: `rgba(0,0,0,.3)` sul bianco 2,11:1; figlio di contenitore a opacità 0 escluso; figlio a opacità 0,3 composto.
+
+Esito sulla candidata: colori fissi 22 → 0 escluso il link nascosto di `index.html`; titoli fuori scala 7 → 0 reali (la pagina della cornice non carica la scala). Correzioni: schermata di blocco della cornice, badge e contatori, icone viola e azzurre, azioni secondarie dell'accesso, Privacy/Termini, icone di stato in chiaro, h3 senza classe; più la patch Codex di Impostazioni e widget Profilo. Registro degli abbinamenti esteso a 7 pagine e 23 casi, con negativi; RED senza le correzioni CSS, GREEN dopo. Verifiche locali: fondamenti UI 39/39, colori 15/15, Profilo 183/183, Stylelint, offline 16/16, budget 4/4 con tetti di Aggiungi scadenza e Impostazioni +1 KB, riferimenti statici e purezza HTML.
+
 <a id="rilascio-ui-1272-verifiche-2026-11-13"></a>
 
 ## APP 1.2.272 — confezionamento del rilascio colori, 13/11/2026
