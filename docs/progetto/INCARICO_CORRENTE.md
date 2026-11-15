@@ -2,7 +2,9 @@
 
 <a id="temi-rilascio-1276-incarico-2026-11-15"></a>
 
-## APP 1.2.276 — PR, merge e Hosting autorizzati, 15/11/2026
+## APP 1.2.276 — ordine eseguito e ricevuta consolidata, 15/11/2026
+
+Completato: #314 unita su **e649fd079d2b651745365fb80c302a83dd3c5205**, CI #1171 e Hosting #1173 verdi, verifica pubblica completa e indipendente PASS. [Ricevuta](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/314#issuecomment-6893245374), [esiti e limiti](../evidenze/COLLAUDI.md#temi-rilascio-1276-verifiche-2026-11-15). La delega production è stata eseguita da Codex; questo consolidamento aggiorna soltanto documenti esistenti e non richiede un nuovo deploy.
 
 Diego ordina: **«Procedi con PR, merge e deploy degli 11 correttivi con una nuova versione. Il secondo lavoro di Claude può continuare separatamente.»** L'ordine supera il precedente limite locale: confezionamento canonico **1.2.276**, commit/push/PR, revisione indipendente della candidata, merge con CI verde, workflow manuale di solo **hosting** sul master finale e verifica pubblica completa. Codex conserva la delega esplicita ai clic production; protezioni e scope esistenti invariati. Il secondo giro rimane nella [#313](https://github.com/Diego-Stack-ai/App-Codici-Password/issues/313), senza attenderne il GO per questo rilascio.
 

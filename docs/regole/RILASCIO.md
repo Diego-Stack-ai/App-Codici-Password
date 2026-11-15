@@ -4,6 +4,8 @@
 
 ## UI 1.2.276 — solo Hosting, cornice ordinaria conservata
 
+Applicazione completata: #314, master **e649fd079d2b651745365fb80c302a83dd3c5205**, Hosting #1173 e verifica pubblica completa PASS. [Ricevuta](../evidenze/COLLAUDI.md#temi-rilascio-1276-verifiche-2026-11-15). Disponibilità ordinaria della cornice conservata; nessuna scrittura policy o backend.
+
 L'[ordine del 15/11](../progetto/INCARICO_CORRENTE.md#temi-rilascio-1276-incarico-2026-11-15) autorizza la sequenza PR → revisione e CI verde → merge → workflow manuale **hosting** sul master finale → approvazione production delegata → verifica pubblica completa. Gli undici correttivi non cambiano policy o backend: la sequenza Rules/Hosting/attivazione sotto riguarda la prima attivazione 275 e non va ripetuta per questa UI. Registrare SHA candidato e finale, versione, run, hash e intestazioni; preservare le protezioni. Il seguito Claude #313 è distinto.
 
 
