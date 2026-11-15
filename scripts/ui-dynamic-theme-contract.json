@@ -757,22 +757,22 @@
         {
           "selector": ".deadline-card-upcoming .deadline-date-badge, .deadline-card-upcoming .deadline-icon-box, .deadline-card-upcoming .deadline-icon-box > .material-symbols-outlined",
           "property": "color",
-          "role": "--status-warning",
-          "semanticHue": "amber",
+          "role": "--theme-ink",
           "states": [
             "valid",
             "upcoming",
             "expired"
-          ]
+          ],
+          "note": "Decisione di Diego 15/11/2026: niente ambra né verde di stato; in arrivo e completata seguono la palette."
         },
         {
           "selector": ".deadline-card-completed .deadline-date-badge, .deadline-card-completed .deadline-icon-box, .deadline-card-completed .deadline-icon-box > .material-symbols-outlined",
           "property": "color",
-          "role": "--status-success",
-          "semanticHue": "green",
+          "role": "--theme-ink",
           "states": [
             "completed"
-          ]
+          ],
+          "note": "Decisione di Diego 15/11/2026: niente ambra né verde di stato; in arrivo e completata seguono la palette."
         }
       ],
       "tests": [

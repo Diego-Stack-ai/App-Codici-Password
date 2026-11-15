@@ -240,15 +240,15 @@ html:not(.dark) .account-card .swipe-content {
 }
 
 .account-card-category.badge-purple {
-    color: var(--color-purple);
+    color: var(--theme-ink);
 }
 
 .account-card-category.badge-amber {
-    color: var(--status-warning);
+    color: var(--theme-ink);
 }
 
 .account-card-category.badge-emerald {
-    color: var(--status-success);
+    color: var(--theme-ink);
 }
 
 .account-card-title {
@@ -396,15 +396,15 @@ html:not(.dark) .account-card-subtitle {
 }
 
 .bg-purple-500 {
-    background: var(--color-purple);
+    background: var(--theme-fill);
 }
 
 .bg-amber-500 {
-    background: var(--status-warning);
+    background: var(--theme-fill);
 }
 
 .bg-emerald-500 {
-    background: var(--status-success);
+    background: var(--theme-fill);
 }
 
 /* Text colors */
@@ -413,15 +413,15 @@ html:not(.dark) .account-card-subtitle {
 }
 
 .text-purple-400 {
-    color: var(--color-purple);
+    color: var(--theme-ink);
 }
 
 .text-amber-400 {
-    color: var(--status-warning);
+    color: var(--theme-ink);
 }
 
 .text-emerald-400 {
-    color: var(--status-success);
+    color: var(--theme-ink);
 }
 
 /* --- 5. LOADING & EMPTY --- */

@@ -147,11 +147,11 @@
 }
 
 .deadline-card-received .swipe-content {
-    border-color: rgba(139, 92, 246, 0.45);
+    border-color: rgba(var(--accent-rgb), 0.45);
 }
 
 .deadline-card-received .deadline-card-category {
-    color: var(--color-purple);
+    color: var(--theme-ink);
     opacity: 1;
 }
 
@@ -360,27 +360,27 @@ html:not(.dark) .deadline-card-subtitle {
 }
 
 .deadline-card-upcoming .deadline-icon-box {
-    color: var(--status-warning);
-    background: rgba(245, 158, 11, 0.12);
-    border-color: rgba(245, 158, 11, 0.1);
+    color: var(--theme-ink);
+    background: rgba(var(--accent-rgb), 0.12);
+    border-color: rgba(var(--accent-rgb), 0.1);
 }
 
 .deadline-card-upcoming .deadline-date-badge {
-    color: var(--status-warning);
-    background: rgba(245, 158, 11, 0.12);
-    border-color: rgba(245, 158, 11, 0.1);
+    color: var(--theme-ink);
+    background: rgba(var(--accent-rgb), 0.12);
+    border-color: rgba(var(--accent-rgb), 0.1);
 }
 
 .deadline-card-completed .deadline-icon-box {
-    color: var(--status-success);
-    background: rgba(16, 185, 129, 0.12);
-    border-color: rgba(16, 185, 129, 0.1);
+    color: var(--theme-ink);
+    background: rgba(var(--accent-rgb), 0.12);
+    border-color: rgba(var(--accent-rgb), 0.1);
 }
 
 .deadline-card-completed .deadline-date-badge {
-    color: var(--status-success);
-    background: rgba(16, 185, 129, 0.12);
-    border-color: rgba(16, 185, 129, 0.1);
+    color: var(--theme-ink);
+    background: rgba(var(--accent-rgb), 0.12);
+    border-color: rgba(var(--accent-rgb), 0.1);
 }
 
 .deadline-card-completed {

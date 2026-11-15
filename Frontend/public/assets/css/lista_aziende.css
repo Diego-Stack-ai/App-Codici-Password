@@ -41,15 +41,15 @@
 }
 
 .card-green {
-    --card-accent: var(--status-success);
+    --card-accent: var(--accent);
 }
 
 .card-orange {
-    --card-accent: var(--status-warning);
+    --card-accent: var(--accent);
 }
 
 .card-amber {
-    --card-accent: var(--status-warning);
+    --card-accent: var(--accent);
 }
 
 .card-red {
@@ -57,19 +57,19 @@
 }
 
 .card-purple {
-    --card-accent: #a855f7;
+    --card-accent: var(--accent);
 }
 
 .card-cyan {
-    --card-accent: #06b6d4;
+    --card-accent: var(--accent);
 }
 
 .card-pink {
-    --card-accent: #ec4899;
+    --card-accent: var(--accent);
 }
 
 .card-emerald {
-    --card-accent: var(--status-success);
+    --card-accent: var(--accent);
 }
 
 /* --- 6. PIN BUTTON --- */
@@ -100,7 +100,7 @@
 
 .btn-pin-azienda.is-pinned {
     opacity: 1;
-    color: var(--status-warning);
+    color: var(--theme-ink);
     /* amber-400 */
 }
 
@@ -216,9 +216,9 @@
 }
 
 .btn-company-account-mode.mode-standard { --mode-accent: var(--accent); }
-.btn-company-account-mode.mode-shared { --mode-accent: var(--color-purple, #a855f7); }
-.btn-company-account-mode.mode-memo { --mode-accent: var(--status-warning); }
-.btn-company-account-mode.mode-shared-memo { --mode-accent: var(--status-success); }
+.btn-company-account-mode.mode-shared { --mode-accent: var(--accent); }
+.btn-company-account-mode.mode-memo { --mode-accent: var(--accent); }
+.btn-company-account-mode.mode-shared-memo { --mode-accent: var(--accent); }
 
 .company-mode-icon {
     color: var(--mode-accent, var(--accent));

@@ -201,7 +201,7 @@
 }
 
 .deadline-inbox-heading > .material-symbols-outlined {
-    color: var(--status-warning);
+    color: var(--theme-ink);
     font-size: var(--icon-xl);
 }
 
@@ -228,7 +228,7 @@
     padding: 0.9rem;
     border: 1px solid var(--card-border);
     border-radius: 14px;
-    background: rgba(245, 158, 11, 0.08);
+    background: rgba(var(--accent-rgb), 0.08);
     color: var(--text-primary);
     text-align: left;
     cursor: pointer;

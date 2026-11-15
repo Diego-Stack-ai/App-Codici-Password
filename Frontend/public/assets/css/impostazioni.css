@@ -115,8 +115,8 @@
 }
 
 .icon-purple {
-    color: var(--color-purple);
-    background: rgba(168, 85, 247, 0.1);
+    color: var(--theme-ink);
+    background: rgba(var(--accent-rgb), 0.1);
 }
 
 .icon-blue {
@@ -130,13 +130,13 @@
 }
 
 .icon-emerald {
-    color: var(--status-success);
-    background: rgba(16, 185, 129, 0.1);
+    color: var(--theme-ink);
+    background: rgba(var(--accent-rgb), 0.1);
 }
 
 .icon-amber {
-    color: var(--status-warning);
-    background: rgba(245, 158, 11, 0.1);
+    color: var(--theme-ink);
+    background: rgba(var(--accent-rgb), 0.1);
 }
 
 /* --- 5. TEXT COMPONENTS --- */
@@ -690,14 +690,14 @@ h3.settings-desc {
 }
 
 .btn-maintenance-accent {
-    background: rgba(99, 102, 241, 0.05);
-    border: 1px solid rgba(99, 102, 241, 0.15);
-    color: #818cf8;
+    background: rgba(var(--accent-rgb), 0.05);
+    border: 1px solid rgba(var(--accent-rgb), 0.15);
+    color: var(--theme-ink);
 }
 
 .btn-maintenance-accent:hover {
-    background: rgba(99, 102, 241, 0.1);
-    border-color: #6366f1;
+    background: rgba(var(--accent-rgb), 0.1);
+    border-color: var(--accent);
 }
 
 .btn-maintenance-danger:active,
@@ -724,9 +724,9 @@ h3.settings-desc {
 .account-field-usage-privacy {
     margin: 0;
     padding: 0.75rem 1rem;
-    border: 1px solid rgb(59 130 246 / 28%);
+    border: 1px solid rgba(var(--accent-rgb), 0.28);
     border-radius: 14px;
-    background: rgb(59 130 246 / 9%);
+    background: rgba(var(--accent-rgb), 0.09);
     color: var(--text-secondary);
     font: var(--font-caption);
 }
@@ -834,7 +834,7 @@ h3.settings-desc {
     margin: 0.75rem 0;
     padding: 0.75rem;
     border-radius: 12px;
-    background: rgba(245, 158, 11, 0.14);
+    background: rgba(var(--accent-rgb), 0.14);
     color: var(--text-primary);
     font-size: var(--fs-xs);
 }
@@ -1015,8 +1015,8 @@ h3.settings-desc {
 }
 
 .shared-credential-account.linked {
-    border-color: rgb(16 185 129 / 68%);
-    background: rgb(16 185 129 / 13%);
+    border-color: rgba(var(--accent-rgb), 0.68);
+    background: rgba(var(--accent-rgb), 0.13);
 }
 
 .shared-credential-account-copy {

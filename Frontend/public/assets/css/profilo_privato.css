@@ -178,12 +178,12 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .user-role-badge {
-    background: rgba(37, 99, 235, 0.2);
+    background: rgba(var(--accent-rgb), 0.2);
     color: var(--accent);
     padding: 4px 12px;
     border-radius: 99px;
     font: var(--font-badge);
-    border: 1px solid rgba(37, 99, 235, 0.3);
+    border: 1px solid rgba(var(--accent-rgb), 0.3);
     margin-top: 0.5rem;
 }
 
@@ -337,17 +337,17 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .icon-emerald {
-    background: linear-gradient(135deg, var(--status-success) 0%, #059669 100%);
+    background:linear-gradient(135deg, var(--theme-fill) 0%, var(--theme-fill-deep) 100%);
     color: #fff;
 }
 
 .icon-amber {
-    background: linear-gradient(135deg, var(--status-warning) 0%, #d97706 100%);
+    background:linear-gradient(135deg, var(--theme-fill) 0%, var(--theme-fill-deep) 100%);
     color: #fff;
 }
 
 .icon-purple {
-    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+    background:linear-gradient(135deg, var(--theme-fill) 0%, var(--theme-fill-deep) 100%);
     color: #fff;
 }
 
@@ -847,7 +847,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     padding: 0 8px;
     border: none;
     background: transparent;
-    color: var(--accent-primary, #6366f1);
+    color: var(--accent);
     opacity: 0.8;
     cursor: pointer;
 }
@@ -1160,8 +1160,8 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     white-space: pre-wrap;
     margin: 0;
 }
-@keyframes assistant-card-focus{0%,100%{box-shadow:var(--shadow-card)}50%{box-shadow:0 0 0 4px rgba(21,94,239,.3),0 12px 32px rgba(21,94,239,.2)}}
-.assistant-focus-card{outline:2px solid #155eef;outline-offset:2px;animation:assistant-card-focus 1.2s ease 2}
+@keyframes assistant-card-focus{0%,100%{box-shadow:var(--shadow-card)}50%{box-shadow:0 0 0 4px rgba(var(--accent-rgb), .3),0 12px 32px rgba(var(--accent-rgb), .2)}}
+.assistant-focus-card{outline:2px solid var(--accent);outline-offset:2px;animation:assistant-card-focus 1.2s ease 2}
 .profile-account-picker {
     display: flex;
     flex-direction: column;

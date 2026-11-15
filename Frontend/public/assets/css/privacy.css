@@ -93,8 +93,8 @@
 }
 
 .icon-emerald {
-    background: rgba(16, 185, 129, 0.12);
-    color: var(--status-success);
+    background: rgba(var(--accent-rgb), 0.12);
+    color: var(--theme-ink);
 }
 
 .icon-blue {
@@ -117,8 +117,8 @@
 }
 
 .icon-amber {
-    background: rgba(245, 158, 11, 0.12);
-    color: var(--status-warning);
+    background: rgba(var(--accent-rgb), 0.12);
+    color: var(--theme-ink);
 }
 
 .settings-item-info {
@@ -245,8 +245,8 @@
 }
 
 /* Mappa visiva (14/11/2026): icone di stato troppo chiare sul fondo chiaro (< 3:1). */
-html:not(.dark) .icon-emerald { color: #047857; }
-html:not(.dark) .icon-amber { color: #b45309; }
+html:not(.dark) .icon-emerald { color: var(--theme-ink); }
+html:not(.dark) .icon-amber { color: var(--theme-ink); }
 html:not(.dark) .icon-red { color: #b91c1c; }
 
 /* Registro Codex dei colori (14/11/2026): le icone delle sezioni legali sono argomenti, non
