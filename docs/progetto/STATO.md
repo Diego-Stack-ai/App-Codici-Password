@@ -1,13 +1,14 @@
 # Stato
 
+<a id="stato-corrente"></a>
+
 <a id="temi-rilascio-1276-stato-2026-11-15"></a>
 
-## APP 1.2.276 — confezionamento e rilascio autorizzati, 15/11/2026
+## APP 1.2.276 — pubblicata e verificata, 15/11/2026
 
-In preparazione la **1.2.276** con gli undici correttivi UI275 e il registro dinamico: base master 06b86713, ramo `codex/release-ui-1.2.276-20261115`. [Ordine esplicito](INCARICO_CORRENTE.md#temi-rilascio-1276-incarico-2026-11-15), [prove locali](../evidenze/COLLAUDI.md#temi-dinamici-ui275-2026-11-15). PR, CI, merge e Hosting ancora da attestare. Online resta 1.2.275 / 44a64edf fino alla verifica pubblica. Cornice ordinaria ON già attestata, nessuna nuova scrittura policy. Secondo giro Claude separato nella #313; i checkpoint sotto descrivono le fasi precedenti.
+Online **1.2.276**, sorgente **e649fd079d2b651745365fb80c302a83dd3c5205**, sourceDirty=false. La #314 è unita dopo GO indipendente sul candidato **7250b60c** e CI **#1171** verde; [Hosting #1173](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43704555470) ha completato validate e deploy sul master finale. Approvazione production eseguita da Codex su delega esplicita di Diego, solo hosting e protezioni conservate. [Ricevuta GitHub](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/314#issuecomment-6893245374), [evidenze](../evidenze/COLLAUDI.md#temi-rilascio-1276-verifiche-2026-11-15).
 
-
-<a id="stato-corrente"></a>
+Pubblicati gli undici correttivi UI275 e la mappa dei loro stati; verifica pubblica completa **365 hash, 41 profili di intestazioni e tre probe di normalizzazione PASS**, più cinque GET indipendenti conformi alle **10:51:45 UTC**. Cornice ordinaria conservata secondo la ricevuta 275: nessuna nuova operazione policy/Rules o backend. Il secondo audit Claude resta separato nella [#313](https://github.com/Diego-Stack-ai/App-Codici-Password/issues/313), con presa in carico ancora da confermare; copertura completa dell'app e prove fisiche non vengono dichiarate concluse. I checkpoint sotto descrivono le fasi precedenti.
 
 <a id="temi-locali-2026-11-15"></a>
 
