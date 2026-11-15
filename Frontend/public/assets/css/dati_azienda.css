@@ -233,7 +233,7 @@
 
 /* --- 3. CARDS & FIELDS --- */
 .glass-card {
-    background: rgba(20, 53, 126, 0.4);
+    background: color-mix(in srgb, var(--accent) 18%, rgb(12 16 26 / 0.4));
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--card-border);
@@ -374,12 +374,12 @@ html:not(.dark) .glass-card {
     width: 44px;
     height: 44px;
     border-radius: 14px;
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--status-success);
+    background: rgba(var(--accent-rgb), 0.1);
+    color: var(--theme-ink);
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(var(--accent-rgb), 0.2);
     transition: all 0.2s;
     font-family: inherit;
     text-decoration: none;
@@ -431,9 +431,9 @@ html:not(.dark) .glass-card {
 }
 
 .btn-mini-section-action.action-amber {
-    color: var(--status-warning);
-    background: rgba(245, 158, 11, 0.1);
-    border-color: rgba(245, 158, 11, 0.2);
+    color: var(--theme-ink);
+    background: rgba(var(--accent-rgb), 0.1);
+    border-color: rgba(var(--accent-rgb), 0.2);
 }
 
 .btn-mini-section-action.action-blue {
@@ -444,8 +444,8 @@ html:not(.dark) .glass-card {
 
 .btn-mini-section-action.action-purple {
     color: var(--accent);
-    background: rgba(168, 85, 247, 0.1);
-    border-color: rgba(168, 85, 247, 0.2);
+    background: rgba(var(--accent-rgb), 0.1);
+    border-color: rgba(var(--accent-rgb), 0.2);
 }
 
 .btn-cancel-text {
@@ -567,12 +567,12 @@ html:not(.dark) .location-tab-btn.active {
     width: 2rem;
     height: 2rem;
     border-radius: 0.5rem;
-    background: rgba(168, 85, 247, 0.1);
+    background: rgba(var(--accent-rgb), 0.1);
     color: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(168, 85, 247, 0.1);
+    border: 1px solid rgba(var(--accent-rgb), 0.1);
     flex-shrink: 0;
 }
 
@@ -778,15 +778,15 @@ html:not(.dark) .location-tab-btn.active {
     color: white;
 }
 .company-profile-page .icon-emerald {
-    background: linear-gradient(135deg, var(--status-success) 0%, #059669 100%);
+    background:linear-gradient(135deg, var(--theme-fill) 0%, var(--theme-fill-deep) 100%);
     color: #fff;
 }
 .company-profile-page .icon-amber {
-    background: linear-gradient(135deg, var(--status-warning) 0%, #d97706 100%);
+    background:linear-gradient(135deg, var(--theme-fill) 0%, var(--theme-fill-deep) 100%);
     color: #fff;
 }
 .company-profile-page .icon-purple {
-    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+    background:linear-gradient(135deg, var(--theme-fill) 0%, var(--theme-fill-deep) 100%);
     color: #fff;
 }
 .company-profile-page .icon-red {
@@ -867,7 +867,7 @@ html:not(.dark) .location-tab-btn.active {
 .company-pdf-choices { display: flex; flex-wrap: wrap; gap: 12px 24px; padding: 16px; border: 1px solid var(--border-color); border-radius: 12px; }
 .company-pdf-choices legend { padding: 0 8px; font-weight: 600; }
 .company-pdf-choices label { display: flex; align-items: center; gap: 8px; min-height: 36px; cursor: pointer; }
-.company-pdf-choices input { width: 18px; height: 18px; accent-color: var(--primary-color, #007aff); }
+.company-pdf-choices input { width: 18px; height: 18px; accent-color: var(--accent); }
 .company-pdf-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .company-pdf-preview { overflow-wrap: anywhere; }
 .company-pdf-preview h3 { margin: 20px 0 12px; }

@@ -2,7 +2,7 @@
 .profile-document-attachments-dialog{width:min(720px,100%);max-height:88vh;overflow:auto;background:var(--card-bg,#fff);color:var(--text-primary,#111827);border-radius:18px 18px 8px 8px;padding:18px;box-shadow:0 20px 55px rgba(0,0,0,.35)}
 .profile-document-attachments-title{font-size:var(--fs-md);margin:0}
 .profile-document-attachments-actions{margin:16px 0;padding:14px;border:1px solid rgba(127,127,127,.2);border-radius:16px;background:rgba(127,127,127,.04)}
-.profile-document-attachments-actions h3{margin:0 0 10px;text-align:center;font-size:var(--fs-sm);letter-spacing:.08em;text-transform:uppercase;color:var(--accent,#1768d5)}
+.profile-document-attachments-actions h3{margin:0 0 10px;text-align:center;font-size:var(--fs-sm);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
 .profile-document-attachments-status{min-height:1.4em;font-size:var(--fs-sm);opacity:.78}
 @media (min-width:700px){.profile-document-attachments-overlay{align-items:center}.profile-document-attachments-dialog{border-radius:18px}}
 .profile-document-inline-attachments:empty{display:none}

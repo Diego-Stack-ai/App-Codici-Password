@@ -235,13 +235,13 @@
 }
 
 .hover-purple:hover {
-    border-color: rgba(168, 85, 247, 0.5);
-    background: rgba(168, 85, 247, 0.05);
+    border-color: rgba(var(--accent-rgb), 0.5);
+    background: rgba(var(--accent-rgb), 0.05);
 }
 
 .hover-amber:hover {
-    border-color: rgba(245, 158, 11, 0.5);
-    background: rgba(245, 158, 11, 0.05);
+    border-color: rgba(var(--accent-rgb), 0.5);
+    background: rgba(var(--accent-rgb), 0.05);
 }
 
 .account-link-value {
@@ -249,11 +249,11 @@
 }
 
 .text-purple-400 {
-    color: var(--color-purple);
+    color: var(--theme-ink);
 }
 
 .text-amber-400 {
-    color: var(--status-warning);
+    color: var(--theme-ink);
 }
 
 
@@ -311,7 +311,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: rgba(16, 185, 129, 0.8);
+    color: rgba(var(--accent-rgb), 0.8);
 }
 
 .referent-title {
@@ -359,7 +359,7 @@
 .card-type {
     font-size: var(--fs-micro);
     font-weight: var(--font-strong-weight);
-    color: var(--status-success);
+    color: var(--theme-ink);
     /* emerald-400 */
     text-transform: uppercase;
 }
@@ -377,16 +377,16 @@
 }
 
 .call-btn-row:hover {
-    background: rgba(16, 185, 129, 0.1);
+    background: rgba(var(--accent-rgb), 0.1);
 }
 
 .call-icon {
     font-size: var(--icon-xs);
-    color: rgba(16, 185, 129, 0.5);
+    color: rgba(var(--accent-rgb), 0.5);
 }
 
 .call-btn-row:hover .call-icon {
-    color: var(--status-success);
+    color: var(--theme-ink);
 }
 
 .call-number {

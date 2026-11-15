@@ -415,7 +415,7 @@ test('shared credentials secondary actions declare the secondary role', async ()
 
 // «Salva» dei moduli Account: azione ordinaria, non una scadenza. Fill della palette in entrambe
 // le grafiche, selezionato per ID: btn-fab-scadenza resta ambra per le vere Scadenze.
-test('account form Save buttons use the palette fill; real deadline FAB stays amber', {timeout: 120000}, async () => {
+test('account form Save buttons and the deadline FAB use the palette fill', {timeout: 120000}, async () => {
   for (const revision of ['tre-livelli', 'classica']) for (const theme of colorContract.themes) for (const palette of colorContract.palettes) {
     const page = await openColorFixture('form_account_privato.html', theme, palette, revision);
     try {
@@ -438,7 +438,8 @@ test('account form Save buttons use the palette fill; real deadline FAB stays am
         assert.equal(ends.length, 2, `${label}: both gradient ends measured`);
         for (const end of ends) assert.ok(contrast('rgb(255, 255, 255)', end) >= 3, `${label}: white icon visible on ${end}`);
       }
-      assert.match(paints[2].image, /245, 158, 11/, `${label}: the deadline FAB keeps its amber`);
+      // Decisione di Diego (15/11/2026): niente ambra, anche il FAB delle scadenze segue la palette.
+      assert.ok(!/245, 158, 11|217, 119, 6/.test(paints[2].image), `${label}: the deadline FAB follows the palette too`);
     } finally { await page.close(); }
   }
 });

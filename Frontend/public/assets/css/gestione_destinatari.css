@@ -32,7 +32,7 @@
     align-items: flex-start;
     gap: 0.5rem;
     margin-top: 0.75rem !important;
-    color: var(--status-warning) !important;
+    color: var(--theme-ink) !important;
 }
 
 .recipient-manager-warning .material-symbols-outlined {
@@ -68,8 +68,8 @@
     min-width: 2rem;
     padding: 0.25rem 0.6rem;
     border-radius: 999px;
-    background: rgba(139, 92, 246, 0.16);
-    color: #c4b5fd;
+    background: rgba(var(--accent-rgb), 0.16);
+    color: var(--theme-ink);
     text-align: center;
     font-weight: var(--font-title-weight);
 }
@@ -107,7 +107,7 @@
 }
 
 .recipient-card-status {
-    color: var(--status-warning);
+    color: var(--theme-ink);
 }
 
 .recipient-icon-button {

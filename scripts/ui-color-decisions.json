@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "source": "Registro Codex sulla #308 (14/11/2026): 171 occorrenze in 45 gruppi, 131 Tema e 40 Funzione. Ordine di Diego: entrambe le grafiche.",
+  "source": "Registro Codex sulla #308 (14/11/2026): 171 occorrenze in 45 gruppi, 131 Tema e 40 Funzione. Ordine di Diego: entrambe le grafiche. Aggiornato il 15/11/2026 (incarico #313): rosso solo sui comandi che cancellano o fanno uscire; Scadenze, Urgenze e avvisi ambra passano al tema.",
   "scope": "Markup statico delle pagine con i CSS reali, script esclusi. Contenuti generati dopo il login, hover/focus e modali chiusi non sono coperti da questo registro.",
   "theme": [
     {
@@ -33,11 +33,11 @@
     {
       "id": "home-navigation-cards",
       "page": "home_page.html",
-      "selector": ".matrix-card:is(.card-blue, .card-green):not(.area-scadenze, .area-urgenze)",
-      "count": 2,
+      "selector": ".matrix-card:is(.card-blue, .card-green, .card-orange, .card-red)",
+      "count": 4,
       "property": "backgroundImage",
       "role": "--rev-hub-gradient",
-      "reason": "Privato e Azienda sono destinazioni; il verde dell'Azienda non è un successo."
+      "reason": "Privato, Azienda, Scadenze e Urgenze: decisione di Diego del 15/11/2026, tutto in tema; le card si distinguono per icona e testo."
     },
     {
       "id": "configuration_section_icons",
@@ -146,6 +146,15 @@
       "property": "color",
       "role": "--rev-icon",
       "reason": "Sezioni del Profilo."
+    },
+    {
+      "id": "recipient-in-use-notice",
+      "page": "gestione_destinatari.html",
+      "selector": ".recipient-manager-warning > span",
+      "count": 2,
+      "property": "color",
+      "role": "--theme-ink",
+      "reason": "Decisione di Diego del 15/11/2026: niente ambra; l'avviso sul destinatario in uso è un'informazione in tema."
     }
   ],
   "legal": {
@@ -181,77 +190,6 @@
         },
         {
           "selector": "#btn-empty-trash span",
-          "properties": [
-            "color"
-          ],
-          "hue": "red"
-        }
-      ]
-    },
-    {
-      "id": "recipient-in-use-warning",
-      "page": "gestione_destinatari.html",
-      "selector": ".recipient-manager-warning",
-      "property": "color",
-      "hue": "amber",
-      "reason": "Avviso sul vincolo di eliminazione di un destinatario in uso.",
-      "paints": [
-        {
-          "selector": ".recipient-manager-warning > span",
-          "properties": [
-            "color"
-          ],
-          "hue": "amber"
-        }
-      ]
-    },
-    {
-      "id": "home-upcoming-deadlines",
-      "page": "home_page.html",
-      "selector": ".area-scadenze .matrix-icon-box",
-      "property": "color",
-      "hue": "amber",
-      "reason": "Scadenze da oggi a 30 giorni: stato temporale.",
-      "paints": [
-        {
-          "selector": ".area-scadenze .matrix-icon-box",
-          "properties": [
-            "bg"
-          ],
-          "hue": "amber",
-          "revisions": [
-            "tre-livelli"
-          ]
-        },
-        {
-          "selector": ".area-scadenze .matrix-icon-box > span",
-          "properties": [
-            "color"
-          ],
-          "hue": "amber"
-        }
-      ]
-    },
-    {
-      "id": "home-overdue-deadlines",
-      "page": "home_page.html",
-      "selector": ".area-urgenze .matrix-icon-box",
-      "property": "color",
-      "hue": "red",
-      "reason": "Urgenze: scadenze già passate.",
-      "paints": [
-        {
-          "selector": ".area-urgenze .matrix-icon-box",
-          "properties": [
-            "bg"
-          ],
-          "hue": "red",
-          "revisions": [
-            "tre-livelli"
-          ]
-        },
-        {
-          "selector": ".area-urgenze .matrix-icon-box > span",
           "properties": [
             "color"
           ],
