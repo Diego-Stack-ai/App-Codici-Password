@@ -29,6 +29,9 @@ html body #qrcode-preview,
 html body #qrcode-zoom,
 html body .qr-zoom-container {
     background: #E3F2FD;
+    /* Preserve the light QR pixels and their eight-pixel quiet zone. Only the
+       outer decorative frame follows the app palette. */
+    border: 2px solid var(--rev-border);
     padding: 8px;
     border-radius: 12px;
 }
@@ -87,7 +90,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     position: absolute;
     bottom: -8px;
     right: -8px;
-    background: rgba(0, 0, 0, 0.82);
+    background: var(--rev-fill);
     border-radius: 50%;
     width: var(--touch-target-min, 44px);
     height: var(--touch-target-min, 44px);
@@ -102,7 +105,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 
 .qr-zoom-btn:hover {
     transform: scale(1.1);
-    background: var(--accent);
+    background: var(--rev-fill);
 }
 
 .qr-zoom-btn .material-symbols-outlined {
@@ -375,17 +378,15 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     opacity: 0;
 }
 
-/* Custom Checkbox Style (Celestino) */
+/* QR inclusion is an ordinary selection, independent of the QR pixel colors. */
 .qr-checkbox {
     width: 20px;
     height: 20px;
     cursor: pointer;
     appearance: none;
     -webkit-appearance: none;
-    background-color: #e0f2fe;
-    /* Celestino Chiaro (Sky 100) */
-    border: 2px solid #bae6fd;
-    /* Bordo Sky 200 */
+    background-color: var(--rev-icon-bg);
+    border: 2px solid var(--rev-icon);
     border-radius: 6px;
     display: inline-grid;
     place-content: center;
@@ -405,9 +406,8 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .qr-checkbox:checked {
-    background-color: #0ea5e9;
-    /* Sky 500 */
-    border-color: #0ea5e9;
+    background-color: var(--rev-fill);
+    border-color: var(--rev-fill);
 }
 
 .qr-checkbox:checked::before {
@@ -415,14 +415,18 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .dark .qr-checkbox {
-    background-color: rgba(56, 189, 248, 0.2);
-    /* Celestino scuro trasparente in dark mode */
-    border-color: rgba(56, 189, 248, 0.5);
+    background-color: var(--rev-icon-bg);
+    border-color: var(--rev-icon);
 }
 
 .dark .qr-checkbox:checked {
-    background-color: #0ea5e9;
-    border-color: #0ea5e9;
+    background-color: var(--rev-fill);
+    border-color: var(--rev-fill);
+}
+
+.qr-checkbox:focus-visible {
+    outline: 2px solid var(--rev-icon);
+    outline-offset: 3px;
 }
 
 .form-card {
@@ -900,7 +904,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 .btn-modal.btn-primary {
     background: var(--accent);
     color: white;
-    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+    box-shadow: var(--ui-shadow-action-soft);
 }
 
 .btn-modal.btn-secondary {
@@ -1200,6 +1204,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 .profile-widget-header { justify-content: space-between; }
 .profile-widget-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 .profile-widget { min-width: 0; border-top: 3px solid var(--accent); }
+body[data-ui-revision] .profile-widget { border-top-color: var(--accent); }
 .profile-widget-wide { grid-column: 1 / -1; }
 .profile-widget-small { align-self: start; }
 .profile-widget-title { display: grid; flex: 1; min-width: 0; gap: 0.2rem; }

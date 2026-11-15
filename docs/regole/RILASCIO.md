@@ -1,5 +1,12 @@
 # Rilascio
 
+<a id="temi-rilascio-1276-2026-11-15"></a>
+
+## UI 1.2.276 — solo Hosting, cornice ordinaria conservata
+
+L'[ordine del 15/11](../progetto/INCARICO_CORRENTE.md#temi-rilascio-1276-incarico-2026-11-15) autorizza la sequenza PR → revisione e CI verde → merge → workflow manuale **hosting** sul master finale → approvazione production delegata → verifica pubblica completa. Gli undici correttivi non cambiano policy o backend: la sequenza Rules/Hosting/attivazione sotto riguarda la prima attivazione 275 e non va ripetuta per questa UI. Registrare SHA candidato e finale, versione, run, hash e intestazioni; preservare le protezioni. Il seguito Claude #313 è distinto.
+
+
 <a id="cornice-ordinaria-rilascio-2026-11-14"></a>
 
 ## Cornice ordinaria e UI 1.2.275 — ordine del 14/11/2026

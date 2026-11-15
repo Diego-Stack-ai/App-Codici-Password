@@ -12,7 +12,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.275",
+  "version": "1.2.276",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -39,7 +39,7 @@
     "graph:ui": "node scripts/build-ui-topology.mjs --output graphify-out/ui-topology.json",
     "graph:ui:inject": "node scripts/build-ui-topology.mjs --output graphify-out/ui-topology.json --inject graphify-out/graph.json",
     "graph:ui-translations": "node scripts/audit-ui-translations.mjs --output graphify-out/ui-translation-audit.json",
-    "test:ui-topology": "node scripts/audit-ui-topology.mjs && node --test tests/ui-topology.test.mjs",
+    "test:ui-topology": "node scripts/audit-ui-topology.mjs && node --test tests/ui-topology.test.mjs tests/ui-dynamic-topology.test.mjs",
     "test:ui-translations": "node scripts/audit-ui-translations.mjs && node --test tests/ui-translations.test.mjs",
     "test:access-i18n-browser": "node scripts/test-access-i18n-browser.mjs",
     "test:guide-browser": "node scripts/test-documentation-guide-browser.mjs",
@@ -90,7 +90,8 @@
     "audit:qa-final": "node scripts/audit-qa-final-inventory.mjs",
     "test:page-shells": "node scripts/audit-page-shells.mjs",
     "audit:visual-map": "node scripts/visual-map.mjs",
-    "test:ui-foundations": "node scripts/audit-ui-foundations.mjs && node --test tests/theme-palette.test.mjs tests/css-color-contract.test.mjs tests/profile-scroll.browser.test.mjs tests/manage-mode.browser.test.mjs tests/ui-graphics-switch.browser.test.mjs tests/ui-tre-livelli-a11y.browser.test.mjs tests/ui-color-decisions.browser.test.mjs tests/visual-map.browser.test.mjs",
+    "audit:dynamic-visual-map": "node scripts/dynamic-visual-map.mjs",
+    "test:ui-foundations": "node scripts/audit-ui-foundations.mjs && node --test tests/theme-palette.test.mjs tests/css-color-contract.test.mjs tests/profile-scroll.browser.test.mjs tests/manage-mode.browser.test.mjs tests/ui-graphics-switch.browser.test.mjs tests/ui-tre-livelli-a11y.browser.test.mjs tests/ui-color-decisions.browser.test.mjs tests/visual-map.browser.test.mjs tests/ui-dynamic-themes.browser.test.mjs",
     "test:html-purity": "node scripts/audit-html-purity.mjs",
     "test:icons": "node --test tests/material-symbols-translation.test.mjs",
     "test:static-references": "node scripts/audit-static-references.mjs",

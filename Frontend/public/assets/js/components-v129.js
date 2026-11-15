@@ -1,7 +1,7 @@
 import {beginFrameLogout} from './frame-navigation.js';
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.275';
+import { auth } from './firebase-config.js?v=1.2.276';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
@@ -338,7 +338,7 @@ export async function initComponents() {
 /**
  * Helper locale per aprire il modale guida (evita dipendenze cicliche)
  */
-function openGuideModal(title, steps) {
+export function openGuideModal(title, steps) {
     // Rimuovi modali esistenti
     const existing = document.getElementById('guide-modal-local');
     if (existing) existing.remove();

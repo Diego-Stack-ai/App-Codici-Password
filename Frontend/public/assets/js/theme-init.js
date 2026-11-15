@@ -1,28 +1,29 @@
-// Anti-flicker & Theme Master (V5.0) - Auto Italy-Time Aware
-// Loaded synchronously in <head> to prevent FOUC (Flash of Unstyled Content)
+// Synchronous theme setup; automatic mode follows Europe/Rome.
 
 (function () {
+    let bodyObserver = null, classic = null;
+    function applyTheme(updateGraphics = true) {
     try {
-        // Interruttore «Grafica: Nuova / Classica» (Impostazioni → Tema visivo).
-        // Classica: le funzioni della revisione a tre livelli (Modifica/Fine, filigrane,
-        // tipografia delle etichette) non si applicano; colori, ruoli e materiali condivisi sì.
-        // Il segno passa da «tre-livelli» a «classica» mentre il body è ancora nascosto.
-        if (localStorage.getItem('ui_graphics') === 'classic') {
-            document.documentElement.dataset.uiGraphics = 'classic';
-            const strip = () => { if (document.body?.hasAttribute('data-ui-revision')) document.body.setAttribute('data-ui-revision', 'classica'); };
-            if (document.body) strip();
-            else {
-                const observer = new MutationObserver(() => { if (document.body) { strip(); observer.disconnect(); } });
-                observer.observe(document.documentElement, { childList: true });
-                document.addEventListener('DOMContentLoaded', strip, { once: true });
+        if (updateGraphics) {
+        classic ??= localStorage.getItem('ui_graphics') === 'classic';
+        if (classic) document.documentElement.dataset.uiGraphics = 'classic';
+        else delete document.documentElement.dataset.uiGraphics;
+        if (document.body) {
+            if (document.body.hasAttribute('data-ui-revision')) {
+                document.body.setAttribute('data-ui-revision', classic ? 'classica' : 'tre-livelli');
             }
+            bodyObserver?.disconnect(); bodyObserver = null;
+        } else if (!bodyObserver) {
+            bodyObserver = new MutationObserver(() => { if (document.body) applyTheme(); });
+            bodyObserver.observe(document.documentElement, { childList: true });
+            document.addEventListener('DOMContentLoaded', applyTheme, { once: true });
+        }
         }
 
         const savedColorTheme = localStorage.getItem('color_theme');
         const colorTheme = ['blue', 'green', 'red', 'sand', 'petrol', 'lavender', 'dusty-rose'].includes(savedColorTheme) ? savedColorTheme : 'blue';
         document.documentElement.dataset.colorTheme = colorTheme;
 
-        // Se la pagina richiede il Dark Forzato (es. Login/Registrazione), non toccare nulla
         if (document.documentElement.classList.contains('protocol-forced-dark')) {
             document.documentElement.classList.add('dark');
             document.documentElement.dataset.themeMode = 'security-dark';
@@ -41,8 +42,6 @@
         } else if (localTheme === 'light') {
             isDark = false;
         } else {
-            // LOGICA AUTO (Orario Italia)
-            // Light dalle 08:00 alle 20:59, Dark altrimenti (Sera/Mattina)
             try {
                 const italyTime = new Intl.DateTimeFormat('en-US', {
                     hour: 'numeric',
@@ -51,10 +50,8 @@
                 }).format(new Date());
 
                 const hour = parseInt(italyTime);
-                // Giorno: 08:00 - 20:59. Sera/Notte: 21:00 - 07:59
                 isDark = (hour < AUTO_LIGHT_START || hour >= AUTO_DARK_START);
             } catch (e) {
-                // Fallback se Intl fallisce
                 isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             }
         }
@@ -69,4 +66,10 @@
     } catch (e) {
         console.warn('Theme init failed', e);
     }
+    }
+    applyTheme();
+    // Sync appearance only; structural graphics stay fixed until the next load.
+    window.addEventListener('storage', event => {
+        if (event.key === null || ['theme', 'color_theme'].includes(event.key)) applyTheme(false);
+    });
 })();

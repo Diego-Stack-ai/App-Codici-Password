@@ -208,12 +208,10 @@
 }
 
 .deadline-card .swipe-content {
-    /* Background scuro ma in tono col tema (Slate 900/Blue 950) per coprire le azioni sotto */
-    /* Background scuro stile Cerca (Slate 800) ma opaco per coprire azioni */
-    /* Glassmorphism Royal Blue (Vibrante ma Molto Trasparente) */
-    background: rgba(20, 53, 126, 0.5);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    /* Ordinary card surface; status icons and swipe actions keep their roles. */
+    background: var(--rev-surface);
+    backdrop-filter: var(--rev-glass-blur);
+    -webkit-backdrop-filter: var(--rev-glass-blur);
 
     /* Hint Colors removed - Clean Look */
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -235,12 +233,10 @@
 /* LIGHT MODE OVERRIDE */
 /* LIGHT MODE OVERRIDE (Correct Selector) */
 html:not(.dark) .deadline-card .swipe-content {
-    background: rgba(219, 234, 254, 0.75);
-    /* Blue 100 Glass (Subtle Blue Tint) */
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-color: #bae6fd;
-    /* Sky 200 */
+    background: var(--rev-surface);
+    backdrop-filter: var(--rev-glass-blur);
+    -webkit-backdrop-filter: var(--rev-glass-blur);
+    border-color: var(--rev-border);
     color: var(--text-primary);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
@@ -420,13 +416,13 @@ html:not(.dark) .deadline-card-subtitle {
 @media (max-width: 600px) {
     .deadline-card .swipe-content {
         /* Un layer opaco evita il conflitto GPU tra blur delle card e fasce fixed. */
-        background: #142f69;
+        background: var(--rev-popup);
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
     }
 
     html:not(.dark) .deadline-card .swipe-content {
-        background: #dbeafe;
+        background: var(--rev-popup);
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
     }
@@ -458,6 +454,15 @@ body[data-ui-revision="tre-livelli"] .azienda-card:is(:hover, :focus-visible) {
 
 body[data-ui-revision="tre-livelli"] .azienda-card:is(:hover, :focus-visible) {
     transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+    body[data-ui-revision] .deadline-card .swipe-content {
+        /* Opaque mobile layer separates swipe actions and avoids GPU conflicts. */
+        background: var(--rev-popup);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
 }
 
 body[data-ui-revision="tre-livelli"] :is(.account-data-label, .account-card-category, .deadline-card-category) {

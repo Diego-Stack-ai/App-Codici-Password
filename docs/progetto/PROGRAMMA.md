@@ -1,5 +1,33 @@
 # Programma
 
+<a id="temi-segnalazioni-1275-2026-11-15"></a>
+
+## Temi 1.2.275 — segnalazioni di Diego da verificare, 15/11/2026
+
+Diego chiede di annotare i casi seguenti e di chiarire dove sono conservate le relazioni fra pagine, interazioni e colori. Successivamente autorizza mappatura dinamica, undici correzioni e prove nelle 28 combinazioni di grafica/palette/luminosità. Le osservazioni sotto conservano il problema originario della 1.2.275; i correttivi sono **implementati e verificati localmente nei 38 stati censiti**, non pubblicati. [Esiti e limiti](../evidenze/COLLAUDI.md#temi-dinamici-ui275-2026-11-15), [perimetro corrente](INCARICO_CORRENTE.md#temi-annotazione-incarico-2026-11-15).
+
+Il giro completo successivo su tutte le pagine/opzioni è affidato a Claude su ordine di Diego nella [#313](https://github.com/Diego-Stack-ai/App-Codici-Password/issues/313), con notifica nel thread #308 e presa in carico ancora da confermare. Codex completa i primi undici casi e il banco riusabile; evitare scritture sovrapposte, account reali e PASS attribuiti a stati non aperti. Il successivo [ordine 1.2.276](INCARICO_CORRENTE.md#temi-rilascio-1276-incarico-2026-11-15) autorizza il rilascio dei soli undici correttivi: confezionare, revisionare, aprire PR, attendere CI, unire, distribuire solo Hosting e verificare manifest/hash/intestazioni. Il secondo giro resta separato.
+
+| ID | Area o stato segnalato | Osservazione originaria |
+| --- | --- | --- |
+| UI275-01 | Aggiornamento e refresh | La schermata rimane celeste dopo il cambio della palette. Verificare anche la transizione e il caricamento iniziale del tema. |
+| UI275-02 | Blocco/sblocco della cornice | Sfondo celeste e pulsante «Sblocca e riprendi» blu indipendenti dalla palette scelta. Distinguere questa schermata dal modale di inserimento della Master Password. |
+| UI275-03 | Allegati, in generale | Card, popup e relative superfici non sembrano seguire il tema; censire i diversi punti di apertura, non soltanto una pagina. |
+| UI275-04 | Ricerca | Punto interrogativo nella card e campo/area della spiegazione non seguono il tema. |
+| UI275-05 | Fascia superiore del Profilo utente | Talvolta entrando nella pagina resta scura e non trasparente. Riesaminare tema iniziale, transizione e superficie effettiva, distinguendo il difetto segnalato dalla protezione di contrasto prevista per titolo e comandi. |
+| UI275-06 | Flag di inclusione nel QR | Le caselle/flag restano azzurri con altre palette. |
+| UI275-07 | Riquadri QR | Cornici e contenitori QR in generale non sembrano seguire il tema. Distinguere le superfici decorative dai colori del codice necessari alla sua lettura. |
+| UI275-08 | Widget personalizzati | La card ha una sottile linea celeste sul bordo superiore. |
+| UI275-09 | Linguette del Profilo | La barra scorrevole «Panoramica, Anagrafica, Contatti, Indirizzi, Documenti, Tessera digitale» non sembra seguire il tema; includere selezione e scorrimento. |
+| UI275-10 | Guida del Profilo dal comando inferiore | Il popup aperto dal pulsante indicato da Diego come «!» ha un comando «Chiudi» con effetto tendente al celeste e troppo intenso; controllare colore e alone, senza presumere quale simbolo sia mostrato dal componente. |
+| UI275-11 | Card Scadenze | Le card non sembrano seguire il tema. Separare sfondo, bordi e comandi dai colori funzionali di valido/in scadenza/scaduto, che conservano il proprio significato. |
+
+Il [registro dinamico](../../scripts/ui-dynamic-theme-contract.json) associa ogni ID a pagina/stato, azione, produttore/componente, selettore/proprietà, sorgenti CSS, ruolo cromatico ed effettivo test. Il [banco locale](../../scripts/dynamic-visual-map.mjs) prova Nuova e Classica, sette palette e chiaro/scuro, con cambio tema, ingresso, refresh e aperture pertinenti. Un caso passa soltanto per gli stati realmente esercitati; nessun PASS trasferito dai precedenti inventari statici. Gli stati non censiti e l'inventario cromatico non ancora classificato restano nel secondo lavoro affidato a Claude.
+
+**Dove si conserva la conoscenza.** Il [registro delle pagine e i contratti UI](../regole/INTERFACCIA.md#fonte-docs-canonical-page-registry-md-l1) descrivono la superficie e i flussi previsti. [build-ui-topology.mjs](../../scripts/build-ui-topology.mjs) estrae pagine, controlli, collegamenti e pattern degli eventi in `graphify-out/ui-topology.json`; il [contratto della topologia](../../scripts/ui-topology-contract.json) dichiara dieci flussi critici e tre scenari runtime. Questa estrazione statica non percorre tutti i clic; anche i controlli di [audit-navigation-flows.mjs](../../scripts/audit-navigation-flows.mjs) restano mirati. Il [catalogo della guida](../../Frontend/public/assets/js/modules/assistant/documentation-catalog.json), revisionato sulla 275, conserva percorsi, istruzioni e target. La mappa locale `graphify-out/graph.json` collega sorgenti e dipendenze, con i [limiti CSS dichiarati](../regole/INTERFACCIA.md#ui-color-contract-2026-11-13).
+
+Per i colori, `core.css` conserva le palette e `core_ui.css` i ruoli comuni; [ui-color-contract.json](../../scripts/ui-color-contract.json) registra abbinamenti verificati e casi pendenti, mentre [ui-color-decisions.json](../../scripts/ui-color-decisions.json) registra decisioni ed eccezioni. [visual-map.mjs](../../scripts/visual-map.mjs) misura l'aspetto calcolato dei contesti predisposti, rimuovendo gli script dell'app: contenuti dinamici, popup, transizioni e stati non visibili richiedono fixture o prove dedicate. Sono strumenti complementari: non esiste ancora un'unica mappa completa e verificata di ogni pagina, clic, stato dinamico e proprietà grafica dell'app.
+
 <a id="cornice-ordinaria-1275-programma-2026-11-14"></a>
 
 ## APP 1.2.275 — sequenza autorizzata UI e cornice ordinaria

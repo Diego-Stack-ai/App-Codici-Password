@@ -1,5 +1,5 @@
 import {confirmFrameAction} from '../core/vault-frame-client.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.275';
+import { auth, db } from '../../firebase-config.js?v=1.2.276';
 import { collection, deleteDoc, doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
@@ -73,14 +73,14 @@ function widgetFields() {
         { key: 'title', label: 'Titolo', icon: 'title' },
         { key: 'description', label: 'Descrizione', icon: 'description', type: 'textarea' },
         { key: 'icon', label: 'Icona Material Symbols', icon: 'emoji_symbols' },
-        { key: 'color', label: 'Colore', icon: 'palette' },
+        { key: 'color', label: t('profile_widget_color_label'), icon: 'palette' },
         { key: 'tab', label: 'Linguetta', icon: 'tab', type: 'select', options: PROFILE_WIDGET_TABS },
         { key: 'size', label: 'Dimensione', icon: 'aspect_ratio', type: 'select', options: ['small', 'medium', 'wide'] }
     ];
 }
 
 export function addWidget(defaultTab = 'personal') {
-    const initial = { title: '', description: '', icon: 'widgets', color: '#3b82f6', tab: defaultTab, size: 'medium' };
+    const initial = { title: '', description: '', icon: 'widgets', color: '', tab: defaultTab, size: 'medium' };
     showProfileModal('Nuovo widget', widgetFields(), initial, async values => {
         const widget = { id: newId('widget'), ...initial, ...values, order: widgets.length, collapsed: false, fields: [] };
         await persistWidget(widget);
@@ -251,11 +251,15 @@ function renderWidgets() {
                 }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add' })])
             ]),
             createElement('div', { className: 'profile-widget-grid' }, widgets.filter(widget => widget.tab === tab).map(widget => createElement('article', {
-                className: `form-card profile-widget profile-widget-${widget.size || 'medium'}`,
-                style: { borderTopColor: widget.color || 'var(--accent)' }
+                className: `form-card profile-widget profile-widget-${widget.size || 'medium'}`
             }, [
                 createElement('header', { className: 'profile-widget-header' }, [
-                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: widget.icon || 'widgets' }),
+                    createElement('span', {
+                        className: 'material-symbols-outlined notranslate profile-widget-identity',
+                        textContent: widget.icon || 'widgets',
+                        dataset: { colorRole: widget.color ? 'custom' : 'theme' },
+                        style: { color: widget.color || 'var(--rev-icon)' }
+                    }),
                     createElement('div', { className: 'profile-widget-title' }, [
                         createElement('strong', { textContent: widget.title }),
                         widget.description ? createElement('small', { textContent: widget.description }) : null

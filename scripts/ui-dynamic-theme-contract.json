@@ -1,0 +1,814 @@
+{
+  "schemaVersion": 1,
+  "scope": "Eleven reported UI families, real local producers with explicit synthetic data adapters. Not all application interactions or physical browser certification.",
+  "matrix": {
+    "graphics": [
+      "tre-livelli",
+      "classica"
+    ],
+    "palettes": [
+      "blue",
+      "green",
+      "red",
+      "sand",
+      "petrol",
+      "lavender",
+      "dusty-rose"
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ]
+  },
+  "cases": [
+    {
+      "id": "UI275-01",
+      "page": "app.html",
+      "producer": {
+        "path": "Frontend/public/assets/js/theme-init.js",
+        "export": "theme bootstrap/storage"
+      },
+      "sources": [
+        "Frontend/public/app.html",
+        "Frontend/public/assets/js/theme-init.js",
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/vault-frame.css"
+      ],
+      "trigger": {
+        "kind": "real-producer",
+        "action": "theme bootstrap/storage"
+      },
+      "states": [
+        "initial",
+        "changed",
+        "reloaded"
+      ],
+      "paints": [
+        {
+          "selector": "#frame-status h1",
+          "property": "color",
+          "role": "--text-primary",
+          "minimum": 4.5
+        }
+      ],
+      "tests": [
+        "tests/ui-dynamic-themes.browser.test.mjs"
+      ]
+    },
+    {
+      "id": "UI275-02",
+      "page": "app.html",
+      "producer": {
+        "path": "Frontend/public/app.html",
+        "export": "show frame status"
+      },
+      "sources": [
+        "Frontend/public/app.html",
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/vault-frame.css"
+      ],
+      "trigger": {
+        "kind": "real-producer",
+        "action": "show frame status"
+      },
+      "states": [
+        "locked",
+        "focus"
+      ],
+      "paints": [
+        {
+          "selector": "#frame-resume",
+          "property": "backgroundColor",
+          "role": "--rev-fill"
+        },
+        {
+          "selector": "#frame-resume",
+          "property": "color",
+          "role": "#fff",
+          "minimum": 4.5
+        }
+      ],
+      "tests": [
+        "tests/ui-dynamic-themes.browser.test.mjs"
+      ]
+    },
+    {
+      "id": "UI275-03",
+      "page": "profilo_privato.html",
+      "producer": {
+        "path": "Frontend/public/assets/js/modules/shared/attachment-source-picker.js",
+        "export": "selectAttachmentSource + openProfileDocumentAttachments + renderProfileDocumentAttachmentPreviews"
+      },
+      "sources": [
+        "Frontend/public/profilo_privato.html",
+        "Frontend/public/assets/js/modules/shared/attachment-source-picker.js",
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/js/modules/privato/profile-document-attachments.js",
+        "Frontend/public/assets/css/attachment-source-picker.css",
+        "Frontend/public/assets/css/profile-document-attachments.css",
+        "Frontend/public/assets/js/modules/privato/profilo-ui.js",
+        "Frontend/public/aggiungi_scadenza.html",
+        "Frontend/public/dettaglio_account_azienda.html",
+        "Frontend/public/dettaglio_account_privato.html",
+        "Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js",
+        "Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js",
+        "Frontend/public/assets/js/modules/scadenze/deadline-attachment-controller.js",
+        "Frontend/public/assets/css/core_fonts.css",
+        "Frontend/public/assets/css/core_fascie.css",
+        "Frontend/public/assets/css/moduli.css",
+        "Frontend/public/assets/css/account_detail.css",
+        "Frontend/public/assets/css/dettaglio_account_azienda.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profilo_privato.css",
+        "Frontend/public/assets/css/profile-contacts.css",
+        "Frontend/public/assets/css/profile-layout.css",
+        "Frontend/public/assets/css/datepicker_v5.css",
+        "Frontend/public/assets/css/aggiungi_scadenza.css",
+        "Frontend/public/assets/css/ui-tre-livelli-moduli.css",
+        "Frontend/public/assets/css/dettaglio_account_privato.css"
+      ],
+      "trigger": {
+        "kind": "real-producer",
+        "action": "selectAttachmentSource + openProfileDocumentAttachments + renderProfileDocumentAttachmentPreviews"
+      },
+      "states": [
+        "picker",
+        "dialog",
+        "inline",
+        "disabled",
+        "private-rows",
+        "company-rows",
+        "deadline-files",
+        "deadline-picker"
+      ],
+      "paints": [
+        {
+          "selector": ".attachment-source-picker-card",
+          "property": "backgroundColor",
+          "role": "--rev-popup",
+          "states": [
+            "picker"
+          ]
+        },
+        {
+          "selector": ".attachment-source-picker-grid button",
+          "property": "color",
+          "role": "--rev-icon",
+          "states": [
+            "picker",
+            "dialog",
+            "disabled"
+          ]
+        },
+        {
+          "selector": ".profile-document-attachments-dialog",
+          "property": "backgroundColor",
+          "role": "--rev-popup",
+          "states": [
+            "dialog",
+            "disabled"
+          ]
+        },
+        {
+          "selector": ".profile-document-inline-card",
+          "property": "backgroundColor",
+          "role": "--rev-surface",
+          "states": [
+            "inline"
+          ]
+        },
+        {
+          "selector": ".attachment-source-picker-grid [data-source=\"gallery\"] .material-symbols-outlined",
+          "property": "color",
+          "role": "--rev-icon",
+          "states": [
+            "picker",
+            "dialog",
+            "disabled"
+          ]
+        },
+        {
+          "selector": ".attachment-item",
+          "property": "backgroundColor",
+          "role": "--rev-surface",
+          "states": [
+            "private-rows",
+            "company-rows",
+            "deadline-files"
+          ]
+        },
+        {
+          "selector": ".attachment-item",
+          "property": "borderTopColor",
+          "role": "--rev-border",
+          "states": [
+            "private-rows",
+            "company-rows",
+            "deadline-files"
+          ]
+        },
+        {
+          "selector": "#source-selector-modal .source-modal-box",
+          "property": "backgroundColor",
+          "role": "--rev-popup",
+          "states": [
+            "deadline-picker"
+          ]
+        },
+        {
+          "selector": ".attachment-source-picker-grid strong",
+          "property": "color",
+          "role": "--text-primary",
+          "minimum": 4.5,
+          "states": [
+            "picker",
+            "dialog"
+          ]
+        },
+        {
+          "selector": ".profile-document-attachments-title",
+          "property": "color",
+          "role": "--text-primary",
+          "minimum": 4.5,
+          "states": [
+            "dialog"
+          ]
+        },
+        {
+          "selector": ".attachment-name",
+          "property": "color",
+          "role": "--text-primary",
+          "minimum": 4.5,
+          "states": [
+            "private-rows",
+            "company-rows",
+            "deadline-files"
+          ]
+        }
+      ],
+      "tests": [
+        "tests/ui-dynamic-themes.browser.test.mjs"
+      ],
+      "statePages": {
+        "private-rows": "dettaglio_account_privato.html",
+        "company-rows": "dettaglio_account_azienda.html",
+        "deadline-files": "aggiungi_scadenza.html",
+        "deadline-picker": "aggiungi_scadenza.html"
+      },
+      "stateProducers": {
+        "private-rows": {
+          "path": "Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js",
+          "export": "initPrivateAttachmentModule + loadPrivateAttachments"
+        },
+        "company-rows": {
+          "path": "Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js",
+          "export": "initAttachmentModule + loadAttachments"
+        },
+        "deadline-files": {
+          "path": "Frontend/public/assets/js/modules/scadenze/deadline-attachment-controller.js",
+          "export": "createDeadlineAttachmentController.init + setExistingAttachments"
+        },
+        "deadline-picker": {
+          "path": "Frontend/public/assets/js/modules/scadenze/deadline-attachment-controller.js",
+          "export": "createDeadlineAttachmentController.init then click btn-trigger-upload"
+        }
+      }
+    },
+    {
+      "id": "UI275-04",
+      "page": "profilo_privato.html",
+      "producer": {
+        "path": "Frontend/public/assets/js/modules/assistant/assistant-ui.js",
+        "export": "createAssistantUI"
+      },
+      "sources": [
+        "Frontend/public/profilo_privato.html",
+        "Frontend/public/assets/js/modules/assistant/assistant-ui.js",
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/vault-assistant.css",
+        "Frontend/public/assets/css/core_fonts.css",
+        "Frontend/public/assets/css/core_fascie.css",
+        "Frontend/public/assets/css/profilo_privato.css",
+        "Frontend/public/assets/css/profile-contacts.css",
+        "Frontend/public/assets/css/profile-layout.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profile-document-attachments.css"
+      ],
+      "trigger": {
+        "kind": "real-producer",
+        "action": "createAssistantUI then click help"
+      },
+      "states": [
+        "closed",
+        "open",
+        "hover",
+        "focus"
+      ],
+      "paints": [
+        {
+          "selector": ".vault-assistant-help",
+          "property": "color",
+          "role": "--rev-text-accent",
+          "minimum": 4.5
+        },
+        {
+          "selector": ".vault-assistant-instructions",
+          "property": "backgroundColor",
+          "role": "--rev-surface-2",
+          "states": [
+            "open",
+            "hover",
+            "focus"
+          ]
+        },
+        {
+          "selector": ".vault-assistant-instructions",
+          "property": "color",
+          "role": "--text-primary",
+          "states": [
+            "open",
+            "hover",
+            "focus"
+          ]
+        },
+        {
+          "selector": ".vault-assistant-instructions p",
+          "property": "color",
+          "role": "--text-primary",
+          "minimum": 4.5,
+          "states": [
+            "open",
+            "hover",
+            "focus"
+          ]
+        }
+      ],
+      "tests": [
+        "tests/ui-dynamic-themes.browser.test.mjs"
+      ]
+    },
+    {
+      "id": "UI275-05",
+      "page": "profilo_privato.html",
+      "producer": {
+        "path": "Frontend/public/assets/js/components-v129.js",
+        "export": "initComponents"
+      },
+      "sources": [
+        "Frontend/public/profilo_privato.html",
+        "Frontend/public/assets/js/components-v129.js",
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/profile-layout.css",
+        "Frontend/public/assets/css/core_fascie.css",
+        "Frontend/public/assets/css/core_fonts.css",
+        "Frontend/public/assets/css/profilo_privato.css",
+        "Frontend/public/assets/css/profile-contacts.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profile-document-attachments.css"
+      ],
+      "trigger": {
+        "kind": "real-producer",
+        "action": "initComponents then scroll"
+      },
+      "states": [
+        "initial",
+        "scrolled"
+      ],
+      "paints": [
+        {
+          "selector": "#header-placeholder",
+          "property": "backgroundColor",
+          "role": "color-mix(in srgb,var(--rev-popup) 88%,transparent)"
+        },
+        {
+          "selector": "#header-placeholder .header-title",
+          "property": "color",
+          "role": "--text-primary",
+          "kind": "headerContrast",
+          "minimum": 4.5
+        },
+        {
+          "selector": "#header-placeholder .btn-icon-header .material-symbols-outlined",
+          "property": "color",
+          "role": "--text-primary",
+          "kind": "headerContrast",
+          "minimum": 3
+        },
+        {
+          "selector": "#header-placeholder",
+          "property": "content",
+          "role": "none",
+          "pseudo": "::before",
+          "mobileOnly": true
+        }
+      ],
+      "tests": [
+        "tests/ui-dynamic-themes.browser.test.mjs"
+      ]
+    },
+    {
+      "id": "UI275-06",
+      "page": "profilo_privato.html",
+      "producer": {
+        "path": "Frontend/public/assets/js/modules/privato/profilo-qr.js",
+        "export": "setupQRToggles"
+      },
+      "sources": [
+        "Frontend/public/profilo_privato.html",
+        "Frontend/public/assets/js/modules/privato/profilo-qr.js",
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/profilo_privato.css",
+        "Frontend/public/assets/js/modules/privato/profilo-dashboard.js",
+        "Frontend/public/assets/css/core_fonts.css",
+        "Frontend/public/assets/css/core_fascie.css",
+        "Frontend/public/assets/css/profile-contacts.css",
+        "Frontend/public/assets/css/profile-layout.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profile-document-attachments.css"
+      ],
+      "trigger": {
+        "kind": "real-producer",
+        "action": "setupQRToggles then checkbox click; renderDigitalCard"
+      },
+      "states": [
+        "checked",
+        "unchecked",
+        "digital-card"
+      ],
+      "paints": [
+        {
+          "selector": "#qr-toggle-nome",
+          "property": "backgroundColor",
+          "role": "--rev-fill",
+          "states": [
+            "checked"
+          ]
+        },
+        {
+          "selector": "#qr-toggle-nome",
+          "property": "backgroundColor",
+          "role": "--rev-icon-bg",
+          "states": [
+            "unchecked"
+          ]
+        },
+        {
+          "selector": "#qr-toggle-nome",
+          "property": "borderTopColor",
+          "role": "--rev-fill",
+          "states": [
+            "checked"
+          ]
+        },
+        {
+          "selector": ".digital-card-choice input",
+          "property": "accentColor",
+          "role": "--accent",
+          "states": [
+            "digital-card"
+          ]
+        }
+      ],
+      "tests": [
+        "tests/ui-dynamic-themes.browser.test.mjs"
+      ]
+    },
+    {
+      "id": "UI275-07",
+      "page": "profilo_privato.html",
+      "producer": {
+        "path": "Frontend/public/assets/js/modules/privato/profilo-qr.js",
+        "export": "generateProfileQRCode"
+      },
+      "sources": [
+        "Frontend/public/profilo_privato.html",
+        "Frontend/public/assets/js/modules/privato/profilo-qr.js",
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/profilo_privato.css",
+        "Frontend/public/assets/css/core_fonts.css",
+        "Frontend/public/assets/css/core_fascie.css",
+        "Frontend/public/assets/css/profile-contacts.css",
+        "Frontend/public/assets/css/profile-layout.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profile-document-attachments.css"
+      ],
+      "trigger": {
+        "kind": "real-producer",
+        "action": "generateProfileQRCode then click QR"
+      },
+      "states": [
+        "inline",
+        "zoom"
+      ],
+      "paints": [
+        {
+          "selector": "#qrcode-header",
+          "property": "borderTopColor",
+          "role": "--rev-border",
+          "states": [
+            "inline"
+          ]
+        },
+        {
+          "selector": ".modal-box-qr",
+          "property": "backgroundColor",
+          "role": "--rev-popup",
+          "states": [
+            "zoom"
+          ]
+        },
+        {
+          "selector": ".qr-zoom-container",
+          "property": "borderTopColor",
+          "role": "--rev-border",
+          "states": [
+            "zoom"
+          ]
+        }
+      ],
+      "tests": [
+        "tests/ui-dynamic-themes.browser.test.mjs"
+      ]
+    },
+    {
+      "id": "UI275-08",
+      "page": "profilo_privato.html",
+      "producer": {
+        "path": "Frontend/public/assets/js/modules/privato/profilo-widgets.js",
+        "export": "initProfileWidgets synthetic repository"
+      },
+      "sources": [
+        "Frontend/public/profilo_privato.html",
+        "Frontend/public/assets/js/modules/privato/profilo-widgets.js",
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/core_fonts.css",
+        "Frontend/public/assets/css/core_fascie.css",
+        "Frontend/public/assets/css/profilo_privato.css",
+        "Frontend/public/assets/css/profile-contacts.css",
+        "Frontend/public/assets/css/profile-layout.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profile-document-attachments.css"
+      ],
+      "trigger": {
+        "kind": "real-producer",
+        "action": "initProfileWidgets synthetic repository"
+      },
+      "states": [
+        "expanded",
+        "collapsed",
+        "color-default",
+        "color-custom"
+      ],
+      "paints": [
+        {
+          "selector": ".profile-widget",
+          "property": "borderTopColor",
+          "role": "--accent"
+        },
+        {
+          "selector": ".profile-widget-identity[data-color-role=\"theme\"]",
+          "property": "color",
+          "role": "--rev-icon",
+          "states": [
+            "color-default"
+          ]
+        },
+        {
+          "selector": ".profile-widget-title strong",
+          "property": "color",
+          "role": "--text-primary",
+          "minimum": 4.5
+        }
+      ],
+      "tests": [
+        "tests/ui-dynamic-themes.browser.test.mjs"
+      ]
+    },
+    {
+      "id": "UI275-09",
+      "page": "profilo_privato.html",
+      "producer": {
+        "path": "Frontend/public/assets/js/modules/privato/profilo-dashboard.js",
+        "export": "initProfileDashboard"
+      },
+      "sources": [
+        "Frontend/public/profilo_privato.html",
+        "Frontend/public/assets/js/modules/privato/profilo-dashboard.js",
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/profile-layout.css",
+        "Frontend/public/assets/css/core_fonts.css",
+        "Frontend/public/assets/css/core_fascie.css",
+        "Frontend/public/assets/css/profilo_privato.css",
+        "Frontend/public/assets/css/profile-contacts.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profile-document-attachments.css"
+      ],
+      "trigger": {
+        "kind": "real-producer",
+        "action": "initProfileDashboard then actual tab click/End"
+      },
+      "states": [
+        "selected",
+        "keyboard",
+        "scrolled"
+      ],
+      "paints": [
+        {
+          "selector": ".profile-tabs",
+          "property": "backgroundColor",
+          "role": "color-mix(in srgb,var(--rev-popup) 88%,transparent)"
+        },
+        {
+          "selector": ".profile-tab.is-active",
+          "property": "backgroundColor",
+          "role": "--rev-fill"
+        },
+        {
+          "selector": ".profile-tab.is-active",
+          "property": "color",
+          "role": "#fff",
+          "minimum": 4.5
+        }
+      ],
+      "tests": [
+        "tests/ui-dynamic-themes.browser.test.mjs"
+      ]
+    },
+    {
+      "id": "UI275-10",
+      "page": "profilo_privato.html",
+      "producer": {
+        "path": "Frontend/public/assets/js/components-v129.js",
+        "export": "initComponents"
+      },
+      "sources": [
+        "Frontend/public/profilo_privato.html",
+        "Frontend/public/assets/js/components-v129.js",
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/core_fonts.css",
+        "Frontend/public/assets/css/core_fascie.css",
+        "Frontend/public/assets/css/profilo_privato.css",
+        "Frontend/public/assets/css/profile-contacts.css",
+        "Frontend/public/assets/css/profile-layout.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profile-document-attachments.css"
+      ],
+      "trigger": {
+        "kind": "real-producer",
+        "action": "initComponents then footer guide click"
+      },
+      "states": [
+        "open",
+        "hover",
+        "focus"
+      ],
+      "paints": [
+        {
+          "selector": ".guide-close-button",
+          "property": "backgroundColor",
+          "role": "--rev-fill"
+        },
+        {
+          "selector": ".guide-close-button",
+          "property": "boxShadow",
+          "role": "--ui-shadow-action-soft"
+        },
+        {
+          "selector": ".guide-close-button",
+          "property": "color",
+          "role": "#fff",
+          "minimum": 4.5
+        },
+        {
+          "selector": ".guide-close-button",
+          "property": "filter",
+          "role": "none",
+          "states": [
+            "hover",
+            "focus"
+          ]
+        }
+      ],
+      "tests": [
+        "tests/ui-dynamic-themes.browser.test.mjs"
+      ]
+    },
+    {
+      "id": "UI275-11",
+      "page": "scadenze.html",
+      "producer": {
+        "path": "Frontend/public/assets/js/modules/scadenze/scadenze.js",
+        "export": "initScadenze synthetic repository"
+      },
+      "sources": [
+        "Frontend/public/scadenze.html",
+        "Frontend/public/assets/js/modules/scadenze/scadenze.js",
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/core_fonts.css",
+        "Frontend/public/assets/css/core_fascie.css",
+        "Frontend/public/assets/css/moduli.css",
+        "Frontend/public/assets/css/scadenze.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css"
+      ],
+      "trigger": {
+        "kind": "real-producer",
+        "action": "initScadenze synthetic repository then filter click"
+      },
+      "states": [
+        "valid",
+        "upcoming",
+        "expired",
+        "completed"
+      ],
+      "paints": [
+        {
+          "selector": ".deadline-card .swipe-content",
+          "property": "backgroundColor",
+          "role": "--rev-popup"
+        },
+        {
+          "selector": ".deadline-card-title",
+          "property": "color",
+          "role": "--text-primary",
+          "minimum": 4.5
+        },
+        {
+          "selector": ".deadline-card-expired .deadline-date-badge, .deadline-card-expired .deadline-icon-box, .deadline-card-expired .deadline-icon-box > .material-symbols-outlined",
+          "property": "color",
+          "role": "--status-error",
+          "semanticHue": "red",
+          "states": [
+            "valid",
+            "upcoming",
+            "expired"
+          ]
+        },
+        {
+          "selector": ".deadline-card-upcoming .deadline-date-badge, .deadline-card-upcoming .deadline-icon-box, .deadline-card-upcoming .deadline-icon-box > .material-symbols-outlined",
+          "property": "color",
+          "role": "--status-warning",
+          "semanticHue": "amber",
+          "states": [
+            "valid",
+            "upcoming",
+            "expired"
+          ]
+        },
+        {
+          "selector": ".deadline-card-completed .deadline-date-badge, .deadline-card-completed .deadline-icon-box, .deadline-card-completed .deadline-icon-box > .material-symbols-outlined",
+          "property": "color",
+          "role": "--status-success",
+          "semanticHue": "green",
+          "states": [
+            "completed"
+          ]
+        }
+      ],
+      "tests": [
+        "tests/ui-dynamic-themes.browser.test.mjs"
+      ]
+    }
+  ],
+  "limits": [
+    "No Firebase/Auth/Vault runtime certification: only injected synthetic repositories and denied writes.",
+    "No microphone, camera, upload, clipboard or device prompts executed.",
+    "Unsupported backdrop paints are unmeasured, never contrast PASS.",
+    "Cases cover only declared selectors/states; static visual map remains separate.",
+    "The 28-context matrix uses local Chrome at 390x844. Existing desktop/header tests remain separate; this is not a physical device/browser certification."
+  ],
+  "exceptions": [
+    {
+      "id": "user-widget-color",
+      "selector": ".profile-widget-identity[data-color-role=\"custom\"]",
+      "property": "color",
+      "meaning": "User-selected or historical saved widget identity color; decorative card border still follows theme",
+      "caseIds": [
+        "UI275-08"
+      ],
+      "valueSource": "widget.color"
+    },
+    {
+      "id": "qr-quiet-zone",
+      "selector": "#qrcode-header, #qr-enlarged",
+      "property": "backgroundColor",
+      "meaning": "Fixed pale QR quiet zone; black and pale pixels preserved by actual QR canvas test",
+      "caseIds": [
+        "UI275-07"
+      ],
+      "values": [
+        "#e3f2fd"
+      ]
+    }
+  ]
+}

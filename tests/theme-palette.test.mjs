@@ -31,8 +31,9 @@ function contrast(first, second) {
 
 test('theme init applies a validated color before rendering and defaults to blue', () => {
   for (const [stored, expected] of [['green','green'],['red','red'],['sand','sand'],['petrol','petrol'],['lavender','lavender'],['dusty-rose','dusty-rose'],['blue','blue'],['invalid','blue'],[null,'blue']]) {
-    const document = {documentElement:{classList:{contains:()=>false,add(){},remove(){}},dataset:{}}};
-    const sandbox = {document, localStorage:{getItem:key=>key === 'color_theme' ? stored : 'light'}, Intl, Date, window:{matchMedia:()=>({matches:false})}, console};
+    const document = {documentElement:{classList:{contains:()=>false,add(){},remove(){}},dataset:{}},addEventListener(){}};
+    const sandbox = {document, localStorage:{getItem:key=>key === 'color_theme' ? stored : 'light'}, Intl, Date,
+      MutationObserver:class {observe(){} disconnect(){}}, window:{matchMedia:()=>({matches:false}),addEventListener(){}}, console};
     vm.runInNewContext(init, sandbox);
     assert.equal(document.documentElement.dataset.colorTheme, expected);
   }

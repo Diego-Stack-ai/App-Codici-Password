@@ -1,6 +1,19 @@
 # Stato
 
+<a id="temi-rilascio-1276-stato-2026-11-15"></a>
+
+## APP 1.2.276 — confezionamento e rilascio autorizzati, 15/11/2026
+
+In preparazione la **1.2.276** con gli undici correttivi UI275 e il registro dinamico: base master 06b86713, ramo `codex/release-ui-1.2.276-20261115`. [Ordine esplicito](INCARICO_CORRENTE.md#temi-rilascio-1276-incarico-2026-11-15), [prove locali](../evidenze/COLLAUDI.md#temi-dinamici-ui275-2026-11-15). PR, CI, merge e Hosting ancora da attestare. Online resta 1.2.275 / 44a64edf fino alla verifica pubblica. Cornice ordinaria ON già attestata, nessuna nuova scrittura policy. Secondo giro Claude separato nella #313; i checkpoint sotto descrivono le fasi precedenti.
+
+
 <a id="stato-corrente"></a>
+
+<a id="temi-locali-2026-11-15"></a>
+
+## Seguito temi — undici correttivi verificati localmente, 15/11/2026
+
+Sul ramo locale `codex/theme-observations-20261115` sono corretti gli [undici casi UI275](PROGRAMMA.md#temi-segnalazioni-1275-2026-11-15), verificati con produttori reali in un banco sintetico isolato: 38 stati × 28 contesti, **1064/1064 PASS**, più 112/112 per le Scadenze desktop. La mappa collega stati, componenti, CSS, ruoli e test; relazioni dichiarate e osservazioni effettive restano distinte. [Esiti e limiti](../evidenze/COLLAUDI.md#temi-dinamici-ui275-2026-11-15). Il giro completo successivo sulle opzioni di ogni pagina è stato consegnato a Claude nella [#313](https://github.com/Diego-Stack-ai/App-Codici-Password/issues/313), con presa in carico ancora da confermare. Alla chiusura locale non erano ancora committati o pubblicati; il successivo ordine 1.2.276 sopra ne autorizza il rilascio.
 
 <a id="cornice-ordinaria-1275-stato-2026-11-14"></a>
 

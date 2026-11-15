@@ -15,7 +15,7 @@
     position: absolute;
     right: 0.2rem;
     bottom: 0.2rem;
-    background: rgba(0, 0, 0, 0.18);
+    background: var(--rev-fill);
     border-radius: 50%;
     width: 32px;
     height: 32px;
@@ -30,8 +30,8 @@
 }
 
 .qr-lens-icon:hover {
-    background: rgba(var(--accent-rgb), 25%);
-    color: var(--accent);
+    background: var(--rev-fill);
+    color: white;
 }
 
 .modal-overlay {
@@ -1144,6 +1144,10 @@ select.shared-account-select-control optgroup {
     margin-top: 1rem;
 }
 
+html body[data-ui-revision] .guide-close-button:is(:hover, :focus-visible) {
+    filter: none;
+}
+
 @media (max-width: 600px) {
     .modal-actions {
         flex-direction: column-reverse;
@@ -1218,7 +1222,7 @@ select.shared-account-select-control optgroup {
 }
 
 /* Popup, menu e avvisi seguono il colore scelto (prima: bianco, azzurro o blu fissi). */
-[data-ui-revision] :is(.modal-box, .modal-box-source, .custom-select-menu, .datepicker-card,
+[data-ui-revision] :is(.modal-box, .modal-profile-box, .modal-box-source, .custom-select-menu, .datepicker-card,
     .first-configuration-dialog, .documentation-panel, .documentation-walkthrough-panel),
 html body[data-ui-revision] .vault-assistant-panel {
     background: var(--rev-popup);
@@ -1228,7 +1232,7 @@ html body[data-ui-revision] .vault-assistant-panel {
     backdrop-filter: none;
 }
 
-[data-ui-revision] :is(.modal-box, .modal-box-source, .first-configuration-dialog),
+[data-ui-revision] :is(.modal-box, .modal-profile-box, .modal-box-source, .first-configuration-dialog),
 html body[data-ui-revision] .vault-assistant-panel {
     border: 1px solid var(--rev-border);
     box-shadow: var(--rev-popup-shadow);
@@ -1255,9 +1259,72 @@ html body[data-ui-revision] :is(.vault-assistant-input, .vault-assistant-result,
     color: var(--text-primary);
 }
 
-/* Icone nelle card: i contenitori neutri (pensati per il vetro scuro) e le pastiglie
-   decorative viola seguono il ventaglio del colore scelto. Restano invariate le pastiglie
-   di stato (rosso, ambra, arancio, verde), che hanno un significato. */
+/* Dynamic search controls. */
+html body[data-ui-revision] :is(.vault-assistant-help, .vault-assistant-result-action, .vault-assistant-credential-action) {
+    background: var(--rev-icon-bg);
+    border-color: var(--rev-border);
+    color: var(--rev-icon);
+    box-shadow: none;
+}
+
+html body[data-ui-revision] .vault-assistant-help {
+    color: var(--rev-text-accent);
+}
+
+html body[data-ui-revision] :is(.vault-assistant-instructions, .vault-assistant-mode-notice) {
+    background: var(--rev-surface-2);
+    border-color: var(--rev-border);
+    color: var(--text-primary);
+}
+
+html body[data-ui-revision] .vault-assistant-modes {
+    background: var(--rev-surface);
+}
+
+html body[data-ui-revision] .vault-assistant-mode.active {
+    background: var(--rev-fill);
+    color: #fff;
+    box-shadow: var(--ui-shadow-selection-soft);
+}
+
+html body[data-ui-revision] :is(.vault-assistant-help, .vault-assistant-input):focus-visible {
+    outline: 2px solid var(--rev-icon);
+    outline-offset: 3px;
+}
+
+/* Shared attachment surfaces; media and destructive controls retain their roles. */
+html body[data-ui-revision] :is(.attachment-item, .attachment-card-row, .attachment-item-edit,
+    .profile-document-inline-card, .profile-document-inline-item.is-file),
+html body[data-ui-revision] #display-attachments .detail-list-item {
+    background: var(--rev-surface);
+    border-color: var(--rev-border);
+    color: var(--text-primary);
+}
+
+html body[data-ui-revision] :is(.attachment-item, .attachment-card-row, .attachment-item-edit,
+    .profile-document-inline-item.is-file):is(:hover, :focus-visible),
+html body[data-ui-revision] #display-attachments .detail-list-item:is(:hover, :focus-visible) {
+    background: var(--rev-surface-hover);
+    border-color: var(--rev-border);
+}
+
+html body[data-ui-revision] .profile-document-attachments-dialog {
+    background: var(--rev-popup);
+    border: 1px solid var(--rev-border);
+    color: var(--text-primary);
+    box-shadow: var(--rev-popup-shadow);
+}
+
+html body[data-ui-revision] .profile-document-attachments-actions {
+    background: var(--rev-surface-2);
+    border-color: var(--rev-border);
+}
+
+html body[data-ui-revision] .profile-document-attachments-actions h3 {
+    color: var(--rev-text-accent);
+}
+
+/* Decorative card icons; semantic state colors remain separate. */
 body[data-ui-revision] :is(.settings-icon-box, .archive-icon-box, .hero-page-icon-box, .account-icon-box,
     .icon-box, .card-icon-box, .upload-icon, .attachment-icon-badge, .glass-btn-icon, .btn-icon-add):not(.icon-red, .icon-amber, .icon-orange, .icon-emerald, .icon-green, .icon-purple) {
     background: var(--rev-icon-bg);
@@ -1301,16 +1368,14 @@ body[data-ui-revision] :is(.btn-primary, .profile-tab.is-active) {
     color: #fff;
 }
 
-/* Icone decorative con un colore storico di stato (Profilo): il ruolo «theme» le fa seguire
-   il ventaglio; le icone senza ruolo dichiarato restano pastiglie di stato. */
+/* Explicit theme icons. */
 body[data-ui-revision] .settings-icon-box[data-icon-role="theme"] {
     background: var(--rev-icon-bg);
     border-color: var(--rev-border);
     color: var(--rev-icon);
 }
 
-/* Coordinate bancarie (moduli e dettagli Account): i titoli verdi erano decorazione, non uno
-   stato. Superfici opache del ventaglio per un contrasto verificabile. */
+/* Bank Account surfaces and labels. */
 body[data-ui-revision] .bank-account-card {
     background: var(--rev-surface-2);
     border-color: var(--rev-border);
@@ -1330,19 +1395,14 @@ body[data-ui-revision] :is(.bank-expand-icon, .card-entry-icon) {
     color: var(--rev-icon);
 }
 
-/* «Salva» dei moduli Account (privato #btn-save-footer, azienda #save-btn-footer): azione
-   ordinaria, non una scadenza. Forma e profondità del FAB Classica, fill della palette.
-   Selezione per ID: .btn-fab-scadenza resta ambra per le vere Scadenze. */
+/* Account Save actions; actual deadline FABs retain amber. */
 body[data-ui-revision] :is(#btn-save-footer, #save-btn-footer).btn-fab-scadenza {
     background: linear-gradient(135deg, var(--rev-fill) 0%, color-mix(in srgb, var(--rev-fill) 82%, #000) 100%);
     box-shadow: var(--ui-shadow-action-soft);
     color: #fff;
 }
 
-/* Registro Codex dei colori (14/11/2026): elementi decorativi con un colore storico di stato
-   (icone di sezione, campi data, TOP 10, segnaposto dei modelli email) dichiarano
-   data-icon-role="theme" nel markup e seguono la palette in entrambe le grafiche. Gli stati
-   reali (cancellazioni, uscita, revoca, avvisi, Scadenze/Urgenze) non hanno il ruolo. */
+/* Only icons with an explicit theme role follow the palette. */
 html body[data-ui-revision] [data-icon-role="theme"]:not(.settings-icon-box) {
     color: var(--rev-icon);
 }

@@ -1,5 +1,24 @@
 # Incarico corrente
 
+<a id="temi-rilascio-1276-incarico-2026-11-15"></a>
+
+## APP 1.2.276 — PR, merge e Hosting autorizzati, 15/11/2026
+
+Diego ordina: **«Procedi con PR, merge e deploy degli 11 correttivi con una nuova versione. Il secondo lavoro di Claude può continuare separatamente.»** L'ordine supera il precedente limite locale: confezionamento canonico **1.2.276**, commit/push/PR, revisione indipendente della candidata, merge con CI verde, workflow manuale di solo **hosting** sul master finale e verifica pubblica completa. Codex conserva la delega esplicita ai clic production; protezioni e scope esistenti invariati. Il secondo giro rimane nella [#313](https://github.com/Diego-Stack-ai/App-Codici-Password/issues/313), senza attenderne il GO per questo rilascio.
+
+Ramo `codex/release-ui-1.2.276-20261115`, base master **06b8671341191362e360ebd25022d4cf7f8842c7**. Perimetro: undici correttivi UI275, mappa di popup/stati, relativi test e documenti, versioni e catalogo aiuti. [Evidenze locali e limiti](../evidenze/COLLAUDI.md#temi-dinamici-ui275-2026-11-15). La cornice ordinaria resta ON secondo la ricevuta 275: questo rilascio conserva il protocollo, le chiavi, le lease e i timer, senza nuovo dispatch policy, Rules, Functions, Storage, indici, claim o IAM. Nessuna prova autenticata o certificazione generale di telefoni/PWA deriva dal deploy. Stato di confezionamento e ricevute successive in [STATO](STATO.md#temi-rilascio-1276-stato-2026-11-15).
+
+
+<a id="temi-annotazione-incarico-2026-11-15"></a>
+
+## Temi — mappatura dinamica e undici correttivi autorizzati, 15/11/2026
+
+Esecuzione locale completata: undici correttivi, registro e grafo dei collegamenti, matrice dinamica e controlli negativi. [Esiti e limiti](../evidenze/COLLAUDI.md#temi-dinamici-ui275-2026-11-15). Il successivo ordine di rilascio 1.2.276 sopra supera il limite locale; il seguito complessivo resta distinto nella #313.
+
+Dopo la prima annotazione, Diego ordina esplicitamente di estendere la mappatura a popup e stati dinamici, correggere le [undici segnalazioni UI275](PROGRAMMA.md#temi-segnalazioni-1275-2026-11-15), verificare entrambe le grafiche con tutte le palette e registrare componenti, colori e test. Sono autorizzate implementazione e prove locali pertinenti, con produttori e CSS reali, dati sintetici e rete esterna bloccata. Ogni ID deve collegare pagina/stato, azione, componente, sorgenti, proprietà/ruoli cromatici e verifica riproducibile. Conservare colori funzionali e leggibilità, effetti Classica attenuati e confini Auth/Vault della cornice. Il vecchio limite alla sola annotazione è superato da questo ordine; quel primo ordine non comprendeva nuove prove su account reali o pubblicazione; l’ordine 1.2.276 sopra autorizza ora il rilascio Hosting. La disponibilità ordinaria della cornice e il rilascio completato sotto restano quelli già attestati.
+
+Diego amplia poi il controllo alle opzioni di ogni pagina (QR, Ricerca, Impostazioni, informazioni delle fasce, sezioni del Profilo e viste aggiungi/modifica, nuova azienda/account/destinatari, allegati, guide, conferme ed errori) e ordina di passare **questo secondo lavoro a Claude**, informandolo dei difetti osservati. Consegna pubblicata nella [#313](https://github.com/Diego-Stack-ai/App-Codici-Password/issues/313) e notificata nel thread #308; presa in carico ancora da confermare. Codex completa gli undici correttivi e il primo banco; Claude riceve il giro completo e gli ulteriori rilievi su checkout separato, riusando la consegna Codex ed evitando modifiche sovrapposte. Nessun utente Auth o dato reale viene creato per questo audit.
+
 <a id="cornice-ordinaria-1275-incarico-2026-11-14"></a>
 
 ## APP 1.2.275 — ordine eseguito, ricevuta 15/11/2026
