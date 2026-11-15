@@ -8,6 +8,7 @@ const projectRoot = path.resolve(scriptDir, '..');
 const defaultPublicRoot = path.join(projectRoot, 'Frontend', 'public');
 const defaultContractPath = path.join(scriptDir, 'ui-topology-contract.json');
 const defaultGuideCatalogPath = path.join(defaultPublicRoot, 'assets', 'js', 'modules', 'assistant', 'documentation-catalog.json');
+const defaultDynamicThemePath = path.join(scriptDir, 'ui-dynamic-theme-contract.json');
 const CONTROL_TAGS = new Set(['a', 'button', 'input', 'select', 'textarea', 'summary', 'form']);
 const TRANSLATION_ATTRIBUTES = [
   ['data-t', 'ui_translates_with', 'text'],
@@ -198,14 +199,158 @@ function uiEdge(source, target, relation, details = {}) {
   };
 }
 
+// These edges record declarations and their exact sources, never browser PASS results.
+export function buildDynamicThemeTopology({ registryPath = defaultDynamicThemePath } = {}) {
+  const collector = makeCollector();
+  const errors = [];
+  const files = new Set();
+  const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+  files.add(registryPath);
+  const cases = Array.isArray(registry.cases) ? registry.cases : [];
+  if (registry.schemaVersion !== 1 || !Array.isArray(registry.cases)) errors.push('dynamic themes: invalid registry');
+  for (const [key, expected] of Object.entries({ graphics: ['tre-livelli', 'classica'], palettes: ['blue', 'green', 'red', 'sand', 'petrol', 'lavender', 'dusty-rose'], themes: ['light', 'dark'] })) {
+    const actual = registry.matrix?.[key];
+    if (!Array.isArray(actual) || actual.length !== expected.length || expected.some(value => !actual.includes(value))) errors.push(`dynamic themes: incomplete ${key} matrix`);
+  }
+  const ids = new Set();
+  let states = 0, paints = 0;
+  const source = (file, label) => {
+    if (typeof file !== 'string' || !file) { errors.push(`${label}: missing source`); return null; }
+    const absolute = path.resolve(projectRoot, file);
+    const relative = path.relative(projectRoot, absolute);
+    if (relative.startsWith('..') || path.isAbsolute(relative) || !fs.existsSync(absolute) || !fs.statSync(absolute).isFile()) {
+      errors.push(`${label}: invalid source ${file}`); return null;
+    }
+    files.add(absolute);
+    return collector.addNode(uiNode(`ui:source:${normalize(file)}`, normalize(file), 'ui_source', { source_file: normalize(file) }));
+  };
+  const roleSources = [path.join(defaultPublicRoot, 'assets/css/core.css'), path.join(defaultPublicRoot, 'assets/css/core_ui.css')]
+    .map(file => ({ file, text: fs.readFileSync(file, 'utf8') }));
+  for (const { file } of roleSources) files.add(file);
+  const declared = { confidence: 'DECLARED', source_file: relativeToProject(registryPath), observed: false };
+  for (const item of cases) {
+    if (!item.id || ids.has(item.id)) { errors.push(`dynamic themes: duplicate or missing id ${item.id || ''}`); continue; }
+    ids.add(item.id);
+    if (!item.trigger?.action || !item.producer?.export || !item.states?.length || !item.paints?.length || !item.tests?.length) {
+      errors.push(`${item.id}: incomplete dynamic state contract`);
+    }
+    const caseId = collector.addNode(uiNode(`ui:dynamic-theme:${item.id}`, item.id, 'ui_dynamic_theme_case', {
+      page: item.page, trigger: item.trigger, producer: item.producer, source_file: relativeToProject(registryPath), observed: false
+    }));
+    if (!/^[a-z0-9_-]+\.html$/.test(item.page || '') || !fs.existsSync(path.join(defaultPublicRoot, item.page || ''))) {
+      errors.push(`${item.id}: unknown page ${item.page}`);
+    } else {
+      const pageId = collector.addNode(uiNode(`ui:page:${item.page}`, item.page, 'ui_page', { source_file: `Frontend/public/${item.page}` }));
+      collector.addEdge(uiEdge(pageId, caseId, 'ui_declares_dynamic_theme_case', declared));
+      source(`Frontend/public/${item.page}`, item.id);
+    }
+    const producer = source(item.producer?.path, item.id);
+    if (producer) collector.addEdge(uiEdge(caseId, producer, 'ui_rendered_by', declared));
+    const actionId = collector.addNode(uiNode(`${caseId}:action`, item.trigger?.action || 'missing trigger', 'ui_dynamic_action', {
+      selector: item.trigger?.selector, kind: item.trigger?.kind, source_file: relativeToProject(registryPath), observed: false
+    }));
+    collector.addEdge(uiEdge(caseId, actionId, 'ui_declares_trigger', declared));
+    for (const file of item.sources || []) {
+      const sourceId = source(file, item.id);
+      if (sourceId) collector.addEdge(uiEdge(caseId, sourceId, 'ui_uses_source', declared));
+    }
+    for (const file of item.tests || []) {
+      const testId = source(file, item.id);
+      if (testId) collector.addEdge(uiEdge(caseId, testId, 'ui_declares_test', declared));
+    }
+    const seenStates = new Set();
+    for (const state of item.states || []) {
+      if (typeof state !== 'string' || !state || seenStates.has(state)) { errors.push(`${item.id}: duplicate or invalid state`); continue; }
+      seenStates.add(state); states++;
+      const statePage = item.statePages?.[state] || item.page;
+      const stateProducer = item.stateProducers?.[state] || item.producer;
+      const stateId = collector.addNode(uiNode(`${caseId}:state:${state}`, `${item.id} / ${state}`, 'ui_dynamic_state', {
+        page: statePage, producer: stateProducer, source_file: relativeToProject(registryPath), observed: false
+      }));
+      collector.addEdge(uiEdge(caseId, stateId, 'ui_declares_state', declared));
+      collector.addEdge(uiEdge(actionId, stateId, 'ui_expects_dynamic_state', declared));
+      if (!/^[a-z0-9_-]+\.html$/.test(statePage || '') || !fs.existsSync(path.join(defaultPublicRoot, statePage || ''))) {
+        errors.push(`${item.id}/${state}: unknown state page ${statePage}`);
+      } else {
+        const pageId = collector.addNode(uiNode(`ui:page:${statePage}`, statePage, 'ui_page', {source_file:`Frontend/public/${statePage}`}));
+        collector.addEdge(uiEdge(pageId, stateId, 'ui_hosts_dynamic_state', declared));
+        source(`Frontend/public/${statePage}`, `${item.id}/${state}`);
+      }
+      const stateProducerId = source(stateProducer?.path, `${item.id}/${state}`);
+      if (stateProducerId) collector.addEdge(uiEdge(stateId, stateProducerId, 'ui_state_rendered_by', declared));
+    }
+    for (const state of [...Object.keys(item.statePages || {}), ...Object.keys(item.stateProducers || {})]) {
+      if (!seenStates.has(state)) errors.push(`${item.id}: metadata for unknown state ${state}`);
+    }
+    const seenPaints = new Map();
+    for (const paint of item.paints || []) {
+      const baseKey = `${paint.selector}|${paint.pseudo || ''}|${paint.property}`;
+      const paintStates = paint.states || item.states || [];
+      const used = seenPaints.get(baseKey) || new Set();
+      if (!paint.selector || !paint.property || !paint.role || paintStates.some(state => used.has(state) || !seenStates.has(state))) {
+        errors.push(`${item.id}: duplicate, unknown-state or incomplete paint ${baseKey}`); continue;
+      }
+      for (const state of paintStates) used.add(state);
+      seenPaints.set(baseKey, used); paints++;
+      const key = `${baseKey}|${[...paintStates].sort().join(',')}`;
+      const role = String(paint.role);
+      const escapedRole = role.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const rolePattern = new RegExp(`${escapedRole}\\s*:`);
+      const definition = role.startsWith('--') ? roleSources.find(({text}) => rolePattern.test(text)) : null;
+      if (role.startsWith('--') && !definition) errors.push(`${item.id}: unknown CSS role ${role}`);
+      const expression = /^color-mix\(in srgb,\s*var\(--[a-z0-9-]+\)\s+(?:100|[0-9]{1,2})(?:\.[0-9]+)?%,\s*transparent\)$/.test(role);
+      if (!role.startsWith('--') && !expression && !['#fff', 'white', 'transparent', 'none'].includes(role)) errors.push(`${item.id}: unregistered literal ${role}`);
+      const paintId = collector.addNode(uiNode(`${caseId}:paint:${encodeURIComponent(key)}`, key, 'ui_dynamic_paint', {
+        selector: paint.selector, pseudo: paint.pseudo, property: paint.property, states: paintStates, source_file: relativeToProject(registryPath), observed: false
+      }));
+      const roleId = collector.addNode(uiNode(`ui:css-role:${role}`, role, 'ui_css_role', {
+        source_file: definition ? relativeToProject(definition.file) : relativeToProject(registryPath),
+        source_location: definition ? `L${lineOf(definition.text, definition.text.search(rolePattern))}` : undefined
+      }));
+      collector.addEdge(uiEdge(caseId, paintId, 'ui_declares_paint', declared));
+      for (const state of paintStates) collector.addEdge(uiEdge(`${caseId}:state:${state}`, paintId, 'ui_expects_state_paint', declared));
+      collector.addEdge(uiEdge(paintId, roleId, 'ui_expects_color_role', declared));
+      for (const [, variable] of role.matchAll(/var\((--[a-z0-9-]+)\)/g)) {
+        const pattern = new RegExp(`${variable}\\s*:`);
+        const origin = roleSources.find(({text}) => pattern.test(text));
+        if (!origin) errors.push(`${item.id}: unknown CSS role ${variable}`);
+        const variableId = collector.addNode(uiNode(`ui:css-role:${variable}`, variable, 'ui_css_role', {
+          source_file: origin ? relativeToProject(origin.file) : relativeToProject(registryPath),
+          source_location: origin ? `L${lineOf(origin.text, origin.text.search(pattern))}` : undefined
+        }));
+        collector.addEdge(uiEdge(roleId, variableId, 'ui_uses_color_role', declared));
+      }
+    }
+  }
+  const exceptionIds = new Set();
+  for (const exception of registry.exceptions || []) {
+    if (!exception.id || exceptionIds.has(exception.id) || !exception.selector || !exception.property || !exception.meaning
+      || !exception.caseIds?.length || exception.caseIds.some(id => !ids.has(id))
+      || (!exception.valueSource && !exception.values?.length)) {
+      errors.push(`dynamic themes: incomplete or unbound exception ${exception.id || ''}`); continue;
+    }
+    exceptionIds.add(exception.id);
+    const exceptionId = collector.addNode(uiNode(`ui:theme-exception:${exception.id}`, exception.meaning, 'ui_theme_exception', {
+      selector: exception.selector, property: exception.property, value_source: exception.valueSource,
+      values: exception.values, source_file: relativeToProject(registryPath), observed: false
+    }));
+    for (const caseId of exception.caseIds) collector.addEdge(uiEdge(`ui:dynamic-theme:${caseId}`, exceptionId, 'ui_declares_theme_exception', declared));
+  }
+  return { nodes: [...collector.nodes.values()], edges: [...collector.edges.values()], errors, files: [...files], summary: { cases: ids.size, states, paints, exceptions: exceptionIds.size } };
+}
+
 export function buildUiTopology({
   publicRoot = defaultPublicRoot,
   contractPath = defaultContractPath,
-  guideCatalogPath = defaultGuideCatalogPath
+  guideCatalogPath = defaultGuideCatalogPath,
+  dynamicThemePath = defaultDynamicThemePath
 } = {}) {
   const contract = JSON.parse(fs.readFileSync(contractPath, 'utf8'));
   const guideCatalog = JSON.parse(fs.readFileSync(guideCatalogPath, 'utf8'));
   const collector = makeCollector();
+  const dynamicThemes = dynamicThemePath ? buildDynamicThemeTopology({ registryPath: dynamicThemePath }) : { nodes: [], edges: [], errors: [], files: [], summary: { cases: 0, states: 0, paints: 0 } };
+  for (const node of dynamicThemes.nodes) collector.addNode(node);
+  for (const edge of dynamicThemes.edges) collector.addEdge(edge);
   const controls = [];
   const surfaces = [];
   const eventBindings = [];
@@ -222,6 +367,8 @@ export function buildUiTopology({
     .map(entry => path.join(publicRoot, entry.name));
   const jsRoot = path.join(publicRoot, 'assets', 'js');
   const jsFiles = walk(jsRoot).filter(file => file.endsWith('.js') && !normalize(file).includes('/vendor/'));
+  const cssRoot = path.join(publicRoot, 'assets', 'css');
+  const cssFiles = walk(cssRoot).filter(file => file.endsWith('.css'));
   const jsSourceByFile = new Map(jsFiles.map(file => [file, fs.readFileSync(file, 'utf8')]));
 
   const ensurePage = page => {
@@ -318,6 +465,15 @@ export function buildUiTopology({
           collector.addEdge(uiEdge(pageId, scriptId, 'ui_loads_script', {
             source_file: relativeToProject(file), source_location: location
           }));
+        }
+      }
+      if (tag === 'link' && String(attributes.rel || '').toLowerCase().split(/\s+/).includes('stylesheet') && attributes.href
+        && !/^(?:https?:|\/\/|data:)/i.test(attributes.href)) {
+        const clean = attributes.href.replace(/^\//, '').split('?')[0].split('#')[0];
+        if (clean.endsWith('.css')) {
+          const stylePath = normalize(clean.startsWith('assets/') ? `Frontend/public/${clean}` : path.posix.join(path.posix.dirname(`Frontend/public/${page}`), clean));
+          const styleId = collector.addNode(uiNode(`ui:source:${stylePath}`, path.posix.basename(stylePath), 'ui_stylesheet', {source_file:stylePath}));
+          collector.addEdge(uiEdge(pageId, styleId, 'ui_loads_stylesheet', {source_file:relativeToProject(file),source_location:location}));
         }
       }
     }
@@ -625,6 +781,7 @@ export function buildUiTopology({
     }));
   }
 
+  contractErrors.push(...dynamicThemes.errors);
   const mappedSelectors = new Set([
     ...eventBindings.map(binding => binding.selector),
     ...selectorReferences.map(reference => reference.selector),
@@ -660,6 +817,7 @@ export function buildUiTopology({
     controlsWithStableSelector: controls.filter(control => control.selector).length,
     eventBindings: eventBindings.length,
     surfaces: surfaces.length,
+    stylesheets: cssFiles.length,
     dynamicSurfaces: surfaces.filter(surface => surface.dynamic).length,
     translations: translationNodes.size,
     guidePages: guidePageNodes.size,
@@ -667,6 +825,10 @@ export function buildUiTopology({
     guideTargets: guideSteps.filter(({ step }) => step.target).length,
     journeys: guideCatalog.journeys?.length || 0,
     runtimeScenarios: contract.runtimeScenarios?.length || 0,
+    dynamicThemeCases: dynamicThemes.summary.cases,
+    dynamicThemeStates: dynamicThemes.summary.states,
+    dynamicThemePaints: dynamicThemes.summary.paints,
+    dynamicThemeExceptions: dynamicThemes.summary.exceptions || 0,
     dormantControls: dormantControlNodeIds.size,
     unmappedControls: unmappedControls.length,
     unmappedControlRate: controls.length ? Number((unmappedControls.length / controls.length).toFixed(4)) : 0,
@@ -676,7 +838,7 @@ export function buildUiTopology({
     runtimeScenarioErrors: runtimeScenarioErrors.length
   };
   const fingerprint = createHash('sha256');
-  for (const file of [...htmlFiles, ...jsFiles, contractPath, guideCatalogPath].sort()) {
+  for (const file of [...new Set([...htmlFiles, ...jsFiles, ...cssFiles, contractPath, guideCatalogPath, ...dynamicThemes.files])].sort()) {
     fingerprint.update(relativeToProject(file));
     fingerprint.update('\0');
     fingerprint.update(fs.readFileSync(file));

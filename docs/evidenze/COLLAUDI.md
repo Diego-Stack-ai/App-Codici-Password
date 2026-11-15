@@ -1,5 +1,45 @@
 # Collaudi
 
+<a id="temi-rilascio-1276-verifiche-2026-11-15"></a>
+
+## APP 1.2.276 — confezionamento degli undici correttivi, 15/11/2026
+
+Su [ordine di Diego](../progetto/INCARICO_CORRENTE.md#temi-rilascio-1276-incarico-2026-11-15), candidata da base **06b8671341191362e360ebd25022d4cf7f8842c7**. I [collaudi dei correttivi](#temi-dinamici-ui275-2026-11-15) sono stati eseguiti prima del bump; il confezionamento canonico porta a 1.2.276, catalogo aiuti contentVersion13 conservato. Confronto dei 365 file pubblici dopo normalizzazione della sola versione: nessuna differenza dal runtime appena collaudato. Bump canonico: 304 riferimenti coerenti, guida12/12 (contentVersion13), offline16/16 (345 risorse), documenti12/12 (34MD,1086 collegamenti), budget31 pagine e diagnostica4/4 PASS; diff pulito. Revisione indipendente del contenuto senza nuovi P1/P2, da ancorare allo SHA immutabile. CI e distribuzione ancora da attestare; non sono trasferiti automaticamente i PASS fisici della cornice.
+
+
+CI iniziale #1170 sul candidato e1d5337f: la matrice dinamica supera il timeout di 300 secondi eseguendosi insieme agli altri file browser; nessun FAIL di asserzione registrato prima dell’arresto. Il comando ora esegue prima i file preesistenti e poi il banco dinamico, conservando tutti gli stati, i negativi e gli stessi timeout. Nuova CI richiesta; nessun bypass o merge sul run fallito.
+
+<a id="temi-dinamici-ui275-2026-11-15"></a>
+
+## UI275 — undici correttivi e mappa dinamica verificati localmente, 15/11/2026
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#temi-annotazione-incarico-2026-11-15), [segnalazioni e seguito](../progetto/PROGRAMMA.md#temi-segnalazioni-1275-2026-11-15). Base funzionale **1.2.275 / 44a64edf**, checkout **81b9bb42**, ramo locale `codex/theme-observations-20261115`; patch non commessa e non pubblicata. Produzione invariata. Il secondo giro su tutte le pagine/opzioni è consegnato a Claude nella [#313](https://github.com/Diego-Stack-ai/App-Codici-Password/issues/313), senza presa in carico attestata.
+
+**Prova negativa sulla produzione conservata.** Il banco eseguito sulla copia immutabile dei 365 file della 275 rileva un FAIL per tutti gli undici ID nel contesto Classica/Petrolio/scuro: 31 stati falliti su 32, uno superato. Rapporto locale `.codex-tmp/ui-dynamic-red275/`. Non è una nuova prova autenticata in produzione.
+
+**Matrice finale.** [Registro dei componenti](../../scripts/ui-dynamic-theme-contract.json), [banco](../../scripts/dynamic-visual-map.mjs) e [test](../../tests/ui-dynamic-themes.browser.test.mjs): **6/6 test PASS**, nessuno saltato; **38 stati × 28 contesti = 1064/1064 PASS**, zero proprietà non misurate nei controlli dichiarati. Nuova/Classica, sette palette, chiaro/scuro; Chrome locale a 390×844. Produttori reali, repository sintetici e rete esterna negata; nessuna richiesta esterna nel giro finale. Le 111 fonti restano stabili durante il giro, fingerprint **a3aab62ef9695f3c20745aab514e9961d80583c920ca4588691fe2022eb834de**. Rapporti JSON/HTML in `.codex-tmp/ui-dynamic-map-test/`; sei PNG prima/dopo in `.codex-tmp/ui-dynamic-evidence/`, Classica/Lavanda/scuro. Confronti frame, Profilo e Ricerca ispezionati: palette applicata, ruoli coerenti e nessun nuovo clipping osservato.
+
+| Casi | Stati per contesto | Produttori e aspetti esercitati |
+| --- | ---: | --- |
+| UI275-01–02 | 3 + 2 | Bootstrap del tema nel padre, cambio palette fra due documenti reali, lettura al reload, ripresa e focus. Grafica strutturale fissata al bootstrap; palette/chiaro-scuro aggiornabili senza reload della Vault. |
+| UI275-03 | 8 | Quattro sorgenti del picker, dialogo e anteprima inline Profilo, limite allegati disabilitato, righe Account privato/azienda e controller file/picker Scadenza. Nessun upload o accesso camera. |
+| UI275-04–05 | 4 + 2 | Ricerca, spiegazione aperta/chiusa, hover/focus; header del Profilo e contrasto sopra bianco/nero. |
+| UI275-06–07 | 3 + 2 | Click dei flag QR, pseudo-elemento del segno, scelte Tessera digitale, generazione QR reale e ingrandimento. Pixel e zona chiara di lettura preservati. |
+| UI275-08–09 | 4 + 3 | Widget espanso/compresso, default vuoto a tema e colore salvato sull'icona; linguette via click/tastiera e scorrimento reale. |
+| UI275-10–11 | 3 + 4 | Guida reale, Chiudi/hover/focus; card Scadenze valide, prossime, scadute e completate, con colori di stato conservati. |
+
+**Errori intercettati e corretti.** La prima matrice estesa aveva 68 FAIL (996 PASS): testi del picker e aiuto Ricerca insufficienti in palette **Blu + aspetto Chiaro**, e brightness residua su Chiudi della guida. Corrette le proprietà e la specificità, nuova matrice finale tutta verde; il rapporto RED intermedio resta in `.codex-tmp/ui-dynamic-precontrast-red/`. Negativi su CSS fisso, produttore/trigger omessi, marker grafico mancante, ruolo CSS non risolto e sfondo non misurabile vengono rilevati. Nessun ruolo indefinito può passare perché sia actual sia probe sono trasparenti.
+
+**Relazioni e freschezza.** Il [grafo UI](../../scripts/build-ui-topology.mjs) collega ID, pagina effettiva di ciascuno stato, azione, produttore, CSS, proprietà/ruolo, test ed eccezione. Archi dichiarati con provenienza CONTRACT e observed=false: non sono PASS browser. Fingerprint esteso a tutti i CSS e archi pagina→stylesheet; [negativi del grafo](../../tests/ui-dynamic-topology.test.mjs) provano errori di sorgenti/ruoli/stati/matrice e invalidazione dopo cambi CSS anche non dichiarati. Il test completo della topologia comprende 31 pagine, 423 controlli, 245 eventi e 198 superfici; questi sono inventari statici, non 423 azioni runtime certificate.
+
+**Controlli di regressione.** I 78 casi UI preesistenti sono verdi dopo un rilancio mirato dei 13 casi nei due file aggiornati: le fixture di scorrimento ora conservano il vero data-ui-revision delle pagine; il sandbox del bootstrap dispone dei reali API browser aggiunti. Contrasto raster, hit-testing e sovrapposizioni dei due Profili restano provati a 320, 393 e 1280 px, separatamente dalla matrice dinamica. Profilo183/183, offline16/16, guida12/12 e diagnostica4/4 PASS; cataloghi Profilo allineati in otto lingue, incluso il nuovo testo del colore icona. CSS, sintassi250 moduli, riferimenti342 file, purezza HTML31 pagine e contratto shell PASS; versione invariata275 con304 riferimenti. Budget31 pagine PASS senza aumento delle soglie: ridotti commenti ridondanti dopo lo sforamento iniziale.
+
+Supplemento mirato sul diverso media query desktop delle card Scadenze: **4 stati × 28 contesti = 112/112 PASS** a **1280×900**, fonti stabili. Riutilizzati gli stessi produttore e verificatore, con ruolo desktop `--rev-surface` al posto dell'opaco mobile `--rev-popup`; titoli e colori funzionali conservano i propri controlli. Comando e rapporto locali `.codex-tmp/check-dynamic-desktop.mjs` e `.codex-tmp/ui-dynamic-desktop.json`. Questo supplemento non estende automaticamente a desktop tutti gli altri stati della matrice mobile.
+
+**Inventari e limiti.** La mappa statica finale ha 54 varianti rispetto alle 53 della base: app.html passa da unica a Nuova/Classica. Sulle 52 varianti comuni nessun nuovo colore fisso/non registrato/non misurato e nessun nuovo rilievo di contrasto; 2478 occorrenze di contrasto già presenti restano identiche secondo la stessa chiave elemento/tema/palette. Questo conteggio non identifica 2478 guasti confermati. Confronto locale `.codex-tmp/ui275-followup-static/comparison.json`.
+
+L'inventario del DOM aperto confronta 9668 gruppi, nessuno incompleto: 48 occorrenze custom registrate, 56 semantiche e **408 candidate cromatiche non ancora registrate**, ripetute fra stati/grafiche, prevalentemente rosso di eliminazione, verde di archiviazione/ripristino e ambra di avviso. Non sono 408 difetti né vengono promosse a PASS; classificazione e giro completo restano nel seguito Claude. Il colore widget storico non distingue default azzurro da scelta esplicita: conservato soltanto sull'icona e non migrato. Il reload del padre verifica la lettura di preferenze predisposte dal banco, non una prova autonoma di persistenza. Nessuna attestazione fisica telefono/PWA, Auth/Vault, revoca in produzione o copertura completa di tutte le interazioni.
+
 <a id="cornice-ordinaria-1275-verifiche-2026-11-14"></a>
 
 ## APP 1.2.275 — ricevuta UI e cornice ordinaria, 15/11/2026

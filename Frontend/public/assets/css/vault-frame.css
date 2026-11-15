@@ -50,14 +50,10 @@ body {
   min-height: 44px;
   padding: 0 1.5rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 85%, #0f172a);
+  background: var(--rev-fill);
   color: #fff;
   font-weight: 600;
   text-decoration: none;
-}
-
-.dark #frame-resume {
-  background: color-mix(in srgb, var(--accent) 45%, #0f172a);
 }
 
 #frame-resume:focus-visible {

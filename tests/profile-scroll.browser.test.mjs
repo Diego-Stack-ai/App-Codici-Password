@@ -46,6 +46,12 @@ test('real CSS token colors remain valid after channel expansion and controls re
   } finally { await browser.close(); }
 });
 
+const applyRealProfileRevision = async (page, source) => {
+  const revision = source.match(/<body\b[^>]*\bdata-ui-revision="([^"]+)"/)?.[1];
+  assert.ok(revision, 'fixture retains the actual page revision that defines its CSS roles');
+  await page.locator('body').evaluate((body, value) => body.setAttribute('data-ui-revision', value), revision);
+};
+
 for (const [name, label] of [['profilo_privato.html', 'private profile'], ['dati_azienda.html', 'company profile']]) {
 test(`${label} tabs follow the shared header height and cover scrolled section actions`, {timeout: 45000}, async () => {
   const browser = await launchBrowser();
@@ -62,6 +68,7 @@ test(`${label} tabs follow the shared header height and cover scrolled section a
       const content = ['Contatti Telefonici', 'Indirizzi & Utenze', '2 allegati'].map((label, i) =>
         `<section class="form-section"><div class="form-section-header"><h3>${label}</h3></div><button id="add-${i}" class="btn-upload-trigger${i === 2 ? ' profile-document-add-trigger' : ''}">Aggiungi ${i}</button><div style="height:900px">Dati sintetici</div></section>`).join('');
       await page.setContent(`<!doctype html><html class="${dark ? 'dark' : ''}"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>${await fixtureStyles(name)}</style></head><body class="${bodyClass}"><div class="base-container"><header class="base-header"><div class="header-balanced-container"><h1>${label}</h1></div></header><main class="base-main"><div class="page-container pt-header-extra pb-footer-extra"><div class="hero-profile-header"><div style="height:220px">Profilo sintetico</div></div>${nav}<div class="detail-content-wrap">${content}</div></div></main><footer class="base-footer"></footer></div></body></html>`);
+      await applyRealProfileRevision(page, source);
       if (headerHeight !== 85) await page.evaluate(height => document.documentElement.style.setProperty('--header-height', `${height}px`), headerHeight);
       assert.equal(await page.locator('.base-header').evaluate(header => header.getBoundingClientRect().height), headerHeight);
       for (const top of [300, 600, 1000]) {
@@ -138,6 +145,7 @@ test(`${label} glass header attenuates scrolled content and keeps its controls o
       await page.setViewportSize(viewport);
       for (const dark of [false, true]) for (const palette of ['blue', 'lavender']) {
         await page.setContent(`<!doctype html><html class="${dark ? 'dark' : ''}" data-color-theme="${palette}"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>${await fixtureStyles(name)}</style></head><body class="${bodyClass}"><div class="base-container">${header.replace('</header>', controls + '</header>')}<main class="base-main"><div class="page-container pt-header-extra pb-footer-extra"><div class="hero-profile-header"><div style="height:220px">Profilo inventato</div></div>${nav}<section class="form-section"><div style="height:100px"></div><button id="under-header" style="display:block;height:44px;width:260px;max-width:100%;background:repeating-linear-gradient(45deg,#e00000 0 8px,#000 8px 16px);color:white;border:0;font-size:20px">SEZIONE E AZIONI</button><div style="height:1800px"></div></section></div></main><footer class="base-footer"></footer></div></body></html>`);
+        await applyRealProfileRevision(page, source);
         const geometry = await page.evaluate(async () => {
           window.fixtureClicks = {header: 0, underlying: 0};
           document.querySelector('#header-action').onclick = () => window.fixtureClicks.header++;

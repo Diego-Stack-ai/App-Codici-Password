@@ -1,4 +1,5 @@
 const it = {
+  profile_widget_color_label: 'Colore icona (vuoto = tema)',
   ui_qr_included: 'Nel QR',
   common_copy: 'Copia', common_copy_vault_error: 'Impossibile copiare. Sblocca il Vault e riprova.', common_password_none: 'Nessuna password', common_password_unavailable: 'Password non disponibile. Sblocca il Vault e controlla il collegamento.', common_show_password: 'Mostra password', common_show_hide_field: 'Mostra o nascondi {label}',
   digital_card_photo_choice: 'Foto nel contatto importato', digital_card_photo_warning: 'La scansione apre una scheda: premi Salva contatto per importare anche la foto. Serve internet.', digital_card_cf_warning: 'Dato personale: sarà leggibile da chi scansiona il QR.', digital_card_birth_warning: 'Dato personale: condividilo solo se necessario.', digital_card_custom_field: 'Campo personalizzato', digital_card_preview_title: 'Anteprima Tessera digitale', digital_card_plaintext_warning: 'Il QR contiene dati in chiaro. Password, PIN, chiavi e allegati sono sempre esclusi.', digital_card_capacity_warning: 'Il QR contiene {bytes} byte: riduci i campi per renderlo più facile da leggere.', digital_card_capacity_used: 'Capacità utilizzata: {bytes} byte.', digital_card_save_vcard: 'Salva vCard', digital_card_share: 'Condividi', digital_card_included_data: 'Dati inclusi', digital_card_no_auto_include: 'Nessun dato viene incluso automaticamente. Ogni scelta aggiorna subito il QR.',
@@ -7,6 +8,7 @@ const it = {
 };
 
 const en = {
+  profile_widget_color_label: 'Icon color (blank = theme)',
   ui_qr_included: 'In QR',
   common_copy: 'Copy', common_copy_vault_error: 'Unable to copy. Unlock the Vault and try again.', common_password_none: 'No password', common_password_unavailable: 'Password unavailable. Unlock the Vault and check the link.', common_show_password: 'Show password', common_show_hide_field: 'Show or hide {label}',
   digital_card_photo_choice: 'Photo in the imported contact', digital_card_photo_warning: 'Scanning opens a contact card: choose Save contact to import the photo too. Internet is required.', digital_card_cf_warning: 'Personal data: anyone scanning the QR code will be able to read it.', digital_card_birth_warning: 'Personal data: share it only when necessary.', digital_card_custom_field: 'Custom field', digital_card_preview_title: 'Digital card preview', digital_card_plaintext_warning: 'The QR code contains plaintext data. Passwords, PINs, keys, and attachments are always excluded.', digital_card_capacity_warning: 'The QR code contains {bytes} bytes: remove fields to make it easier to scan.', digital_card_capacity_used: 'Capacity used: {bytes} bytes.', digital_card_save_vcard: 'Save vCard', digital_card_share: 'Share', digital_card_included_data: 'Included data', digital_card_no_auto_include: 'No data is included automatically. Each choice updates the QR code immediately.',
@@ -15,6 +17,7 @@ const en = {
 };
 
 const es = {
+  profile_widget_color_label: 'Color del icono (vacío = tema)',
   ui_qr_included: 'En el QR',
   common_copy: 'Copiar', common_copy_vault_error: 'No se puede copiar. Desbloquea la Caja fuerte e inténtalo de nuevo.', common_password_none: 'Sin contraseña', common_password_unavailable: 'Contraseña no disponible. Desbloquea la Caja fuerte y comprueba el enlace.', common_show_password: 'Mostrar contraseña', common_show_hide_field: 'Mostrar u ocultar {label}',
   digital_card_photo_choice: 'Foto en el contacto importado', digital_card_photo_warning: 'Al escanear se abre una ficha: pulsa Guardar contacto para importar también la foto. Se necesita internet.', digital_card_cf_warning: 'Dato personal: podrá leerlo quien escanee el código QR.', digital_card_birth_warning: 'Dato personal: compártelo solo cuando sea necesario.', digital_card_custom_field: 'Campo personalizado', digital_card_preview_title: 'Vista previa de la tarjeta digital', digital_card_plaintext_warning: 'El código QR contiene datos en texto claro. Las contraseñas, PIN, claves y adjuntos siempre se excluyen.', digital_card_capacity_warning: 'El código QR contiene {bytes} bytes: reduce los campos para facilitar su lectura.', digital_card_capacity_used: 'Capacidad utilizada: {bytes} bytes.', digital_card_save_vcard: 'Guardar vCard', digital_card_share: 'Compartir', digital_card_included_data: 'Datos incluidos', digital_card_no_auto_include: 'No se incluye ningún dato automáticamente. Cada selección actualiza el código QR al instante.',
@@ -23,6 +26,7 @@ const es = {
 };
 
 const fr = {
+  profile_widget_color_label: 'Couleur de l’icône (vide = thème)',
   ui_qr_included: 'Dans le QR',
   common_copy: 'Copier', common_copy_vault_error: 'Impossible de copier. Déverrouillez le Coffre et réessayez.', common_password_none: 'Aucun mot de passe', common_password_unavailable: 'Mot de passe indisponible. Déverrouillez le Coffre et vérifiez le lien.', common_show_password: 'Afficher le mot de passe', common_show_hide_field: 'Afficher ou masquer {label}',
   digital_card_photo_choice: 'Photo dans le contact importé', digital_card_photo_warning: 'Le scan ouvre une fiche : choisissez Enregistrer le contact pour importer aussi la photo. Internet est nécessaire.', digital_card_cf_warning: 'Donnée personnelle : toute personne scannant le code QR pourra la lire.', digital_card_birth_warning: 'Donnée personnelle : ne la partagez que si nécessaire.', digital_card_custom_field: 'Champ personnalisé', digital_card_preview_title: 'Aperçu de la carte numérique', digital_card_plaintext_warning: 'Le code QR contient des données en clair. Les mots de passe, codes PIN, clés et pièces jointes sont toujours exclus.', digital_card_capacity_warning: 'Le code QR contient {bytes} octets : réduisez les champs pour faciliter sa lecture.', digital_card_capacity_used: 'Capacité utilisée : {bytes} octets.', digital_card_save_vcard: 'Enregistrer la vCard', digital_card_share: 'Partager', digital_card_included_data: 'Données incluses', digital_card_no_auto_include: 'Aucune donnée n’est incluse automatiquement. Chaque choix actualise immédiatement le code QR.',
@@ -31,6 +35,7 @@ const fr = {
 };
 
 const de = {
+  profile_widget_color_label: 'Symbolfarbe (leer = Design)',
   ui_qr_included: 'Im QR',
   common_copy: 'Kopieren', common_copy_vault_error: 'Kopieren nicht möglich. Tresor entsperren und erneut versuchen.', common_password_none: 'Kein Passwort', common_password_unavailable: 'Passwort nicht verfügbar. Tresor entsperren und Verknüpfung prüfen.', common_show_password: 'Passwort anzeigen', common_show_hide_field: '{label} ein- oder ausblenden',
   digital_card_photo_choice: 'Foto im importierten Kontakt', digital_card_photo_warning: 'Beim Scannen wird eine Kontaktkarte geöffnet: Kontakt speichern wählen, um auch das Foto zu importieren. Internet ist erforderlich.', digital_card_cf_warning: 'Personenbezogene Daten: Sie sind für jeden lesbar, der den QR-Code scannt.', digital_card_birth_warning: 'Personenbezogene Daten: nur bei Bedarf teilen.', digital_card_custom_field: 'Benutzerdefiniertes Feld', digital_card_preview_title: 'Vorschau der digitalen Karte', digital_card_plaintext_warning: 'Der QR-Code enthält Klartextdaten. Passwörter, PINs, Schlüssel und Anhänge sind immer ausgeschlossen.', digital_card_capacity_warning: 'Der QR-Code enthält {bytes} Byte: Felder reduzieren, damit er leichter lesbar ist.', digital_card_capacity_used: 'Verwendete Kapazität: {bytes} Byte.', digital_card_save_vcard: 'vCard speichern', digital_card_share: 'Teilen', digital_card_included_data: 'Enthaltene Daten', digital_card_no_auto_include: 'Es werden keine Daten automatisch aufgenommen. Jede Auswahl aktualisiert den QR-Code sofort.',
@@ -39,6 +44,7 @@ const de = {
 };
 
 const zh = {
+  profile_widget_color_label: '图标颜色（留空使用主题）',
   ui_qr_included: '已加入二维码',
   common_copy: '复制', common_copy_vault_error: '无法复制。请解锁保险库后重试。', common_password_none: '无密码', common_password_unavailable: '密码不可用。请解锁保险库并检查关联。', common_show_password: '显示密码', common_show_hide_field: '显示或隐藏{label}',
   digital_card_photo_choice: '导入联系人中的照片', digital_card_photo_warning: '扫描后会打开联系人卡片；请选择“保存联系人”以同时导入照片。需要联网。', digital_card_cf_warning: '个人数据：扫描二维码的人都可以读取。', digital_card_birth_warning: '个人数据：仅在必要时分享。', digital_card_custom_field: '自定义字段', digital_card_preview_title: '数字卡片预览', digital_card_plaintext_warning: '二维码包含明文数据。密码、PIN、密钥和附件始终不会包含。', digital_card_capacity_warning: '二维码包含 {bytes} 字节：请减少字段以便更容易扫描。', digital_card_capacity_used: '已用容量：{bytes} 字节。', digital_card_save_vcard: '保存 vCard', digital_card_share: '分享', digital_card_included_data: '包含的数据', digital_card_no_auto_include: '不会自动包含任何数据。每次选择都会立即更新二维码。',
@@ -47,6 +53,7 @@ const zh = {
 };
 
 const hi = {
+  profile_widget_color_label: 'आइकन का रंग (खाली = थीम)',
   ui_qr_included: 'QR में',
   common_copy: 'कॉपी करें', common_copy_vault_error: 'कॉपी नहीं हो सकी। वॉल्ट अनलॉक करके फिर कोशिश करें।', common_password_none: 'कोई पासवर्ड नहीं', common_password_unavailable: 'पासवर्ड उपलब्ध नहीं है। वॉल्ट अनलॉक करें और लिंक जाँचें।', common_show_password: 'पासवर्ड दिखाएँ', common_show_hide_field: '{label} दिखाएँ या छिपाएँ',
   digital_card_photo_choice: 'आयात किए गए संपर्क में फ़ोटो', digital_card_photo_warning: 'स्कैन करने पर संपर्क कार्ड खुलता है: फ़ोटो भी आयात करने के लिए संपर्क सहेजें चुनें। इंटरनेट आवश्यक है।', digital_card_cf_warning: 'व्यक्तिगत डेटा: QR स्कैन करने वाला कोई भी व्यक्ति इसे पढ़ सकेगा।', digital_card_birth_warning: 'व्यक्तिगत डेटा: केवल आवश्यकता होने पर साझा करें।', digital_card_custom_field: 'कस्टम फ़ील्ड', digital_card_preview_title: 'डिजिटल कार्ड पूर्वावलोकन', digital_card_plaintext_warning: 'QR में स्पष्ट रूप से पढ़ा जा सकने वाला डेटा होता है। पासवर्ड, PIN, कुंजियाँ और अटैचमेंट हमेशा बाहर रखे जाते हैं।', digital_card_capacity_warning: 'QR में {bytes} बाइट हैं: इसे आसानी से पढ़ने योग्य बनाने के लिए फ़ील्ड कम करें।', digital_card_capacity_used: 'उपयोग की गई क्षमता: {bytes} बाइट।', digital_card_save_vcard: 'vCard सहेजें', digital_card_share: 'साझा करें', digital_card_included_data: 'शामिल डेटा', digital_card_no_auto_include: 'कोई डेटा अपने आप शामिल नहीं होता। हर चयन QR को तुरंत अपडेट करता है।',
@@ -55,6 +62,7 @@ const hi = {
 };
 
 const pt = {
+  profile_widget_color_label: 'Cor do ícone (vazio = tema)',
   ui_qr_included: 'No QR',
   common_copy: 'Copiar', common_copy_vault_error: 'Não foi possível copiar. Desbloqueie o Cofre e tente novamente.', common_password_none: 'Sem palavra-passe', common_password_unavailable: 'Palavra-passe indisponível. Desbloqueie o Cofre e verifique a ligação.', common_show_password: 'Mostrar palavra-passe', common_show_hide_field: 'Mostrar ou ocultar {label}',
   digital_card_photo_choice: 'Fotografia no contacto importado', digital_card_photo_warning: 'A leitura abre um cartão: escolha Guardar contacto para importar também a fotografia. É necessária ligação à internet.', digital_card_cf_warning: 'Dado pessoal: ficará legível para quem ler o código QR.', digital_card_birth_warning: 'Dado pessoal: partilhe apenas quando necessário.', digital_card_custom_field: 'Campo personalizado', digital_card_preview_title: 'Pré-visualização do cartão digital', digital_card_plaintext_warning: 'O código QR contém dados em texto simples. Palavras-passe, PIN, chaves e anexos são sempre excluídos.', digital_card_capacity_warning: 'O código QR contém {bytes} bytes: reduza os campos para facilitar a leitura.', digital_card_capacity_used: 'Capacidade utilizada: {bytes} bytes.', digital_card_save_vcard: 'Guardar vCard', digital_card_share: 'Partilhar', digital_card_included_data: 'Dados incluídos', digital_card_no_auto_include: 'Nenhum dado é incluído automaticamente. Cada escolha atualiza de imediato o código QR.',

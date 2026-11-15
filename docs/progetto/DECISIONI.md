@@ -1,5 +1,12 @@
 # Decisioni
 
+<a id="temi-rilascio-1276-decisione-2026-11-15"></a>
+
+## 15/11/2026 — pubblicare gli undici correttivi, seguito Claude separato
+
+Diego autorizza esplicitamente PR, merge e deploy degli undici correttivi con una nuova versione e conferma che il secondo lavoro di Claude prosegue separatamente. Candidata **1.2.276**, solo Hosting dopo revisione e CI, con delega production già concessa e protezioni conservate. La [#313](https://github.com/Diego-Stack-ai/App-Codici-Password/issues/313) non è un gate aggiuntivo di questo rilascio. L'[incarico](INCARICO_CORRENTE.md#temi-rilascio-1276-incarico-2026-11-15) conserva disponibilità ordinaria della cornice e limiti delle prove fisiche; nessuna riattivazione policy o modifica backend.
+
+
 <a id="cornice-ordinaria-1275-decisione-2026-11-14"></a>
 
 ## 14/11/2026 — correzione degli effetti e cornice ordinaria per tutti

@@ -300,6 +300,20 @@ Il controllo Stylelint ha namespace di progetto `app-codici-password/valid-accen
 
 La modalità luminosa (`chiaro`, `automatico`, `scuro`) e la palette cromatica sono preferenze indipendenti. Le palette ammesse sono `blue`, `green`, `red`, `sand`, `petrol`, `lavender` e `dusty-rose`; `blue` è il fallback per valori assenti o non validi. La preferenza locale viene applicata da `theme-init.js` prima del rendering per evitare il cambio colore visibile all’avvio. `core.css` resta l’autorità dei token d’identità; colori funzionali di successo, avviso ed errore e colori di categoria non cambiano significato con la palette. I controlli in Impostazioni devono esporre selezione visiva e stato accessibile `aria-pressed`.
 
+<a id="mappa-dinamica-temi-2026-11-15"></a>
+
+### Popup e stati dinamici — incarico UI275, 15/11/2026
+
+Per l'[ordine di Diego](../progetto/INCARICO_CORRENTE.md#temi-annotazione-incarico-2026-11-15), la mappatura comprende esplicitamente gli undici casi UI275 registrati nel [programma](../progetto/PROGRAMMA.md#temi-segnalazioni-1275-2026-11-15). Ogni caso conserva pagina e stato, azione di apertura, produttore reale del componente, sorgenti CSS, selettore/proprietà, ruolo cromatico atteso e test. Le relazioni dichiarate dal registro e le osservazioni browser sono informazioni distinte; la presenza di un arco nel grafo non equivale a una prova superata.
+
+Fonti operative: [registro dinamico](../../scripts/ui-dynamic-theme-contract.json), [banco e rapporto](../../scripts/dynamic-visual-map.mjs), [verifiche browser](../../tests/ui-dynamic-themes.browser.test.mjs), [grafo UI](../../scripts/build-ui-topology.mjs) e [verifiche delle relazioni](../../tests/ui-dynamic-topology.test.mjs). Comando riproducibile `npm run audit:dynamic-visual-map -- <cartella-output>`; suite inclusa in `test:ui-foundations`, relazioni incluse in `test:ui-topology`. [Esiti della prima applicazione](../evidenze/COLLAUDI.md#temi-dinamici-ui275-2026-11-15).
+
+Il banco dinamico deve invocare i produttori e i comandi reali con dati sintetici e dipendenze di rete negate, senza duplicare nei test il markup dei componenti. Avvio e caricamento delle preferenze, cambio tema, riapertura dei pannelli e refresh sono stati espliciti quando pertinenti. Misurare entrambe le grafiche, sette palette e chiaro/scuro: 28 contesti per ciascuno stato censito. Contare separatamente stati eseguiti, falliti, saltati e proprietà non misurabili; elementi assenti o nascosti e trigger non eseguiti non possono produrre PASS.
+
+Colori calcolati, bordi, flag/checkbox, pseudo-elementi e ombre interessati dagli undici casi devono essere associati ai ruoli condivisi. Conservare colori di stato delle Scadenze e azioni distruttive, contrasto del QR e campioni espliciti delle palette. L'header conserva l'effetto vetro ed è coerente con la palette, con titolo e comandi leggibili anche sopra contenuti molto chiari o scuri: la trasparenza non autorizza regressioni di contrasto. Gli effetti ordinari rispettano i limiti attenuati della 275. Conservare almeno un controllo negativo che dimostri il rilevamento di colore fisso e stato dinamico mancante.
+
+Questa copertura è un'estensione dichiarata dell'inventario statico, non la certificazione di ogni stato dell'app. Non usa account reali, accessi alla Vault, upload o servizi esterni e non attesta dispositivi fisici. Auth, policy, chiavi e inattività restano estranei alle correzioni cromatiche.
+
 <a id="mappa-visiva-2026-11-14"></a>
 
 ### Mappa visiva — 14/11/2026

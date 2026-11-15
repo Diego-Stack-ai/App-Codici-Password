@@ -1,12 +1,6 @@
-/* Header dei profili a linguette: torna il vetro con dissolvenza della Classica (ordine di
-   Diego, 14/11/2026; prima era pieno dal correttivo 1.2.267). Il velo mobile resta
-   dentro l'altezza dell'header, così non copre la fascia delle linguette che gli sta sotto;
-   sotto titolo e comandi il contenuto passa sfocato e attenuato, non leggibile. */
-/* Protezione traslucida dietro titolo e comandi a ogni larghezza (revisione Codex su bc221f2):
-   vetro sfocato al colore di fondo, dissolvenza solo sul bordo inferiore. Contenuti chiari o
-   scuri che scorrono sotto non tolgono leggibilità (testo 4,5:1, icone 3:1). */
+/* One translucent contrast veil: text >=4.5:1, icons >=3:1 over light/dark content. */
 #header-placeholder.base-header {
-    background: color-mix(in srgb, var(--bg-primary) 88%, transparent);
+    background: color-mix(in srgb, var(--rev-popup) 88%, transparent);
     backdrop-filter: blur(14px) saturate(110%);
     -webkit-backdrop-filter: blur(14px) saturate(110%);
     mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
@@ -15,9 +9,8 @@
 
 @media (max-width: 600px) {
     #header-placeholder.base-header::before {
-        height: 100%;
-        -webkit-mask-image: linear-gradient(to bottom, black 70%, rgb(0 0 0 / 60%) 100%);
-        mask-image: linear-gradient(to bottom, black 70%, rgb(0 0 0 / 60%) 100%);
+        /* Avoid a second mobile veil. */
+        content: none;
     }
 }
 
@@ -33,7 +26,7 @@
     border: 0;
     border-radius: 1rem;
     /* Fascia in vetro coordinata con l'header: i contenuti che scorrono sotto restano sfocati. */
-    background: color-mix(in srgb, var(--bg-primary) 78%, transparent);
+    background: color-mix(in srgb, var(--rev-popup) 88%, transparent);
     backdrop-filter: blur(14px) saturate(110%);
     -webkit-backdrop-filter: blur(14px) saturate(110%);
     scrollbar-width: none;
@@ -48,12 +41,13 @@
     border: 0;
     border-radius: 0.75rem;
     background: transparent;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     font: var(--font-label);
     cursor: pointer;
 }
 
-.profile-tab:is(:hover, :focus-visible) { background: var(--surface-hover); color: var(--text-primary); }
+.profile-tab:is(:hover, :focus-visible) { background: var(--rev-surface-hover); color: var(--text-primary); }
+.profile-tab:focus-visible { outline: 2px solid var(--rev-icon); outline-offset: -2px; }
 .profile-tab.is-active { background: var(--accent); color: #fff; }
 .profile-tab-panel.hidden { display: none !important; }
 
