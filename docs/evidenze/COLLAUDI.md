@@ -7,6 +7,8 @@
 Su [ordine di Diego](../progetto/INCARICO_CORRENTE.md#temi-rilascio-1276-incarico-2026-11-15), candidata da base **06b8671341191362e360ebd25022d4cf7f8842c7**. I [collaudi dei correttivi](#temi-dinamici-ui275-2026-11-15) sono stati eseguiti prima del bump; il confezionamento canonico porta a 1.2.276, catalogo aiuti contentVersion13 conservato. Confronto dei 365 file pubblici dopo normalizzazione della sola versione: nessuna differenza dal runtime appena collaudato. Bump canonico: 304 riferimenti coerenti, guida12/12 (contentVersion13), offline16/16 (345 risorse), documenti12/12 (34MD,1086 collegamenti), budget31 pagine e diagnostica4/4 PASS; diff pulito. Revisione indipendente del contenuto senza nuovi P1/P2, da ancorare allo SHA immutabile. CI e distribuzione ancora da attestare; non sono trasferiti automaticamente i PASS fisici della cornice.
 
 
+CI iniziale #1170 sul candidato e1d5337f: la matrice dinamica supera il timeout di 300 secondi eseguendosi insieme agli altri file browser; nessun FAIL di asserzione registrato prima dell’arresto. Il comando ora esegue prima i file preesistenti e poi il banco dinamico, conservando tutti gli stati, i negativi e gli stessi timeout. Nuova CI richiesta; nessun bypass o merge sul run fallito.
+
 <a id="temi-dinamici-ui275-2026-11-15"></a>
 
 ## UI275 — undici correttivi e mappa dinamica verificati localmente, 15/11/2026

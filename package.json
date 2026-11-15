@@ -91,7 +91,7 @@
     "test:page-shells": "node scripts/audit-page-shells.mjs",
     "audit:visual-map": "node scripts/visual-map.mjs",
     "audit:dynamic-visual-map": "node scripts/dynamic-visual-map.mjs",
-    "test:ui-foundations": "node scripts/audit-ui-foundations.mjs && node --test tests/theme-palette.test.mjs tests/css-color-contract.test.mjs tests/profile-scroll.browser.test.mjs tests/manage-mode.browser.test.mjs tests/ui-graphics-switch.browser.test.mjs tests/ui-tre-livelli-a11y.browser.test.mjs tests/ui-color-decisions.browser.test.mjs tests/visual-map.browser.test.mjs tests/ui-dynamic-themes.browser.test.mjs",
+    "test:ui-foundations": "node scripts/audit-ui-foundations.mjs && node --test tests/theme-palette.test.mjs tests/css-color-contract.test.mjs tests/profile-scroll.browser.test.mjs tests/manage-mode.browser.test.mjs tests/ui-graphics-switch.browser.test.mjs tests/ui-tre-livelli-a11y.browser.test.mjs tests/ui-color-decisions.browser.test.mjs tests/visual-map.browser.test.mjs && node --test tests/ui-dynamic-themes.browser.test.mjs",
     "test:html-purity": "node scripts/audit-html-purity.mjs",
     "test:icons": "node --test tests/material-symbols-translation.test.mjs",
     "test:static-references": "node scripts/audit-static-references.mjs",
