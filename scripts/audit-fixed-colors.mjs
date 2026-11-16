@@ -11,7 +11,7 @@ import path from 'node:path';
 export const cssRoot = fileURLToPath(new URL('../Frontend/public/assets/css/', import.meta.url));
 export const allowed = [
   {id: 'comandi che cancellano o fanno uscire', pattern: /remove|delete|danger|logout|unlink|\.icon-red|btn-icon-cancel/},
-  {id: 'scorrimento predefinito degli elenchi', pattern: /^\.account-card$|^\.deadline-card$|bg-restore|bg-delete/},
+  {id: 'scorrimento predefinito degli elenchi', pattern: /^\.account-card$|^\.deadline-card$|bg-restore|bg-delete|bg-archive|swipe-action-bg/},
   {id: 'campioni delle sette palette', pattern: /swatch-/},
   {id: 'esiti ed errori', pattern: /is-error|is-success|is-valid|diagnostics-|backup-preview|credential-health|self-healing|image-editor-warning|portable-archive-status/},
   {id: 'scadenza scaduta (valutazione a vista di Diego)', pattern: /deadline-card-expired/}
