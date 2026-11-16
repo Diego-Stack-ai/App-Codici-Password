@@ -2,9 +2,9 @@
 
 <a id="rilascio-1277-programma-2026-11-16"></a>
 
-## APP 1.2.277 — rilascio del giro #313, 16/11/2026
+## APP 1.2.277 — rilascio del giro #313 completato, 16/11/2026
 
-Su [ordine di Diego](DECISIONI.md#rilascio-1277-decisione-2026-11-16), completare la sequenza confezionamento canonico → identità funzionale e controlli → riesame indipendente e CI dello SHA effettivo → merge #318 → workflow manuale Hosting sul master finale → approvazione production delegata → verifica pubblica di manifest/hash/intestazioni. [Incarico](INCARICO_CORRENTE.md#rilascio-1277-incarico-2026-11-16), [stato](STATO.md#rilascio-1277-stato-2026-11-16), [ricevuta](../evidenze/COLLAUDI.md#rilascio-1277-verifiche-2026-11-16). Il pacchetto conserva il runtime a1becaa7 dopo normalizzazione 276→277; cornice ordinaria conservata e pilot storico ritirato. Nessuna modifica policy/backend o nuova attestazione fisica.
+Su [ordine di Diego](DECISIONI.md#rilascio-1277-decisione-2026-11-16), completata la sequenza confezionamento canonico → identità funzionale e controlli → riesame indipendente e CI dello SHA effettivo → merge #318 → workflow manuale Hosting sul master finale → approvazione production delegata → verifica pubblica di manifest/hash/intestazioni. Candidata **630aed9f**, master pubblicato **8d28c7b5**, [Hosting #1182 SUCCESS](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43877847216), **365 hash / 41 profili / tre probe PASS** e riscontro indipendente di cinque GET. [Incarico](INCARICO_CORRENTE.md#rilascio-1277-incarico-2026-11-16), [stato](STATO.md#rilascio-1277-stato-2026-11-16), [ricevuta](../evidenze/COLLAUDI.md#rilascio-1277-verifiche-2026-11-16). Cornice ordinaria conservata e pilot storico ritirato; nessuna modifica policy/backend o nuova attestazione fisica. Questa chiusura aggiorna soltanto documenti; il codice Hosting resta sullo SHA attestato.
 
 <a id="deep-temi-313-programma-2026-11-16"></a>
 

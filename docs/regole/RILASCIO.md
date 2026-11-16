@@ -4,6 +4,8 @@
 
 ## UI 1.2.277 — giro completo #313, solo Hosting
 
+Applicazione completata: #318 unita in **8d28c7b5**, candidata 630aed9f con GO indipendente e CI #1180 PASS; CI master #1181 e [Hosting #1182](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43877847216) SUCCESS, verifica pubblica completa PASS. Approvazione production eseguita da Codex su delega di Diego, protezioni conservate. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1277-verifiche-2026-11-16). Questa chiusura è soltanto documentale e non richiede un ulteriore Hosting.
+
 L'[ordine corrente](../progetto/INCARICO_CORRENTE.md#rilascio-1277-incarico-2026-11-16) abilita il rilascio della #318, sorgente funzionale a1becaa7 già verificata. Confezionamento tramite lo script canonico e reviewedAppVersion della guida; contentVersion invariato se i contenuti non cambiano. Verificare i file pubblici contro la sorgente dopo la sola normalizzazione delle versioni, versione/offline/guida/documenti e riesame indipendente del pacchetto. La CI completa deve essere verde sullo SHA finale della PR; merge con testa attesa, quindi workflow manuale **hosting** sul master finale e approvazione production già delegata, senza bypass di protezioni. Verifica pubblica completa dopo il deploy: manifest, hash, intestazioni e probe di normalizzazione. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1277-verifiche-2026-11-16).
 
 La disponibilità ordinaria della cornice viene conservata secondo l'attivazione .275; il pilot storico è ritirato. Questo rilascio non esegue policy, Rules, Functions, Storage, Auth, claim o IAM. Nessun test sintetico viene promosso a collaudo fisico.
