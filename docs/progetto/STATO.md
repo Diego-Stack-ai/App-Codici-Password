@@ -8,6 +8,8 @@
 
 Su [ordine di Diego](INCARICO_CORRENTE.md#rilascio-1278-incarico-2026-11-16), si confeziona la candidata sul ramo `codex/search-footer-colors-20261116`, base master 917dfc7f. Comprende i correttivi Ricerca e la configurazione comune Classica/Nuova verificata sotto, con bicolore e card +15% soltanto Nuova. Seguono riesame indipendente sul pacchetto, PR/CI, merge, Hosting protetto e verifica completa di manifest/hash/intestazioni. Produzione ancora attestata 1.2.277; nessuna modifica cornice o backend. [Ricevuta del rilascio](../evidenze/COLLAUDI.md#rilascio-1278-verifiche-2026-11-16). Gli stati sottostanti sono checkpoint precedenti.
 
+Prima CI #1184 sulla #320: 1.812 test verdi, poi arresto per budget statico di peso e moduli; nessun merge/deploy. Correttivo in verifica: decorazioni integrate nel modulo comune, commenti storici rimossi da tre CSS serviti mantenendo identico l'AST funzionale. Budget invariati, audit locale di tutte le 31 pagine verde; necessario nuovo SHA e nuova CI completa.
+
 <a id="livree-comuni-stato-2026-11-16"></a>
 
 ## Base comune Classica/Nuova — candidata locale verificata, 16/11/2026

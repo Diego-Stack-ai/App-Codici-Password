@@ -385,7 +385,7 @@ export function buildDeepThemeTopology({registryPath = defaultDeepThemePath} = {
 
 export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
   const registry=JSON.parse(fs.readFileSync(registryPath,'utf8'));
-  const collector=makeCollector(),errors=[],files=new Set([registryPath,fileURLToPath(import.meta.url),path.join(projectRoot,'tests/ui-dynamic-topology.test.mjs')]),roles=new Set();
+  const collector=makeCollector(),errors=[],files=new Set([registryPath,fileURLToPath(import.meta.url),path.join(projectRoot,'tests/ui-dynamic-topology.test.mjs'),path.join(projectRoot,'scripts/lib/view-tour-harness.mjs')]),roles=new Set();
   const declared={confidence:'DECLARED',source_file:relativeToProject(registryPath),observed:false};
   const source=file=>{
     const absolute=path.resolve(projectRoot,file||'');
@@ -398,7 +398,8 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
   const decorationSource=source(registry.decorationsSource),colorSource=source(registry.colorSource),styles=source(registry.sharedStyles),testSource=source(registry.test);
   const roleSources=[colorSource&&{file:registry.colorSource,id:colorSource},styles&&{file:registry.sharedStyles,id:styles}].filter(Boolean).map(entry=>({...entry,text:fs.readFileSync(path.resolve(projectRoot,entry.file),'utf8')}));
   const text=decorationSource?fs.readFileSync(path.resolve(projectRoot,registry.decorationsSource),'utf8'):'';
-  const entries=[...text.matchAll(/['"]([^'"]+\.html)['"]\s*:\s*['"]([^'"]+)['"]/g)].map(match=>[match[1],match[2]]);
+  const symbolMap=/export const pageSymbols = Object\.freeze\(\{([\s\S]*?)\}\);/.exec(text)?.[1]||'';
+  const entries=[...symbolMap.matchAll(/['"]([^'"]+\.html)['"]\s*:\s*['"]([^'"]+)['"]/g)].map(match=>[match[1],match[2]]);
   const pages=entries.map(([page])=>page);
   if(!pages.length||new Set(pages).size!==pages.length||pages.length!==registry.expectedPageCount)errors.push('liveries: empty, duplicate or incomplete page-symbol map');
   const variants=(Array.isArray(registry.graphics)?registry.graphics:[]).map(name=>collector.addNode(uiNode(`ui:livery:${name}`,name,'ui_livery',{base:registry.baseRevision,companion:name==='new',cardSaturationMultiplier:name==='new'?registry.cardSaturationMultiplier:1,...declared})));

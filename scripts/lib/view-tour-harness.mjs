@@ -82,10 +82,10 @@ export const generateVaultKey=unsupported,createVaultKeyring=unsupported,createV
 export async function buildTourBundle({initializers=pages,sourceBase='http://view-tour.invalid',memory=false}={}) {
   const entry = `
 import * as Pages from '/PUBLIC/assets/js/pages-init.js';
-import {initComponents} from '/PUBLIC/assets/js/components-v129.js';
+import {initComponents,installPageDecorations} from '/PUBLIC/assets/js/components-v129.js';
 import {loadLanguage, applyGlobalTranslations} from '/PUBLIC/assets/js/translations.js';
 import * as Ui from '/PUBLIC/assets/js/ui-core-v129.js';
-window.__viewTour={errors:[],Ui};
+window.__viewTour={errors:[],Ui,installPageDecorations};
 window.addEventListener('error',e=>window.__viewTour.errors.push(String(e.message)));
 window.addEventListener('unhandledrejection',e=>window.__viewTour.errors.push('rejection: '+String(e.reason?.message||e.reason)));
 (async()=>{ const init=${JSON.stringify(initializers)}[location.pathname.split('/').pop()];

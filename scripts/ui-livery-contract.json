@@ -9,7 +9,7 @@
   "widths": [320, 1280],
   "cardSaturationMultiplier": 1.15,
   "colorSource": "Frontend/public/assets/css/core.css",
-  "decorationsSource": "Frontend/public/assets/js/modules/shared/page-decorations.js",
+  "decorationsSource": "Frontend/public/assets/js/components-v129.js",
   "sharedStyles": "Frontend/public/assets/css/core_ui.css",
   "test": "tests/ui-livery.browser.test.mjs",
   "cardProducers": [

@@ -4,8 +4,11 @@ import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {createTourHarness} from '../scripts/lib/view-tour-harness.mjs';
 import {inspectDynamicPaint} from '../scripts/dynamic-visual-map.mjs';
 
-// The public tree is browser ESM inside a CommonJS package; load this dependency-free producer as ESM.
-const {pageSymbols}=await import('data:text/javascript;base64,'+Buffer.from(await readFile(new URL('../Frontend/public/assets/js/modules/shared/page-decorations.js',import.meta.url),'utf8')).toString('base64'));
+// Read the actual bounded metadata declaration without importing the browser's Firebase dependencies.
+const componentsSource=await readFile(new URL('../Frontend/public/assets/js/components-v129.js',import.meta.url),'utf8');
+const symbolDeclaration=componentsSource.match(/export const pageSymbols = Object\.freeze\(\{[\s\S]*?\}\);/)?.[0];
+assert.ok(symbolDeclaration,'actual page symbol declaration exists');
+const {pageSymbols}=await import('data:text/javascript;base64,'+Buffer.from(symbolDeclaration).toString('base64'));
 
 const contract=JSON.parse(await readFile(new URL('../scripts/ui-livery-contract.json',import.meta.url),'utf8'));
 const output='.codex-tmp/livery-verification';
@@ -68,7 +71,7 @@ test('the two liveries keep the same evolved geometry and all decorations on 22 
      if(graphics==='classica')baseline.set(key,layout);else assert.deepEqual(layout,baseline.get(key),key+': livery cannot change geometry, commands or card surfaces');
      observed.push({page:file,width,graphics,state});
     }
-    const module=await f.page.evaluate(async()=>{const m=await import('/assets/js/modules/shared/page-decorations.js');m.installPageDecorations(document,location.pathname);return document.querySelectorAll('.archive-watermark').length;});
+    const module=await f.page.evaluate(()=>{window.__viewTour.installPageDecorations(document,location.pathname);return document.querySelectorAll('.archive-watermark').length;});
     assert.equal(module,1,'decoration producer is idempotent');
    }finally{await f.context.close();}
   }

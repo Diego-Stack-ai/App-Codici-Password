@@ -19,6 +19,7 @@ test('shared-base liveries connect all 22 pages, selectors, roles, producers and
   }
   assert.ok(result.files.some(file=>file.endsWith('ui-livery-contract.json')));
   assert.ok(result.files.some(file=>file.endsWith('ui-livery.browser.test.mjs')));
+  assert.ok(result.files.some(file=>file.endsWith('view-tour-harness.mjs')),'the real producer test bundle affects the fingerprint');
   const cardDefinitions=result.edges.filter(edge=>edge.source==='ui:livery-color-role:--card-icon-ink'&&edge.relation==='ui_role_defined_in');
   assert.deepEqual(cardDefinitions.map(edge=>edge.target),['ui:source:Frontend/public/assets/css/core_ui.css']);
   for(const edge of result.edges.filter(edge=>edge.relation==='ui_expects_color_role'&&edge.target.includes('--companion-')))assert.deepEqual(edge.graphics,['new']);
