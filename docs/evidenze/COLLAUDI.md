@@ -1,5 +1,19 @@
 # Collaudi
 
+<a id="giro-temi-313-verifiche-2026-11-16"></a>
+
+## Giro completo dei temi (#313) — verifiche locali, 16/11/2026
+
+Candidata sul ramo `claude/awesome-keller-kt4v9t`, base master con la 1.2.276. Non unita, non versionata, non pubblicata.
+
+**Metodo.** La mappa statica non apre le viste generate dagli script; per coprirle il censimento è fatto **alla fonte**, su ogni dichiarazione di ogni foglio di stile: 328 dichiarazioni con colore cromatico fisso più 85 usi decorativi delle variabili di stato. Convertite ai ruoli `--theme-ink`, `--theme-fill` e alle tinte da `--accent-rgb`, definiti in `core.css` per ogni documento. Restano **74 dichiarazioni**, tutte nelle eccezioni decise: comandi che cancellano o fanno uscire 38, esiti ed errori 21, campioni delle palette 7, scorrimento predefinito 4, scadenza scaduta 4. Il controllo è permanente: `scripts/audit-fixed-colors.mjs` e `tests/css-fixed-colors.test.mjs` falliscono su un nuovo colore fisso non ammesso (negativo incluso).
+
+**Difetti trovati e corretti oltre al censimento.** Avvisi della cornice: `app.html` non caricava il font delle icone e mostrava `check_circle` come testo (riprodotto: span largo 88 px con font Manrope; dopo 24 px con il font delle icone). Dettaglio Account privato e azienda: lo script impostava `--accent-rgb` fisso per tipo di Account (blu, verde, rosso, ambra) sull'intera pagina, ignorando la palette. Home: Scadenze e Urgenze seguono la palette. Conferme: `btn-danger` nei popup segue la palette. Pulsanti rotondi di scadenze, azienda, archivio e privato sul riempimento leggibile.
+
+**Caratteri.** Grandezze già sulla scala `--fs-*` (una sola eccezione con ripiego). Riportati ai token 28 pesi fuori scala (600/650/750/800) e 3 famiglie scritte a mano; 13 testi bianchi o neri fissi senza fondo proprio passati ai ruoli `--text-*`. Non modificati, da valutare con Diego: 104 regole in maiuscolo e 95 con spaziatura delle lettere, che in Nuova sono già neutralizzate sulle etichette e in Classica fanno parte dello stile.
+
+**Limiti.** Il censimento prova che le regole non contengono colori fissi decorativi, non che ogni vista sia stata aperta: popup, guide e stati dopo il login sono esercitati dal banco dinamico solo per gli undici casi UI275. Colori impostati da script: verificati i moduli applicativi (restano il colore personalizzato dei widget, scelta dell'utente, e la zona chiara del QR). Nessuna prova su account o dispositivi fisici. Verifiche: fondamenti UI 81/81 con il nuovo test, banco dinamico 6/6, profilo, offline, guida, topologia, Stylelint, purezza HTML, page shells, riferimenti statici, sintassi JS e budget.
+
 <a id="temi-rilascio-1276-verifiche-2026-11-15"></a>
 
 ## APP 1.2.276 — ricevuta degli undici correttivi, 15/11/2026

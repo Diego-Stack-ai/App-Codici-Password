@@ -1,5 +1,11 @@
 # Stato
 
+<a id="giro-temi-313-stato-2026-11-16"></a>
+
+## Giro completo dei temi (#313) — candidata in revisione, 16/11/2026
+
+Online **1.2.276**. Su [ordine di Diego](DECISIONI.md#giro-temi-313-decisione-2026-11-15) Claude ha censito alla fonte tutte le regole di stile (anche delle viste generate dopo un clic) e portato ai ruoli della palette i colori fissi decorativi; restano solo le eccezioni decise. Corretti anche il nome dell'icona visibile negli avvisi della cornice e il colore fisso per tipo nel dettaglio Account. [Verifiche e limiti](../evidenze/COLLAUDI.md#giro-temi-313-verifiche-2026-11-16). Nessun merge, versione o deploy da questa preparazione.
+
 <a id="stato-corrente"></a>
 
 <a id="temi-rilascio-1276-stato-2026-11-15"></a>

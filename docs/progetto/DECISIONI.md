@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="giro-temi-313-decisione-2026-11-15"></a>
+
+## 15/11/2026 — giro completo dei temi: regole sui colori e sui caratteri
+
+Fonte: Diego a Claude in chat, incarico [#313](https://github.com/Diego-Stack-ai/App-Codici-Password/issues/313). Claude esegue l'intero lavoro fino al codice; Codex rivede. Regole: **tutto in tema, anche Scadenze e Urgenze in Home**; niente ambra (avvisi, pulsanti rotondi); **rosso solo sul comando che cancella o fa uscire** (cestino, elimina, «Esci dall'account»), mentre il popup di conferma e i pulsanti Sì/No seguono la palette; scorrimento rosso/verde degli elenchi invariato; data e calendario rossi delle scadenze scadute restano fino alla valutazione a vista di Diego; **esiti ed errori restano colorati** (errori, requisiti password, robustezza, diagnostica, anteprima backup); zona di lettura del QR scura su chiaro, casella del flag in tema. Il giro comprende anche i caratteri. Supera, per Scadenze/Urgenze e avviso destinatario, i gruppi Funzione del registro del 14/11.
+
 <a id="temi-rilascio-1276-decisione-2026-11-15"></a>
 
 ## 15/11/2026 — pubblicare gli undici correttivi, seguito Claude separato
