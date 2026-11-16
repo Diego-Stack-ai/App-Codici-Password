@@ -1,5 +1,29 @@
 # Programma
 
+<a id="rilascio-1277-programma-2026-11-16"></a>
+
+## APP 1.2.277 — rilascio del giro #313, 16/11/2026
+
+Su [ordine di Diego](DECISIONI.md#rilascio-1277-decisione-2026-11-16), completare la sequenza confezionamento canonico → identità funzionale e controlli → riesame indipendente e CI dello SHA effettivo → merge #318 → workflow manuale Hosting sul master finale → approvazione production delegata → verifica pubblica di manifest/hash/intestazioni. [Incarico](INCARICO_CORRENTE.md#rilascio-1277-incarico-2026-11-16), [stato](STATO.md#rilascio-1277-stato-2026-11-16), [ricevuta](../evidenze/COLLAUDI.md#rilascio-1277-verifiche-2026-11-16). Il pacchetto conserva il runtime a1becaa7 dopo normalizzazione 276→277; cornice ordinaria conservata e pilot storico ritirato. Nessuna modifica policy/backend o nuova attestazione fisica.
+
+<a id="deep-temi-313-programma-2026-11-16"></a>
+
+## Giro #313 — chiusura dei comportamenti oltre profondità, 16/11/2026
+
+Su [ordine di seguito](INCARICO_CORRENTE.md#deep-temi-313-incarico-2026-11-16), le 492 occorrenze ripetute della #317 sono ricondotte a gruppi di comportamento nel [registro dei percorsi profondi](../../scripts/ui-deep-theme-contract.json): Impostazioni 252, Profilo 96, altri percorsi 144. Il registro dichiara 30 scenari, 117 stati per grafica e relativi collegamenti a produttori, CSS, colori e test. Il grafo UI importa queste relazioni come dichiarate, senza trasformarle in osservazioni o PASS. [Metodo e limiti](../regole/INTERFACCIA.md#deep-temi-313-ui-2026-11-16), [esiti](../evidenze/COLLAUDI.md#deep-temi-313-verifiche-2026-11-16).
+
+[Claude ha recepito la #317 nella #316/a126d59d](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/316#issuecomment-6915022674). Il seguito Codex resta separato: prove con dati sintetici, correzioni pertinenti riprodotte, bozza contro master per la CI completa e revisione sullo SHA finale. Il confronto con Claude continua sulla consegna concreta. Nessuna modifica alla produzione 1.2.276, alla disponibilità della cornice o alle decisioni cromatiche; versione, merge e deploy richiedono un nuovo ordine.
+
+<a id="review-temi-313-programma-2026-11-16"></a>
+
+## Giro #313 — revisione e consegna a Claude, 16/11/2026
+
+Diego consegna **39e7bab** della [#316](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/316) e autorizza Codex a completarne revisione e correzioni pertinenti senza attendere Claude. Il ramo separato `codex/review-ui313-20261116` conserva intatta la sorgente di Claude per il confronto successivo. [Incarico](INCARICO_CORRENTE.md#review-temi-313-incarico-2026-11-16), [contratto delle prove](../regole/INTERFACCIA.md#review-temi-313-ui-2026-11-16), [esiti](../evidenze/COLLAUDI.md#review-temi-313-verifiche-2026-11-16).
+
+Automezzi: il vecchio banco apriva soltanto lo stato senza regola; il produttore reale riceve ora una configurazione sintetica valida con `source=deadlineConfig&rule=tour-rule`, editor, mezzo esistente e aggiunta. Questo residuo non è un difetto applicativo dimostrato. Le correzioni applicative emerse riguardano contrasto dei menu, Annulla ordinario e decorazioni fisse residue. Censimento alla fonte, matrice dinamica, inventario statico e tour runtime conservano esiti e limiti distinti. Il seguito oltre la profondità osservata e le prove native/fisiche restano espliciti; nessun numero d'inventario equivale a una certificazione universale.
+
+Correttivo verificato: matrice 1064/1064 e inventario delle 22 pagine nelle due grafiche, con profondità e residui espliciti. Consegna revisionabile a Claude con diff, test e dati di provenienza; produzione **1.2.276** e cornice ordinaria già attestate. Questo incarico non comprende cambio versione, merge, deploy o nuove operazioni cloud.
+
 <a id="temi-segnalazioni-1275-2026-11-15"></a>
 
 ## Temi 1.2.275 — segnalazioni di Diego da verificare, 15/11/2026

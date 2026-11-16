@@ -278,15 +278,15 @@ html:not(.dark) .account-card .swipe-content {
 }
 
 .account-card-category.badge-purple {
-    color: var(--color-purple);
+    color: var(--theme-ink);
 }
 
 .account-card-category.badge-amber {
-    color: var(--status-warning);
+    color: var(--theme-ink);
 }
 
 .account-card-category.badge-emerald {
-    color: var(--status-success);
+    color: var(--theme-ink);
 }
 
 .account-card-title {
@@ -307,15 +307,15 @@ html:not(.dark) .account-card-title {
 .account-card-subtitle {
     font-size: var(--fs-micro);
     font-weight: var(--font-weight-medium);
-    color: var(--text-secondary);
-    opacity: 0.8;
+    color: var(--text-primary);
+    opacity: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 html:not(.dark) .account-card-subtitle {
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 /* Right Side Actions */
@@ -375,7 +375,7 @@ html:not(.dark) .account-card-subtitle {
 }
 
 .account-data-label {
-    color: var(--text-secondary);
+    color: var(--text-primary);
     font-weight: var(--font-weight-medium);
     text-transform: uppercase;
     font: var(--font-caption);
@@ -408,15 +408,15 @@ html:not(.dark) .account-card-subtitle {
 }
 
 .theme-accent-shared {
-    background: var(--color-purple);
+    background: var(--theme-fill);
 }
 
 .theme-accent-memo {
-    background: var(--status-warning);
+    background: var(--theme-fill);
 }
 
 .theme-accent-shared-memo {
-    background: var(--status-success);
+    background: var(--theme-fill);
 }
 
 /* Text colors equivalent */
@@ -426,15 +426,15 @@ html:not(.dark) .account-card-subtitle {
 }
 
 .theme-text-shared {
-    color: var(--color-purple);
+    color: var(--theme-ink);
 }
 
 .theme-text-memo {
-    color: var(--status-warning);
+    color: var(--theme-ink);
 }
 
 .theme-text-shared-memo {
-    color: var(--status-success);
+    color: var(--theme-ink);
 }
 
 /* --- 5. LOADING & EMPTY STATES --- */

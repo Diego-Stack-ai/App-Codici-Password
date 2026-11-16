@@ -235,9 +235,9 @@
     align-items: center;
     gap: 0.75rem;
     padding: 1rem;
-    border: 1px solid rgba(139, 92, 246, 0.35);
+    border: 1px solid rgba(var(--accent-rgb), 0.35);
     border-radius: 16px;
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(var(--accent-rgb), 0.1);
 }
 
 .detail-actions-panel {
@@ -256,8 +256,8 @@
     margin: 0;
     padding: 0.75rem 1rem;
     border-radius: 12px;
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--status-success);
+    background: rgba(var(--accent-rgb), 0.1);
+    color: var(--theme-ink);
     font-size: var(--fs-micro);
 }
 
@@ -321,15 +321,15 @@
 }
 
 .icon-red {
-    color: var(--status-error);
+    color: var(--theme-ink);
 }
 
 .icon-purple {
-    color: var(--color-purple);
+    color: var(--theme-ink);
 }
 
 .icon-emerald {
-    color: var(--status-success);
+    color: var(--theme-ink);
 }
 
 .icon-blue {
@@ -337,7 +337,7 @@
 }
 
 .icon-amber {
-    color: var(--status-warning);
+    color: var(--theme-ink);
 }
 
 .icon-dim {

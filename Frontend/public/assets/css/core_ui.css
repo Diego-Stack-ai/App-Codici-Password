@@ -29,6 +29,11 @@
     transition: background 0.2s;
 }
 
+/* Anche i controlli nativi degli editor dinamici seguono la palette. */
+input[type="checkbox"] {
+    accent-color: var(--theme-fill, var(--accent));
+}
+
 .qr-lens-icon:hover {
     background: var(--rev-fill);
     color: white;
@@ -323,15 +328,15 @@
 }
 
 .icon-accent-emerald {
-    color: var(--status-success);
+    color: var(--theme-ink);
 }
 
 .icon-accent-amber {
-    color: var(--status-warning);
+    color: var(--theme-ink);
 }
 
 .icon-accent-orange {
-    color: var(--status-warning);
+    color: var(--theme-ink);
 }
 
 .modal-title {
@@ -362,7 +367,7 @@
 }
 
 .dark .modal-text {
-    color: #94a3b8;
+    color: var(--text-secondary);
 }
 
 .modal-actions {
@@ -420,11 +425,13 @@
     box-shadow: var(--ui-shadow-action-soft);
 }
 
+/* Conferme (decisione di Diego, 15/11/2026): il rosso sta sul comando che cancella; nel popup
+   «Sei sicuro?» i pulsanti Sì/No seguono la palette. */
 .btn-modal.btn-danger {
-    background: var(--status-error);
+    background: var(--theme-fill);
     color: white;
     border: 1px solid transparent;
-    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 8px 20px rgba(var(--accent-rgb), 0.3);
 }
 
 #toast {
@@ -497,23 +504,23 @@
 }
 
 .btn-fab-scadenza {
-    background: linear-gradient(135deg, var(--status-warning) 0%, #d97706 100%);
+    background:linear-gradient(135deg, var(--theme-fill) 0%, var(--theme-fill-deep) 100%);
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    box-shadow: 0 10px 30px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 10px 30px rgba(var(--accent-rgb), 0.4);
     z-index: var(--z-control);
 }
 
 .btn-fab-privato {
-    background: var(--accent);
+    background: var(--theme-fill);
     width: 48px;
     height: 48px;
     box-shadow: var(--ui-shadow-action-soft);
 }
 
 .btn-fab-azienda {
-    background: linear-gradient(135deg, var(--status-success) 0%, #059669 100%);
+    background:linear-gradient(135deg, var(--theme-fill) 0%, var(--theme-fill-deep) 100%);
     width: 48px;
     height: 48px;
     box-shadow: var(--ui-shadow-action-soft);
@@ -556,7 +563,7 @@
     background: transparent;
     color: var(--text-primary);
     font: inherit;
-    font-weight: 650;
+    font-weight: var(--font-label-weight);
     text-align: left;
     cursor: pointer;
 }
@@ -569,7 +576,7 @@
 }
 
 .home-company-quick-menu-create {
-    color: var(--status-success);
+    color: var(--theme-ink);
 }
 
 .btn-fab-danger {
@@ -626,11 +633,11 @@
 }
 
 .btn-fab-privato {
-    background: var(--accent);
+    background: var(--theme-fill);
 }
 
 .btn-fab-archive {
-    background: linear-gradient(135deg, var(--status-warning) 0%, #d97706 100%);
+    background:linear-gradient(135deg, var(--theme-fill) 0%, var(--theme-fill-deep) 100%);
     box-shadow: var(--ui-shadow-action-soft);
     border-radius: 50%;
 }
@@ -1351,15 +1358,15 @@ body[data-ui-revision].company-profile-page :is(.icon-purple, .icon-blue) {
 
 /* Icone di stato in chiaro: tinte scurite per ≥ 3:1 (mappa visiva 14/11/2026). */
 html:not(.dark) [data-ui-revision] :is(.icon-accent-emerald, .config-badge-emerald, span.material-symbols-outlined.icon-emerald):not([data-icon-role="theme"]) {
-    color: #047857;
+    color: var(--theme-ink);
 }
 
 html:not(.dark) [data-ui-revision] :is(.icon-accent-amber, span.material-symbols-outlined.icon-amber):not([data-icon-role="theme"]) {
-    color: #b45309;
+    color: var(--theme-ink);
 }
 
 html:not(.dark) [data-ui-revision] .icon-accent-orange:not([data-icon-role="theme"]) {
-    color: #c2410c;
+    color: var(--theme-ink);
 }
 
 /* Pulsanti primari e linguetta attiva: bianco su --rev-fill (≥ 4,5:1 anche col blu chiaro). */

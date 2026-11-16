@@ -8,7 +8,7 @@ import { canReadCachedAccount } from '../shared/cached-account-access.js';
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.276';
+import { auth, db } from '../../firebase-config.js?v=1.2.277';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -289,7 +289,7 @@ async function loadAccount(mount = mounted) {
         if (!active()) return;
         const widgetContext = {compactView: true, uid: loadViewerId, context: 'company', accountId, companyId, readOnly: isReadOnly, active: actionActive, signal};
         for (const [path, initializer] of [['account-shared-credentials', 'initAccountSharedCredentials'], ['account-embedded-widgets', 'initAccountEmbeddedWidgets']]) {
-            import(`../shared/${path}.js?v=1.2.276`).then(async module => {
+            import(`../shared/${path}.js?v=1.2.277`).then(async module => {
                 if (!active()) return;
                 const controller = await module[initializer](widgetContext);
                 if (!active()) controller?.destroy();
@@ -309,13 +309,7 @@ function render(acc, active) {
     if (!active()) return;
     document.title = acc.nomeAccount || 'Dettaglio Azienda';
 
-    // Accent Colors
-    const colors = getAccentColors(acc);
-    const container = document.querySelector('.base-container');
-    if (container) {
-        container.style.setProperty('--accent-rgb', colors.rgb);
-        container.style.setProperty('--accent-hex', colors.hex);
-    }
+    // Il dettaglio segue la palette scelta: nessun colore fisso per tipo di Account (15/11/2026).
 
     const setT = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '-'; };
     setT('hero-title', acc.nomeAccount);
@@ -524,14 +518,6 @@ function setupActions(active, fileInputs = new Set()) {
     });
 }
 
-function getAccentColors(acc) {
-    if (acc.isBanking) return { rgb: '16, 185, 129', hex: '#10b981' };
-    const mode = accountModeFromRecord(acc);
-    if (mode === 'memo-shared') return { rgb: '34, 197, 94', hex: '#22c55e' };
-    if (mode === 'account-shared') return { rgb: '244, 63, 94', hex: '#f43f5e' };
-    if (mode === 'memo-private') return { rgb: '245, 158, 11', hex: '#f59e0b' };
-    return { rgb: '59, 130, 246', hex: '#3b82f6' };
-}
 
 function setupReadOnlyUI() {
     // Hide Actions

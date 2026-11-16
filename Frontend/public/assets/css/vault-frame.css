@@ -52,7 +52,7 @@ body {
   border-radius: 999px;
   background: var(--rev-fill);
   color: #fff;
-  font-weight: 600;
+  font-weight: var(--font-label-weight);
   text-decoration: none;
 }
 

@@ -146,7 +146,7 @@
 
 .icon-accent-orange {
     /* orange-500 — nessun token semantico esistente, mantenuto hardcoded per precisione visiva */
-    color: #f97316;
+    color: var(--theme-ink);
 }
 
 .section-spacing {

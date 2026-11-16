@@ -11,6 +11,19 @@ async function loadModel() {
   return import(`data:text/javascript;base64,${Buffer.from(result.outputFiles[0].text).toString('base64')}`);
 }
 
+test('conserva la scelta Scadenza soltanto sulle date pubbliche del Widget', async () => {
+  const {prepareEmbeddedAccountWidget} = await loadModel();
+  const fields = [
+    {id:'date',label:'Data',type:'date',value:'2030-01-15',deadlineEnabled:true},
+    {id:'plain',label:'Testo',type:'text',value:'QA',deadlineEnabled:true},
+    {id:'secret',label:'Segreto',type:'date',value:'2030-01-15',encrypted:true,deadlineEnabled:true}
+  ];
+  const result = await prepareEmbeddedAccountWidget({title:'Widget',fields}, {context:'private',accountId:'qa'}, async value=>'cipher:'+value);
+  assert.equal(result.fields[0].deadlineEnabled,true);
+  assert.equal(result.fields[1].deadlineEnabled,false);
+  assert.equal(result.fields[2].deadlineEnabled,false);
+});
+
 test('cifra i campi sensibili e ne disattiva ogni esposizione', async () => {
   const {prepareSharedVaultData} = await loadModel();
   const result = await prepareSharedVaultData({

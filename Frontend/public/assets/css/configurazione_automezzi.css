@@ -59,8 +59,8 @@
 }
 
 .icon-purple {
-    background: rgba(168, 85, 247, 0.15);
-    color: #a855f7;
+    background: rgba(var(--accent-rgb), 0.15);
+    color: var(--theme-ink);
 }
 
 .icon-blue {
@@ -69,8 +69,8 @@
 }
 
 .icon-amber {
-    background: rgba(245, 158, 11, 0.15);
-    color: var(--status-warning);
+    background: rgba(var(--accent-rgb), 0.15);
+    color: var(--theme-ink);
 }
 
 .settings-item-info {
@@ -225,6 +225,7 @@
 
 .btn-icon-edit:hover,
 .btn-icon-save:hover,
+.btn-icon-cancel:hover,
 .btn-manage-account-semantic:not(.btn-delete-item-semantic):hover {
     background: rgba(var(--accent-rgb), 0.15 );
     color: var(--accent);
@@ -232,7 +233,6 @@
 }
 
 .btn-icon-delete:hover,
-.btn-icon-cancel:hover,
 .btn-delete-item-semantic:hover {
     background: rgba(239, 68, 68, 0.15);
     color: var(--status-error);
@@ -332,20 +332,20 @@
 
 .config-badge-blue {
     background: rgba(var(--accent-rgb), 0.2 );
-    color: #60a5fa;
+    color: var(--theme-ink);
     border: 1px solid rgba(var(--accent-rgb), 0.3 );
 }
 
 .config-badge-amber {
-    background: rgba(245, 158, 11, 0.2);
-    color: #fbbf24;
-    border: 1px solid rgba(245, 158, 11, 0.3);
+    background: rgba(var(--accent-rgb), 0.2);
+    color: var(--theme-ink);
+    border: 1px solid rgba(var(--accent-rgb), 0.3);
 }
 
 .config-badge-purple {
-    background: rgba(168, 85, 247, 0.2);
-    color: #c084fc;
-    border: 1px solid rgba(168, 85, 247, 0.3);
+    background: rgba(var(--accent-rgb), 0.2);
+    color: var(--theme-ink);
+    border: 1px solid rgba(var(--accent-rgb), 0.3);
 }
 
 /* --- 7. ANIMATIONS --- */
@@ -382,7 +382,7 @@
 .vehicle-rule-page-header h2,
 .vehicle-rule-object-header h3 { margin: 0; color: var(--text-primary); }
 .vehicle-rule-page-header p { margin: 0.3rem 0 0; color: var(--text-secondary); }
-.vehicle-rule-eyebrow { color: var(--accent) !important; font-size: var(--fs-micro); font-weight: 800; }
+.vehicle-rule-eyebrow { color: var(--accent) !important; font-size: var(--fs-micro); font-weight: var(--font-strong-weight); }
 
 .vehicle-rule-object,
 .vehicle-reference-editor,
@@ -465,7 +465,7 @@
     border-radius: 10px;
     color: var(--accent);
     background: rgba(var(--accent-rgb), 0.1);
-    font-weight: 750;
+    font-weight: var(--font-strong-weight);
 }
 
 .vehicle-add-reference,
@@ -481,7 +481,7 @@
     color: var(--accent);
     background: rgba(var(--accent-rgb), 0.08);
     font: inherit;
-    font-weight: 750;
+    font-weight: var(--font-strong-weight);
     cursor: pointer;
 }
 

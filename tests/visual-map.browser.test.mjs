@@ -115,22 +115,22 @@ test('visual map keeps forced-dark pages dark and measures Nuova and Classica se
   } finally { await rm(dir, {recursive: true, force: true}); }
 });
 
-// Revisione Codex su bc221f2: un colore diverso dentro un avviso registrato non diventa
-// «eccezione funzionale». Il registro reale ammette solo l'ambra sui figli dell'avviso.
-const warning = `<!doctype html><html lang="it"><head><meta charset="utf-8">
-<style>body{background:#000;margin:0}.recipient-manager-warning{color:#f59e0b}#wrong-green{color:#34d399}</style></head>
-<body><p class="recipient-manager-warning"><span id="ok-amber">Avviso ambra</span> <span id="wrong-green">Verde non ammesso</span></p></body></html>`;
+// Revisione Codex su bc221f2: un colore diverso dentro un'eccezione registrata non diventa
+// «eccezione funzionale». Il registro ammette solo il rosso sul comando «Svuota cestino».
+const trash = `<!doctype html><html lang="it"><head><meta charset="utf-8">
+<style>body{background:#000;margin:0}#btn-empty-trash{background:transparent;border:0;color:#ef4444}#wrong-green{color:#34d399}</style></head>
+<body><button id="btn-empty-trash"><span id="ok-red">Svuota cestino</span> <span id="wrong-green">Verde non ammesso</span></button></body></html>`;
 
 test('visual map registers only the declared paint, property and hue of a functional exception', {timeout: 120000}, async () => {
   const dir = await mkdtemp(path.join(tmpdir(), 'visual-map-'));
   try {
-    await writeFile(path.join(dir, 'gestione_destinatari.html'), warning);
-    await run(process.execPath, [tool, path.join(dir, 'out'), 'gestione_destinatari.html'], {env: {...process.env, VISUAL_MAP_ROOT: dir}});
+    await writeFile(path.join(dir, 'archivio_account.html'), trash);
+    await run(process.execPath, [tool, path.join(dir, 'out'), 'archivio_account.html'], {env: {...process.env, VISUAL_MAP_ROOT: dir}});
     const [report] = JSON.parse(await readFile(path.join(dir, 'out', 'visual-map.json'), 'utf8'));
     for (const theme of ['light', 'dark']) {
       const {functional, status} = report.themes[theme];
-      assert.ok(functional.some(item => item.label.includes('#ok-amber')), `${theme}: the declared amber child is registered`);
-      assert.ok(!functional.some(item => item.label.includes('#wrong-green')), `${theme}: green under the amber warning is not registered`);
+      assert.ok(functional.some(item => item.label.includes('#ok-red')), `${theme}: the declared red child is registered`);
+      assert.ok(!functional.some(item => item.label.includes('#wrong-green')), `${theme}: green under the red command is not registered`);
       assert.ok(status.some(item => item.label.includes('#wrong-green')), `${theme}: green stays an unregistered fixed color`);
     }
     const summary = await readFile(path.join(dir, 'out', 'index.html'), 'utf8');

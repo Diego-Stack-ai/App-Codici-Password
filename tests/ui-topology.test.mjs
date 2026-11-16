@@ -6,6 +6,19 @@ import { buildUiTopology, injectUiTopology } from '../scripts/build-ui-topology.
 const topology = buildUiTopology();
 const contract = JSON.parse(await readFile(new URL('../scripts/ui-topology-contract.json', import.meta.url), 'utf8'));
 const guide = JSON.parse(await readFile(new URL('../Frontend/public/assets/js/modules/assistant/documentation-catalog.json', import.meta.url), 'utf8'));
+const deep = JSON.parse(await readFile(new URL('../scripts/ui-deep-theme-contract.json', import.meta.url), 'utf8'));
+
+test('i casi profondi collegano pagina, produttore, stylesheet, colori e test senza attribuire osservazioni',()=>{
+  assert.equal(topology.summary.deepThemeCases,deep.cases.length);
+  assert.equal(topology.summary.deepThemeStates,deep.cases.reduce((n,c)=>n+c.expectedStates.length,0));
+  for(const c of deep.cases){const id='ui:deep-theme:'+c.id,edges=topology.edges.filter(e=>e.source===id);
+    assert.ok(edges.some(e=>e.relation==='ui_rendered_by'&&e.target==='ui:source:'+c.producer));
+    assert.ok(edges.some(e=>e.relation==='ui_declares_test'&&e.target==='ui:source:'+c.test.file));
+    assert.equal(edges.filter(e=>e.relation==='ui_declares_state').length,c.expectedStates.length);
+    assert.ok(edges.every(e=>e.observed===false));
+    for(const state of c.expectedStates)assert.equal(topology.edges.filter(e=>e.source===id+':state:'+state&&e.relation==='ui_declares_color_role').length,Object.keys(c.colors).length);
+  }
+});
 
 test('la topologia copre pagine, controlli, eventi, superfici e percorsi guida', () => {
   const { summary, diagnostics } = topology;

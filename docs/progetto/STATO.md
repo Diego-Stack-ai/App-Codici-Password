@@ -1,6 +1,34 @@
 # Stato
 
+<a id="rilascio-1277-stato-2026-11-16"></a>
+
+## APP 1.2.277 — candidata confezionata, 16/11/2026
+
+Diego autorizza il [rilascio del giro completo](DECISIONI.md#rilascio-1277-decisione-2026-11-16). La [#318](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/318), sorgente funzionale **a1becaa7**, comprende la base Claude recepita e i correttivi successivi, con CI completa #1179 e GO tecnico. Il confezionamento 1.2.277 aggiorna solo riferimenti di versione e catalogo reviewedAppVersion: **365 file pubblici identici dopo normalizzazione**, versione/guida/offline/documenti verdi. La candidata finale attende riesame e propria CI prima di merge e Hosting. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1277-verifiche-2026-11-16); esiti definitivi, SHA e run saranno annotati sulla #318 dopo la loro osservazione.
+
+All'avvio, GET pubblico del manifest: **1.2.276/e649fd079**, sourceDirty=false; la .277 non è ancora distribuita. Cornice ordinaria conservata secondo l'attivazione .275, pilot ritirato; nessuna nuova lettura/scrittura amministrativa o prova fisica. Gli stati sotto sono checkpoint precedenti.
+
 <a id="stato-corrente"></a>
+
+<a id="deep-temi-313-stato-2026-11-16"></a>
+
+## Giro #313 — percorsi profondi verificati localmente, 16/11/2026
+
+[Ordine di seguito](INCARICO_CORRENTE.md#deep-temi-313-incarico-2026-11-16): il ramo `codex/ui313-deep-states-20261116`, base a126d59d, contiene 30 scenari nominati e i correttivi riprodotti durante la verifica. [Claude ha riesaminato e recepito la #317 nella #316](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/316#issuecomment-6915022674), che ora ha la stessa base a126d59d; questo riesame non è attribuito ai correttivi successivi. Il nuovo registro collega pagine, produttori, stili, ruoli colore e test e conserva i limiti delle prove. Matrice locale **234 stati / 3276 contesti PASS**, fonti stabili e nessuno stato atteso mancante; suite UI finale **117/117 PASS**, canonico **1064/1064 PASS**. [Contratto](../regole/INTERFACCIA.md#deep-temi-313-ui-2026-11-16), [ricevuta e limiti](../evidenze/COLLAUDI.md#deep-temi-313-verifiche-2026-11-16). La CI completa della nuova bozza e la revisione sullo SHA effettivo restano condizioni del GO tecnico; gli esiti finali saranno annotati sulla PR. Produzione **1.2.276/e649fd07** invariata, Canary OFF come disposto, nessuna nuova versione, unione in master o distribuzione autorizzata da questo seguito.
+
+<a id="review-temi-313-stato-2026-11-16"></a>
+
+## Giro temi #313 — correttivi Codex verificati per Claude, 16/11/2026
+
+Su [ordine diretto di Diego](INCARICO_CORRENTE.md#review-temi-313-incarico-2026-11-16), revisione di **39e7bab** e correttivi sul ramo separato `codex/review-ui313-20261116`, senza modificare il ramo di Claude. Risolti contrasto dei menu, Annulla rosso, decorazioni residue e difetti del banco; Automezzi verificato con il vero editor e configurazione sintetica valida, inclusa conferma/annullamento rimozione nelle due grafiche. [Esiti, fonti e limiti](../evidenze/COLLAUDI.md#review-temi-313-verifiche-2026-11-16).
+
+Canonico **1064/1064** e regressioni pertinenti verdi; inventario finale **22 pagine / 44 avvii / 1103 viste / 15442 contesti**, zero colori fissi non registrati, errori, asset mancanti o clic falliti, fonti stabili. Le **492 occorrenze oltre profondità** conservano copertura INCOMPLETE: nessun GO generale a tutte le interazioni o ai dispositivi. Consegna pubblicata nella [bozza #317](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/317), codice **998a879c**, e [annotata per Claude sulla #316](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/316#issuecomment-6913561562); nessuna auto-approvazione o integrazione nel suo ramo. Risposta di Claude non ancora attestata. Online resta **1.2.276/e649fd07**; versione, merge e deploy non fanno parte di questo incarico.
+
+<a id="giro-temi-313-stato-2026-11-16"></a>
+
+## Giro completo dei temi (#313) — candidata in revisione, 16/11/2026
+
+Online **1.2.276**. Su [ordine di Diego](DECISIONI.md#giro-temi-313-decisione-2026-11-15) Claude ha censito alla fonte tutte le regole di stile (anche delle viste generate dopo un clic) e portato ai ruoli della palette i colori fissi decorativi; restano solo le eccezioni decise. Corretti anche il nome dell'icona visibile negli avvisi della cornice e il colore fisso per tipo nel dettaglio Account. [Verifiche e limiti](../evidenze/COLLAUDI.md#giro-temi-313-verifiche-2026-11-16). Nessun merge, versione o deploy da questa preparazione.
 
 <a id="temi-rilascio-1276-stato-2026-11-15"></a>
 

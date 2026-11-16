@@ -518,7 +518,7 @@ html[data-i18n="loading"] body {
 }
 
 .password-suggestion-btn .material-symbols-outlined { font-size: var(--icon-sm); }
-.password-suggestion-btn:hover, .password-suggestion-btn:focus-visible { color: #93c5fd; }
+.password-suggestion-btn:hover, .password-suggestion-btn:focus-visible { color: var(--theme-ink); }
 
 .password-requirements li::before {
     content: '○';

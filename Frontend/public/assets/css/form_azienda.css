@@ -189,7 +189,7 @@
 }
 
 .detail-field-input::placeholder {
-    color: rgba(255, 255, 255, 0.2);
+    color: var(--text-placeholder);
 }
 
 .detail-field-input.uppercase {
@@ -537,12 +537,12 @@
 
 /* Text Utilities for Icons */
 .text-icon-red {
-    color: var(--status-error);
+    color: var(--theme-ink);
     opacity: 0.6;
 }
 
 .text-icon-purple {
-    color: #a855f7;
+    color: var(--theme-ink);
     opacity: 0.6;
 }
 
@@ -561,7 +561,7 @@
 }
 
 .attachment-icon-muted {
-    color: rgba(255, 255, 255, 0.2);
+    color: var(--text-secondary);
 }
 
 .attachment-text-group {
@@ -573,7 +573,7 @@
 .attachment-file-name {
     max-width: 150px;
     overflow: hidden;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--text-primary);
     font: var(--font-label);
     text-overflow: ellipsis;
     text-transform: uppercase;
@@ -581,7 +581,7 @@
 }
 
 .attachment-file-status {
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--text-secondary);
     font: var(--font-micro);
     font-weight: var(--font-label-weight);
     letter-spacing: 0.1em;
@@ -656,15 +656,15 @@
 }
 
 .text-emerald-400 {
-    color: var(--status-success);
+    color: var(--theme-ink);
 }
 
 .text-purple-400 {
-    color: #c084fc;
+    color: var(--theme-ink);
 }
 
 .text-green-400 {
-    color: var(--status-success);
+    color: var(--theme-ink);
 }
 
 /* Rounded utilities */
@@ -697,7 +697,7 @@
 }
 
 .icon-accent-purple {
-    color: #a855f7;
+    color: var(--theme-ink);
 }
 
 /* --- 9. MODAL SOURCE SELECTOR --- */
@@ -762,7 +762,7 @@
 .btn-text-cancel {
     background: transparent;
     border: none;
-    color: #000;
+    color: var(--text-primary);
     /* Richiesto nero */
     cursor: pointer;
     font: var(--font-badge);

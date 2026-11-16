@@ -5,7 +5,7 @@ import { canReadCachedAccount } from '../shared/cached-account-access.js';
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.276';
+import { auth, db } from '../../firebase-config.js?v=1.2.277';
 import { LOG } from '../../logger.js';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
@@ -322,9 +322,9 @@ async function loadAccount(mount = mounted) {
             const controller = await module[name](widgetContext);
             if (!active()) controller?.destroy();
         };
-        import('../shared/account-shared-credentials.js?v=1.2.276').then(module => initWidget(module, 'initAccountSharedCredentials'))
+        import('../shared/account-shared-credentials.js?v=1.2.277').then(module => initWidget(module, 'initAccountSharedCredentials'))
             .catch(error => { if (active()) logError('SharedCredentials', error); });
-        import('../shared/account-embedded-widgets.js?v=1.2.276').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
+        import('../shared/account-embedded-widgets.js?v=1.2.277').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
             .catch(error => { if (active()) logError('AccountWidgets', error); });
         setupActions(actionActive);
         if (readOnly) mount.banners.add(setupReadOnlyUI());
@@ -345,13 +345,7 @@ function renderAccount(acc, active) {
     const renderedVersion = loadVersion;
     document.title = acc.nomeAccount || 'Dettaglio';
 
-    // Accent Colors
-    const colors = getAccentColors(acc);
-    const container = document.querySelector('.base-container');
-    if (container) {
-        container.style.setProperty('--accent-rgb', colors.rgb);
-        container.style.setProperty('--accent-hex', colors.hex);
-    }
+    // Il dettaglio segue la palette scelta: nessun colore fisso per tipo di Account (15/11/2026).
 
     // Header & Hero
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '-'; };
@@ -450,14 +444,6 @@ function renderAccount(acc, active) {
 /**
  * UI HELPERS
  */
-function getAccentColors(acc) {
-    if (acc.isBanking) return { rgb: '16, 185, 129', hex: '#10b981' };
-    const mode = accountModeFromRecord(acc);
-    if (mode === 'memo-shared') return { rgb: '34, 197, 94', hex: '#22c55e' };
-    if (mode === 'account-shared') return { rgb: '244, 63, 94', hex: '#f43f5e' };
-    if (mode === 'memo-private') return { rgb: '245, 158, 11', hex: '#f59e0b' };
-    return { rgb: '59, 130, 246', hex: '#3b82f6' };
-}
 
 function setupReadOnlyUI() {
     const banner = createElement('div', { className: 'read-only-banner p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl mb-6' }, [

@@ -291,7 +291,7 @@
     width: 60px;
     height: 60px;
     border-radius: 20px;
-    background: var(--status-success);
+    background: var(--theme-fill);
     color: white;
     box-shadow: var(--ui-shadow-action-soft);
     border: none;
@@ -334,7 +334,7 @@
 }
 
 input:checked+.base-switch {
-    background: var(--status-success);
+    background: var(--theme-fill);
 }
 
 input:checked+.base-switch::after {
@@ -487,7 +487,7 @@ input:checked+.base-switch::after {
 }
 
 .bg-purple-soft {
-    background: rgba(168, 85, 247, 0.1);
+    background: rgba(var(--accent-rgb), 0.1);
 }
 
 .bg-blue-soft {
@@ -495,11 +495,11 @@ input:checked+.base-switch::after {
 }
 
 .bg-orange-soft {
-    background: rgba(249, 115, 22, 0.1);
+    background: rgba(var(--accent-rgb), 0.1);
 }
 
 .bg-green-soft {
-    background: rgba(34, 197, 94, 0.1);
+    background: rgba(var(--accent-rgb), 0.1);
 }
 
 .option-label {
@@ -531,8 +531,8 @@ input:checked+.base-switch::after {
 }
 
 input:checked+.base-switch {
-    background: var(--status-success);
-    border-color: var(--status-success);
+    background: var(--theme-fill);
+    border-color: var(--accent);
 }
 
 input:checked+.base-switch::after {
@@ -581,7 +581,7 @@ input:checked+.base-switch::after {
 
 .bank-expand-icon {
     font-size: var(--icon-xs);
-    color: #22c55e;
+    color: var(--theme-ink);
     /* verde erba */
     transition: transform 0.2s;
 }
@@ -590,7 +590,7 @@ input:checked+.base-switch::after {
     font: var(--font-caption);
     font-weight: var(--font-strong-weight);
     text-transform: uppercase;
-    color: #22c55e;
+    color: var(--theme-ink);
     /* verde erba */
 }
 
@@ -689,7 +689,7 @@ input:checked+.base-switch::after {
 
 .card-entry-icon {
     font-size: var(--icon-xs);
-    color: #34d399;
+    color: var(--theme-ink);
     transition: transform 0.2s;
 }
 
@@ -697,7 +697,7 @@ input:checked+.base-switch::after {
     font: var(--font-caption);
     font-weight: var(--font-strong-weight);
     text-transform: uppercase;
-    color: #34d399;
+    color: var(--theme-ink);
 }
 
 .card-header {
@@ -718,7 +718,7 @@ input:checked+.base-switch::after {
 
 .card-icon {
     font-size: var(--icon-xs);
-    color: #34d399;
+    color: var(--theme-ink);
     transition: transform 0.2s;
 }
 
@@ -726,7 +726,7 @@ input:checked+.base-switch::after {
     font: var(--font-caption);
     font-weight: var(--font-strong-weight);
     text-transform: uppercase;
-    color: #34d399;
+    color: var(--theme-ink);
 }
 
 .btn-delete-card {

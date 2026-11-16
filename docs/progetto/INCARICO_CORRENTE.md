@@ -1,5 +1,37 @@
 # Incarico corrente
 
+<a id="rilascio-1277-incarico-2026-11-16"></a>
+
+## APP 1.2.277 — confezionamento, merge e Hosting autorizzati, 16/11/2026
+
+Il [nuovo ordine diretto di Diego](DECISIONI.md#rilascio-1277-decisione-2026-11-16) supera il precedente arresto alla sola consegna: pubblicare il giro completo Claude/Codex della [#318](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/318), sorgente funzionale **a1becaa75e5372e7646c23b41b44e5b687a75dcb**, già verificata con [CI completa #1179](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43868314029) e [GO tecnico Codex](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/318#issuecomment-6917117282). Confezionare **1.2.277** sul ramo Codex della stessa PR, provare l'identità del runtime dopo normalizzazione delle sole versioni, aggiornare i documenti esistenti, ottenere riesame indipendente del pacchetto e CI sullo SHA finale; poi unire, avviare il workflow manuale **hosting** sul master effettivo, eseguire l'approvazione production già delegata e verificare manifest, hash e intestazioni pubbliche.
+
+Un solo esecutore; supporti in sola lettura. Nessuna nuova correzione funzionale dedotta dalla confezione, nessun account/dato reale o prova Vault in produzione, nessuna modifica a policy/Rules/backend/permessi. Cornice ordinaria conservata, pilot storico ritirato. [Percorso di rilascio](../regole/RILASCIO.md#rilascio-1277-2026-11-16), [stato](STATO.md#rilascio-1277-stato-2026-11-16), [prove e ricevuta](../evidenze/COLLAUDI.md#rilascio-1277-verifiche-2026-11-16).
+
+<a id="deep-temi-313-incarico-2026-11-16"></a>
+
+## Giro #313 — seguito dei percorsi residui e futura CI, 16/11/2026
+
+Fonte diretta: dopo la consegna #317, Diego chiede come procedere e ordina **«Procedi»** al piano di revisione Claude dei correttivi, chiusura dei percorsi residui (soprattutto Impostazioni/Profilo), CI completa sulla futura testa aggiornata e revisione finale Codex. Versione, merge e deploy richiedono un ordine successivo; Canary OFF come già disposto.
+
+Alla verifica iniziale la #316 era ancora a **39e7bab**, la #317 alla ricevuta **a126d59d**. Dopo il [seguito comunicato](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/316#issuecomment-6914159103), [Claude ha confermato il riesame e recepito la #317](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/316#issuecomment-6915022674): la #316 è ora a **a126d59d** e la #317 è chiusa perché integrata nel suo ramo, senza unione in master. Claude dichiara di non avere altre scritture in corso. Codex completa i residui su **codex/ui313-deep-states-20261116**, checkout separato dalla stessa base, senza scrivere sul ramo di Claude. Supporti indipendenti in lettura; un solo esecutore.
+
+Perimetro: ridurre le 492 occorrenze a comportamenti verificabili, riusare le prove già valide senza trasferirle a nuovi stati, completare fixture/strumento e correggere eventuali difetti riprodotti pertinenti, registrare azioni, produttori, proprietà/ruoli, test, esiti e limiti nei registri e documenti esistenti. Ammesse consegne revisionabili separate su GitHub. Nessun account/dato reale, salvataggio produttivo, operazione Firebase/Google Cloud, modifica Auth/Vault/backend, nuova versione, merge o deploy. La CI completa e il GO finale devono riferirsi alla futura testa effettiva della candidata integrata; il solo audit locale non li sostituisce.
+
+La consegna del seguito comprende una bozza Codex contro master, che include la #316/a126d59d e i nuovi correttivi e consente la CI completa sullo SHA effettivo senza modificare il ramo di Claude. La [CI della #316/a126d59d](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43857123906) ha incontrato un test statico che cercava ancora i rami cromatici rimossi: il seguito lo sostituisce con la prova del modello e dei renderer reali nei quattro modi Account/Memo privato/condiviso. La bozza e la revisione tecnica non autorizzano versione, merge o pubblicazione.
+
+<a id="review-temi-313-incarico-2026-11-16"></a>
+
+## Giro temi #313 — revisione Codex e completamento Automezzi, 16/11/2026
+
+Fonte diretta: Diego consegna il commit **39e7bab90376d19d97349921e9458f6487f83ee4** di Claude, segnala il controllo incompleto di Automezzi e ordina **«Procedi»** al riepilogo di revisione, correzione del residuo riprodotto, verifiche sulle due grafiche/sette palette/chiaro-scuro e registrazione di componenti, colori, test ed esiti. Codex procede senza attendere la disponibilità di Claude; il confronto indipendente con Claude seguirà sulla candidata concreta. La [#316](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/316) resta la fonte del giro, base master **077b6a12b13ba9614bae0eabd0a860f8a2a93f8d**.
+
+Ramo separato `codex/review-ui313-20261116`, partenza immutabile 39e7bab: un solo esecutore delle modifiche, supporti indipendenti in sola lettura. Autorizzati analisi, correzioni locali pertinenti, test con produttori reali e dati sintetici, aggiornamento dei documenti esistenti e consegna revisionabile dei correttivi per il confronto con Claude. Le regole cromatiche del giro sono quelle della [decisione registrata](DECISIONI.md#giro-temi-313-decisione-2026-11-15); nessuna eccezione o vista omessa viene promossa a PASS. Nessun account o dato reale, operazione Firebase/Google Cloud, nuova versione, merge o deploy deriva da questo incarico. La produzione 1.2.276 e la disponibilità ordinaria della cornice restano quelle già attestate; il precedente ordine di pubblicazione era riferito agli undici correttivi della #314.
+
+Diego ribadisce **«Procedi con i 4 punti»**: completare matrice canonica, giro delle 22 pagine nelle due grafiche/sette palette, registrazione degli esiti e consegna del correttivo separato a Claude per il confronto con #316. La consegna comprende ramo e diff revisionabili su GitHub e notifica nel thread già autorizzato; nessuna unione automatica nel ramo di Claude o in master.
+
+Consegna eseguita: correttivo **998a879cd8915a22f77ed5413f07ed277d8fb3b2** nella [bozza #317](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/317), con base esatta del ramo di Claude 39e7bab; [nota per Claude sulla #316](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/316#issuecomment-6913561562). Nessuna presa in carico o risposta di Claude ancora attestata.
+
 <a id="temi-rilascio-1276-incarico-2026-11-15"></a>
 
 ## APP 1.2.276 — ordine eseguito e ricevuta consolidata, 15/11/2026
