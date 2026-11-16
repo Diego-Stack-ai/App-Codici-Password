@@ -311,7 +311,7 @@ test('Settings: Classica shares the palette roles; semantic danger/status colors
       await page.evaluate(() => {
         const container = document.createElement('section');
         container.id = 'semantic-samples';
-        container.innerHTML = '<div class="settings-icon-box icon-red" id="danger-icon">x</div><button class="btn-maintenance-danger" id="danger-button">Cancella</button><span class="diagnostics-status-pass" id="status-pass">PASS</span><span class="diagnostics-status-warn" id="status-warn">WARN</span><span class="diagnostics-status-fail" id="status-fail">FAIL</span>';
+        container.innerHTML = '<button id="btn-reset-vault"><span class="settings-icon-box icon-red" id="danger-icon">x</span></button><button class="btn-maintenance-danger" id="danger-button">Cancella</button><span class="diagnostics-status-pass" id="status-pass">PASS</span><span class="diagnostics-status-warn" id="status-warn">WARN</span><span class="diagnostics-status-fail" id="status-fail">FAIL</span>';
         document.body.append(container);
       });
       const read = () => page.evaluate(() => {
@@ -320,7 +320,7 @@ test('Settings: Classica shares the palette roles; semantic danger/status colors
           return {color: style.color, background: style.backgroundColor, image: style.backgroundImage, border: style.borderColor};
         };
         return {
-          semantic: [...document.querySelector('#semantic-samples').children].map(paint),
+          semantic: [...document.querySelectorAll('#danger-icon, #danger-button, #status-pass, #status-warn, #status-fail')].map(paint),
           maintenance: paint(document.querySelector('[data-color-case="settings-maintenance-card"] button')),
           legacyIcon: paint(document.querySelector('[data-color-case="settings-theme-icon-emerald"] div')),
           selection: paint(document.querySelector('[data-color-case="settings-selected-timer"] button')),

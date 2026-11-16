@@ -1,0 +1,1119 @@
+{
+  "schemaVersion": 1,
+  "source": "Decisioni giro #313; revisione Codex 16/11/2026. Ogni eccezione ammette solo selettore, proprietà e valore esatti; nessuna esenzione per antenato o nome generico.",
+  "exceptions": [
+    {
+      "file": "accesso.css",
+      "selector": ".password-requirements li.is-valid",
+      "prop": "color",
+      "value": "#4ade80",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "account_azienda.css",
+      "selector": ".account-card",
+      "prop": "background",
+      "value": "linear-gradient(to right,\n            rgba(245, 158, 11, 0.8) 0%,\n            \n            transparent 10%,\n            transparent 90%,\n            rgba(239, 68, 68, 0.8) 100%)",
+      "reason": "scorrimento predefinito degli elenchi"
+    },
+    {
+      "file": "account_azienda.css",
+      "selector": ".swipe-action-bg.bg-delete",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "scorrimento predefinito degli elenchi"
+    },
+    {
+      "file": "account_azienda.css",
+      "selector": ".swipe-action-bg.bg-archive",
+      "prop": "color",
+      "value": "var(--status-warning)",
+      "reason": "scorrimento predefinito degli elenchi"
+    },
+    {
+      "file": "account_azienda.css",
+      "selector": ".error-message-box",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "account_detail.css",
+      "selector": ".btn-delete-attachment",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_detail.css",
+      "selector": ".sharing-revoke-button",
+      "prop": "border",
+      "value": "1px solid rgb(var(--status-error-rgb, 239 68 68) / 0.22)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_detail.css",
+      "selector": ".sharing-revoke-button",
+      "prop": "background",
+      "value": "rgb(var(--status-error-rgb, 239 68 68) / 0.08)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_detail.css",
+      "selector": ".sharing-revoke-button",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_detail.css",
+      "selector": ".sharing-revoke-button:hover",
+      "prop": "background",
+      "value": "rgb(var(--status-error-rgb, 239 68 68) / 0.15)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_detail.css",
+      "selector": ".sharing-revoke-button:hover",
+      "prop": "border-color",
+      "value": "rgb(var(--status-error-rgb, 239 68 68) / 0.38)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_detail.css",
+      "selector": ".attachment-upload-status.is-success",
+      "prop": "border-color",
+      "value": "#22c55e",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "account_detail.css",
+      "selector": ".attachment-upload-status.is-error",
+      "prop": "border-color",
+      "value": "#ef4444",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "account_form.css",
+      "selector": ".btn-remove-logo:hover",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_form.css",
+      "selector": ".btn-remove-logo:hover",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.1)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_form.css",
+      "selector": ".btn-delete-bank",
+      "prop": "color",
+      "value": "rgba(239, 68, 68, 0.55)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_form.css",
+      "selector": ".btn-delete-bank:hover",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_form.css",
+      "selector": ".btn-delete-card",
+      "prop": "color",
+      "value": "rgba(239, 68, 68, 0.2)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_form.css",
+      "selector": ".btn-delete-card:hover",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_form.css",
+      "selector": ".account-guest-remove",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_privati.css",
+      "selector": ".account-card",
+      "prop": "background",
+      "value": "linear-gradient(to right,\n            rgba(245, 158, 11, 0.8) 0%,\n            \n            transparent 10%,\n            transparent 90%,\n            rgba(239, 68, 68, 0.8) 100%)",
+      "reason": "scorrimento predefinito degli elenchi"
+    },
+    {
+      "file": "account_privati.css",
+      "selector": ".swipe-action-bg.bg-delete",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "scorrimento predefinito degli elenchi"
+    },
+    {
+      "file": "account_privati.css",
+      "selector": ".swipe-action-bg.bg-archive",
+      "prop": "color",
+      "value": "var(--status-warning)",
+      "reason": "scorrimento predefinito degli elenchi"
+    },
+    {
+      "file": "account_privati.css",
+      "selector": ".account-leave-button",
+      "prop": "border",
+      "value": "1px solid color-mix(in srgb, var(--status-error) 45%, transparent)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_privati.css",
+      "selector": ".account-leave-button",
+      "prop": "background",
+      "value": "color-mix(in srgb, var(--status-error) 10%, transparent)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_privati.css",
+      "selector": ".account-leave-button",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_privati.css",
+      "selector": ".account-leave-button:hover",
+      "prop": "background",
+      "value": "color-mix(in srgb, var(--status-error) 18%, transparent)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "account_privati.css",
+      "selector": ".account-leave-button:focus-visible",
+      "prop": "background",
+      "value": "color-mix(in srgb, var(--status-error) 18%, transparent)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "aggiungi_scadenza.css",
+      "selector": ".btn-delete-attachment",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "aggiungi_scadenza.css",
+      "selector": ".btn-delete-opt",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "aggiungi_scadenza.css",
+      "selector": ".btn-delete-opt:hover",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "aggiungi_scadenza.css",
+      "selector": ".deadline-recipient-remove",
+      "prop": "background",
+      "value": "rgba(239,68,68,.12)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "aggiungi_scadenza.css",
+      "selector": ".deadline-recipient-remove",
+      "prop": "color",
+      "value": "#ef4444",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "archivio_account.css",
+      "selector": ".bg-restore",
+      "prop": "background",
+      "value": "linear-gradient(90deg, rgba(16, 185, 129, 0.25) 0%, transparent 100%)",
+      "reason": "scorrimento predefinito degli elenchi"
+    },
+    {
+      "file": "archivio_account.css",
+      "selector": ".bg-restore",
+      "prop": "color",
+      "value": "var(--status-success)",
+      "reason": "scorrimento predefinito degli elenchi"
+    },
+    {
+      "file": "archivio_account.css",
+      "selector": ".bg-delete",
+      "prop": "background",
+      "value": "linear-gradient(270deg, rgba(239, 68, 68, 0.25) 0%, transparent 100%)",
+      "reason": "scorrimento predefinito degli elenchi"
+    },
+    {
+      "file": "archivio_account.css",
+      "selector": ".bg-delete",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "scorrimento predefinito degli elenchi"
+    },
+    {
+      "file": "archivio_account.css",
+      "selector": ".btn-action-danger",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.1)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "archivio_account.css",
+      "selector": ".btn-action-danger",
+      "prop": "border",
+      "value": "1px solid rgba(239, 68, 68, 0.2)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "archivio_account.css",
+      "selector": ".btn-action-danger",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "archivio_account.css",
+      "selector": ".btn-action-danger:hover",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.2)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "archivio_account.css",
+      "selector": ".btn-action-danger:hover",
+      "prop": "border-color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "area_privata.css",
+      "selector": ".action-delete",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "area_privata.css",
+      "selector": ".error-text",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "configurazione_automezzi.css",
+      "selector": ".btn-icon-delete:hover",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.15)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_automezzi.css",
+      "selector": ".btn-delete-item-semantic:hover",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.15)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_automezzi.css",
+      "selector": ".btn-icon-delete:hover",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_automezzi.css",
+      "selector": ".btn-delete-item-semantic:hover",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_automezzi.css",
+      "selector": ".btn-icon-delete:hover",
+      "prop": "border-color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_automezzi.css",
+      "selector": ".btn-delete-item-semantic:hover",
+      "prop": "border-color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_documenti.css",
+      "selector": ".btn-icon-delete:hover",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.15)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_documenti.css",
+      "selector": ".btn-delete-item-semantic:hover",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.15)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_documenti.css",
+      "selector": ".btn-icon-delete:hover",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_documenti.css",
+      "selector": ".btn-delete-item-semantic:hover",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_documenti.css",
+      "selector": ".btn-icon-delete:hover",
+      "prop": "border-color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_documenti.css",
+      "selector": ".btn-delete-item-semantic:hover",
+      "prop": "border-color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_generali.css",
+      "selector": ".btn-icon-delete:hover",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.15)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_generali.css",
+      "selector": ".btn-delete-item-semantic:hover",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.15)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_generali.css",
+      "selector": ".btn-icon-delete:hover",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_generali.css",
+      "selector": ".btn-delete-item-semantic:hover",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_generali.css",
+      "selector": ".btn-icon-delete:hover",
+      "prop": "border-color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "configurazione_generali.css",
+      "selector": ".btn-delete-item-semantic:hover",
+      "prop": "border-color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "core_ui.css",
+      "selector": ".btn-fab-danger",
+      "prop": "background",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "core_ui.css",
+      "selector": ".btn-fab-danger",
+      "prop": "box-shadow",
+      "value": "0 8px 25px rgba(239, 68, 68, 0.3)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "core_ui.css",
+      "selector": ".shared-account-unlink",
+      "prop": "border",
+      "value": "1px solid rgb(239 68 68 / 36%)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "core_ui.css",
+      "selector": ".shared-account-unlink",
+      "prop": "background",
+      "value": "rgb(239 68 68 / 10%)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "core_ui.css",
+      "selector": ".shared-account-unlink",
+      "prop": "color",
+      "value": "var(--color-danger, #dc2626)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "core_ui.css",
+      "selector": ".dark .shared-account-unlink",
+      "prop": "background",
+      "value": "rgb(239 68 68 / 16%)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "core_ui.css",
+      "selector": ".dark .shared-account-unlink",
+      "prop": "color",
+      "value": "#fecaca",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "core_ui.css",
+      "selector": ".account-widget-remove",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "core_ui.css",
+      "selector": ".account-widget-delete",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "core_ui.css",
+      "selector": ".ui-state-error",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "core_ui.css",
+      "selector": ".ui-state-warning",
+      "prop": "color",
+      "value": "var(--status-warning)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "core_ui.css",
+      "selector": ".modal-password-requirements li.is-valid",
+      "prop": "color",
+      "value": "var(--status-success)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "form_azienda.css",
+      "selector": ".btn-remove-item",
+      "prop": "color",
+      "value": "rgba(239, 68, 68, 0.6)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "form_azienda.css",
+      "selector": ".btn-remove-item:hover",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "form_azienda.css",
+      "selector": ".btn-danger",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "gestione_destinatari.css",
+      "selector": ".recipient-icon-button.action-delete",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "home_page.css",
+      "selector": ".self-healing-banner",
+      "prop": "border-color",
+      "value": "var(--status-error)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "home_page.css",
+      "selector": ".self-healing-banner",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.1)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "home_page.css",
+      "selector": ".self-healing-title",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "home_page.css",
+      "selector": ".self-healing-detail",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "home_page.css",
+      "selector": ".self-healing-action",
+      "prop": "background",
+      "value": "var(--status-error)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "image-crop-editor.css",
+      "selector": ".image-editor-warning",
+      "prop": "color",
+      "value": "var(--danger-color,#b42318)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ":is(#btn-reset-vault, #btn-revoke-all-sessions) .icon-red",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ":is(#btn-reset-vault, #btn-revoke-all-sessions) .icon-red",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.1)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".swatch-blue",
+      "prop": "background",
+      "value": "#137fec",
+      "reason": "campioni delle sette palette"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".swatch-green",
+      "prop": "background",
+      "value": "#177245",
+      "reason": "campioni delle sette palette"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".swatch-red",
+      "prop": "background",
+      "value": "#9f2348",
+      "reason": "campioni delle sette palette"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".swatch-sand",
+      "prop": "background",
+      "value": "#a97828",
+      "reason": "campioni delle sette palette"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".swatch-petrol",
+      "prop": "background",
+      "value": "#0f766e",
+      "reason": "campioni delle sette palette"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".swatch-lavender",
+      "prop": "background",
+      "value": "#6750a4",
+      "reason": "campioni delle sette palette"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".swatch-dusty-rose",
+      "prop": "background",
+      "value": "#855466",
+      "reason": "campioni delle sette palette"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".btn-logout-semantic",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.05)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".btn-logout-semantic",
+      "prop": "border",
+      "value": "1px solid rgba(239, 68, 68, 0.2)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".btn-logout-semantic",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".btn-logout-semantic:hover",
+      "prop": "background",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".btn-logout-semantic:hover",
+      "prop": "box-shadow",
+      "value": "0 15px 30px rgba(239, 68, 68, 0.3)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".btn-maintenance-danger",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.05)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".btn-maintenance-danger",
+      "prop": "border",
+      "value": "1px solid rgba(239, 68, 68, 0.15)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".btn-maintenance-danger",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".btn-maintenance-danger:hover",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.1)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".btn-maintenance-danger:hover",
+      "prop": "border-color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".portable-archive-status",
+      "prop": "color",
+      "value": "var(--danger-color, #b91c1c)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".shared-credentials-delete",
+      "prop": "color",
+      "value": "var(--color-danger, #dc2626)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".diagnostics-status-pass",
+      "prop": "color",
+      "value": "var(--success-color, #22c55e)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".diagnostics-engine-active",
+      "prop": "color",
+      "value": "var(--success-color, #22c55e)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".diagnostics-status-warn",
+      "prop": "color",
+      "value": "var(--warning-color, #f59e0b)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".diagnostics-engine-limited",
+      "prop": "color",
+      "value": "var(--warning-color, #f59e0b)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".diagnostics-status-fail",
+      "prop": "color",
+      "value": "var(--error-color, #ef4444)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".backup-preview-missing .backup-preview-status",
+      "prop": "color",
+      "value": "var(--success-color, #059669)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".backup-preview-changed .backup-preview-status",
+      "prop": "color",
+      "value": "var(--warning-color, #d97706)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".credential-health-weak",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.16)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".credential-health-weak",
+      "prop": "color",
+      "value": "#dc2626",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".credential-health-medium",
+      "prop": "background",
+      "value": "rgba(245, 158, 11, 0.18)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".credential-health-medium",
+      "prop": "color",
+      "value": "#b45309",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".credential-health-strong",
+      "prop": "background",
+      "value": "rgba(34, 197, 94, 0.16)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".credential-health-strong",
+      "prop": "color",
+      "value": "#15803d",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".credential-health-duplicate",
+      "prop": "background",
+      "value": "rgba(245, 158, 11, 0.18)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".credential-health-duplicate",
+      "prop": "color",
+      "value": "#b45309",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".credential-health-dated",
+      "prop": "background",
+      "value": "rgba(99, 102, 241, 0.16)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".credential-health-dated",
+      "prop": "color",
+      "value": "#4f46e5",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "lista_aziende.css",
+      "selector": ".azienda-card.is-delete-mode",
+      "prop": "border-color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "lista_aziende.css",
+      "selector": ".azienda-card.is-delete-mode",
+      "prop": "box-shadow",
+      "value": "0 0 15px rgba(239, 68, 68, 0.3)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "lista_aziende.css",
+      "selector": ".delete-indicator",
+      "prop": "background",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "profile-document-attachments.css",
+      "selector": ".profile-document-inline-delete",
+      "prop": "background",
+      "value": "rgba(220,38,38,.1)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "profile-document-attachments.css",
+      "selector": ".profile-document-inline-delete",
+      "prop": "color",
+      "value": "#dc2626",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "profile-document-attachments.css",
+      "selector": ".profile-document-inline-delete:hover",
+      "prop": "background",
+      "value": "rgba(220,38,38,.18)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "profile-document-attachments.css",
+      "selector": ".profile-document-inline-delete:focus-visible",
+      "prop": "background",
+      "value": "rgba(220,38,38,.18)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "profile-document-attachments.css",
+      "selector": ".profile-document-inline-delete:hover",
+      "prop": "outline",
+      "value": "2px solid rgba(220,38,38,.28)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "profile-document-attachments.css",
+      "selector": ".profile-document-inline-delete:focus-visible",
+      "prop": "outline",
+      "value": "2px solid rgba(220,38,38,.28)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "profile-layout.css",
+      "selector": ".digital-card-capacity.is-warning",
+      "prop": "color",
+      "value": "var(--status-warning)",
+      "reason": "esiti ed errori"
+    },
+    {
+      "file": "profilo_privato.css",
+      "selector": ".btn-edit-section.btn-delete",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.1)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "profilo_privato.css",
+      "selector": ".btn-edit-section.btn-delete",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "profilo_privato.css",
+      "selector": ".btn-edit-section.btn-delete:hover",
+      "prop": "background",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "profilo_privato.css",
+      "selector": ".profile-label-delete",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.1)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "profilo_privato.css",
+      "selector": ".profile-label-delete",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "regole_scadenze.css",
+      "selector": ".deadline-domain-icon-action.is-danger",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "scadenze.css",
+      "selector": ".deadline-card",
+      "prop": "background",
+      "value": "linear-gradient(to right,\n            rgba(16, 185, 129, 0.8) 0%,\n            \n            transparent 10%,\n            \n            transparent 90%,\n            rgba(239, 68, 68, 0.8) 100%)",
+      "reason": "scorrimento predefinito degli elenchi"
+    },
+    {
+      "file": "scadenze.css",
+      "selector": ".swipe-action-bg.bg-archive",
+      "prop": "color",
+      "value": "var(--status-success)",
+      "reason": "scorrimento predefinito degli elenchi"
+    },
+    {
+      "file": "scadenze.css",
+      "selector": ".swipe-action-bg.bg-restore",
+      "prop": "color",
+      "value": "var(--status-success)",
+      "reason": "scorrimento predefinito degli elenchi"
+    },
+    {
+      "file": "scadenze.css",
+      "selector": ".swipe-action-bg.bg-delete",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "scorrimento predefinito degli elenchi"
+    },
+    {
+      "file": "scadenze.css",
+      "selector": ".deadline-card-expired .deadline-icon-box",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "scadenza scaduta (valutazione a vista di Diego)"
+    },
+    {
+      "file": "scadenze.css",
+      "selector": ".deadline-card-expired .deadline-icon-box",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.12)",
+      "reason": "scadenza scaduta (valutazione a vista di Diego)"
+    },
+    {
+      "file": "scadenze.css",
+      "selector": ".deadline-card-expired .deadline-icon-box",
+      "prop": "border-color",
+      "value": "rgba(239, 68, 68, 0.3)",
+      "reason": "scadenza scaduta (valutazione a vista di Diego)"
+    },
+    {
+      "file": "scadenze.css",
+      "selector": ".deadline-card-expired .deadline-date-badge",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "scadenza scaduta (valutazione a vista di Diego)"
+    },
+    {
+      "file": "scadenze.css",
+      "selector": ".deadline-card-expired .deadline-date-badge",
+      "prop": "background",
+      "value": "rgba(239, 68, 68, 0.12)",
+      "reason": "scadenza scaduta (valutazione a vista di Diego)"
+    },
+    {
+      "file": "scadenze.css",
+      "selector": ".deadline-card-expired .deadline-date-badge",
+      "prop": "border-color",
+      "value": "rgba(239, 68, 68, 0.2)",
+      "reason": "scadenza scaduta (valutazione a vista di Diego)"
+    },
+    {
+      "file": "vault-assistant.css",
+      "selector": ".vault-assistant-result .swipe-bg-left",
+      "prop": "color",
+      "value": "var(--status-error)",
+      "reason": "scorrimento predefinito degli elenchi"
+    },
+    {
+      "file": "vault-assistant.css",
+      "selector": ".vault-assistant-result .swipe-bg-right",
+      "prop": "color",
+      "value": "var(--status-warning)",
+      "reason": "scorrimento predefinito degli elenchi"
+    }
+  ],
+  "scope": "Dichiarazioni CSS ammesse: contratto dichiarato, non osservazione di ogni vista runtime.",
+  "tests": [
+    "tests/css-fixed-colors.test.mjs"
+  ],
+  "runtimePaints": [
+    {
+      "id": "diagnostics-result-border-pass",
+      "selector": ".diagnostics-overall.diagnostics-status-pass",
+      "property": "borderTopColor",
+      "values": [
+        "rgb(34, 197, 94)"
+      ],
+      "meaning": "Bordo dell’esito diagnostico derivato da currentColor; solo il contenitore di risultato con lo stato esatto.",
+      "source": {
+        "path": "Frontend/public/assets/css/impostazioni.css",
+        "selector": ".diagnostics-overall",
+        "property": "border",
+        "value": "1px solid currentColor"
+      },
+      "producer": "Frontend/public/assets/js/modules/settings/impostazioni.js",
+      "tests": [
+        "tests/ui-view-tour.browser.test.mjs"
+      ]
+    },
+    {
+      "id": "diagnostics-result-border-warn",
+      "selector": ".diagnostics-overall.diagnostics-status-warn",
+      "property": "borderTopColor",
+      "values": [
+        "rgb(245, 158, 11)"
+      ],
+      "meaning": "Bordo dell’esito diagnostico derivato da currentColor; solo il contenitore di risultato con lo stato esatto.",
+      "source": {
+        "path": "Frontend/public/assets/css/impostazioni.css",
+        "selector": ".diagnostics-overall",
+        "property": "border",
+        "value": "1px solid currentColor"
+      },
+      "producer": "Frontend/public/assets/js/modules/settings/impostazioni.js",
+      "tests": [
+        "tests/ui-view-tour.browser.test.mjs"
+      ]
+    },
+    {
+      "id": "diagnostics-result-border-fail",
+      "selector": ".diagnostics-overall.diagnostics-status-fail",
+      "property": "borderTopColor",
+      "values": [
+        "rgb(239, 68, 68)"
+      ],
+      "meaning": "Bordo dell’esito diagnostico derivato da currentColor; solo il contenitore di risultato con lo stato esatto.",
+      "source": {
+        "path": "Frontend/public/assets/css/impostazioni.css",
+        "selector": ".diagnostics-overall",
+        "property": "border",
+        "value": "1px solid currentColor"
+      },
+      "producer": "Frontend/public/assets/js/modules/settings/impostazioni.js",
+      "tests": [
+        "tests/ui-view-tour.browser.test.mjs"
+      ]
+    }
+  ]
+}

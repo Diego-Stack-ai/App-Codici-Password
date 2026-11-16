@@ -1,12 +1,20 @@
 # Stato
 
+<a id="stato-corrente"></a>
+
+<a id="review-temi-313-stato-2026-11-16"></a>
+
+## Giro temi #313 — correttivi Codex verificati per Claude, 16/11/2026
+
+Su [ordine diretto di Diego](INCARICO_CORRENTE.md#review-temi-313-incarico-2026-11-16), revisione di **39e7bab** e correttivi sul ramo separato `codex/review-ui313-20261116`, senza modificare il ramo di Claude. Risolti contrasto dei menu, Annulla rosso, decorazioni residue e difetti del banco; Automezzi verificato con il vero editor e configurazione sintetica valida, inclusa conferma/annullamento rimozione nelle due grafiche. [Esiti, fonti e limiti](../evidenze/COLLAUDI.md#review-temi-313-verifiche-2026-11-16).
+
+Canonico **1064/1064** e regressioni pertinenti verdi; inventario finale **22 pagine / 44 avvii / 1103 viste / 15442 contesti**, zero colori fissi non registrati, errori, asset mancanti o clic falliti, fonti stabili. Le **492 occorrenze oltre profondità** conservano copertura INCOMPLETE: nessun GO generale a tutte le interazioni o ai dispositivi. Consegnare a Claude il correttivo revisionabile per il confronto sulla #316; nessuna auto-approvazione o integrazione nel suo ramo. Online resta **1.2.276/e649fd07**; versione, merge e deploy non fanno parte di questo incarico.
+
 <a id="giro-temi-313-stato-2026-11-16"></a>
 
 ## Giro completo dei temi (#313) — candidata in revisione, 16/11/2026
 
 Online **1.2.276**. Su [ordine di Diego](DECISIONI.md#giro-temi-313-decisione-2026-11-15) Claude ha censito alla fonte tutte le regole di stile (anche delle viste generate dopo un clic) e portato ai ruoli della palette i colori fissi decorativi; restano solo le eccezioni decise. Corretti anche il nome dell'icona visibile negli avvisi della cornice e il colore fisso per tipo nel dettaglio Account. [Verifiche e limiti](../evidenze/COLLAUDI.md#giro-temi-313-verifiche-2026-11-16). Nessun merge, versione o deploy da questa preparazione.
-
-<a id="stato-corrente"></a>
 
 <a id="temi-rilascio-1276-stato-2026-11-15"></a>
 

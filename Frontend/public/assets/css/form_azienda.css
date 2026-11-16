@@ -537,7 +537,7 @@
 
 /* Text Utilities for Icons */
 .text-icon-red {
-    color: var(--status-error);
+    color: var(--theme-ink);
     opacity: 0.6;
 }
 

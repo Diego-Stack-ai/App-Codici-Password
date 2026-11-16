@@ -352,7 +352,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .icon-red {
-    background: linear-gradient(135deg, var(--status-error) 0%, #dc2626 100%);
+    background: var(--rev-icon-bg);
     color: white;
 }
 

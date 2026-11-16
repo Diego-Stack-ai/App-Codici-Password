@@ -321,7 +321,7 @@
 }
 
 .icon-red {
-    color: var(--status-error);
+    color: var(--theme-ink);
 }
 
 .icon-purple {

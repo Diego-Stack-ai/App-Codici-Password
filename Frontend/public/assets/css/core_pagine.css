@@ -220,22 +220,18 @@
 
 /* --- 4. COLOR THEMES (Matrix Cards) --- */
 .matrix-card.card-blue {
-    --accent-rgb: 37, 99, 235;
     background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.6), rgba(var(--accent-rgb), 0.4));
 }
 
 .matrix-card.card-green {
-    --accent-rgb: 16, 185, 129;
     background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.6), rgba(var(--accent-rgb), 0.4));
 }
 
 .matrix-card.card-orange {
-    --accent-rgb: 249, 115, 22;
     background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.62), rgba(var(--accent-rgb), 0.82));
 }
 
 .matrix-card.card-red {
-    --accent-rgb: 239, 68, 68;
     background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.6), rgba(var(--accent-rgb), 0.4));
 }
 

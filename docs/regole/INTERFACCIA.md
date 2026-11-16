@@ -1,5 +1,17 @@
 # Interfaccia
 
+<a id="review-temi-313-ui-2026-11-16"></a>
+
+## Registro e prove del giro #313 — 16/11/2026
+
+La [decisione di Diego per il giro #313](../progetto/DECISIONI.md#giro-temi-313-decisione-2026-11-15) prevale sulle precedenti regole cromatiche: decorazioni, Home Scadenze/Urgenze e conferme seguono la palette; restano i comandi realmente distruttivi, gli esiti/errori, gli scorrimenti predefiniti e il rosso della data/calendario scaduti in attesa della valutazione di Diego. Il rosso non si ammette dal solo nome `danger`, da un antenato o dalla presenza di un avviso.
+
+Il [registro delle eccezioni alla fonte](../../scripts/ui-fixed-color-exceptions.json) associa **file CSS, selettore, proprietà e valore completi** alla motivazione. I selettori raggruppati devono essere tutti ammessi; tuple RGB e usi decorativi delle variabili di stato sono controllati. I test positivi e negativi sono in [css-fixed-colors.test.mjs](../../tests/css-fixed-colors.test.mjs). Le eccezioni runtime derivate dichiarano separatamente proprietà, valore calcolato, fonte CSS, produttore e test: il bordo `currentColor` dell'esito diagnostico non ammette altri bordi o colori.
+
+Il [giro runtime](../../scripts/ui-view-tour.mjs), con [banco sintetico](../../scripts/lib/view-tour-harness.mjs) e [osservatore](../../scripts/lib/view-tour-paints.mjs), avvia il vero produttore di ciascuna delle 22 pagine private **separatamente per grafica**; ogni DOM aperto attraversa le sette palette in chiaro/scuro. Registra pagina, produttore, stylesheet, catena di azioni, destinazioni comprensive di regola/sorgente, controlli disabilitati o coperti dal popup, proprietà cromatiche e provenienza delle eccezioni. CSS/JS/font mancanti, bootstrap e runtime error, sorgenti cambiate e clic non riusciti impediscono un PASS. Le capacità native sono adattate e contate esplicitamente; non sono prove del dispositivo.
+
+Il rapporto distingue inventario dei colori fissi, debito di esplorazione e contrasto: **il tour non misura il contrasto e non certifica tutta l'app**. Mantiene ogni vista non aperta e ogni azione oltre la profondità dichiarata. Il [contratto dinamico](../../scripts/ui-dynamic-theme-contract.json), i suoi archi nel [grafo UI](../../scripts/build-ui-topology.mjs) e le [regressioni aggiuntive](../../tests/ui313-regressions.browser.test.mjs) restano prove separate per produttori, stati, proprietà/ruoli e contrasto dichiarati. I [test del tour](../../tests/ui-view-tour.browser.test.mjs) provano anche i suoi rifiuti: colore estraneo, gradiente/ombra/alpha diversi, variabile non risolta, asset assente e clic dietro un popup. [Evidenze della candidata](../evidenze/COLLAUDI.md#review-temi-313-verifiche-2026-11-16).
+
 <a id="cornice-riprendi-ui-2026-11-11"></a>
 
 ## Schermata di blocco comune e ripresa — 11/11/2026

@@ -112,8 +112,8 @@
 }
 
 .icon-red {
-    background: rgba(239, 68, 68, 0.12);
-    color: var(--status-error);
+    background: rgba(var(--accent-rgb), 0.12);
+    color: var(--theme-ink);
 }
 
 .icon-amber {
@@ -247,7 +247,7 @@
 /* Mappa visiva (14/11/2026): icone di stato troppo chiare sul fondo chiaro (< 3:1). */
 html:not(.dark) .icon-emerald { color: var(--theme-ink); }
 html:not(.dark) .icon-amber { color: var(--theme-ink); }
-html:not(.dark) .icon-red { color: #b91c1c; }
+html:not(.dark) .icon-red { color: var(--theme-ink); }
 
 /* Registro Codex dei colori (14/11/2026): le icone delle sezioni legali sono argomenti, non
    esiti; seguono la palette. Nessuna modifica ai testi legali. */

@@ -124,7 +124,7 @@
     background: rgba(var(--accent-rgb), 0.1 );
 }
 
-.icon-red {
+:is(#btn-reset-vault, #btn-revoke-all-sessions) .icon-red {
     color: var(--status-error);
     background: rgba(239, 68, 68, 0.1);
 }

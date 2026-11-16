@@ -388,7 +388,7 @@
     top: calc(100% + 8px);
     left: 0;
     right: 0;
-    background: rgba(255, 255, 255, 0.98);
+    background: var(--rev-popup, var(--card-bg));
     backdrop-filter: blur(20px);
     border: 1px solid rgba(var(--accent-rgb), 0.3 );
     border-radius: 20px;
@@ -402,8 +402,7 @@
 }
 
 .dark .base-dropdown-menu {
-    background: rgba(var(--accent-rgb), 0.95);
-    /* Azzurro profondo / Ceruleo (Sky-900) */
+    background: var(--rev-popup, var(--card-bg));
     border: 1px solid rgba(var(--accent-rgb), 0.4);
     box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(20px);
@@ -411,13 +410,13 @@
 
 .dark .base-dropdown-item {
     color: rgba(255, 255, 255, 0.9);
-    /* Testo chiaro su fondo intenso */
+    /* Testo chiaro sulla superficie scura tinta della palette. */
 }
 
 .dark .base-dropdown-item:hover {
     /* specificità 0,2,1 — supera .base-dropdown-item:hover (0,1,1) senza !important */
     background: rgba(var(--accent-rgb), 0.15);
-    color: #fff;
+    color: var(--theme-ink);
 }
 
 .dark .base-dropdown-item.active {
@@ -446,11 +445,11 @@
 
 .base-dropdown-item:hover {
     background: rgba(var(--accent-rgb), 0.1 );
-    color: var(--accent);
+    color: var(--theme-ink);
 }
 
 .base-dropdown-item.active {
-    background: var(--accent);
+    background: var(--theme-fill);
     color: #fff;
 }
 

@@ -53,7 +53,7 @@
 }
 
 .card-red {
-    --card-accent: var(--status-error);
+    --card-accent: var(--accent);
 }
 
 .card-purple {

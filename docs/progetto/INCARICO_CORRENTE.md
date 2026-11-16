@@ -1,5 +1,15 @@
 # Incarico corrente
 
+<a id="review-temi-313-incarico-2026-11-16"></a>
+
+## Giro temi #313 — revisione Codex e completamento Automezzi, 16/11/2026
+
+Fonte diretta: Diego consegna il commit **39e7bab90376d19d97349921e9458f6487f83ee4** di Claude, segnala il controllo incompleto di Automezzi e ordina **«Procedi»** al riepilogo di revisione, correzione del residuo riprodotto, verifiche sulle due grafiche/sette palette/chiaro-scuro e registrazione di componenti, colori, test ed esiti. Codex procede senza attendere la disponibilità di Claude; il confronto indipendente con Claude seguirà sulla candidata concreta. La [#316](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/316) resta la fonte del giro, base master **077b6a12b13ba9614bae0eabd0a860f8a2a93f8d**.
+
+Ramo separato `codex/review-ui313-20261116`, partenza immutabile 39e7bab: un solo esecutore delle modifiche, supporti indipendenti in sola lettura. Autorizzati analisi, correzioni locali pertinenti, test con produttori reali e dati sintetici, aggiornamento dei documenti esistenti e consegna revisionabile dei correttivi per il confronto con Claude. Le regole cromatiche del giro sono quelle della [decisione registrata](DECISIONI.md#giro-temi-313-decisione-2026-11-15); nessuna eccezione o vista omessa viene promossa a PASS. Nessun account o dato reale, operazione Firebase/Google Cloud, nuova versione, merge o deploy deriva da questo incarico. La produzione 1.2.276 e la disponibilità ordinaria della cornice restano quelle già attestate; il precedente ordine di pubblicazione era riferito agli undici correttivi della #314.
+
+Diego ribadisce **«Procedi con i 4 punti»**: completare matrice canonica, giro delle 22 pagine nelle due grafiche/sette palette, registrazione degli esiti e consegna del correttivo separato a Claude per il confronto con #316. La consegna comprende ramo e diff revisionabili su GitHub e notifica nel thread già autorizzato; nessuna unione automatica nel ramo di Claude o in master.
+
 <a id="temi-rilascio-1276-incarico-2026-11-15"></a>
 
 ## APP 1.2.276 — ordine eseguito e ricevuta consolidata, 15/11/2026

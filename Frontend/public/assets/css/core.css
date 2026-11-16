@@ -512,7 +512,7 @@ textarea::placeholder {
 }
 
 .text-red {
-    color: var(--status-error);
+    color: var(--theme-ink);
 }
 
 .flex-1 {

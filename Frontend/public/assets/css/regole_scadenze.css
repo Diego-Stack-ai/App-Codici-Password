@@ -479,7 +479,7 @@
 }
 
 .deadline-personal-status.is-unlinked {
-    color: var(--status-warning);
+    color: var(--theme-ink);
 }
 
 .deadline-personal-data {

@@ -790,7 +790,7 @@ html:not(.dark) .location-tab-btn.active {
     color: #fff;
 }
 .company-profile-page .icon-red {
-    background: linear-gradient(135deg, var(--status-error) 0%, #dc2626 100%);
+    background: var(--rev-icon-bg);
     color: white;
 }
 .company-profile-page .form-card {

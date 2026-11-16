@@ -225,6 +225,7 @@
 
 .btn-icon-edit:hover,
 .btn-icon-save:hover,
+.btn-icon-cancel:hover,
 .btn-manage-account-semantic:not(.btn-delete-item-semantic):hover {
     background: rgba(var(--accent-rgb), 0.15 );
     color: var(--accent);
@@ -232,7 +233,6 @@
 }
 
 .btn-icon-delete:hover,
-.btn-icon-cancel:hover,
 .btn-delete-item-semantic:hover {
     background: rgba(239, 68, 68, 0.15);
     color: var(--status-error);
