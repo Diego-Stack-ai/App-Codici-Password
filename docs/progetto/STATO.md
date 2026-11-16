@@ -1,14 +1,14 @@
 # Stato
 
+<a id="stato-corrente"></a>
+
 <a id="rilascio-1277-stato-2026-11-16"></a>
 
-## APP 1.2.277 — candidata confezionata, 16/11/2026
+## APP 1.2.277 — pubblicata e verificata, 16/11/2026
 
-Diego autorizza il [rilascio del giro completo](DECISIONI.md#rilascio-1277-decisione-2026-11-16). La [#318](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/318), sorgente funzionale **a1becaa7**, comprende la base Claude recepita e i correttivi successivi, con CI completa #1179 e GO tecnico. Il confezionamento 1.2.277 aggiorna solo riferimenti di versione e catalogo reviewedAppVersion: **365 file pubblici identici dopo normalizzazione**, versione/guida/offline/documenti verdi. La candidata finale attende riesame e propria CI prima di merge e Hosting. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1277-verifiche-2026-11-16); esiti definitivi, SHA e run saranno annotati sulla #318 dopo la loro osservazione.
+Online **1.2.277**, sorgente **8d28c7b5f406e68b1daeaa01c736d74845f75b2c**, sourceDirty=false. La [#318](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/318) comprende il giro Claude e il seguito Codex: candidata **630aed9f**, identica alla sorgente funzionale a1becaa7 dopo normalizzazione delle sole versioni, riesame indipendente e [CI completa #1180 verde](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43873715041). Merge autorizzato, CI del master #1181 verde e [Hosting #1182 riuscito](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43877847216). Approvazione production eseguita da Codex su delega di Diego, senza cambiare protezioni. [Ricevuta completa](../evidenze/COLLAUDI.md#rilascio-1277-verifiche-2026-11-16).
 
-All'avvio, GET pubblico del manifest: **1.2.276/e649fd079**, sourceDirty=false; la .277 non è ancora distribuita. Cornice ordinaria conservata secondo l'attivazione .275, pilot ritirato; nessuna nuova lettura/scrittura amministrativa o prova fisica. Gli stati sotto sono checkpoint precedenti.
-
-<a id="stato-corrente"></a>
+Verifica pubblica completa **365 hash / 41 profili di intestazioni / tre probe di normalizzazione PASS** alle **14:10:20.966 UTC**, più cinque GET indipendenti conformi alle **14:11:09–14:11:13 UTC**. Cornice ordinaria conservata secondo l'attivazione .275; pilot storico ritirato, nessuna operazione policy/Rules/backend o nuova prova fisica. Questa ricevuta aggiorna soltanto documenti: l'eventuale master documentale successivo conserva lo stesso runtime pubblicato, senza ulteriore Hosting. Gli stati sotto sono checkpoint precedenti.
 
 <a id="deep-temi-313-stato-2026-11-16"></a>
 
