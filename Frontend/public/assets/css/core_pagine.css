@@ -274,11 +274,6 @@ body[data-ui-revision][data-ui-model="hub"] .matrix-card:is(.card-blue, .card-gr
     color: var(--text-primary);
 }
 
-/* Classica: icona grande al centro della scheda, colore del testo. */
-body[data-ui-revision="classica"][data-ui-model="hub"] .matrix-card .matrix-icon-box {
-    color: var(--text-primary);
-}
-
 /* Nuova: icona in un piccolo riquadro accentato, non più filigrana a tutta scheda. */
 body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card.border-glow::after {
     display: none;
@@ -297,7 +292,7 @@ body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card .matrix-i
     border-radius: 14px;
     background: var(--rev-icon-bg);
     box-shadow: none;
-    color: var(--rev-icon);
+    color: var(--card-icon-ink);
 }
 
 body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card .matrix-icon-box span {

@@ -1,5 +1,13 @@
 # Rilascio
 
+<a id="rilascio-1278-2026-11-16"></a>
+
+## UI 1.2.278 — base comune e livree, solo Hosting
+
+L'[ordine di Diego](../progetto/INCARICO_CORRENTE.md#rilascio-1278-incarico-2026-11-16) autorizza il rilascio dei correttivi Ricerca e delle livree comuni. Versione con script canonico, rigenerazione offline e inclusione del nuovo produttore delle decorazioni, `reviewedAppVersion` della guida allineato; `contentVersion` resta 13 se gli aiuti applicativi non cambiano. Controllare l'identità del sorgente dopo normalizzazione delle versioni e riesaminare i soli derivati rigenerati. Richiesti GO indipendente sul pacchetto e CI completa verde sullo SHA finale della PR, merge con testa attesa, workflow manuale `firebase-deploy.yml` sul master finale e scope `hosting`, production protetto con approvazione delegata. Nessun cambio di workflow/protezioni o deploy dal PC.
+
+Dopo il deploy verificare manifest, tutti gli hash, intestazioni, redirect/rewrite e probe canonici sullo SHA effettivamente pubblicato. Ricevute documentali successive restano distinte dal runtime e non richiedono un altro deploy. Rollback eventuale tramite revert revisionato, nuova versione canonica e stesso workflow Hosting, preservando dati e disponibilità ordinaria della cornice. Nessuna operazione policy, Rules, Functions, Storage, Auth, claim o IAM. [Stato](../progetto/STATO.md#rilascio-1278-stato-2026-11-16), [ricevuta](../evidenze/COLLAUDI.md#rilascio-1278-verifiche-2026-11-16).
+
 <a id="rilascio-1277-2026-11-16"></a>
 
 ## UI 1.2.277 — giro completo #313, solo Hosting

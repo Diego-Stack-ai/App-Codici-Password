@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {runDynamicMap,compareDynamicInventory,contrastRatio} from '../scripts/dynamic-visual-map.mjs';
+import {runDynamicMap,compareDynamicInventory,contrastRatio,inspectDynamicPaint} from '../scripts/dynamic-visual-map.mjs';
 
 test('eleven dynamic UI families exercise their real producers in all 28 contexts', {timeout:300000}, async()=>{
   const report=await runDynamicMap({outDir:'.codex-tmp/ui-dynamic-map-test'});
@@ -15,6 +15,23 @@ test('eleven dynamic UI families exercise their real producers in all 28 context
 });
 
 const fourContexts=['tre-livelli','classica'].flatMap(graphics=>['light','dark'].map(theme=>({graphics,theme,palette:'red'})));
+
+test('header livery roles reject swapped variants, missing roles and unreadable paint', {timeout:60000}, async()=>{
+  const selector='#header-placeholder .btn-icon-header .material-symbols-outlined';
+  for(const [graphics,mutationCss] of [
+    ['tre-livelli',`${selector}{color:var(--text-primary)!important}`],
+    ['classica',`${selector}{color:var(--companion-ink)!important}`],
+    ['tre-livelli','body[data-ui-revision]{--companion-ink:initial!important}'],
+    ['tre-livelli',`${selector}{color:var(--rev-popup)!important}`]
+  ]){
+    const report=await runDynamicMap({contexts:[{graphics,theme:'light',palette:'red'}],cases:['UI275-05'],mutationCss});
+    assert.equal(report.status,'FAIL',`${graphics}: mutation rejected`);
+    assert.ok(report.results.every(result=>result.checks.some(check=>check.name.includes('follows role')&&check.status==='FAIL')));
+    if(mutationCss.includes('initial'))assert.ok(report.results.flatMap(result=>result.checks).flatMap(check=>check.values||[]).some(value=>value.roleResolved===false));
+    if(mutationCss.includes('color:var(--rev-popup)'))assert.ok(report.results.every(result=>result.checks.some(check=>check.name.includes('contrast')&&check.status==='FAIL')));
+  }
+  await assert.rejects(inspectDynamicPaint(null,{newRole:'--companion-ink'}),/explicit graphics context/);
+});
 test('negative controls: fixed blue widget border and intense blue guide glow fail in both graphics/themes', {timeout:90000}, async()=>{
   const report=await runDynamicMap({contexts:fourContexts,cases:['UI275-08','UI275-10'],
     mutationCss:'.profile-widget{border-top-color:#38bdf8!important}.guide-close-button{box-shadow:0 10px 25px rgba(37,99,235,.3)!important}'});

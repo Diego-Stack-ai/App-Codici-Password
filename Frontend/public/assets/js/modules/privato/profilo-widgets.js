@@ -1,5 +1,5 @@
 import {confirmFrameAction} from '../core/vault-frame-client.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.277';
+import { auth, db } from '../../firebase-config.js?v=1.2.278';
 import { collection, deleteDoc, doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
@@ -258,7 +258,7 @@ function renderWidgets() {
                         className: 'material-symbols-outlined notranslate profile-widget-identity',
                         textContent: widget.icon || 'widgets',
                         dataset: { colorRole: widget.color ? 'custom' : 'theme' },
-                        style: { color: widget.color || 'var(--rev-icon)' }
+                        style: { color: widget.color || 'var(--card-icon-ink)' }
                     }),
                     createElement('div', { className: 'profile-widget-title' }, [
                         createElement('strong', { textContent: widget.title }),

@@ -19,8 +19,8 @@ const launchBrowser = () => chromium.launch({headless: true,
 
 function prepare(html, {theme, palette, revision}) {
   return html.replace(/<script\b[\s\S]*?<\/script>/gi, '')
-    .replace(/<body([^>]*)>/i, (match, attrs) => `<body${attrs.replace(/\s(hidden|inert)(?=[\s>])/g, '').replace(/data-ui-revision="[^"]*"/, `data-ui-revision="${revision}"`)}>`)
-    .replace(/<html([^>]*)>/i, (match, attrs) => `<html${attrs.replace(/\s(class|data-color-theme)="[^"]*"/g, '')} class="${theme === 'dark' ? 'dark' : ''}" data-color-theme="${palette}">`);
+    .replace(/<body([^>]*)>/i, (match, attrs) => `<body${attrs.replace(/\s(hidden|inert)(?=[\s>])/g, '').replace(/data-ui-revision="[^"]*"/, 'data-ui-revision="tre-livelli"')}>`)
+    .replace(/<html([^>]*)>/i, (match, attrs) => `<html${attrs.replace(/\s(class|data-color-theme|data-ui-graphics)="[^"]*"/g, '')} class="${theme === 'dark' ? 'dark' : ''}" data-color-theme="${palette}" data-ui-graphics="${revision==='classica'?'classic':'new'}">`);
 }
 
 let browser, server, base;

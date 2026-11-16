@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "source": "Ordine diretto di Diego, 16/11/2026: base evoluta comune; bicolore e saturazione card +15% solo Nuova.",
+  "graphics": ["classic", "new"],
+  "baseRevision": "tre-livelli",
+  "expectedPageCount": 22,
+  "palettes": ["blue", "green", "red", "sand", "petrol", "lavender", "dusty-rose"],
+  "themes": ["light", "dark"],
+  "widths": [320, 1280],
+  "cardSaturationMultiplier": 1.15,
+  "colorSource": "Frontend/public/assets/css/core.css",
+  "decorationsSource": "Frontend/public/assets/js/modules/shared/page-decorations.js",
+  "sharedStyles": "Frontend/public/assets/css/core_ui.css",
+  "test": "tests/ui-livery.browser.test.mjs",
+  "cardProducers": [
+    "Frontend/public/assets/js/modules/shared/account-avatar.js",
+    "Frontend/public/assets/js/modules/shared/account-list-view.js",
+    "Frontend/public/assets/js/modules/settings/archivio_account.js",
+    "Frontend/public/assets/js/modules/privato/profilo-dashboard.js",
+    "Frontend/public/assets/js/modules/azienda/company-profile-ui.js",
+    "Frontend/public/assets/js/modules/privato/profilo-widgets.js"
+  ],
+  "pairNames": {
+    "blue": "Rame", "green": "Oro", "red": "Petrolio grigio", "sand": "Blu ardesia",
+    "petrol": "Terracotta", "lavender": "Salvia", "dusty-rose": "Blu polvere"
+  },
+  "cardGlyphs": [
+    ".matrix-icon-box:not(.icon-blue):not(.icon-purple) > .material-symbols-outlined",
+    ".settings-icon-box[data-icon-role=theme] > .material-symbols-outlined:not([data-icon-role])",
+    ".material-symbols-outlined[data-icon-role=theme]",
+    ".archive-icon-box > .material-symbols-outlined",
+    ".profile-summary-card > .material-symbols-outlined",
+    ".profile-widget-identity[data-color-role=theme]"
+  ],
+  "filledCardGlyphs": [
+    ".company-profile-page .settings-icon-box:is(.icon-blue,.icon-purple) > .material-symbols-outlined",
+    ".matrix-icon-box:is(.icon-blue,.icon-purple) > .material-symbols-outlined",
+    ".account-icon-box > span.account-default-logo"
+  ],
+  "footer": {
+    "producer": "Frontend/public/assets/js/components-v129.js",
+    "homeProducer": "Frontend/public/assets/js/modules/home/home.js",
+    "homeActions": ["Nuovo account privato", "Nuova scadenza", "Nuovo account azienda: scegli azienda"],
+    "inkRole": "--companion-ink",
+    "fillRole": "--companion-fill",
+    "deepRole": "--companion-fill-deep",
+    "guide": "#profile-guide-button"
+  },
+  "limits": "Local real producers with synthetic repositories; no real Auth/Vault, physical devices or production certification. Gradients are measured by the existing ancestor compositor; sibling glow/watermark optical occlusion is assessed separately in screenshots."
+}

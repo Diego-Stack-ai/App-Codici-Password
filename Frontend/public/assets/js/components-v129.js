@@ -1,12 +1,13 @@
 import {beginFrameLogout} from './frame-navigation.js';
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.277';
+import { auth } from './firebase-config.js?v=1.2.278';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
 import { setFooterReady } from './footer-state.js';
 import { APP_VERSION } from './app-env.js';
+import { installPageDecorations } from './modules/shared/page-decorations.js';
 
 // Guard idempotenza — sostituisce window.__componentsInitialized
 let _componentsInitialized = false;
@@ -68,6 +69,7 @@ export async function initComponents() {
         const isHome = document.body?.classList.contains('home-page') || path === '/home' || path.endsWith('home_page.html') || /^\/home-v\d+\.html$/.test(path);
         // Pagine che non devono avere header/footer standard (Login, Registrazione, etc)
         const isAuth = ['login.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'].some(p => path.endsWith(p)) || path.endsWith('/');
+        if (!isAuth) installPageDecorations(document, path);
 
         const h = new Date().getHours();
         const timeGreeting = (h >= 6 && h < 13) ? t('greeting_morning') : (h >= 13 && h < 18) ? t('greeting_afternoon') : t('greeting_evening');
@@ -269,6 +271,7 @@ export async function initComponents() {
             // GUIDA RAPIDA (Icona Centrale - Solo Profilo)
             if (path.includes('profilo_privato')) {
                 const guideBtn = createElement('button', {
+                    id: 'profile-guide-button',
                     className: 'btn-icon-header',
                     title: 'Guida Profilo',
                     onclick: () => {

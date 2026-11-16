@@ -2,10 +2,96 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
+import {createDynamicHarness} from '../scripts/lib/dynamic-theme-harness.mjs';
 const {chromium} = createRequire(import.meta.url)('playwright');
 const source = (await readFile(new URL('../Frontend/public/assets/js/modules/assistant/assistant-ui.js', import.meta.url), 'utf8'))
     .replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '')
     .replace("import('./speech-synthesis-controller.js')", "Promise.reject(new Error('SPEECH_DISABLED_IN_TEST'))");
+const controllerSource = (await readFile(new URL('../Frontend/public/assets/js/modules/assistant/assistant-controller.js', import.meta.url), 'utf8'))
+    .replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
+
+test('Search opens without a square pulse and uses an empty divider without collapsing real messages', {timeout: 120000}, async () => {
+    const harness = await createDynamicHarness();
+    const failures = [];
+    try {
+        for (const graphics of ['classica', 'tre-livelli']) {
+            const page = await harness.open('profilo_privato.html', {graphics, theme: 'light', palette: 'blue'});
+            try {
+                await page.emulateMedia({reducedMotion: 'no-preference'});
+                await page.evaluate(({ui, controller}) => {
+                    // Restore motion only for this regression: sample the actual CSS animation halfway through.
+                    for (const style of document.querySelectorAll('style')) {
+                        if (style.textContent.startsWith('*,*::before,*::after{animation')) style.remove();
+                    }
+                    Object.defineProperty(window, 'SpeechRecognition', {value: undefined, configurable: true});
+                    Object.defineProperty(window, 'webkitSpeechRecognition', {value: undefined, configurable: true});
+                    const createUI = new Function('t', ui + '; return createAssistantUI;')(value => value);
+                    const user = {uid: 'synthetic-owner'};
+                    const dependencies = {
+                        vaultFrameClient: {isChild: () => false}, auth: {currentUser: user},
+                        onAuthStateChanged: () => () => {},
+                        ensureVaultKeyMaterial: () => new Promise(resolve => {window.releaseSearch = resolve;}),
+                        loadVaultSearchRecords: async () => [],
+                        fetch: async () => ({ok: false}),
+                        getCurrentLanguage: () => 'it', t: value => value,
+                        getOfflineReadiness: () => ({complete: true}),
+                        VaultConversationEngine: class {
+                            ask() {return {message: 'Risposta sintetica', items: []};}
+                            clear() {}
+                        },
+                        createAssistantUI: createUI
+                    };
+                    window.initSearchFixture = new Function(...Object.keys(dependencies), controller + '; return initVaultAssistant;')(...Object.values(dependencies));
+                    window.searchUser = user;
+                    document.getElementById('search-status').classList.remove('hidden');
+                }, {ui: source, controller: controllerSource});
+                for (const width of [320, 1280]) {
+                    await page.setViewportSize({width, height: 844});
+                    for (const theme of ['light', 'dark']) for (const palette of ['blue', 'green', 'red', 'sand', 'petrol', 'lavender', 'dusty-rose']) {
+                        const context = `${graphics}/${width}/${theme}/${palette}`;
+                        await page.evaluate(async ({theme, palette}) => {
+                            document.documentElement.classList.toggle('dark', theme === 'dark');
+                            document.documentElement.dataset.colorTheme = palette;
+                            window.searchController = await window.initSearchFixture(window.searchUser);
+                            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                        }, {theme, palette});
+                        await page.waitForFunction(() => document.querySelector('link[data-vault-assistant]')?.sheet);
+                        await page.locator('#search-status').click();
+                        await page.waitForSelector('#search-status[aria-busy="true"]');
+                        const pulse = await page.locator('#search-status .material-symbols-outlined').evaluate(element => {
+                            const animations = element.getAnimations();
+                            for (const animation of animations) {animation.pause(); animation.currentTime = 400;}
+                            const style = getComputedStyle(element);
+                            return {animations: animations.length, shadow: style.boxShadow};
+                        });
+                        if (!pulse.animations || pulse.shadow !== 'none') failures.push(`${context}: preparing square ${JSON.stringify(pulse)}`);
+                        await page.evaluate(() => window.releaseSearch('synthetic-key'));
+                        await page.waitForSelector('.vault-assistant-panel');
+                        const empty = await page.locator('.vault-assistant-conversation').evaluate(element => {
+                            const style = getComputedStyle(element);
+                            const probe = document.createElement('div');
+                            probe.style.borderTop = '1px solid var(--rev-border)';
+                            element.append(probe);
+                            const expectedBorder = getComputedStyle(probe).borderTopColor;
+                            probe.remove();
+                            return {height: element.getBoundingClientRect().height, radius: style.borderRadius, padding: style.padding,
+                                background: style.backgroundColor, border: style.borderTopWidth, borderStyle: style.borderTopStyle,
+                                color: style.borderTopColor, expectedBorder};
+                        });
+                        if (empty.height < 1 || empty.height > 2 || empty.border !== '1px' || empty.borderStyle !== 'solid' || empty.color !== empty.expectedBorder || empty.radius !== '0px' || empty.padding !== '0px' || empty.background !== 'rgba(0, 0, 0, 0)') failures.push(`${context}: empty divider ${JSON.stringify(empty)}`);
+                        await page.locator('.vault-assistant-input').fill('Domanda sintetica');
+                        await page.locator('.vault-assistant-send').click();
+                        await page.waitForFunction(() => document.querySelector('.vault-assistant-conversation')?.textContent.includes('Risposta sintetica'));
+                        const populated = await page.locator('.vault-assistant-conversation').evaluate(element => ({height: element.getBoundingClientRect().height, radius: getComputedStyle(element).borderRadius, text: element.textContent}));
+                        assert.ok(populated.height > 30 && populated.radius !== '0px' && populated.text.includes('Domanda sintetica'), `${context}: real messages remain visible`);
+                        await page.evaluate(() => window.searchController.destroy());
+                    }
+                }
+            } finally {await page.context().close();}
+        }
+        assert.equal(failures.length, 0, failures.slice(0, 4).join('\n'));
+    } finally {await harness.close();}
+});
 
 test('real Search DOM rejects retained reveal/copy and late plaintext after dialog teardown', async () => {
     const browser = await chromium.launch({executablePath: process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true});

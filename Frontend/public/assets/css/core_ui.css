@@ -1188,6 +1188,7 @@ html body[data-ui-revision] .guide-close-button:is(:hover, :focus-visible) {
    sfondo, su un grigio neutro (non bluastro) per non falsare i colori caldi. Valgono in entrambe le
    grafiche (data-ui-revision «tre-livelli» o «classica», 14/11/2026). Le percentuali sono i soli punti da ritoccare. */
 [data-ui-revision] {
+    --card-icon-ink: var(--theme-ink);
     /* Materiali della Classica con i ruoli della palette (ordine di Diego, 14/11/2026):
        superfici a vetro traslucido tinto e sfocato. Il contrasto si misura sullo sfondo
        composto, nel caso peggiore della sfumatura di pagina e del bagliore. */
@@ -1426,4 +1427,114 @@ html body[data-ui-revision] :is(.mini-icon-box, .config-badge)[data-icon-role="t
 
 html body[data-ui-revision] .config-badge[data-icon-role="theme"] {
     color: var(--rev-text-accent);
+}
+
+/* One evolved layout, three shared decorative layers, independent of livery. */
+body[data-ui-revision] .archive-watermark {
+    display: block;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%) rotate(-10deg);
+    opacity: 0.05;
+    z-index: var(--z-decoration);
+    pointer-events: none;
+    user-select: none;
+}
+
+body[data-ui-revision] .header-title::before,
+body[data-ui-revision] .page-container::after {
+    content: var(--page-symbol, none) / "";
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    pointer-events: none;
+    user-select: none;
+}
+
+body[data-ui-revision] .header-title::before {
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    margin-right: var(--space-2, 0.5rem);
+    border-radius: 9px;
+    background: rgba(var(--accent-rgb), 0.12);
+    color: var(--accent);
+    font-size: var(--icon-md);
+    vertical-align: middle;
+}
+
+body[data-ui-revision] .page-container::after {
+    display: block;
+    margin-top: var(--space-6, 1.5rem);
+    text-align: right;
+    font-size: var(--icon-deco-mark, 72px);
+    color: var(--text-primary);
+    opacity: 0.06;
+}
+
+/* Explicit card glyphs, not status colors or arbitrary text badges. */
+html[data-ui-graphics] body[data-ui-revision] :is(.settings-icon-box, .mini-icon-box, .detail-section-icon, .material-symbols-outlined)[data-icon-role="theme"],
+html[data-ui-graphics] body[data-ui-revision] .archive-icon-box > .material-symbols-outlined,
+html[data-ui-graphics] body[data-ui-revision] .profile-summary-card > .material-symbols-outlined {
+    color: var(--card-icon-ink);
+}
+
+/* Bare section glyphs need an opaque palette chip over the page gradient. */
+html[data-ui-graphics] body[data-ui-revision] .detail-section-header > .detail-section-icon[data-icon-role="theme"] {
+    background: var(--rev-icon-bg);
+    border-radius: var(--radius-sm);
+}
+
+/* New livery changes only declared ordinary controls and decorative card identities. */
+html[data-ui-graphics] body[data-ui-revision] .matrix-icon-box:is(.icon-purple, .icon-blue) {
+    background: linear-gradient(135deg, var(--rev-fill), color-mix(in srgb, var(--rev-fill) 80%, #000));
+    color: #fff;
+}
+
+html[data-ui-graphics] body[data-ui-revision] .account-icon-box > span.account-default-logo {
+    background: linear-gradient(135deg, var(--theme-fill), var(--theme-fill-deep));
+    color: #fff;
+}
+
+html[data-ui-graphics] body[data-ui-revision] .matrix-icon-box:is(.icon-purple, .icon-blue) > .material-symbols-outlined,
+html[data-ui-graphics] body[data-ui-revision].company-profile-page :is(.icon-purple, .icon-blue) > .material-symbols-outlined {
+    color: #fff;
+}
+
+html[data-ui-graphics="new"] body[data-ui-revision] {
+    --card-icon-ink: var(--companion-card-ink);
+}
+
+html[data-ui-graphics="new"] body[data-ui-revision] :is(.search-status, .footer-settings-link, #profile-guide-button),
+html[data-ui-graphics="new"] body[data-ui-revision] .base-header .btn-icon-header:not(#header-logout-btn) {
+    color: var(--companion-ink);
+}
+
+html[data-ui-graphics="new"] body[data-ui-revision] #footer-center-actions :is(.btn-fab-privato, .btn-fab-scadenza, .btn-fab-azienda, .btn-fab-archive):not(.btn-fab-danger):not(.btn-fab-neutral) {
+    background: linear-gradient(135deg, var(--companion-fill), var(--companion-fill-deep));
+    color: #fff;
+}
+
+html[data-ui-graphics="new"] body[data-ui-revision] #footer-center-actions .btn-fab-privato:not(.btn-fab-danger):not(.btn-fab-neutral) {
+    background: var(--companion-fill);
+}
+
+html[data-ui-graphics="new"] body[data-ui-revision] .matrix-icon-box:is(.icon-purple, .icon-blue),
+html[data-ui-graphics="new"] body[data-ui-revision].company-profile-page :is(.icon-purple, .icon-blue) {
+    background: linear-gradient(135deg, var(--companion-card-fill), color-mix(in srgb, var(--companion-card-fill) 80%, #000));
+    color: #fff;
+}
+
+html[data-ui-graphics="new"] body[data-ui-revision] .account-icon-box > span.account-default-logo {
+    background: linear-gradient(135deg, var(--companion-card-fill), color-mix(in srgb, var(--companion-card-fill) 80%, #000));
+    color: #fff;
 }

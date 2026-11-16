@@ -72,6 +72,7 @@
       "markup": "<div class=\"settings-icon-box icon-purple\">x</div>",
       "foregroundRole": "white",
       "backgroundRole": "--rev-fill",
+      "backgroundRoles": {"classic": "--rev-fill", "new": "--companion-card-fill"},
       "minContrast": 4.5
     },
     {
@@ -83,6 +84,7 @@
       "markup": "<div class=\"settings-icon-box icon-blue\">x</div>",
       "foregroundRole": "white",
       "backgroundRole": "--rev-fill",
+      "backgroundRoles": {"classic": "--rev-fill", "new": "--companion-card-fill"},
       "minContrast": 4.5
     },
     {
@@ -205,7 +207,7 @@
       ],
       "selector": ".settings-icon-box.icon-purple[data-icon-role=\"theme\"]",
       "markup": "<div class=\"settings-icon-box icon-purple\" data-icon-role=\"theme\">x</div>",
-      "foregroundRole": "--rev-icon",
+      "foregroundRole": "--card-icon-ink",
       "backgroundRole": "--rev-icon-bg",
       "minContrast": 3
     },
@@ -216,7 +218,7 @@
       ],
       "selector": ".settings-icon-box.icon-blue[data-icon-role=\"theme\"]",
       "markup": "<div class=\"settings-icon-box icon-blue\" data-icon-role=\"theme\">x</div>",
-      "foregroundRole": "--rev-icon",
+      "foregroundRole": "--card-icon-ink",
       "backgroundRole": "--rev-icon-bg",
       "minContrast": 3
     },
@@ -227,7 +229,7 @@
       ],
       "selector": ".settings-icon-box.icon-emerald[data-icon-role=\"theme\"]",
       "markup": "<div class=\"settings-icon-box icon-emerald\" data-icon-role=\"theme\">x</div>",
-      "foregroundRole": "--rev-icon",
+      "foregroundRole": "--card-icon-ink",
       "backgroundRole": "--rev-icon-bg",
       "minContrast": 3
     },
@@ -238,7 +240,7 @@
       ],
       "selector": ".settings-icon-box.icon-amber[data-icon-role=\"theme\"]",
       "markup": "<div class=\"settings-icon-box icon-amber\" data-icon-role=\"theme\">x</div>",
-      "foregroundRole": "--rev-icon",
+      "foregroundRole": "--card-icon-ink",
       "backgroundRole": "--rev-icon-bg",
       "minContrast": 3
     },
@@ -249,7 +251,7 @@
       ],
       "selector": ".settings-icon-box.icon-red[data-icon-role=\"theme\"]",
       "markup": "<div class=\"settings-icon-box icon-red\" data-icon-role=\"theme\">x</div>",
-      "foregroundRole": "--rev-icon",
+      "foregroundRole": "--card-icon-ink",
       "backgroundRole": "--rev-icon-bg",
       "minContrast": 3
     },
@@ -329,7 +331,7 @@
       ],
       "selector": ".settings-icon-box.icon-emerald",
       "markup": "<div class=\"settings-icon-box icon-emerald\" data-icon-role=\"theme\">x</div>",
-      "foregroundRole": "--rev-icon",
+      "foregroundRole": "--card-icon-ink",
       "backgroundRole": "--rev-icon-bg",
       "minContrast": 3
     },
@@ -340,7 +342,7 @@
       ],
       "selector": ".settings-icon-box.icon-amber",
       "markup": "<div class=\"settings-icon-box icon-amber\" data-icon-role=\"theme\">x</div>",
-      "foregroundRole": "--rev-icon",
+      "foregroundRole": "--card-icon-ink",
       "backgroundRole": "--rev-icon-bg",
       "minContrast": 3
     },
@@ -351,7 +353,7 @@
       ],
       "selector": ".settings-icon-box.icon-red",
       "markup": "<div class=\"settings-icon-box icon-red\" data-icon-role=\"theme\">x</div>",
-      "foregroundRole": "--rev-icon",
+      "foregroundRole": "--card-icon-ink",
       "backgroundRole": "--rev-icon-bg",
       "minContrast": 3
     },

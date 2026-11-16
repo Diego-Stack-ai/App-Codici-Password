@@ -6,11 +6,11 @@
     try {
         if (updateGraphics) {
         classic ??= localStorage.getItem('ui_graphics') === 'classic';
-        if (classic) document.documentElement.dataset.uiGraphics = 'classic';
-        else delete document.documentElement.dataset.uiGraphics;
+        document.documentElement.dataset.uiGraphics = classic ? 'classic' : 'new';
         if (document.body) {
             if (document.body.hasAttribute('data-ui-revision')) {
-                document.body.setAttribute('data-ui-revision', classic ? 'classica' : 'tre-livelli');
+                // One evolved interface; graphics chooses only the color livery.
+                document.body.setAttribute('data-ui-revision', 'tre-livelli');
             }
             bodyObserver?.disconnect(); bodyObserver = null;
         } else if (!bodyObserver) {

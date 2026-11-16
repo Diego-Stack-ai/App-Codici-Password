@@ -30,15 +30,16 @@ const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 
 // Return actual computed values and expected roles in the SAME element scope.
 // Unsupported paint is explicitly unmeasured. Hidden/missing expected targets fail.
-export async function inspectDynamicPaint(page,paint,{theme}={}) {
-  const values=await page.evaluate(({paint,theme})=>{
+export async function inspectDynamicPaint(page,paint,{theme,graphics}={}) {
+  if(paint.newRole&&!['classica','tre-livelli'].includes(graphics))throw Error('A variant color role requires an explicit graphics context');
+  const values=await page.evaluate(({paint,theme,graphics})=>{
     const nodes=[...document.querySelectorAll(paint.selector)];
     return nodes.map(element=>{
       const style=getComputedStyle(element,paint.pseudo||null);
       const rect=element.getBoundingClientRect();
       let visible=!!rect.width&&!!rect.height;
       for(let node=element;node;node=node.parentElement){const s=getComputedStyle(node);if(s.display==='none'||s.visibility==='hidden'||Number(s.opacity)===0)visible=false;}
-      const role=theme==='dark'&&paint.darkRole?paint.darkRole:paint.role;
+      const role=graphics==='tre-livelli'&&paint.newRole?paint.newRole:theme==='dark'&&paint.darkRole?paint.darkRole:paint.role;
       const roleNames=role.startsWith('--')?[role]:[...role.matchAll(/var\(\s*(--[\w-]+)/g)].map(match=>match[1]);
       const roleDeclarations=Object.fromEntries(roleNames.map(name=>[name,style.getPropertyValue(name).trim()]));
       const roleResolved=Object.values(roleDeclarations).every(value=>value.length>0);
@@ -66,7 +67,7 @@ export async function inspectDynamicPaint(page,paint,{theme}={}) {
       }
       return {own,actual,expected,visible,roleDeclarations,roleResolved,...extra};
     });
-  },{paint,theme});
+  },{paint,theme,graphics});
   let records;
   if(paint.minimum||paint.kind==='headerContrast') records=(await page.evaluate(collectDynamicPaint)).records;
   return values.map(value=>{
@@ -93,7 +94,7 @@ export async function verifyDynamicState(page,item,state,context,{omitTrigger=fa
   const triggered=await page.evaluate(()=>window.__dynamicLastTrigger);
   add('real producer trigger',triggered?.id===item.id&&triggered?.phase===state,{actual:triggered||null});
   const graphics=await page.evaluate(()=>({body:document.body.dataset.uiRevision,html:document.documentElement.dataset.uiGraphics}));
-  add('real bootstrap retains graphics marker',graphics.body===context.graphics&&(context.graphics!=='classica'||graphics.html==='classic'),{actual:graphics});
+  add('real bootstrap retains shared base and distinct livery marker',graphics.body==='tre-livelli'&&graphics.html===(context.graphics==='classica'?'classic':'new'),{actual:graphics});
   if(['UI275-04','UI275-10'].includes(item.id)&&(state==='hover'||state==='focus')){
     const target=item.id==='UI275-04'?'.vault-assistant-help':'.guide-close-button';
     if(state==='hover')await page.locator(target).hover();else await page.locator(target).focus();
@@ -137,11 +138,11 @@ export async function verifyDynamicState(page,item,state,context,{omitTrigger=fa
         const nextGraphics=context.graphics==='classica'?'tre-livelli':'classica';
         await child.evaluate(next=>localStorage.setItem('ui_graphics',next==='classica'?'classic':'new'),nextGraphics);
         await page.waitForTimeout(30);
-        add('graphics stays fixed for the current parent Document',await page.evaluate(graphics=>document.body.dataset.uiRevision===graphics,context.graphics));
+        add('graphics stays fixed for the current parent Document',await page.evaluate(graphics=>document.body.dataset.uiRevision==='tre-livelli'&&document.documentElement.dataset.uiGraphics===(graphics==='classica'?'classic':'new'),context.graphics));
         await child.reload({waitUntil:'load'});await child.waitForFunction(()=>window.__dynamicThemeReady||window.__dynamicThemeError);
-        add('new child Document adopts the saved graphics preference',await child.evaluate(graphics=>document.body.dataset.uiRevision===graphics,nextGraphics));
+        add('new child Document adopts the saved graphics preference',await child.evaluate(graphics=>document.body.dataset.uiRevision==='tre-livelli'&&document.documentElement.dataset.uiGraphics===(graphics==='classica'?'classic':'new'),nextGraphics));
         await child.evaluate(()=>localStorage.clear());await page.waitForTimeout(30);
-        add('storage clear also preserves current parent graphics',await page.evaluate(graphics=>document.body.dataset.uiRevision===graphics,context.graphics));
+        add('storage clear also preserves current parent graphics',await page.evaluate(graphics=>document.body.dataset.uiRevision==='tre-livelli'&&document.documentElement.dataset.uiGraphics===(graphics==='classica'?'classic':'new'),context.graphics));
         await child.evaluate(graphics=>localStorage.setItem('ui_graphics',graphics==='classica'?'classic':'new'),context.graphics);
         await child.evaluate(({palette,theme})=>{localStorage.setItem('color_theme',palette);localStorage.setItem('theme',theme);},context);
         await page.waitForFunction(({palette,theme})=>document.documentElement.dataset.colorTheme===palette&&document.documentElement.classList.contains('dark')===(theme==='dark'),context,{timeout:2500});

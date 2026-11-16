@@ -63,7 +63,14 @@ html.dark .vault-assistant-result-content {
 }
 
 .search-status.assistant-preparing .material-symbols-outlined {
-    animation: assistant-pulse 0.8s infinite;
+    animation: assistant-search-preparing 0.8s infinite;
+}
+
+@keyframes assistant-search-preparing {
+    50% {
+        opacity: 0.6;
+        transform: scale(0.92);
+    }
 }
 
 .base-footer .search-status {
@@ -112,6 +119,17 @@ body.vault-assistant-open {
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
+}
+
+/* Empty conversation separates the header from the input without a padded capsule. */
+html body .vault-assistant-conversation:empty,
+html body[data-ui-revision] .vault-assistant-conversation:empty {
+    padding: 0;
+    border: 0;
+    border-top: 1px solid var(--rev-border, var(--border-color));
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 .vault-assistant-conversation[hidden] {
@@ -201,7 +219,6 @@ html.dark .vault-assistant-credential-label {
 
 .search-status.hidden { display: none; }
 .search-status .material-symbols-outlined { font-size: var(--icon-sm); }
-.search-status.assistant-preparing .material-symbols-outlined { animation: assistant-pulse 0.8s infinite; }
 .search-status-label {
     position: absolute;
     width: 1px;

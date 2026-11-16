@@ -38,6 +38,7 @@ if (outputArgument >= 0 && process.argv[outputArgument + 1]) {
 console.log(`Topologia UI: ${summary.pages} pagine · ${summary.controls} controlli · ${summary.eventBindings} eventi · ${summary.surfaces} superfici`);
 console.log(`Guide/video: ${summary.guidePages} pagine · ${summary.guideSteps} passi · ${summary.guideTargets} target · ${summary.journeys} percorsi`);
 console.log(`Controlli dormienti dichiarati: ${summary.dormantControls}`);
+console.log(`Livree dichiarate: ${summary.liveryPages} pagine · ${summary.liveryVariants} varianti · ${summary.liveryComponents} componenti · ${summary.liveryColorRoles} ruoli`);
 console.log(`Controlli non mappati: ${summary.unmappedControls}/${summary.controls} (${(summary.unmappedControlRate * 100).toFixed(2)}%)`);
 console.log(`Fingerprint sorgenti: ${topology.sourceFingerprint}`);
 if (errors.length) {

@@ -2,6 +2,28 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1278-stato-2026-11-16"></a>
+
+## APP 1.2.278 — confezionamento e rilascio in corso, 16/11/2026
+
+Su [ordine di Diego](INCARICO_CORRENTE.md#rilascio-1278-incarico-2026-11-16), si confeziona la candidata sul ramo `codex/search-footer-colors-20261116`, base master 917dfc7f. Comprende i correttivi Ricerca e la configurazione comune Classica/Nuova verificata sotto, con bicolore e card +15% soltanto Nuova. Seguono riesame indipendente sul pacchetto, PR/CI, merge, Hosting protetto e verifica completa di manifest/hash/intestazioni. Produzione ancora attestata 1.2.277; nessuna modifica cornice o backend. [Ricevuta del rilascio](../evidenze/COLLAUDI.md#rilascio-1278-verifiche-2026-11-16). Gli stati sottostanti sono checkpoint precedenti.
+
+<a id="livree-comuni-stato-2026-11-16"></a>
+
+## Base comune Classica/Nuova — candidata locale verificata, 16/11/2026
+
+[Ordine corrente](INCARICO_CORRENTE.md#livree-comuni-incarico-2026-11-16): entrambe le livree usano la base evoluta, Modifica/Fine e le tre decorazioni; Classica conserva la palette principale, solo Nuova applica bicolore e saturazione delle icone delle card +15%. Ruoli centrali e registro dei produttori/test implementati sul ramo `codex/search-footer-colors-20261116`; faro e confini Auth/Vault/cornice invariati. [Contratto](../regole/INTERFACCIA.md#livree-comuni-ui-2026-11-16), [verifiche effettive e limiti](../evidenze/COLLAUDI.md#livree-comuni-verifiche-2026-11-16).
+
+Verificati 88 contesti strutturali e 1.232 cromatici sulle 22 route, tutti i sette temi in chiaro/scuro nelle due livree; ulteriori otto prove sui titoli dei form a 320 px PASS. Anche i 1.064 stati dinamici, i percorsi profondi, i contrasti e i negativi pertinenti sono verdi, con limiti sintetici documentati. Mappa collegata a componenti, ruoli, produttori e test; riesami in lettura senza P1/P2. Nessuna nuova versione o pubblicazione: la produzione conserva la ricevuta 1.2.277 sotto. Il seguito Ricerca/anteprime precedente è incorporato nella candidata e non rappresenta più il limite del nuovo ordine.
+
+<a id="ricerca-footer-stato-2026-11-16"></a>
+
+## Ricerca e icone footer — seguito locale, 16/11/2026
+
+[Incarico](INCARICO_CORRENTE.md#ricerca-footer-incarico-2026-11-16), ramo `codex/search-footer-colors-20261116`, base 917dfc7f. Correttivi locali: animazione di preparazione della Ricerca senza ombra quadrata; conversazione vuota come divisore sottile del tema, mantenendo il contenitore normale dopo una domanda. Il registro UI275-04 collega controller, produttore footer, CSS e regressione browser supplementare. [Prove e limiti](../evidenze/COLLAUDI.md#ricerca-footer-verifiche-2026-11-16).
+
+Gli abbinamenti alternativi delle sole icone Ricerca/Info/Impostazioni sono una proposta visiva, non applicata al prodotto o al selettore Classica/Nuova. Faro invariato su richiesta di Diego. «Verifica accesso in corso» è il messaggio transitorio del controllo identità, distinto dalla richiesta di Master Password; nessuna modifica a quel controllo. Produzione e cornice ordinaria conservano la ricevuta 1.2.277 sotto; nessuna nuova versione o pubblicazione deriva da questo seguito locale.
+
 <a id="rilascio-1277-stato-2026-11-16"></a>
 
 ## APP 1.2.277 — pubblicata e verificata, 16/11/2026

@@ -562,10 +562,4 @@ body[data-ui-revision="tre-livelli"] {
     --page-symbol: 'lock';
 }
 
-/* Registro Codex dei colori (14/11/2026): in Classica i riquadri delle icone di Condivisi,
-   Note e Note condivise erano rosso/arancio/verde fissi, ma sono solo navigazione. Seguono
-   il riempimento della palette (la Nuova usa già il riquadro tenue di core_pagine.css). */
-body[data-ui-revision="classica"] .matrix-card:is(.card-blue, .card-red, .card-orange, .card-green) .matrix-icon-box {
-    background: linear-gradient(135deg, var(--rev-fill) 0%, color-mix(in srgb, var(--rev-fill) 80%, #000) 100%);
-    color: #fff;
-}
+/* Both liveries use the shared evolved card geometry in core_pagine.css. */

@@ -41,7 +41,7 @@ export async function createDeepDriver({outDir,measure=true}={}){
   const profileField=label=>page.locator('#profile-edit-modal .glass-field-container').filter({has:page.locator('.view-label').filter({hasText:new RegExp('^'+label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$')})});
   const selectProfile=async(label,value)=>{const box=profileField(label);await click(box.locator('.custom-select-trigger'));await click(box.locator('.custom-option').filter({hasText:new RegExp('^'+value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'))}).first().locator('span').first());};
   const profileInput=(label)=>profileField(label).locator('input,textarea').first();
-  const manage=async title=>{if(graphics==='tre-livelli'){const button=page.getByRole('button',{name:'Modifica: '+title,exact:true});if(await button.count()&&await button.isVisible())await click(button);}};
+  const manage=async title=>{const button=page.getByRole('button',{name:'Modifica: '+title,exact:true});if(await button.count()&&await button.isVisible())await click(button);};
   const expand=async section=>{const header=page.locator('.collapsible-header[data-section="'+section+'"]');if(await header.count()&&await header.evaluate(e=>e.classList.contains('collapsed')))await click(header.locator('h3').first());};
   const state=async(caseId,name,{root='body',contrast=true}={})=>{
    await page.evaluate(settleTourUi);await page.evaluate(()=>document.fonts.ready);

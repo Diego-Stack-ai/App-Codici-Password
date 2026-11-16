@@ -9,7 +9,7 @@ test('tour boots both real graphics and reports partial coverage and ordinary hr
  const report=await runViewTour({only:['profilo_privato.html'],depth:0,screenshots:false});
  assert.equal(report.pages.length,2);assert.equal(report.declaredDepth,0);
  const counts=report.pages.map(page=>({graphics:page.graphics,manage:page.states[0].controls.filter(c=>c.classes.split(' ').includes('manage-toggle')).length}));
- assert.equal(counts.find(c=>c.graphics==='classica').manage,0);
+ assert.equal(counts.find(c=>c.graphics==='classica').manage,counts.find(c=>c.graphics==='tre-livelli').manage,'both liveries install the same management controls');
  assert.ok(counts.find(c=>c.graphics==='tre-livelli').manage>=6,'Nuova really installed section management');
  assert.ok(report.pages.every(p=>p.links.some(link=>link.to.includes('impostazioni.html'))),'normal a[href] is observed');
  assert.equal(report.coverageStatus,'INCOMPLETE');assert.equal(report.omittedPrivatePages.length,Object.keys(pages).length-1);
@@ -59,7 +59,7 @@ test('a real graphics change in Settings survives its page reload',{timeout:3000
  try{
   await f.page.locator('#theme-settings-toggle').click();
   await f.page.locator('.ui-graphics-btn[data-ui-graphics="new"]').click();
-  await f.page.waitForFunction(()=>window.__viewTour?.ready&&document.body.dataset.uiRevision==='tre-livelli',undefined,{timeout:15000});
+  await f.page.waitForFunction(()=>window.__viewTour?.ready&&document.body.dataset.uiRevision==='tre-livelli'&&document.documentElement.dataset.uiGraphics==='new',undefined,{timeout:15000});
   assert.equal(await f.page.evaluate(()=>localStorage.getItem('ui_graphics')),null);
   assert.equal(await f.page.locator('.ui-graphics-btn[data-ui-graphics="new"]').getAttribute('aria-pressed'),'true');
  }finally{await f.context.close();await h.close();}
@@ -79,6 +79,8 @@ test('an unresolved registered variable cannot inherit and excuse an ordinary bl
 test('a real note dialog has unique replay paths and Cancel is an ordinary click',{timeout:30000},async()=>{
  const h=await createTourHarness(),f=await h.open('dettaglio_account_privato.html');
  try{
+  assert.equal(await f.page.locator('#btn-modify-account-note').isVisible(),false,'shared consultation hides editing');
+  await f.page.getByRole('button',{name:'Modifica: Note',exact:true}).click();
   await f.page.locator('#btn-modify-account-note').click();
   const controls=(await f.page.evaluate(listTourControls,TOUR_CLICKABLE)).filter(c=>c.visible&&!c.disabled);
   for(const control of controls)assert.equal(await f.page.locator(control.selector).count(),1,control.name+' has a unique locator');
@@ -91,6 +93,8 @@ test('a real note dialog has unique replay paths and Cancel is an ordinary click
 test('lazy picker assets retain their native module URL and native capabilities stay synthetic',{timeout:30000},async()=>{
  const h=await createTourHarness(),f=await h.open('dettaglio_account_privato.html');
  try{
+  assert.equal(await f.page.locator('#btn-add-attachment').isVisible(),false,'shared consultation hides attachment management');
+  await f.page.getByRole('button',{name:'Modifica: Allegati',exact:true}).click();
   await f.page.locator('#btn-add-attachment').click();
   await f.page.waitForFunction(()=>getComputedStyle(document.querySelector('.attachment-source-picker-grid')).display==='grid');
   assert.equal(await f.page.locator('.attachment-source-picker').evaluate(e=>getComputedStyle(e).position),'fixed');

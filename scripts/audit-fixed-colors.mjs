@@ -13,6 +13,7 @@ export const normalizePaint=value=>value.replace(/\/\*[\s\S]*?\*\//g,'').replace
 export const normalizeSelector=value=>value.trim().replace(/\s+/g,' ');
 const palettes=['blue','green','red','sand','petrol','lavender','dusty-rose'];
 const definitions=new Set(['--bg-primary','--viewport-edge-color','--text-primary','--text-secondary','--text-placeholder','--accent','--accent-rgb','--accent-hex','--accent-surface','--accent-surface-strong','--base-box-gradient','--qr-bg','--theme-ink','--theme-fill','--theme-fill-deep','--status-success','--status-warning','--status-error','--color-purple']);
+for(const role of ['--companion-ink','--companion-card-ink','--companion-card-fill','--companion-fill','--companion-fill-deep'])definitions.add(role);
 const paletteSelectors=new Set([':root','.dark',...[':root','.dark'].flatMap(root=>[
  ...palettes.map(p=>`${root}[data-color-theme="${p}"]`),`${root}:is([data-color-theme="petrol"], [data-color-theme="lavender"], [data-color-theme="dusty-rose"])`])]);
 const chromatic=rgb=>Math.max(...rgb)-Math.min(...rgb)>=40;

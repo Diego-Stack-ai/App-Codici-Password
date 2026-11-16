@@ -1,5 +1,66 @@
 # Collaudi
 
+<a id="rilascio-1278-verifiche-2026-11-16"></a>
+
+## APP 1.2.278 — confezionamento e rilascio in corso, 16/11/2026
+
+[Mandato](../progetto/INCARICO_CORRENTE.md#rilascio-1278-incarico-2026-11-16), [decisione](../progetto/DECISIONI.md#rilascio-1278-decisione-2026-11-16), [procedura](../regole/RILASCIO.md#rilascio-1278-2026-11-16). Base remota confermata 917dfc7f; produzione precedente attestata 1.2.277. Confezionamento della candidata verificata nelle due sezioni sotto; riesame tecnico in lettura senza P1/P2, da confermare sul commit immutabile. Versione, pacchetto offline, guida, CI, SHA finali, run e verifica pubblica verranno annotati ai rispettivi esiti, senza anticipare la pubblicazione. Solo Hosting; cornice, policy e backend invariati.
+
+**Pacchetto locale.** Script canonico 1.2.277 → **1.2.278**, **304 riferimenti asset** allineati, lock modificato soltanto nei due campi versione. Catalogo guida reviewed278/content13, **12/12 PASS**, contenuti applicativi invariati. Build offline riuscito: **346 risorse**, incluso `page-decorations.js`; **16/16 offline PASS**. Confronto dei **366 file pubblici** dopo normalizzazione delle versioni e fine riga: unica differenza dal sorgente funzionale preconfezionamento è l'inclusione del nuovo modulo in `offline-assets.js`, nessuna rimozione; vendor/PDF invariati. Documenti **12/12 PASS**, 34 Markdown e 1.184 collegamenti locali. Artefatti ignorati `.codex-tmp/release278-{source-snapshot,package-comparison}.json`. Nessun dato o account reale e nessun cambiamento delle dipendenze.
+
+<a id="livree-comuni-verifiche-2026-11-16"></a>
+
+## Base comune e livree — banco locale completato, 16/11/2026
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#livree-comuni-incarico-2026-11-16), [decisione](../progetto/DECISIONI.md#livree-comuni-decisione-2026-11-16), [contratto](../regole/INTERFACCIA.md#livree-comuni-ui-2026-11-16). Ramo `codex/search-footer-colors-20261116`, base 917dfc7f / runtime 1.2.277; conservati i precedenti correttivi Ricerca. La candidata non è pubblicata.
+
+Il [registro delle livree](../../scripts/ui-livery-contract.json) collega 22 route, produttore comune delle decorazioni, sorgenti dei colori, cinque controlli Home, guida Profilo e glyph delle card alla regressione `tests/ui-livery.browser.test.mjs`. I registri precedenti consumano il ruolo comune `--card-icon-ink`; il marker della base e quello della livrea sono verificati separatamente, senza fallback che nasconda un bootstrap mancante.
+
+Esiti locali eseguiti per gruppi, con produttori reali e dati sintetici:
+
+| Banco | Esito |
+|---|---|
+| Livree: geometria/comandi e tre decorazioni | 22 route × due livree × 320/1280 px = **88 contesti PASS**; idempotenza e tre negativi PASS |
+| Livree: ruoli e contrasto di card/footer | 22 route × due livree × sette palette × chiaro/scuro × 320/1280 px = **1.232 contesti PASS**; cinque controlli Home inclusi |
+| Titoli dei quattro form a 320 px | **8 contesti PASS**: nessuna sovrapposizione con Indietro/Home, titolo nei confini e nessun overflow orizzontale |
+| Contrasti registrati, coppie e negativi | `ui-tre-livelli-a11y` **25/25 PASS**, soglie invariate; Profile scroll **7/7** e graphics switch **3/3 PASS** |
+| Stati dinamici | **1.064 stati / 28 contesti PASS**, suite **7/7**; ruoli header scambiati, token mancante e contrasto insufficiente rifiutati |
+| Percorsi profondi e tour/regressioni | Deep **9/9 PASS**; tour/regressioni **18/18 PASS**, ottenuti come 16 casi verdi e riesecuzione mirata dei due corretti |
+| Ricerca preservata | Lifecycle **3/3 PASS**, comprese tutte le 56 combinazioni della prova animazione/divisore |
+| Mappa, CSS e struttura | Topologia **15/15 PASS**, 423 controlli e 0 non mappati; Stylelint dei sei fogli modificati PASS; shell, HTML puro, riferimenti statici e sintassi JS PASS; documentazione **12/12**, elenco chiuso di 34 Markdown invariato |
+
+La prima esecuzione aggregata `test:ui-foundations` si era fermata a sei errori; non è dichiarata verde come comando unico. I gruppi coinvolti sono stati corretti e rieseguiti: aspettative dei colori divenute specifiche per livrea, isolamento Auth del banco graphics e accesso ai comandi del tour attraverso Modifica. Palette, registro statico dei colori e mappa visuale erano già verdi nella prima tranche. Il negativo del secondo stop del gradiente conserva il primo stop corretto per Nuova e continua a fallire per contrasto, senza essere mascherato da un ruolo sbagliato.
+
+La nuova prova delle icone piene ha riprodotto un contrasto **1,92:1** del logo Account bianco in Classica/Verde scuro: il vecchio gradiente usava l'accento chiaro. Il correttivo mantiene la tinta principale ma usa `--theme-fill/deep`, già calibrati per il bianco; Nuova usa il riempimento companion intensificato. La prova rifiuta anche i foreground tematici sovrapposti a involucri pieni dello stesso colore e conserva bianchi quei simboli. Non sono inclusi immagini personalizzate o Widget con colore `custom`.
+
+In Blu chiaro le icone nude di tre intestazioni dei form restavano sotto 3:1: usano ora lo stesso fondo `--rev-icon-bg` delle altre icone tematiche, senza ingrandimenti né cambio di palette approvata. Ispezionati campioni sintetici di Home (entrambe le livree), Profilo e Impostazioni (Nuova), Azienda (Classica). Riesami in lettura di runtime, mapping e aspettative per variante: nessun P1/P2 aperto.
+
+Metodo del 15%: saturazione HSL dichiarata esattamente ×1,15, H/L conservati; il colore effettivamente dipinto è verificato separatamente tenendo conto della quantizzazione RGB a8bit. La prima misura del footer sul pulsante-contenitore senza testo proprio era non misurabile: la prova usa i veri span dei glifi, senza convertire un risultato non misurabile in PASS.
+
+Artefatti locali ignorati: `.codex-tmp/livery-verification/{decorations,colors}.json` e PNG, `.codex-tmp/ui-dynamic-map-test/dynamic-visual-map.json`. Il [registro delle livree](../../scripts/ui-livery-contract.json) e `graphify-out/ui-topology.json` dichiarano i collegamenti; gli archi `CONTRACT`, con `observed:false`, non inventano osservazioni browser. Le condizioni Classica/Nuova sono registrate anche per le icone dell'header. Mappa Graphify aggiornata con estrazione del solo codice, senza operazioni semantiche. Le evidenze restano quelle dei banchi sopra, senza nuova ricevuta di produzione.
+
+Limiti: banchi locali con repository/identità sintetici, rete esterna bloccata, nessun account o dato reale, nessuna modifica Auth/Vault/cornice/backend. Il compositore dei contrasti segue gli sfondi degli antenati; la sovrapposizione ottica di faro/filigrana fra fratelli richiede anche l'ispezione delle schermate sintetiche. Chrome headless non certifica dispositivi fisici o altri browser. La route opzionale Astra/Flash non è configurata (doctor statico: catalogo mancante); implementazione Codex con supporti in lettura, nessun provider esterno consultato.
+
+<a id="ricerca-footer-verifiche-2026-11-16"></a>
+
+## Ricerca e icone footer — banco locale, 16/11/2026
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#ricerca-footer-incarico-2026-11-16), base documentale 917dfc7f / runtime 1.2.277, ramo `codex/search-footer-colors-20261116`. Nessuna nuova versione o ricevuta di produzione.
+
+| Stato e azione | Produttori / colore | Verifica |
+|---|---|---|
+| Clic Ricerca, preparazione trattenuta | Footer `components-v129.js`, `initVaultAssistant`; glifo `.assistant-preparing`, CSS `vault-assistant.css` | Animazione reale campionata a 400 ms: prima ombra rettangolare da 8 px, dopo pulsazione senza ombra |
+| Popup appena aperto, conversazione vuota | `createAssistantUI`; `.vault-assistant-conversation:empty`, bordo `--rev-border` | Prima capsula alta 20/26 px; dopo linea visibile 1 px, raggio/padding nulli e fondo trasparente |
+| Invio domanda sintetica, poi chiusura | Stesso popup/produttore, conversazione popolata | Risposta visibile e contenitore tornato più alto di 30 px, senza ereditare la geometria del divisore |
+
+Regressione supplementare in `tests/assistant-ui-lifecycle.browser.test.mjs`, collegata al registro `scripts/ui-dynamic-theme-contract.json` / UI275-04: **56 contesti** (due grafiche × sette palette × chiaro/scuro × 320/1280 px). RED sul CSS precedente: 112 violazioni, due per contesto. GREEN dopo il correttivo; suite browser Ricerca **3/3**, suite `test:assistant` **24/24**, contratti/palette/colori fissi **14/14**, Stylelint del foglio modificato PASS. La riesecuzione congiunta Ricerca + `ui-dynamic-themes.browser.test.mjs` passa **9/9**, inclusa la matrice esistente **1064/1064 stati** nei 28 contesti e i controlli negativi; documentazione **12/12**, elenco invariato a 34 Markdown. Riesame indipendente in lettura senza P1/P2; non è una revisione di pubblicazione o un PASS produttivo. Il test rifiuta anche una conversazione vuota nascosta anziché disegnata come linea.
+
+Limiti: footer reale del Profilo condiviso con Home; controller e popup reali eseguiti con dipendenze sintetiche, nessun Auth o dato reale. Non certifica il bootstrap completo Home, la voce fisica, altri browser o lo stato amministrativo corrente della cornice. Rete esterna bloccata nei banchi applicativi. L'errore iniziale di rete loopback negata e la prima fixture con animazioni ancora disabilitate non sono conteggiati come RED del prodotto; il RED sopra è quello con animazione effettivamente campionata.
+
+Proposta distinta: sette abbinamenti dei soli glifi footer (Blu/Rame, Verde/Oro, Rosso/Petrolio grigio, Sabbia/Blu ardesia, Petrolio/Terracotta, Lavanda/Salvia, Rosa polvere/Blu polvere). Anteprima locale con fondi opachi composti da un punto statico del gradiente: non è uno screenshot del vetro/faro reale né una certificazione del contrasto su contenuti che scorrono. Controlli di tema/aspetto verificati in 28 combinazioni (sette palette × chiaro/scuro × 320/736 px), senza overflow o errori JS. Questi colori non sono aggiunti alle palette runtime.
+
+Rilievi delle domande: `core.css` / `private-auth-gate.js` distinguono «Verifica accesso in corso» da `security-manager.js` / richiesta Master. La filigrana Nuova di `ui-tre-livelli.css` è decorativa, 72 px / opacità 0,06, in fondo a `.page-container`; dipende da `--page-symbol`, che non è dichiarato da Home e Profilo. Non attribuire quindi la filigrana inferiore a ogni pagina. Faro lasciato invariato dopo conferma di Diego.
+
 <a id="rilascio-1277-verifiche-2026-11-16"></a>
 
 ## APP 1.2.277 — ricevuta del giro #313 pubblicato, 16/11/2026

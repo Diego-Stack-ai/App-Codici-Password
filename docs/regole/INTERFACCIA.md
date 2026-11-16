@@ -1,5 +1,19 @@
 # Interfaccia
 
+<a id="livree-comuni-ui-2026-11-16"></a>
+
+## Base evoluta comune e livree — candidata locale, 16/11/2026
+
+[Decisione di Diego](../progetto/DECISIONI.md#livree-comuni-decisione-2026-11-16). Questo contratto supera le precedenti differenze funzionali/strutturali fra Classica e Nuova e il divieto storico della filigrana grande nelle pagine migrate. `body[data-ui-revision="tre-livelli"]` identifica la base comune; `html[data-ui-graphics="classic"|"new"]` identifica soltanto la livrea. Preferenza locale `ui_graphics` e ricarica da Impostazioni compatibili; gestione Modifica/Fine, testi, struttura, materiali ed effetti sono comuni.
+
+Il produttore [page-decorations.js](../../Frontend/public/assets/js/modules/shared/page-decorations.js) censisce le 22 route private e assicura un'unica filigrana grande `aria-hidden`, riusando i nodi esistenti. Iconcina nel titolo e filigrana finale di 72px/6% sono comuni e decorate con contenuto alternativo vuoto; la filigrana di sfondo resta al5%, arretrata e non interattiva. Quella finale riserva il proprio spazio dopo l'ultimo blocco. Nessuna variazione del faro o dei suoi tempi. Le regole comuni stanno in `core_ui.css`, caricato anche dai form; non dipendono dalla presenza di `ui-tre-livelli.css`.
+
+Classica usa i ruoli della palette principale. Solo Nuova applica i ruoli centrali `--companion-ink`, `--companion-fill/deep`, `--companion-card-ink` e `--companion-card-fill` di `core.css` ai componenti dichiarati nel [registro delle livree](../../scripts/ui-livery-contract.json). Il ruolo comune `--card-icon-ink` deriva da `--theme-ink` in Classica e dal companion intensificato in Nuova. Saturazione HSL del companion delle card moltiplicata per1,15 (limite100%), H/L conservati; colori già calcolati nel CSS, senza filtri sui contenitori o modifica delle dimensioni. I footer conservano l'ink companion senza incremento. Gli involucri pieni e i loghi Account predefiniti usano un riempimento abbinato intensificato con simbolo bianco; le immagini personalizzate e i Widget con colore `custom` restano distinti.
+
+Mapping: cinque controlli Home e guida Profilo, navigazione ordinaria delle fasce, identità decorative delle card e intestazioni marcate Tema. Le superfici delle card, il gradiente di pagina e i testi ordinari continuano a usare la palette principale. Nessuna sostituzione globale di `--rev-icon` o `--rev-fill`, che servono anche a testi e stati. Logout, comandi distruttivi, esiti/avvisi, colori personalizzati e controlli di sicurezza conservano i propri contratti. Registi precedenti e banchi distinguono ora base comune e livrea; un marker mancante non viene interpretato come Nuova.
+
+Verifica richiesta: due livree × sette palette × chiaro/scuro, 320/1280px; produttori reali, geometria/comandi comuni, tre decorazioni e assenza di duplicazioni, ruoli dei cinque pulsanti Home, incremento cromatico solo Nuova e contrasto. [Evidenze e limiti](../evidenze/COLLAUDI.md#livree-comuni-verifiche-2026-11-16). Nessuna attestazione fisica o pubblicazione implicita.
+
 <a id="deep-temi-313-ui-2026-11-16"></a>
 
 ## Percorsi profondi e relazioni verificabili — 16/11/2026
@@ -76,6 +90,8 @@ Per le famiglie di pagine migrate con questa revisione, la regola storica «cons
 - Vetro e sfocatura soltanto su intestazione e piè di pagina; card e righe usano superfici piene con un solo livello d'ombra dai token.
 
 ### Filigrane: simbolo nel titolo e filigrana discreta
+
+Chiarimento del 16/11/2026: nella Nuova la filigrana discreta è lo pseudo-elemento finale di `.page-container`, a destra dopo l'ultimo blocco, non un elemento fisso del footer. Dimensione nominale 72px, opacità 0,06. Compare dove è dichiarato `--page-symbol`; Home e Profilo non dichiarano quel simbolo di fondo. L'iconcina nel titolo non prova quindi che ogni pagina abbia anche la filigrana inferiore. Diego chiede di lasciare il faro invariato dopo averne confermato la presenza. Nessun ritocco delle decorazioni è incluso nel seguito locale Ricerca/footer.
 
 - **Titolo:** il simbolo semantico della pagina (stesse famiglie già censite: configurazione, informazione, liste) compare come piccola icona accanto al titolo dell'intestazione, decorativa (`aria-hidden`), senza alterare il nome accessibile del titolo.
 - **Filigrana discreta:** lo stesso simbolo resta in un angolo inferiore, ridotto e tenue, su un livello decorativo arretrato ma **senza alcuna sovrapposizione con testi, campi o pulsanti**, verificata anche durante lo scorrimento e sui dispositivi; non intercetta input, non cambia le dimensioni del documento e rispetta `prefers-reduced-motion`.
