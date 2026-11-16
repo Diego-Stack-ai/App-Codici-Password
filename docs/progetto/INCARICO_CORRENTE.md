@@ -2,7 +2,9 @@
 
 <a id="rilascio-1279-incarico-2026-11-16"></a>
 
-## APP 1.2.279 — ordine di PR, merge e Hosting, 16/11/2026
+## APP 1.2.279 — ordine eseguito, ricevuta 17/11/2026
+
+Rilascio completato: candidata **2099a651** con GO indipendenti e CI #1189 verde; [#322](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/322) unita in **9cbf2d42**, CI master #1190 e [Hosting #1191](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43975431125) SUCCESS. Approvazione production eseguita da Codex su delega di Diego, protezioni conservate. Verifica pubblica **365 hash / 41 profili / tre probe PASS**, più cinque GET indipendenti conformi. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1279-verifiche-2026-11-16). L'ordine del16/11 sotto conserva il mandato eseguito; la chiusura successiva riguarda soltanto documenti/GitHub, senza nuovo Hosting o operazioni policy/backend.
 
 Diego ordina «Procedi con PR, merge e deploy del correttivo delle icone delle scadenze, con una nuova versione, e aggiorna gli MD e GitHub». L'ordine estende il seguito locale sotto: confezionare **1.2.279**, ramo `codex/deadline-icons-1279-20261116` dalla base **39c78b02**, conservando esattamente il correttivo già revisionato e gli abbinamenti mostrati. Icone ordinarie nella palette primaria in Classica, companion +15% in Nuova; scadute rosse, glifi salvati e fallback conservati. Il debito di contrasto preesistente del rosso resta dichiarato.
 

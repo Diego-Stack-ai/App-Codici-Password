@@ -2,13 +2,30 @@
 
 <a id="rilascio-1279-verifiche-2026-11-16"></a>
 
-## APP 1.2.279 — confezionamento e gate, 16/11/2026
+## APP 1.2.279 — pubblicata e verificata, ricevuta 17/11/2026
 
 [Ordine](../progetto/INCARICO_CORRENTE.md#rilascio-1279-incarico-2026-11-16), ramo `codex/deadline-icons-1279-20261116`, base **39c78b02**. Il sorgente funzionale è il [correttivo verificato sotto](#icone-scadenze-verifiche-2026-11-16), senza ulteriori scelte cromatiche. La confezione usa il bump canonico278→279, guida `reviewedAppVersion=1.2.279`/`contentVersion=13` e derivati offline. Comparazione dei365 pubblici dopo normalizzazione delle sole versioni/EOL; solo `offline-assets.js` è ammesso come derivato diverso.
 
 Confezione locale PASS: **365 pubblici identici** al correttivo dopo normalizzazione delle sole versioni/EOL, nessun file aggiunto/rimosso e nessun altro delta, anche dopo rigenerazione offline; **304 riferimenti** allineati. Offline **16/16**, guida **12/12** e budget originale delle **31 pagine + quattro test diagnostici PASS**. Delta funzionale del foglio Scadenze: **+264 byte / +89 byte gzip**; nessun asset/import aggiunto e nessuna soglia modificata. Le prove locali precedenti e il GO funzionale non sostituiscono la CI completa e il riesame della candidata confezionata.
 
-SHA finale, PR, run, merge e ricevuta pubblica verranno registrati dopo gli esiti effettivi. Produzione ancora **1.2.278**. Debito preesistente del rosso **2,72:1** dichiarato, nessuna riduzione di soglia; nessun collaudo telefonico o altro browser dedotto dai banchi sintetici. Nessuna operazione su dati, policy o backend.
+| Passaggio | Esito attestato |
+|---|---|
+| Candidata e riesami | **2099a6516a287dfa126eedfecfeb1aba2bbc9cdb**, GO indipendenti su runtime e confezione, checkout pulito; nessun P1/P2 aperto |
+| PR e CI | [#322](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/322), [CI #1189](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43969958060) SUCCESS; sorgente sintetica di merge CI65ef613609f9ef37595df3c2556a94211351abc5 distinta dalla candidata e dal merge reale |
+| Merge e master | **9cbf2d4205a368944e17a5969c13e535778db4b0**, [CI master #1190](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43973804243) SUCCESS; albero identico alla candidata |
+| Hosting protetto | [#1191](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43975431125), validate133678065940 **24m17s**, deploy133690677450 **39s**, entrambi SUCCESS; scopehosting, sourceDirty=false |
+| Approvazione | Production approvato da Codex su delega di Diego alle **00:26 CET del17/11** nella sessione GitHub Diego-Stack-ai; nessuna modifica delle protezioni |
+| Pubblicazione e verifica del workflow | Hosting completato alle **00:26:50 CET del17/11** (23:26:50.094Z del16/11); verifica pubblica del workflow PASS alle00:26:56CET |
+| Verifica completa indipendente dal workflow | **00:28:27 CET del17/11** (23:28:27.779Z del16/11), **365 hash / 41 profili di intestazioni / tre probe di normalizzazione PASS**; root, rewrite e redirect compresi |
+| Cinque GET indipendenti | **00:29:22 CET del17/11**, UTC23:29:22.051Z–23:29:22.365Z: manifest, app.html, app-env.js, scadenze.css e home-deadline-dashboard.js **5/5 HTTP200 / hash esatti / intestazioni conformi**, nessun retry |
+
+Tutte e tre le validazioni complete riportano gli stessi **68 riepiloghi TAP:3.789 test dichiarati,3.778 PASS,11 SKIP,0 FAIL**. Gli skip di piattaforma/profilo restano espliciti e non ricevono PASS. Il manifest pubblico identifica la **1.2.279/9cbf2d42**, sourceDirty=false; publicTree **bd0e8a4594aad3926ef2d145c29137503cf5c7a92d42d8e7fb2b0a31e53c3868**, SHA manifest **e1886167415e41a00fbcdaec7d667bbb36ddf74bc4e2ace48a4b6e08174cf658**. Il CLI Hosting include anche il manifest nel proprio conteggio:366 file, mentre l'albero attestato contiene365 risorse.
+
+I cinque GET confermano CSP, Permissions-Policy, X-Frame-Options, nosniff e Referrer-Policy. Manifest/HTML/JS hanno la policy dichiarata no-cache/no-store/must-revalidate; per il CSS si registra **max-age=3600** osservato, senza attribuire PASS a un override cache assente dal config. Artefatti locali ignorati: `.codex-tmp/release279-public-verification.json`, confronto di confezione e manifest; prova visiva del workflow1191 conservata nella cartella di visualizzazione della chat.
+
+Il primo avvio dalla pagina Chrome non aveva creato alcuna run, come confermato dalla collezione Actions; il tentativo GitHub CLI con il PAT esistente è stato respinto403 per Actions. Nessuna credenziale o autorizzazione modificata: avvio riuscito dalla sessione web integrata già autorizzata, con master/hosting verificati. L'audit Git strict resta negativo per l'inventario preesistente degli altri rami/worktree, senza pulizie o modifiche a quel debito; candidato, ramo pubblicato e checkout di verifica sono invece quelli attestati sopra, puliti e allineati.
+
+Nessuna operazione su dati, policy, Rules, Functions, Storage, Auth, claim o IAM: installazione backend e tre scope diversi daHosting saltati. Controllo della credenziale storica PASS alle23:26:42.352Z del16/11; **la revisione dell'incidente storico resta aperta**. Cornice ordinaria conservata; debito preesistente del rosso **2,72:1** dichiarato, nessuna riduzione di soglia e nessun nuovo collaudo telefonico o di altri browser. Questa ricevuta è soltanto documentale, non modifica il runtime pubblicato e non richiede altro Hosting.
 
 <a id="icone-scadenze-verifiche-2026-11-16"></a>
 
