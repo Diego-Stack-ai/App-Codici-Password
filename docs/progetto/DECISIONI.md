@@ -1,5 +1,13 @@
 # Decisioni
 
+<a id="rilascio-1277-decisione-2026-11-16"></a>
+
+## 16/11/2026 — pubblicare il giro completo dei temi e il seguito Codex
+
+Dopo il chiarimento che la 1.2.276 pubblica gli undici correttivi iniziali mentre la #318 contiene il giro successivo Claude/Codex, Diego ordina: **«Okay, ora gente, facciamo l'aggiornamento con GitHub e prima facciamo anche il deploy.»** Codex comunica la sequenza operativa: confezionamento **1.2.277**, CI e revisione sulla candidata effettiva, unione della #318, workflow manuale del solo **Hosting**, approvazione production delegata e verifica pubblica. L'ordine abilita il rilascio del seguito già verificato, senza cambiare i gate o richiedere di nuovo la delega production conservata in questa chat. [Incarico](INCARICO_CORRENTE.md#rilascio-1277-incarico-2026-11-16).
+
+La cornice ordinaria, attivata con la 1.2.275 e conservata nella .276, viene conservata anche in questo rilascio; il vecchio pilot/canary è ritirato. Nessuna scrittura policy, Rules, Function, Storage, Auth, claim o IAM. Le prove sintetiche non diventano attestazioni di dispositivi fisici o servizi reali.
+
 <a id="giro-temi-313-decisione-2026-11-15"></a>
 
 ## 15/11/2026 — giro completo dei temi: regole sui colori e sui caratteri

@@ -1,5 +1,11 @@
 # Programma
 
+<a id="rilascio-1277-programma-2026-11-16"></a>
+
+## APP 1.2.277 — rilascio del giro #313, 16/11/2026
+
+Su [ordine di Diego](DECISIONI.md#rilascio-1277-decisione-2026-11-16), completare la sequenza confezionamento canonico → identità funzionale e controlli → riesame indipendente e CI dello SHA effettivo → merge #318 → workflow manuale Hosting sul master finale → approvazione production delegata → verifica pubblica di manifest/hash/intestazioni. [Incarico](INCARICO_CORRENTE.md#rilascio-1277-incarico-2026-11-16), [stato](STATO.md#rilascio-1277-stato-2026-11-16), [ricevuta](../evidenze/COLLAUDI.md#rilascio-1277-verifiche-2026-11-16). Il pacchetto conserva il runtime a1becaa7 dopo normalizzazione 276→277; cornice ordinaria conservata e pilot storico ritirato. Nessuna modifica policy/backend o nuova attestazione fisica.
+
 <a id="deep-temi-313-programma-2026-11-16"></a>
 
 ## Giro #313 — chiusura dei comportamenti oltre profondità, 16/11/2026

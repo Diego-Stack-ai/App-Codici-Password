@@ -1,5 +1,13 @@
 # Stato
 
+<a id="rilascio-1277-stato-2026-11-16"></a>
+
+## APP 1.2.277 — candidata confezionata, 16/11/2026
+
+Diego autorizza il [rilascio del giro completo](DECISIONI.md#rilascio-1277-decisione-2026-11-16). La [#318](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/318), sorgente funzionale **a1becaa7**, comprende la base Claude recepita e i correttivi successivi, con CI completa #1179 e GO tecnico. Il confezionamento 1.2.277 aggiorna solo riferimenti di versione e catalogo reviewedAppVersion: **365 file pubblici identici dopo normalizzazione**, versione/guida/offline/documenti verdi. La candidata finale attende riesame e propria CI prima di merge e Hosting. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1277-verifiche-2026-11-16); esiti definitivi, SHA e run saranno annotati sulla #318 dopo la loro osservazione.
+
+All'avvio, GET pubblico del manifest: **1.2.276/e649fd079**, sourceDirty=false; la .277 non è ancora distribuita. Cornice ordinaria conservata secondo l'attivazione .275, pilot ritirato; nessuna nuova lettura/scrittura amministrativa o prova fisica. Gli stati sotto sono checkpoint precedenti.
+
 <a id="stato-corrente"></a>
 
 <a id="deep-temi-313-stato-2026-11-16"></a>

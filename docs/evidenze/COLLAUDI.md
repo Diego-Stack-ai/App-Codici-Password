@@ -1,5 +1,17 @@
 # Collaudi
 
+<a id="rilascio-1277-verifiche-2026-11-16"></a>
+
+## APP 1.2.277 — confezionamento del giro #313, 16/11/2026
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#rilascio-1277-incarico-2026-11-16), [decisione](../progetto/DECISIONI.md#rilascio-1277-decisione-2026-11-16), [percorso](../regole/RILASCIO.md#rilascio-1277-2026-11-16). Sorgente funzionale **a1becaa75e5372e7646c23b41b44e5b687a75dcb** nella #318, [CI completa #1179 PASS](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43868314029), [GO Codex](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/318#issuecomment-6917117282). Le prove del seguito sotto conservano fonti e limiti; il pacchetto .277 richiede identità dopo normalizzazione della sola versione, riesame e nuova CI sulla testa effettiva.
+
+**Checkpoint iniziale:** manifest pubblico **1.2.276/e649fd079d2b651745365fb80c302a83dd3c5205**, sourceDirty=false. Confezionamento .277 in corso, nessun merge o deploy ancora eseguito da questo ordine. Cornice ordinaria conservata, pilot ritirato; nessuna rilettura amministrativa o scrittura policy. Gli esiti finali saranno aggiunti dopo la loro osservazione, distinguendo candidata, master e pubblicazione.
+
+**Confezione locale verificata.** Script canonico 276→277: **304 riferimenti asset**, package/lock root, APP_VERSION, Home e cache del service worker allineati. Catalogo `reviewedAppVersion=1.2.277`, `contentVersion=13` invariato perché i contenuti guida non cambiano. Confrontati **365 file pubblici** con a1becaa7 tramite gli oggetti Git, inclusi i binari: 115 file diversi, **zero differenze dopo la sola normalizzazione 277→276**. Nessuna nuova dipendenza o modifica funzionale; nel lock cambiano soltanto le due versioni del progetto. Rapporto locale ignorato `.codex-tmp/release277-normalization.json`.
+
+Versione coerente, guida **12/12**, offline **16/16** (345 risorse), documenti **12/12**, 34 Markdown ammessi, controllo diff PASS. Le prove complete del codice a1becaa7 conservano il loro contesto; la nuova CI della confezione dovrà passare sullo SHA effettivo. Commit candidato, CI finale, master e run Hosting saranno attestati sulla #318 dopo osservazione, senza preannunciare il rilascio.
+
 <a id="deep-temi-313-verifiche-2026-11-16"></a>
 
 ## Giro #313 — percorsi profondi, 16/11/2026

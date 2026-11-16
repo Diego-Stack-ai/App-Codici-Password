@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="rilascio-1277-incarico-2026-11-16"></a>
+
+## APP 1.2.277 — confezionamento, merge e Hosting autorizzati, 16/11/2026
+
+Il [nuovo ordine diretto di Diego](DECISIONI.md#rilascio-1277-decisione-2026-11-16) supera il precedente arresto alla sola consegna: pubblicare il giro completo Claude/Codex della [#318](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/318), sorgente funzionale **a1becaa75e5372e7646c23b41b44e5b687a75dcb**, già verificata con [CI completa #1179](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43868314029) e [GO tecnico Codex](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/318#issuecomment-6917117282). Confezionare **1.2.277** sul ramo Codex della stessa PR, provare l'identità del runtime dopo normalizzazione delle sole versioni, aggiornare i documenti esistenti, ottenere riesame indipendente del pacchetto e CI sullo SHA finale; poi unire, avviare il workflow manuale **hosting** sul master effettivo, eseguire l'approvazione production già delegata e verificare manifest, hash e intestazioni pubbliche.
+
+Un solo esecutore; supporti in sola lettura. Nessuna nuova correzione funzionale dedotta dalla confezione, nessun account/dato reale o prova Vault in produzione, nessuna modifica a policy/Rules/backend/permessi. Cornice ordinaria conservata, pilot storico ritirato. [Percorso di rilascio](../regole/RILASCIO.md#rilascio-1277-2026-11-16), [stato](STATO.md#rilascio-1277-stato-2026-11-16), [prove e ricevuta](../evidenze/COLLAUDI.md#rilascio-1277-verifiche-2026-11-16).
+
 <a id="deep-temi-313-incarico-2026-11-16"></a>
 
 ## Giro #313 — seguito dei percorsi residui e futura CI, 16/11/2026
