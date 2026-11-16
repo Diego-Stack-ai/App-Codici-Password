@@ -1,3 +1,4 @@
+/* UI contract and rationale: docs/regole/INTERFACCIA.md; history retained in Git. */
 body[data-private-auth][hidden] {
     display: none !important;
 }
@@ -73,6 +74,11 @@ body,
 
 :root {
     color-scheme: light;
+    --companion-ink: #704c3d;
+    --companion-card-ink: hsl(17.647059deg 33.901734% 33.921569%);
+    --companion-card-fill: hsl(17.647059deg 33.901734% 33.921569%);
+    --companion-fill: #704c3d;
+    --companion-fill-deep: color-mix(in srgb, var(--companion-fill) 84%, #0f172a);
 
     --space-1: 0.25rem;
     --space-2: 0.5rem;
@@ -146,10 +152,6 @@ body,
 
     --transition-base: 0.2s ease;
     --qr-bg: #E3F2FD;
-
-
-    /* Ruoli di palette validi in ogni documento (anche senza data-ui-revision): testo accentato
-       leggibile e riempimento pieno con testo bianco. Giro completo dei temi, 15/11/2026. */
     --theme-ink: color-mix(in srgb, var(--accent) 60%, #0f172a);
     --theme-fill: color-mix(in srgb, var(--accent) 85%, #0f172a);
     --theme-fill-deep: color-mix(in srgb, var(--accent) 68%, #0f172a);
@@ -163,6 +165,10 @@ body,
 }
 
 :root[data-color-theme="green"] {
+    --companion-ink: #70612f;
+    --companion-card-ink: hsl(46.153846deg 47.012579% 31.176471%);
+    --companion-card-fill: hsl(46.153846deg 47.012579% 31.176471%);
+    --companion-fill: #70612f;
     --bg-primary: #e3f2e8;
     --viewport-edge-color: #eef8f1;
     --accent: #177245;
@@ -173,6 +179,10 @@ body,
 }
 
 :root[data-color-theme="red"] {
+    --companion-ink: #34585e;
+    --companion-card-ink: hsl(188.571429deg 33.082192% 28.627451%);
+    --companion-card-fill: hsl(188.571429deg 33.082192% 28.627451%);
+    --companion-fill: #34585e;
     --bg-primary: #f3e5e9;
     --viewport-edge-color: #faeef1;
     --accent: #9f2348;
@@ -183,6 +193,10 @@ body,
 }
 
 :root[data-color-theme="sand"] {
+    --companion-ink: #3b4f72;
+    --companion-card-ink: hsl(218.181818deg 36.560694% 33.921569%);
+    --companion-card-fill: hsl(218.181818deg 36.560694% 33.921569%);
+    --companion-fill: #3b4f72;
     --bg-primary: #f1eadc;
     --viewport-edge-color: #faf5ea;
     --accent: #875b18;
@@ -193,16 +207,28 @@ body,
 }
 
 :root[data-color-theme="petrol"] {
+    --companion-ink: #714e4e;
+    --companion-card-ink: hsl(0deg 21.073298% 37.450980%);
+    --companion-card-fill: hsl(0deg 21.073298% 37.450980%);
+    --companion-fill: #714e4e;
     --accent: #0f766e;
     --accent-rgb: 15, 118, 110;
 }
 
 :root[data-color-theme="lavender"] {
+    --companion-ink: #505d44;
+    --companion-card-ink: hsl(91.2deg 17.857143% 31.568627%);
+    --companion-card-fill: hsl(91.2deg 17.857143% 31.568627%);
+    --companion-fill: #505d44;
     --accent: #6750a4;
     --accent-rgb: 103, 80, 164;
 }
 
 :root[data-color-theme="dusty-rose"] {
+    --companion-ink: #3c5a6c;
+    --companion-card-ink: hsl(202.5deg 32.857143% 32.941176%);
+    --companion-card-fill: hsl(202.5deg 32.857143% 32.941176%);
+    --companion-fill: #3c5a6c;
     --accent: #855466;
     --accent-rgb: 133, 84, 102;
 }
@@ -228,6 +254,8 @@ body,
 
 
 .dark {
+    --companion-ink: #e4d2c8;
+    --companion-card-ink: hsl(21.428571deg 39.268293% 83.921569%);
     color-scheme: dark;
     --bg-primary: #0a0f1e;
     --viewport-edge-color: #0c1326;
@@ -261,6 +289,8 @@ body,
 }
 
 .dark[data-color-theme="green"] {
+    --companion-ink: #e4dcc2;
+    --companion-card-ink: hsl(45.882353deg 44.431818% 82.745098%);
     --bg-primary: #0b1b13;
     --viewport-edge-color: #10261b;
     --accent: #55c985;
@@ -269,6 +299,8 @@ body,
 }
 
 .dark[data-color-theme="red"] {
+    --companion-ink: #c8d8d7;
+    --companion-card-ink: hsl(176.25deg 19.574468% 81.568627%);
     --bg-primary: #1d0b11;
     --viewport-edge-color: #291018;
     --accent: #e47791;
@@ -277,6 +309,8 @@ body,
 }
 
 .dark[data-color-theme="sand"] {
+    --companion-ink: #cbd4e1;
+    --companion-card-ink: hsl(215.454545deg 30.853659% 83.921569%);
     --bg-primary: #1c160c;
     --viewport-edge-color: #282013;
     --accent: #e0b968;
@@ -285,16 +319,22 @@ body,
 }
 
 .dark[data-color-theme="petrol"] {
+    --companion-ink: #e5d3d0;
+    --companion-card-ink: hsl(8.571429deg 33.082192% 85.686275%);
     --accent: #5eead4;
     --accent-rgb: 94, 234, 212;
 }
 
 .dark[data-color-theme="lavender"] {
+    --companion-ink: #d6dacb;
+    --companion-card-ink: hsl(76deg 19.382022% 82.549020%);
     --accent: #c4b5fd;
     --accent-rgb: 196, 181, 253;
 }
 
 .dark[data-color-theme="dusty-rose"] {
+    --companion-ink: #ccd9de;
+    --companion-card-ink: hsl(196.666667deg 24.642857% 83.529412%);
     --accent: #d9a7b8;
     --accent-rgb: 217, 167, 184;
 }
@@ -524,9 +564,6 @@ textarea::placeholder {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
-/* Collegamenti senza una regola propria: mai il blu predefinito del browser (giro delle
-   viste #313, stato vuoto delle Regole automezzi). Specificità zero: ogni classe prevale. */
 :where(a:not([class])) {
     color: var(--theme-ink);
 }
@@ -540,7 +577,6 @@ textarea::placeholder {
     padding: 9px 14px;
     border: 1px solid rgba(var(--accent-rgb), 0.45);
     border-radius: 999px;
-    /* Avviso «sei offline» in tema (niente ambra): fondo scuro tinto, testo bianco. */
     color: #fff;
     background: color-mix(in srgb, var(--theme-fill) 55%, rgb(12 16 26 / 92%));
     box-shadow: 0 8px 28px rgb(0 0 0 / 28%);

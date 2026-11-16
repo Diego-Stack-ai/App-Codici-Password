@@ -8,7 +8,7 @@ import path from 'node:path';
 import {chromium} from 'playwright';
 
 // Interruttore «Grafica: Nuova / Classica»: preferenza locale applicata da theme-init.js
-// prima della visualizzazione; in Classica nessuna regola a tre livelli e nessun «Modifica».
+// prima della visualizzazione; stessa base evoluta e stessi comandi nelle due livree.
 const publicRoot = fileURLToPath(new URL('../Frontend/public/', import.meta.url));
 const launchBrowser = () => chromium.launch({headless: true,
   ...(process.env.CHROME_PATH ? {executablePath: process.env.CHROME_PATH}
@@ -32,7 +32,11 @@ test.before(async () => {
       const file = path.join(publicRoot, decodeURIComponent(pathname));
       if (!file.startsWith(publicRoot)) throw Error('outside');
       const type = file.endsWith('.html') ? 'text/html' : file.endsWith('.css') ? 'text/css' : file.endsWith('.json') ? 'application/json' : 'text/javascript';
-      res.writeHead(200, {'Content-Type': type, 'Cache-Control': 'no-store'}); res.end(await readFile(file));
+      let content=await readFile(file);
+      // Isolate the real synchronous theme bootstrap on real hidden private markup.
+      // Main/Auth redirects are tested elsewhere and can destroy this observation context.
+      if(pathname==='/profilo_privato.html')content=content.toString().replace(/<script\b[\s\S]*?<\/script>/gi,script=>/src=["'][^"']*theme-init\.js/.test(script)?script:'');
+      res.writeHead(200, {'Content-Type': type, 'Cache-Control': 'no-store'}); res.end(content);
     } catch { res.writeHead(404); res.end(); }
   });
   await new Promise(done => server.listen(0, '127.0.0.1', done));
@@ -55,25 +59,31 @@ test('default «Nuova» keeps the three-level revision and installs Modifica', {
   try {
     await page.waitForFunction(() => window.ready === true);
     assert.equal(await page.getAttribute('body', 'data-ui-revision'), 'tre-livelli');
+    assert.equal(await page.getAttribute('html', 'data-ui-graphics'), 'new');
     assert.equal(await page.locator('.manage-toggle').count(), 1);
   } finally { await context.close(); }
 });
 
-test('«Classica» marks the revision as classica before display and installs no Modifica', {timeout: 30000}, async () => {
+test('«Classica» retains the evolved base and installs the same Modifica/Fine controls', {timeout: 30000}, async () => {
   const {page, context} = await open('fixture.html', 'classic');
   try {
     await page.waitForFunction(() => window.ready === true);
     assert.equal(await page.getAttribute('html', 'data-ui-graphics'), 'classic');
-    assert.equal(await page.getAttribute('body', 'data-ui-revision'), 'classica', 'shared colors and roles stay; Nuova-only features do not');
-    assert.equal(await page.locator('.manage-toggle').count(), 0);
-    assert.equal(await page.getAttribute('#s', 'data-manage'), null, 'no hidden management state');
+    assert.equal(await page.getAttribute('body', 'data-ui-revision'), 'tre-livelli');
+    assert.equal(await page.locator('.manage-toggle').count(), 1);
+    assert.equal(await page.getAttribute('#s', 'data-manage'), 'off');
+    await page.locator('.manage-toggle').click();
+    assert.equal(await page.getAttribute('#s', 'data-manage'), 'on');
+    await page.locator('.manage-toggle').click();
+    assert.equal(await page.getAttribute('#s', 'data-manage'), 'off');
   } finally { await context.close(); }
 });
 
 test('«Classica» applies to a real migrated page before any script reveals it', {timeout: 30000}, async () => {
   const {page, context} = await open('profilo_privato.html', 'classic');
   try {
-    assert.equal(await page.evaluate(() => document.body.getAttribute('data-ui-revision')), 'classica');
+    assert.equal(await page.evaluate(() => document.body.getAttribute('data-ui-revision')), 'tre-livelli');
+    assert.equal(await page.getAttribute('html', 'data-ui-graphics'), 'classic');
     assert.equal(await page.evaluate(() => document.body.hidden), true, 'private page still hidden by the auth gate');
   } finally { await context.close(); }
 });

@@ -287,6 +287,8 @@
       "sources": [
         "Frontend/public/profilo_privato.html",
         "Frontend/public/assets/js/modules/assistant/assistant-ui.js",
+        "Frontend/public/assets/js/modules/assistant/assistant-controller.js",
+        "Frontend/public/assets/js/components-v129.js",
         "Frontend/public/assets/css/core.css",
         "Frontend/public/assets/css/core_ui.css",
         "Frontend/public/assets/css/vault-assistant.css",
@@ -348,7 +350,8 @@
         }
       ],
       "tests": [
-        "tests/ui-dynamic-themes.browser.test.mjs"
+        "tests/ui-dynamic-themes.browser.test.mjs",
+        "tests/assistant-ui-lifecycle.browser.test.mjs"
       ]
     },
     {
@@ -396,6 +399,7 @@
           "selector": "#header-placeholder .btn-icon-header .material-symbols-outlined",
           "property": "color",
           "role": "--text-primary",
+            "newRole": "--companion-ink",
           "kind": "headerContrast",
           "minimum": 3
         },
@@ -576,7 +580,7 @@
         {
           "selector": ".profile-widget-identity[data-color-role=\"theme\"]",
           "property": "color",
-          "role": "--rev-icon",
+          "role": "--card-icon-ink",
           "states": [
             "color-default"
           ]

@@ -1,5 +1,21 @@
 # Decisioni
 
+<a id="rilascio-1278-decisione-2026-11-16"></a>
+
+## Pubblicare base comune e livree nella 1.2.278 — 16/11/2026
+
+Fonte: ordine diretto di Diego «procedi con il deploy ed aggiorna gli md e github», successivo alla consegna locale verificata. Autorizzata la sequenza GitHub e Hosting dell'[incarico](INCARICO_CORRENTE.md#rilascio-1278-incarico-2026-11-16), senza saltare riesame del pacchetto, CI o gate production. Entrambe le varianti mantengono la base evoluta e le tre decorazioni; solo Nuova usa bicolore e card +15%. Cornice e faro invariati. La decisione supera il precedente limite alla sola consegna locale, senza attivare policy o backend. Esiti nello [stato](STATO.md#rilascio-1278-stato-2026-11-16) e nella [ricevuta](../evidenze/COLLAUDI.md#rilascio-1278-verifiche-2026-11-16).
+
+<a id="livree-comuni-decisione-2026-11-16"></a>
+
+## 16/11/2026 — stessa base evoluta, Classica monocolore e Nuova bicolore
+
+Fonte: ordine diretto di Diego dopo il confronto delle sette livree e la correzione dell'anteprima del footer Home, che deve comprendere Ricerca, Nuovo account privato, Nuova scadenza, Nuovo account azienda e Impostazioni. Classica include tutta l'evoluzione dell'app; il selettore non riporta più alla vecchia disposizione o alla gestione sempre visibile. Entrambe usano la base evoluta, iconcine nel titolo, filigrana piccola in fondo e filigrana sullo sfondo. Faro, materiali, dati e confini di sicurezza restano invariati.
+
+**Solo Nuova** usa il colore principale più l'abbinamento approvato (Blu/Rame, Verde/Oro, Rosso/Petrolio grigio, Sabbia/Blu ardesia, Petrolio/Terracotta, Lavanda/Salvia, Rosa polvere/Blu polvere) e il colore delle icone delle card più intenso del 15%. L'ultima domanda di Diego e il «procedi» confermano espressamente questo limite; superata la sintesi precedente che attribuiva il 15% a entrambe. Il 15% è saturazione cromatica relativa, con tinta e luminosità HSL conservate e verifica del contrasto; non ingrandimento dei controlli. I simboli bianchi dei pulsanti pieni restano leggibili sul riempimento abbinato.
+
+Autorizzata implementazione e verifica locale con produttori reali e dati sintetici; [perimetro](INCARICO_CORRENTE.md#livree-comuni-incarico-2026-11-16), [contratto](../regole/INTERFACCIA.md#livree-comuni-ui-2026-11-16). Nessun ordine di nuova versione, commit/push, PR, merge o pubblicazione. La ricevuta di produzione 1.2.277 sottostante rimane distinta.
+
 <a id="rilascio-1277-decisione-2026-11-16"></a>
 
 ## 16/11/2026 — pubblicare il giro completo dei temi e il seguito Codex

@@ -32,9 +32,8 @@ const pages = process.argv[3] ? process.argv[3].split(',')
   : (await readdir(root)).filter(file => file.endsWith('.html')).sort();
 
 function prepare(html, theme, palette, mode) {
-  // Classica = come theme-init.js: il segno della revisione diventa «classica» (colori e
-  // materiali condivisi, nessuna funzione esclusiva della Nuova).
-  if (mode === 'classica') html = html.replace(/(<body[^>]*?\sdata-ui-revision=)"[^"]*"/i, '$1"classica"');
+  // The evolved base is common; the HTML marker selects the color livery only.
+  html = html.replace(/(<body[^>]*?\sdata-ui-revision=)"[^"]*"/i, '$1"tre-livelli"');
   return html
     .replace(/<script\b[\s\S]*?<\/script>/gi, '')
     .replace(/<meta[^>]+http-equiv=["']?refresh[^>]*>/gi, '')
@@ -43,11 +42,11 @@ function prepare(html, theme, palette, mode) {
       // Conserva le classi della pagina (es. protocol-forced-dark), sostituisce solo il tema;
       // data-i18n="ready" perché senza script la pagina resterebbe nello stato di caricamento.
       const kept = (attrs.match(/\sclass="([^"]*)"/)?.[1] || '').split(/\s+/).filter(name => name && name !== 'dark');
-      const rest = attrs.replace(/\s(class|data-i18n|data-color-theme)="[^"]*"/g, '');
+      const rest = attrs.replace(/\s(class|data-i18n|data-color-theme|data-ui-graphics)="[^"]*"/g, '');
       // Le pagine con protocol-forced-dark sono sempre scure: il tema chiaro non esiste.
       const forcedDark = kept.includes('protocol-forced-dark');
       const classes = [...kept, ...(theme === 'dark' || forcedDark ? ['dark'] : [])].join(' ');
-      return `<html${rest} class="${classes}" data-i18n="ready"${palette ? ` data-color-theme="${palette}"` : ''}>`;
+      return `<html${rest} class="${classes}" data-i18n="ready" data-ui-graphics="${mode==='classica'?'classic':'new'}"${palette ? ` data-color-theme="${palette}"` : ''}>`;
     });
 }
 
@@ -293,7 +292,7 @@ for (const [page, mode] of variants) {
     const tab = runs.__tab;
     // Registrata solo la pittura dichiarata: stesso elemento (nessun sottoalbero in blocco),
     // stessa proprietà e stessa tinta della decisione.
-    const revision = mode === 'nuova' ? 'tre-livelli' : mode === 'classica' ? 'classica' : '';
+    const revision = ['nuova','classica'].includes(mode) ? 'tre-livelli' : '';
     const paints = decisions.function.filter(group => group.page === page).flatMap(group => group.paints || [])
       .filter(paint => !paint.revisions || paint.revisions.includes(revision));
     const allowed = new Map(await tab.evaluate(paints => {

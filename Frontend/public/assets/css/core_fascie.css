@@ -1,13 +1,8 @@
-/* ==========================================================================
-   CORE FASCIE (Header, Footer & Spacers) - Standard V3.9 (Updated)
-   ========================================================================== */
-
+/* UI contract and rationale: docs/regole/INTERFACCIA.md; history retained in Git. */
 :root {
     --header-height: 85px;
     --footer-color: rgba(255, 255, 255, 0.4);
 }
-
-/* --- 1. STRUTTURA FISSA (Header & Footer Master) --- */
 .base-header,
 .base-footer {
     position: fixed;
@@ -26,7 +21,6 @@
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     will-change: transform;
-    /* Essenziale per calcolo height + padding safe-area */
 }
 
 @media (max-width: 600px) {
@@ -131,7 +125,6 @@
     padding-top: var(--frame-safe-area-inset-top, env(safe-area-inset-top));
     height: calc(var(--header-height) + var(--frame-safe-area-inset-top, env(safe-area-inset-top)));
     border-radius: 0;
-    /* Effetto storico: vetro più solido al bordo e dissolvenza ampia verso il centro. */
     mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
     border-bottom: 1px solid var(--card-border);
@@ -143,16 +136,12 @@
     height: calc(85px + var(--frame-safe-area-inset-bottom, env(safe-area-inset-bottom)));
     justify-content: space-between;
     border-radius: 0;
-    /* Effetto storico speculare: dissolvenza dal bordo inferiore verso il centro. */
     mask-image: linear-gradient(to top, black 55%, transparent 100%);
     -webkit-mask-image: linear-gradient(to top, black 55%, transparent 100%);
     border-top: 1px solid var(--card-border);
 }
-
-/* --- 2. BILANCIAMENTO CONTENUTI --- */
 .header-balanced-container {
     height: var(--header-height);
-    /* Altezza fissa del contenuto utile indipendentemente dalla notch */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -181,11 +170,8 @@
     font-size: var(--fs-md);
     font-weight: var(--font-label-weight);
     color: var(--text-primary);
-    /* Tipografia 11/11/2026: spaziatura quasi normale, più leggibile. */
     letter-spacing: 0.01em;
 }
-
-/* --- 3. BOTTONI E AVATAR --- */
 .btn-icon-header {
     width: 44px;
     height: 44px;
@@ -286,30 +272,19 @@
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
-
-/* --- UTILITY GESTIONE SPAZI --- */
-/* (Header e Footer Spacer HTML sono stati deprecati e rimossi nello standard V3.9) */
-
-
-/* --- 5. TESTO LEGALE (Login/Auth) --- */
 .legal-footer {
     margin-top: 2rem;
     color: var(--footer-color);
     font-size: var(--fs-micro);
     text-align: center;
 }
-
-/* --- 6. UTILITY SPACER (Footer & Header Safety) --- */
 .pb-footer-extra {
     padding-bottom: calc(120px + var(--frame-safe-area-inset-bottom, env(safe-area-inset-bottom)));
 }
 
 .pt-header-extra {
     padding-top: calc(100px + var(--frame-safe-area-inset-top, env(safe-area-inset-top)));
-    /* Spazio sicuro per evitare overlap col header fisso */
 }
-
-/* --- 7. SECONDARY FOOTER BUTTONS (Theme, Settings) --- */
 .btn-footer-secondary {
     width: 44px;
     height: 44px;

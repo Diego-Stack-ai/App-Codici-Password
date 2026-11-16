@@ -121,6 +121,10 @@ test('color registry preserves the reviewed matrix and minimum coverage', () => 
   }
   for (const item of colorContract.components) {
     assert.ok(item.selector && item.markup && item.foregroundRole && item.backgroundRole, `${item.id}: complete color pair`);
+    if (item.backgroundRoles) {
+      assert.deepEqual(Object.keys(item.backgroundRoles), ['classic', 'new'], `${item.id}: both livery backgrounds are declared`);
+      assert.ok(Object.values(item.backgroundRoles).every(role => role.startsWith('--')), `${item.id}: explicit background roles`);
+    }
     assert.ok(Number.isFinite(item.minContrast) && item.minContrast >= 3, `${item.id}: numeric minimum`);
     if (item.states) assert.deepEqual(item.states, ['hover', 'focus'], `${item.id}: reviewed interactive states`);
     if (item.pages) assert.ok(item.pages.length > 0 && item.pages.every(file => colorContract.pages.includes(file)), `${item.id}: valid page subset`);
@@ -136,8 +140,8 @@ function colorFixture(file, theme, palette, revision = 'tre-livelli') {
   const body = attributes(source.match(/<body\b[^>]*>/i)[0]);
   const components = colorContract.components.filter(item => !item.pages || item.pages.includes(file));
   assert.ok(components.length > 0, `${file}: registered cases exist`);
-  return `<!doctype html><html lang="it" class="${theme === 'dark' ? 'dark' : ''}" data-color-theme="${palette}"><head><meta charset="utf-8">${sheets.map(href => `<link rel="stylesheet" href="/${href}">`).join('')}<style>*,*::before,*::after{transition:none!important;animation:none!important}</style></head>
-    <body class="${body.class}" data-ui-model="${body['data-ui-model']}" data-ui-revision="${revision}">${components.map(item => `<section data-color-case="${item.id}">${item.markup}</section>`).join('')}</body></html>`;
+  return `<!doctype html><html lang="it" class="${theme === 'dark' ? 'dark' : ''}" data-color-theme="${palette}" data-ui-graphics="${revision==='classica'?'classic':'new'}"><head><meta charset="utf-8">${sheets.map(href => `<link rel="stylesheet" href="/${href}">`).join('')}<style>*,*::before,*::after{transition:none!important;animation:none!important}</style></head>
+    <body class="${body.class}" data-ui-model="${body['data-ui-model']}" data-ui-revision="tre-livelli">${components.map(item => `<section data-color-case="${item.id}">${item.markup}</section>`).join('')}</body></html>`;
 }
 async function openColorFixture(file, theme, palette, revision = 'tre-livelli') {
   const page = await browser.newPage();
@@ -171,6 +175,7 @@ async function readColorCases(page, file) {
       const element = document.querySelector(`[data-color-case="${item.id}"] ${item.selector}`);
       if (!element) throw Error(`Missing color fixture: ${item.id}`);
       const style = getComputedStyle(element);
+      const backgroundRole = item.backgroundRoles?.[document.documentElement.dataset.uiGraphics] || item.backgroundRole;
       let surface = element;
       while (surface && surface !== document.body && getComputedStyle(surface).backgroundImage === 'none' && rgba(getComputedStyle(surface).backgroundColor)[3] === 0) surface = surface.parentElement;
       if (!surface || surface === document.body) throw Error(`Missing painted surface: ${item.id}`);
@@ -202,7 +207,7 @@ async function readColorCases(page, file) {
       }
       const ancestorsOpaque = [...(function* () { for (let node = element.parentElement; node; node = node.parentElement) yield node; })()].every(node => Number(getComputedStyle(node).opacity) === 1);
       return {id: item.id, foreground: rgba(style.color), stops, layers, backdrop, image: paint.backgroundImage,
-        opacity: Number(style.opacity), ancestorsOpaque, foregroundRole: roleColor(element, item.foregroundRole), backgroundRole: roleColor(element, item.backgroundRole)};
+        opacity: Number(style.opacity), ancestorsOpaque, foregroundRole: roleColor(element, item.foregroundRole), backgroundRole: roleColor(element, backgroundRole), backgroundRoleName: backgroundRole};
     });
   }, colorContract.components.filter(item => !item.pages || item.pages.includes(file)));
 }
@@ -216,7 +221,7 @@ function verifyColorCases(values, label) {
     if (!glass) assert.ok(value.stops.length > 0 && value.stops.every(stop => stop[3] === 1), `${name}: never treat transparent as black`);
     else assert.ok(value.backdrop?.length > 0 && value.backdrop.every(stop => stop[3] === 1), `${name}: glass is composed over a measured opaque backdrop`);
     assert.ok(near(value.foreground, value.foregroundRole), `${name}: foreground uses ${item.foregroundRole}`);
-    assert.ok(value.stops.some(stop => near(stop, value.backgroundRole) && Math.abs(stop[3] - value.backgroundRole[3]) < 0.02), `${name}: background uses ${item.backgroundRole}`);
+    assert.ok(value.stops.some(stop => near(stop, value.backgroundRole) && Math.abs(stop[3] - value.backgroundRole[3]) < 0.02), `${name}: background uses ${value.backgroundRoleName}`);
     if (item.backgroundImage) assert.equal(value.image, item.backgroundImage, `${name}: no fixed legacy gradient`);
     if (value.image !== 'none') {
       assert.ok(value.image.startsWith('linear-gradient(') && value.stops.length === 2 && near(value.foreground, [255, 255, 255]), `${name}: unsupported gradient must not pass silently`);
@@ -264,7 +269,7 @@ for (const [name, file, brokenCss, expected] of [
   ['bright selected timer', 'impostazioni.html', 'html body[data-ui-revision] .timer-btn.active{background:var(--accent)!important}', /settings-selected-timer/],
   ['white on a bright accent', 'impostazioni.html', 'html body[data-ui-revision] .vault-assistant-bubble.user{background:var(--accent)!important}', /search-user-bubble/],
   ['extra secondary opacity', 'impostazioni.html', 'html body[data-ui-revision] .settings-desc{opacity:.7!important}', /settings-secondary.*effective contrast/],
-  ['bright second gradient stop', 'dati_azienda.html', 'html body[data-ui-revision].company-profile-page .icon-purple{background:linear-gradient(135deg,var(--rev-fill),var(--accent))!important}', /company-purple.*effective contrast/],
+  ['bright second gradient stop', 'dati_azienda.html', 'html body[data-ui-revision].company-profile-page .icon-purple{background:linear-gradient(135deg,var(--companion-card-fill),var(--accent))!important}', /company-purple.*effective contrast/],
   ['fixed blue badge', 'configurazione_documenti.html', 'html body[data-ui-revision] .config-badge-blue{color:#60a5fa!important}', /config-badge-accent/],
   ['fixed green bank title', 'dettaglio_account_privato.html', 'html body[data-ui-revision] .bank-title{color:#22c55e!important}', /bank-title.*foreground uses/],
   ['fixed emerald profile icon', 'profilo_privato.html', 'html body[data-ui-revision] .icon-emerald{background:#10b981!important}', /profile-theme-icon-emerald.*background uses/],
@@ -339,7 +344,7 @@ test('Settings: Classica shares the palette roles; semantic danger/status colors
       assert.equal(new Set(revised.semantic.slice(2).map(value => value.color)).size, 3, 'PASS/WARN/FAIL retain three distinct semantic colors');
       assert.notEqual(revised.semantic[0].color, revised.semantic[2].color, 'danger is not rendered as success');
       // Ordine di Diego (14/11/2026): la Classica riceve gli stessi ruoli colore della Nuova.
-      await page.evaluate(() => document.body.setAttribute('data-ui-revision', 'classica'));
+      await page.evaluate(() => document.documentElement.dataset.uiGraphics = 'classic');
       const classic = await read();
       assert.deepEqual(classic.semantic, revised.semantic, `${theme}/${palette}: danger and diagnostic status paints identical in both graphics`);
       assert.notEqual(classic.maintenance.color, 'rgb(129, 140, 248)', 'Classica no longer uses the fixed indigo text');
@@ -347,7 +352,7 @@ test('Settings: Classica shares the palette roles; semantic danger/status colors
       assert.equal(classic.maintenance.color, revised.maintenance.color, 'maintenance action shares the palette role');
       assert.equal(classic.legacyIcon.background, revised.legacyIcon.background, 'decorative icon shares the palette role');
       assert.equal(classic.selection.background, revised.selection.background, 'selected fill shares the readable palette fill');
-      await page.evaluate(() => document.body.setAttribute('data-ui-revision', 'tre-livelli'));
+      await page.evaluate(() => document.documentElement.dataset.uiGraphics = 'new');
       assert.deepEqual(await read(), revised, 'switching back restores the candidate paints');
     } finally { await page.close(); }
   }
@@ -365,7 +370,7 @@ async function paintOf(page, selector) {
       fill: probe('--rev-fill'), popup: probe('--rev-popup'), success: probe('--status-success')};
   }, selector);
 }
-const classic = page => page.evaluate(() => document.body.setAttribute('data-ui-revision', 'classica'));
+const classic = page => page.evaluate(() => document.documentElement.dataset.uiGraphics = 'classic');
 
 test('toast messages have a single surface that follows the palette', {timeout: 60000}, async () => {
   for (const theme of colorContract.themes) for (const palette of ['', 'petrol']) {

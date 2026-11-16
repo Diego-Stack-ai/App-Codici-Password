@@ -9,7 +9,7 @@
       "selector": ".label-icon[data-icon-role=\"theme\"]",
       "count": 3,
       "property": "color",
-      "role": "--rev-icon",
+      "role": "--card-icon-ink",
       "reason": "Icona fissa dell'etichetta di un campo: non segnala urgenza o errore."
     },
     {
@@ -18,7 +18,7 @@
       "selector": ".mini-icon-box[data-icon-role=\"theme\"]",
       "count": 1,
       "property": "color",
-      "role": "--rev-icon",
+      "role": "--card-icon-ink",
       "reason": "Introduce la classifica TOP 10: nessuno stato di avviso."
     },
     {
@@ -45,7 +45,7 @@
       "selector": ".settings-icon-box[data-icon-role=\"theme\"]",
       "count": 2,
       "property": "color",
-      "role": "--rev-icon",
+      "role": "--card-icon-ink",
       "reason": "Decorazione delle categorie di configurazione."
     },
     {
@@ -72,7 +72,7 @@
       "selector": ".detail-section-icon[data-icon-role=\"theme\"]",
       "count": 2,
       "property": "color",
-      "role": "--rev-icon",
+      "role": "--card-icon-ink",
       "reason": "Referente e Note: sezioni di dati, nessuno stato."
     },
     {
@@ -81,7 +81,7 @@
       "selector": ".detail-section-icon[data-icon-role=\"theme\"]",
       "count": 2,
       "property": "color",
-      "role": "--rev-icon",
+      "role": "--card-icon-ink",
       "reason": "Referente e Note: sezioni di dati, nessuno stato."
     },
     {
@@ -90,7 +90,7 @@
       "selector": ".detail-section-icon[data-icon-role=\"theme\"]",
       "count": 2,
       "property": "color",
-      "role": "--rev-icon",
+      "role": "--card-icon-ink",
       "reason": "Coordinate e Note: sezioni di dati, nessuno stato."
     },
     {
@@ -99,7 +99,7 @@
       "selector": ".detail-section-icon[data-icon-role=\"theme\"]",
       "count": 3,
       "property": "color",
-      "role": "--rev-icon",
+      "role": "--card-icon-ink",
       "reason": "Coordinate, Referente e Note: sezioni di dati, nessuno stato."
     },
     {
@@ -108,7 +108,7 @@
       "selector": ".detail-section-icon[data-icon-role=\"theme\"]",
       "count": 4,
       "property": "color",
-      "role": "--rev-icon",
+      "role": "--card-icon-ink",
       "reason": "Dati fiscali, referente, email e note: categorie di dati costanti."
     },
     {
@@ -117,7 +117,7 @@
       "selector": ".detail-section-icon[data-icon-role=\"theme\"]",
       "count": 3,
       "property": "color",
-      "role": "--rev-icon",
+      "role": "--card-icon-ink",
       "reason": "Stessa funzione delle icone di sezione dei moduli Azienda."
     },
     {
@@ -126,7 +126,7 @@
       "selector": "[data-icon-role=\"theme\"]",
       "count": 3,
       "property": "color",
-      "role": "--rev-icon",
+      "role": "--card-icon-ink",
       "reason": "Calendario, categoria e pianificazione statici: il render cambia solo il testo."
     },
     {
@@ -135,7 +135,7 @@
       "selector": ".settings-icon-box[data-icon-role=\"theme\"]",
       "count": 24,
       "property": "color",
-      "role": "--rev-icon",
+      "role": "--card-icon-ink",
       "reason": "Voci del menu Impostazioni (anche le classic-settings-* del registro): icone di destinazione, non esiti."
     },
     {
@@ -144,7 +144,7 @@
       "selector": ".settings-icon-box[data-icon-role=\"theme\"]",
       "count": 6,
       "property": "color",
-      "role": "--rev-icon",
+      "role": "--card-icon-ink",
       "reason": "Sezioni del Profilo."
     },
     {

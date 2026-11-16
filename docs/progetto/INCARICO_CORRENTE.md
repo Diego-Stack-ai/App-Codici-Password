@@ -1,5 +1,27 @@
 # Incarico corrente
 
+<a id="rilascio-1278-incarico-2026-11-16"></a>
+
+## APP 1.2.278 — rilascio autorizzato, 16/11/2026
+
+Diego ordina «procedi con il deploy ed aggiorna gli md e github». L'ordine estende la consegna locale sotto: confezionare la 1.2.278 con Ricerca corretta e base comune Classica/Nuova, aggiornare i Markdown esistenti e GitHub, commit/push e PR contro master, riesame indipendente e CI completa sullo SHA finale, merge con testa attesa, workflow manuale Hosting e verifica pubblica. L'approvazione production già delegata nella sessione resta operativa, con tutte le protezioni conservate. Nessuna operazione policy, Rules, Functions, Storage, Auth, claim o IAM; cornice ordinaria e limiti dei collaudi fisici invariati. [Procedura](../regole/RILASCIO.md#rilascio-1278-2026-11-16), [stato](STATO.md#rilascio-1278-stato-2026-11-16), [ricevuta](../evidenze/COLLAUDI.md#rilascio-1278-verifiche-2026-11-16).
+
+<a id="livree-comuni-incarico-2026-11-16"></a>
+
+## Base evoluta comune e due livree — implementazione locale, 16/11/2026
+
+Diego ordina «Procedi con questa configurazione» e ribadisce «procedi»: Classica e Nuova condividono la base evoluta dell'app, comandi, impostazioni, disposizione ed effetti. Entrambe conservano iconcine dei titoli, filigrane piccole dove previste e filigrana decorativa sullo sfondo; faro invariato. **Solo Nuova** adotta i sette abbinamenti bicolore approvati nelle anteprime e rende il colore delle icone delle card circa il 15% più intenso. Questa precisazione diretta supera la precedente sintesi che attribuiva il 15% a entrambe. Classica è la stessa app evoluta con i colori della sola palette principale, non il vecchio assetto funzionale.
+
+Ramo locale `codex/search-footer-colors-20261116`, base 917dfc7f / runtime 1.2.277; conservare i correttivi Ricerca già presenti e le modifiche documentali in corso. Ammessi implementazione pertinente, mappatura componenti/ruoli/test, prove sintetiche su entrambe le varianti × sette temi × chiaro/scuro e aggiornamento dei documenti esistenti. Un solo esecutore; supporti in lettura. Selettore e preferenze locali rimangono compatibili. La scelta cromatica non cambia Auth/Vault/cornice, dati, permessi o colori funzionali di errore/avviso/azioni distruttive. Nessun account reale, nuova versione, commit/push, PR, merge, deploy o operazione cloud è implicito in questo ordine. Consegna locale revisionabile con risultati e limiti effettivi.
+
+<a id="ricerca-footer-incarico-2026-11-16"></a>
+
+## Ricerca e icone footer — correttivi locali e proposta, 16/11/2026
+
+Diego segnala il quadrato colorato durante l'apertura della Ricerca e l'ovale vuoto sopra il campo; chiede una linea divisoria e un colore alternativo armonico per le icone del footer in ciascuna delle sette palette, mantenendo sfondi e card nel tema. Autorizzati diagnosi, correttivi locali pertinenti, prove con produttori reali e dati sintetici e proposta visiva comparabile; gli abbinamenti sono una proposta da valutare, non un nuovo comportamento già pubblicato del selettore Classica/Nuova. Ramo `codex/search-footer-colors-20261116`, base documentale 917dfc7f, runtime di partenza 1.2.277.
+
+Diego conferma che «Verifica accesso in corso» sparisce da solo, senza digitare la Master: spiegare il controllo di identità senza modificare Auth/Vault o cornice. Ha ritrovato il faro e dispone di lasciarlo invariato. Distinguere le differenze attuali Classica/Nuova dagli abbinamenti proposti. Un solo esecutore e supporti in lettura; nessun account o dato reale. Questo seguito non comprende nuova versione, commit/push, PR, merge, deploy o operazioni policy/backend. La cornice ordinaria e la ricevuta di produzione sottostante restano quelle già attestate.
+
 <a id="rilascio-1277-incarico-2026-11-16"></a>
 
 ## APP 1.2.277 — ordine eseguito e ricevuta consolidata, 16/11/2026

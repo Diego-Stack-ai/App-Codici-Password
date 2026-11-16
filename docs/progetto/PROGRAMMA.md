@@ -1,5 +1,21 @@
 # Programma
 
+<a id="rilascio-1278-programma-2026-11-16"></a>
+
+## APP 1.2.278 — pubblicazione autorizzata, 16/11/2026
+
+[Incarico](INCARICO_CORRENTE.md#rilascio-1278-incarico-2026-11-16): script canonico versione e offline, riesame della guida e identità del pacchetto → revisione indipendente e CI dello SHA finale → merge con testa attesa → workflow manuale `hosting` sul master finale, production protetto → verifica pubblica completa → ricevuta nei Markdown e su GitHub. Conservare rami e worktree precedenti; nessuna operazione policy/backend. [Stato](STATO.md#rilascio-1278-stato-2026-11-16), [evidenze](../evidenze/COLLAUDI.md#rilascio-1278-verifiche-2026-11-16).
+
+<a id="livree-comuni-programma-2026-11-16"></a>
+
+## Livree Classica/Nuova — seguito locale completato, 16/11/2026
+
+[Ordine](INCARICO_CORRENTE.md#livree-comuni-incarico-2026-11-16): unificare la base evoluta e le tre decorazioni, conservare Classica nella palette principale, applicare bicolore e card +15% soltanto alla Nuova. Conservare i correttivi Ricerca del ramo corrente. Sequenza: contratto e ruoli centrali → produttori/CSS → adeguamento dei banchi ai marker distinti → matrice di pagine/palette e stati dinamici pertinenti → riesame in lettura e ricevuta locale. Il [registro](../../scripts/ui-livery-contract.json) collega componenti, colori, produttori e prove; gli esiti effettivi vanno nelle [evidenze](../evidenze/COLLAUDI.md#livree-comuni-verifiche-2026-11-16).
+
+Nessuna nuova versione, commit/push, PR, merge, deploy o operazione policy/backend è autorizzata da questo seguito. Il rilascio completato sotto conserva la propria ricevuta.
+
+Completati implementazione, matrice dei sette temi, controlli dinamici e riesame in lettura. La [ricevuta locale](../evidenze/COLLAUDI.md#livree-comuni-verifiche-2026-11-16) distingue i gruppi eseguiti, le prove negative e i limiti; nessuna equivalenza con CI o pubblicazione.
+
 <a id="rilascio-1277-programma-2026-11-16"></a>
 
 ## APP 1.2.277 — rilascio del giro #313 completato, 16/11/2026

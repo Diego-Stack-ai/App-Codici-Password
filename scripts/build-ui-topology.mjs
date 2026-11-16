@@ -10,6 +10,7 @@ const defaultContractPath = path.join(scriptDir, 'ui-topology-contract.json');
 const defaultGuideCatalogPath = path.join(defaultPublicRoot, 'assets', 'js', 'modules', 'assistant', 'documentation-catalog.json');
 const defaultDynamicThemePath = path.join(scriptDir, 'ui-dynamic-theme-contract.json');
 const defaultDeepThemePath = path.join(scriptDir, 'ui-deep-theme-contract.json');
+const defaultLiveryPath = path.join(scriptDir, 'ui-livery-contract.json');
 const CONTROL_TAGS = new Set(['a', 'button', 'input', 'select', 'textarea', 'summary', 'form']);
 const TRANSLATION_ATTRIBUTES = [
   ['data-t', 'ui_translates_with', 'text'],
@@ -294,23 +295,26 @@ export function buildDynamicThemeTopology({ registryPath = defaultDynamicThemePa
       for (const state of paintStates) used.add(state);
       seenPaints.set(baseKey, used); paints++;
       const key = `${baseKey}|${[...paintStates].sort().join(',')}`;
-      const role = String(paint.role);
+      const paintId = collector.addNode(uiNode(`${caseId}:paint:${encodeURIComponent(key)}`, key, 'ui_dynamic_paint', {
+        selector: paint.selector, pseudo: paint.pseudo, property: paint.property, states: paintStates, source_file: relativeToProject(registryPath), observed: false
+      }));
+      collector.addEdge(uiEdge(caseId, paintId, 'ui_declares_paint', declared));
+      for (const state of paintStates) collector.addEdge(uiEdge(`${caseId}:state:${state}`, paintId, 'ui_expects_state_paint', declared));
+      if(paint.newRole!==undefined&&(typeof paint.newRole!=='string'||!paint.newRole.startsWith('--')))errors.push(`${item.id}: invalid variant CSS role`);
+      const variants=[{role:String(paint.role),graphics:paint.newRole?['classica']:undefined},
+        ...(paint.newRole?[{role:String(paint.newRole),graphics:['tre-livelli']}]:[])];
+      for(const {role,graphics} of variants){
       const escapedRole = role.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const rolePattern = new RegExp(`${escapedRole}\\s*:`);
       const definition = role.startsWith('--') ? roleSources.find(({text}) => rolePattern.test(text)) : null;
       if (role.startsWith('--') && !definition) errors.push(`${item.id}: unknown CSS role ${role}`);
       const expression = /^color-mix\(in srgb,\s*var\(--[a-z0-9-]+\)\s+(?:100|[0-9]{1,2})(?:\.[0-9]+)?%,\s*transparent\)$/.test(role);
       if (!role.startsWith('--') && !expression && !['#fff', 'white', 'transparent', 'none'].includes(role)) errors.push(`${item.id}: unregistered literal ${role}`);
-      const paintId = collector.addNode(uiNode(`${caseId}:paint:${encodeURIComponent(key)}`, key, 'ui_dynamic_paint', {
-        selector: paint.selector, pseudo: paint.pseudo, property: paint.property, states: paintStates, source_file: relativeToProject(registryPath), observed: false
-      }));
       const roleId = collector.addNode(uiNode(`ui:css-role:${role}`, role, 'ui_css_role', {
         source_file: definition ? relativeToProject(definition.file) : relativeToProject(registryPath),
         source_location: definition ? `L${lineOf(definition.text, definition.text.search(rolePattern))}` : undefined
       }));
-      collector.addEdge(uiEdge(caseId, paintId, 'ui_declares_paint', declared));
-      for (const state of paintStates) collector.addEdge(uiEdge(`${caseId}:state:${state}`, paintId, 'ui_expects_state_paint', declared));
-      collector.addEdge(uiEdge(paintId, roleId, 'ui_expects_color_role', declared));
+      collector.addEdge(uiEdge(paintId, roleId, 'ui_expects_color_role', {...declared,...(graphics?{graphics}:{})}));
       for (const [, variable] of role.matchAll(/var\((--[a-z0-9-]+)\)/g)) {
         const pattern = new RegExp(`${variable}\\s*:`);
         const origin = roleSources.find(({text}) => pattern.test(text));
@@ -320,6 +324,7 @@ export function buildDynamicThemeTopology({ registryPath = defaultDynamicThemePa
           source_location: origin ? `L${lineOf(origin.text, origin.text.search(pattern))}` : undefined
         }));
         collector.addEdge(uiEdge(roleId, variableId, 'ui_uses_color_role', declared));
+      }
       }
     }
   }
@@ -378,12 +383,71 @@ export function buildDeepThemeTopology({registryPath = defaultDeepThemePath} = {
   return {nodes:[...collector.nodes.values()],edges:[...collector.edges.values()],files:[...files],errors,summary:{cases:ids.size,states}};
 }
 
+export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
+  const registry=JSON.parse(fs.readFileSync(registryPath,'utf8'));
+  const collector=makeCollector(),errors=[],files=new Set([registryPath,fileURLToPath(import.meta.url),path.join(projectRoot,'tests/ui-dynamic-topology.test.mjs'),path.join(projectRoot,'scripts/lib/view-tour-harness.mjs')]),roles=new Set();
+  const declared={confidence:'DECLARED',source_file:relativeToProject(registryPath),observed:false};
+  const source=file=>{
+    const absolute=path.resolve(projectRoot,file||'');
+    if(!file||!absolute.startsWith(projectRoot+path.sep)||!fs.existsSync(absolute)||!fs.statSync(absolute).isFile()){errors.push(`liveries: invalid source ${file}`);return null;}
+    files.add(absolute);return collector.addNode(uiNode(`ui:source:${file}`,file,'ui_source',{source_file:file,observed:false}));
+  };
+  const equalList=(actual,expected)=>Array.isArray(actual)&&actual.length===expected.length&&new Set(actual).size===expected.length&&expected.every(value=>actual.includes(value));
+  if(registry.schemaVersion!==1||!equalList(registry.graphics,['classic','new'])||!equalList(registry.themes,['light','dark'])||!equalList(registry.widths,[320,1280])||!equalList(registry.palettes,['blue','green','red','sand','petrol','lavender','dusty-rose']))errors.push('liveries: invalid or reduced matrix');
+  if(registry.baseRevision!=='tre-livelli'||registry.cardSaturationMultiplier!==1.15)errors.push('liveries: shared base or New-only saturation contract changed');
+  const decorationSource=source(registry.decorationsSource),colorSource=source(registry.colorSource),styles=source(registry.sharedStyles),testSource=source(registry.test);
+  const roleSources=[colorSource&&{file:registry.colorSource,id:colorSource},styles&&{file:registry.sharedStyles,id:styles}].filter(Boolean).map(entry=>({...entry,text:fs.readFileSync(path.resolve(projectRoot,entry.file),'utf8')}));
+  const text=decorationSource?fs.readFileSync(path.resolve(projectRoot,registry.decorationsSource),'utf8'):'';
+  const symbolMap=/export const pageSymbols = Object\.freeze\(\{([\s\S]*?)\}\);/.exec(text)?.[1]||'';
+  const entries=[...symbolMap.matchAll(/['"]([^'"]+\.html)['"]\s*:\s*['"]([^'"]+)['"]/g)].map(match=>[match[1],match[2]]);
+  const pages=entries.map(([page])=>page);
+  if(!pages.length||new Set(pages).size!==pages.length||pages.length!==registry.expectedPageCount)errors.push('liveries: empty, duplicate or incomplete page-symbol map');
+  const variants=(Array.isArray(registry.graphics)?registry.graphics:[]).map(name=>collector.addNode(uiNode(`ui:livery:${name}`,name,'ui_livery',{base:registry.baseRevision,companion:name==='new',cardSaturationMultiplier:name==='new'?registry.cardSaturationMultiplier:1,...declared})));
+  for(const [page,symbol] of entries){
+    const pageId=collector.addNode(uiNode(`ui:page:${page}`,page,'ui_page',{source_file:`Frontend/public/${page}`}));source(`Frontend/public/${page}`);
+    for(const variant of variants)collector.addEdge(uiEdge(pageId,variant,'ui_supports_livery',declared));
+    const symbolId=collector.addNode(uiNode(`ui:livery-symbol:${symbol}`,symbol,'ui_decorative_symbol',declared));
+    collector.addEdge(uiEdge(pageId,symbolId,'ui_declares_page_symbol',declared));
+  }
+  const components=[
+    {id:'decorations',pages,selectors:['.archive-watermark','.header-title::before','.page-container::after'],roles:[],producers:[registry.decorationsSource]},
+    {id:'card-glyphs',pages,selectors:registry.cardGlyphs,roles:['--card-icon-ink','--theme-ink','--companion-card-ink'],producers:registry.cardProducers},
+    {id:'filled-card-glyphs',pages,selectors:registry.filledCardGlyphs,roles:['--companion-card-fill','--theme-fill'],producers:registry.cardProducers},
+    {id:'footer-ink',pages,selectors:['#search-status','.footer-settings-link'],roles:[registry.footer?.inkRole,'--theme-ink','--text-primary'],producers:[registry.footer?.producer]},
+    {id:'home-actions',pages:['home_page.html'],selectors:['.fab-group .btn-fab-privato','.fab-group .btn-fab-scadenza','.fab-group .btn-fab-azienda'],roles:[registry.footer?.fillRole,registry.footer?.deepRole,'--theme-fill','--theme-fill-deep'],producers:[registry.footer?.homeProducer]},
+    {id:'profile-guide',pages:['profilo_privato.html'],selectors:[registry.footer?.guide],roles:[registry.footer?.inkRole,'--text-primary'],producers:[registry.footer?.producer]}
+  ];
+  for(const component of components){
+    const id=collector.addNode(uiNode(`ui:livery-component:${component.id}`,component.id,'ui_livery_component',declared));
+    for(const variant of variants)collector.addEdge(uiEdge(variant,id,'ui_shares_component',{...declared,graphics:['classic','new']}));
+    for(const page of component.pages)collector.addEdge(uiEdge(`ui:page:${page}`,id,'ui_declares_livery_component',declared));
+    for(const target of [styles,testSource].filter(Boolean))collector.addEdge(uiEdge(id,target,target===testSource?'ui_declares_test':'ui_loads_stylesheet',declared));
+    if(!Array.isArray(component.selectors)||!component.selectors.length)errors.push(`liveries: ${component.id} has no selectors`);
+    for(const [index,selector] of (Array.isArray(component.selectors)?component.selectors:[]).entries()){
+      if(typeof selector!=='string'||!selector.trim()){errors.push(`liveries: ${component.id} has an invalid selector`);continue;}
+      const selectorId=collector.addNode(uiNode(`${id}:selector:${index}`,selector,'ui_livery_selector',{selector,...declared}));collector.addEdge(uiEdge(id,selectorId,'ui_declares_selector',declared));
+    }
+    if(!Array.isArray(component.producers)||!component.producers.length)errors.push(`liveries: ${component.id} has no producers`);
+    for(const file of Array.isArray(component.producers)?component.producers:[]){const target=source(file);if(target)collector.addEdge(uiEdge(id,target,'ui_rendered_by',declared));}
+    for(const role of component.roles){
+      if(typeof role!=='string'||!role.startsWith('--')){errors.push(`liveries: ${component.id} has an invalid role`);continue;}
+      const definitions=roleSources.filter(entry=>entry.text.includes(role+':'));
+      if(!definitions.length)errors.push(`liveries: ${component.id} has unknown color role ${role}`);
+      const graphics=role.startsWith('--companion-')?['new']:role==='--card-icon-ink'?['classic','new']:['classic'];
+      roles.add(role);const roleId=collector.addNode(uiNode(`ui:livery-color-role:${role}`,role,'ui_color_role',declared));collector.addEdge(uiEdge(id,roleId,'ui_expects_color_role',{...declared,graphics}));
+      for(const definition of definitions)collector.addEdge(uiEdge(roleId,definition.id,'ui_role_defined_in',declared));
+    }
+  }
+  return {nodes:[...collector.nodes.values()],edges:[...collector.edges.values()],files:[...files],errors,summary:{pages:pages.length,variants:variants.length,components:components.length,roles:roles.size}};
+}
+
 export function buildUiTopology({
   publicRoot = defaultPublicRoot,
   contractPath = defaultContractPath,
   guideCatalogPath = defaultGuideCatalogPath,
   dynamicThemePath = defaultDynamicThemePath,
-  deepThemePath = defaultDeepThemePath
+  deepThemePath = defaultDeepThemePath,
+  liveryPath = defaultLiveryPath
 } = {}) {
   const contract = JSON.parse(fs.readFileSync(contractPath, 'utf8'));
   const guideCatalog = JSON.parse(fs.readFileSync(guideCatalogPath, 'utf8'));
@@ -394,6 +458,9 @@ export function buildUiTopology({
   const deepThemes = deepThemePath ? buildDeepThemeTopology({registryPath:deepThemePath}) : {nodes:[],edges:[],files:[],errors:[],summary:{cases:0,states:0}};
   for (const node of deepThemes.nodes) collector.addNode(node);
   for (const edge of deepThemes.edges) collector.addEdge(edge);
+  const liveries=liveryPath?buildLiveryTopology({registryPath:liveryPath}):{nodes:[],edges:[],files:[],errors:[],summary:{pages:0,variants:0,components:0,roles:0}};
+  for(const node of liveries.nodes)collector.addNode(node);
+  for(const edge of liveries.edges)collector.addEdge(edge);
   const controls = [];
   const surfaces = [];
   const eventBindings = [];
@@ -826,6 +893,7 @@ export function buildUiTopology({
 
   contractErrors.push(...dynamicThemes.errors);
   contractErrors.push(...deepThemes.errors);
+  contractErrors.push(...liveries.errors);
   const mappedSelectors = new Set([
     ...eventBindings.map(binding => binding.selector),
     ...selectorReferences.map(reference => reference.selector),
@@ -875,6 +943,10 @@ export function buildUiTopology({
     dynamicThemeExceptions: dynamicThemes.summary.exceptions || 0,
     deepThemeCases: deepThemes.summary.cases,
     deepThemeStates: deepThemes.summary.states,
+    liveryPages: liveries.summary.pages,
+    liveryVariants: liveries.summary.variants,
+    liveryComponents: liveries.summary.components,
+    liveryColorRoles: liveries.summary.roles,
     dormantControls: dormantControlNodeIds.size,
     unmappedControls: unmappedControls.length,
     unmappedControlRate: controls.length ? Number((unmappedControls.length / controls.length).toFixed(4)) : 0,
@@ -884,7 +956,7 @@ export function buildUiTopology({
     runtimeScenarioErrors: runtimeScenarioErrors.length
   };
   const fingerprint = createHash('sha256');
-  for (const file of [...new Set([...htmlFiles, ...jsFiles, ...cssFiles, contractPath, guideCatalogPath, ...dynamicThemes.files, ...deepThemes.files])].sort()) {
+  for (const file of [...new Set([...htmlFiles, ...jsFiles, ...cssFiles, contractPath, guideCatalogPath, ...dynamicThemes.files, ...deepThemes.files, ...liveries.files])].sort()) {
     fingerprint.update(relativeToProject(file));
     fingerprint.update('\0');
     fingerprint.update(fs.readFileSync(file));

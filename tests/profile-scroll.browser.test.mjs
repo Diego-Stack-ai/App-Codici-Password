@@ -272,7 +272,7 @@ test('profile attachment metadata stays outside its delete control on narrow car
       await page.setViewportSize(viewport);
       for (const dark of [false, true]) for (const fontSize of [16, 24, 32]) {
         const cards = [true, false].map((image, index) => `<article class="profile-document-inline-card"><button id="open-${index}" class="profile-document-inline-item ${image ? 'is-image' : 'is-file'}" aria-label="Apri allegato sintetico ${index}">${image ? '<span>Immagine inventata</span>' : '<span>PDF</span><span class="profile-document-inline-name">documento_sintetico_esteso.pdf</span>'}</button><div class="profile-document-inline-footer"><div class="profile-document-inline-meta"><span class="profile-document-inline-name">documento_sintetico_con_nome_molto_lungo.${image ? 'jpg' : 'pdf'}</span><span class="profile-document-inline-status">123.45 MB · 09/11/2026</span></div><button id="delete-${index}" type="button" class="btn-delete-attachment profile-document-inline-delete" aria-label="Elimina allegato sintetico ${index}"><span class="material-symbols-outlined">×</span></button></div></article>`).join('');
-        await page.setContent(`<!doctype html><html class="${dark ? 'dark' : ''}" style="font-size:${fontSize}px"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>${await fixtureStyles()}</style></head><body class="base-bg"><div class="base-container"><main class="base-main"><div class="page-container" style="padding-top:40px"><section class="form-card"><div class="profile-document-inline-gallery">${cards}</div></section><div style="height:100px"></div></div></main></div></body></html>`);
+        await page.setContent(`<!doctype html><html class="${dark ? 'dark' : ''}" data-ui-graphics="new" style="font-size:${fontSize}px"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>${await fixtureStyles()}</style></head><body class="base-bg"><div class="base-container"><main class="base-main"><div class="page-container" style="padding-top:40px"><section class="form-card"><div class="profile-document-inline-gallery">${cards}</div></section><div style="height:100px"></div></div></main></div></body></html>`);
         await page.evaluate(() => {
           window.fixtureClicks = {open: 0, remove: 0};
           document.querySelectorAll('.profile-document-inline-item').forEach(button => {button.onclick = () => window.fixtureClicks.open++;});
@@ -325,7 +325,7 @@ test('New profile widgets keep titles, descriptions and all six actions readable
         const header = `<header class="profile-widget-header"><span class="material-symbols-outlined notranslate" aria-hidden="true">◇</span><div class="profile-widget-title"><strong>Widget sintetico dimostrativo</strong><small>Descrizione sintetica completa del widget personalizzato.</small></div><div class="profile-widget-actions">${labels.map((label, index) => `<button type="button" data-widget-action="${index}">${label}</button>`).join('')}</div></header>`;
         const field = `<div class="profile-widget-field"><span class="data-label">Campo sintetico</span><span class="data-value">${'valore'.repeat(12)}</span><div class="profile-widget-field-actions"><button type="button">Copia</button><button type="button">↑</button><button type="button">↓</button><button type="button">Modifica</button><button type="button">Elimina</button></div></div>`;
         const widget = `<article class="form-card profile-widget profile-widget-medium">${header}<div class="profile-widget-body">${field}<button type="button" class="btn-upload-trigger">Aggiungi campo</button></div></article>`;
-        await page.setContent(`<!doctype html><html class="${dark ? 'dark' : ''}" style="font-size:${fontSize}px"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>${styles}*,*::before,*::after{transition:none!important;animation:none!important}</style></head><body class="${bodyClass}" data-ui-model="detail" data-ui-revision="tre-livelli"><div class="base-container"><main class="base-main"><div class="page-container"><section class="profile-widget-zone"><div class="profile-widget-grid">${widget}${widget}</div></section></div></main></div></body></html>`);
+        await page.setContent(`<!doctype html><html class="${dark ? 'dark' : ''}" data-ui-graphics="new" style="font-size:${fontSize}px"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>${styles}*,*::before,*::after{transition:none!important;animation:none!important}</style></head><body class="${bodyClass}" data-ui-model="detail" data-ui-revision="tre-livelli"><div class="base-container"><main class="base-main"><div class="page-container"><section class="profile-widget-zone"><div class="profile-widget-grid">${widget}${widget}</div></section></div></main></div></body></html>`);
         const geometries = await page.locator('.profile-widget').evaluateAll(widgets => widgets.map(widget => {
           const rect = element => element.getBoundingClientRect().toJSON();
           const title = widget.querySelector('.profile-widget-title');
@@ -365,12 +365,14 @@ test('New profile widgets keep titles, descriptions and all six actions readable
         });
         for (let index = 0; index < 6; index++) await page.locator('.profile-widget').first().locator(`[data-widget-action="${index}"]`).click();
         assert.deepEqual(await page.evaluate(() => window.widgetFixtureClicks), [0, 1, 2, 3, 4, 5], context + ': all six synthetic controls remain reachable and distinct');
-        await page.evaluate(() => document.body.removeAttribute('data-ui-revision'));
-        const classic = await page.evaluate(() => ({
+        const readSharedWidgetLayout = () => ({
           header: getComputedStyle(document.querySelector('.profile-widget-header')).display,
           caption: getComputedStyle(document.querySelector('.profile-widget-title small')).whiteSpace
-        }));
-        assert.deepEqual(classic, {header: 'flex', caption: 'nowrap'}, 'Classica keeps the previous header and caption layout');
+        });
+        const evolved = await page.evaluate(readSharedWidgetLayout);
+        await page.evaluate(() => document.documentElement.dataset.uiGraphics = 'classic');
+        const classic = await page.evaluate(readSharedWidgetLayout);
+        assert.deepEqual(classic, evolved, 'Classica retains the same evolved widget layout');
       }
     }
   } finally {await browser.close();}

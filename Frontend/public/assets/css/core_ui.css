@@ -1,5 +1,4 @@
-/* Azioni ordinarie: profondità Classica discreta, indipendente da riempimenti,
-   focus e colori di stato. Anche il popup Vault usa questi ruoli. */
+/* UI contract and rationale: docs/regole/INTERFACCIA.md; history retained in Git. */
 :root {
     --ui-shadow-action-soft: 0 4px 10px rgba(var(--accent-rgb), 12%);
     --ui-shadow-selection-soft: 0 2px 10px rgba(var(--accent-rgb), 12%);
@@ -28,8 +27,6 @@
     color: white;
     transition: background 0.2s;
 }
-
-/* Anche i controlli nativi degli editor dinamici seguono la palette. */
 input[type="checkbox"] {
     accent-color: var(--theme-fill, var(--accent));
 }
@@ -58,8 +55,6 @@ input[type="checkbox"] {
     opacity: 1;
     pointer-events: auto;
 }
-
-/* Le conferme possono essere aperte da gallerie/editor già modali. */
 #protocol-confirm-modal {
     z-index: 13000;
 }
@@ -424,9 +419,6 @@ input[type="checkbox"] {
     border: 1px solid transparent;
     box-shadow: var(--ui-shadow-action-soft);
 }
-
-/* Conferme (decisione di Diego, 15/11/2026): il rosso sta sul comando che cancella; nel popup
-   «Sei sicuro?» i pulsanti Sì/No seguono la palette. */
 .btn-modal.btn-danger {
     background: var(--theme-fill);
     color: white;
@@ -641,8 +633,6 @@ input[type="checkbox"] {
     box-shadow: var(--ui-shadow-action-soft);
     border-radius: 50%;
 }
-
-/* Labels */
 .btn-fab-action::after {
     display: none;
     content: attr(data-label);
@@ -1016,8 +1006,6 @@ select.shared-account-select-control optgroup {
         gap: 0.4rem;
     }
 }
-
-/* Stati di pagina condivisi: caricamento, vuoto, avviso ed errore. */
 .ui-state {
     grid-column: 1 / -1;
     min-height: 12rem;
@@ -1068,8 +1056,6 @@ select.shared-account-select-control optgroup {
 @keyframes ui-state-spin {
     to { transform: rotate(360deg); }
 }
-
-/* --- LOADERS & SPINNERS --- */
 .animate-spin {
     animation: spin 1s linear infinite;
 }
@@ -1180,17 +1166,8 @@ html body[data-ui-revision] .guide-close-button:is(:hover, :focus-visible) {
         font-size: var(--fs-base) !important;
     }
 }
-
-/* === Ventaglio tonale della grafica Nuova (13/11/2026) ===
-   Un'unica scala di ruoli per ogni colore, derivata da --accent: sfondo pagina e
-   gradiente restano quelli della palette; cambiano solo le superfici sopra di esso.
-   Chiaro: il bianco tende al colore base. Scuro: le superfici sono più chiare dello
-   sfondo, su un grigio neutro (non bluastro) per non falsare i colori caldi. Valgono in entrambe le
-   grafiche (data-ui-revision «tre-livelli» o «classica», 14/11/2026). Le percentuali sono i soli punti da ritoccare. */
 [data-ui-revision] {
-    /* Materiali della Classica con i ruoli della palette (ordine di Diego, 14/11/2026):
-       superfici a vetro traslucido tinto e sfocato. Il contrasto si misura sullo sfondo
-       composto, nel caso peggiore della sfumatura di pagina e del bagliore. */
+    --card-icon-ink: var(--theme-ink);
     --rev-surface: color-mix(in srgb, var(--accent) 6%, rgb(255 255 255 / 0.70));
     --rev-surface-hover: color-mix(in srgb, var(--accent) 10%, rgb(255 255 255 / 0.78));
     --rev-surface-2: color-mix(in srgb, var(--accent) 10%, rgb(255 255 255 / 0.70));
@@ -1200,9 +1177,7 @@ html body[data-ui-revision] .guide-close-button:is(:hover, :focus-visible) {
     --rev-border: color-mix(in srgb, var(--accent) 28%, #e2e8f0);
     --rev-icon-bg: color-mix(in srgb, var(--accent) 22%, #fff);
     --rev-icon: color-mix(in srgb, var(--accent) 85%, #0f172a);
-    /* Riempimento pieno con testo bianco: scurito quanto basta per ≥ 4,5:1 su ogni palette. */
     --rev-fill: color-mix(in srgb, var(--accent) 85%, #0f172a);
-    /* Testo su pastiglia tinta: ≥ 4,5:1 su --rev-icon-bg. */
     --rev-text-accent: color-mix(in srgb, var(--accent) 60%, #0f172a);
     --rev-shadow: none;
     --rev-popup-shadow: 0 16px 36px -12px rgba(var(--accent-rgb), 12%);
@@ -1217,18 +1192,13 @@ html body[data-ui-revision] .guide-close-button:is(:hover, :focus-visible) {
     --rev-border: color-mix(in srgb, var(--accent) 34%, #3c414c);
     --rev-icon-bg: color-mix(in srgb, var(--accent) 28%, #2e323b);
     --rev-icon: color-mix(in srgb, var(--accent) 45%, #fff);
-    /* Gli accenti scuri sono chiari: il riempimento con testo bianco va scurito di più. */
     --rev-fill: color-mix(in srgb, var(--accent) 45%, #0f172a);
     --rev-text-accent: color-mix(in srgb, var(--accent) 45%, #fff);
-    /* In scuro gli accenti sono chiari: percentuali più basse; il grigio secondario
-       si schiarisce per restare ≥ 4,5:1 su ogni superficie. */
     --text-secondary: #c3cddb;
     --text-placeholder: #c3cddb;
     --rev-shadow: none;
     --rev-popup-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.45);
 }
-
-/* Popup, menu e avvisi seguono il colore scelto (prima: bianco, azzurro o blu fissi). */
 [data-ui-revision] :is(.modal-box, .modal-profile-box, .modal-box-source, .custom-select-menu, .datepicker-card,
     .first-configuration-dialog, .documentation-panel, .documentation-walkthrough-panel),
 html body[data-ui-revision] .vault-assistant-panel {
@@ -1244,17 +1214,12 @@ html body[data-ui-revision] .vault-assistant-panel {
     border: 1px solid var(--rev-border);
     box-shadow: var(--rev-popup-shadow);
 }
-
-/* Avvisi: una sola superficie, la pillola #toast; il contenuto interno resta trasparente
-   (prima un rettangolo colorato dentro la pillola bianca). */
 [data-ui-revision] #toast {
     background: var(--rev-popup);
     border: 1px solid var(--rev-border);
     color: var(--text-primary);
     box-shadow: var(--rev-popup-shadow);
 }
-
-/* Il foglio Ricerca usa html.dark .vault-assistant-* (0,2,1): html body[…] (0,2,2) prevale. */
 html body[data-ui-revision] :is(.vault-assistant-microphone, .vault-assistant-bubble.user) {
     background: var(--rev-fill);
     color: #fff;
@@ -1265,8 +1230,6 @@ html body[data-ui-revision] :is(.vault-assistant-input, .vault-assistant-result,
     border-color: var(--rev-border);
     color: var(--text-primary);
 }
-
-/* Dynamic search controls. */
 html body[data-ui-revision] :is(.vault-assistant-help, .vault-assistant-result-action, .vault-assistant-credential-action) {
     background: var(--rev-icon-bg);
     border-color: var(--rev-border);
@@ -1298,8 +1261,6 @@ html body[data-ui-revision] :is(.vault-assistant-help, .vault-assistant-input):f
     outline: 2px solid var(--rev-icon);
     outline-offset: 3px;
 }
-
-/* Shared attachment surfaces; media and destructive controls retain their roles. */
 html body[data-ui-revision] :is(.attachment-item, .attachment-card-row, .attachment-item-edit,
     .profile-document-inline-card, .profile-document-inline-item.is-file),
 html body[data-ui-revision] #display-attachments .detail-list-item {
@@ -1330,8 +1291,6 @@ html body[data-ui-revision] .profile-document-attachments-actions {
 html body[data-ui-revision] .profile-document-attachments-actions h3 {
     color: var(--rev-text-accent);
 }
-
-/* Decorative card icons; semantic state colors remain separate. */
 body[data-ui-revision] :is(.settings-icon-box, .archive-icon-box, .hero-page-icon-box, .account-icon-box,
     .icon-box, .card-icon-box, .upload-icon, .attachment-icon-badge, .glass-btn-icon, .btn-icon-add):not(.icon-red, .icon-amber, .icon-orange, .icon-emerald, .icon-green, .icon-purple) {
     background: var(--rev-icon-bg);
@@ -1349,14 +1308,9 @@ body[data-ui-revision].company-profile-page :is(.icon-purple, .icon-blue) {
     background: linear-gradient(135deg, var(--rev-fill) 0%, color-mix(in srgb, var(--rev-fill) 80%, #000) 100%);
     color: #fff;
 }
-
-/* Il secondario delle Impostazioni aveva opacity 0.7 sopra il colore: nella grafica Nuova
-   il grigio è già calibrato per 4,5:1, quindi l'opacità aggiuntiva va tolta. */
 [data-ui-revision] .settings-desc {
     opacity: 1;
 }
-
-/* Icone di stato in chiaro: tinte scurite per ≥ 3:1 (mappa visiva 14/11/2026). */
 html:not(.dark) [data-ui-revision] :is(.icon-accent-emerald, .config-badge-emerald, span.material-symbols-outlined.icon-emerald):not([data-icon-role="theme"]) {
     color: var(--theme-ink);
 }
@@ -1368,21 +1322,15 @@ html:not(.dark) [data-ui-revision] :is(.icon-accent-amber, span.material-symbols
 html:not(.dark) [data-ui-revision] .icon-accent-orange:not([data-icon-role="theme"]) {
     color: var(--theme-ink);
 }
-
-/* Pulsanti primari e linguetta attiva: bianco su --rev-fill (≥ 4,5:1 anche col blu chiaro). */
 body[data-ui-revision] :is(.btn-primary, .profile-tab.is-active) {
     background: var(--rev-fill);
     color: #fff;
 }
-
-/* Explicit theme icons. */
 body[data-ui-revision] .settings-icon-box[data-icon-role="theme"] {
     background: var(--rev-icon-bg);
     border-color: var(--rev-border);
     color: var(--rev-icon);
 }
-
-/* Bank Account surfaces and labels. */
 body[data-ui-revision] .bank-account-card {
     background: var(--rev-surface-2);
     border-color: var(--rev-border);
@@ -1401,20 +1349,14 @@ body[data-ui-revision] :is(.bank-title, .card-entry-label) {
 body[data-ui-revision] :is(.bank-expand-icon, .card-entry-icon) {
     color: var(--rev-icon);
 }
-
-/* Account Save actions; actual deadline FABs retain amber. */
 body[data-ui-revision] :is(#btn-save-footer, #save-btn-footer).btn-fab-scadenza {
     background: linear-gradient(135deg, var(--rev-fill) 0%, color-mix(in srgb, var(--rev-fill) 82%, #000) 100%);
     box-shadow: var(--ui-shadow-action-soft);
     color: #fff;
 }
-
-/* Only icons with an explicit theme role follow the palette. */
 html body[data-ui-revision] [data-icon-role="theme"]:not(.settings-icon-box) {
     color: var(--rev-icon);
 }
-
-/* moduli.css dà a .icon-emerald/.icon-amber/.icon-red anche un fondo tenue fisso. */
 html body[data-ui-revision] [data-icon-role="theme"]:is(.icon-emerald, .icon-amber, .icon-red):not(.settings-icon-box) {
     background-color: color-mix(in srgb, var(--accent) 15%, transparent);
 }
@@ -1426,4 +1368,106 @@ html body[data-ui-revision] :is(.mini-icon-box, .config-badge)[data-icon-role="t
 
 html body[data-ui-revision] .config-badge[data-icon-role="theme"] {
     color: var(--rev-text-accent);
+}
+body[data-ui-revision] .archive-watermark {
+    display: block;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%) rotate(-10deg);
+    opacity: 0.05;
+    z-index: var(--z-decoration);
+    pointer-events: none;
+    user-select: none;
+}
+
+body[data-ui-revision] .header-title::before,
+body[data-ui-revision] .page-container::after {
+    content: var(--page-symbol, none) / "";
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    pointer-events: none;
+    user-select: none;
+}
+
+body[data-ui-revision] .header-title::before {
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    margin-right: var(--space-2, 0.5rem);
+    border-radius: 9px;
+    background: rgba(var(--accent-rgb), 0.12);
+    color: var(--accent);
+    font-size: var(--icon-md);
+    vertical-align: middle;
+}
+
+body[data-ui-revision] .page-container::after {
+    display: block;
+    margin-top: var(--space-6, 1.5rem);
+    text-align: right;
+    font-size: var(--icon-deco-mark, 72px);
+    color: var(--text-primary);
+    opacity: 0.06;
+}
+html[data-ui-graphics] body[data-ui-revision] :is(.settings-icon-box, .mini-icon-box, .detail-section-icon, .material-symbols-outlined)[data-icon-role="theme"],
+html[data-ui-graphics] body[data-ui-revision] .archive-icon-box > .material-symbols-outlined,
+html[data-ui-graphics] body[data-ui-revision] .profile-summary-card > .material-symbols-outlined {
+    color: var(--card-icon-ink);
+}
+html[data-ui-graphics] body[data-ui-revision] .detail-section-header > .detail-section-icon[data-icon-role="theme"] {
+    background: var(--rev-icon-bg);
+    border-radius: var(--radius-sm);
+}
+html[data-ui-graphics] body[data-ui-revision] .matrix-icon-box:is(.icon-purple, .icon-blue) {
+    background: linear-gradient(135deg, var(--rev-fill), color-mix(in srgb, var(--rev-fill) 80%, #000));
+    color: #fff;
+}
+
+html[data-ui-graphics] body[data-ui-revision] .account-icon-box > span.account-default-logo {
+    background: linear-gradient(135deg, var(--theme-fill), var(--theme-fill-deep));
+    color: #fff;
+}
+
+html[data-ui-graphics] body[data-ui-revision] .matrix-icon-box:is(.icon-purple, .icon-blue) > .material-symbols-outlined,
+html[data-ui-graphics] body[data-ui-revision].company-profile-page :is(.icon-purple, .icon-blue) > .material-symbols-outlined {
+    color: #fff;
+}
+
+html[data-ui-graphics="new"] body[data-ui-revision] {
+    --card-icon-ink: var(--companion-card-ink);
+}
+
+html[data-ui-graphics="new"] body[data-ui-revision] :is(.search-status, .footer-settings-link, #profile-guide-button),
+html[data-ui-graphics="new"] body[data-ui-revision] .base-header .btn-icon-header:not(#header-logout-btn) {
+    color: var(--companion-ink);
+}
+
+html[data-ui-graphics="new"] body[data-ui-revision] #footer-center-actions :is(.btn-fab-privato, .btn-fab-scadenza, .btn-fab-azienda, .btn-fab-archive):not(.btn-fab-danger):not(.btn-fab-neutral) {
+    background: linear-gradient(135deg, var(--companion-fill), var(--companion-fill-deep));
+    color: #fff;
+}
+
+html[data-ui-graphics="new"] body[data-ui-revision] #footer-center-actions .btn-fab-privato:not(.btn-fab-danger):not(.btn-fab-neutral) {
+    background: var(--companion-fill);
+}
+
+html[data-ui-graphics="new"] body[data-ui-revision] .matrix-icon-box:is(.icon-purple, .icon-blue),
+html[data-ui-graphics="new"] body[data-ui-revision].company-profile-page :is(.icon-purple, .icon-blue) {
+    background: linear-gradient(135deg, var(--companion-card-fill), color-mix(in srgb, var(--companion-card-fill) 80%, #000));
+    color: #fff;
+}
+
+html[data-ui-graphics="new"] body[data-ui-revision] .account-icon-box > span.account-default-logo {
+    background: linear-gradient(135deg, var(--companion-card-fill), color-mix(in srgb, var(--companion-card-fill) 80%, #000));
+    color: #fff;
 }

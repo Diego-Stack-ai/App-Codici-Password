@@ -85,7 +85,7 @@ const paletteOnly = `<!doctype html><html lang="it"><head><meta charset="utf-8">
 <style>body{background:#000;color:#fff;margin:0}html[data-color-theme="green"] .sample{background-image:radial-gradient(#fff,#fff)}</style></head>
 <body><div class="sample"><p id="palette-only">Testo sintetico</p></div></body></html>`;
 const revision = `<!doctype html><html lang="it"><head><meta charset="utf-8">
-<style>body{background:#fff;margin:0;color:#000}[data-ui-revision="tre-livelli"] #rev{color:#fff}</style></head>
+<style>body{background:#fff;margin:0;color:#000}html[data-ui-graphics="new"] #rev{color:#fff}</style></head>
 <body data-ui-revision="tre-livelli"><p id="rev">Bianco solo in grafica Nuova</p></body></html>`;
 
 test('visual map keeps forced-dark pages dark and measures Nuova and Classica separately', {timeout: 120000}, async () => {
@@ -104,7 +104,7 @@ test('visual map keeps forced-dark pages dark and measures Nuova and Classica se
     const classica = report.find(entry => entry.page === 'revisione.html' && entry.mode === 'classica');
     assert.ok(nuova && classica, 'migrated pages are mapped in both graphics');
     assert.equal(flagged(nuova, 'light', 'rev'), true, 'Nuova applies the revision rules');
-    assert.equal(flagged(classica, 'light', 'rev'), false, 'Classica marks the revision «classica» like theme-init.js: Nuova-only rules do not apply');
+    assert.equal(flagged(classica, 'light', 'rev'), false, 'Classica retains the base but omits the New-only color mutation');
     const palettePage = report.find(entry => entry.page === 'palette.html');
     for (const theme of ['light', 'dark']) {
       const items = palettePage.themes[theme].unmeasured.filter(item => item.label.includes('#palette-only'));

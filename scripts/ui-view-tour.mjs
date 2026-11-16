@@ -33,8 +33,8 @@ export async function runViewTour({outDir,only=Object.keys(pages),depth=3,graphi
    const {page,context}=instance;let navigation=null;
    page.on('framenavigated',frame=>{if(frame===page.mainFrame())try{navigation=tourDestination(frame.url(),harness.base+'/'+file);}catch{navigation='changed document';}});
    try{
-    const actual=await page.evaluate(()=>({revision:document.body.dataset.uiRevision,graphics:document.documentElement.dataset.uiGraphics||'new'}));
-    if(actual.graphics!==(graphicsMode==='classica'?'classic':'new')||(actual.revision&&actual.revision!==graphicsMode))throw Error('Real graphics bootstrap mismatch');
+    const actual=await page.evaluate(()=>({revision:document.body.dataset.uiRevision,graphics:document.documentElement.dataset.uiGraphics}));
+    if(actual.graphics!==(graphicsMode==='classica'?'classic':'new')||(actual.revision&&actual.revision!=='tre-livelli'))throw Error('Real graphics bootstrap mismatch');
     for(const action of trail){
      const controls=await page.evaluate(listTourControls,TOUR_CLICKABLE),target=controls.find(c=>c.selector===action.selector&&c.name===action.name);
      if(!target){await page.locator(action.selector).waitFor({state:'attached',timeout:2000});const ready=await page.evaluate(listTourControls,TOUR_CLICKABLE);if(!ready.some(c=>c.selector===action.selector&&c.name===action.name))throw Error('Replay control identity changed');}
