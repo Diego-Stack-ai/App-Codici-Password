@@ -35,7 +35,7 @@ const capture = () => {
     for (let node = element; node; node = node.parentElement) { const s = getComputedStyle(node); if (s.display === 'none' || s.visibility === 'hidden' || Number(s.opacity) === 0) return false; }
     return true;
   });
-  const label = element => `${element.tagName.toLowerCase()}${element.id ? '#' + element.id : ''}${[...element.classList].slice(0, 4).map(c => '.' + c).join('')}`;
+  const label = element => `${element.tagName.toLowerCase()}${element.id ? '#' + element.id : ''}${[...element.classList].slice(0, 8).map(c => '.' + c).join('')}`;
   const meta = elements.map(element => ({label: label(element), chain: (() => { const parts = []; for (let n = element; n && n !== body && parts.length < 8; n = n.parentElement) parts.push(label(n)); return parts.reverse().join(' > '); })(),
     hasText: [...element.childNodes].some(n => n.nodeType === 3 && n.textContent.trim()), swatch: !!element.closest('[class*="swatch"], .color-theme-btn, input[type="color"]')}));
   const runs = {};

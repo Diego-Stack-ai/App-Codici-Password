@@ -525,6 +525,12 @@ textarea::placeholder {
     text-overflow: ellipsis;
 }
 
+/* Collegamenti senza una regola propria: mai il blu predefinito del browser (giro delle
+   viste #313, stato vuoto delle Regole automezzi). Specificità zero: ogni classe prevale. */
+:where(a:not([class])) {
+    color: var(--theme-ink);
+}
+
 .offline-status-banner {
     position: fixed;
     z-index: var(--z-app-status);
