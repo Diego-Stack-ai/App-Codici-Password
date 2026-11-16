@@ -2,7 +2,9 @@
 
 <a id="rilascio-1278-incarico-2026-11-16"></a>
 
-## APP 1.2.278 — rilascio autorizzato, 16/11/2026
+## APP 1.2.278 — ordine eseguito, 16/11/2026
+
+Rilascio completato: candidata **9caed90d** con GO indipendente e CI #1185 verde, merge [#320](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/320) in **a02c76a7**, CI master #1186 e Hosting #1187 SUCCESS. Production approvato da Codex su delega di Diego, protezioni conservate; verifica pubblica **365 hash / 41 profili / tre probe PASS**. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1278-verifiche-2026-11-16). L'ordine sotto conserva il mandato eseguito; segue soltanto la chiusura documentale/GitHub, senza altro Hosting o operazioni policy/backend.
 
 Diego ordina «procedi con il deploy ed aggiorna gli md e github». L'ordine estende la consegna locale sotto: confezionare la 1.2.278 con Ricerca corretta e base comune Classica/Nuova, aggiornare i Markdown esistenti e GitHub, commit/push e PR contro master, riesame indipendente e CI completa sullo SHA finale, merge con testa attesa, workflow manuale Hosting e verifica pubblica. L'approvazione production già delegata nella sessione resta operativa, con tutte le protezioni conservate. Nessuna operazione policy, Rules, Functions, Storage, Auth, claim o IAM; cornice ordinaria e limiti dei collaudi fisici invariati. [Procedura](../regole/RILASCIO.md#rilascio-1278-2026-11-16), [stato](STATO.md#rilascio-1278-stato-2026-11-16), [ricevuta](../evidenze/COLLAUDI.md#rilascio-1278-verifiche-2026-11-16).
 

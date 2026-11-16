@@ -2,7 +2,9 @@
 
 <a id="livree-comuni-ui-2026-11-16"></a>
 
-## Base evoluta comune e livree — candidata locale, 16/11/2026
+## Base evoluta comune e livree — pubblicate nella 1.2.278, 16/11/2026
+
+Distribuite con la #320, sorgente **a02c76a7**, Hosting #1187 e verifica pubblica completa PASS. [Ricevuta, prove e limiti](../evidenze/COLLAUDI.md#rilascio-1278-verifiche-2026-11-16); nessuna nuova attestazione su dispositivi fisici.
 
 [Decisione di Diego](../progetto/DECISIONI.md#livree-comuni-decisione-2026-11-16). Questo contratto supera le precedenti differenze funzionali/strutturali fra Classica e Nuova e il divieto storico della filigrana grande nelle pagine migrate. `body[data-ui-revision="tre-livelli"]` identifica la base comune; `html[data-ui-graphics="classic"|"new"]` identifica soltanto la livrea. Preferenza locale `ui_graphics` e ricarica da Impostazioni compatibili; gestione Modifica/Fine, testi, struttura, materiali ed effetti sono comuni.
 

@@ -2,7 +2,9 @@
 
 <a id="rilascio-1278-programma-2026-11-16"></a>
 
-## APP 1.2.278 — pubblicazione autorizzata, 16/11/2026
+## APP 1.2.278 — rilascio completato, 16/11/2026
+
+Completata la sequenza autorizzata sotto: #320, master pubblicato **a02c76a7**, Hosting #1187 SUCCESS e verifica completa **365 hash / 41 profili / tre probe PASS**. La [ricevuta finale](../evidenze/COLLAUDI.md#rilascio-1278-verifiche-2026-11-16) chiude il rilascio; l'aggiornamento dei Markdown su GitHub è separato dallo SHA runtime e non avvia un altro deploy. Cornice e faro conservati.
 
 [Incarico](INCARICO_CORRENTE.md#rilascio-1278-incarico-2026-11-16): script canonico versione e offline, riesame della guida e identità del pacchetto → revisione indipendente e CI dello SHA finale → merge con testa attesa → workflow manuale `hosting` sul master finale, production protetto → verifica pubblica completa → ricevuta nei Markdown e su GitHub. Conservare rami e worktree precedenti; nessuna operazione policy/backend. [Stato](STATO.md#rilascio-1278-stato-2026-11-16), [evidenze](../evidenze/COLLAUDI.md#rilascio-1278-verifiche-2026-11-16).
 
