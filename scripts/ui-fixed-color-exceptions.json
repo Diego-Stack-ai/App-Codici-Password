@@ -734,7 +734,14 @@
       "file": "impostazioni.css",
       "selector": ".shared-credentials-delete",
       "prop": "color",
-      "value": "var(--color-danger, #dc2626)",
+      "value": "color-mix(in srgb, var(--status-error) 72%, #000)",
+      "reason": "comandi che cancellano o fanno uscire"
+    },
+    {
+      "file": "impostazioni.css",
+      "selector": ".dark .shared-credentials-delete",
+      "prop": "color",
+      "value": "color-mix(in srgb, var(--status-error) 55%, #fff)",
       "reason": "comandi che cancellano o fanno uscire"
     },
     {

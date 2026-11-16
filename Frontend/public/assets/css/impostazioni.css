@@ -1076,7 +1076,12 @@ h3.settings-desc {
 }
 
 .shared-credentials-delete {
-    color: var(--color-danger, #dc2626);
+    background: var(--rev-popup);
+    color: color-mix(in srgb, var(--status-error) 72%, #000);
+}
+
+.dark .shared-credentials-delete {
+    color: color-mix(in srgb, var(--status-error) 55%, #fff);
 }
 
 .shared-credentials-add {

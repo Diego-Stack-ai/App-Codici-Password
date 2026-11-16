@@ -307,15 +307,15 @@ html:not(.dark) .account-card-title {
 .account-card-subtitle {
     font-size: var(--fs-micro);
     font-weight: var(--font-weight-medium);
-    color: var(--text-secondary);
-    opacity: 0.8;
+    color: var(--text-primary);
+    opacity: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 html:not(.dark) .account-card-subtitle {
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 /* Right Side Actions */
@@ -375,7 +375,7 @@ html:not(.dark) .account-card-subtitle {
 }
 
 .account-data-label {
-    color: var(--text-secondary);
+    color: var(--text-primary);
     font-weight: var(--font-weight-medium);
     text-transform: uppercase;
     font: var(--font-caption);

@@ -1,5 +1,17 @@
 # Incarico corrente
 
+<a id="deep-temi-313-incarico-2026-11-16"></a>
+
+## Giro #313 — seguito dei percorsi residui e futura CI, 16/11/2026
+
+Fonte diretta: dopo la consegna #317, Diego chiede come procedere e ordina **«Procedi»** al piano di revisione Claude dei correttivi, chiusura dei percorsi residui (soprattutto Impostazioni/Profilo), CI completa sulla futura testa aggiornata e revisione finale Codex. Versione, merge e deploy richiedono un ordine successivo; Canary OFF come già disposto.
+
+Alla verifica iniziale la #316 era ancora a **39e7bab**, la #317 alla ricevuta **a126d59d**. Dopo il [seguito comunicato](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/316#issuecomment-6914159103), [Claude ha confermato il riesame e recepito la #317](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/316#issuecomment-6915022674): la #316 è ora a **a126d59d** e la #317 è chiusa perché integrata nel suo ramo, senza unione in master. Claude dichiara di non avere altre scritture in corso. Codex completa i residui su **codex/ui313-deep-states-20261116**, checkout separato dalla stessa base, senza scrivere sul ramo di Claude. Supporti indipendenti in lettura; un solo esecutore.
+
+Perimetro: ridurre le 492 occorrenze a comportamenti verificabili, riusare le prove già valide senza trasferirle a nuovi stati, completare fixture/strumento e correggere eventuali difetti riprodotti pertinenti, registrare azioni, produttori, proprietà/ruoli, test, esiti e limiti nei registri e documenti esistenti. Ammesse consegne revisionabili separate su GitHub. Nessun account/dato reale, salvataggio produttivo, operazione Firebase/Google Cloud, modifica Auth/Vault/backend, nuova versione, merge o deploy. La CI completa e il GO finale devono riferirsi alla futura testa effettiva della candidata integrata; il solo audit locale non li sostituisce.
+
+La consegna del seguito comprende una bozza Codex contro master, che include la #316/a126d59d e i nuovi correttivi e consente la CI completa sullo SHA effettivo senza modificare il ramo di Claude. La [CI della #316/a126d59d](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43857123906) ha incontrato un test statico che cercava ancora i rami cromatici rimossi: il seguito lo sostituisce con la prova del modello e dei renderer reali nei quattro modi Account/Memo privato/condiviso. La bozza e la revisione tecnica non autorizzano versione, merge o pubblicazione.
+
 <a id="review-temi-313-incarico-2026-11-16"></a>
 
 ## Giro temi #313 — revisione Codex e completamento Automezzi, 16/11/2026

@@ -292,10 +292,6 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     transition: opacity 0.2s ease;
 }
 
-.collapsible-header:hover {
-    opacity: 0.8;
-}
-
 .expand-icon {
     font-size: var(--icon-lg);
     color: var(--accent);
@@ -463,8 +459,8 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     font: var(--font-label);
     /* Normalizzato da 0.72rem/800 */
     text-transform: capitalize;
-    color: var(--accent);
-    opacity: 0.85;
+    color: var(--rev-text-accent, var(--text-primary));
+    opacity: 1;
     letter-spacing: 0.02em;
     margin: 0;
 }
@@ -1137,8 +1133,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 .view-label {
     font-size: var(--fs-micro);
     font-weight: var(--font-weight-medium);
-    color: #94a3b8;
-    /* Slate 400 - Grigio più marcato */
+    color: var(--text-secondary);
     margin-bottom: 0.25rem;
     display: block;
     text-transform: capitalize;
@@ -1146,9 +1141,8 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .dark .view-label {
-    color: #94a3b8;
-    /* Slate 400 anche in Dark per coerenza 'grigia' */
-    opacity: 0.9;
+    color: var(--text-secondary);
+    opacity: 1;
 }
 
 .note-text {

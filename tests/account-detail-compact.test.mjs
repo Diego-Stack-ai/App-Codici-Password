@@ -112,12 +112,17 @@ test('private and company details preserve banking copy handlers', async () => {
 
 test('private and company details derive shared and memorandum rendering from canonical mode fields', async () => {
     for (const type of ['privato', 'azienda']) {
-        const detailSource = await readFile(new URL(`../Frontend/public/assets/js/modules/${type}/dettaglio_account_${type}.js`, import.meta.url), 'utf8');
-        assert.match(detailSource, /import \{ accountModeFromRecord \} from '\.\.\/shared\/account-mode-model\.js'/);
-        assert.match(detailSource, /accountModeFromRecord\(acc\)\.endsWith\('-shared'\)/);
-        assert.match(detailSource, /mode === 'memo-shared'/);
-        assert.match(detailSource, /mode === 'account-shared'/);
-        assert.match(detailSource, /mode === 'memo-private'/);
+        const management = node();let sharedRenders = 0;
+        const realm = vm.createContext({document: {getElementById: id => id === 'shared-management-section' ? management : null, querySelector: () => null},
+            renderSharingMap() { sharedRenders++; }, renderPrivateSharingMap() { sharedRenders++; }, renderAccountBanking() {}, t: () => '', window: {location: {}}});
+        vm.runInContext(await source('shared/account-mode-model.js'), realm);
+        vm.runInContext(await source(`${type}/dettaglio_account_${type}.js`), realm);
+        for (const [record,shared] of [[{},false],[{visibility:'shared'},true],[{type:'memo'},false],[{type:'memo',visibility:'shared'},true]]) {
+            const before = sharedRenders;
+            realm[type === 'privato' ? 'renderAccount' : 'render'](record, () => true);
+            assert.equal(management.classList.contains('hidden'),!shared);
+            assert.equal(sharedRenders,before+Number(shared));
+        }
     }
 });
 

@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+<a id="deep-temi-313-stato-2026-11-16"></a>
+
+## Giro #313 — percorsi profondi verificati localmente, 16/11/2026
+
+[Ordine di seguito](INCARICO_CORRENTE.md#deep-temi-313-incarico-2026-11-16): il ramo `codex/ui313-deep-states-20261116`, base a126d59d, contiene 30 scenari nominati e i correttivi riprodotti durante la verifica. [Claude ha riesaminato e recepito la #317 nella #316](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/316#issuecomment-6915022674), che ora ha la stessa base a126d59d; questo riesame non è attribuito ai correttivi successivi. Il nuovo registro collega pagine, produttori, stili, ruoli colore e test e conserva i limiti delle prove. Matrice locale **234 stati / 3276 contesti PASS**, fonti stabili e nessuno stato atteso mancante; suite UI finale **117/117 PASS**, canonico **1064/1064 PASS**. [Contratto](../regole/INTERFACCIA.md#deep-temi-313-ui-2026-11-16), [ricevuta e limiti](../evidenze/COLLAUDI.md#deep-temi-313-verifiche-2026-11-16). La CI completa della nuova bozza e la revisione sullo SHA effettivo restano condizioni del GO tecnico; gli esiti finali saranno annotati sulla PR. Produzione **1.2.276/e649fd07** invariata, Canary OFF come disposto, nessuna nuova versione, unione in master o distribuzione autorizzata da questo seguito.
+
 <a id="review-temi-313-stato-2026-11-16"></a>
 
 ## Giro temi #313 — correttivi Codex verificati per Claude, 16/11/2026

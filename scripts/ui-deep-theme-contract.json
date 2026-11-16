@@ -1,0 +1,1024 @@
+{
+  "schemaVersion": 1,
+  "scope": "Named deep UI workflows, following the 492 beyond-depth observations of #317. These are behavior families, not a whole-app certification.",
+  "matrix": {
+    "graphics": [
+      "classica",
+      "tre-livelli"
+    ],
+    "palettes": [
+      "blue",
+      "green",
+      "red",
+      "sand",
+      "petrol",
+      "lavender",
+      "dusty-rose"
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ]
+  },
+  "boundaries": [
+    "Synthetic local records and SDK adapter; no real Firebase, Auth, Vault cryptography or cross-document persistence certification.",
+    "Native date picker, files, camera, uploads, shares and physical devices remain delegated.",
+    "Company deletion is expected to fail closed even when empty.",
+    "Contrast covers hit-tested ordinary text in the current viewport and scroll clips. OFF_VIEWPORT, CLIPPED and OCCLUDED texts are counted separately and receive no PASS. Inputs, icons, borders, filters and optical occlusion through non-hit-testable layers are outside this compositor."
+  ],
+  "cases": [
+    {
+      "id": "A01",
+      "page": "dettaglio_account_privato.html",
+      "title": "Note Account: annulla, salva, elimina, riaggiungi",
+      "producer": "Frontend/public/assets/js/modules/shared/account-note-editor.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/account_detail.css"
+      ],
+      "expectedStates": [
+        "editor",
+        "delete-note"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "A02",
+      "page": "dettaglio_account_azienda.html",
+      "title": "Note Account: annulla, salva, elimina, riaggiungi",
+      "producer": "Frontend/public/assets/js/modules/shared/account-note-editor.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/account_detail.css"
+      ],
+      "expectedStates": [
+        "editor",
+        "delete-note"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "A03",
+      "page": "form_account_privato.html",
+      "title": "Nuovo profilo Widget, campi e modifica valori",
+      "producer": "Frontend/public/assets/js/modules/shared/account-embedded-widgets.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/account_form.css"
+      ],
+      "expectedStates": [
+        "profile-catalog",
+        "new-editor",
+        "date-field",
+        "sensitive-field",
+        "locked-structure-edit"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)",
+        "nativeCheckbox": "accent-color: --theme-fill (native-control property assertion on real editors)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "A04",
+      "page": "form_account_azienda.html",
+      "title": "Nuovo profilo Widget, campi e modifica valori",
+      "producer": "Frontend/public/assets/js/modules/shared/account-embedded-widgets.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/account_form.css"
+      ],
+      "expectedStates": [
+        "profile-catalog",
+        "new-editor",
+        "date-field",
+        "sensitive-field",
+        "locked-structure-edit"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)",
+        "nativeCheckbox": "accent-color: --theme-fill (native-control property assertion on real editors)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "A05",
+      "page": "dettaglio_account_privato.html",
+      "title": "Picker allegati, annulla, rifiuto Storage e rimozione",
+      "producer": "Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/account_detail.css"
+      ],
+      "expectedStates": [
+        "source-picker",
+        "delete-confirmation",
+        "storage-refused"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "A06",
+      "page": "dettaglio_account_azienda.html",
+      "title": "Picker allegati, annulla, rifiuto Storage e rimozione",
+      "producer": "Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/account_detail.css"
+      ],
+      "expectedStates": [
+        "source-picker",
+        "delete-confirmation",
+        "storage-refused"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "C01",
+      "page": "dati_azienda.html",
+      "title": "Note aziendali da tab e riepilogo IVA",
+      "producer": "Frontend/public/assets/js/modules/azienda/dati_azienda.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/dati_azienda.css"
+      ],
+      "expectedStates": [
+        "tab-editor",
+        "overview-editor"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "C02",
+      "page": "dati_azienda.html",
+      "title": "Otto comandi aziendali e diciotto ingressi verso Modifica",
+      "producer": "Frontend/public/assets/js/modules/azienda/company-profile-ui.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/dati_azienda.css"
+      ],
+      "expectedStates": [
+        "control-0",
+        "control-1",
+        "control-2",
+        "control-3",
+        "control-4",
+        "control-5",
+        "control-6",
+        "control-7"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "C03",
+      "page": "modifica_azienda.html",
+      "title": "E-mail personalizzata: mostra e ripristina mascheramento",
+      "producer": "Frontend/public/assets/js/modules/azienda/ma_cards.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/form_azienda.css"
+      ],
+      "expectedStates": [
+        "email-password-shown",
+        "email-password-hidden"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "O01",
+      "page": "account_privati.html",
+      "title": "Quattro ordinamenti Account e fissati",
+      "producer": "Frontend/public/assets/js/modules/shared/account-list-sort.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/account_privati.css"
+      ],
+      "expectedStates": [
+        "desc",
+        "recent",
+        "old",
+        "asc"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "O02",
+      "page": "account_azienda.html",
+      "title": "Quattro ordinamenti Account e fissati",
+      "producer": "Frontend/public/assets/js/modules/shared/account-list-sort.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/account_azienda.css"
+      ],
+      "expectedStates": [
+        "desc",
+        "recent",
+        "old",
+        "asc"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "O03",
+      "page": "scadenze.html",
+      "title": "Ordinamento Scadenze e route proprie/ricevute",
+      "producer": "Frontend/public/assets/js/modules/scadenze/scadenze.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/scadenze.css"
+      ],
+      "expectedStates": [
+        "date-asc",
+        "date-desc",
+        "name-asc",
+        "name-desc"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "O04",
+      "page": "area_privata.html",
+      "title": "Reset TOP10: annulla e azzera solo contatori privati",
+      "producer": "Frontend/public/assets/js/modules/privato/area_privata.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/area_privata.css"
+      ],
+      "expectedStates": [
+        "reset-confirmation"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "O05",
+      "page": "lista_aziende.html",
+      "title": "Eliminazione Azienda annullata e bloccata",
+      "producer": "Frontend/public/assets/js/modules/azienda/company-list-service.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/lista_aziende.css"
+      ],
+      "expectedStates": [
+        "delete-company-confirmation"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "O06",
+      "page": "lista_aziende.html",
+      "title": "Azienda vuota preservata senza protocollo di cancellazione",
+      "producer": "Frontend/public/assets/js/modules/azienda/company-list-service.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/lista_aziende.css"
+      ],
+      "expectedStates": [
+        "empty-delete-confirmation"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "P01",
+      "page": "profilo_privato.html",
+      "title": "Sezioni collassabili e Modifica/Fine",
+      "producer": "Frontend/public/assets/js/modules/shared/manage-mode.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profilo_privato.css"
+      ],
+      "expectedStates": [
+        "indirizzi-open",
+        "indirizzi-closed",
+        "telefoni-open",
+        "telefoni-closed",
+        "email-open",
+        "email-closed",
+        "documenti-open",
+        "documenti-closed"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "P02",
+      "page": "profilo_privato.html",
+      "title": "Salva e annulla Dati personali e Note",
+      "producer": "Frontend/public/assets/js/modules/privato/profilo-actions.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profilo_privato.css"
+      ],
+      "expectedStates": [
+        "personal-editor",
+        "note-editor"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "P03",
+      "page": "profilo_privato.html",
+      "title": "Crea Telefono ed Email",
+      "producer": "Frontend/public/assets/js/modules/privato/profilo-phones-emails.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profilo_privato.css"
+      ],
+      "expectedStates": [
+        "phone-label-primary",
+        "email-editor"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "P04",
+      "page": "profilo_privato.html",
+      "title": "Crea Indirizzo e seleziona principale",
+      "producer": "Frontend/public/assets/js/modules/privato/profilo-actions.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profilo_privato.css"
+      ],
+      "expectedStates": [
+        "address-type-primary"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "P05",
+      "page": "profilo_privato.html",
+      "title": "Schemi dei cinque tipi di Documento",
+      "producer": "Frontend/public/assets/js/modules/privato/profilo-actions.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profilo_privato.css"
+      ],
+      "expectedStates": [
+        "document-Carta Identità",
+        "document-Patente",
+        "document-Codice Fiscale",
+        "document-Passaporto",
+        "document-Altro"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "P06",
+      "page": "profilo_privato.html",
+      "title": "Visibilità dei campi sensibili e date Documento",
+      "producer": "Frontend/public/assets/js/modules/privato/profilo-modal.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profilo_privato.css"
+      ],
+      "expectedStates": [
+        "fiscal-shown",
+        "fiscal-hidden",
+        "identity-secrets-and-date-values"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "P07",
+      "page": "profilo_privato.html",
+      "title": "Seguito salvataggio Documento e scelta allegato",
+      "producer": "Frontend/public/assets/js/modules/privato/profilo_privato.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profilo_privato.css"
+      ],
+      "expectedStates": [
+        "ask-skip-attachment",
+        "configure-deadline-prompt",
+        "ask-add-attachment",
+        "attachment-manager"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "P08",
+      "page": "profilo_privato.html",
+      "title": "Nuovo Widget nelle quattro sezioni e tre dimensioni",
+      "producer": "Frontend/public/assets/js/modules/privato/profilo-widgets.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profilo_privato.css"
+      ],
+      "expectedStates": [
+        "new-personal",
+        "new-contacts",
+        "new-addresses",
+        "new-documents"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "P09",
+      "page": "profilo_privato.html",
+      "title": "QR scalari Nome, Codice fiscale e Nascita",
+      "producer": "Frontend/public/assets/js/modules/privato/profilo-qr.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/profilo_privato.css"
+      ],
+      "expectedStates": [
+        "nome-included",
+        "cf-included",
+        "nascita-included"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "R01",
+      "page": "regole_scadenze.html",
+      "title": "Crea regole nei sette ambiti, annulla e valida frequenza",
+      "producer": "Frontend/public/assets/js/modules/scadenze/deadline-rules-hub.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/regole_scadenze.css"
+      ],
+      "expectedStates": [
+        "vehicles-name",
+        "vehicles-notice",
+        "vehicles-frequency",
+        "home-name",
+        "home-notice",
+        "home-frequency",
+        "health-name",
+        "health-notice",
+        "health-frequency",
+        "sport-name",
+        "sport-notice",
+        "sport-frequency",
+        "contracts-name",
+        "contracts-notice",
+        "contracts-frequency",
+        "user-company-name",
+        "user-company-notice",
+        "user-company-frequency",
+        "company-name",
+        "company-notice",
+        "company-frequency"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "R02",
+      "page": "regole_scadenze.html",
+      "title": "Rinomina ed elimina regole in tre sorgenti",
+      "producer": "Frontend/public/assets/js/modules/scadenze/deadline-rules-hub.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/regole_scadenze.css"
+      ],
+      "expectedStates": [
+        "deadlineConfig-rename",
+        "deadlineConfig-delete",
+        "deadlineConfigDocuments-rename",
+        "deadlineConfigDocuments-delete",
+        "generalConfig-rename",
+        "generalConfig-delete"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "S00",
+      "page": "impostazioni.html",
+      "title": "Cambio palette, clic idempotente e ripristino",
+      "producer": "Frontend/public/assets/js/modules/settings/impostazioni.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/impostazioni.css"
+      ],
+      "expectedStates": [
+        "selected-and-restored"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "S01",
+      "page": "impostazioni.html",
+      "title": "Collega, scollega, filtra e chiudi Credenziali comuni",
+      "producer": "Frontend/public/assets/js/modules/settings/shared-credentials-controller.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/impostazioni.css"
+      ],
+      "expectedStates": [
+        "link-manager",
+        "linked",
+        "unlinked",
+        "empty-search"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "S02",
+      "page": "impostazioni.html",
+      "title": "Modifica e rimozione di una Credenziale comune",
+      "producer": "Frontend/public/assets/js/modules/settings/shared-credentials-controller.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/impostazioni.css"
+      ],
+      "expectedStates": [
+        "edit-open",
+        "field-added",
+        "delete-confirmation"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)",
+        "nativeCheckbox": "accent-color: --theme-fill (native-control property assertion on real editors)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    },
+    {
+      "id": "S03",
+      "page": "impostazioni.html",
+      "title": "Crea Credenziale comune e validazione campi",
+      "producer": "Frontend/public/assets/js/modules/settings/shared-credentials-controller.js",
+      "styles": [
+        "Frontend/public/assets/css/core.css",
+        "Frontend/public/assets/css/core_ui.css",
+        "Frontend/public/assets/css/ui-tre-livelli.css",
+        "Frontend/public/assets/css/impostazioni.css"
+      ],
+      "expectedStates": [
+        "new-public-field",
+        "no-fields-warning",
+        "sensitive-field"
+      ],
+      "colors": {
+        "surface": "--rev-popup / --rev-surface",
+        "text": "--text-primary / --text-secondary",
+        "action": "--rev-fill / --rev-text-accent",
+        "functional": "scripts/ui-fixed-color-exceptions.json (exact selector, property, value)",
+        "nativeCheckbox": "accent-color: --theme-fill (native-control property assertion on real editors)"
+      },
+      "test": {
+        "file": "tests/ui313-deep.browser.test.mjs",
+        "runner": "scripts/ui-deep-scenarios.mjs",
+        "command": "npm run test:ui-deep"
+      }
+    }
+  ],
+  "baselineGroups": [
+    {
+      "family": "Settings palette",
+      "occurrences": 24,
+      "cases": [
+        "S00"
+      ]
+    },
+    {
+      "family": "Shared-credential linking",
+      "occurrences": 176,
+      "cases": [
+        "S01"
+      ]
+    },
+    {
+      "family": "Shared-credential existing editor",
+      "occurrences": 40,
+      "cases": [
+        "S02"
+      ]
+    },
+    {
+      "family": "Shared-credential new editor",
+      "occurrences": 12,
+      "cases": [
+        "S03"
+      ]
+    },
+    {
+      "family": "Profile deep paths",
+      "occurrences": 96,
+      "cases": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+        "P06",
+        "P07",
+        "P08",
+        "P09"
+      ]
+    },
+    {
+      "family": "Account widget editor",
+      "occurrences": 8,
+      "cases": [
+        "A03",
+        "A04"
+      ]
+    },
+    {
+      "family": "Account notes",
+      "occurrences": 5,
+      "cases": [
+        "A01",
+        "A02"
+      ]
+    },
+    {
+      "family": "Attachment picker/removal integration",
+      "occurrences": 15,
+      "cases": [
+        "A05",
+        "A06"
+      ]
+    },
+    {
+      "family": "TOP10 reset",
+      "occurrences": 2,
+      "cases": [
+        "O04"
+      ]
+    },
+    {
+      "family": "Account list sort",
+      "occurrences": 4,
+      "cases": [
+        "O01",
+        "O02"
+      ]
+    },
+    {
+      "family": "Company delete confirmations",
+      "occurrences": 16,
+      "cases": [
+        "O05",
+        "O06"
+      ]
+    },
+    {
+      "family": "Company email password re-hide",
+      "occurrences": 2,
+      "cases": [
+        "C03"
+      ]
+    },
+    {
+      "family": "Company profile notes and navigation aliases",
+      "occurrences": 24,
+      "cases": [
+        "C01",
+        "C02"
+      ]
+    },
+    {
+      "family": "Deadline sort rediscovery and route identity",
+      "occurrences": 16,
+      "cases": [
+        "O03"
+      ]
+    },
+    {
+      "family": "Rule creation/rename/delete prompts",
+      "occurrences": 52,
+      "cases": [
+        "R01",
+        "R02"
+      ]
+    }
+  ]
+}

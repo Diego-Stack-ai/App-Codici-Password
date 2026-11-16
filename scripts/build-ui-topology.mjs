@@ -9,6 +9,7 @@ const defaultPublicRoot = path.join(projectRoot, 'Frontend', 'public');
 const defaultContractPath = path.join(scriptDir, 'ui-topology-contract.json');
 const defaultGuideCatalogPath = path.join(defaultPublicRoot, 'assets', 'js', 'modules', 'assistant', 'documentation-catalog.json');
 const defaultDynamicThemePath = path.join(scriptDir, 'ui-dynamic-theme-contract.json');
+const defaultDeepThemePath = path.join(scriptDir, 'ui-deep-theme-contract.json');
 const CONTROL_TAGS = new Set(['a', 'button', 'input', 'select', 'textarea', 'summary', 'form']);
 const TRANSLATION_ATTRIBUTES = [
   ['data-t', 'ui_translates_with', 'text'],
@@ -339,11 +340,50 @@ export function buildDynamicThemeTopology({ registryPath = defaultDynamicThemePa
   return { nodes: [...collector.nodes.values()], edges: [...collector.edges.values()], errors, files: [...files], summary: { cases: ids.size, states, paints, exceptions: exceptionIds.size } };
 }
 
+export function buildDeepThemeTopology({registryPath = defaultDeepThemePath} = {}) {
+  const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+  const collector = makeCollector(), errors = [], files = new Set([registryPath]), ids = new Set();
+  let states = 0;
+  const declared = {confidence:'DECLARED', source_file:relativeToProject(registryPath), observed:false};
+  const source = (file,id) => {
+    const absolute = path.resolve(projectRoot,file || '');
+    if (!file || !absolute.startsWith(projectRoot + path.sep) || !fs.existsSync(absolute) || !fs.statSync(absolute).isFile()) {errors.push(`${id}: invalid deep source ${file}`);return null;}
+    files.add(absolute);
+    return collector.addNode(uiNode(`ui:source:${file}`,file,'ui_source',{source_file:file,observed:false}));
+  };
+  if (registry.schemaVersion !== 1 || !registry.cases?.length) errors.push('deep themes: empty or invalid registry');
+  for (const item of registry.cases || []) {
+    if (!item.id || ids.has(item.id)) {errors.push(`deep themes: duplicate or missing id ${item.id}`);continue;}
+    ids.add(item.id);
+    const caseId = collector.addNode(uiNode(`ui:deep-theme:${item.id}`,item.title,'ui_deep_theme_case',{page:item.page,...declared}));
+    const pageId = collector.addNode(uiNode(`ui:page:${item.page}`,item.page,'ui_page',{source_file:`Frontend/public/${item.page}`}));
+    source(`Frontend/public/${item.page}`,item.id);
+    collector.addEdge(uiEdge(pageId,caseId,'ui_declares_deep_theme_case',declared));
+    for (const [relation,list] of [['ui_rendered_by',[item.producer]],['ui_loads_stylesheet',item.styles || []],['ui_declares_test',[item.test?.file]],['ui_exercised_by',[item.test?.runner]]]) {
+      for (const file of list) {const target=source(file,item.id);if(target)collector.addEdge(uiEdge(caseId,target,relation,declared));}
+    }
+    const names = new Set();
+    if (!item.expectedStates?.length) errors.push(`${item.id}: no deep states`);
+    for (const name of item.expectedStates || []) {
+      if (!name || names.has(name)) {errors.push(`${item.id}: duplicate or missing deep state`);continue;}
+      names.add(name);states++;
+      const stateId=collector.addNode(uiNode(`${caseId}:state:${name}`,`${item.id} / ${name}`,'ui_deep_state',declared));
+      collector.addEdge(uiEdge(caseId,stateId,'ui_declares_state',declared));
+      for (const [role,value] of Object.entries(item.colors || {})) {
+        const roleId=collector.addNode(uiNode(`ui:deep-color-role:${role}`,role,'ui_color_role',{value,...declared}));
+        collector.addEdge(uiEdge(stateId,roleId,'ui_declares_color_role',declared));
+      }
+    }
+  }
+  return {nodes:[...collector.nodes.values()],edges:[...collector.edges.values()],files:[...files],errors,summary:{cases:ids.size,states}};
+}
+
 export function buildUiTopology({
   publicRoot = defaultPublicRoot,
   contractPath = defaultContractPath,
   guideCatalogPath = defaultGuideCatalogPath,
-  dynamicThemePath = defaultDynamicThemePath
+  dynamicThemePath = defaultDynamicThemePath,
+  deepThemePath = defaultDeepThemePath
 } = {}) {
   const contract = JSON.parse(fs.readFileSync(contractPath, 'utf8'));
   const guideCatalog = JSON.parse(fs.readFileSync(guideCatalogPath, 'utf8'));
@@ -351,6 +391,9 @@ export function buildUiTopology({
   const dynamicThemes = dynamicThemePath ? buildDynamicThemeTopology({ registryPath: dynamicThemePath }) : { nodes: [], edges: [], errors: [], files: [], summary: { cases: 0, states: 0, paints: 0 } };
   for (const node of dynamicThemes.nodes) collector.addNode(node);
   for (const edge of dynamicThemes.edges) collector.addEdge(edge);
+  const deepThemes = deepThemePath ? buildDeepThemeTopology({registryPath:deepThemePath}) : {nodes:[],edges:[],files:[],errors:[],summary:{cases:0,states:0}};
+  for (const node of deepThemes.nodes) collector.addNode(node);
+  for (const edge of deepThemes.edges) collector.addEdge(edge);
   const controls = [];
   const surfaces = [];
   const eventBindings = [];
@@ -782,6 +825,7 @@ export function buildUiTopology({
   }
 
   contractErrors.push(...dynamicThemes.errors);
+  contractErrors.push(...deepThemes.errors);
   const mappedSelectors = new Set([
     ...eventBindings.map(binding => binding.selector),
     ...selectorReferences.map(reference => reference.selector),
@@ -829,6 +873,8 @@ export function buildUiTopology({
     dynamicThemeStates: dynamicThemes.summary.states,
     dynamicThemePaints: dynamicThemes.summary.paints,
     dynamicThemeExceptions: dynamicThemes.summary.exceptions || 0,
+    deepThemeCases: deepThemes.summary.cases,
+    deepThemeStates: deepThemes.summary.states,
     dormantControls: dormantControlNodeIds.size,
     unmappedControls: unmappedControls.length,
     unmappedControlRate: controls.length ? Number((unmappedControls.length / controls.length).toFixed(4)) : 0,
@@ -838,7 +884,7 @@ export function buildUiTopology({
     runtimeScenarioErrors: runtimeScenarioErrors.length
   };
   const fingerprint = createHash('sha256');
-  for (const file of [...new Set([...htmlFiles, ...jsFiles, ...cssFiles, contractPath, guideCatalogPath, ...dynamicThemes.files])].sort()) {
+  for (const file of [...new Set([...htmlFiles, ...jsFiles, ...cssFiles, contractPath, guideCatalogPath, ...dynamicThemes.files, ...deepThemes.files])].sort()) {
     fingerprint.update(relativeToProject(file));
     fingerprint.update('\0');
     fingerprint.update(fs.readFileSync(file));

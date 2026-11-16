@@ -151,7 +151,7 @@
 }
 
 .deadline-card-received .deadline-card-category {
-    color: var(--theme-ink);
+    color: var(--rev-text-accent, var(--theme-ink));
     opacity: 1;
 }
 
@@ -292,7 +292,7 @@ html:not(.dark) .deadline-card-subtitle {
     font: var(--font-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    opacity: 0.6;
+    opacity: 1;
 }
 
 .deadline-pilot-badge {
@@ -317,7 +317,7 @@ html:not(.dark) .deadline-card-subtitle {
     font: var(--font-micro);
     font-weight: var(--font-weight-medium);
     color: var(--text-secondary);
-    opacity: 0.8;
+    opacity: 1;
 }
 
 .deadline-card-trailing {
@@ -342,7 +342,7 @@ html:not(.dark) .deadline-card-subtitle {
     letter-spacing: 0.1em;
     flex-shrink: 0;
     background: rgba(255, 255, 255, 0.05);
-    color: var(--accent);
+    color: var(--rev-text-accent, var(--theme-ink));
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 

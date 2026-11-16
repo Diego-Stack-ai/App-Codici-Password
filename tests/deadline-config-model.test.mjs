@@ -5,6 +5,14 @@ import test from 'node:test';
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/scadenze/deadline-config-model.js', import.meta.url), 'utf8');
 const model = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 
+test('preavviso zero rimane zero creando e rinominando una regola', () => {
+    const created = model.appendDeadlineType({}, {id:'qa-zero',name:'Regola QA',period:0,freq:7});
+    assert.equal(created.deadlineTypes[0].period,0);
+    const renamed = model.updateDeadlineType(created,0,{...created.deadlineTypes[0],name:'Regola rinominata QA'});
+    assert.equal(renamed.deadlineTypes[0].period,0);
+    assert.equal(model.normalizeDeadlineConfig(created).deadlineTypes[0].period,0);
+});
+
 test('rule identity keeps stable IDs and makes domain and schema explicit', () => {
     const created = model.withDeadlineRuleIdentity({name: 'IMU'}, {id: 'rule-imu', domain: 'home'});
     assert.equal(created.id, 'rule-imu');

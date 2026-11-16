@@ -39,6 +39,7 @@ export async function prepareSharedVaultData(input = {}, encryptValue) {
             preview: encrypted ? false : source.preview !== false,
             copyable: encrypted ? false : source.copyable !== false,
             includeInQr: encrypted ? false : source.includeInQr === true,
+            deadlineEnabled: !encrypted && (type === 'date' || type === 'expiry') && source.deadlineEnabled === true,
             qrLabel: optionalText(source.qrLabel, 120),
             qrOrder: Number.isInteger(source.qrOrder) && source.qrOrder >= 0 ? source.qrOrder : index
         };

@@ -279,7 +279,7 @@ export function showProfileModal(title, fields, currentValues, onSave) {
                 const k = (f.key || '').toLowerCase();
                 const isSensitive = k.includes('pin') || k.includes('puk') || k.includes('password') ||
                     k.includes('num_serie') || k.includes('cf') || k.includes('username') ||
-                    k.includes('id_number') || k.includes('license') || k.includes('app_code');
+                    k.includes('id_number') || k.includes('license') || k.includes('app_code') || k.includes('codice_app');
 
                 const inputType = f.type === 'date' ? 'date' : 'text';
                 const inputEl = createElement('input', {

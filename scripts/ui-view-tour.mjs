@@ -9,9 +9,11 @@ import {fixedColorRegistry} from './audit-fixed-colors.mjs';
 import {listTourControls,captureTourPaints,analyseTourPaints,settleTourUi} from './lib/view-tour-paints.mjs';
 import {buildUiTopology} from './build-ui-topology.mjs';
 export const TOUR_CLICKABLE='button,[role="button"],summary,.collapsible-header,[data-action],select,.custom-select-trigger,input[type="checkbox"],input[type="date"],a[href],a:not([href]),[data-value],.custom-option,[role=option],[tabindex]:not([tabindex="-1"]),.azienda-card';
-export function tourDestination(href,base){const url=new URL(href,base);const query=new URLSearchParams();for(const key of ['source','rule','id','companyId','accountId','profileTab','mode','type','tab','section'])if(url.searchParams.has(key))query.set(key,url.searchParams.get(key));return url.pathname+(query.size?'?'+query:'')+url.hash;}
-async function snapshot(){const files=[];async function walk(dir){for(const e of await readdir(dir,{withFileTypes:true})){const name=path.join(dir,e.name);if(e.isDirectory())await walk(name);else if(/\.(?:html|css|js|mjs|json)$/.test(name)&&e.name!=='release-manifest.json')files.push(name);}}await walk(publicRoot);
- for(const name of ['scripts/ui-view-tour.mjs','scripts/lib/view-tour-harness.mjs','scripts/lib/view-tour-paints.mjs','scripts/ui-fixed-color-exceptions.json','scripts/ui-dynamic-theme-contract.json','scripts/audit-fixed-colors.mjs','scripts/build-ui-topology.mjs','scripts/ui-topology-contract.json','package.json','package-lock.json'])files.push(fileURLToPath(new URL('../'+name,import.meta.url)));
+export function tourDestination(href,base){const url=new URL(href,base);const query=new URLSearchParams();for(const key of ['source','rule','id','aziendaId','received','ownerId','companyId','accountId','profileTab','mode','type','tab','section'])if(url.searchParams.has(key))query.set(key,url.searchParams.get(key));return url.pathname+(query.size?'?'+query:'')+url.hash;}
+export async function tourSourceSnapshot(){const files=[];async function walk(dir){for(const e of await readdir(dir,{withFileTypes:true})){const name=path.join(dir,e.name);if(e.isDirectory())await walk(name);else if(/\.(?:html|css|js|mjs|json)$/.test(name)&&e.name!=='release-manifest.json')files.push(name);}}await walk(publicRoot);
+ for(const name of ['scripts/ui-view-tour.mjs','scripts/lib/view-tour-harness.mjs','scripts/lib/view-tour-memory.mjs','scripts/lib/deep-ui.mjs','scripts/lib/deep-other-scenarios.mjs','scripts/ui-deep-scenarios.mjs','scripts/ui-deep-theme-contract.json','scripts/lib/view-tour-paints.mjs','scripts/ui-fixed-color-exceptions.json','scripts/ui-dynamic-theme-contract.json','scripts/audit-fixed-colors.mjs','scripts/build-ui-topology.mjs','scripts/ui-topology-contract.json','package.json','package-lock.json'])files.push(fileURLToPath(new URL('../'+name,import.meta.url)));
+ for(const name of ['tests/ui313-deep.browser.test.mjs','tests/ui-topology.test.mjs','tests/account-detail-compact.test.mjs','tests/shared-vault-data-model.test.mjs','tests/deadline-config-model.test.mjs'])files.push(fileURLToPath(new URL('../'+name,import.meta.url)));
+ for(const name of ['scripts/lib/dynamic-paint.mjs','scripts/dynamic-visual-map.mjs','scripts/lib/dynamic-theme-harness.mjs','scripts/lib/dynamic-theme-entry.mjs'])files.push(fileURLToPath(new URL('../'+name,import.meta.url)));
  const records=[];for(const name of files.sort())records.push({path:path.relative(fileURLToPath(new URL('../',import.meta.url)),name).replaceAll('\\','/'),sha256:createHash('sha256').update(await readFile(name)).digest('hex')});
  return {sha256:createHash('sha256').update(JSON.stringify(records)).digest('hex'),files:records};}
 const identity=c=>c.selector+'|'+c.name+'|'+c.classes;
@@ -20,7 +22,7 @@ export async function runViewTour({outDir,only=Object.keys(pages),depth=3,graphi
  if(only.some(file=>!pages[file]))throw Error('Unknown private page: '+only.filter(file=>!pages[file]).join(','));
  if(graphics.some(g=>!['classica','tre-livelli'].includes(g)))throw Error('Unknown graphics');
  if(outDir)await mkdir(outDir,{recursive:true});
- const sourceBefore=await snapshot(),dynamic=JSON.parse(await readFile(new URL('./ui-dynamic-theme-contract.json',import.meta.url),'utf8'));
+ const sourceBefore=await tourSourceSnapshot(),dynamic=JSON.parse(await readFile(new URL('./ui-dynamic-theme-contract.json',import.meta.url),'utf8'));
  const harness=await createTourHarness(harnessOptions),report=[];
  try{
  for(const file of only)for(const graphicsMode of graphics){
@@ -47,7 +49,7 @@ export async function runViewTour({outDir,only=Object.keys(pages),depth=3,graphi
     await page.waitForFunction(()=>[...document.querySelectorAll('link[rel=stylesheet]')].every(link=>link.disabled||link.sheet),undefined,{timeout:5000});
     await page.evaluate(()=>document.fonts.ready);
     const data=await page.evaluate(captureTourPaints,{graphics:graphicsMode,exceptions:fixedColorRegistry.exceptions,dynamicExceptions:[...dynamic.exceptions,...fixedColorRegistry.runtimePaints]});
-    const flags=analyseTourPaints(data),state={trail,name:trail.at(-1)?.name||'initial',contexts:14,flags,errors:errors.runtime,contrast:data.contrast,controls:after};
+    const flags=analyseTourPaints(data),state={trail,name:trail.at(-1)?.name||'initial',contexts:14,flags,errors:errors.runtime,contrast:data.contrast,bootstrap:instance.readiness,controls:after};
     const shot=file.replace('.html','')+'-'+graphicsMode+'-'+(entry.states.length)+'.png';
     if(outDir&&screenshots&&(!trail.length||flags.some(x=>!x.exception))){await page.screenshot({path:path.join(outDir,shot)});state.screenshot=shot;}
     entry.states.push(state);
@@ -75,7 +77,7 @@ export async function runViewTour({outDir,only=Object.keys(pages),depth=3,graphi
   console.log(`${file}/${graphicsMode}: ${entry.states.length} real states ×14, ${entry.notOpened.length} missing, ${entry.beyondDepth.length} beyond depth`);
  }
  }finally{await harness.close();}
- const sourceAfter=await snapshot(),topology=buildUiTopology();
+ const sourceAfter=await tourSourceSnapshot(),topology=buildUiTopology();
  const states=report.flatMap(p=>p.states),missing=report.reduce((n,p)=>n+p.notOpened.length,0),open=states.flatMap(s=>s.flags).filter(f=>!f.exception),errors=states.reduce((n,s)=>n+s.errors.length,0);
  const criticalMissingAssets=[...harness.assets.missing].filter(name=>/\.(?:css|js|mjs|woff2?|json)$/.test(name));
  const expectedPrivate=Object.keys(pages),covered=new Set(report.filter(p=>p.states.length).map(p=>p.page));

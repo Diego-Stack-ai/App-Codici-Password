@@ -450,11 +450,19 @@ html:not(.dark) .glass-card {
 
 .btn-cancel-text {
     font: var(--font-badge);
-    color: var(--text-secondary);
+    color: var(--text-primary);
     background: transparent;
     border: none;
     cursor: pointer;
-    opacity: 0.7;
+    opacity: 1;
+}
+
+#btn-edit-note {
+    width: auto;
+    min-width: 44px;
+    padding: 0 0.6rem;
+    color: var(--rev-text-accent, var(--theme-ink));
+    background: var(--rev-icon-bg);
 }
 
 /* --- 6. MODALS — definiti in core_ui.css, non duplicare qui --- */
@@ -676,7 +684,7 @@ html:not(.dark) .location-tab-btn.active {
     text-align: center;
     color: var(--text-secondary);
     font: var(--font-badge);
-    opacity: 0.5;
+    opacity: 1;
     padding: 1rem 0;
 }
 
@@ -692,7 +700,11 @@ html:not(.dark) .location-tab-btn.active {
 .company-contact-value { flex: 1; min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; color: var(--text-primary); }
 .company-contact-note { display: grid; gap: 4px; color: var(--text-secondary); white-space: pre-wrap; overflow-wrap: anywhere; }
 .company-contact-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.company-profile-action { min-height: 44px; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 12px; color: var(--accent); background: var(--surface-glass); font: var(--font-button); cursor: pointer; }
+.company-profile-action { min-height: 44px; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 12px; color: var(--rev-text-accent, var(--theme-ink)); background: var(--surface-glass); font: var(--font-button); cursor: pointer; }
+body[data-ui-revision] .company-profile-action.profile-account-connect {
+    background: var(--rev-icon-bg);
+    color: var(--rev-text-accent, var(--theme-ink));
+}
 .company-qr-options { display: grid; gap: 8px; }
 .company-qr-options label { display: flex; align-items: center; gap: 10px; min-height: 44px; }
 .company-qr-preview { width: fit-content; max-width: 100%; padding: 12px; background: white; border-radius: 12px; margin: 16px auto; }

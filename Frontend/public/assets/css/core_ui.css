@@ -29,6 +29,11 @@
     transition: background 0.2s;
 }
 
+/* Anche i controlli nativi degli editor dinamici seguono la palette. */
+input[type="checkbox"] {
+    accent-color: var(--theme-fill, var(--accent));
+}
+
 .qr-lens-icon:hover {
     background: var(--rev-fill);
     color: white;
@@ -362,7 +367,7 @@
 }
 
 .dark .modal-text {
-    color: #94a3b8;
+    color: var(--text-secondary);
 }
 
 .modal-actions {

@@ -1,5 +1,13 @@
 # Programma
 
+<a id="deep-temi-313-programma-2026-11-16"></a>
+
+## Giro #313 — chiusura dei comportamenti oltre profondità, 16/11/2026
+
+Su [ordine di seguito](INCARICO_CORRENTE.md#deep-temi-313-incarico-2026-11-16), le 492 occorrenze ripetute della #317 sono ricondotte a gruppi di comportamento nel [registro dei percorsi profondi](../../scripts/ui-deep-theme-contract.json): Impostazioni 252, Profilo 96, altri percorsi 144. Il registro dichiara 30 scenari, 117 stati per grafica e relativi collegamenti a produttori, CSS, colori e test. Il grafo UI importa queste relazioni come dichiarate, senza trasformarle in osservazioni o PASS. [Metodo e limiti](../regole/INTERFACCIA.md#deep-temi-313-ui-2026-11-16), [esiti](../evidenze/COLLAUDI.md#deep-temi-313-verifiche-2026-11-16).
+
+[Claude ha recepito la #317 nella #316/a126d59d](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/316#issuecomment-6915022674). Il seguito Codex resta separato: prove con dati sintetici, correzioni pertinenti riprodotte, bozza contro master per la CI completa e revisione sullo SHA finale. Il confronto con Claude continua sulla consegna concreta. Nessuna modifica alla produzione 1.2.276, alla disponibilità della cornice o alle decisioni cromatiche; versione, merge e deploy richiedono un nuovo ordine.
+
 <a id="review-temi-313-programma-2026-11-16"></a>
 
 ## Giro #313 — revisione e consegna a Claude, 16/11/2026

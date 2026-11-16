@@ -43,7 +43,7 @@ export function normalizeDeadlineType(item, defaultPeriod = 14, defaultFrequency
     return {
         ...source,
         name,
-        period: Number.isFinite(period) && period > 0 ? period : defaultPeriod,
+        period: Number.isFinite(period) && period >= 0 ? period : defaultPeriod,
         freq: Number.isFinite(freq) && freq > 0 ? freq : defaultFrequency
     };
 }
