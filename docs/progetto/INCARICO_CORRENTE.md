@@ -10,6 +10,8 @@ Ramo separato `codex/review-ui313-20261116`, partenza immutabile 39e7bab: un sol
 
 Diego ribadisce **«Procedi con i 4 punti»**: completare matrice canonica, giro delle 22 pagine nelle due grafiche/sette palette, registrazione degli esiti e consegna del correttivo separato a Claude per il confronto con #316. La consegna comprende ramo e diff revisionabili su GitHub e notifica nel thread già autorizzato; nessuna unione automatica nel ramo di Claude o in master.
 
+Consegna eseguita: correttivo **998a879cd8915a22f77ed5413f07ed277d8fb3b2** nella [bozza #317](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/317), con base esatta del ramo di Claude 39e7bab; [nota per Claude sulla #316](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/316#issuecomment-6913561562). Nessuna presa in carico o risposta di Claude ancora attestata.
+
 <a id="temi-rilascio-1276-incarico-2026-11-15"></a>
 
 ## APP 1.2.276 — ordine eseguito e ricevuta consolidata, 15/11/2026
