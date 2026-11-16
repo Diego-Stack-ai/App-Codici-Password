@@ -2,9 +2,9 @@
 
 <a id="rilascio-1279-registro-2026-11-16"></a>
 
-## 16/11/2026 — ordine di rilascio1.2.279, icone delle Scadenze
+## 16/11/2026 — ordine1.2.279; pubblicazione verificata il17/11
 
-Diego autorizza PR, merge e nuova versione del correttivo dopo la verifica diretta della propria scheda. Riprodotte due omissioni di livrea nei glifi delle righe Home/elenco; nessun blocco globale del companion rame riprodotto nei14 passaggi dei selettori. Il seguito locale sotto è ora confezionato nella candidata1.2.279: abbinamenti invariati, Classica primaria e Nuova companion +15%, scadute rosse, simboli salvati/fallback conservati. La precedente attenuazione delle archiviate Nuova è rimossa per mantenere il contrasto dell'identità. [Incarico](../progetto/INCARICO_CORRENTE.md#rilascio-1279-incarico-2026-11-16), [prove e limiti](../evidenze/COLLAUDI.md#rilascio-1279-verifiche-2026-11-16). CI finale, merge e pubblicazione ancora da attestare; nessuna operazione policy/backend.
+Diego autorizza PR, merge e nuova versione del correttivo dopo la verifica diretta della propria scheda. Riprodotte due omissioni di livrea nei glifi delle righe Home/elenco; nessun blocco globale del companion rame riprodotto nei14 passaggi dei selettori. La **1.2.279 è pubblicata**: candidata **2099a651** con GO indipendenti e CI #1189 verde, #322 unita in **9cbf2d42**, CI master #1190 e Hosting #1191 SUCCESS. Approvazione production delegata eseguita alle00:26CET del17/11, protezioni conservate; verifica pubblica completa **365 hash / 41 profili / tre probe** e cinque GET indipendenti PASS. Abbinamenti invariati, Classica primaria e Nuova companion +15%, scadute rosse, simboli salvati/fallback conservati; attenuazione globale delle archiviate rimossa soltanto in Nuova. [Incarico](../progetto/INCARICO_CORRENTE.md#rilascio-1279-incarico-2026-11-16), [ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-1279-verifiche-2026-11-16). Nessuna operazione policy/backend, nessuna nuova attestazione fisica; segue soltanto la chiusura documentale, senza altro Hosting.
 
 <a id="errata-documentali-2026-11-07"></a>
 

@@ -4,9 +4,11 @@
 
 <a id="rilascio-1279-stato-2026-11-16"></a>
 
-## APP 1.2.279 — candidata in rilascio, 16/11/2026
+## APP 1.2.279 — pubblicata e verificata, ricevuta 17/11/2026
 
-Su [ordine di Diego](INCARICO_CORRENTE.md#rilascio-1279-incarico-2026-11-16), ramo `codex/deadline-icons-1279-20261116`, base **39c78b02**: confezionamento del correttivo delle singole Scadenze già verificato sotto. Abbinamenti, glifi e rosso degli avvisi conservati; solo Nuova evita l'attenuazione globale delle archiviate per mantenere leggibile l'icona. Versione **1.2.279**; CI finale, merge e Hosting ancora da attestare. Produzione tuttora **1.2.278/a02c76a7**. [Procedura](../regole/RILASCIO.md#rilascio-1279-2026-11-16), [ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-1279-verifiche-2026-11-16).
+Online **1.2.279**, sorgente **9cbf2d4205a368944e17a5969c13e535778db4b0**, sourceDirty=false. La [#322](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/322) è stata unita dopo GO indipendenti sulla candidata **2099a651** e CI #1189 verde; anche CI master #1190 e [Hosting #1191](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43975431125) SUCCESS. Le icone delle singole Scadenze Home/elenco seguono la livrea; abbinamenti, glifi e rosso degli avvisi conservati. Solo Nuova evita l'attenuazione globale delle archiviate per mantenere leggibile l'icona. [Ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-1279-verifiche-2026-11-16).
+
+Production approvato da Codex su delega di Diego alle **00:26 CET del17/11**. Verifica pubblica completa PASS alle **00:28:27 CET**: **365 hash / 41 profili / tre probe**, più cinque GET indipendenti conformi alle **00:29:22 CET**. Solo Hosting; nessuna operazione policy/backend. Cornice ordinaria e faro conservati. I commit successivi della ricevuta documentale non modificano il runtime pubblicato e non richiedono un altro deploy. I checkpoint locali sotto precedono questo esito.
 
 <a id="icone-scadenze-stato-2026-11-16"></a>
 

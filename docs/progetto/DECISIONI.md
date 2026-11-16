@@ -4,6 +4,8 @@
 
 ## Pubblicare il correttivo delle identità Scadenze — 16/11/2026
 
+Applicazione conclusa il **17/11**: candidata **2099a651**, [#322](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/322) unita in **9cbf2d42**, CI #1189 e master #1190 verdi, [Hosting #1191 SUCCESS](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43975431125). Approvazione production delegata eseguita con protezioni conservate; verifica pubblica completa e indipendente PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1279-verifiche-2026-11-16). Nessuna modifica di policy/backend o dei limiti fisici; la chiusura documentale non richiede un nuovo Hosting.
+
 Fonte diretta: Diego autorizza PR, merge e deploy con nuova versione e aggiornamento MD/GitHub del correttivo mostrato. Il precedente limite alla sola consegna locale è superato per la **1.2.279**, con [procedura](../regole/RILASCIO.md#rilascio-1279-2026-11-16), GO indipendente, CI completa e production protetto. La delega di approvazione già espressa nella sessione rimane operativa per lo stesso scope Hosting.
 
 La correzione applica alle singole icone Home/elenco gli abbinamenti già approvati: Classica primaria, Nuova companion +15%; nessun nuovo abbinamento, ridisegno dei glifi o modifica del rosso semantico. Il limite preesistente di contrasto rosso è registrato separatamente. Nessuna modifica Auth/Vault/cornice/policy/backend. [Mandato](INCARICO_CORRENTE.md#rilascio-1279-incarico-2026-11-16), [esiti](../evidenze/COLLAUDI.md#rilascio-1279-verifiche-2026-11-16).
