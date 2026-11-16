@@ -5,7 +5,7 @@
 import { createElement, clearElement } from '../../dom-utils.js';
 import { t } from '../../translations.js';
 import { listDeadlines } from '../data/vault-repository.js';
-import { auth } from '../../firebase-config.js?v=1.2.278';
+import { auth } from '../../firebase-config.js?v=1.2.279';
 import { currentDiffDays, deadlineBucket, deadlinePresentation } from '../scadenze/deadline-model.js';
 
 let dashboardEpoch = 0;
@@ -71,7 +71,7 @@ function renderMiniItem(item, today) {
 
     return createElement('div', { className: 'dashboard-list-item' }, [
         createElement('div', { className: 'item-icon-box' }, [
-            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: item.icon || 'event' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', dataset: { iconRole: 'theme' }, textContent: item.icon || 'event' })
         ]),
         createElement('span', { className: 'item-copy' }, [
             createElement('span', { className: 'item-title', textContent: presentation.category }),

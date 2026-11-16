@@ -1,5 +1,9 @@
 # Guida
 
+## Icone delle singole Scadenze — candidata 1.2.279
+
+Le icone delle singole righe Scadenze nella Home e nell'elenco seguono la livrea: colore principale in Classica, secondo colore abbinato e più intenso in Nuova. Restano i simboli scelti e il rosso delle scadute. In Nuova anche le icone archiviate mantengono la propria intensità. Disponibilità effettiva nello [stato corrente](../progetto/STATO.md#stato-corrente); [prove e limiti](../evidenze/COLLAUDI.md#rilascio-1279-verifiche-2026-11-16).
+
 ## Grafica Classica e Nuova — 1.2.278
 
 Questa configurazione è disponibile nella **1.2.278 pubblicata**; [stato e ricevuta](../progetto/STATO.md#rilascio-1278-stato-2026-11-16).

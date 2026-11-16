@@ -2,6 +2,20 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1279-stato-2026-11-16"></a>
+
+## APP 1.2.279 — candidata in rilascio, 16/11/2026
+
+Su [ordine di Diego](INCARICO_CORRENTE.md#rilascio-1279-incarico-2026-11-16), ramo `codex/deadline-icons-1279-20261116`, base **39c78b02**: confezionamento del correttivo delle singole Scadenze già verificato sotto. Abbinamenti, glifi e rosso degli avvisi conservati; solo Nuova evita l'attenuazione globale delle archiviate per mantenere leggibile l'icona. Versione **1.2.279**; CI finale, merge e Hosting ancora da attestare. Produzione tuttora **1.2.278/a02c76a7**. [Procedura](../regole/RILASCIO.md#rilascio-1279-2026-11-16), [ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-1279-verifiche-2026-11-16).
+
+<a id="icone-scadenze-stato-2026-11-16"></a>
+
+## Seguito icone Scadenze — locale, non pubblicato, 16/11/2026
+
+La verifica diretta della scheda di Diego conferma che in Nuova i sette selettori cambiano il colore di Ricerca e delle icone Impostazioni controllate, in Chiaro e Scuro; anche Ricerca/Impostazioni dell'elenco sono oro in Verde. Nessun blocco globale sul rame riprodotto. Confermate invece due omissioni: miniature delle Scadenze Home nere/bianche e identità dell'elenco ancora sulla palette primaria.
+
+Il correttivo locale collega entrambe al ruolo `--card-icon-ink`, conserva simboli e rosso delle scadute e aggiorna registri/test. Solo Nuova rimuove l'opacità globale delle archiviate, che portava l'icona oro a **2,79:1**; colori secondari dei testi conservati. Regressione delle identità **112 contesti Home/lista e 56 archiviate PASS**, con negativi e conteggi per stato; UI275-11 **112/112 PASS**, dopo correzione della misura sul contenitore. Riesame indipendente GO; restano distinti i limiti e il debito preesistente del rosso. Produzione **1.2.278/a02c76a7** invariata, nessun nuovo rilascio. [Mandato](INCARICO_CORRENTE.md#icone-scadenze-incarico-2026-11-16), [contratto](../regole/INTERFACCIA.md#icone-scadenze-ui-2026-11-16), [evidenze](../evidenze/COLLAUDI.md#icone-scadenze-verifiche-2026-11-16).
+
 <a id="rilascio-1278-stato-2026-11-16"></a>
 
 ## APP 1.2.278 — pubblicata e verificata, 16/11/2026

@@ -1,5 +1,5 @@
 import {confirmFrameAction} from '../core/vault-frame-client.js';
-import {auth, functions} from '../../firebase-config.js?v=1.2.278';
+import {auth, functions} from '../../firebase-config.js?v=1.2.279';
 import {httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
 
 const manageWidgetProfile = httpsCallable(functions, 'manageWidgetProfile');

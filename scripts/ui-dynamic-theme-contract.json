@@ -759,7 +759,7 @@
           ]
         },
         {
-          "selector": ".deadline-card-upcoming .deadline-date-badge, .deadline-card-upcoming .deadline-icon-box, .deadline-card-upcoming .deadline-icon-box > .material-symbols-outlined",
+          "selector": ".deadline-card-upcoming .deadline-date-badge",
           "property": "color",
           "role": "--theme-ink",
           "states": [
@@ -770,13 +770,27 @@
           "note": "Decisione di Diego 15/11/2026: niente ambra né verde di stato; in arrivo e completata seguono la palette."
         },
         {
-          "selector": ".deadline-card-completed .deadline-date-badge, .deadline-card-completed .deadline-icon-box, .deadline-card-completed .deadline-icon-box > .material-symbols-outlined",
+          "selector": ".deadline-card-completed .deadline-date-badge",
           "property": "color",
           "role": "--theme-ink",
           "states": [
             "completed"
           ],
           "note": "Decisione di Diego 15/11/2026: niente ambra né verde di stato; in arrivo e completata seguono la palette."
+        },
+        {
+          "selector": ".deadline-card:not(.deadline-card-expired) .deadline-icon-box",
+          "property": "color",
+          "role": "--card-icon-ink",
+          "states": ["valid", "upcoming", "expired", "completed"]
+        },
+        {
+          "selector": ".deadline-card:not(.deadline-card-expired) .deadline-icon-box > .material-symbols-outlined",
+          "property": "color",
+          "role": "--card-icon-ink",
+          "minimum": 3,
+          "states": ["valid", "upcoming", "expired", "completed"],
+          "note": "Identità delle singole card: palette primaria in Classica, companion +15% in Nuova; data e rosso scadute conservati."
         }
       ],
       "tests": [

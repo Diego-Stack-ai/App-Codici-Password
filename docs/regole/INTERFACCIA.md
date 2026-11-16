@@ -1,5 +1,15 @@
 # Interfaccia
 
+<a id="icone-scadenze-ui-2026-11-16"></a>
+
+## Identità delle singole Scadenze — seguito locale della livrea, 16/11/2026
+
+Il seguito è incluso nella candidata **1.2.279**, ora autorizzata al [percorso di rilascio](RILASCIO.md#rilascio-1279-2026-11-16); pubblicazione attestata soltanto dalla [ricevuta](../evidenze/COLLAUDI.md#rilascio-1279-verifiche-2026-11-16).
+
+L'applicazione del ruolo card comprende i glifi prodotti da `home-deadline-dashboard.js` nelle `.dashboard-list-item .item-icon-box` e da `scadenze.js` nelle `.deadline-icon-box` non scadute. Classica usa `--theme-ink`; Nuova `--companion-card-ink` con l'incremento già approvato. Le card scadute dell'elenco restano `status-error`; date, badge e superfici non vengono trasferiti al companion. Simboli salvati e fallback esistenti (`event` nella Home, `event_note` nell'elenco) restano distinti: questa correzione non introduce un nuovo disegno del calendario.
+
+Solo in Nuova le archiviate evitano l'opacità globale della card, che riduceva il contrasto del companion oro sotto3:1. Conservati colori secondari dei testi, chevron e opacità Classica. I due produttori/selettori sono nel [registro livrea](../../scripts/ui-livery-contract.json); UI275-11 separa il ruolo delle date da quello dell'identità e conserva il rosso. La regressione usa record sintetici reali, identità esplicite/fallback, sette palette, due aspetti e due larghezze, con rifiuto di rame fisso e recolorazione degli avvisi. [Evidenze e limiti](../evidenze/COLLAUDI.md#icone-scadenze-verifiche-2026-11-16). Modifica locale, non inclusa nella ricevuta di produzione sottostante.
+
 <a id="livree-comuni-ui-2026-11-16"></a>
 
 ## Base evoluta comune e livree — pubblicate nella 1.2.278, 16/11/2026

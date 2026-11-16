@@ -1,5 +1,13 @@
 # Decisioni
 
+<a id="rilascio-1279-decisione-2026-11-16"></a>
+
+## Pubblicare il correttivo delle identità Scadenze — 16/11/2026
+
+Fonte diretta: Diego autorizza PR, merge e deploy con nuova versione e aggiornamento MD/GitHub del correttivo mostrato. Il precedente limite alla sola consegna locale è superato per la **1.2.279**, con [procedura](../regole/RILASCIO.md#rilascio-1279-2026-11-16), GO indipendente, CI completa e production protetto. La delega di approvazione già espressa nella sessione rimane operativa per lo stesso scope Hosting.
+
+La correzione applica alle singole icone Home/elenco gli abbinamenti già approvati: Classica primaria, Nuova companion +15%; nessun nuovo abbinamento, ridisegno dei glifi o modifica del rosso semantico. Il limite preesistente di contrasto rosso è registrato separatamente. Nessuna modifica Auth/Vault/cornice/policy/backend. [Mandato](INCARICO_CORRENTE.md#rilascio-1279-incarico-2026-11-16), [esiti](../evidenze/COLLAUDI.md#rilascio-1279-verifiche-2026-11-16).
+
 <a id="rilascio-1278-decisione-2026-11-16"></a>
 
 ## Pubblicare base comune e livree nella 1.2.278 — 16/11/2026

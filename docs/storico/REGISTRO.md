@@ -1,5 +1,11 @@
 # Registro
 
+<a id="rilascio-1279-registro-2026-11-16"></a>
+
+## 16/11/2026 — ordine di rilascio1.2.279, icone delle Scadenze
+
+Diego autorizza PR, merge e nuova versione del correttivo dopo la verifica diretta della propria scheda. Riprodotte due omissioni di livrea nei glifi delle righe Home/elenco; nessun blocco globale del companion rame riprodotto nei14 passaggi dei selettori. Il seguito locale sotto è ora confezionato nella candidata1.2.279: abbinamenti invariati, Classica primaria e Nuova companion +15%, scadute rosse, simboli salvati/fallback conservati. La precedente attenuazione delle archiviate Nuova è rimossa per mantenere il contrasto dell'identità. [Incarico](../progetto/INCARICO_CORRENTE.md#rilascio-1279-incarico-2026-11-16), [prove e limiti](../evidenze/COLLAUDI.md#rilascio-1279-verifiche-2026-11-16). CI finale, merge e pubblicazione ancora da attestare; nessuna operazione policy/backend.
+
 <a id="errata-documentali-2026-11-07"></a>
 
 ## Errata di lettura delle fonti conservate — 07/11/2026

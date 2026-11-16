@@ -13,6 +13,8 @@
   "sharedStyles": "Frontend/public/assets/css/core_ui.css",
   "test": "tests/ui-livery.browser.test.mjs",
   "cardProducers": [
+    "Frontend/public/assets/js/modules/home/home-deadline-dashboard.js",
+    "Frontend/public/assets/js/modules/scadenze/scadenze.js",
     "Frontend/public/assets/js/modules/shared/account-avatar.js",
     "Frontend/public/assets/js/modules/shared/account-list-view.js",
     "Frontend/public/assets/js/modules/settings/archivio_account.js",
@@ -25,6 +27,8 @@
     "petrol": "Terracotta", "lavender": "Salvia", "dusty-rose": "Blu polvere"
   },
   "cardGlyphs": [
+    ".dashboard-list-item .item-icon-box > .material-symbols-outlined",
+    ".deadline-card:not(.deadline-card-expired) .deadline-icon-box > .material-symbols-outlined",
     ".matrix-icon-box:not(.icon-blue):not(.icon-purple) > .material-symbols-outlined",
     ".settings-icon-box[data-icon-role=theme] > .material-symbols-outlined:not([data-icon-role])",
     ".material-symbols-outlined[data-icon-role=theme]",
