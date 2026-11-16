@@ -190,7 +190,7 @@
     border-radius: 12px;
     font-size: var(--fs-xs);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .dashboard-list-item .item-copy {

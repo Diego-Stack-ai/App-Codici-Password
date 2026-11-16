@@ -336,7 +336,7 @@
 .cards-title {
     font: var(--font-caption);
     font-weight: var(--font-strong-weight);
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 0 0.25rem;

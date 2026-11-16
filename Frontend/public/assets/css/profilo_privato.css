@@ -769,7 +769,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 
 .profile-label-edit {
     background: rgba(0, 0, 0, 0.05);
-    color: #000;
+    color: var(--text-primary);
 }
 
 .profile-label-delete {
@@ -1183,7 +1183,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 .profile-account-result { display: grid; flex: 0 0 auto; gap: 4px; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--surface-glass); color: var(--text-primary); text-align: left; cursor: pointer; overflow-wrap: anywhere; }
 .profile-account-result[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--surface-glass)); box-shadow: inset 3px 0 var(--accent); }
 .profile-account-result:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-.profile-account-result-name { font-weight: 650; font-size: var(--fs-base); }
+.profile-account-result-name { font-weight: var(--font-label-weight); font-size: var(--fs-base); }
 .profile-account-result-context { color: var(--accent); font-size: var(--fs-sm); }
 .profile-account-result-user { color: var(--text-secondary); font-size: var(--fs-sm); }
 .profile-account-empty { padding: 16px; color: var(--text-secondary); }

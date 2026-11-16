@@ -316,7 +316,7 @@ body,
     overflow-x: hidden;
     position: relative;
     isolation: isolate;
-    font-family: 'Manrope', sans-serif;
+    font-family: var(--font-family-base);
 }
 
 

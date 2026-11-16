@@ -64,7 +64,7 @@
     height: var(--touch-target-min, 44px);
     padding: 0;
     border-radius: 50%;
-    font-weight: 800;
+    font-weight: var(--font-strong-weight);
 }
 
 .documentation-overlay {

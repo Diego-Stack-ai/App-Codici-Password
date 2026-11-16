@@ -382,7 +382,7 @@
 .vehicle-rule-page-header h2,
 .vehicle-rule-object-header h3 { margin: 0; color: var(--text-primary); }
 .vehicle-rule-page-header p { margin: 0.3rem 0 0; color: var(--text-secondary); }
-.vehicle-rule-eyebrow { color: var(--accent) !important; font-size: var(--fs-micro); font-weight: 800; }
+.vehicle-rule-eyebrow { color: var(--accent) !important; font-size: var(--fs-micro); font-weight: var(--font-strong-weight); }
 
 .vehicle-rule-object,
 .vehicle-reference-editor,
@@ -465,7 +465,7 @@
     border-radius: 10px;
     color: var(--accent);
     background: rgba(var(--accent-rgb), 0.1);
-    font-weight: 750;
+    font-weight: var(--font-strong-weight);
 }
 
 .vehicle-add-reference,
@@ -481,7 +481,7 @@
     color: var(--accent);
     background: rgba(var(--accent-rgb), 0.08);
     font: inherit;
-    font-weight: 750;
+    font-weight: var(--font-strong-weight);
     cursor: pointer;
 }
 

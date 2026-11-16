@@ -189,7 +189,7 @@
 }
 
 .detail-field-input::placeholder {
-    color: rgba(255, 255, 255, 0.2);
+    color: var(--text-placeholder);
 }
 
 .detail-field-input.uppercase {
@@ -561,7 +561,7 @@
 }
 
 .attachment-icon-muted {
-    color: rgba(255, 255, 255, 0.2);
+    color: var(--text-secondary);
 }
 
 .attachment-text-group {
@@ -573,7 +573,7 @@
 .attachment-file-name {
     max-width: 150px;
     overflow: hidden;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--text-primary);
     font: var(--font-label);
     text-overflow: ellipsis;
     text-transform: uppercase;
@@ -581,7 +581,7 @@
 }
 
 .attachment-file-status {
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--text-secondary);
     font: var(--font-micro);
     font-weight: var(--font-label-weight);
     letter-spacing: 0.1em;
@@ -762,7 +762,7 @@
 .btn-text-cancel {
     background: transparent;
     border: none;
-    color: #000;
+    color: var(--text-primary);
     /* Richiesto nero */
     cursor: pointer;
     font: var(--font-badge);

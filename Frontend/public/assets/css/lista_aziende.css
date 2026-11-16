@@ -90,12 +90,12 @@
     cursor: pointer;
     transition: opacity 0.2s, color 0.2s;
     opacity: 0.4;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--text-secondary);
 }
 
 .btn-pin-azienda:hover {
     opacity: 1;
-    color: white;
+    color: var(--text-primary);
 }
 
 .btn-pin-azienda.is-pinned {
