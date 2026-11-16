@@ -1,5 +1,29 @@
 # Collaudi
 
+<a id="rilascio-1279-verifiche-2026-11-16"></a>
+
+## APP 1.2.279 — confezionamento e gate, 16/11/2026
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#rilascio-1279-incarico-2026-11-16), ramo `codex/deadline-icons-1279-20261116`, base **39c78b02**. Il sorgente funzionale è il [correttivo verificato sotto](#icone-scadenze-verifiche-2026-11-16), senza ulteriori scelte cromatiche. La confezione usa il bump canonico278→279, guida `reviewedAppVersion=1.2.279`/`contentVersion=13` e derivati offline. Comparazione dei365 pubblici dopo normalizzazione delle sole versioni/EOL; solo `offline-assets.js` è ammesso come derivato diverso.
+
+Confezione locale PASS: **365 pubblici identici** al correttivo dopo normalizzazione delle sole versioni/EOL, nessun file aggiunto/rimosso e nessun altro delta, anche dopo rigenerazione offline; **304 riferimenti** allineati. Offline **16/16**, guida **12/12** e budget originale delle **31 pagine + quattro test diagnostici PASS**. Delta funzionale del foglio Scadenze: **+264 byte / +89 byte gzip**; nessun asset/import aggiunto e nessuna soglia modificata. Le prove locali precedenti e il GO funzionale non sostituiscono la CI completa e il riesame della candidata confezionata.
+
+SHA finale, PR, run, merge e ricevuta pubblica verranno registrati dopo gli esiti effettivi. Produzione ancora **1.2.278**. Debito preesistente del rosso **2,72:1** dichiarato, nessuna riduzione di soglia; nessun collaudo telefonico o altro browser dedotto dai banchi sintetici. Nessuna operazione su dati, policy o backend.
+
+<a id="icone-scadenze-verifiche-2026-11-16"></a>
+
+## Seguito icone della 1.2.278 — verifica diretta e correttivo locale, 16/11/2026
+
+[Mandato](../progetto/INCARICO_CORRENTE.md#icone-scadenze-incarico-2026-11-16), base **39c78b02**. Verifica read-only degli stili nella scheda Chrome reale di Diego, che ha eseguito personalmente lo sblocco. CSS core/core_ui dichiarati **1.2.278**, grafica Nuova. Eseguiti i clic dei sette temi in Chiaro e Scuro: **14 osservazioni** mostrano sette colori diversi per Ricerca e la prima icona tematica delle Impostazioni; in Verde l'elenco Scadenze dipinge entrambi Ricerca/Impostazioni in `rgb(112,97,47)` (oro). In Rosso Ricerca è `rgb(52,88,94)` e l'icona card `rgb(49,90,97)`; non sono rame fisso. Ripristinati Verde/Nuova/Chiaro e Scadenze. Queste osservazioni non attestano altri dispositivi o una matrice fisica Classica.
+
+Il controllo alla fonte e nel DOM reale conferma l'omissione: i glifi delle righe Home ereditavano `--text-primary`, quelli dell'elenco restavano sulla palette principale e non erano registrati nella livrea. Nuovo test dedicato RED sul codice precedente (Home Classica/Blu chiaro: nero invece del ruolo tematico). Dopo il collegamento dei produttori, il controllo scopre **2,79:1** per l'icona archiviata Nuova/Verde chiaro: risolta l'attenuazione globale soltanto in Nuova, senza cambiare coppie cromatiche o il15%.
+
+Esiti locali: livree **5/5 PASS**, compresi i precedenti **1.232 contesti cromatici / 88 strutturali / otto titoli form** e la nuova prova delle righe. Quest'ultima è stata poi rafforzata e rieseguita: **112 contesti Home/lista + 56 archiviate PASS**, con conteggi esatti per stato, simboli salvati/fallback conservati e negativi che rifiutano rame fisso, ricolorazione del rosso e omissione reale del glifo. Due larghezze320/1280, due livree, sette palette e due aspetti. Riesame indipendente in lettura GO, rilievo di vacuità dei controlli di presenza chiuso.
+
+Il primo comando aggregato livree/dinamici chiude **11/12 PASS**: i dieci casi dinamici estranei alle Scadenze danno **952 stati PASS** e i sei test dinamici di controllo/negativi passano; UI275-11 fallisce con196 misure non disponibili perché il nuovo `minimum:3` era applicato anche ai contenitori privi di testo proprio. Separati controllo del ruolo del box e contrasto del vero glifo, senza ridurre la soglia: riesecuzione della sola famiglia interessata **112/112 PASS**, zero non misurati. Il comando aggregato non è dichiarato rieseguito o verde. Artefatti ignorati: `.codex-tmp/livery-verification/deadline-identities.json` e `.codex-tmp/deadline-final-dynamic/dynamic-visual-map.json`.
+
+Controlli puri Scadenze, Material Symbols e topologia **32/32 PASS**, Stylelint del foglio Scadenze PASS; documentazione **12/12**,34 MD e1196 collegamenti. Il controllo del rosso conserva il ruolo già contrattuale: una misura supplementare dello scaduto Blu chiaro rileva **2,72:1**, debito preesistente escluso dal correttivo e non dichiarato PASS di contrasto. Nessuna soglia esistente è stata abbassata. Nessun cambiamento di Auth/Vault/cornice/backend, record, versione o produzione; nessun nuovo commit/deploy.
+
 <a id="rilascio-1278-verifiche-2026-11-16"></a>
 
 ## APP 1.2.278 — pubblicata e verificata, 16/11/2026

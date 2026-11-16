@@ -5,7 +5,7 @@ import {confirmFrameAction} from '../core/vault-frame-client.js';
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.278';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.279';
 import { getFooterReady } from '../../footer-state.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
@@ -14,7 +14,7 @@ import { updateDoc, deleteDoc, doc, onAuthStateChanged, runTransaction, serverTi
 import {deleteObject, ref} from "/assets/js/vendor/firebase-runtime.js";
 import { deadlineDate, deadlineBucket, deadlinePresentation } from './deadline-model.js';
 import { t } from '../../translations.js';
-import { initComponents } from '../../components-v129.js?v=1.2.278';
+import { initComponents } from '../../components-v129.js?v=1.2.279';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import {listDeadlines, listReceivedDeadlines} from '../data/vault-repository.js';
@@ -376,7 +376,7 @@ function createScadenzaCard(scadenza) {
         createElement('div', { className: 'deadline-card-layout' }, [
             createElement('div', { className: 'deadline-card-left' }, [
                 createElement('div', { className: 'deadline-icon-box' }, [
-                    createElement('span', { className: 'material-symbols-outlined filled notranslate', textContent: scadenza.icon || 'event_note' })
+                    createElement('span', { className: 'material-symbols-outlined filled notranslate', dataset: { iconRole: stateClass === 'deadline-card-expired' ? 'status-error' : 'theme' }, textContent: scadenza.icon || 'event_note' })
                 ]),
                 createElement('div', { className: 'deadline-card-info-group' }, [
                     createElement('span', { className: 'deadline-card-category', textContent: cardOwner.toUpperCase() }),

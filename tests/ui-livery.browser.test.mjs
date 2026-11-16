@@ -132,7 +132,7 @@ test('all seven palettes keep companion ink and the 15 percent card increase exc
        const role=graphics==='tre-livelli'?'--companion-fill':'--theme-fill';
        for(const value of await inspectDynamicPaint(f.page,{selector:'.btn-fab-privato',property:'backgroundColor',role},{theme}))assert.ok(value.rolePass,label+': actual private quick action fill');
       }
-      results.push({page:file,graphics,width,theme,palette,cardGlyphs:measured});
+      results.push({page:file,graphics,width,theme,palette,cardGlyphs:measured,miniDeadlineGlyphs:file==='home_page.html'?await f.page.locator('.dashboard-list-item .item-icon-box > .material-symbols-outlined').count():0});
      }
     }
     if(['home_page.html','profilo_privato.html','impostazioni.html','dati_azienda.html'].includes(file)){
@@ -140,7 +140,7 @@ test('all seven palettes keep companion ink and the 15 percent card increase exc
     }
    }finally{await f.context.close();}
   }
-  assert.equal(results.length,22*2*2*2*7);assert.ok(results.filter(r=>r.page==='home_page.html').every(r=>r.cardGlyphs===4));
+  assert.equal(results.length,22*2*2*2*7);assert.ok(results.filter(r=>r.page==='home_page.html').every(r=>r.miniDeadlineGlyphs===2&&r.cardGlyphs===4+r.miniDeadlineGlyphs));
   await mkdir(output,{recursive:true});await writeFile(output+'/colors.json',JSON.stringify({status:failures.length?'FAIL':'PASS',contexts:results,failures},null,2));
   assert.equal(failures.length,0,JSON.stringify(failures.slice(0,8),null,2));
  }finally{await harness.close();}
@@ -159,4 +159,55 @@ test('decoration checks reject a missing symbol, a hidden watermark and a form w
   await f.page.evaluate(()=>{for(const link of document.querySelectorAll('link[rel=stylesheet]'))if(link.href.includes('/core_ui.css'))link.disabled=true;});
   assert.equal(validDecorations(await f.page.evaluate(decorationState),symbol),false);
  }finally{await f.context.close();await harness.close();}
+});
+
+test('individual deadline identities follow both liveries without recoloring expired alerts or replacing saved glyphs',{timeout:180000},async()=>{
+ const harness=await createTourHarness({memory:true}),results=[],archived=[];
+ const uid='synthetic-local-only',date=days=>new Date(Date.now()+days*86400000).toISOString().slice(0,10);
+ const memorySeeds=[[-2,false,'warning'],[3,false,'directions_car'],[60,false,null],[10,true,'school'],[7,false,null]].map(([days,completed,icon],i)=>({
+  path:`users/${uid}/scadenze/doc-${i}`,value:{title:`Scadenza sintetica ${i}`,category:'Prova',type:'Documento',dueDate:date(days),completed,userId:uid,ownerId:uid,...(icon?{icon}:{})}
+ }));
+ try{
+  for(const file of ['home_page.html','scadenze.html'])for(const graphics of ['classica','tre-livelli']){
+   const f=await harness.open(file,{graphics,memorySeeds});
+   try{
+    const selector=file==='home_page.html'?'.dashboard-list-item .item-icon-box > .material-symbols-outlined':'.deadline-card:not(.deadline-card-expired) .deadline-icon-box > .material-symbols-outlined';
+    await f.page.locator(selector).first().waitFor();
+    const check=async(label)=>{
+     const groups=file==='home_page.html'?[['#upcoming-list-container .item-icon-box > span',2],['#expired-list-container .item-icon-box > span',1]]:[['.deadline-card-expired .deadline-icon-box > span',1],['.deadline-card-upcoming .deadline-icon-box > span',2],['.deadline-card-info .deadline-icon-box > span',1]];
+     for(const [group,count] of groups)assert.equal(await f.page.locator(group).count(),count,label+': row identity count '+group);
+     const values=await inspectDynamicPaint(f.page,{selector,property:'color',role:'--card-icon-ink',minimum:3});
+     assert.equal(values.length,3,label+': real row identities exist');
+     for(const value of values)assert.ok(value.visible&&value.rolePass&&value.contrast?.pass,label+': row color and contrast '+JSON.stringify(value));
+     // Preserve the existing alert role; its contrast is outside this livery change.
+     if(file==='scadenze.html')for(const value of await inspectDynamicPaint(f.page,{selector:'.deadline-card-expired .deadline-icon-box > .material-symbols-outlined',property:'color',role:'--status-error'}))assert.ok(value.visible&&value.rolePass,label+': expired alert remains red '+JSON.stringify(value));
+    };
+    for(const width of contract.widths){await f.page.setViewportSize({width,height:844});for(const theme of contract.themes)for(const palette of contract.palettes){
+     await f.page.evaluate(({theme,palette})=>{document.documentElement.classList.toggle('dark',theme==='dark');document.documentElement.dataset.colorTheme=palette;},{theme,palette});
+     await check(`${file}/${graphics}/${width}/${theme}/${palette}`);results.push({file,graphics,width,theme,palette});
+    }}
+    const glyphs=await f.page.locator(selector).allTextContents();
+    assert.ok(glyphs.includes('directions_car'),'saved symbol preserved');assert.ok(glyphs.includes(file==='home_page.html'?'event':'event_note'),'existing default symbol preserved');
+    if(file==='scadenze.html'){
+     await f.page.locator('[data-filter=completed]').click();await f.page.locator('.deadline-card-completed').waitFor();
+     for(const width of contract.widths){await f.page.setViewportSize({width,height:844});for(const theme of contract.themes)for(const palette of contract.palettes){
+      await f.page.evaluate(({theme,palette})=>{document.documentElement.classList.toggle('dark',theme==='dark');document.documentElement.dataset.colorTheme=palette;},{theme,palette});
+      const values=await inspectDynamicPaint(f.page,{selector,property:'color',role:'--card-icon-ink',minimum:3});assert.equal(values.length,1);assert.ok(values[0].visible&&values[0].rolePass&&values[0].contrast?.pass,`${graphics}/${theme}/${palette}: completed identity ${JSON.stringify(values[0])}`);
+      archived.push({file,graphics,width,theme,palette});
+     }}
+     assert.deepEqual(await f.page.locator(selector).allTextContents(),['school']);
+     await f.page.locator('[data-filter=all]').click();await f.page.locator('.deadline-card-expired').waitFor();
+     await f.page.addStyleTag({content:'.deadline-card-expired .deadline-icon-box > .material-symbols-outlined{color:var(--companion-card-ink)!important}'});
+     const expiredPaint=await inspectDynamicPaint(f.page,{selector:'.deadline-card-expired .deadline-icon-box > .material-symbols-outlined',property:'color',role:'--status-error'});
+     assert.equal(expiredPaint.length,1);assert.ok(expiredPaint.every(v=>!v.rolePass),'accidental recoloring of expired alerts is rejected');
+    }
+    await f.page.locator(file==='home_page.html'?'#expired-list-container .item-icon-box > span':'.deadline-card-expired .deadline-icon-box > span').evaluate(e=>e.remove());
+    await assert.rejects(()=>check('missing identity'),/row identity count/,'omitting the actual expired identity is rejected');
+    await f.page.addStyleTag({content:`${selector}{color:#704c3d!important}`});
+    const fixedPaint=await inspectDynamicPaint(f.page,{selector,property:'color',role:'--card-icon-ink'});
+    assert.ok(fixedPaint.length>0);assert.ok(fixedPaint.every(v=>!v.rolePass),'fixed copper is rejected in dusty rose');
+   }finally{await f.context.close();}
+  }
+  assert.equal(results.length,2*2*2*2*7);assert.equal(archived.length,2*2*2*7);await mkdir(output,{recursive:true});await writeFile(output+'/deadline-identities.json',JSON.stringify({status:'PASS',contexts:results,archived},null,2));
+ }finally{await harness.close();}
 });

@@ -279,7 +279,7 @@ html:not(.dark) .deadline-card-subtitle {
     flex-shrink: 0;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--card-border);
-    color: var(--accent);
+    color: var(--card-icon-ink, var(--theme-ink));
 }
 
 .deadline-card-info-group {
@@ -360,7 +360,7 @@ html:not(.dark) .deadline-card-subtitle {
 }
 
 .deadline-card-upcoming .deadline-icon-box {
-    color: var(--theme-ink);
+    color: var(--card-icon-ink, var(--theme-ink));
     background: rgba(var(--accent-rgb), 0.12);
     border-color: rgba(var(--accent-rgb), 0.1);
 }
@@ -372,7 +372,7 @@ html:not(.dark) .deadline-card-subtitle {
 }
 
 .deadline-card-completed .deadline-icon-box {
-    color: var(--theme-ink);
+    color: var(--card-icon-ink, var(--theme-ink));
     background: rgba(var(--accent-rgb), 0.12);
     border-color: rgba(var(--accent-rgb), 0.1);
 }
@@ -385,6 +385,11 @@ html:not(.dark) .deadline-card-subtitle {
 
 .deadline-card-completed {
     opacity: 0.8;
+}
+
+/* Preserve companion contrast; existing secondary text colors still distinguish the archive. */
+html[data-ui-graphics="new"] body[data-ui-revision] .deadline-card-completed {
+    opacity: 1;
 }
 
 /* --- 3. CHECKBOX COMPLETAMENTO (REMOVED) --- */

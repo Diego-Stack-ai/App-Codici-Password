@@ -1,5 +1,21 @@
 # Incarico corrente
 
+<a id="rilascio-1279-incarico-2026-11-16"></a>
+
+## APP 1.2.279 — ordine di PR, merge e Hosting, 16/11/2026
+
+Diego ordina «Procedi con PR, merge e deploy del correttivo delle icone delle scadenze, con una nuova versione, e aggiorna gli MD e GitHub». L'ordine estende il seguito locale sotto: confezionare **1.2.279**, ramo `codex/deadline-icons-1279-20261116` dalla base **39c78b02**, conservando esattamente il correttivo già revisionato e gli abbinamenti mostrati. Icone ordinarie nella palette primaria in Classica, companion +15% in Nuova; scadute rosse, glifi salvati e fallback conservati. Il debito di contrasto preesistente del rosso resta dichiarato.
+
+Un solo esecutore, supporti in lettura. Autorizzati bump canonico, derivati offline/guida, documenti esistenti, commit/push e PR, GO indipendente e CI completa sullo SHA finale; quindi merge con testa attesa, workflow manuale `firebase-deploy.yml` sul master effettivo, scope **hosting**, approvazione production già delegata nella sessione e verifica pubblica completa. Protezioni e disponibilità ordinaria della cornice conservate. Nessuna operazione policy, Rules, Functions, Storage, Auth, claim o IAM. [Procedura](../regole/RILASCIO.md#rilascio-1279-2026-11-16), [stato](STATO.md#rilascio-1279-stato-2026-11-16), [ricevuta](../evidenze/COLLAUDI.md#rilascio-1279-verifiche-2026-11-16).
+
+<a id="icone-scadenze-incarico-2026-11-16"></a>
+
+## Seguito 1.2.278 — verifica diretta e identità delle Scadenze, 16/11/2026
+
+Diego segnala icone apparentemente sempre ramate e simboli delle singole Scadenze ancora esclusi dalla livrea; chiede di verificare direttamente. Autorizzata l'ispezione dei soli stili della scheda Chrome aperta, con sblocco eseguito personalmente da Diego. La prova cambia i sette temi in Chiaro/Scuro e ripristina Verde/Nuova/Chiaro e la pagina Scadenze. Nessuna lettura di password o modifica di record.
+
+Seguito locale della configurazione già approvata: collegare le identità delle righe Home e dell'elenco Scadenze al ruolo card, conservando simboli salvati, fallback, date/badge e rosso delle scadute; ampliare registri e regressioni. Un solo esecutore, riesame indipendente in lettura. Base **39c78b02**, checkout separato `.codex-tmp/search-footer-colors-20261116`; nessuna nuova versione, commit/push, PR o pubblicazione da questo seguito. La produzione resta **1.2.278/a02c76a7**. [Esiti e limiti](../evidenze/COLLAUDI.md#icone-scadenze-verifiche-2026-11-16).
+
 <a id="rilascio-1278-incarico-2026-11-16"></a>
 
 ## APP 1.2.278 — ordine eseguito, 16/11/2026

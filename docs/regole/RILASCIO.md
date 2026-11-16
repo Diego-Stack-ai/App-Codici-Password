@@ -1,5 +1,13 @@
 # Rilascio
 
+<a id="rilascio-1279-2026-11-16"></a>
+
+## UI 1.2.279 — icone delle singole Scadenze, solo Hosting
+
+L'[ordine diretto](../progetto/INCARICO_CORRENTE.md#rilascio-1279-incarico-2026-11-16) abilita nuova versione, PR, merge e deploy del correttivo già revisionato. Bump con script canonico, rigenerazione offline e guida `reviewedAppVersion=1.2.279`; `contentVersion=13` invariato. Verificare i365 pubblici contro il correttivo pre-confezione dopo la sola normalizzazione278/279/EOL; solo `offline-assets.js` è ammesso come derivato diverso. Nessuna modifica alle soglie di performance o ai gate.
+
+GO indipendente sul pacchetto e CI completa verde sullo SHA finale della PR; merge con testa attesa, poi workflow manuale `firebase-deploy.yml` da master effettivo, scope **hosting** e production protetto con approvazione già delegata. Nessun deploy dal PC, modifica di workflow o protezioni. Concludere con verifica integrale manifest/hash/intestazioni/redirect/rewrite e probe canonici, più ricevuta che distingua candidata, merge e runtime distribuito. Eventuali commit della ricevuta soltanto documentali non richiedono altro Hosting. Rollback tramite revert revisionato, nuova versione e stesso percorso; preservare cornice e dati. Nessuna operazione policy, Rules, Functions, Storage, Auth, claim o IAM. [Stato](../progetto/STATO.md#rilascio-1279-stato-2026-11-16), [evidenze e limiti](../evidenze/COLLAUDI.md#rilascio-1279-verifiche-2026-11-16).
+
 <a id="rilascio-1278-2026-11-16"></a>
 
 ## UI 1.2.278 — base comune e livree, solo Hosting
