@@ -4,11 +4,11 @@
 
 <a id="rilascio-1278-stato-2026-11-16"></a>
 
-## APP 1.2.278 — confezionamento e rilascio in corso, 16/11/2026
+## APP 1.2.278 — pubblicata e verificata, 16/11/2026
 
-Su [ordine di Diego](INCARICO_CORRENTE.md#rilascio-1278-incarico-2026-11-16), si confeziona la candidata sul ramo `codex/search-footer-colors-20261116`, base master 917dfc7f. Comprende i correttivi Ricerca e la configurazione comune Classica/Nuova verificata sotto, con bicolore e card +15% soltanto Nuova. Seguono riesame indipendente sul pacchetto, PR/CI, merge, Hosting protetto e verifica completa di manifest/hash/intestazioni. Produzione ancora attestata 1.2.277; nessuna modifica cornice o backend. [Ricevuta del rilascio](../evidenze/COLLAUDI.md#rilascio-1278-verifiche-2026-11-16). Gli stati sottostanti sono checkpoint precedenti.
+Online **1.2.278**, sorgente **a02c76a7919dfa6e9acc23bf25acef232522afc8**, sourceDirty=false. La [#320](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/320) è stata unita dopo GO indipendente sulla candidata **9caed90d** e [CI #1185 verde](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43945630807); anche CI master #1186 e [Hosting #1187](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43950718707) SUCCESS. Entrambe le grafiche hanno la base evoluta e le tre decorazioni; solo Nuova usa bicolore e card +15%. Correttivi Ricerca inclusi, faro e cornice invariati. [Ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-1278-verifiche-2026-11-16).
 
-Prima CI #1184 sulla #320: 1.812 test verdi, poi arresto per budget statico di peso e moduli; nessun merge/deploy. Correttivo in verifica: decorazioni integrate nel modulo comune, commenti storici rimossi da tre CSS serviti mantenendo identico l'AST funzionale. Budget invariati, audit locale di tutte le 31 pagine verde; necessario nuovo SHA e nuova CI completa.
+Approvazione production eseguita da Codex su delega di Diego alle **22:00:11 CET**. Solo Hosting, nessuna operazione policy/backend. Verifica pubblica completa PASS alle **21:02:42.278 UTC**: **365 hash / 41 profili di intestazioni / tre probe**. Il correttivo del budget non ha aumentato i limiti; la prima CI fallita e gli stati locali sotto restano checkpoint storici superati. La ricevuta documentale successiva non modifica il runtime pubblicato e non richiede un altro deploy.
 
 <a id="livree-comuni-stato-2026-11-16"></a>
 

@@ -4,6 +4,8 @@
 
 ## Pubblicare base comune e livree nella 1.2.278 — 16/11/2026
 
+Applicazione conclusa: #320 unita, sorgente pubblicata **a02c76a7**, [Hosting #1187 SUCCESS](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43950718707) e verifica pubblica completa PASS. La [ricevuta](../evidenze/COLLAUDI.md#rilascio-1278-verifiche-2026-11-16) distingue candidata, merge, CI e osservazioni pubbliche. Approvazione production delegata eseguita con protezioni conservate; nessuna policy o backend modificati.
+
 Fonte: ordine diretto di Diego «procedi con il deploy ed aggiorna gli md e github», successivo alla consegna locale verificata. Autorizzata la sequenza GitHub e Hosting dell'[incarico](INCARICO_CORRENTE.md#rilascio-1278-incarico-2026-11-16), senza saltare riesame del pacchetto, CI o gate production. Entrambe le varianti mantengono la base evoluta e le tre decorazioni; solo Nuova usa bicolore e card +15%. Cornice e faro invariati. La decisione supera il precedente limite alla sola consegna locale, senza attivare policy o backend. Esiti nello [stato](STATO.md#rilascio-1278-stato-2026-11-16) e nella [ricevuta](../evidenze/COLLAUDI.md#rilascio-1278-verifiche-2026-11-16).
 
 <a id="livree-comuni-decisione-2026-11-16"></a>

@@ -2,6 +2,8 @@
 
 ## Grafica Classica e Nuova — 1.2.278
 
+Questa configurazione è disponibile nella **1.2.278 pubblicata**; [stato e ricevuta](../progetto/STATO.md#rilascio-1278-stato-2026-11-16).
+
 In **Impostazioni → Tema App → Grafica**, Classica e Nuova offrono le stesse funzioni, disposizione e modalità Modifica/Fine. Entrambe mostrano l'iconcina accanto al titolo, la piccola filigrana finale e la filigrana di sfondo. **Classica** usa il colore principale scelto; **Nuova** abbina un secondo colore alle icone e ai comandi previsti e rende più intenso del 15% il colore delle icone delle card. La scelta non cambia i colori di errore o avviso, le personalizzazioni né il funzionamento della Vault. Il faro mantiene il suo effetto attuale. Disponibilità pubblicata nello [stato corrente](../progetto/STATO.md#stato-corrente).
 
 ## Navigazione con la cornice ordinaria — candidata 1.2.275
