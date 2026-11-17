@@ -1,5 +1,13 @@
 # Decisioni
 
+<a id="scaletta-chiusura-decisione-2026-11-17"></a>
+
+## Riordinare la chiusura senza ripetere il lavoro pubblicato — 17/11/2026
+
+Diego approva il confronto della scaletta di Claude con le fonti correnti e ordina l'aggiornamento degli MD e di GitHub, prima dei residui grafici. La [scaletta principale](PROGRAMMA.md#scaletta-chiusura-2026-11-17) distingue: giro #313 già distribuito e residui a vista; collaudi della cornice già ordinaria; sicurezza/recupero; prodotto residuo; maturità; PentAGI non attivo. Le 492 occorrenze ripetute non diventano 492 viste ancora da aprire, né i test sintetici diventano prove fisiche.
+
+Conservati monitor quotidiano già registrato attivo, retention Archivio già decisa, supporto 2FA esistente e limiti del futuro piano commerciale. Nessuna nuova scelta di colore/rosso o tipografia è dedotta dall'ordine di aggiornamento; la valutazione di Diego resta nel [primo lotto grafico](PROGRAMMA.md#residui-grafici-2026-11-17). [Mandato](INCARICO_CORRENTE.md#scaletta-chiusura-incarico-2026-11-17).
+
 <a id="rilascio-1279-decisione-2026-11-16"></a>
 
 ## Pubblicare il correttivo delle identità Scadenze — 16/11/2026

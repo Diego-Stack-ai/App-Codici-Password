@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="scaletta-chiusura-incarico-2026-11-17"></a>
+
+## Scaletta aggiornata e preparazione dei residui grafici — 17/11/2026
+
+Fonte diretta: Diego ordina «Aggiorna la scaletta negli MD e su GitHub con queste correzioni, poi procediamo con i residui grafici». Aggiornare il [programma corrente](PROGRAMMA.md#scaletta-chiusura-2026-11-17), distinguendo attività distribuite, collaudi residui e scelte ancora da compiere; allineare la #313 conservando il mandato originale come storico. Consegna tramite ramo e normale PR documentale su GitHub, controlli e riesame indipendente. Un solo esecutore; supporti in sola lettura.
+
+Il seguito grafico parte dall'[elenco RG-01–RG-04](PROGRAMMA.md#residui-grafici-2026-11-17): preparazione del confronto sul telefono e riproduzione locale con dati inventati del contrasto rosso già segnalato. La valutazione estetica di Diego e i PASS fisici non sono sostituibili dal banco. Il presente ordine non cambia automaticamente rosso, maiuscole, tipografia o palette e non autorizza nuovi account, prove autenticate su dati reali, versioni/deploy, operazioni policy/backend, audit o installazioni. La produzione resta quella della ricevuta 1.2.279 sotto; l'aggiornamento degli MD non richiede Hosting.
+
 <a id="rilascio-1279-incarico-2026-11-16"></a>
 
 ## APP 1.2.279 — ordine eseguito, ricevuta 17/11/2026
