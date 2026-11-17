@@ -162,7 +162,16 @@ test('derived result borders are exact and native sharing stays inside the synth
   assert.ok(negative.some(p=>p.label.includes('diagnostics-actions')&&p.property==='borderTopColor'&&!p.exception));
  }finally{await f.context.close();}
  const profile=await h.open('profilo_privato.html');
- try{await profile.page.locator('#profile-tab-digital-card').click();await profile.page.getByRole('button',{name:'Condividi',exact:true}).click();await profile.page.waitForFunction(()=>window.__viewTourNativeShares===1);assert.equal(h.assets.nativeShares,1);assert.deepEqual(await profile.page.evaluate(()=>window.__viewTour.errors),[]);}
+ try{
+  await profile.page.locator('#profile-tab-digital-card').click();await profile.page.getByRole('button',{name:'Condividi',exact:true}).click();
+  const dialog=profile.page.locator('#contact-export-modal');await dialog.waitFor();
+  assert.equal(h.assets.nativeShares,0,'the announcement must not share before the explicit native command');
+  await dialog.getByRole('button',{name:'Condividi o salva…',exact:true}).click();
+  await profile.page.waitForFunction(()=>window.__viewTourNativeShares===1);assert.equal(h.assets.nativeShares,1);
+  await profile.page.waitForFunction(()=>document.querySelector('#contact-export-modal [role=status]')?.textContent?.startsWith('File consegnato al sistema'));
+  await dialog.getByRole('button',{name:'Chiudi',exact:true}).click();
+  assert.deepEqual(await profile.page.evaluate(()=>window.__viewTour.errors),[]);
+ }
  finally{await profile.context.close();await h.close();}
 });
 

@@ -222,3 +222,25 @@
     order: -1;
     margin-right: auto;
 }
+.contact-export-dialog {
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+}
+
+.contact-export-name {
+    overflow-wrap: anywhere;
+}
+
+.contact-export-actions {
+    flex-wrap: wrap;
+}
+
+.contact-export-actions .btn-modal {
+    flex: 1 1 10rem;
+    min-width: 0;
+    white-space: normal;
+}
+
+.contact-export-actions .btn-modal[hidden] {
+    display: none;
+}

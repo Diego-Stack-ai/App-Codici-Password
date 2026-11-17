@@ -2,9 +2,13 @@
 
 <a id="stato-corrente"></a>
 
+## APP 1.2.280 completa — grafica, vCard e QR in verifica locale, 17/11/2026
+
+Su [nuovo ordine di Diego](INCARICO_CORRENTE.md#vcard-1280-incarico-2026-11-17), la 1.2.280 deve includere anche nomi/destinazione/esiti vCard e zoom della Tessera azienda. La #325 è già unita in **a90fd274** con CI #1194 verde sulla candidata grafica; i suoi esiti restano pertinenti a quel perimetro. Hosting **#1196 annullato**, nessun passo di deploy eseguito: la versione online resta **1.2.279/9cbf2d42**. La candidata completa è implementata localmente e richiede nuova revisione/CI e ricevuta; nessuna pubblicazione è dedotta dai checkpoint sotto.
+
 <a id="rilascio-1280-stato-2026-11-17"></a>
 
-## APP 1.2.280 — correttivo in confezionamento, 17/11/2026
+## Checkpoint precedente — correttivo grafico in confezionamento, 17/11/2026
 
 Applicazione locale della [decisione approvata](DECISIONI.md#rilascio-1280-decisione-2026-11-17), base **de41428c**, ramo `codex/ui-rg02-1280-20261117`: rosso leggibile nelle Scadenze scadute per tutti i sette temi, entrambe le grafiche e Chiaro/Scuro; scrittura originale degli intestatari e tipografia/etichette italiane del Profilo. Registri colore e collegamenti CSS/produttori/traduzioni/test aggiornati. Riesame funzionale indipendente GO; confezionamento, CI e distribuzione devono ancora essere attestati sullo SHA finale. [Mandato](INCARICO_CORRENTE.md#rilascio-1280-incarico-2026-11-17), [evidenze e limiti](../evidenze/COLLAUDI.md#rilascio-1280-verifiche-2026-11-17). Online resta **1.2.279/9cbf2d42** fino alla nuova ricevuta.
 
@@ -12,7 +16,7 @@ L'osservazione di Diego sulla schermata transitoria «Vault bloccata / Sblocca e
 
 <a id="rg02-proposta-stato-2026-11-17"></a>
 
-## Residui grafici — proposta locale pronta, 17/11/2026
+## Checkpoint precedente — proposta grafica locale pronta, 17/11/2026
 
 Su [ordine di Diego](INCARICO_CORRENTE.md#rg02-proposta-incarico-2026-11-17), preparati confronto attuale/proposta a 390×844 per Scadenze, Impostazioni e Profilo, in Classica/Nuova e Chiaro/Scuro, e proposta locale per il rosso scaduto. Candidati finali: **#A61B1B in Chiaro / #FECACA in Scuro**, limitati a icona/data delle card scadute dell'elenco; 28 contesti sintetici cromatici senza fallimenti, minimo **5,17:1 / 5,64:1** rispettivamente. Il primo candidato è scartato con i limiti misurati conservati. [Prove, alternative e limiti](../evidenze/COLLAUDI.md#rg02-proposta-verifiche-2026-11-17).
 

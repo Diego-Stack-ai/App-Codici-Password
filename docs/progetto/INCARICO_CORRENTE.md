@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="vcard-1280-incarico-2026-11-17"></a>
+
+## APP 1.2.280 completa — vCard e QR inclusi, 17/11/2026
+
+Diego chiede «pubblichiamo tutto anche il lavoro precedente sulla versione280», dopo i rilievi su download, nomi, condivisione e zoom. L'ordine amplia la candidata non ancora distribuita: conservare il correttivo grafico della #325/master **a90fd274** e includere vCard private/aziendali con nomi riconoscibili, nome visibile prima dell'azione, scelta della destinazione quando supportata, download e condivisione con esiti comprensibili e zoom esplicito del QR della Tessera azienda. Nomi richiesti: `contatto-Nome-Cognome.vcf` e `contatto-azienda-Nome-Ditta.vcf`. La schermata transitoria dopo login/passkey resta separata.
+
+Il workflow parziale Hosting **#1196** è annullato prima della pubblicazione: validate e deploy cancelled, nessun passo del deploy eseguito. Produzione ancora **1.2.279**. Il GO e la CI della #325 riguardano soltanto il correttivo grafico; non valgono come verifica della futura candidata completa. Ramo `codex/vcard-qr-1280-20261117`, base documentale **48528396**, un solo esecutore e supporti indipendenti in lettura. Implementazione locale completata; aggiornare registri/componenti/test e Markdown esistenti, provare i percorsi nativi con dati inventati e dichiarare separatamente i limiti fisici. Nuova PR/CI sulla testa completa, merge con testa attesa, controlli master/Hosting e production protetto già delegato, verifica pubblica e ricevuta. Versione resta **1.2.280**, non essendo stata ancora pubblicata. Nessuna modifica Auth, policy, Rules, Functions, Storage, claim o IAM; gesto nativo e revoche della cornice restano obbligatori. [Decisione](DECISIONI.md#vcard-1280-decisione-2026-11-17).
+
 <a id="rilascio-1280-incarico-2026-11-17"></a>
 
 ## APP 1.2.280 — applicazione RG-02/RG-03 e rilascio autorizzati, 17/11/2026

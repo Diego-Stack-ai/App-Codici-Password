@@ -17,7 +17,7 @@ import { logError } from '../../utils.js';
 import {getCompany, getCompanyConfirmed} from '../data/vault-repository.js';
 
 import { ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils.js';
-import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
+import { encrypt, ensureVaultKeyMaterial, isVaultUnlocked } from '../core/security-manager.js';
 import { renderCompanyEmbeddedAttachments } from './dati-azienda-attachments.js';
 
 // --- STATE ---
@@ -25,7 +25,7 @@ let currentAziendaId = null;
 let currentAziendaData = null;
 let currentLocations = [];
 let currentVCard = null;       // VCard string per lazy QR zoom
-let isQRZoomRendered = false;  // Evita re-render ad ogni apertura del modal
+let qrZoomOpener = null;
 let refreshAfterWrite = false;
 let loadVersion = 0;
 let currentUid = null;
@@ -81,11 +81,21 @@ async function initProtocolUI() {
 }
 
 function setupEventListeners() {
-    document.getElementById('btn-zoom-qr')?.addEventListener('click', openQRZoom);
+    document.getElementById('btn-zoom-qr')?.addEventListener('click', event => openQRZoom({opener: event.currentTarget}));
     document.getElementById('btn-close-qr')?.addEventListener('click', closeQRZoom);
     document.getElementById('qr-zoom-modal')?.addEventListener('click', (e) => {
         if (e.target.id === 'qr-zoom-modal') closeQRZoom();
     });
+    document.getElementById('qr-zoom-modal')?.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {event.preventDefault(); event.stopPropagation(); closeQRZoom();}
+        if (event.key === 'Tab') {event.preventDefault(); event.stopPropagation(); document.getElementById('btn-close-qr')?.focus();}
+    });
+    document.addEventListener('focusin', event => {
+        const modal = document.getElementById('qr-zoom-modal');
+        if (modal?.classList.contains('active') && !modal.contains(event.target)) document.getElementById('btn-close-qr')?.focus();
+    });
+    const revokeZoom = () => closeQRZoom({restoreFocus: false});
+    for (const event of ['pagehide', 'private-auth-blocked', 'vault-session-locked']) window.addEventListener(event, revokeZoom);
 
     document.getElementById('toggle-referente-btn')?.addEventListener('click', () => {
         const container = document.getElementById('referente-container');
@@ -200,7 +210,7 @@ async function loadData(uid, {afterWrite = false} = {}) {
             populateFields(currentAziendaData);
             handleLogoAndQR(currentAziendaData);
             renderCompanyEmbeddedAttachments(currentAziendaData.allegati);
-            initCompanyProfile(currentAziendaData, companyId, {buildVCard, reload: () => {
+            initCompanyProfile(currentAziendaData, companyId, {buildVCard, openQRZoom, reload: () => {
                 if (initialization !== initializationVersion || currentAziendaId !== companyId || currentUid !== uid) return;
                 return loadData(uid, {afterWrite: true});
             }});
@@ -325,7 +335,6 @@ async function handleLogoAndQR(data) {
 
     // Costruisce la vCard e la salva per il lazy zoom
     currentVCard = buildVCard(data);
-    isQRZoomRendered = false;
 
     // Render Preview leggero (88x88 → box 100px con padding 6px) — non blocca il load
     const qrCont = document.getElementById('qrcode-container');
@@ -344,28 +353,26 @@ async function handleLogoAndQR(data) {
 }
 
 
-function openQRZoom() {
+function openQRZoom({payload = currentVCard, opener = document.activeElement} = {}) {
     const modal = document.getElementById('qr-zoom-modal');
-    if (!modal) return;
-    modal.classList.add('active');
-
-    // Lazy render: genera il QR 300x300 solo alla prima apertura
-    if (!isQRZoomRendered && currentVCard) {
-        const qrZoom = document.getElementById('qrcode-zoom-container');
-        if (qrZoom) {
-            renderQRCode(qrZoom, currentVCard, {
-                width: 300,
-                height: 300,
-                colorDark: "#000000",
-                colorLight: "#E3F2FD"
-            });
-            isQRZoomRendered = true;
-        }
+    if (!modal || !payload || !isVaultUnlocked() || auth.currentUser?.uid !== currentUid) return;
+    qrZoomOpener = opener;
+    const qrZoom = document.getElementById('qrcode-zoom-container');
+    if (qrZoom) {
+        clearElement(qrZoom);
+        qrZoom.removeAttribute('title');
+        renderQRCode(qrZoom, payload, {width: 300, height: 300, colorDark: '#000000', colorLight: '#ffffff'});
     }
+    modal.classList.add('active');
+    document.getElementById('btn-close-qr')?.focus();
 }
 
-function closeQRZoom() {
+function closeQRZoom({restoreFocus = true} = {}) {
     const modal = document.getElementById('qr-zoom-modal');
     if (modal) modal.classList.remove('active');
+    const qrZoom = document.getElementById('qrcode-zoom-container');
+    if (qrZoom) {clearElement(qrZoom); qrZoom.removeAttribute('title');}
+    if (restoreFocus && isVaultUnlocked() && auth.currentUser?.uid === currentUid && qrZoomOpener?.isConnected) qrZoomOpener.focus();
+    qrZoomOpener = null;
 }
 

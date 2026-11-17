@@ -121,7 +121,7 @@ window.__viewTourUser={uid:'synthetic-local-only',email:'fixture@example.invalid
 
 export async function createTourHarness(options={}) {
   let code='';
-  const assets={served:new Set(),missing:new Set(),blocked:new Set(),console:[],nativeFileChoosers:0,nativeShares:0};
+  const assets={served:new Set(),missing:new Set(),blocked:new Set(),console:[],nativeFileChoosers:0,nativeShares:0,nativeSavePickers:0};
   const nativeStubs=new Map([['firebase-runtime.js',firebaseStub],['firebase-config.js',configStub],['security-manager.js',securityStub]]);
   if(options.memory)nativeStubs.set('crypto-utils.js',cryptoUiStub);
   const server = createServer(async (req, res) => {
@@ -159,9 +159,16 @@ export async function createTourHarness(options={}) {
         window.privateAuthGate = {isReady: () => true};
         Object.defineProperty(navigator,'canShare',{configurable:true,value:()=>true});
         Object.defineProperty(navigator,'share',{configurable:true,value:async()=>{window.__viewTourNativeShares=(window.__viewTourNativeShares||0)+1;await window.__viewTourRecordShare();}});
+        // Explicit native-save adapter: no operating-system picker or file is used.
+        Object.defineProperty(window,'showSaveFilePicker',{configurable:true,value:async options=>{
+          const save={name:options.suggestedName,active:navigator.userActivation.isActive,writes:0,closed:0,aborted:0};
+          window.__viewTourLastSave=save;await window.__viewTourRecordSavePicker();
+          return {name:save.name,createWritable:async()=>({write:async()=>{save.writes++;},close:async()=>{save.closed++;},abort:async()=>{save.aborted++;}})};
+        }});
         Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{window.__viewTourClipboardWrites=(window.__viewTourClipboardWrites||0)+1;}}});
         if(navigator.mediaDevices)navigator.mediaDevices.getUserMedia=async()=>{throw new DOMException('Synthetic fixture: camera and microphone are not exercised','NotAllowedError');}; }, {theme, palette, graphics,memory:options.memory===true,memorySeeds});
       await page.exposeFunction('__viewTourRecordShare',()=>{assets.nativeShares++;});
+      await page.exposeFunction('__viewTourRecordSavePicker',()=>{assets.nativeSavePickers++;});
       page.on('dialog',dialog=>dialog.dismiss());page.on('filechooser',()=>{assets.nativeFileChoosers++;});page.on('popup',popup=>popup.close());
       await page.goto(`${base}/${file}${query}`, {waitUntil: 'load'});
       try {

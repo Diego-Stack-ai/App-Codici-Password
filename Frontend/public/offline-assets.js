@@ -263,6 +263,8 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/shared/company-area-preference.js",
   "assets/js/modules/shared/contact-card-model.js",
   "assets/js/modules/shared/contact-card-photo.js",
+  "assets/js/modules/shared/contact-export-model.js",
+  "assets/js/modules/shared/contact-export.js",
   "assets/js/modules/shared/credential-decrypt-guard.js",
   "assets/js/modules/shared/detail-account-mode.js",
   "assets/js/modules/shared/gestione-destinatari.js",

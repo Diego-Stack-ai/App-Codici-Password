@@ -157,7 +157,7 @@ export function renderDigitalCard() {
                         : formatTranslation('digital_card_capacity_used', { bytes: vcardSize })
                 }),
                 createElement('div', { className: 'digital-card-actions' }, [
-                    createElement('button', { className: 'btn-upload-trigger', textContent: t('digital_card_save_vcard'), onclick: () => _callbacks.downloadVCard() }),
+                    createElement('button', { className: 'btn-upload-trigger', textContent: t('contact_export_entry'), onclick: () => _callbacks.downloadVCard() }),
                     createElement('button', { className: 'btn-upload-trigger', textContent: t('digital_card_share'), onclick: () => _callbacks.shareVCard() })
                 ])
             ]),

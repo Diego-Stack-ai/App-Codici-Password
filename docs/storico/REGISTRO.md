@@ -1,12 +1,16 @@
 # Registro
 
+## 17/11/2026 — ampliata la candidata completa280
+
+Su nuovo ordine di Diego, vCard privata/azienda (nomi, destinazione ed esiti) e zoom Tessera azienda confluiscono nella stessa280 con la grafica già revisionata. Superata la precedente classificazione come seguiti separati; soltanto il transitorio post-passkey resta separato. Hosting#1196 annullato senza passi di deploy, produzione279 invariata. Implementazione locale completata, nuove suite/riesame/CI e Hosting da attestare sulla candidata completa. [Mandato](../progetto/INCARICO_CORRENTE.md#vcard-1280-incarico-2026-11-17), [evidenze](../evidenze/COLLAUDI.md#vcard-1280-verifiche-2026-11-17).
+
 <a id="rilascio-1280-registro-2026-11-17"></a>
 
 ## 17/11/2026 — approvazione RG-02/RG-03 e ordine della1.2.280
 
 Diego approva contrasto del rosso, scrittura degli intestatari e tipografia del Profilo in entrambe le grafiche e chiede PR, merge e deploy con nuova versione e MD/GitHub aggiornati. Chiarito che il rosso vale per tutte le sette palette; «più accentuato» significa maggiore contrasto, con dimensioni/superfici/bordi invariati. [Decisione](../progetto/DECISIONI.md#rilascio-1280-decisione-2026-11-17), [stato](../progetto/STATO.md#rilascio-1280-stato-2026-11-17), [controlli](../evidenze/COLLAUDI.md#rilascio-1280-verifiche-2026-11-17).
 
-Registrati separatamente la schermata transitoria post-passkey (flusso automatico, senza clic su Riprendi) e il dubbio sul download `profilo.vcf`; sono seguiti di controllo/usabilità, non ulteriori modifiche di questo rilascio.
+Registrati separatamente la schermata transitoria post-passkey (flusso automatico, senza clic su Riprendi), i nomi/destinazioni vCard richiesti da Diego, la condivisione poco comprensibile sul PC e lo zoom mancante nella Tessera azienda. Il [PROGRAMMA](../progetto/PROGRAMMA.md#ingresso-passkey-2026-11-17) distingue osservazioni, controllo locale e requisiti: sono seguiti di controllo/usabilità, non ulteriori modifiche di questo rilascio.
 
 <a id="scaletta-chiusura-registro-2026-11-17"></a>
 

@@ -1,5 +1,13 @@
 # Guida
 
+## Contatti e QR — candidata completa 1.2.280
+
+Il comando «Salva contatto…» mostra il nome prima di procedere: **contatto-Nome-Cognome.vcf** per il privato, **contatto-azienda-Ragione-Sociale.vcf** per l'azienda. Il file contiene i dati selezionati nella Tessera digitale; non viene aggiunto automaticamente alla rubrica.
+
+Se disponibile, «Scegli dove salvare…» apre la scelta del dispositivo. «Condividi o salva…» usa le opzioni offerte dal sistema. Con «Scarica file», cerca il nome indicato in Download o nell'app File; se appare un'anteprima, usa Condividi/Salva su File. Il browser decide dove e come presentare il download. «Download avviato» non significa che il file sia già salvato; la consegna alla condivisione non conferma una destinazione o l'importazione in rubrica. Durante l'attesa puoi chiudere il pannello e scegliere un altro comando: questo non annulla necessariamente una finestra del sistema già aperta.
+
+Nella Tessera azienda la lente ingrandisce sempre il QR con la selezione corrente; salva la selezione per conservarla anche nella tessera della testata. [Stato effettivo del rilascio](../progetto/STATO.md#stato-corrente), [verifiche e limiti](../evidenze/COLLAUDI.md#vcard-1280-verifiche-2026-11-17).
+
 ## Contrasto e scrittura più naturale — candidata 1.2.280
 
 La candidata applica in **tutti e sette i temi**, sia Classica sia Nuova, un rosso più leggibile all'icona e alla data delle Scadenze scadute: più profondo in Chiaro e più luminoso in Scuro. Superfici e bordi delle card rimangono quelli attuali. Gli intestatari conservano la scrittura originale; nel Profilo titoli/etichette selezionati hanno maiuscole e spaziatura più naturali, con gli stessi caratteri e dimensioni. I dati personali e i QR non vengono trasformati. Impostazioni conserva la normalizzazione già presente. La pubblicazione va verificata nello [stato corrente](../progetto/STATO.md#stato-corrente), non dedotta da questa descrizione della candidata.

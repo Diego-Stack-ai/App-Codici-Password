@@ -14,8 +14,8 @@ import {testTranslate} from './helpers/test-translator.mjs';
 //   3. contenuto **ancora disponibile tramite cache** dopo il purge.
 //
 // Cosa è **reale**: `account-field-usage-model/service.js`,
-// `showCredentialHealthResults` di `impostazioni.js`, `downloadVCard` di
-// `profilo_privato.js` e i percorsi di export (`backup-export-service.js`).
+// `showCredentialHealthResults` di `impostazioni.js`, il provider vCard
+// `contact-export-model.js` e i percorsi di export (`backup-export-service.js`).
 // Cosa è **simulato**: DOM, Blob/URL, storage e repository (in Node non
 // esistono). Nessun file o dato personale reale è stato letto o creato.
 const root = new URL('../Frontend/public/', import.meta.url);
@@ -34,7 +34,8 @@ const sliceFunction = (source, name) => {
 const usageModel = strip(await read('assets/js/modules/settings/account-field-usage-model.js'));
 const usageService = strip(await read('assets/js/modules/settings/account-field-usage-service.js'));
 const settingsSource = await read('assets/js/modules/settings/impostazioni.js');
-const profileSource = await read('assets/js/modules/privato/profilo_privato.js');
+const contactExportSource = await read('assets/js/modules/shared/contact-export-model.js');
+const contactExport = await import(`data:text/javascript;base64,${Buffer.from(contactExportSource).toString('base64')}`);
 const backupService = await read('assets/js/modules/settings/backup-export-service.js');
 
 // ── 1. Report uso dei campi: solo memoria, nessuna superficie di file ───────
@@ -166,22 +167,25 @@ test('T-24: il report salute credenziali resta in memoria, senza segreti e azzer
 // ── 3. Copie file: vCard e backup escono dal controllo dell'app ─────────────
 
 test('T-24: la vCard è un file dell’utente, creato una volta e non ritirabile', async () => {
-    const source = sliceFunction(profileSource, 'saveProfileVCard') + '\n' + sliceFunction(profileSource, 'downloadVCard');
     const downloads = [], revoked = [];
-    const context = vm.createContext(withStandaloneFrame({
+    let timer;
+    const value = 'BEGIN:VCARD\nFN:Sintetico\nEND:VCARD';
+    const actions = contactExport.createContactFileActions({value, filename: 'contatto-Sintetico.vcf', assertActive() {}, environment: {
         Blob: class {constructor(chunks, options) { this.chunks = chunks; this.type = options?.type; }},
         URL: {createObjectURL: blob => { downloads.push(blob); return 'blob:synthetic'; },
             revokeObjectURL: value => revoked.push(value)},
-        document: {createElement: tag => ({tag, click() { this.clicked = true; }})},
-        getProfileVCard: () => 'BEGIN:VCARD\nFN:Sintetico\nEND:VCARD',
-        setTimeout: callback => { callback(); return 1; }
-    }));
-    vm.runInContext(`${source}\nglobalThis.downloadVCard = downloadVCard;`, context);
-    context.downloadVCard();
+        document: {body: {append() {}}, createElement: tag => ({tag, click() { this.clicked = true; }, remove() {}})},
+        setTimeout: callback => {timer = callback; return 1;}, clearTimeout() {}
+    }});
+    const result = await actions.download();
+    assert.equal(result.kind, 'download-started');
     assert.equal(downloads.length, 1, 'viene creato un oggetto da scaricare');
     assert.equal(downloads[0].type, 'text/vcard;charset=utf-8');
+    const external = downloads[0].chunks[0].slice();
+    timer(); actions.dispose();
     assert.deepEqual(revoked, ['blob:synthetic'], 'viene revocato solo l’Object URL, non il file scaricato');
-    assert.equal(source.includes('showSaveFilePicker'), false, 'nessun handle del file resta all’app');
+    assert.equal(new TextDecoder().decode(external), value, 'la copia consegnata resta esterna anche dopo dispose');
+    await assert.rejects(actions.save(), /CONTACT_EXPORT_CLOSED/, 'il provider chiuso non può scrivere un file');
 });
 
 test('T-24: l’export del backup richiede la rete, non filtra gli archiviati e finisce in un file dell’utente', async () => {

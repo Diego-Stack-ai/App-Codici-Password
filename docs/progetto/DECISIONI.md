@@ -1,5 +1,13 @@
 # Decisioni
 
+<a id="vcard-1280-decisione-2026-11-17"></a>
+
+## vCard e QR nella stessa 1.2.280 — 17/11/2026
+
+Diego richiede nomi riconoscibili per privato e azienda, usando rispettivamente nome/cognome e ragione sociale: `contatto-Nome-Cognome.vcf` e `contatto-azienda-Nome-Ditta.vcf`. Nome visibile prima del comando e nel risultato, identico fra file scaricato/condiviso e nome suggerito al sistema; caratteri compatibili e fallback generico se manca il titolare. La procedura deve offrire scelta della destinazione nativa dove disponibile, condivisione quando ammessa e download esplicito con istruzioni negli altri casi. Annullamento/errore non avviano un'esportazione alternativa automatica; il download avviato non viene dichiarato già salvato e Web Share non attesta una cartella.
+
+Lo zoom della Tessera azienda è esplicito e sempre disponibile, con la selezione locale corrente anche prima del salvataggio. Riutilizzare il modale della testata e mantenere il QR nero su superficie chiara, indipendente dalla livrea. L'ordine «pubblichiamo tutto… sulla versione280» include questi correttivi insieme alla grafica già unita, con nuova revisione e CI della candidata completa. La candidata parziale non è pubblicata; [mandato e gate](INCARICO_CORRENTE.md#vcard-1280-incarico-2026-11-17).
+
 <a id="rilascio-1280-decisione-2026-11-17"></a>
 
 ## Applicare e pubblicare RG-02/RG-03 in tutte le palette — 17/11/2026
