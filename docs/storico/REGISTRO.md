@@ -1,5 +1,13 @@
 # Registro
 
+<a id="rilascio-1280-registro-2026-11-17"></a>
+
+## 17/11/2026 — approvazione RG-02/RG-03 e ordine della1.2.280
+
+Diego approva contrasto del rosso, scrittura degli intestatari e tipografia del Profilo in entrambe le grafiche e chiede PR, merge e deploy con nuova versione e MD/GitHub aggiornati. Chiarito che il rosso vale per tutte le sette palette; «più accentuato» significa maggiore contrasto, con dimensioni/superfici/bordi invariati. [Decisione](../progetto/DECISIONI.md#rilascio-1280-decisione-2026-11-17), [stato](../progetto/STATO.md#rilascio-1280-stato-2026-11-17), [controlli](../evidenze/COLLAUDI.md#rilascio-1280-verifiche-2026-11-17).
+
+Registrati separatamente la schermata transitoria post-passkey (flusso automatico, senza clic su Riprendi) e il dubbio sul download `profilo.vcf`; sono seguiti di controllo/usabilità, non ulteriori modifiche di questo rilascio.
+
 <a id="scaletta-chiusura-registro-2026-11-17"></a>
 
 ## 17/11/2026 — riallineamento della scaletta dopo 1.2.279

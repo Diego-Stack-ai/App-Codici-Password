@@ -1,5 +1,19 @@
 # Programma
 
+<a id="rilascio-1280-programma-2026-11-17"></a>
+
+## RG-02/RG-03 — applicazione e rilascio ordinati, 17/11/2026
+
+Diego approva la proposta e ordina nuova versione, PR/merge/deploy e aggiornamento MD/GitHub. Sequenza: applicazione locale e registri → controlli/revisione → confezione1.2.280 → CI sulla testa → merge/CI master → Hosting protetto → verifica pubblica/ricevuta. [Mandato](INCARICO_CORRENTE.md#rilascio-1280-incarico-2026-11-17), [stato](STATO.md#rilascio-1280-stato-2026-11-17). L'approvazione della proposta chiude la scelta estetica qui presentata, non le prove fisiche di RG-01/RG-04 o la revisione completa delle otto lingue.
+
+<a id="ingresso-passkey-2026-11-17"></a>
+
+### Controllo successivo — schermata transitoria al primo ingresso
+
+Diego osserva su PC e telefono che dopo l'accesso biometrico/passkey compare brevemente «Vault bloccata» con «Sblocca e riprendi», poi il flusso prosegue automaticamente: **non preme il pulsante e non descrive un secondo sblocco manuale obbligatorio**. Verificare se il primo ingresso viene presentato come ripresa di una cornice bloccata o se è lo stato transitorio di inizializzazione. Valutare un indicatore neutro durante l'ingresso, mantenendo controlli di identità/permesso e la schermata corretta per i blocchi effettivi (inattività, revoca e altri motivi contrattuali). Osservazione da riprodurre, causa non accertata; controllo successivo al rilascio grafico, senza modifiche Auth/Vault autorizzate implicitamente da questa nota.
+
+**Tessera digitale e Profilo privato — chiarezza del download.** Diego chiede cosa venga salvato e dove, anche per il pulsante «Salva vCard» del Profilo privato. I comandi producono `profilo.vcf` con la selezione del contatto e delegano il salvataggio al browser; non importano automaticamente nella rubrica. Annotata la necessità di spiegare formato, destinazione gestita dal browser e importazione nei Contatti, valutando il nome «Scarica contatto (.vcf)» e un riscontro comprensibile. Non è attestato un mancato download su un dispositivo né una modifica al flusso nativo da questi rilievi.
+
 <a id="scaletta-chiusura-2026-11-17"></a>
 
 ## Scaletta di chiusura aggiornata — 17/11/2026
@@ -18,6 +32,8 @@ Fonte: [ordine di Diego](INCARICO_CORRENTE.md#scaletta-chiusura-incarico-2026-11
 <a id="residui-grafici-2026-11-17"></a>
 
 ### Primo lotto — residui grafici dopo 1.2.279
+
+Seguito del17/11: [proposta locale e confronto mobile pronti](../evidenze/COLLAUDI.md#rg02-proposta-verifiche-2026-11-17) su nuovo ordine di Diego. RG-02 è riprodotto con alternativa misurata, RG-01/RG-03 hanno anteprime a 390 px nelle due grafiche; la scelta estetica e le prove fisiche restano aperte. Nessuna proposta è già applicata alla versione online e RG-04 non cambia stato.
 
 | ID | Controllo residuo | Criterio ed evidenza richiesta |
 |---|---|---|

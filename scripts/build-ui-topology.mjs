@@ -252,9 +252,16 @@ export function buildDynamicThemeTopology({ registryPath = defaultDynamicThemePa
       selector: item.trigger?.selector, kind: item.trigger?.kind, source_file: relativeToProject(registryPath), observed: false
     }));
     collector.addEdge(uiEdge(caseId, actionId, 'ui_declares_trigger', declared));
+    const caseRoleSources = [...roleSources];
     for (const file of item.sources || []) {
       const sourceId = source(file, item.id);
-      if (sourceId) collector.addEdge(uiEdge(caseId, sourceId, 'ui_uses_source', declared));
+      if (sourceId) {
+        collector.addEdge(uiEdge(caseId, sourceId, 'ui_uses_source', declared));
+        const absolute = path.resolve(projectRoot, file);
+        if (file.endsWith('.css') && !caseRoleSources.some(entry => entry.file === absolute)) {
+          caseRoleSources.push({file: absolute, text: fs.readFileSync(absolute, 'utf8')});
+        }
+      }
     }
     for (const file of item.tests || []) {
       const testId = source(file, item.id);
@@ -306,7 +313,7 @@ export function buildDynamicThemeTopology({ registryPath = defaultDynamicThemePa
       for(const {role,graphics} of variants){
       const escapedRole = role.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const rolePattern = new RegExp(`${escapedRole}\\s*:`);
-      const definition = role.startsWith('--') ? roleSources.find(({text}) => rolePattern.test(text)) : null;
+      const definition = role.startsWith('--') ? caseRoleSources.find(({text}) => rolePattern.test(text)) : null;
       if (role.startsWith('--') && !definition) errors.push(`${item.id}: unknown CSS role ${role}`);
       const expression = /^color-mix\(in srgb,\s*var\(--[a-z0-9-]+\)\s+(?:100|[0-9]{1,2})(?:\.[0-9]+)?%,\s*transparent\)$/.test(role);
       if (!role.startsWith('--') && !expression && !['#fff', 'white', 'transparent', 'none'].includes(role)) errors.push(`${item.id}: unregistered literal ${role}`);
@@ -317,7 +324,7 @@ export function buildDynamicThemeTopology({ registryPath = defaultDynamicThemePa
       collector.addEdge(uiEdge(paintId, roleId, 'ui_expects_color_role', {...declared,...(graphics?{graphics}:{})}));
       for (const [, variable] of role.matchAll(/var\((--[a-z0-9-]+)\)/g)) {
         const pattern = new RegExp(`${variable}\\s*:`);
-        const origin = roleSources.find(({text}) => pattern.test(text));
+        const origin = caseRoleSources.find(({text}) => pattern.test(text));
         if (!origin) errors.push(`${item.id}: unknown CSS role ${variable}`);
         const variableId = collector.addNode(uiNode(`ui:css-role:${variable}`, variable, 'ui_css_role', {
           source_file: origin ? relativeToProject(origin.file) : relativeToProject(registryPath),
@@ -388,8 +395,9 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
   const collector=makeCollector(),errors=[],files=new Set([registryPath,fileURLToPath(import.meta.url),path.join(projectRoot,'tests/ui-dynamic-topology.test.mjs'),path.join(projectRoot,'scripts/lib/view-tour-harness.mjs')]),roles=new Set();
   const declared={confidence:'DECLARED',source_file:relativeToProject(registryPath),observed:false};
   const source=file=>{
-    const absolute=path.resolve(projectRoot,file||'');
-    if(!file||!absolute.startsWith(projectRoot+path.sep)||!fs.existsSync(absolute)||!fs.statSync(absolute).isFile()){errors.push(`liveries: invalid source ${file}`);return null;}
+    if(typeof file!=='string'||!file){errors.push(`liveries: invalid source ${file}`);return null;}
+    const absolute=path.resolve(projectRoot,file);
+    if(!absolute.startsWith(projectRoot+path.sep)||!fs.existsSync(absolute)||!fs.statSync(absolute).isFile()){errors.push(`liveries: invalid source ${file}`);return null;}
     files.add(absolute);return collector.addNode(uiNode(`ui:source:${file}`,file,'ui_source',{source_file:file,observed:false}));
   };
   const equalList=(actual,expected)=>Array.isArray(actual)&&actual.length===expected.length&&new Set(actual).size===expected.length&&expected.every(value=>actual.includes(value));
@@ -415,13 +423,29 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
     {id:'filled-card-glyphs',pages,selectors:registry.filledCardGlyphs,roles:['--companion-card-fill','--theme-fill'],producers:registry.cardProducers},
     {id:'footer-ink',pages,selectors:['#search-status','.footer-settings-link'],roles:[registry.footer?.inkRole,'--theme-ink','--text-primary'],producers:[registry.footer?.producer]},
     {id:'home-actions',pages:['home_page.html'],selectors:['.fab-group .btn-fab-privato','.fab-group .btn-fab-scadenza','.fab-group .btn-fab-azienda'],roles:[registry.footer?.fillRole,registry.footer?.deepRole,'--theme-fill','--theme-fill-deep'],producers:[registry.footer?.homeProducer]},
-    {id:'profile-guide',pages:['profilo_privato.html'],selectors:[registry.footer?.guide],roles:[registry.footer?.inkRole,'--text-primary'],producers:[registry.footer?.producer]}
+    {id:'profile-guide',pages:['profilo_privato.html'],selectors:[registry.footer?.guide],roles:[registry.footer?.inkRole,'--text-primary'],producers:[registry.footer?.producer]},
+    {id:'profile-typography',pages:[registry.profileTypography?.page],selectors:registry.profileTypography?.selectors,roles:[],producers:[registry.profileTypography?.producer],styles:registry.profileTypography?.styles,test:registry.profileTypography?.test,translations:registry.profileTypography?.translations}
   ];
   for(const component of components){
-    const id=collector.addNode(uiNode(`ui:livery-component:${component.id}`,component.id,'ui_livery_component',declared));
+    const id=collector.addNode(uiNode(`ui:livery-component:${component.id}`,component.id,'ui_livery_component',{...declared,...(component.test?{test_name:component.test.name}:{})}));
     for(const variant of variants)collector.addEdge(uiEdge(variant,id,'ui_shares_component',{...declared,graphics:['classic','new']}));
-    for(const page of component.pages)collector.addEdge(uiEdge(`ui:page:${page}`,id,'ui_declares_livery_component',declared));
+    for(const page of component.pages){if(!pages.includes(page)){errors.push(`liveries: ${component.id} has unknown page ${page}`);continue;}collector.addEdge(uiEdge(`ui:page:${page}`,id,'ui_declares_livery_component',declared));}
     for(const target of [styles,testSource].filter(Boolean))collector.addEdge(uiEdge(id,target,target===testSource?'ui_declares_test':'ui_loads_stylesheet',declared));
+    for(const file of Array.isArray(component.styles)?component.styles:[]){const target=source(file);if(target)collector.addEdge(uiEdge(id,target,'ui_loads_stylesheet',declared));}
+    let componentTestSource=null;
+    if(component.test){componentTestSource=source(component.test.file);if(componentTestSource)collector.addEdge(uiEdge(id,componentTestSource,'ui_declares_test',declared));if(!component.test.name)errors.push(`liveries: ${component.id} has no named test`);}
+    if(component.id==='profile-typography'){
+      if(!Array.isArray(component.styles)||!component.styles.length)errors.push('liveries: missing typography stylesheet');
+      if(!componentTestSource||typeof component.test?.name!=='string'||!component.test.name||!fs.readFileSync(path.resolve(projectRoot,component.test.file),'utf8').includes(component.test.name))errors.push('liveries: missing named typography regression');
+      const translations=component.translations,target=source(translations?.source),keys=translations?.keys;
+      if(!Array.isArray(keys)||keys.length!==5||new Set(keys).size!==keys.length)errors.push('liveries: profile typography has invalid translation keys');
+      const text=target?fs.readFileSync(path.resolve(projectRoot,translations.source),'utf8'):'';
+      for(const key of Array.isArray(keys)?keys:[]){
+        if(typeof key!=='string'||!/^[a-z0-9_]+$/.test(key)||!new RegExp(`\\b${key}\\s*:`).test(text)){errors.push(`liveries: unknown typography translation ${key}`);continue;}
+        const translationId=collector.addNode(uiNode(`ui:i18n:${key}`,key,'ui_translation',{...declared,source_file:translations.source}));
+        collector.addEdge(uiEdge(id,translationId,'ui_uses_translation',declared));if(target)collector.addEdge(uiEdge(translationId,target,'ui_translation_defined_in',declared));
+      }
+    }
     if(!Array.isArray(component.selectors)||!component.selectors.length)errors.push(`liveries: ${component.id} has no selectors`);
     for(const [index,selector] of (Array.isArray(component.selectors)?component.selectors:[]).entries()){
       if(typeof selector!=='string'||!selector.trim()){errors.push(`liveries: ${component.id} has an invalid selector`);continue;}

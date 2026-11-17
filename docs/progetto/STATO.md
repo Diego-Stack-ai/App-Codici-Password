@@ -2,6 +2,22 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1280-stato-2026-11-17"></a>
+
+## APP 1.2.280 — correttivo in confezionamento, 17/11/2026
+
+Applicazione locale della [decisione approvata](DECISIONI.md#rilascio-1280-decisione-2026-11-17), base **de41428c**, ramo `codex/ui-rg02-1280-20261117`: rosso leggibile nelle Scadenze scadute per tutti i sette temi, entrambe le grafiche e Chiaro/Scuro; scrittura originale degli intestatari e tipografia/etichette italiane del Profilo. Registri colore e collegamenti CSS/produttori/traduzioni/test aggiornati. Riesame funzionale indipendente GO; confezionamento, CI e distribuzione devono ancora essere attestati sullo SHA finale. [Mandato](INCARICO_CORRENTE.md#rilascio-1280-incarico-2026-11-17), [evidenze e limiti](../evidenze/COLLAUDI.md#rilascio-1280-verifiche-2026-11-17). Online resta **1.2.279/9cbf2d42** fino alla nuova ricevuta.
+
+L'osservazione di Diego sulla schermata transitoria «Vault bloccata / Sblocca e riprendi» dopo login/passkey è registrata nel [controllo successivo](PROGRAMMA.md#ingresso-passkey-2026-11-17): non serve premere il pulsante, il flusso prosegue da solo. Nessuna causa o correzione di Auth/Vault è dedotta dal solo racconto o inclusa in questo rilascio grafico.
+
+<a id="rg02-proposta-stato-2026-11-17"></a>
+
+## Residui grafici — proposta locale pronta, 17/11/2026
+
+Su [ordine di Diego](INCARICO_CORRENTE.md#rg02-proposta-incarico-2026-11-17), preparati confronto attuale/proposta a 390×844 per Scadenze, Impostazioni e Profilo, in Classica/Nuova e Chiaro/Scuro, e proposta locale per il rosso scaduto. Candidati finali: **#A61B1B in Chiaro / #FECACA in Scuro**, limitati a icona/data delle card scadute dell'elenco; 28 contesti sintetici cromatici senza fallimenti, minimo **5,17:1 / 5,64:1** rispettivamente. Il primo candidato è scartato con i limiti misurati conservati. [Prove, alternative e limiti](../evidenze/COLLAUDI.md#rg02-proposta-verifiche-2026-11-17).
+
+Proposta tipografica: scrittura originale degli intestatari nelle card, etichette italiane selezionate del Profilo in sentence case e spaziatura normale; font e dimensioni conservati. Impostazioni è già normalizzata nelle due grafiche e la vista proposta la lascia invariata. RG-01/RG-03 attendono la valutazione di Diego, RG-02 non è chiuso né applicato all'app; RG-04 conserva i limiti nativi/fisici. Nessuna nuova pubblicazione: la versione online resta 1.2.279 come nella ricevuta sotto.
+
 <a id="scaletta-chiusura-stato-2026-11-17"></a>
 
 ## Priorità dopo la 1.2.279 — 17/11/2026

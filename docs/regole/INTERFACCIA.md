@@ -1,5 +1,15 @@
 # Interfaccia
 
+<a id="rg02-rg03-ui-2026-11-17"></a>
+
+## Contrasto delle Scadenze e tipografia del Profilo — candidata 1.2.280
+
+[Decisione di Diego](../progetto/DECISIONI.md#rilascio-1280-decisione-2026-11-17). Il token locale `--deadline-expired-ink`, definito in `scadenze.css` sulla card scaduta, vale **#A61B1B in Chiaro / #FECACA in Scuro** in tutte le sette palette e in Classica/Nuova. Colora soltanto icona e data delle card scadute dell'elenco. Il marker funzionale `data-icon-role=status-error` conserva il significato rosso, pur usando un token diverso dal globale. I nuovi letterali hanno eccezioni esatte; superfici/bordi, swipe, errori, cancellazioni e logout conservano i propri ruoli. UI275-11 distingue box (solo ruolo), vero glifo (almeno3:1) e data (almeno4,5:1). Il resolver del grafo cerca il token nei soli CSS validati della singola famiglia, senza renderlo disponibile agli altri casi.
+
+L'intestatario delle card mostra la stringa originaria del modello, senza `toUpperCase()`; il formato delle date resta invariato. Nel Profilo i selettori `.user-display-name`, `.form-section-title`, `.data-label` e `.view-label` usano `none/normal` per trasformazione e spaziatura, con font/pesi/dimensioni preservati. Le cinque chiavi italiane `profile_personal`, `label_name_surname`, `label_cf`, `label_birth_data`, `profile_notes` e i fallback HTML sono allineati alla proposta; le altre lingue e i valori utente non vengono riscritti. Il titolo Widget già in scrittura naturale beneficia dello stesso CSS. Nessun nuovo reset in Impostazioni, nei modali o nel logout.
+
+[Registro dinamico](../../scripts/ui-dynamic-theme-contract.json), [registro livree](../../scripts/ui-livery-contract.json) con `profileTypography`, [mappa](../../scripts/build-ui-topology.mjs) e [regressioni](../../tests/ui-livery.browser.test.mjs) collegano pagine, produttori, selettori, CSS, cinque chiavi italiane e test nominato. Archi dichiarati, `observed:false`; file mancanti, ruoli ignoti e metadati tipografici incompleti sono errori di contratto. La sezione279 sotto conserva la specifica precedente, superata solo per questa tonalità rossa e il perimetro tipografico approvato. [Evidenze](../evidenze/COLLAUDI.md#rilascio-1280-verifiche-2026-11-17).
+
 <a id="icone-scadenze-ui-2026-11-16"></a>
 
 ## Identità delle singole Scadenze — pubblicate nella 1.2.279, ricevuta 17/11/2026

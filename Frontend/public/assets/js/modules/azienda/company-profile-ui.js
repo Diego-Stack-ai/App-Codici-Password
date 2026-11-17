@@ -1,6 +1,6 @@
 import {executeFrameNativeAction} from '../core/vault-frame-client.js';
 import { changeProfileAccount, unlinkProfileAccount } from '../shared/profile-account-management.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.279';
+import { auth, db } from '../../firebase-config.js?v=1.2.280';
 import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
 import { doc, runTransaction, deleteField, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { createElement, setChildren } from '../../dom-utils.js';

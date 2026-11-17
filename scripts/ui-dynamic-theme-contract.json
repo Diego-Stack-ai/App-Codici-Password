@@ -399,7 +399,7 @@
           "selector": "#header-placeholder .btn-icon-header .material-symbols-outlined",
           "property": "color",
           "role": "--text-primary",
-            "newRole": "--companion-ink",
+          "newRole": "--companion-ink",
           "kind": "headerContrast",
           "minimum": 3
         },
@@ -748,15 +748,39 @@
           "minimum": 4.5
         },
         {
-          "selector": ".deadline-card-expired .deadline-date-badge, .deadline-card-expired .deadline-icon-box, .deadline-card-expired .deadline-icon-box > .material-symbols-outlined",
+          "selector": ".deadline-card-expired .deadline-icon-box",
           "property": "color",
-          "role": "--status-error",
+          "role": "--deadline-expired-ink",
           "semanticHue": "red",
           "states": [
             "valid",
             "upcoming",
             "expired"
           ]
+        },
+        {
+          "selector": ".deadline-card-expired .deadline-icon-box > .material-symbols-outlined",
+          "property": "color",
+          "role": "--deadline-expired-ink",
+          "semanticHue": "red",
+          "states": [
+            "valid",
+            "upcoming",
+            "expired"
+          ],
+          "minimum": 3
+        },
+        {
+          "selector": ".deadline-card-expired .deadline-date-badge",
+          "property": "color",
+          "role": "--deadline-expired-ink",
+          "semanticHue": "red",
+          "states": [
+            "valid",
+            "upcoming",
+            "expired"
+          ],
+          "minimum": 4.5
         },
         {
           "selector": ".deadline-card-upcoming .deadline-date-badge",
@@ -782,19 +806,30 @@
           "selector": ".deadline-card:not(.deadline-card-expired) .deadline-icon-box",
           "property": "color",
           "role": "--card-icon-ink",
-          "states": ["valid", "upcoming", "expired", "completed"]
+          "states": [
+            "valid",
+            "upcoming",
+            "expired",
+            "completed"
+          ]
         },
         {
           "selector": ".deadline-card:not(.deadline-card-expired) .deadline-icon-box > .material-symbols-outlined",
           "property": "color",
           "role": "--card-icon-ink",
           "minimum": 3,
-          "states": ["valid", "upcoming", "expired", "completed"],
+          "states": [
+            "valid",
+            "upcoming",
+            "expired",
+            "completed"
+          ],
           "note": "Identità delle singole card: palette primaria in Classica, companion +15% in Nuova; data e rosso scadute conservati."
         }
       ],
       "tests": [
-        "tests/ui-dynamic-themes.browser.test.mjs"
+        "tests/ui-dynamic-themes.browser.test.mjs",
+        "tests/ui-livery.browser.test.mjs"
       ]
     }
   ],

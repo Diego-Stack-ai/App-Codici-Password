@@ -1,5 +1,21 @@
 # Incarico corrente
 
+<a id="rilascio-1280-incarico-2026-11-17"></a>
+
+## APP 1.2.280 — applicazione RG-02/RG-03 e rilascio autorizzati, 17/11/2026
+
+Fonte diretta: Diego approva «il rosso proposto e le modifiche a card, maiuscole e spaziatura del Profilo in entrambe le grafiche» e ordina «PR, merge e deploy con nuova versione, aggiornando gli MD e GitHub». Il rosso vale per tutti e sette i temi, non soltanto il Blu mostrato nelle anteprime: **#A61B1B in Chiaro / #FECACA in Scuro** su icona/data delle Scadenze scadute dell'elenco. Approvati scrittura originaria degli intestatari e stile/etichette italiane selezionate del Profilo, senza trasformazioni dei valori personali o cambi di font/dimensioni. Questo ordine supera il limite alla sola proposta sotto; non certifica una prova fisica.
+
+Base **de41428c**, ramo `codex/ui-rg02-1280-20261117`, versione prevista **1.2.280**. Un solo esecutore; riesami indipendenti in lettura. Implementare il perimetro approvato, registrare componenti/ruoli/test e aggiornare gli MD esistenti; confezionamento canonico, derivati offline/guida, controlli pertinenti e revisione del pacchetto, commit/push/PR e CI completa sullo SHA finale. Poi merge con testa attesa, CI master e workflow manuale `firebase-deploy.yml` sul master effettivo con scope **hosting**, approvazione production già delegata e protezioni conservate, verifica pubblica integrale e ricevuta. Cornice ordinaria e dati preservati; nessuna operazione policy, Rules, Functions, Storage, Auth, claim, IAM o cambio di workflow. [Proposta e limiti](../evidenze/COLLAUDI.md#rg02-proposta-verifiche-2026-11-17).
+
+<a id="rg02-proposta-incarico-2026-11-17"></a>
+
+## RG-02/RG-03 — proposta e confronto mobile, 17/11/2026
+
+Fonte diretta: Diego ordina «Procedi con la proposta per correggere il contrasto del rosso e fammi vedere il confronto sul telefono di card, maiuscole e spaziatura, in entrambe le grafiche». Preparare una proposta misurata sui componenti reali con dati inventati, anteprime a larghezza telefono e confronto attuale/proposta Classica/Nuova. Il confronto renderizzato non è una prova fisica sul dispositivo di Diego.
+
+Un solo esecutore e riesame indipendente in lettura. Ammessi banco locale, sovrapposizioni di stile e sole etichette nelle anteprime, misure pertinenti e aggiornamento degli MD esistenti. Nessuna preferenza estetica è attribuita a Diego prima della sua scelta; non applicare la proposta al runtime né cambiare versione, commit/push, PR, merge, deploy, account, policy/backend o strumenti installati. Il mandato integra la preparazione del lotto nella [scaletta](PROGRAMMA.md#residui-grafici-2026-11-17); esiti e limiti nella [ricevuta della proposta](../evidenze/COLLAUDI.md#rg02-proposta-verifiche-2026-11-17).
+
 <a id="scaletta-chiusura-incarico-2026-11-17"></a>
 
 ## Scaletta aggiornata e preparazione dei residui grafici — 17/11/2026

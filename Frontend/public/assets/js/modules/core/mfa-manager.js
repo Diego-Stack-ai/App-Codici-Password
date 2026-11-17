@@ -1,4 +1,4 @@
-import { auth, functions } from '../../firebase-config.js?v=1.2.279';
+import { auth, functions } from '../../firebase-config.js?v=1.2.280';
 import {
     multiFactor,
     onAuthStateChanged,
