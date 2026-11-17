@@ -27,11 +27,14 @@ test('testo e attributi traducibili fanno parte del grafo UI', () => {
 });
 
 test('la copertura della guida distingue traduzione diretta e fallback italiano', () => {
+  const direct = ['guide.pages.app.title', 'guide.pages.app.purpose', 'guide.pages.app.step-1',
+    'guide.pages.profilo_privato.step-6', 'guide.pages.dati_azienda.step-2'];
   assert.equal(audit.fallbackLocale, 'it');
   assert.deepEqual(audit.missingGuideByLanguage.it, []);
   for (const language of expectedLanguages.filter(language => language !== 'it')) {
-    assert.equal(audit.missingGuideByLanguage[language].length, audit.summary.guideKeys - 3);
-    assert.ok(audit.missingGuideByLanguage[language].every(key => !key.startsWith('guide.pages.app.')));
+    const missing = audit.missingGuideByLanguage[language];
+    assert.equal(missing.length, audit.summary.guideKeys - direct.length);
+    assert.deepEqual(audit.guideKeys.filter(key => !missing.includes(key)).sort(), [...direct].sort());
   }
   assert.equal(audit.summary.guideFallbackLanguages, 7);
 });
