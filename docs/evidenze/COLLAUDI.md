@@ -1,5 +1,35 @@
 # Collaudi
 
+<a id="rilascio-1280-verifiche-2026-11-17"></a>
+
+## APP 1.2.280 — applicazione locale e controlli, 17/11/2026
+
+[Mandato](../progetto/INCARICO_CORRENTE.md#rilascio-1280-incarico-2026-11-17), base **de41428c**, ramo `codex/ui-rg02-1280-20261117`. Applicati cinque file pubblici: CSS Scadenze/Profilo, produttore Scadenze, cinque traduzioni italiane e fallback del Profilo; nulla di Auth/Vault/cornice/backend. Il [contratto](../regole/INTERFACCIA.md#rg02-rg03-ui-2026-11-17) adotta la proposta sotto, senza trasformarla in una prova fisica.
+
+**Regressioni.** Nuovi controlli inizialmente RED sulla base: intestatario ancora tutto maiuscolo e titoli italiani precedenti. Dopo il correttivo, identità reali Home/elenco **112 contesti**, archiviate **56** e Profilo **84** (320/390/1280, sette palette, due aspetti/grafiche) PASS nelle prove pertinenti: rosso locale per glifo/data con soglie3/4,5, nome originale, simboli/fallback, QR, valori personali, assenza di scritture, font/pesi/dimensioni conservati. Negativi su companion al posto del rosso, rame fisso e glifo mancante preservati.
+
+**Suite UI locale.** Prima esecuzione: fondamenti **90/90**, dinamici **7/7**, regressioni/tour **18/18**; deep **8/9**, senza attribuire verde all'aggregato. P02/P09 cercavano ancora i titoli «Dati Personali»/«Note Anagrafica»: il mancato Modifica rendeva correttamente non cliccabili editor e flag. Allineate solo le etichette del banco, senza force-click o guardie ridotte; ripresa dei due casi **10 stati FUNCTIONAL_ONLY**, copertura completa richiesta e fonti stabili. La CI completa sullo SHA confezionato resta necessaria.
+
+**Altri controlli.** Eccezioni CSS **5/5**, topologia **18/18**, CSS e budget31 pagine più quattro controlli diagnostici PASS; Profilo PASS e i18n **19/19**, senza peggioramento della baseline e senza dichiarare completa la revisione editoriale. Il nuovo mapping impedisce ruoli locali non dichiarati nel caso, fonti non stringa, stylesheet o regressione tipografica mancanti; sette componenti livrea dichiarati, nessuna osservazione inventata. Limiti: banchi sintetici, nessun nuovo PASS fisico o produzione; confezionamento e ricevute GitHub/Hosting seguono sullo SHA effettivo.
+
+**Confezione280.** Bump canonico: 304 riferimenti in111 file; catalogo guida reviewedAppVersion1.2.280/contentVersion13, runtime offline61 export/345 risorse. Tutti i **365 file pubblici** coincidono col correttivo prima del confezionamento dopo la sola normalizzazione279/280 ed EOL; zero file aggiunti/rimossi o differenze inattese. Sulla confezione, regressioni mirate rosso/identità/Profilo **2/2**, documenti **12/12** (34 MD), offline **16/16**, guida **12/12** e budget31 pagine/diagnostica **4/4** PASS. Il collegamento temporaneo alle dipendenze già installate è stato rimosso preservando la directory originale prima dell'audit documentale; nessuna installazione. Riesame immutabile e CI completa sono i gate successivi, non impliciti in questi esiti locali.
+
+<a id="rg02-proposta-verifiche-2026-11-17"></a>
+
+## RG-02/RG-03 — proposta locale e confronto mobile, 17/11/2026
+
+[Mandato](../progetto/INCARICO_CORRENTE.md#rg02-proposta-incarico-2026-11-17), base **de41428c**, app **1.2.279**, ramo locale `codex/rg02-mobile-proposal-20261117`. Harness esistente con produttori reali, dati inventati, loopback e nessun accesso a un account o salvataggio esterno. L'overlay e le etichette proposte appartengono soltanto alle anteprime: nessun file in `Frontend/public` modificato.
+
+**Rosso: riproduzione e candidati.** Sulla card sintetica identificata `rg02`, glifo salvato `directions_car`, i selettori puntuali dell'icona e della data devono individuare ciascuno esattamente un elemento visibile. In Blu chiaro il valore corrente #EF4444 riproduce **2,724720746:1**. La prova estesa misura icona almeno 3:1 e data almeno 4,5:1 su entrambe le grafiche × sette palette × due aspetti, a 390×844: 28 contesti / 56 misure prima e dopo, senza colori o contrasto dedotti dalla sola presenza del nodo.
+
+Il primo candidato **#B91C1C in Chiaro**, con Scuro invariato, fallisce la data in Rosso chiaro (**4,452071996:1**) e diverse date in Scuro; in Petrolio scuro anche il glifo corrente misura **2,947660179:1**. Non è un esito verde né una regressione introdotta dalla proposta. L'alternativa finale usa un token locale d'anteprima `--deadline-expired-proposal-ink`: **#A61B1B in Chiaro / #FECACA in Scuro**, solo per `.deadline-card-expired` → icona/data. Mantiene superfici, bordi, rosso semantico e tutti gli altri danger. Le 56 misure finali hanno ruolo conforme, rapporto misurato e soglia superata: minimo **5,171876405:1 in Chiaro / 5,635818487:1 in Scuro**, zero fallimenti nei 28 contesti. Questo non certifica Home, altri componenti o viewport/dispositivi non attraversati.
+
+**Maiuscole e spaziatura.** L'intestatario delle card è già senza trasformazione CSS ma il produttore Scadenze applica `cardOwner.toUpperCase()`: nell'anteprima proposta viene mostrata la scrittura originale della fixture, senza modificare dati salvati o forzare in minuscolo nomi reali. Date e codici conservano il formato esistente. Nel Profilo la proposta rimuove `capitalize` e spaziatura forzata da titoli/etichette pertinenti e mostra alcune etichette italiane selezionate in sentence case; valori personali, QR, codici e input sono esclusi. Font, pesi e dimensioni restano quelli correnti. È una proposta editoriale italiana, non una revisione delle otto lingue. In Impostazioni le descrizioni sono già `none/normal` in entrambe le grafiche; nessun nuovo reset viene attribuito a questo lotto.
+
+**Confronto e limiti.** 24 catture reali del banco (tre pagine × due grafiche × due aspetti × prima/dopo), tutte in Blu a 390×844; Profilo aperto in Anagrafica, scroll reale per mostrare titoli e card. Le sette palette sono misurate per il rosso, non tutte fotografate per la tipografia. Due confronti selezionabili, con immagini incorporate, sotto 1 MB ciascuno; 24 combinazioni dei controlli verificate a larghezze browser 360/1100 senza errori JavaScript o overflow, incluso il picker singolo nascosto. Non sono immagini generate o prove su iPhone/Android fisici, Safari o PWA.
+
+Artefatti locali ignorati: `.codex-tmp/rg02-mobile-proposal-20261117/report.json`, candidato scartato `candidate-b91c1c.json`, `inline-check.json`; script riproducibile `.codex-tmp/rg02-mobile-proposal-20261117.mjs` (modo completo misura e cattura, `RG_CAPTURE_ONLY=1` riusa le misure e ricattura). Anteprime della chat nella directory autorizzata `C:/Users/Diego/.codex/visualizations/2026/11/05/01a1abd8-a2a0-7d70-a458-bc58c2a2b1a7/`, file `scadenze-rosso-confronto.html` e `tipografia-telefono-confronto.html`; i file non sono pubblicati o aggiunti al repository. Approvazione estetica e scelta di Diego restano pendenti: nessuna implementazione, commit/push o distribuzione della proposta.
+
 <a id="scaletta-chiusura-verifiche-2026-11-17"></a>
 
 ## Scaletta — riconciliazione documentale, 17/11/2026

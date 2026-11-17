@@ -160,8 +160,8 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 .user-display-name {
     font: var(--font-h1);
     /* 1.5rem / 900 */
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    text-transform: none;
+    letter-spacing: normal;
     color: var(--text-primary);
     margin-top: 0.85rem;
     padding: 0;
@@ -306,8 +306,8 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     font: var(--font-card-title);
     /* Normalizzato da 0.95rem/800 */
     color: var(--text-primary);
-    text-transform: capitalize;
-    letter-spacing: 0.05em;
+    text-transform: none;
+    letter-spacing: normal;
 }
 
 /* --- SETTINGS STYLE ICON BOXES --- */
@@ -458,10 +458,10 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 .data-label {
     font: var(--font-label);
     /* Normalizzato da 0.72rem/800 */
-    text-transform: capitalize;
+    text-transform: none;
     color: var(--rev-text-accent, var(--text-primary));
     opacity: 1;
-    letter-spacing: 0.02em;
+    letter-spacing: normal;
     margin: 0;
 }
 
@@ -1136,8 +1136,8 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     color: var(--text-secondary);
     margin-bottom: 0.25rem;
     display: block;
-    text-transform: capitalize;
-    letter-spacing: 0.05em;
+    text-transform: none;
+    letter-spacing: normal;
 }
 
 .dark .view-label {

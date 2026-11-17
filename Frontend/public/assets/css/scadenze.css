@@ -290,8 +290,8 @@ html:not(.dark) .deadline-card-subtitle {
 
 .deadline-card-category {
     font: var(--font-micro);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    text-transform: none;
+    letter-spacing: normal;
     opacity: 1;
 }
 
@@ -347,14 +347,22 @@ html:not(.dark) .deadline-card-subtitle {
 }
 
 /* Status Variants */
+.deadline-card-expired {
+    --deadline-expired-ink: #a61b1b;
+}
+
+.dark .deadline-card-expired {
+    --deadline-expired-ink: #fecaca;
+}
+
 .deadline-card-expired .deadline-icon-box {
-    color: var(--status-error);
+    color: var(--deadline-expired-ink);
     background: rgba(239, 68, 68, 0.12);
     border-color: rgba(239, 68, 68, 0.3);
 }
 
 .deadline-card-expired .deadline-date-badge {
-    color: var(--status-error);
+    color: var(--deadline-expired-ink);
     background: rgba(239, 68, 68, 0.12);
     border-color: rgba(239, 68, 68, 0.2);
 }

@@ -50,5 +50,32 @@
     "deepRole": "--companion-fill-deep",
     "guide": "#profile-guide-button"
   },
+  "profileTypography": {
+    "page": "profilo_privato.html",
+    "selectors": [
+      ".user-display-name",
+      ".form-section-title",
+      ".data-label",
+      ".view-label"
+    ],
+    "producer": "Frontend/public/assets/js/modules/privato/profilo_privato.js",
+    "styles": [
+      "Frontend/public/assets/css/profilo_privato.css"
+    ],
+    "translations": {
+      "source": "Frontend/public/assets/js/translations/it.js",
+      "keys": [
+        "profile_personal",
+        "label_name_surname",
+        "label_cf",
+        "label_birth_data",
+        "profile_notes"
+      ]
+    },
+    "test": {
+      "file": "tests/ui-livery.browser.test.mjs",
+      "name": "approved profile typography keeps values and QR intact across both liveries"
+    }
+  },
   "limits": "Local real producers with synthetic repositories; no real Auth/Vault, physical devices or production certification. Gradients are measured by the existing ancestor compositor; sibling glow/watermark optical occlusion is assessed separately in screenshots."
 }

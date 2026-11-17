@@ -32,6 +32,38 @@ export function decorationState(){
 }
 const validDecorations=(state,symbol)=>state.revision==='tre-livelli'&&state.largeCount===1&&state.large.symbol===symbol&&state.large.hidden==='true'&&state.large.display!=='none'&&Number(state.large.opacity)>0&&state.large.pointer==='none'&&state.title.content?.includes(symbol)&&state.title.pointer==='none'&&state.small.content?.includes(symbol)&&state.small.display==='block'&&state.small.fontSize==='72px'&&Number(state.small.opacity)>0&&state.small.pointer==='none';
 
+
+test('approved profile typography keeps values and QR intact across both liveries',{timeout:180000},async()=>{
+ const harness=await createTourHarness({memory:true}),results=[];
+ try{
+  for(const graphics of ['classica','tre-livelli']){
+   const f=await harness.open('profilo_privato.html',{graphics,query:'?profileTab=personal'});
+   try{
+    await f.page.locator('[data-profile-tab-target=personal]').click();
+    await f.page.locator('#nome-view').waitFor();
+    const stable=()=>f.page.evaluate(()=>({name:document.querySelector('#nome-view').textContent,cf:document.querySelector('#cf-view').textContent,
+     qr:document.querySelector('#qrcode-header').innerHTML,choices:[...document.querySelectorAll('.qr-checkbox')].map(e=>[e.id,e.checked]),writes:window.__viewTourWrites||0}));
+    const before=await stable();assert.equal(before.name,'Nome fittizio Locale');assert.equal(before.cf,'QA-CF-0001');assert.ok(before.qr.length>100);
+    for(const width of [320,390,1280]){await f.page.setViewportSize({width,height:844});for(const theme of contract.themes)for(const palette of contract.palettes){
+     await f.page.evaluate(({theme,palette})=>{document.documentElement.classList.toggle('dark',theme==='dark');document.documentElement.dataset.colorTheme=palette;},{theme,palette});
+     const state=await f.page.evaluate(()=>{
+      const heading=document.querySelector('[data-profile-tab=personal] .form-section-title'),labels=[...document.querySelectorAll('#field-nome .data-label,#field-cf .data-label,#field-nascita .data-label')];
+      const style=e=>{const s=getComputedStyle(e);return {text:e.textContent,transform:s.textTransform,spacing:s.letterSpacing,size:s.fontSize,weight:s.fontWeight}};
+      return {heading:style(heading),labels:labels.map(style),notes:document.querySelector('[data-t=profile_notes]').textContent,widgets:[...document.querySelectorAll('.form-section-title')].find(e=>e.textContent==='Widget personalizzati')?.textContent};
+     });
+     assert.equal(state.heading.text,'Dati personali');assert.deepEqual(state.labels.map(x=>x.text),['Nome & cognome','Codice fiscale','Dati nascita']);assert.equal(state.notes,'Note anagrafiche');assert.equal(state.widgets,'Widget personalizzati');
+     for(const item of [state.heading,...state.labels]){assert.equal(item.transform,'none');assert.equal(item.spacing,'normal');assert.equal(item.weight,'700');}
+     assert.equal(state.heading.size,'18px');assert.ok(state.labels.every(x=>x.size==='14px'));
+     assert.deepEqual(await stable(),before,'theme/livery typography must preserve values, QR and writes');
+     results.push({graphics,width,theme,palette});
+    }}
+   }finally{await f.context.close();}
+  }
+  assert.equal(results.length,84);await mkdir(output,{recursive:true});await writeFile(output+'/profile-typography.json',JSON.stringify({status:'PASS',contexts:results},null,2));
+ }finally{await harness.close();}
+});
+
+
 test('shared title icons fit between real form header controls at 320 pixels',{timeout:60000},async()=>{
  const harness=await createTourHarness({memory:true});
  try{
@@ -165,7 +197,7 @@ test('individual deadline identities follow both liveries without recoloring exp
  const harness=await createTourHarness({memory:true}),results=[],archived=[];
  const uid='synthetic-local-only',date=days=>new Date(Date.now()+days*86400000).toISOString().slice(0,10);
  const memorySeeds=[[-2,false,'warning'],[3,false,'directions_car'],[60,false,null],[10,true,'school'],[7,false,null]].map(([days,completed,icon],i)=>({
-  path:`users/${uid}/scadenze/doc-${i}`,value:{title:`Scadenza sintetica ${i}`,category:'Prova',type:'Documento',dueDate:date(days),completed,userId:uid,ownerId:uid,...(icon?{icon}:{})}
+  path:`users/${uid}/scadenze/doc-${i}`,value:{title:`Scadenza sintetica ${i}`,name:`Collaudo Sintetico ${i}`,category:'Prova',type:'Documento',dueDate:date(days),completed,userId:uid,ownerId:uid,...(icon?{icon}:{})}
  }));
  try{
   for(const file of ['home_page.html','scadenze.html'])for(const graphics of ['classica','tre-livelli']){
@@ -179,8 +211,14 @@ test('individual deadline identities follow both liveries without recoloring exp
      const values=await inspectDynamicPaint(f.page,{selector,property:'color',role:'--card-icon-ink',minimum:3});
      assert.equal(values.length,3,label+': real row identities exist');
      for(const value of values)assert.ok(value.visible&&value.rolePass&&value.contrast?.pass,label+': row color and contrast '+JSON.stringify(value));
-     // Preserve the existing alert role; its contrast is outside this livery change.
-     if(file==='scadenze.html')for(const value of await inspectDynamicPaint(f.page,{selector:'.deadline-card-expired .deadline-icon-box > .material-symbols-outlined',property:'color',role:'--status-error'}))assert.ok(value.visible&&value.rolePass,label+': expired alert remains red '+JSON.stringify(value));
+     if(file==='scadenze.html'){
+      assert.equal(await f.page.locator('.deadline-card[data-id="doc-0"] .deadline-card-category').textContent(),'Collaudo Sintetico 0',label+': preserve original owner spelling');
+      for(const [expiredSelector,minimum] of [['.deadline-card-expired .deadline-icon-box > .material-symbols-outlined',3],['.deadline-card-expired .deadline-date-badge',4.5]]){
+       const paints=await inspectDynamicPaint(f.page,{selector:expiredSelector,property:'color',role:'--deadline-expired-ink',minimum});
+       assert.equal(paints.length,1,label+': exactly one expired '+expiredSelector);
+       assert.ok(paints[0].visible&&paints[0].rolePass&&paints[0].contrast?.pass,label+': expired red and contrast '+JSON.stringify(paints[0]));
+      }
+     }
     };
     for(const width of contract.widths){await f.page.setViewportSize({width,height:844});for(const theme of contract.themes)for(const palette of contract.palettes){
      await f.page.evaluate(({theme,palette})=>{document.documentElement.classList.toggle('dark',theme==='dark');document.documentElement.dataset.colorTheme=palette;},{theme,palette});
@@ -198,7 +236,7 @@ test('individual deadline identities follow both liveries without recoloring exp
      assert.deepEqual(await f.page.locator(selector).allTextContents(),['school']);
      await f.page.locator('[data-filter=all]').click();await f.page.locator('.deadline-card-expired').waitFor();
      await f.page.addStyleTag({content:'.deadline-card-expired .deadline-icon-box > .material-symbols-outlined{color:var(--companion-card-ink)!important}'});
-     const expiredPaint=await inspectDynamicPaint(f.page,{selector:'.deadline-card-expired .deadline-icon-box > .material-symbols-outlined',property:'color',role:'--status-error'});
+     const expiredPaint=await inspectDynamicPaint(f.page,{selector:'.deadline-card-expired .deadline-icon-box > .material-symbols-outlined',property:'color',role:'--deadline-expired-ink'});
      assert.equal(expiredPaint.length,1);assert.ok(expiredPaint.every(v=>!v.rolePass),'accidental recoloring of expired alerts is rejected');
     }
     await f.page.locator(file==='home_page.html'?'#expired-list-container .item-icon-box > span':'.deadline-card-expired .deadline-icon-box > span').evaluate(e=>e.remove());

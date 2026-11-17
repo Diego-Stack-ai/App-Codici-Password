@@ -1005,9 +1005,9 @@
     },
     {
       "file": "scadenze.css",
-      "selector": ".deadline-card-expired .deadline-icon-box",
-      "prop": "color",
-      "value": "var(--status-error)",
+      "selector": ".deadline-card-expired",
+      "prop": "--deadline-expired-ink",
+      "value": "#a61b1b",
       "reason": "scadenza scaduta (valutazione a vista di Diego)"
     },
     {
@@ -1026,9 +1026,9 @@
     },
     {
       "file": "scadenze.css",
-      "selector": ".deadline-card-expired .deadline-date-badge",
-      "prop": "color",
-      "value": "var(--status-error)",
+      "selector": ".dark .deadline-card-expired",
+      "prop": "--deadline-expired-ink",
+      "value": "#fecaca",
       "reason": "scadenza scaduta (valutazione a vista di Diego)"
     },
     {

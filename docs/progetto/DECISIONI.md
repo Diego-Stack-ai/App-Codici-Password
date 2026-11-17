@@ -1,5 +1,13 @@
 # Decisioni
 
+<a id="rilascio-1280-decisione-2026-11-17"></a>
+
+## Applicare e pubblicare RG-02/RG-03 in tutte le palette — 17/11/2026
+
+Diego approva la [proposta confrontata](../evidenze/COLLAUDI.md#rg02-proposta-verifiche-2026-11-17) e ordina PR, merge e deploy con nuova versione e aggiornamento MD/GitHub. Il rosso locale dell'elenco Scadenze è **#A61B1B in Chiaro / #FECACA in Scuro**, per tutti e sette i temi e nelle due grafiche; riguarda icona/data scadute, mantenendo superfici, bordi e danger globale. «Più accentuato» significa qui maggiore contrasto dei dettagli, non ingrandimento, ombre o aumento dell'area rossa.
+
+Approvate scrittura originale degli intestatari nelle card, rimozione della capitalizzazione/spaziatura forzata nel Profilo e cinque etichette italiane selezionate; font, dimensioni, pesi, valori personali, codici, date e QR restano preservati. Impostazioni è già normalizzata; modali e logout non mostrati nel confronto non vengono modificati. [Mandato](INCARICO_CORRENTE.md#rilascio-1280-incarico-2026-11-17), [contratto](../regole/INTERFACCIA.md#rg02-rg03-ui-2026-11-17), [percorso di rilascio](../regole/RILASCIO.md#rilascio-1280-2026-11-17). L'approvazione estetica non certifica un collaudo fisico.
+
 <a id="scaletta-chiusura-decisione-2026-11-17"></a>
 
 ## Riordinare la chiusura senza ripetere il lavoro pubblicato — 17/11/2026

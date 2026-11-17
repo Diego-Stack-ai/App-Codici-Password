@@ -1,5 +1,9 @@
 # Guida
 
+## Contrasto e scrittura più naturale — candidata 1.2.280
+
+La candidata applica in **tutti e sette i temi**, sia Classica sia Nuova, un rosso più leggibile all'icona e alla data delle Scadenze scadute: più profondo in Chiaro e più luminoso in Scuro. Superfici e bordi delle card rimangono quelli attuali. Gli intestatari conservano la scrittura originale; nel Profilo titoli/etichette selezionati hanno maiuscole e spaziatura più naturali, con gli stessi caratteri e dimensioni. I dati personali e i QR non vengono trasformati. Impostazioni conserva la normalizzazione già presente. La pubblicazione va verificata nello [stato corrente](../progetto/STATO.md#stato-corrente), non dedotta da questa descrizione della candidata.
+
 ## Icone delle singole Scadenze — disponibili nella 1.2.279
 
 Le icone delle singole righe Scadenze nella Home e nell'elenco seguono la livrea: colore principale in Classica, secondo colore abbinato e più intenso in Nuova. Restano i simboli scelti e il rosso delle scadute. In Nuova anche le icone archiviate mantengono la propria intensità. La **1.2.279 è pubblicata e verificata**: ricarica una volta l'app per caricare la nuova versione. [Stato corrente](../progetto/STATO.md#stato-corrente), [prove e limiti](../evidenze/COLLAUDI.md#rilascio-1279-verifiche-2026-11-16).

@@ -8,9 +8,55 @@ import {buildDynamicThemeTopology, buildLiveryTopology, buildUiTopology, injectU
 const contractPath = new URL('../scripts/ui-dynamic-theme-contract.json', import.meta.url);
 const contract = JSON.parse(await readFile(contractPath, 'utf8'));
 
+
+test('local dynamic roles retain stylesheet provenance and cannot leak between cases',async()=>{
+ const result=buildDynamicThemeTopology();assert.deepEqual(result.errors,[]);
+ const role=result.nodes.find(n=>n.id==='ui:css-role:--deadline-expired-ink');
+ assert.equal(role.source_file,'Frontend/public/assets/css/scadenze.css');assert.match(role.source_location,/^L[0-9]+$/);
+ const dir=await mkdtemp(path.join(tmpdir(),'ui-local-role-'));
+ try{
+  const bad=structuredClone(contract);bad.cases[0].paints[0].role='--deadline-expired-ink';
+  const registryPath=path.join(dir,'contract.json');await writeFile(registryPath,JSON.stringify(bad));
+  const broken=buildDynamicThemeTopology({registryPath});
+  assert.ok(broken.errors.some(e=>e.includes(bad.cases[0].id+': unknown CSS role --deadline-expired-ink')),'a role declared only by another case is unavailable');
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
+
+test('profile typography links both liveries to its source, Italian labels and named regression',()=>{
+ const result=buildLiveryTopology();assert.deepEqual(result.errors,[]);
+ const id='ui:livery-component:profile-typography',component=result.nodes.find(n=>n.id===id);
+ assert.equal(component.test_name,'approved profile typography keeps values and QR intact across both liveries');
+ const edges=result.edges.filter(e=>e.source===id);
+ for(const target of ['Frontend/public/assets/js/modules/privato/profilo_privato.js','Frontend/public/assets/css/profilo_privato.css','tests/ui-livery.browser.test.mjs'])assert.ok(edges.some(e=>e.target==='ui:source:'+target),target);
+ assert.equal(edges.filter(e=>e.relation==='ui_declares_selector').length,4);
+ const keys=['profile_personal','label_name_surname','label_cf','label_birth_data','profile_notes'];
+ assert.deepEqual(edges.filter(e=>e.relation==='ui_uses_translation').map(e=>e.target).sort(),keys.map(k=>'ui:i18n:'+k).sort());
+ for(const key of keys)assert.ok(result.edges.some(e=>e.source==='ui:i18n:'+key&&e.relation==='ui_translation_defined_in'&&e.target==='ui:source:Frontend/public/assets/js/translations/it.js'));
+ for(const graphic of ['classic','new'])assert.ok(result.edges.some(e=>e.source==='ui:livery:'+graphic&&e.target===id&&e.observed===false));
+});
+
+test('typography mapping rejects invalid sources and unknown translated labels',async()=>{
+ const dir=await mkdtemp(path.join(tmpdir(),'ui-typography-links-'));
+ try{
+  const registry=JSON.parse(await readFile(new URL('../scripts/ui-livery-contract.json',import.meta.url),'utf8'));
+  registry.profileTypography.producer='../outside.js';registry.profileTypography.translations.keys[0]='missing_typography_key';
+  const registryPath=path.join(dir,'contract.json');await writeFile(registryPath,JSON.stringify(registry));
+  const result=buildLiveryTopology({registryPath});
+  for(const text of ['invalid source','unknown typography translation'])assert.ok(result.errors.some(e=>e.includes(text)),text);
+  delete registry.profileTypography.styles;delete registry.profileTypography.test;
+  await writeFile(registryPath,JSON.stringify(registry));
+  const missing=buildLiveryTopology({registryPath});
+  for(const text of ['missing typography stylesheet','missing named typography regression'])assert.ok(missing.errors.some(e=>e.includes(text)),text);
+  registry.profileTypography.test={file:123,name:'nonexistent regression'};
+  await writeFile(registryPath,JSON.stringify(registry));
+  assert.ok(buildLiveryTopology({registryPath}).errors.some(e=>e.includes('invalid source 123')),'a non-string source is a contract error, not a crash');
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
+
+
 test('shared-base liveries connect all 22 pages, selectors, roles, producers and tests without inventing observations',()=>{
   const result=buildLiveryTopology();assert.deepEqual(result.errors,[]);
-  assert.deepEqual(result.summary,{pages:22,variants:2,components:6,roles:10});
+  assert.deepEqual(result.summary,{pages:22,variants:2,components:7,roles:10});
   const ids=new Set(result.nodes.map(node=>node.id));
   for(const edge of result.edges){assert.ok(ids.has(edge.source)&&ids.has(edge.target));assert.equal(edge.observed,false);assert.equal(edge.declaration,'CONTRACT');}
   for(const component of result.nodes.filter(node=>node.file_type==='ui_livery_component')){

@@ -1,5 +1,13 @@
 # Rilascio
 
+<a id="rilascio-1280-2026-11-17"></a>
+
+## UI 1.2.280 — contrasto e tipografia approvati, solo Hosting
+
+[Ordine diretto](../progetto/INCARICO_CORRENTE.md#rilascio-1280-incarico-2026-11-17): implementare il solo perimetro approvato e confezionare **1.2.280** con script canonico, offline e guida `reviewedAppVersion=1.2.280`, mantenendo `contentVersion=13` se i contenuti d'aiuto non cambiano. Confrontare il pacchetto col correttivo prima del bump, normalizzando soltanto versioni/EOL e verificando i derivati. Soglie e gate invariati.
+
+GO indipendente su candidata immutabile e CI completa verde sulla stessa testa, merge con testa attesa, CI master e workflow manuale `firebase-deploy.yml` sul master effettivo, input `release_scope=hosting`, production protetto con approvazione già delegata. Nessun deploy locale né modifica del workflow/protezioni. Dopo Hosting verificare integralmente manifest, hash, intestazioni, redirect/rewrite e probe canonici; ricevuta distinta fra candidata, merge e sorgente distribuito. La sola ricevuta documentale non richiede un altro Hosting. Nessuna operazione policy, Rules, Functions, Storage, Auth, claim o IAM; cornice ordinaria e dati preservati. [Stato](../progetto/STATO.md#rilascio-1280-stato-2026-11-17), [prove e limiti](../evidenze/COLLAUDI.md#rilascio-1280-verifiche-2026-11-17).
+
 <a id="rilascio-1279-2026-11-16"></a>
 
 ## UI 1.2.279 — icone delle singole Scadenze, solo Hosting
