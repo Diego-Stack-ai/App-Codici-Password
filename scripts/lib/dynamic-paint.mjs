@@ -130,7 +130,10 @@ export function collectDynamicPaint() {
     if (!rect.width || !rect.height || style.visibility !== 'visible' || style.display === 'none' || groupOpacity === 0) continue;
     // Testo solo per lettori di schermo (sr-only, ritagliato a 1 px): non è visibile.
     if ((rect.width <= 1 && rect.height <= 1) || /rect\(0(px)?,? 0(px)?,? 0(px)?,? 0(px)?\)|inset\(50%\)/.test(style.clip + ' ' + style.clipPath)) continue;
-    const text = [...element.childNodes].some(node => node.nodeType === 3 && node.textContent.trim());
+    // The closed native select renders its selected option inside the control.
+    // The operating-system options popup is outside this DOM paint measurement.
+    const text = [...element.childNodes].some(node => node.nodeType === 3 && node.textContent.trim()) ||
+      (element.tagName === 'SELECT' && [...element.selectedOptions].some(option => option.textContent.trim()));
     const bg = firstStop(style.backgroundImage) || parse(style.backgroundColor);
     const border = parseFloat(style.borderTopWidth) > 0 ? parse(style.borderTopColor) : null;
     if (!text && !(bg && bg.alpha > 0.05) && !(border && border.alpha > 0.05)) continue;

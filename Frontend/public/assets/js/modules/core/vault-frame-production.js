@@ -2,7 +2,7 @@ import {emitFrameDiagnostic} from '../../frame-navigation.js';
 import {createProductionFrameAdmission} from './vault-frame-admission.js';
 import {doc, onSnapshot} from '/assets/js/vendor/firebase-runtime.js';
 import {APP_VERSION} from '../../app-env.js';
-import {auth, db} from '../../firebase-config.js?v=1.2.280';
+import {auth, db} from '../../firebase-config.js?v=1.2.281';
 import {authSessionFence} from '../../auth-session-fence.js';
 import {getUserProfile} from '../data/vault-repository.js';
 import {createVaultFrameOwner} from './vault-frame-owner.mjs';
@@ -21,6 +21,7 @@ export async function startVaultFrame({user, securityManager, fenceTicket}) {
     ? {uid: user.uid, epoch} : null;
   let stopPreference = () => {}, stopPush = () => {}, preferenceEpoch = 0;
   const status = document.getElementById('frame-status'), resume = document.getElementById('frame-resume');
+  const loading = document.getElementById('frame-loading');
   let owner;
   const admission = createProductionFrameAdmission({user, fenceTicket, onDeny: () => owner?.session.lock('policy-revoked')});
   owner = createVaultFrameOwner({window, iframe: document.getElementById('vault-frame'), release: APP_VERSION,
@@ -43,16 +44,17 @@ export async function startVaultFrame({user, securityManager, fenceTicket}) {
       } finally {signal.removeEventListener('abort', cancel);}
     }, clearMaterial: () => {if (generation === mountGeneration) securityManager.clearSession();},
     onDispose: () => {stopPush(); stopPreference(); admission.dispose();},
-    onState: state => {if (generation !== mountGeneration) return; if (state.locked) {stopPush(); stopPreference(); admission.dispose();} status.hidden = !state.locked; resume.hidden = !state.locked;}
+    onState: state => {if (generation !== mountGeneration) return; if (state.locked) {stopPush(); stopPreference(); admission.dispose();} if (loading && (state.locked || state.visible)) loading.hidden = true; status.hidden = !state.locked; resume.hidden = !state.locked;}
   });
   mounted = owner;
   stopPush = installFramePushNavigation({window, owner});
   securityManager.setFrameExpiryAuthority(() => owner.session.state().expiresAt);
   resume.addEventListener('click', event => {if (mounted === owner && owner.resume()) event.preventDefault();});
   const route = new URL(window.location.href).searchParams.get('route') || '/home_page.html';
-  const started = await owner.start(route);
+  let started = false;
+  try {started = await owner.start(route);} catch { /* Keep a usable blocked/standalone exit on bootstrap failure. */ }
   if (generation !== mountGeneration || mounted !== owner) {owner.dispose(); return;}
-  if (!started) {owner.dispose(); mounted = null; securityManager.setFrameExpiryAuthority(null); return;}
+  if (!started) {owner.dispose(); mounted = null; securityManager.setFrameExpiryAuthority(null); if (loading) loading.hidden = true; status.hidden = false; resume.hidden = false; return;}
   stopPreference = onSnapshot(doc(db, 'users', user.uid), snapshot => {
     const preferenceTicket = ++preferenceEpoch;
     void (async () => {

@@ -1,6 +1,18 @@
 # Stato
 
 <a id="stato-corrente"></a>
+<a id="ingresso-contatti-1281-stato-2026-11-17"></a>
+
+## Ingresso e contatti — candidata locale 1.2.281, 17/11/2026
+
+Produzione ancora **1.2.280/d4e20c29**. Su [ordine diretto](INCARICO_CORRENTE.md#ingresso-contatti-1281-2026-11-17) sono implementati una sola entry contatto e un solo pannello finale compatto, più attesa neutra fino a sblocco e inizializzazione della Home. Identità verificata e pagina pronta sono stati distinti; il popup reale della Master rimane accessibile. Annullamento/errori restituiscono una ripresa utilizzabile; blocco reale e revoche conservati. Contatto/composizione locale **20/20 PASS**, ingresso/gate/boundary **52/52 PASS**; confezione canonica281 verificata, matrici finali e CI ancora in corso. [Ricevuta](../evidenze/COLLAUDI.md#ingresso-contatti-1281-verifiche-2026-11-17). Nessuna pubblicazione281 attestata prima della ricevuta Hosting. Prova fisica di Diego successiva. Le diciture proposta/non implementato sotto sono checkpoint storici.
+
+
+
+## Seguito contatti e ingresso — locale, non pubblicato, 17/11/2026
+
+Produzione resta **1.2.280/d4e20c29**. Riprodotti i pulsanti azienda160px contro56px del privato; correzione dimensionale locale e banco8/8PASS, inclusi48contesti di geometria e matrici colore/QR esistenti. L'entry unica e il pannello finale semplificato sono una proposta, non implementati. Ricevuti sette fotogrammi della sequenza post-login con Home e Vault bloccata intermedi prima della passkey: causa e modifica Auth restano da verificare. [Perimetro](INCARICO_CORRENTE.md#contatti-ux-2026-11-17), [prove](../evidenze/COLLAUDI.md#contatti-compact-verifiche-2026-11-17), [proposta](PROGRAMMA.md#contatti-flusso-2026-11-17). Nessun commit/push/merge/deploy eseguito per questo seguito.
+
 
 <a id="rilascio-1280-completo-stato-2026-11-17"></a>
 

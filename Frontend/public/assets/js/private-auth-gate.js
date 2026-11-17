@@ -1,6 +1,7 @@
 /* Presentation gate only: Firebase Rules remain the data authorization boundary. */
 (() => {
     const requestingDocument = document;
+    document.documentElement.dataset.privateLoadingLabel = 'Verifica accesso in corso…';
     const AUTH_CHECK_TIMEOUT_MS = 45000;
     const FAILURE_MARKER_KEY = 'codex_auth_gate_last_failure_v1';
     let epoch = 0, blocked = false, ready = false, acceptedUid = null, redirecting = false;
@@ -86,11 +87,23 @@
             document.body.hidden = false; document.body.inert = false;
             return true;
         },
+        // Identity readiness and first-page presentation are different states.
+        // The body remains usable by the real Vault modal while Home is held.
+        reveal(ticket) {
+            if (window.document && window.document !== requestingDocument) return false;
+            if (!ready || blocked || ticket === null || ticket !== epoch || !acceptedUid ||
+                (window.authSessionFence && !window.authSessionFence.isLocallyAllowed())) return false;
+            delete document.documentElement.dataset.privatePageState;
+            return true;
+        },
         active: ticket => !blocked && ticket !== null && ticket === epoch &&
             (!window.authSessionFence || window.authSessionFence.isLocallyAllowed()),
         isReady: () => ready,
         block, reject
     });
+    if (/(?:^|\/)home_page\.html$/.test(window.location?.pathname || '')) {
+        document.documentElement.dataset.privatePageState = 'pending';
+    }
     setPendingState(true);
     arm();
     window.addEventListener('pagehide', hide);

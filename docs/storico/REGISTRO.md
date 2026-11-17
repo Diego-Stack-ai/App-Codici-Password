@@ -1,5 +1,12 @@
 # Registro
 
+<a id="ingresso-contatti-1281-registro-2026-11-17"></a>
+
+## 17/11/2026 — implementazione ingresso e contatti1.2.281
+
+Ordine diretto di Diego dopo foto280: contatto semplificato e flusso ingresso per prova telefono. Implementati pannello finale unico e attesa Home fino a chiave/init, salvaguardie conservate. [Mandato](../progetto/INCARICO_CORRENTE.md#ingresso-contatti-1281-2026-11-17), [prove](../evidenze/COLLAUDI.md#ingresso-contatti-1281-verifiche-2026-11-17). Pubblicazione non dedotta dai primi test locali.
+
+
 ## 17/11/2026 — pubblicata la1.2.280 completa
 
 #326 unita in d4e20c29 dopo GO sulla candidata91e1c158 e CI#1198 SUCCESS; CI master#1199 e Hosting#1200 SUCCESS. Production approvato da Codex su delega di Diego dopo i due validate verdi e master invariato; verifica pubblica completa367hash/41profili/3probe PASS alle12:11:48CET. Grafica precedente, nomi/opzioni/esiti vCard e zoom Tessera azienda nello stesso rilascio. Il precedente1196 fu annullato senza deploy. [Ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-1280-completo-verifiche-2026-11-17).

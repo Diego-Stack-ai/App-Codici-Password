@@ -1,6 +1,10 @@
 const it = {
+  contact_export_options: "Altre opzioni",
+  contact_export_method: "Operazione",
+  contact_export_retry: "Prepara di nuovo…",
+  contact_export_preparing: "Preparazione del contatto…",
   contact_export_pending: "Attendi la finestra del dispositivo. Se non compare, chiudi questo pannello e scegli un altro comando.",
-  contact_export_entry: "Salva contatto…",
+  contact_export_entry: "Salva o condividi contatto…",
   contact_export_title: "Salva o condividi il contatto",
   contact_export_file: "Nome del file",
   contact_export_hint: "Il file contiene i dati scelti nella tessera. Non viene aggiunto automaticamente alla rubrica.",
@@ -23,8 +27,12 @@ const it = {
 };
 
 const en = {
+  contact_export_options: "More options",
+  contact_export_method: "Action",
+  contact_export_retry: "Prepare again…",
+  contact_export_preparing: "Preparing the contact…",
   contact_export_pending: "Waiting for your device. If no window appears, close this panel and choose another action.",
-  contact_export_entry: "Save contact…",
+  contact_export_entry: "Save or share contact…",
   contact_export_title: "Save or share the contact",
   contact_export_file: "File name",
   contact_export_hint: "The file contains the details selected on the digital card. It is not added to your contacts automatically.",
@@ -47,8 +55,12 @@ const en = {
 };
 
 const es = {
+  contact_export_options: "Más opciones",
+  contact_export_method: "Operación",
+  contact_export_retry: "Preparar de nuevo…",
+  contact_export_preparing: "Preparando el contacto…",
   contact_export_pending: "Espera la ventana del dispositivo. Si no aparece, cierra este panel y elige otra acción.",
-  contact_export_entry: "Guardar contacto…",
+  contact_export_entry: "Guardar o compartir contacto…",
   contact_export_title: "Guardar o compartir el contacto",
   contact_export_file: "Nombre del archivo",
   contact_export_hint: "El archivo contiene los datos seleccionados en la tarjeta. No se añade automáticamente a los contactos.",
@@ -71,8 +83,12 @@ const es = {
 };
 
 const fr = {
+  contact_export_options: "Autres options",
+  contact_export_method: "Action",
+  contact_export_retry: "Préparer à nouveau…",
+  contact_export_preparing: "Préparation du contact…",
   contact_export_pending: "Attendez la fenêtre du système. Si elle ne s’ouvre pas, fermez ce panneau et choisissez une autre action.",
-  contact_export_entry: "Enregistrer le contact…",
+  contact_export_entry: "Enregistrer ou partager le contact…",
   contact_export_title: "Enregistrer ou partager le contact",
   contact_export_file: "Nom du fichier",
   contact_export_hint: "Le fichier contient les données sélectionnées sur la carte. Il n’est pas ajouté automatiquement aux contacts.",
@@ -95,8 +111,12 @@ const fr = {
 };
 
 const de = {
+  contact_export_options: "Weitere Optionen",
+  contact_export_method: "Aktion",
+  contact_export_retry: "Erneut vorbereiten…",
+  contact_export_preparing: "Kontakt wird vorbereitet…",
   contact_export_pending: "Warte auf das Gerätefenster. Wenn es nicht erscheint, schließe dieses Fenster und wähle eine andere Aktion.",
-  contact_export_entry: "Kontakt speichern…",
+  contact_export_entry: "Kontakt speichern oder teilen…",
   contact_export_title: "Kontakt speichern oder teilen",
   contact_export_file: "Dateiname",
   contact_export_hint: "Die Datei enthält die auf der Karte ausgewählten Daten. Sie wird nicht automatisch zu den Kontakten hinzugefügt.",
@@ -119,8 +139,12 @@ const de = {
 };
 
 const zh = {
+  contact_export_options: "更多选项",
+  contact_export_method: "操作",
+  contact_export_retry: "重新准备…",
+  contact_export_preparing: "正在准备联系人…",
   contact_export_pending: "正在等待设备窗口。如果窗口未出现，请关闭此面板并选择其他操作。",
-  contact_export_entry: "保存联系人…",
+  contact_export_entry: "保存或分享联系人…",
   contact_export_title: "保存或分享联系人",
   contact_export_file: "文件名",
   contact_export_hint: "文件包含名片中选定的信息，不会自动添加到通讯录。",
@@ -143,8 +167,12 @@ const zh = {
 };
 
 const hi = {
+  contact_export_options: "अन्य विकल्प",
+  contact_export_method: "कार्रवाई",
+  contact_export_retry: "फिर से तैयार करें…",
+  contact_export_preparing: "संपर्क तैयार किया जा रहा है…",
   contact_export_pending: "डिवाइस की विंडो का इंतज़ार करें। अगर वह न खुले, तो यह पैनल बंद करके दूसरी कार्रवाई चुनें।",
-  contact_export_entry: "संपर्क सहेजें…",
+  contact_export_entry: "संपर्क सहेजें या साझा करें…",
   contact_export_title: "संपर्क सहेजें या साझा करें",
   contact_export_file: "फ़ाइल का नाम",
   contact_export_hint: "फ़ाइल में कार्ड पर चुनी गई जानकारी है। यह अपने आप संपर्क सूची में नहीं जुड़ती।",
@@ -167,8 +195,12 @@ const hi = {
 };
 
 const pt = {
+  contact_export_options: "Mais opções",
+  contact_export_method: "Operação",
+  contact_export_retry: "Preparar novamente…",
+  contact_export_preparing: "A preparar o contacto…",
   contact_export_pending: "Aguarde a janela do dispositivo. Se não aparecer, feche este painel e escolha outra ação.",
-  contact_export_entry: "Guardar contacto…",
+  contact_export_entry: "Guardar ou partilhar contacto…",
   contact_export_title: "Guardar ou partilhar o contacto",
   contact_export_file: "Nome do ficheiro",
   contact_export_hint: "O ficheiro contém os dados selecionados no cartão. Não é adicionado automaticamente aos contactos.",

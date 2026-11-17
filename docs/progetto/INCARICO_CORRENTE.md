@@ -1,5 +1,23 @@
 # Incarico corrente
 
+<a id="ingresso-contatti-1281-2026-11-17"></a>
+
+## Ingresso e contatti — implementazione e prova sul telefono, 17/11/2026
+
+Nuovo ordine diretto di Diego: «Implementa anche il flusso dell'ingresso e poi controllo dal cellulare». Si realizza il seguito proposto: correzione dimensionale e flusso unico dei contatti privato/azienda, più presentazione iniziale dell'ingresso senza Home vuota o messaggio di ripresa prematuro. Conservare i due scopi distinti (account e chiave Vault), i gate di identità/ammissione, timeout, UID/fence, revoche, sblocco, proof sensibili consumabili una volta e gesto nativo trusted. Nessuna modifica a password, chiavi persistite, credenziali o protocollo di trasporto.
+
+Contatti: una entry, preparazione del file e una sola UI finale con nome, primaria per capacità effettive, Chiudi e alternative secondarie. Nessuna API nativa prima del click finale, nessun fallback dopo annullamento, prova nuova a ogni tentativo; PDF senza opzione contatto invariato. Ingresso: attesa neutra durante routing/sblocco/init Home, popup Master accessibile, trasporto visibile operativo; errori/cancellazioni terminano l'attesa in modo utilizzabile, blocchi reali mantengono ripresa e revoca.
+
+L'ordine di rendere disponibile la prova sul cellulare viene eseguito con nuova versione1.2.281, PR/check/revisione indipendente, merge con testa attesa e Hosting protetto secondo la delega di pubblicazione della sessione. Validazioni master e Hosting sullo stesso SHA; approvazione solo dopo entrambe verdi, poi verifica pubblica e ricevuta. Un solo esecutore e supporti indipendenti in lettura;34MD invariati come elenco. Nessun backend/Rules/Functions/Storage/policy/claim/IAM. Il test fisico di Diego resta successivo al rilascio e non è sostituito dai banchi locali.
+
+<a id="contatti-ux-2026-11-17"></a>
+
+## Rilievi contatti dopo la280 — riproduzione e proposta locale
+
+Diego mostra due foto: nel contatto azienda i pulsanti del popup sono enormi; osserva anche due comandi nella Tessera e più scelte ripetute nel popup, proponendo un unico «Salva o condividi contatto» con comportamento adatto alle capacità del dispositivo. Si riproduce il difetto e si prepara un correttivo dimensionale locale e una proposta concreta di semplificazione per privato/azienda, senza cambiare il protocollo della cornice o avviare una nuova pubblicazione. La scelta esatta del nuovo flusso resta una proposta da discutere, non un ordine di nuovo merge/deploy dedotto dalla segnalazione.
+
+Conservare nome file visibile, gesto nativo esplicito, permessi/revoca e alternativa di download soltanto su scelta dell'utente. Il rilievo sul login resta separato. Nei sette fotogrammi successivi Diego mostra password salvata → verifica → Home → verifica → Vault bloccata → verifica → richiesta passkey. Registrare la sequenza fisica e confrontarla con routing/guardie, senza dedurre durata o causa interna dalle foto. Nessun cambiamento Auth o nuovo rilascio è autorizzato dalla sola osservazione.
+
 <a id="vcard-1280-incarico-2026-11-17"></a>
 
 ## APP 1.2.280 completa — vCard e QR inclusi, 17/11/2026

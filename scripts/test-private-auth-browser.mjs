@@ -27,7 +27,7 @@ const server = createServer(async (request, response) => {
             const simulation = `
                 const gate = window.privateAuthGate;
                 const currentPage = 'home';
-                const user = {uid:'synthetic',emailVerified:true,reload:async()=>{}};
+                const user = {uid:'synthetic',emailVerified:true,reload:async()=>{},getIdTokenResult:async()=>({claims:{email_verified:true}}),getIdToken:async()=>{}};
                 const auth = {currentUser:user};
                 const {authSessionFence} = await import('/assets/js/auth-session-fence.js');
                 const fenceTicket = await authSessionFence.readPermit();
@@ -38,6 +38,8 @@ const server = createServer(async (request, response) => {
                     if (${JSON.stringify(scenario)} === 'error') { gate.reject('error'); return; }
                     const authAttempt = gate.begin(user.uid);
                     ${gateValidation}
+                    // This auth-only harness intentionally ends before the full Home initializer.
+                    gate.reveal(authAttempt);
                     window.__authPhase = 'ready';
                     if (${JSON.stringify(scenario)} === 'logout') {
                         sessionStorage.setItem('vault_session_v1','synthetic');

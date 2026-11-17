@@ -1,5 +1,30 @@
 # Collaudi
 
+<a id="ingresso-contatti-1281-verifiche-2026-11-17"></a>
+
+## Ingresso e contatti — verifica candidata 1.2.281
+
+Base00659986, runtime280 d4e20c29, ramo codex/entry-contact-flow-1281-20261117; un esecutore e riesami in lettura. **20/20 PASS**:8 contatti +12 runtime-browser. Geometria96 contesti: due pagine/grafiche,320/390/1280px, due altezze, quattro capacità share/picker. Matrici112 popup (anche alternative aperte) e168 QR. Nessuna API prima del click; vera userActivation, nuova prova al retry, owner reale revoca pannello pronto. Negativi nome invisibile/nascosto, select rame fisso e select nascosto. Il misuratore prima non riconosceva il testo select: esteso alla selectedOption chiusa, senza certificare l’elenco OS.
+
+Ingresso iniziale35/35 PASS gate/owner/modal/browser; aggiunta prova errore A tardivo dopo accettazione B. Home/gate/CSS e frammenti effettivi main con dipendenze pausate inventate, popup Master reale. Attesa prima identità/routing/chiave/init e durante ultima fence; nessun reveal al cambio UID. Cancellazione, routing throw, key error e owner.start throw terminano l’attesa. Composizione usa owner/session/transport/client/helper/controller/model reali, solo Auth/fence/traduzioni/API OS sintetici. Nessun account reale, nessuna attestazione Face ID/WebKit fisici o destinazioni OS.
+
+Checkpoint di confezione: ingresso/gate/offline-bootstrap/boundary **52/52 PASS** (attesa nelle otto lingue compresa), native runtime-browser definitivo **12/12 PASS**, contatti8/8, profili206/206, tour14/14, guida12/12, topologia20/20, traduzioni5/5, offline16/16, budget4/4 e Markdown12/12. Header5/5 dopo ripristino della sola junction alle dipendenze esistenti; prima suite frame262/267, i5 errori erano avvio del tool assente nel worktree, nessuna modifica header necessaria. Catalogo71 chiavi profilo; guida15/reviewed281. Bump canonico307 riferimenti in112 file, offline61 export/347 risorse. Snapshot funzionale confrontato con confezione:116 file pubblici cambiati, nessun delta inatteso oltre versione/EOL/derivati ammessi. CSS/sintassi/riferimenti PASS. Il primo controllo UI90/90 è verde; la prima matrice dinamica ha avuto0 stati falliti ma status FAIL per sorgenti modificati durante la prova; viene ripetuta con pacchetto fermo, senza aggirare il controllo. Primo trace nativo fallito per newline del payload atteso nel test, corretto e12/12 PASS. Matrici finali/CI e ricevuta pubblica ancora da registrare. Produzione280 fino alla ricevuta; compact-only48 contesti sotto è storico, superato dalla matrice96.
+
+
+<a id="contatti-compact-verifiche-2026-11-17"></a>
+
+## Contatti — pulsanti mobile e proposta di flusso, locale 17/11/2026
+
+[Segnalazione e perimetro](../progetto/INCARICO_CORRENTE.md#contatti-ux-2026-11-17), base documentale00659986/app pubblicata1.2.280. Le foto di Diego mostrano pulsanti normali nel privato e enormi nell'azienda. Riprodotto col vero controller/render/CSS, dati sintetici, senza operazioni OS: a390px, in entrambe le grafiche, Privato56px e Azienda160px. Causa: il mobile comune usa column-reverse e il successivo flex-basis10rem del contatto diventa altezza; il privato lo maschera usando una griglia.
+
+Nuova regressione RED sulla sorgente pubblicata: Azienda/Classica/320×568, tre pulsanti160px. Correttivo locale nel solo componente contatto: griglia esplicita comune, flex:none, altezza automatica con minimo tattile44px e testo a capo. GREEN: banco completo8/8PASS, incluse48combinazioni dimensionali (privato/azienda × due grafiche × picker presente/assente ×320/390/1280 ×568/844), altezze44–78,5px, testo contenuto, popup dentro il viewport e Chiudi raggiungibile. Conservati112contesti cromatici del popup e168QR nei sette temi, stati funzionali/guardie e negativi. CSS lint e topologia12/12PASS; [registro](../../scripts/ui-livery-contract.json) collega la regressione nominata allo stato open e ai CSS. Nessuna nuova attestazione fisica del correttivo, nessuna nuova versione o pubblicazione.
+
+I sette fotogrammi successivi mostrano, in ordine: login con richiesta iOS della password salvata → verifica → Home → verifica → Vault bloccata/Sblocca e riprendi → verifica → Home dietro richiesta iOS di passkey. Sono un riscontro fisico della sequenza sulla280; non identificano da soli la causa, lo scopo crittografico della passkey o la durata dei passaggi. Non dedurre tempi dai contatori esterni delle foto, né richieste di rete dal numero di indicatori visibili. Nessuna credenziale o dato dei contatti viene riportato qui.
+
+Analisi statica dell'ingresso, distinta dalla riproduzione runtime: [login](../../Frontend/public/assets/js/modules/auth/login.js) apre Home dopo l'accesso; [private-auth-gate](../../Frontend/public/assets/js/private-auth-gate.js) mostra il body in acceptIdentity prima del routing nel [main](../../Frontend/public/assets/js/main-v129.js). Home standalone, app.html e Home child hanno ciascuno un gate di presentazione. [app.html](../../Frontend/public/app.html) contiene già lo stato bloccato e [vault-frame-production](../../Frontend/public/assets/js/modules/core/vault-frame-production.js) lo aggiorna con il bootstrap dell'owner. Questo rende possibili Home vuota e scritta di blocco premature: candidato da isolare con ritardi controllati, senza chiamarlo causa live già provata. La catena ensureVaultKeyMaterial → tryBiometricUnlock → WebAuthn PRF in [security-manager](../../Frontend/public/assets/js/modules/core/security-manager.js) è compatibile con lo sheet finale della passkey e serve alla chiave locale della Vault, distinta dal login account. Non è stata acquisita una traccia del chiamante sul telefono.
+
+La semplificazione dei comandi resta una [proposta di flusso](../progetto/PROGRAMMA.md#contatti-flusso-2026-11-17), non implementata o distribuita da questo correttivo dimensionale. Codice Auth/cornice/nativo invariato.
+
 <a id="rilascio-1280-completo-verifiche-2026-11-17"></a>
 
 ## APP 1.2.280 completa — pubblicata e verificata, 17/11/2026

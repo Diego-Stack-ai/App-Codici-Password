@@ -1,5 +1,14 @@
 # Vault
 
+<a id="ingresso-1281-vault-2026-11-17"></a>
+
+## Ingresso e azioni native — presentazione 1.2.281
+
+Home incompleta coperta, popup Master accessibile e parent neutro prima del vero blocco. Ticket/UID/fence ancora verificati prima del reveal, anche dopo await; errori vecchi non bloccano il tentativo nuovo. Revoca, cleanup e uscita standalone conservati. Il callback visible aggiunto aggiorna solo la presentazione; il messaggio di trasporto resta invariato.
+
+Il solo contatto collega la UI finale al launcher senza secondo pannello. Snapshot/fingerprint, fresh/consume, assert locale e scadenza precedono il lancio; solo un vero click trusted invoca l’API OS, senza await intermedio. La scadenza vale prima del lancio, non durante il picker. PDF e chiamate senza presentation conservano il percorso precedente. Nessuna nuova persistenza, chiave, sessione o modifica dei tempi di sicurezza. [Contratto UI](INTERFACCIA.md#ingresso-contatti-1281-ui-2026-11-17).
+
+
 <a id="cornice-ordinaria-vault-2026-11-14"></a>
 
 ## Cornice ordinaria — candidata 1.2.275, 14/11/2026

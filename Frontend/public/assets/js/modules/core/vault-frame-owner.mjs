@@ -114,6 +114,7 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
       session.tick();
       if (!locked && token === nonce && doc === currentDocument() && seq === sequence && !win.document.hidden) {
         mask(false); post({kind: 'visible', leaseExpiresAt: session.state().expiresAt});
+        onState({locked: false, visible: true});
       }
       return;
     }

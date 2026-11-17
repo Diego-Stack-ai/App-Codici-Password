@@ -2,6 +2,8 @@
 // Modificar este ficheiro diretamente; não regenerar com split-translations.mjs.
 // As chaves devem permanecer alinhadas com o catálogo italiano.
 export default {
+    frame_app_title: "Codici & Password",
+    entry_loading: "A verificar o acesso…",
     "frame_locked_title": "Cofre bloqueado",
     "frame_unlock_resume": "Desbloquear e retomar",
     "frame_export_ready": "Exportação pronta",

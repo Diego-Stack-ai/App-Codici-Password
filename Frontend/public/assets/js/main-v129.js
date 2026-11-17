@@ -32,7 +32,7 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.280';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.281';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, limit, updateDoc, onSnapshot } from "/assets/js/vendor/firebase-runtime.js";
@@ -41,7 +41,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage, getLocalQaLanguageOverride, observeTranslatedSubtrees } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 
-import * as Pages from './pages-init.js?v=1.2.280&push=20261022a&ai=20261019b&deadline-share=20260908a&touch=20261017b';
+import * as Pages from './pages-init.js?v=1.2.281&push=20261022a&ai=20261019b&deadline-share=20260908a&touch=20261017b';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric, captureNavigationMetric } from './performance-metrics.js';
@@ -377,6 +377,17 @@ async function bootstrapMain() {
                     }
 
                     if (!gate.active(authAttempt)) { securityModules[0].clearSession(); return; }
+                    if (currentPage === 'home' && !vaultKeyMaterial) {
+                        securityModules[0].clearSession();
+                        if (!gate.active(authAttempt) || auth.currentUser?.uid !== user.uid) return;
+                        const entryStatus = document.getElementById('private-entry-status');
+                        if (entryStatus) {
+                            document.documentElement.dataset.privatePageState = 'blocked';
+                            entryStatus.hidden = false;
+                            document.getElementById('private-entry-retry').onclick = () => window.location.reload();
+                        }
+                        return;
+                    }
                     if (vaultKeyMaterial) {
                         void import('./modules/shared/sharing-identity-service.js')
                             .then(({ensureSharingIdentity}) => ensureSharingIdentity({
@@ -449,7 +460,7 @@ async function bootstrapMain() {
                     try {
                         const trigger = document.getElementById('search-status');
                         const includeCompanies = getSyncedCompanyAreaPreference(userDoc.data() || {}, user.uid);
-                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.280');
+                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.281');
                         await initVaultAssistant(user, { includeCompanies });
                         trigger?.classList.remove('hidden');
                     } catch (error) {
@@ -487,6 +498,11 @@ async function bootstrapMain() {
                     case 'dettaglio_account_azienda': await Pages.initDettaglioAccountAzienda(user); break;
                     case 'form_account_azienda': await Pages.initFormAccountAzienda(user); break;
                 }
+                if (currentPage === 'home') {
+                    if (!gate.active(authAttempt) || auth.currentUser?.uid !== user.uid || !await authSessionFence.isCurrent(fenceTicket)) return;
+                    if (!gate.active(authAttempt) || auth.currentUser?.uid !== user.uid) return;
+                    if (!gate.reveal(authAttempt)) return;
+                }
                 if (currentPage === 'home' && !firstConfigurationComplete) {
                     await firstConfiguration.openFirstConfigurationDialog({ blocking: false });
                 }
@@ -512,7 +528,7 @@ async function bootstrapMain() {
                 startN1ShareRevokedNotices(user.uid, authAttempt, n1Epoch);
 
             } catch (error) {
-                if (gate && !gate.isReady()) gate.reject('error');
+                if (gate && gate.active(authAttempt) && (!gate.isReady() || currentPage === 'vault_frame' || (currentPage === 'home' && document.documentElement.dataset.privatePageState === 'pending'))) gate.reject('error');
                 console.error("Global Check Error:", error);
             }
         } else {

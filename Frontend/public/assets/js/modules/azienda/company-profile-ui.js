@@ -1,6 +1,6 @@
 import {frameMediaLifetime} from '../core/vault-frame-client.js';
 import { changeProfileAccount, unlinkProfileAccount } from '../shared/profile-account-management.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.280';
+import { auth, db } from '../../firebase-config.js?v=1.2.281';
 import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
 import { doc, runTransaction, deleteField, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { createElement, setChildren } from '../../dom-utils.js';
@@ -201,13 +201,13 @@ export function initCompanyProfile(data, companyId, {buildVCard, reload, openQRZ
         const lifetime = frameMediaLifetime({signal: new AbortController().signal, requireUnlocked: false});
         const value = buildVCard({...data, qrConfig: config});
         const isCurrent = () => lifetime.valid() && ownerUid && auth.currentUser?.uid === ownerUid && qr.isConnected && opener?.isConnected;
-        return import('../shared/contact-export.js?v=1.2.280').then(module => {
+        return import('../shared/contact-export.js?v=1.2.281').then(module => {
             if (isCurrent()) return module.openContactExport({value, holder: {company: true, companyName: data.ragioneSociale},
                 mode, opener, isCurrent, signal: lifetime.signal, target: {scope: 'company-vcard', companyId}});
         }).catch(() => {if (isCurrent()) showToast(t('contact_export_failed'), 'error');}).finally(() => lifetime.dispose());
     };
     const download = button(t('contact_export_entry'), () => exportContact('save'));
-    const share = button(t('digital_card_share'), () => exportContact('share'));
+    download.setAttribute('data-contact-export', '');
     const zoom = createElement('button', {type: 'button', className: 'company-qr-zoom-trigger',
         title: t('click_to_enlarge'), 'aria-label': t('aria_zoom_card'),
         onclick: event => openQRZoom({payload: buildVCard({...data, qrConfig: config}), opener: event.currentTarget})}, [
@@ -218,7 +218,7 @@ export function initCompanyProfile(data, companyId, {buildVCard, reload, openQRZ
             createElement('h2',{className:'form-section-title',textContent:t('digital_card_preview_title')}),zoom,
             createElement('p',{className:'digital-card-warning',textContent:t('digital_card_plaintext_warning')}),
             createElement('p',{className:'digital-card-capacity',id:'company-qr-capacity'}),
-            createElement('div',{className:'digital-card-actions'},[download, share])
+            createElement('div',{className:'digital-card-actions'},[download])
         ]),
         createElement('section',{className:'form-card digital-card-fields'},[
             createElement('h2',{className:'form-section-title',textContent:t('digital_card_included_data')}),

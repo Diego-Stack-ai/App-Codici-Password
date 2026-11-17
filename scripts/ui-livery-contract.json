@@ -115,12 +115,12 @@
     "entries": [
       {
         "page": "profilo_privato.html",
-        "selector": ".digital-card-actions button",
-        "producer": "Frontend/public/assets/js/modules/privato/profilo_privato.js"
+        "selector": "[data-contact-export]",
+        "producer": "Frontend/public/assets/js/modules/privato/profilo-dashboard.js"
       },
       {
         "page": "dati_azienda.html",
-        "selector": ".digital-card-actions button",
+        "selector": "[data-contact-export]",
         "producer": "Frontend/public/assets/js/modules/azienda/company-profile-ui.js"
       }
     ],
@@ -133,7 +133,9 @@
       ".contact-export-dialog",
       ".contact-export-name",
       "#contact-export-modal [role=status]",
-      ".contact-export-actions"
+      ".contact-export-actions",
+      ".contact-export-options",
+      "#contact-export-method"
     ],
     "states": [
       "open",
@@ -146,7 +148,10 @@
       "cancelled",
       "download-started",
       "revoked",
-      "pending"
+      "pending",
+      "preparing",
+      "ready",
+      "options-open"
     ],
     "nonVisualStates": [
       "revoked"
@@ -166,7 +171,10 @@
           "share-error",
           "cancelled",
           "download-started",
-          "pending"
+          "pending",
+          "preparing",
+          "ready",
+          "options-open"
         ]
       },
       {
@@ -184,7 +192,10 @@
           "share-error",
           "cancelled",
           "download-started",
-          "pending"
+          "pending",
+          "preparing",
+          "ready",
+          "options-open"
         ]
       },
       {
@@ -202,7 +213,10 @@
           "share-error",
           "cancelled",
           "download-started",
-          "pending"
+          "pending",
+          "preparing",
+          "ready",
+          "options-open"
         ]
       },
       {
@@ -220,7 +234,10 @@
           "share-error",
           "cancelled",
           "download-started",
-          "pending"
+          "pending",
+          "preparing",
+          "ready",
+          "options-open"
         ]
       },
       {
@@ -235,7 +252,45 @@
           "share-error",
           "cancelled",
           "download-started",
-          "pending"
+          "pending",
+          "preparing",
+          "ready",
+          "options-open"
+        ]
+      },
+      {
+        "selector": "#contact-export-method",
+        "property": "backgroundColor",
+        "role": "--rev-surface-2",
+        "states": [
+          "options-open"
+        ]
+      },
+      {
+        "selector": ".contact-export-options summary",
+        "property": "color",
+        "role": "--text-primary",
+        "minimum": 4.5,
+        "states": [
+          "options-open"
+        ]
+      },
+      {
+        "selector": ".contact-export-options label",
+        "property": "color",
+        "role": "--text-primary",
+        "minimum": 4.5,
+        "states": [
+          "options-open"
+        ]
+      },
+      {
+        "selector": "#contact-export-method",
+        "property": "color",
+        "role": "--text-primary",
+        "minimum": 4.5,
+        "states": [
+          "options-open"
         ]
       }
     ],
@@ -246,7 +301,10 @@
         "states": [
           "open",
           "saved",
-          "shared"
+          "shared",
+          "preparing",
+          "ready",
+          "options-open"
         ]
       },
       {
@@ -280,6 +338,13 @@
         "name": "pending contact actions remain closable and ignore late native completion",
         "states": [
           "pending"
+        ]
+      },
+      {
+        "file": "tests/contact-export.browser.test.mjs",
+        "name": "contact export controls stay compact and reachable on private and company pages",
+        "states": [
+          "open"
         ]
       }
     ],

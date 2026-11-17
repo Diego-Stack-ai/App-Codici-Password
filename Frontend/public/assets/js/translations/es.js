@@ -2,6 +2,8 @@
 // Modificare questo file direttamente; non rigenerare con split-translations.mjs.
 // Le chiavi devono restare allineate al catalogo italiano.
 export default {
+    frame_app_title: "Codici & Password",
+    entry_loading: "Verificando el acceso…",
     "frame_locked_title": "Bóveda bloqueada",
     "frame_unlock_resume": "Desbloquear y continuar",
     "frame_export_ready": "Exportación lista",

@@ -62,7 +62,10 @@ window.__dynamicTheme = {
   async trigger(id, phase) {
     if(!implementedStates[id]?.includes(phase)) throw Error(`No real producer scenario implemented for ${id}/${phase}`);
     closeOverlays(); window.scrollTo(0,0);
-    if(id==='UI275-02') { document.getElementById('frame-status').hidden=false; }
+    if(id==='UI275-01'||id==='UI275-02') {
+      document.getElementById('frame-loading').hidden=id==='UI275-02';
+      document.getElementById('frame-status').hidden=id==='UI275-01';
+    }
     if(id==='UI275-03') {
       if(phase==='picker') void selectAttachmentSource();
       else if(phase==='dialog'||phase==='disabled') {

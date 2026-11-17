@@ -99,6 +99,13 @@ export async function verifyDynamicState(page,item,state,context,{omitTrigger=fa
     const target=item.id==='UI275-04'?'.vault-assistant-help':'.guide-close-button';
     if(state==='hover')await page.locator(target).hover();else await page.locator(target).focus();
   }
+  if(['UI275-01','UI275-02'].includes(item.id)) {
+    const states=await page.evaluate(()=>Object.fromEntries(['frame-loading','frame-status'].map(id=>{
+      const element=document.getElementById(id),rect=element?.getBoundingClientRect(),style=element&&getComputedStyle(element);
+      return [id,Boolean(rect?.width&&rect?.height&&style.display!=='none'&&style.visibility!=='hidden')];
+    })));
+    add('waiting and locked presentations are mutually exclusive',states['frame-loading']===(item.id==='UI275-01')&&states['frame-status']===(item.id==='UI275-02'),{actual:states});
+  }
   if(item.id==='UI275-02'&&state==='focus')await page.locator('#frame-resume').focus();
   if(state==='focus') {
     const target=item.id==='UI275-02'?'#frame-resume':item.id==='UI275-04'?'.vault-assistant-help':'.guide-close-button';

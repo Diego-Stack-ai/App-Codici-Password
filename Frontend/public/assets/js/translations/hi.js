@@ -1,6 +1,8 @@
 // हिंदी का आधिकारिक अनुवाद कैटलॉग।
 // scripts/split-translations.mjs से दोबारा न बनाएँ: वह पुरानी इनलाइन संरचना के लिए है।
 export default {
+    frame_app_title: "Codici & Password",
+    entry_loading: "पहुँच की जाँच जारी है…",
     "frame_locked_title": "वॉल्ट लॉक है",
     "frame_unlock_resume": "अनलॉक करके जारी रखें",
     "frame_export_ready": "निर्यात तैयार है",

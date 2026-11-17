@@ -1,5 +1,7 @@
 // Catalogo autorevole inglese. Modificare qui e verificare con npm run test:i18n.
 export default {
+    frame_app_title: "Codici & Password",
+    entry_loading: "Checking access…",
     "frame_locked_title": "Vault locked",
     "frame_unlock_resume": "Unlock and resume",
     "frame_export_ready": "Export ready",
