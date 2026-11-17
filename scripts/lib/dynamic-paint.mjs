@@ -145,6 +145,14 @@ export function collectDynamicPaint({paint,theme,graphics} = {}) {
         boxShadow:style.boxShadow,filter:style.filter,outline:style.outline,
         pseudoBefore:{content:getComputedStyle(element,'::before').content,backgroundColor:getComputedStyle(element,'::before').backgroundColor,transform:getComputedStyle(element,'::before').transform},
         checked:element instanceof HTMLInputElement?element.checked:undefined,disabled:element.disabled===true};
+      if (paint.withinSelector) extra.matchesWithin = Boolean(element.closest(paint.withinSelector));
+      if (paint.captureAncestry) {
+        extra.ancestry = [];
+        for (let node = element; node && extra.ancestry.length < 5; node = node.parentElement) {
+          const computed = getComputedStyle(node);
+          extra.ancestry.push({tag:node.tagName,class:node.className,color:computed.color,bg:computed.backgroundColor,image:computed.backgroundImage,opacity:computed.opacity});
+        }
+      }
       if(paint.kind==='headerContrast') {
         const canvas=document.createElement('canvas');canvas.width=canvas.height=1;const ctx=canvas.getContext('2d');
         const rgba=css=>{ctx.clearRect(0,0,1,1);ctx.fillStyle=css;ctx.fillRect(0,0,1,1);return [...ctx.getImageData(0,0,1,1).data];};

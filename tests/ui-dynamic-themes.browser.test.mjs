@@ -83,14 +83,16 @@ test('contrast and role use one DOM snapshot even when a producer inserts conten
  let reads=0;
  const movingPage={evaluate:async(fn,arg)=>{
   const result=await page.evaluate(fn,arg);reads++;
-  await page.evaluate(()=>document.body.prepend(document.createElement('aside')));
+  await page.evaluate(()=>{const aside=document.createElement('aside');aside.className='filled';document.querySelector('.target').before(aside);aside.append(document.querySelector('.target'));});
   return result;
  }};
- const paint={selector:'.target',property:'color',role:'--ink',minimum:4.5};
+ const paint={selector:'.target',property:'color',role:'--ink',minimum:4.5,withinSelector:'.filled',captureAncestry:true};
  const values=await inspectDynamicPaint(movingPage,paint);
  assert.equal(await page.locator('aside').count(),1,'the adversarial insertion really occurred');
  assert.equal(reads,1,'roles and composite are sampled in a single browser task');
- assert.equal(values.length,1);assert.equal(values[0].rolePass,true);assert.equal(values[0].contrast.status,'measured');assert.ok(values[0].contrast.ratio>20);
+ assert.equal(values.length,1);assert.equal(values[0].matchesWithin,false,'exclusion uses the original snapshot');
+ assert.equal(await page.locator('.target').evaluate(node=>Boolean(node.closest('.filled'))),true,'producer really moved target into a different surface');
+ assert.equal(values[0].ancestry[0].class,'target');assert.equal(values[0].rolePass,true);assert.equal(values[0].contrast.status,'measured');assert.ok(values[0].contrast.ratio>20);
  await page.locator('.target').evaluate(node=>node.style.color='transparent');
  assert.equal((await inspectDynamicPaint(page,paint))[0].contrast.pass,false,'unreadable paint still fails');
  await page.locator('.target').evaluate(node=>node.remove());
