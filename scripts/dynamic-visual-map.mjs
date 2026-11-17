@@ -32,44 +32,8 @@ const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 // Unsupported paint is explicitly unmeasured. Hidden/missing expected targets fail.
 export async function inspectDynamicPaint(page,paint,{theme,graphics}={}) {
   if(paint.newRole&&!['classica','tre-livelli'].includes(graphics))throw Error('A variant color role requires an explicit graphics context');
-  const values=await page.evaluate(({paint,theme,graphics})=>{
-    const nodes=[...document.querySelectorAll(paint.selector)];
-    return nodes.map(element=>{
-      const style=getComputedStyle(element,paint.pseudo||null);
-      const rect=element.getBoundingClientRect();
-      let visible=!!rect.width&&!!rect.height;
-      for(let node=element;node;node=node.parentElement){const s=getComputedStyle(node);if(s.display==='none'||s.visibility==='hidden'||Number(s.opacity)===0)visible=false;}
-      const role=graphics==='tre-livelli'&&paint.newRole?paint.newRole:theme==='dark'&&paint.darkRole?paint.darkRole:paint.role;
-      const roleNames=role.startsWith('--')?[role]:[...role.matchAll(/var\(\s*(--[\w-]+)/g)].map(match=>match[1]);
-      const roleDeclarations=Object.fromEntries(roleNames.map(name=>[name,style.getPropertyValue(name).trim()]));
-      const roleResolved=Object.values(roleDeclarations).every(value=>value.length>0);
-      let expected=role;
-      if(!['content','transform'].includes(paint.property)) {
-        const probe=document.createElement('span');
-        probe.style[paint.property]=role.startsWith('--')?`var(${role})`:role;
-        // Inputs are void elements: an appended child has no computed style.
-        (element.matches('input,img,canvas')?element.parentElement:element).append(probe);
-        expected=getComputedStyle(probe)[paint.property];probe.remove();
-      }
-      const own=[...document.body.querySelectorAll('*')].indexOf(element);
-      const actual=style[paint.property];
-      const extra={fontSize:style.fontSize,fontWeight:style.fontWeight,opacity:style.opacity,
-        backgroundColor:style.backgroundColor,color:style.color,backgroundImage:style.backgroundImage,
-        boxShadow:style.boxShadow,filter:style.filter,outline:style.outline,
-        pseudoBefore:{content:getComputedStyle(element,'::before').content,backgroundColor:getComputedStyle(element,'::before').backgroundColor,transform:getComputedStyle(element,'::before').transform},
-        checked:element instanceof HTMLInputElement?element.checked:undefined,disabled:element.disabled===true};
-      if(paint.kind==='headerContrast') {
-        const canvas=document.createElement('canvas');canvas.width=canvas.height=1;const ctx=canvas.getContext('2d');
-        const rgba=css=>{ctx.clearRect(0,0,1,1);ctx.fillStyle=css;ctx.fillRect(0,0,1,1);return [...ctx.getImageData(0,0,1,1).data];};
-        const bg=rgba(getComputedStyle(element.closest('#header-placeholder')).backgroundColor),fg=rgba(style.color);
-        const over=(c,b)=>b.map((v,i)=>c[i]*(c[3]/255)+v*(1-c[3]/255));
-        extra.headerExtremes=[0,255].map(value=>{const backdrop=over(bg,[value,value,value]);return {bg:backdrop,fg:over(fg,backdrop)};});
-      }
-      return {own,actual,expected,visible,roleDeclarations,roleResolved,...extra};
-    });
-  },{paint,theme,graphics});
-  let records;
-  if(paint.minimum||paint.kind==='headerContrast') records=(await page.evaluate(collectDynamicPaint)).records;
+  // Values and composited paint must refer to the same synchronous DOM snapshot.
+  const {values,records}=await page.evaluate(collectDynamicPaint,{paint,theme,graphics});
   return values.map(value=>{
     const result={...value,rolePass:value.roleResolved&&value.actual===value.expected};
     if(paint.minimum) {
@@ -98,6 +62,13 @@ export async function verifyDynamicState(page,item,state,context,{omitTrigger=fa
   if(['UI275-04','UI275-10'].includes(item.id)&&(state==='hover'||state==='focus')){
     const target=item.id==='UI275-04'?'.vault-assistant-help':'.guide-close-button';
     if(state==='hover')await page.locator(target).hover();else await page.locator(target).focus();
+  }
+  if(['UI275-01','UI275-02'].includes(item.id)) {
+    const states=await page.evaluate(()=>Object.fromEntries(['frame-loading','frame-status'].map(id=>{
+      const element=document.getElementById(id),rect=element?.getBoundingClientRect(),style=element&&getComputedStyle(element);
+      return [id,Boolean(rect?.width&&rect?.height&&style.display!=='none'&&style.visibility!=='hidden')];
+    })));
+    add('waiting and locked presentations are mutually exclusive',states['frame-loading']===(item.id==='UI275-01')&&states['frame-status']===(item.id==='UI275-02'),{actual:states});
   }
   if(item.id==='UI275-02'&&state==='focus')await page.locator('#frame-resume').focus();
   if(state==='focus') {

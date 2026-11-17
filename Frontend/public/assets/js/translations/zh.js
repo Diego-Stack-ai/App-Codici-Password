@@ -1,6 +1,8 @@
 // Catalogo autorevole in cinese semplificato.
 // Non rigenerare con scripts/split-translations.mjs: lo script descrive il vecchio catalogo inline.
 export default {
+    frame_app_title: "Codici & Password",
+    entry_loading: "正在验证访问权限…",
     "frame_locked_title": "保险库已锁定",
     "frame_unlock_resume": "解锁并继续",
     "frame_export_ready": "导出已就绪",

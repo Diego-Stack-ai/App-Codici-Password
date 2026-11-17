@@ -46,7 +46,7 @@
       ],
       "paints": [
         {
-          "selector": "#frame-status h1",
+          "selector": "#frame-loading",
           "property": "color",
           "role": "--text-primary",
           "minimum": 4.5

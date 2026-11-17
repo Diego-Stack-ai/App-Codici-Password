@@ -1,5 +1,12 @@
 # Rilascio
 
+<a id="ingresso-contatti-1281-rilascio-2026-11-17"></a>
+
+## Candidata1.2.281 — ingresso e contatti
+
+[Mandato](../progetto/INCARICO_CORRENTE.md#ingresso-contatti-1281-2026-11-17). Snapshot funzionale prima del bump canonico281; guida contentVersion15/reviewed281, derivati offline e confronto confezione. Budget conservati. Riesame indipendente sul commit immutabile, CI sulla testa, merge con SHA atteso. Master e Hosting validate sul medesimo SHA fisso possono procedere in parallelo; production solo dopo entrambi verdi e master invariato. SoloHosting, nessuna operazione backend/policy. Poi manifest dalla sorgente pubblicata pulita, verifica integrale file/header/probe e cinque GET indipendenti; ricevuta/GitHub. Una prova280 non attesta281.
+
+
 <a id="vcard-1280-rilascio-2026-11-17"></a>
 
 ## APP 1.2.280 completa — pubblicata, solo Hosting

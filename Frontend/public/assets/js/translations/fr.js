@@ -2,6 +2,8 @@
 // Ne pas régénérer avec scripts/split-translations.mjs (générateur historique obsolète).
 // Lingua: fr — parité avec le catalogue de base italien.
 export default {
+    frame_app_title: "Codici & Password",
+    entry_loading: "Vérification de l’accès…",
     "frame_locked_title": "Coffre verrouillé",
     "frame_unlock_resume": "Déverrouiller et reprendre",
     "frame_export_ready": "Exportation prête",

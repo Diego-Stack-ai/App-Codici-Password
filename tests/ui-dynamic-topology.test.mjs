@@ -76,7 +76,7 @@ test('shared-base liveries connect all 22 pages, selectors, roles, producers and
 
 test('native contact topology links entries, models, visual states, roles and exact named regressions',()=>{
   const result=buildLiveryTopology();assert.deepEqual(result.errors,[]);
-  for(const [name,count] of [['contact-export',11],['company-card-qr',6]]){
+  for(const [name,count] of [['contact-export',14],['company-card-qr',6]]){
     const id='ui:livery-component:'+name,edges=result.edges.filter(edge=>edge.source===id);
     assert.equal(edges.filter(edge=>edge.relation==='ui_declares_state').length,count);
     for(const relation of ['ui_uses_model','ui_names_regression','ui_declares_paint'])assert.ok(edges.some(edge=>edge.relation===relation),name+'/'+relation);

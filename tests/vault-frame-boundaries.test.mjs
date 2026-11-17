@@ -62,15 +62,16 @@ test('microphone stream resolving after cancellation stops every late track',asy
 const productionSource=await source('vault-frame-production.js');
 function productionFixture(started=true){
  const state={snap:null,error:null,updates:[],locks:[],valid:()=>Promise.resolve(true),resume:0};
- const anchor=new EventTarget();const owner={session:{state:()=>({expiresAt:1}),lock:reason=>state.locks.push(reason)},start:async()=>started,
+ const elements=Object.fromEntries(['frame-status','frame-loading','vault-frame'].map(id=>[id,{hidden:id==='frame-status'}]));
+ const anchor=new EventTarget();const owner={session:{state:()=>({expiresAt:1}),lock:reason=>state.locks.push(reason)},start:async()=>{if(started==='throw')throw Error('synthetic startup error');return started;},
  updatePreference:v=>state.updates.push(v),resume:()=>{state.resume++;return true;},dispose(){}};
- const context=vm.createContext({window:{location:{href:'https://fixture.invalid/app.html'}},document:{getElementById:id=>id==='frame-resume'?anchor:{}},
+ const context=vm.createContext({window:{location:{href:'https://fixture.invalid/app.html'}},document:{getElementById:id=>id==='frame-resume'?anchor:elements[id]},
  URL,APP_VERSION:'fixture',auth:{currentUser:{uid:'synthetic'}},db:{},doc:()=>({}),getUserProfile:async()=>({lock_timeout:3}),
  createProductionFrameAdmission:()=>({read:async()=>null,dispose(){}}),
  installFramePushNavigation:()=>()=>{}, emitFrameDiagnostic:()=>{},
- authSessionFence:{isCurrent:()=>state.valid(),isLocallyAllowed:()=>true},createVaultFrameOwner:()=>owner,
+ authSessionFence:{isCurrent:()=>state.valid(),isLocallyAllowed:()=>true},createVaultFrameOwner:options=>{state.onState=options.onState;return owner;},
  onSnapshot:(_ref,next,error)=>{state.snap=next;state.error=error;return()=>{};}});
- vm.runInContext(productionSource,context);return {state,anchor,start:()=>vm.runInContext("startVaultFrame({user:{uid:'synthetic'},fenceTicket:{revision:1,nonce:'n'},securityManager:{setFrameExpiryAuthority(){}}})",context)};
+ vm.runInContext(productionSource,context);return {state,anchor,elements,start:()=>vm.runInContext("startVaultFrame({user:{uid:'synthetic'},fenceTicket:{revision:1,nonce:'n'},securityManager:{setFrameExpiryAuthority(){}}})",context)};
 }
 test('out-of-order preference snapshots cannot extend the newer short timeout',async()=>{
  const f=productionFixture();await f.start();const old=pause();let call=0;f.state.valid=()=>++call===1?old.promise:Promise.resolve(true);
@@ -91,4 +92,21 @@ test('proof expiring during a durable fence read is rejected after the await',as
  const f=actionFixture(),check=await f.run("confirmFrameAction('backup-export',{scope:'synthetic'})"),pending=pause();
  f.state.fenceRead=()=>pending.promise;const validation=check();f.state.now=1500;pending.resolve(true);
  await assert.rejects(validation,/FRAME_CONFIRMATION_REQUIRED/);
+});
+
+test('parent starts neutral, hides waiting on child presentation, and shows only actual lock',async()=>{
+ const f=productionFixture();await f.start();
+ assert.equal(f.elements['frame-status'].hidden,true);
+ assert.equal(f.elements['frame-loading'].hidden,false);
+ f.state.onState({locked:false,visible:true});
+ assert.equal(f.elements['frame-loading'].hidden,true);
+ assert.equal(f.elements['frame-status'].hidden,true);
+ f.state.onState({locked:true});
+ assert.equal(f.elements['frame-status'].hidden,false);assert.equal(f.anchor.hidden,false);
+});
+test('a throwing frame start ends waiting and retains the standalone exit',async()=>{
+ const f=productionFixture('throw');await f.start();
+ assert.equal(f.elements['frame-loading'].hidden,true);assert.equal(f.elements['frame-status'].hidden,false);
+ const click=new Event('click',{cancelable:true});f.anchor.dispatchEvent(click);
+ assert.equal(click.defaultPrevented,false);assert.equal(f.state.resume,0);
 });

@@ -1,4 +1,6 @@
 export default {
+    frame_app_title: "Codici & Password",
+    entry_loading: "Verifica accesso in corso…",
     "frame_locked_title": "Vault bloccata",
     "frame_unlock_resume": "Sblocca e riprendi",
     "frame_export_ready": "Esportazione pronta",

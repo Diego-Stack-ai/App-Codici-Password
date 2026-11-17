@@ -165,6 +165,7 @@ export function applyGlobalTranslations(root = document) {
     if (root instanceof Element && root.matches(selector)) translateElement(root);
     root.querySelectorAll(selector).forEach(translateElement);
     if (root === document) {
+        document.documentElement.dataset.privateLoadingLabel = t('entry_loading');
         document.documentElement.setAttribute('data-i18n', 'ready');
         if (!_missingKeys.size) delete document.documentElement.dataset.i18nFallback;
         document.dispatchEvent(new CustomEvent('app-language-applied', {

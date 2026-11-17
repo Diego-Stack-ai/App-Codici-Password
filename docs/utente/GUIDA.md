@@ -1,5 +1,14 @@
 # Guida
 
+<a id="ingresso-contatti-1281-guida-2026-11-17"></a>
+
+## Ingresso e contatti — preparati per la1.2.281
+
+Disponibilità nello [stato corrente](../progetto/STATO.md#stato-corrente). Attendi verifica e sblocco: Home si mostra quando è pronta. «Vault bloccata / Sblocca e riprendi» serve per blocco effettivo o sblocco annullato. Login account e sblocco Vault restano distinti.
+
+Nelle due Tessere usa l’unico «Salva o condividi contatto…». Il pannello mostra nome e primaria disponibile sul dispositivo; «Altre opzioni» contiene le alternative. Dopo errore/annullamento «Prepara di nuovo…» rinnova i controlli; premi poi la primaria per procedere. Chiudi/Escape chiudono anche durante l’attesa, senza garantire di annullare la finestra OS già aperta. Browser/sistema decidono destinazione/importazione; nessun contatto aggiunto automaticamente. Nomi riconoscibili e lente QR conservati. Descrizione280 sotto storica.
+
+
 ## Contatti e QR — disponibili nella 1.2.280
 
 La versione completa è pubblicata e verificata. Ricarica una volta l’app. [Ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-1280-completo-verifiche-2026-11-17).

@@ -1,5 +1,24 @@
 # Programma
 
+<a id="ingresso-contatti-1281-programma-2026-11-17"></a>
+
+## Seguito autorizzato e implementato — 1.2.281
+
+L’[ordine diretto](INCARICO_CORRENTE.md#ingresso-contatti-1281-2026-11-17) supera la proposta storica sotto e comprende ingresso e contatti. Implementazione locale conclusa; completare suite, confezione, riesame indipendente/CI, PR/merge e Hosting protetto, poi verifica pubblica. Restano prova fisica iPhone/Android/PC di condivisione, destinazione file e nuovo ingresso. Nessun PASS fisico dedotto da Chromium; RG-01/RG-04 restano aperti.
+
+
+<a id="contatti-flusso-2026-11-17"></a>
+
+## Seguito dei contatti e ingresso — 17/11/2026
+
+Diego segnala nella280 il difetto dimensionale dei pulsanti azienda e la ridondanza Tessera → popup → eventuale conferma della cornice. [Correttivo dimensionale locale e prove](../evidenze/COLLAUDI.md#contatti-compact-verifiche-2026-11-17); produzione invariata.
+
+**Proposta di flusso, da discutere:** una sola entry «Salva o condividi contatto…» in entrambe le Tessere; preparazione del file e dei controlli; un solo pannello finale con nome visibile, una primaria e Chiudi. Primaria secondo capacità effettive: condivisione file se supportata; altrimenti scelta destinazione se disponibile; altrimenti download. Le alternative necessarie possono stare sotto «Altre opzioni». Il download resta un'alternativa esplicita per indisponibilità o errore; mai avviarlo automaticamente dopo annullamento.
+
+Per eliminare davvero il pannello duplicato nella cornice occorre valutare la sola presentazione della conferma nativa esistente, mantenendo immutati snapshot/fingerprint, proof consumabile una volta, identità/revisione/generazione, revoca, scadenza e clic trusted finale senza await prima dell'API. Non promettere apertura OS dal primo tocco dopo preparazioni asincrone. Nessuna distinzione rigida tramite nome del browser o semplice classificazione telefono/PC. Nessuna di queste modifiche di flusso è dichiarata già applicata.
+
+Il nuovo riscontro fisico post-login è la sequenza password salvata → verifica → Home → verifica → Vault bloccata → verifica → richiesta passkey. Confrontare routing standalone/cornice, guardie e avvio dello sblocco, distinguendo i due scopi di autenticazione dal codice prima di attribuirli. L'obiettivo di presentazione è evitare Home e stato di inattività prematuri durante il primo ingresso, conservando gli stati necessari per blocchi effettivi. Nessuna causa o correzione Auth è ancora accertata.
+
 <a id="rilascio-1280-programma-2026-11-17"></a>
 
 ## RG-02/RG-03 — applicati e distribuiti nella 1.2.280, 17/11/2026

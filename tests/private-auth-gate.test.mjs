@@ -10,12 +10,12 @@ const logoutSource = (await readFile(new URL('assets/js/logout-session.js', root
 const vaultSource = (await readFile(new URL('assets/js/modules/core/vault-session.js', root), 'utf8')).replace(/^export /gm, '');
 const verifiedUser = {uid: 'synthetic', emailVerified: true};
 
-function fixture() {
+function fixture({page = '/fixture.html'} = {}) {
     const redirects = [], events = [], timers = new Map(), handlers = new Map(), storage = new Map();
     let serial = 0;
     const body = {hidden: true, inert: true};
     const documentElement = {dataset: {}};
-    const window = {location: {pathname: '/fixture.html', replace: url => redirects.push(url), reload: () => redirects.push('reload')},
+    const window = {location: {pathname: page, replace: url => redirects.push(url), reload: () => redirects.push('reload')},
         dispatchEvent: event => events.push(event.type), addEventListener: (name, fn) => handlers.set(name, fn)};
     const context = vm.createContext({beginFrameLogout: () => null, window, navigateDocument: target => window.location.replace(target), document: {body, documentElement}, Event, Promise,
         setTimeout: (fn, ms) => { timers.set(++serial, {fn, ms}); return serial; },
@@ -66,6 +66,31 @@ test('unverified identity cannot reveal private HTML', () => {
     const f = fixture(); const ticket = f.gate.begin('synthetic');
     assert.equal(f.gate.acceptIdentity(ticket, {...verifiedUser, emailVerified: false}), false);
     assert.equal(f.body.hidden, true);
+});
+
+test('Home keeps first presentation pending after identity and only the current ready ticket reveals it', () => {
+    const f = fixture({page: '/home_page.html'}), ticket = f.gate.begin(verifiedUser.uid);
+    assert.equal(f.documentElement.dataset.privatePageState, 'pending');
+    assert.equal(f.gate.reveal(ticket), false, 'identity is still unverified');
+    assert.equal(f.gate.acceptIdentity(ticket, verifiedUser), true);
+    assert.equal(f.body.inert, false, 'real body-level Vault modal can be used');
+    assert.equal(f.documentElement.dataset.privatePageState, 'pending', 'Home remains held');
+    assert.equal(f.gate.reveal(ticket - 1), false);
+    assert.equal(f.gate.reveal(ticket), true);
+    assert.equal(f.documentElement.dataset.privatePageState, undefined);
+});
+
+test('a late Home reveal cannot override logout, another identity, a blocked fence or document replacement', () => {
+    for (const boundary of ['logout', 'identity', 'fence', 'document']) {
+        const f = fixture({page: '/home_page.html'}), ticket = f.gate.begin(verifiedUser.uid);
+        f.gate.acceptIdentity(ticket, verifiedUser);
+        if (boundary === 'logout') f.gate.block();
+        if (boundary === 'identity') f.gate.begin('other-user');
+        if (boundary === 'fence') f.context.window.authSessionFence = {isLocallyAllowed: () => false};
+        if (boundary === 'document') f.context.window.document = {};
+        assert.equal(f.gate.reveal(ticket), false, boundary);
+        assert.equal(f.documentElement.dataset.privatePageState, 'pending', boundary);
+    }
 });
 
 for (const kind of ['error', 'timeout']) test(kind + ' keeps the page hidden and rejects a late Auth success', () => {

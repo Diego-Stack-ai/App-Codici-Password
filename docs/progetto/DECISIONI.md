@@ -1,5 +1,12 @@
 # Decisioni
 
+<a id="ingresso-contatti-1281-decisione-2026-11-17"></a>
+
+## Ingresso e contatti — ordine 17/11/2026
+
+Fonte diretta: «Implementa anche il flusso dell’ingresso e poi controllo dal cellulare». Il seguito include la semplificazione proposta dei contatti e la presentazione dell’ingresso, da rendere disponibili con nuova versione secondo il [mandato](INCARICO_CORRENTE.md#ingresso-contatti-1281-2026-11-17). Account e Vault restano distinti; invariati ammissione, lease e timeout. Una UI finale contatto conserva prova fresca consumata una volta e click nativo successivo trusted. Le foto attestano l’ordine, non durata o causa interna. Valutazione fisica dopo pubblicazione.
+
+
 <a id="vcard-1280-decisione-2026-11-17"></a>
 
 ## vCard e QR nella stessa 1.2.280 — 17/11/2026

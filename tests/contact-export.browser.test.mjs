@@ -7,37 +7,122 @@ const livery = JSON.parse(await readFile(new URL('../scripts/ui-livery-contract.
 const coverage = {'contact-export': new Set(), 'company-card-qr': new Set()};
 const cover = (component, ...states) => states.forEach(state => coverage[component].add(state));
 const registeredPaintPass = (values, paint) => values.length > 0 && values.every(value => value.visible && value.rolePass && (!paint.minimum || value.contrast?.pass));
+const entryName = 'Salva o condividi contatto…';
 
-// Real page/controller/renderer; synthetic identity, Vault and native adapters.
-// These tests never open an OS picker, write a real contact or certify a device.
+// Real page/controller/native launcher; synthetic identity, Vault and OS adapters.
+async function openContact(f) {
+    await f.page.evaluate(() => {
+        window.contactPreparationSeen = false;
+        const observer = new MutationObserver(() => {
+            const modal = document.querySelector('#contact-export-modal');
+            if (modal?.dataset.exportState === 'preparing' && modal.getBoundingClientRect().width > 0 &&
+                modal.querySelector('.contact-export-primary')?.disabled) window.contactPreparationSeen = true;
+        });
+        observer.observe(document.body, {subtree: true, childList: true, attributes: true});
+    });
+    const entry = f.page.locator('[data-contact-export]');
+    assert.equal(await entry.count(), 1, 'one contact command per card');
+    assert.equal(await entry.textContent(), entryName);
+    await entry.click();
+    const dialog = f.page.locator('#contact-export-modal'); await dialog.waitFor();
+    await f.page.waitForFunction(() => document.querySelector('#contact-export-modal')?.dataset.exportState === 'ready');
+    assert.equal(await f.page.evaluate(() => window.contactPreparationSeen), true);
+    assert.equal(await f.page.locator('.modal-overlay.active [role=dialog]').count(), 1, 'one active final panel');
+    assert.equal(await dialog.locator('button').count(), 2, 'one primary and Close');
+    cover('contact-export', 'open', 'preparing', 'ready');
+    return dialog;
+}
+async function choose(dialog, name) {
+    const method = dialog.locator('#contact-export-method');
+    if (await method.inputValue() !== name) {
+        const details = dialog.locator('.contact-export-options');
+        if (await details.getAttribute('open') === null) await details.locator('summary').click();
+        await method.selectOption(name); cover('contact-export', 'options-open');
+    }
+    if (await dialog.getAttribute('data-export-state') === 'result') {
+        await dialog.locator('.contact-export-primary').click();
+        await dialog.page().waitForFunction(() => document.querySelector('#contact-export-modal')?.dataset.exportState === 'ready');
+    }
+}
+async function openFixture(harness, company, graphics) {
+    return harness.open(company ? 'dati_azienda.html' : 'profilo_privato.html', {
+        graphics, query: company ? '?id=doc-0&profileTab=digital-card' : '?profileTab=digital-card'});
+}
+
+test('contact export controls stay compact and reachable on private and company pages', {timeout: 120000}, async () => {
+    const harness = await createTourHarness({memory: true}), measurements = [];
+    try {
+        for (const graphics of ['classica', 'tre-livelli']) for (const company of [false, true])
+        for (const picker of [false, true]) for (const share of [false, true]) {
+            const f = await openFixture(harness, company, graphics);
+            try {
+                await f.page.evaluate(({picker, share}) => {
+                    if (!picker) Object.defineProperty(window, 'showSaveFilePicker', {configurable: true, value: undefined});
+                    Object.defineProperty(navigator, 'canShare', {configurable: true, value: () => share});
+                    document.documentElement.classList.remove('dark'); document.documentElement.dataset.colorTheme = 'blue';
+                }, {picker, share});
+                const dialog = await openContact(f);
+                const expected = share ? 'share' : picker ? 'save' : 'download';
+                assert.equal(await dialog.locator('#contact-export-method').inputValue(), expected);
+                assert.equal(await dialog.locator('option[value=save]').count(), Number(picker));
+                assert.equal(await dialog.locator('option[value=share]').count(), Number(share));
+                if (!picker) cover('contact-export', 'save-unavailable');
+                if (!share) cover('contact-export', 'share-unavailable');
+                if (!picker && !share) {
+                    assert.equal(await dialog.locator('.contact-export-options').isVisible(), false);
+                    assert.match(await dialog.locator('.contact-export-download-help').textContent(), /browser/);
+                }
+                for (const width of [320, 390, 1280]) for (const height of [568, 844]) {
+                    await f.page.setViewportSize({width, height});
+                    const sizes = await dialog.locator('button').evaluateAll(buttons => buttons.map(button => {
+                        const rect = button.getBoundingClientRect(), range = document.createRange(); range.selectNodeContents(button);
+                        const text = range.getBoundingClientRect();
+                        return {label: button.textContent, height: rect.height,
+                            compact: rect.height >= 44 && rect.height <= parseFloat(getComputedStyle(document.documentElement).fontSize) * 5.5,
+                            textFits: text.top >= rect.top && text.bottom <= rect.bottom && text.left >= rect.left && text.right <= rect.right};
+                    }));
+                    const label = `${company ? 'company' : 'private'}/${graphics}/${picker}/${share}/${width}x${height}`;
+                    assert.equal(sizes.length, 2); assert.ok(sizes.every(size => size.compact && size.textFits), label + JSON.stringify(sizes));
+                    const bounds = await dialog.boundingBox(); assert.ok(bounds.y >= -1 && bounds.y + bounds.height <= height + 1, label);
+                    const close = dialog.getByRole('button', {name: 'Chiudi', exact: true}); await close.focus(); await close.scrollIntoViewIfNeeded();
+                    const b = await close.boundingBox(); assert.ok(b.y >= 0 && b.y + b.height <= height + 1, label + ': reachable');
+                    measurements.push({label, sizes});
+                    if (!picker && share && graphics === 'tre-livelli' && width === 390 && height === 844) {
+                        await dialog.evaluate(element => {element.scrollTop = 0;}); await mkdir('.codex-tmp/contact-export-compact', {recursive: true});
+                        await f.page.screenshot({path: `.codex-tmp/contact-export-compact/${company ? 'company' : 'private'}-phone.png`});
+                    }
+                }
+                assert.deepEqual(await f.page.evaluate(() => window.__viewTour.errors), []);
+            } finally {await f.context.close();}
+        }
+    } finally {await harness.close();}
+    await writeFile('.codex-tmp/contact-export-compact/measurements.json', JSON.stringify({kind: 'synthetic native adapters', measurements}, null, 2));
+    assert.equal(measurements.length, 96);
+});
+
 test('private and company contact commands announce names and save through a trusted native click', {timeout: 120000}, async () => {
     const harness = await createTourHarness({memory: true});
     try {
         for (const graphics of ['classica', 'tre-livelli']) for (const company of [false, true]) {
-            const f = await harness.open(company ? 'dati_azienda.html' : 'profilo_privato.html', {graphics,
-                query: company ? '?id=doc-0&profileTab=digital-card' : '?profileTab=digital-card'});
+            const f = await openFixture(harness, company, graphics);
             try {
                 const filename = company ? 'contatto-azienda-Azienda-inventata-0.vcf' : 'contatto-Nome-fittizio-Locale.vcf';
-                const savesBefore = harness.assets.nativeSavePickers;
-                const entry = livery.contactExport.entries.find(entry => entry.page === (company ? 'dati_azienda.html' : 'profilo_privato.html'));
-                assert.ok(entry);
-                await f.page.locator(entry.selector).filter({hasText: /^Salva contatto…$/}).click();
-                const dialog = f.page.getByRole('dialog', {name: 'Salva o condividi il contatto'});
-                await dialog.waitFor(); assert.equal(await dialog.locator('.contact-export-name').textContent(), filename);
-                cover('contact-export', 'open');
-                assert.equal(harness.assets.nativeSavePickers, savesBefore, 'the announcement does not start a file operation');
-                await dialog.getByRole('button', {name: 'Scegli dove salvare…', exact: true}).click();
+                const before = harness.assets.nativeSavePickers;
+                const dialog = await openContact(f);
+                assert.equal(await dialog.locator('.contact-export-name').textContent(), filename);
+                assert.equal(harness.assets.nativeSavePickers, before);
+                await choose(dialog, 'save');
+                assert.equal(harness.assets.nativeSavePickers, before, 'changing the alternative cannot export');
+                await dialog.locator('.contact-export-primary').click();
                 await f.page.waitForFunction(() => document.querySelector('#contact-export-modal [role=status]')?.textContent?.startsWith('File salvato:'));
                 assert.deepEqual(await f.page.evaluate(() => window.__viewTourLastSave), {name: filename, active: true, writes: 1, closed: 1, aborted: 0});
-                assert.equal(await dialog.locator('[role=status]').textContent(), 'File salvato: ' + filename);
                 cover('contact-export', 'saved');
-                await dialog.getByRole('button', {name: 'Condividi o salva…', exact: true}).click();
-                await f.page.waitForFunction(() => document.querySelector('#contact-export-modal [role=status]')?.textContent?.startsWith('File consegnato al sistema per la condivisione:'));
+                await choose(dialog, 'share'); await dialog.locator('.contact-export-primary').click();
+                await f.page.waitForFunction(() => document.querySelector('#contact-export-modal [role=status]')?.textContent?.startsWith('File consegnato al sistema'));
                 assert.equal(await dialog.locator('[role=status]').textContent(), 'File consegnato al sistema per la condivisione: ' + filename);
                 cover('contact-export', 'shared');
                 await dialog.getByRole('button', {name: 'Chiudi', exact: true}).click();
-                assert.equal(await f.page.locator('#contact-export-modal').count(), 0);
-                assert.deepEqual(await f.page.evaluate(() => window.__viewTour.errors), []);
+                assert.equal(await dialog.count(), 0); assert.deepEqual(await f.page.evaluate(() => window.__viewTour.errors), []);
             } finally {await f.context.close();}
         }
         assert.equal(harness.assets.nativeSavePickers, 4);
@@ -48,52 +133,36 @@ test('unsupported sharing and rejected or cancelled native actions always have a
     const harness = await createTourHarness({memory: true});
     try {
         for (const graphics of ['classica', 'tre-livelli']) for (const company of [false, true]) {
-            const f = await harness.open(company ? 'dati_azienda.html' : 'profilo_privato.html', {
-                graphics, query: company ? '?id=doc-0&profileTab=digital-card' : '?profileTab=digital-card'});
+            const f = await openFixture(harness, company, graphics);
             try {
                 await f.page.evaluate(() => {
                     Object.defineProperty(window, 'showSaveFilePicker', {configurable: true, value: undefined});
                     Object.defineProperty(navigator, 'canShare', {configurable: true, value: () => false});
                     document.addEventListener('click', event => {
-                        const link = event.target.closest('a[download]');
-                        if (link) {event.preventDefault(); (window.contactDownloads ||= []).push(link.download);}
+                        const link = event.target.closest('a[download]'); if (link) {event.preventDefault(); (window.contactDownloads ||= []).push(link.download);}
                     });
                 });
-                const entry = f.page.locator('.digital-card-actions').getByRole('button', {name: 'Condividi', exact: true});
-                await entry.click();
-                const dialog = f.page.locator('#contact-export-modal'); await dialog.waitFor();
-                assert.equal(await dialog.getByText('Scegli dove salvare…', {exact: true}).isVisible(), false, 'unsupported picker is visually absent');
-                assert.equal(await dialog.getByRole('button', {name: 'Condividi o salva…', exact: true}).isDisabled(), true);
-                assert.match(await dialog.locator('[role=status]').textContent(), /non è disponibile/);
-                cover('contact-export', 'save-unavailable', 'share-unavailable');
-                assert.equal(await f.page.evaluate(() => window.contactDownloads?.length || 0), 0, 'no automatic fallback');
-                const announced = await dialog.locator('.contact-export-name').textContent();
-                await dialog.getByRole('button', {name: 'Scarica file', exact: true}).click();
+                let dialog = await openContact(f); const announced = await dialog.locator('.contact-export-name').textContent();
+                assert.equal(await f.page.evaluate(() => window.contactDownloads?.length || 0), 0);
+                await dialog.locator('.contact-export-primary').click();
                 await f.page.waitForFunction(() => document.querySelector('#contact-export-modal [role=status]')?.textContent?.startsWith('Download avviato:'));
-                assert.deepEqual(await f.page.evaluate(() => window.contactDownloads), [announced]);
-                assert.equal(await dialog.locator('[role=status]').textContent(), 'Download avviato: ' + announced);
-                cover('contact-export', 'download-started');
+                assert.deepEqual(await f.page.evaluate(() => window.contactDownloads), [announced]); cover('contact-export', 'download-started');
                 await f.page.keyboard.press('Escape'); assert.equal(await dialog.count(), 0);
-                assert.equal(await entry.evaluate(element => element === document.activeElement), true);
-                for (const method of ['share', 'save']) for (const name of ['NotAllowedError', 'AbortError']) {
+                for (const method of ['share', 'save']) for (const name of ['NotAllowedError', 'AbortError', 'NotSupportedError', 'DataError']) {
                     await f.page.evaluate(({name, method}) => {
                         Object.defineProperty(navigator, 'canShare', {configurable: true, value: () => true});
-                        Object.defineProperty(navigator, 'share', {configurable: true, value: async () => {
-                            window.contactShareActive = navigator.userActivation.isActive;
-                            throw new DOMException('Synthetic native result', name);
-                        }});
-                        if (method === 'save') Object.defineProperty(window, 'showSaveFilePicker', {configurable: true, value: async () => {
-                            window.contactShareActive = navigator.userActivation.isActive;
-                            throw new DOMException('Synthetic native result', name);
-                        }});
+                        const fail = async () => {window.contactActivation = navigator.userActivation.isActive; throw new DOMException('Synthetic result', name);};
+                        Object.defineProperty(navigator, 'share', {configurable: true, value: fail});
+                        Object.defineProperty(window, 'showSaveFilePicker', {configurable: true, value: method === 'save' ? fail : undefined});
                     }, {name, method});
-                    await entry.click(); await dialog.waitFor();
-                    await dialog.getByRole('button', {name: method === 'share' ? 'Condividi o salva…' : 'Scegli dove salvare…', exact: true}).click();
-                    const expected = name === 'AbortError' ? 'Operazione annullata.' : 'Operazione non riuscita. Riprova oppure scegli un altro comando.';
+                    dialog = await openContact(f); await choose(dialog, method); await dialog.locator('.contact-export-primary').click();
+                    const expected = name === 'AbortError' ? 'Operazione annullata.' : name === 'NotSupportedError' && method === 'share'
+                        ? 'La condivisione di file non è disponibile in questo browser. Puoi salvare o scaricare il contatto.'
+                        : 'Operazione non riuscita. Riprova oppure scegli un altro comando.';
                     await f.page.waitForFunction(expected => document.querySelector('#contact-export-modal [role=status]')?.textContent === expected, expected);
-                    assert.equal(await f.page.evaluate(() => window.contactShareActive), true);
+                    assert.equal(await f.page.evaluate(() => window.contactActivation), true);
                     cover('contact-export', name === 'AbortError' ? 'cancelled' : method + '-error');
-                    assert.deepEqual(await f.page.evaluate(() => window.contactDownloads), [announced], 'no export after a rejected/cancelled share');
+                    assert.deepEqual(await f.page.evaluate(() => window.contactDownloads), [announced], 'no automatic fallback');
                     await dialog.getByRole('button', {name: 'Chiudi', exact: true}).click();
                 }
                 assert.deepEqual(await f.page.evaluate(() => window.__viewTour.errors), []);
@@ -106,8 +175,7 @@ test('a pending native picker cannot write after lock and re-entry with the same
     const harness = await createTourHarness({memory: true});
     try {
         for (const graphics of ['classica', 'tre-livelli']) for (const company of [false, true]) {
-            const f = await harness.open(company ? 'dati_azienda.html' : 'profilo_privato.html', {
-                graphics, query: company ? '?id=doc-0&profileTab=digital-card' : '?profileTab=digital-card'});
+            const f = await openFixture(harness, company, graphics);
             try {
                 await f.page.evaluate(() => {
                     window.lateContactWrites = 0;
@@ -117,15 +185,11 @@ test('a pending native picker cannot write after lock and re-entry with the same
                         }});
                     })});
                 });
-                await f.page.getByRole('button', {name: 'Salva contatto…', exact: true}).click();
-                await f.page.locator('#contact-export-modal').getByRole('button', {name: 'Scegli dove salvare…', exact: true}).click();
+                const dialog = await openContact(f); await choose(dialog, 'save'); await dialog.locator('.contact-export-primary').click();
                 await f.page.waitForFunction(() => typeof window.releaseContactPicker === 'function');
                 await f.page.evaluate(() => {window.dispatchEvent(new Event('vault-session-locked')); window.dispatchEvent(new Event('vault-session-unlocked'));});
-                assert.equal(await f.page.locator('#contact-export-modal').count(), 0);
-                await f.page.evaluate(() => window.releaseContactPicker());
-                await f.page.waitForFunction(() => !document.querySelector('#contact-export-modal'));
-                assert.equal(await f.page.evaluate(() => window.lateContactWrites), 0);
-                cover('contact-export', 'revoked');
+                assert.equal(await dialog.count(), 0); await f.page.evaluate(() => window.releaseContactPicker());
+                assert.equal(await f.page.evaluate(() => window.lateContactWrites), 0); cover('contact-export', 'revoked');
                 assert.deepEqual(await f.page.evaluate(() => window.__viewTour.errors), []);
             } finally {await f.context.close();}
         }
@@ -136,8 +200,7 @@ test('pending contact actions remain closable and ignore late native completion'
     const harness = await createTourHarness({memory: true});
     try {
         for (const graphics of ['classica', 'tre-livelli']) for (const company of [false, true]) for (const method of ['share', 'save']) {
-            const f = await harness.open(company ? 'dati_azienda.html' : 'profilo_privato.html', {
-                graphics, query: company ? '?id=doc-0&profileTab=digital-card' : '?profileTab=digital-card'});
+            const f = await openFixture(harness, company, graphics);
             try {
                 await f.page.evaluate(method => {
                     window.lateContactWrites = 0;
@@ -148,28 +211,20 @@ test('pending contact actions remain closable and ignore late native completion'
                     Object.defineProperty(navigator, 'share', {configurable: true, value: held});
                     Object.defineProperty(window, 'showSaveFilePicker', {configurable: true, value: held});
                 }, method);
-                const entry = f.page.getByRole('button', {name: 'Salva contatto…', exact: true});
-                await entry.click();
-                const dialog = f.page.locator('#contact-export-modal'); await dialog.waitFor();
-                await dialog.getByRole('button', {name: method === 'share' ? 'Condividi o salva…' : 'Scegli dove salvare…', exact: true}).click();
+                let dialog = await openContact(f); await choose(dialog, method); await dialog.locator('.contact-export-primary').click();
                 await f.page.waitForFunction(() => typeof window.releaseHeldContact === 'function');
                 assert.match(await dialog.locator('[role=status]').textContent(), /Attendi la finestra/);
-                for (const label of ['Scegli dove salvare…', 'Condividi o salva…', 'Scarica file']) assert.equal(await dialog.getByRole('button', {name: label, exact: true}).isDisabled(), true);
+                assert.equal(await dialog.locator('.contact-export-primary').isDisabled(), true);
                 const close = dialog.getByRole('button', {name: 'Chiudi', exact: true});
-                assert.equal(await close.isEnabled(), true);
-                assert.equal(await close.evaluate(element => element === document.activeElement), true, 'pending immediately keeps keyboard focus inside the dialog');
-                await f.page.keyboard.press('Tab');
                 assert.equal(await close.evaluate(element => element === document.activeElement), true);
                 if (method === 'save') await close.click(); else await f.page.keyboard.press('Escape');
                 assert.equal(await dialog.count(), 0);
-                await entry.click(); await dialog.waitFor();
-                await f.page.evaluate(() => window.releaseHeldContact());
-                await f.page.waitForFunction(() => document.querySelector('#contact-export-modal [role=status]')?.textContent === '');
+                dialog = await openContact(f); await f.page.evaluate(() => window.releaseHeldContact());
+                await f.page.waitForFunction(() => document.querySelector('#contact-export-modal')?.dataset.exportState === 'ready');
                 assert.equal(await f.page.evaluate(() => window.lateContactWrites), 0);
-                assert.equal(await dialog.count(), 1, 'late result does not reopen or replace the new dialog');
-                await dialog.getByRole('button', {name: 'Chiudi', exact: true}).click();
+                assert.equal(await dialog.locator('[role=status]').textContent(), '');
+                await dialog.getByRole('button', {name: 'Chiudi', exact: true}).click(); cover('contact-export', 'pending');
                 assert.deepEqual(await f.page.evaluate(() => window.__viewTour.errors), []);
-                cover('contact-export', 'pending');
             } finally {await f.context.close();}
         }
     } finally {await harness.close();}
@@ -262,8 +317,11 @@ test('contact export stays readable and contained in all seven themes and both g
             const f = await harness.open(company ? 'dati_azienda.html' : 'profilo_privato.html', {graphics,
                 query: company ? '?id=doc-0&profileTab=digital-card' : '?profileTab=digital-card'});
             try {
-                await f.page.evaluate(() => Object.defineProperty(navigator, 'canShare', {configurable: true, value: () => false}));
-                await f.page.getByRole('button', {name: 'Salva contatto…', exact: true}).click(); await f.page.locator('#contact-export-modal').waitFor();
+                await f.page.evaluate(() => Object.defineProperty(navigator, 'canShare', {configurable: true, value: () => true}));
+                await openContact(f);
+                await f.page.locator('.contact-export-options summary').click();
+                assert.equal(await f.page.locator('#contact-export-method').isVisible(), true);
+                cover('contact-export', 'options-open');
                 for (const width of [320, 1280]) {
                     await f.page.setViewportSize({width, height: 844});
                     for (const theme of livery.themes) for (const palette of livery.palettes) {
@@ -271,7 +329,7 @@ test('contact export stays readable and contained in all seven themes and both g
                         const label = `${company ? 'company' : 'private'}/${graphics}/${width}/${theme}/${palette}`;
                         const paints = await inspectDynamicPaint(f.page, {selector: '#contact-export-modal .modal-title,#contact-export-modal .contact-export-name,#contact-export-modal .modal-description,#contact-export-modal button:not([hidden]):not(:disabled)', property: 'color', role: '--text-primary', minimum: 4.5}, {theme, graphics});
                         for (const paint of paints) if (paint.visible && !paint.contrast?.pass) failures.push({label, contrast: paint.contrast, actual: paint.actual, own: paint.own});
-                        for (const paint of livery.contactExport.paints.filter(paint => paint.states.includes('open'))) {
+                        for (const paint of livery.contactExport.paints.filter(paint => paint.states.includes('options-open'))) {
                             const values = await inspectDynamicPaint(f.page, paint, {theme, graphics});
                             if (!registeredPaintPass(values, paint)) failures.push({label, paint, values});
                         }
@@ -288,6 +346,15 @@ test('contact export stays readable and contained in all seven themes and both g
                     await mkdir('.codex-tmp/contact-export-verification', {recursive: true});
                     await f.page.screenshot({path: '.codex-tmp/contact-export-verification/private-contact-phone.png'});
                 }
+                await f.page.addStyleTag({content: '#contact-export-method{color:#B87333!important}'});
+                const selectPaint = livery.contactExport.paints.find(paint => paint.selector === '#contact-export-method' && paint.property === 'color');
+                const wrongSelect = await inspectDynamicPaint(f.page, selectPaint, {graphics});
+                assert.ok(wrongSelect.some(paint => !paint.rolePass), 'a fixed copper select is rejected');
+                await f.page.addStyleTag({content: '#contact-export-method{display:none!important}'});
+                assert.equal(registeredPaintPass(await inspectDynamicPaint(f.page, selectPaint, {graphics}), selectPaint), false, 'hidden alternatives are rejected');
+                const labelPaint=livery.contactExport.paints.find(paint=>paint.selector==='.contact-export-options label');
+                await f.page.locator('.contact-export-options label').evaluate(element=>element.remove());
+                assert.equal(registeredPaintPass(await inspectDynamicPaint(f.page,labelPaint,{graphics}),labelPaint),false,'missing method label is rejected');
                 await f.page.addStyleTag({content: '#contact-export-modal .contact-export-name{color:transparent!important}'});
                 const negative = await inspectDynamicPaint(f.page, {selector: '.contact-export-name', property: 'color', role: '--text-primary', minimum: 4.5});
                 assert.ok(negative.some(paint => !paint.rolePass && !paint.contrast?.pass), 'invisible file names are rejected');

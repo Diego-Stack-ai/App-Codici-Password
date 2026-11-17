@@ -426,7 +426,7 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
     {id:'profile-guide',pages:['profilo_privato.html'],selectors:[registry.footer?.guide],roles:[registry.footer?.inkRole,'--text-primary'],producers:[registry.footer?.producer]},
     {id:'profile-typography',pages:[registry.profileTypography?.page],selectors:registry.profileTypography?.selectors,roles:[],producers:[registry.profileTypography?.producer],styles:registry.profileTypography?.styles,test:registry.profileTypography?.test,translations:registry.profileTypography?.translations},
     ...[
-      {id:'contact-export',metadata:registry.contactExport,expectedPages:['profilo_privato.html','dati_azienda.html'],requiredStates:['open','save-unavailable','share-unavailable','saved','shared','save-error','share-error','cancelled','download-started','revoked','pending']},
+      {id:'contact-export',metadata:registry.contactExport,expectedPages:['profilo_privato.html','dati_azienda.html'],requiredStates:['open','save-unavailable','share-unavailable','saved','shared','save-error','share-error','cancelled','download-started','revoked','pending','preparing','ready','options-open']},
       {id:'company-card-qr',metadata:registry.companyCardQr,expectedPages:['dati_azienda.html'],requiredStates:['card-inline','card-zoom','unsaved-selection-zoom','header-zoom','closed','revoked']}
     ].map(component=>({...component,native:true,pages:Array.isArray(component.metadata?.pages)?component.metadata.pages:[],
       selectors:component.metadata?.selectors,styles:component.metadata?.styles,

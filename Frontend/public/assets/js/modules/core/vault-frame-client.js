@@ -1,5 +1,5 @@
 import {createFrameMediaLifetime} from './vault-frame-media-lifetime.mjs';
-import {auth} from '../../firebase-config.js?v=1.2.280';
+import {auth} from '../../firebase-config.js?v=1.2.281';
 import {authSessionFence} from '../../auth-session-fence.js';
 import {APP_VERSION, VAULT_FRAME_ENABLED} from '../../app-env.js';
 import {createFrameTransport} from './vault-frame-transport.mjs';
@@ -54,11 +54,11 @@ export function frameMediaLifetime(options = {}) {
 }
 
 // No native-export UI or its dependencies on ordinary page startup.
-export function executeFrameNativeAction(target, action) {
-  if (!vaultFrameClient.isChild()) return action();
+export function executeFrameNativeAction(target, action, presentation) {
+  if (!vaultFrameClient.isChild() && !presentation) return action();
   const generation = vaultFrameClient.generation(), suspension = vaultFrameClient.suspensionGeneration();
   return import('./vault-frame-native-action.js').then(module => {
-    if (generation !== vaultFrameClient.generation() || suspension !== vaultFrameClient.suspensionGeneration() || !vaultFrameClient.isUnlocked()) throw Error('FRAME_CONFIRMATION_REQUIRED');
-    return module.executeFrameNativeAction(target, action, {vaultFrameClient, confirmFrameAction});
+    if (vaultFrameClient.isChild() && (generation !== vaultFrameClient.generation() || suspension !== vaultFrameClient.suspensionGeneration() || !vaultFrameClient.isUnlocked())) throw Error('FRAME_CONFIRMATION_REQUIRED');
+    return module.executeFrameNativeAction(target, action, {vaultFrameClient, confirmFrameAction}, presentation);
   });
 }

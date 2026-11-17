@@ -141,14 +141,14 @@ test('all seven palettes keep companion ink and the 15 percent card increase exc
       assert.deepEqual(colors.actual,graphics==='classica'?colors.primary:colors.enhanced,label+': Classic never receives the companion or increase');
       let measured=0;
       const selectors=contract.cardGlyphs.join(',');
-      const cardPaint={selector:selectors,property:'color',role:'--card-icon-ink',minimum:3};
+      const cardPaint={selector:selectors,property:'color',role:'--card-icon-ink',minimum:3,withinSelector:'.company-profile-page .settings-icon-box.icon-blue,.company-profile-page .settings-icon-box.icon-purple,.matrix-icon-box.icon-blue,.matrix-icon-box.icon-purple',captureAncestry:true};
       const values=await inspectDynamicPaint(f.page,cardPaint,{theme});
       for(const value of values){
        if(!value.visible)continue;
-       const filled=await f.page.evaluate(index=>{const node=[...document.body.querySelectorAll('*')][index];return !!node?.closest('.company-profile-page .settings-icon-box.icon-blue,.company-profile-page .settings-icon-box.icon-purple,.matrix-icon-box.icon-blue,.matrix-icon-box.icon-purple');},value.own);
+       const filled=value.matchesWithin;
        if(filled)continue;
        if(!value.rolePass||!value.contrast?.pass){
-        const ancestry=failures.length<80?await f.page.evaluate(index=>{const list=[];for(let node=[...document.body.querySelectorAll('*')][index];node&&list.length<5;node=node.parentElement){const s=getComputedStyle(node);list.push({tag:node.tagName,class:node.className,color:s.color,bg:s.backgroundColor,image:s.backgroundImage,opacity:s.opacity});}return list;},value.own):[];
+        const ancestry=failures.length<80?value.ancestry:[];
         failures.push({label,kind:'card',role:value.rolePass,contrast:value.contrast,actual:value.actual,expected:value.expected,ancestry});
        }measured++;
       }

@@ -1,5 +1,24 @@
 # Interfaccia
 
+<a id="ingresso-contatti-1281-ui-2026-11-17"></a>
+
+## Ingresso e contatti — candidata 1.2.281
+
+Entrambe le Tessere hanno una entry «Salva o condividi contatto…»: nome visibile, preparazione, una primaria e Chiudi, alternative sotto «Altre opzioni». Primaria: file share se supportato, altrimenti picker, altrimenti download esplicito. Chiudi/Escape disponibili anche durante preparazione e attesa OS; niente esportazione dal cambio metodo o fallback automatico. Ogni retry richiede preparazione e poi click finale nuovi. Pulsanti scoped con minimo44px e wrapping.
+
+Home coperta dopo identità accettata fino a chiave/init e ricontrollo ticket/UID/fence. Body disponibile al popup Master. Errori/annullamento terminano l’attesa con blocco reale o ripresa standalone. Parent app inizialmente neutro, blocco/ripresa nascosti; titolo stabile «Codici & Password» e testo di attesa localizzato: supera la prescrizione storica del title frame_locked_title. Il trasporto visible resta al punto originario per evitare deadlock.
+
+Registro14 stati contatto +6 QR; produttore privato corretto al dashboard. Summary/label/select hanno ruoli e prove anche negative; il misuratore tratta la selectedOption chiusa, non il popup OS. UI275-01 misura attesa, UI275-02 blocco, mutuamente esclusivi. [Prove](../evidenze/COLLAUDI.md#ingresso-contatti-1281-verifiche-2026-11-17). Le descrizioni280 sotto sono storiche.
+
+
+<a id="contatti-compact-ui-2026-11-17"></a>
+
+## Popup contatti — correzione dimensionale locale dopo la280
+
+Nel solo componente `.contact-export-actions`, griglia esplicita a due colonne restringibili, pulsanti ad altezza automatica e minimo44px; nessun flex-basis che possa diventare altezza nel layout mobile aziendale. Testo a capo e scorrimento del popup rimangono disponibili. Nessun reset globale o cambiamento dei token colore; comandi/etichette e protocollo nativo restano quelli pubblicati.
+
+La [regressione](../../tests/contact-export.browser.test.mjs) controlla dimensioni, contenimento del testo e raggiungibilità di Chiudi; è collegata nello stato open del [registro](../../scripts/ui-livery-contract.json). [Prove e limiti](../evidenze/COLLAUDI.md#contatti-compact-verifiche-2026-11-17). Il percorso con una sola entry e un solo pannello finale è una proposta separata, non un comportamento già attivo.
+
 <a id="vcard-1280-ui-2026-11-17"></a>
 
 ## Esportazione contatti e QR azienda — distribuiti nella 1.2.280

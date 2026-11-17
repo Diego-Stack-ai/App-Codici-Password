@@ -232,15 +232,48 @@
 }
 
 .contact-export-actions {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 0.75rem;
 }
 
 .contact-export-actions .btn-modal {
-    flex: 1 1 10rem;
+    flex: none;
     min-width: 0;
+    min-height: 2.75rem;
+    height: auto;
+    padding: 0.75rem 1rem;
+    line-height: 1.25;
     white-space: normal;
 }
 
 .contact-export-actions .btn-modal[hidden] {
     display: none;
+}
+
+.contact-export-options {
+    margin-top: 0.75rem;
+}
+
+.contact-export-options summary {
+    cursor: pointer;
+    padding: 0.5rem 0;
+    color: var(--text-primary);
+}
+
+.contact-export-options label {
+    display: block;
+    margin: 0.5rem 0;
+}
+
+.contact-export-options select {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid var(--card-border);
+    border-radius: 0.75rem;
+    background: var(--rev-surface-2);
+    color: var(--text-primary);
+    padding: 0.5rem;
+    font: inherit;
 }

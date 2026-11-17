@@ -5,6 +5,7 @@ import {readFile} from 'node:fs/promises';
 import {resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
+import {createHash} from 'node:crypto';
 import {FRAME_ROUTES} from '../Frontend/public/assets/js/modules/core/vault-frame-policy.mjs';
 
 // Actual owner/transport/CSS with synthetic Auth/admission; no Firebase traffic.
@@ -227,4 +228,78 @@ test('native second click rejects a suspended proof or expired lease with the re
   await page.waitForFunction(()=>window.nativeFixture.done);assert.equal(await page.evaluate(()=>window.nativeFixture.calls),0);
  }
  }finally{await context.close();}
+});
+
+// This composes the real owner/session/transport/client/native helper/controller/model.
+// Only identity/fence, labels, and operating-system APIs are synthetic.
+async function contactFixture() {
+ const context=await browser.newContext({viewport:{width:393,height:852}});
+ const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await context.route('**/*',async route=>{
+  const url=new URL(route.request().url());if(!url.href.startsWith(base))return route.abort();
+  let body;
+  if(url.pathname==='/child-fixture.mjs')body=[
+   "import {vaultFrameClient as client,frameMediaLifetime} from '/assets/js/modules/core/vault-frame-client.js';",
+   "import {openContactExport} from '/assets/js/modules/shared/contact-export.js';",
+   "window.fixtureChild={keys:0};window.contactState={calls:0,active:false,reject:true};",
+   "window.requestFixtureKey=async()=>{const reply=await client.request('key');if(reply.kind!=='key')throw Error('DENIED');window.fixtureChild.keys++;};",
+   "Object.defineProperty(navigator,'canShare',{configurable:true,value:()=>true});",
+   "Object.defineProperty(navigator,'share',{configurable:true,value:async()=>{parent.fixture.contactNativeCalls=(parent.fixture.contactNativeCalls||0)+1;window.contactState.calls++;window.contactState.active=navigator.userActivation.isActive;if(window.contactState.reject)throw new DOMException('synthetic','AbortError');}});",
+   "document.querySelector('#action').onclick=()=>{const life=frameMediaLifetime({signal:new AbortController().signal,requireUnlocked:false});void openContactExport({value:'BEGIN:VCARD\\nFN:Synthetic\\nEND:VCARD',holder:{name:'Synthetic'},target:{scope:'synthetic-contact'},isCurrent:life.valid,signal:life.signal}).finally(()=>life.dispose());};",
+   "await window.requestFixtureKey();"
+  ].join('\n');
+  else if(url.pathname==='/assets/js/firebase-config.js')body="export const auth={currentUser:{uid:'synthetic',emailVerified:true}};";
+  else if(url.pathname==='/assets/js/auth-session-fence.js')body="export const authSessionFence={readPermit:async()=>({uid:'synthetic'}),isCurrent:async()=>true,isLocallyCurrent:()=>true};";
+  else if(url.pathname==='/assets/js/app-env.js')body="export const APP_VERSION='fixture',VAULT_FRAME_ENABLED=true;";
+  else if(url.pathname==='/assets/js/translations.js')body="export const t=k=>k;export const tf=(k,v)=>k+' '+JSON.stringify(v);";
+  else if(url.pathname==='/assets/js/vendor/firebase-runtime.js')body="export const onAuthStateChanged=(a,cb)=>{queueMicrotask(()=>cb(a.currentUser));return()=>{};};";
+  else if(url.pathname==='/assets/js/modules/core/security-manager.js')body="import {vaultFrameClient} from './vault-frame-client.js';export const isVaultUnlocked=()=>vaultFrameClient.isUnlocked();";
+  if(body!==undefined)return route.fulfill({contentType:'text/javascript',body});
+  return route.continue();
+ });
+ await page.addInitScript(()=>{window.protocolTrace=[];window.addEventListener('message',e=>{if(['fresh','consume'].includes(e.data?.command))window.protocolTrace.push({command:e.data.command,purpose:e.data.purpose,target:e.data.target,grant:e.data.grant});});});
+ await page.goto(base+'/app.html');
+ await page.waitForFunction(()=>window.fixtureStarted&&document.querySelector('iframe').style.visibility==='visible');
+ const child=page.frames().find(frame=>frame!==page.mainFrame());await child.waitForFunction(()=>window.fixtureChild?.keys===1);
+ return {context,page,child,errors};
+}
+test('one contact panel composes real fresh and consume, then waits for a trusted native click and new proof on retry',async()=>{
+ const f=await contactFixture();try{
+ await f.child.locator('#action').click();
+ const dialog=f.child.locator('#contact-export-modal');await f.child.waitForFunction(()=>document.querySelector('#contact-export-modal')?.dataset.exportState==='ready');
+ assert.equal(await f.child.locator('.modal-overlay.active [role=dialog]').count(),1);
+ assert.equal(await dialog.locator('.contact-export-name').textContent(),'contatto-Synthetic.vcf');
+ assert.equal(await f.page.evaluate(()=>window.fixture.confirms),1);
+ assert.equal(await f.child.evaluate(()=>window.contactState.calls),0);
+ await dialog.locator('.contact-export-primary').dispatchEvent('click');
+ assert.equal(await f.child.evaluate(()=>window.contactState.calls),0);
+ await dialog.locator('.contact-export-primary').click();
+ await f.child.waitForFunction(()=>document.querySelector('#contact-export-modal')?.dataset.exportState==='result');
+ assert.deepEqual(await f.child.evaluate(()=>[window.contactState.calls,window.contactState.active]),[1,true]);
+ await dialog.locator('.contact-export-primary').click();
+ await f.child.waitForFunction(()=>document.querySelector('#contact-export-modal')?.dataset.exportState==='ready');
+ assert.equal(await f.page.evaluate(()=>window.fixture.confirms),2);
+ assert.equal(await f.child.evaluate(()=>window.contactState.calls),1,'retry preparation does not export');
+ await f.child.evaluate(()=>{window.contactState.reject=false;});
+ await dialog.locator('.contact-export-primary').click();await f.child.waitForFunction(()=>window.contactState.calls===2);
+ const trace=await f.page.evaluate(()=>window.protocolTrace);
+ const fingerprint=createHash('sha256').update(new TextEncoder().encode('BEGIN:VCARD\nFN:Synthetic\nEND:VCARD')).digest('hex');
+ const target=createHash('sha256').update(JSON.stringify({scope:'synthetic-contact',fingerprint})).digest('hex');
+ assert.deepEqual(trace.map(value=>value.command),['fresh','consume','fresh','consume']);
+ assert.ok(trace.every(value=>value.purpose==='backup-export'&&value.target===target),JSON.stringify({trace,target}));
+ assert.notEqual(trace[1].grant,trace[3].grant);
+ assert.equal(await f.page.evaluate(()=>window.frameOwner.session.state().grants),0);
+ assert.deepEqual(f.errors,[]);
+ }finally{await f.context.close();}
+});
+test('a real owner lock revokes the prepared contact panel without any operating-system action',async()=>{
+ const f=await contactFixture();try{
+ await f.child.locator('#action').click();await f.child.waitForFunction(()=>document.querySelector('#contact-export-modal')?.dataset.exportState==='ready');
+ await f.page.evaluate(()=>{window.lastNativeCalls=document.querySelector('iframe').contentWindow.contactState.calls;window.frameOwner.session.lock('synthetic-contact-lock');});
+ await f.page.waitForFunction(()=>!document.querySelector('iframe')||document.querySelector('iframe').hidden);
+ assert.equal(await f.page.evaluate(()=>window.lastNativeCalls),0);
+ assert.equal(await f.page.evaluate(()=>window.fixture.contactNativeCalls||0),0);
+ assert.equal(await f.page.evaluate(()=>window.fixture.locks.at(-1)),'synthetic-contact-lock');
+ assert.deepEqual(f.errors,[]);
+ }finally{await f.context.close();}
 });
