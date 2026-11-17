@@ -1,5 +1,13 @@
 # Collaudi
 
+<a id="scaletta-chiusura-verifiche-2026-11-17"></a>
+
+## Scaletta — riconciliazione documentale, 17/11/2026
+
+[Mandato](../progetto/INCARICO_CORRENTE.md#scaletta-chiusura-incarico-2026-11-17), [programma principale](../progetto/PROGRAMMA.md#scaletta-chiusura-2026-11-17). Confrontati STATO, PROGRAMMA, contratti/evidenze pertinenti e GitHub: #316 risulta integrata nel master 8d28c7b5 del giro #318/1.2.277; #313 era ancora aperta con descrizione ferma alla 1.2.275 e presa in carico invece già confermata nel commento di Claude. La ricevuta corrente resta 1.2.279/9cbf2d42.
+
+Corrette le interpretazioni di «492 viste ancora tutte da aprire», attivazione generale della cornice ancora da fare, retention Archivio da ridecidere e assenza assoluta di supporto/altri utenti. Il monitor quotidiano è dichiarato attivo dalle fonti, senza verifica di una nuova esecuzione in questo incarico. Il lotto RG-01–RG-04 riusa prove e limiti già registrati: nessun nuovo tour dell'app, contrasto misurato, prova fisica, audit sicurezza o approvazione estetica attestato da questo aggiornamento. Controlli locali: 34 MD ammessi, 1.243 collegamenti validi, test documentali 12/12 PASS e diff senza errori di spaziatura. L'audit documentale verifica struttura e collegamenti e non certifica il completamento della roadmap.
+
 <a id="rilascio-1279-verifiche-2026-11-16"></a>
 
 ## APP 1.2.279 — pubblicata e verificata, ricevuta 17/11/2026

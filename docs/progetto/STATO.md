@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+<a id="scaletta-chiusura-stato-2026-11-17"></a>
+
+## Priorità dopo la 1.2.279 — 17/11/2026
+
+Su [ordine di Diego](INCARICO_CORRENTE.md#scaletta-chiusura-incarico-2026-11-17), scaletta riallineata nel [PROGRAMMA](PROGRAMMA.md#scaletta-chiusura-2026-11-17): residui grafici → collaudi della cornice già attiva → sicurezza/recupero → prodotto residuo → maturità → PentAGI non attivo. Il giro #313 non è più in attesa del rilascio #316; le 492 ripetizioni sono state raggruppate e provate nel seguito, con i limiti dichiarati. Restano RG-01–RG-04, valutazione di Diego sul telefono e prove native/fisiche; nessun nuovo PASS o cambiamento applicativo deriva dal riordino. Versione e sorgente distribuiti restano quelli della ricevuta sotto.
+
 <a id="rilascio-1279-stato-2026-11-16"></a>
 
 ## APP 1.2.279 — pubblicata e verificata, ricevuta 17/11/2026

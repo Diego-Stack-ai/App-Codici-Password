@@ -1,5 +1,11 @@
 # Registro
 
+<a id="scaletta-chiusura-registro-2026-11-17"></a>
+
+## 17/11/2026 — riallineamento della scaletta dopo 1.2.279
+
+Diego ordina di aggiornare MD/GitHub con le correzioni al riepilogo di Claude e poi riprendere i residui grafici. [Programma principale](../progetto/PROGRAMMA.md#scaletta-chiusura-2026-11-17), [mandato](../progetto/INCARICO_CORRENTE.md#scaletta-chiusura-incarico-2026-11-17), [verifica delle fonti](../evidenze/COLLAUDI.md#scaletta-chiusura-verifiche-2026-11-17). Separati lavoro grafico già distribuito, controllo a vista RG-01–RG-04, collaudi cornice, sicurezza/recupero e lotti successivi; conservate decisioni già prese e gate. Nessun nuovo risultato fisico o rilascio: produzione 1.2.279 invariata.
+
 <a id="rilascio-1279-registro-2026-11-16"></a>
 
 ## 16/11/2026 — ordine1.2.279; pubblicazione verificata il17/11
