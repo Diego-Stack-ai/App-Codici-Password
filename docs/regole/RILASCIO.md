@@ -1,5 +1,12 @@
 # Rilascio
 
+<a id="rilascio-1281-eseguito-2026-11-17"></a>
+
+## APP1.2.281 — pubblicazione Hosting conclusa
+
+Procedura eseguita: GO sulla testa finale b312feac, CI#1206 SUCCESS, #328 unita in6b77e6d6; CI master#1207 e validateHosting#1208 sullo stesso SHA e digest pubblico identico. Production approvato circa17:15CET dopo master remoto invariato; deploy job134180408076 SUCCESS alle17:16:28CET. Verifica pubblica367hash/41profili/3probe e cinque GET indipendenti PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1281-verifiche-2026-11-17). Confezione canonica281/307riferimenti, guida15/reviewed281, offline61/347. Il gate require-clean è conservato: inventario QA generato allineato prima della CI finale. Il manifest locale è confrontato dai byte Git LF, con zero delta Git; nessun confronto fra hash CRLF e LF è usato come prova di distribuzione. Chiusura documentale senza altro Hosting.
+
+
 <a id="ingresso-contatti-1281-rilascio-2026-11-17"></a>
 
 ## Candidata1.2.281 — ingresso e contatti

@@ -1,5 +1,12 @@
 # Interfaccia
 
+<a id="rilascio-1281-ui-2026-11-17"></a>
+
+## Ingresso e contatti — disponibili nella1.2.281
+
+Il contratto implementativo sotto è ora distribuito: una entry e un pannello finale del contatto, controlli compatti e alternativa secondaria; attesa prima della Home pronta, Master accessibile e ripresa dopo un blocco effettivo o annullamento. Classica/Nuova, sette palette, decorazioni e ruoli conservati. [Pubblicazione e limiti](../evidenze/COLLAUDI.md#rilascio-1281-verifiche-2026-11-17). Le prove native su iPhone/Android/PC restano fisiche. Il banco legge valori/ruoli/compositi, esclusioni e diagnostica nello stesso snapshot; negativi e soglie invariati. Le precedenti diciture “candidata/proposta” sotto sono storiche.
+
+
 <a id="ingresso-contatti-1281-ui-2026-11-17"></a>
 
 ## Ingresso e contatti — candidata 1.2.281

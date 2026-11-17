@@ -1,6 +1,15 @@
 # Stato
 
 <a id="stato-corrente"></a>
+<a id="rilascio-1281-stato-2026-11-17"></a>
+
+## APP1.2.281 — pubblicata e verificata, 17/11/2026
+
+Online **1.2.281**, sorgente **6b77e6d64322e89211b274bc08559ed916333e8a**, sourceDirty=false. [#328](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/328) unita dopo GO indipendenti e CI#1206 SUCCESS sulla testa b312feac; CI master#1207 e [Hosting#1208](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44117075505) SUCCESS sullo stesso master. Ogni validate:3831test,3820PASS/11SKIP/0FAIL.
+
+Ingresso con attesa coerente fino a sblocco/init Home; blocco/ripresa solo effettivi, popup Master accessibile. Contatti privato/azienda con un comando e un pannello finale compatto; proof e gesto nativo conservati. Approvazione production su delega di Diego circa17:15CET, dopo entrambi i gate e master remoto invariato. Verifica pubblica completa **367hash/41profili/3probe PASS** alle17:18:05CET, più cinque GET indipendenti alle17:18:41CET. [Ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-1281-verifiche-2026-11-17). SoloHosting; prova fisica di Diego ancora successiva. I checkpoint locali e CI falliti sotto sono storici; la ricevuta soltanto documentale non modifica il runtime.
+
+
 <a id="ingresso-contatti-1281-stato-2026-11-17"></a>
 
 ## Ingresso e contatti — candidata locale 1.2.281, 17/11/2026
