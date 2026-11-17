@@ -1,5 +1,12 @@
 # Registro
 
+<a id="rilascio-1282-registro-2026-11-17"></a>
+
+## 17/11/2026 — ordine pubblicazione correttivo contatto
+
+Diego ordina «pubblica»: candidata1.2.282 per rimuovere l’alternativa Scarica file ridondante e aggiornare la guida. Il seguito soltanto locale diventa rilascio autorizzato, senza ampliare il delta o chiudere prove fisiche. [Mandato](../progetto/INCARICO_CORRENTE.md#rilascio-1282-incarico-2026-11-17), [stato](../progetto/STATO.md#rilascio-1282-stato-2026-11-17).
+
+
 <a id="rilascio-1281-registro-2026-11-17"></a>
 
 ## 17/11/2026 —1.2.281 pubblicata e verificata

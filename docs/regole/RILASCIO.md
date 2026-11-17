@@ -1,5 +1,12 @@
 # Rilascio
 
+<a id="rilascio-1282-procedura-2026-11-17"></a>
+
+## Candidata1.2.282 — correttivo contatto
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#rilascio-1282-incarico-2026-11-17): snapshot funzionale prima del bump; versione282, guida16/reviewed282, offline e QA rigenerati prima del commit finale. Riesame indipendente sullo SHA immutabile e CI completa sulla testa; merge con SHA atteso. CI master e workflow manuale firebase-deploy.yml sullo stesso master fissato, release_scope=hosting. Approvazione production già delegata solo dopo entrambi i validate verdi e master invariato; workflow/protezioni conservati. Poi manifest dalla sorgente pulita pubblicata con byte Git LF, verifica integrale file/header/probe e cinque GET indipendenti; ricevuta documentale senza ulteriore Hosting.
+
+
 <a id="rilascio-1281-eseguito-2026-11-17"></a>
 
 ## APP1.2.281 — pubblicazione Hosting conclusa

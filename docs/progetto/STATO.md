@@ -1,6 +1,21 @@
 # Stato
 
 <a id="stato-corrente"></a>
+
+<a id="rilascio-1282-stato-2026-11-17"></a>
+
+## Candidata1.2.282 — pubblicazione in preparazione
+
+Su [ordine diretto](INCARICO_CORRENTE.md#rilascio-1282-incarico-2026-11-17), confezionamento del correttivo contatto e guida16/reviewed282. Controlli locali del delta già PASS, riesame statico GO; gate sulla confezione e CI ancora da acquisire. Produzione sempre1.2.281/6b77e6d6 finché non compare una ricevuta Hosting282 verificata. Il limite al solo lavoro locale nei checkpoint sotto è storico. Prove fisiche di ingresso, condivisione/destinazione e altri residui ancora aperte.
+
+
+<a id="contatto-opzioni-stato-2026-11-17"></a>
+
+## Riscontro telefono dopo la281 — correttivo locale
+
+Diego segnala ridondante e poco chiaro «Scarica file» nelle alternative del contatto. Il seguito locale elimina questa opzione quando esiste condivisione file o scelta della destinazione; «Altre opzioni» compare solo se entrambe le funzioni native sono disponibili. Senza entrambe resta una sola primaria «Salva file contatto», con nome e destinazione gestita dal browser spiegati. Capacità effettive, non tipo di dispositivo; errori e annullamenti non aggiungono alternative né avviano esportazioni.
+
+[Mandato](INCARICO_CORRENTE.md#contatto-opzioni-incarico-2026-11-17) e [contratto](../regole/INTERFACCIA.md#contatto-opzioni-ui-2026-11-17). Produzione ancora **1.2.281 / 6b77e6d6**; nessuna nuova pubblicazione da questo riscontro. Prova dell’ingresso FaceID/passkey ancora in attesa di Diego. Le ricevute281 sotto descrivono il rilascio già completato.
 <a id="rilascio-1281-stato-2026-11-17"></a>
 
 ## APP1.2.281 — pubblicata e verificata, 17/11/2026

@@ -1,4 +1,4 @@
-import {auth} from '../../firebase-config.js?v=1.2.281';
+import {auth} from '../../firebase-config.js?v=1.2.282';
 import {onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {authSessionFence} from '../../auth-session-fence.js';
 import {executeFrameNativeAction} from '../core/vault-frame-client.js';
@@ -47,7 +47,10 @@ export async function openContactExport({value, holder, target, isCurrent, signa
             createElement('div', {className: 'modal-actions contact-export-actions'}, [primary, close])
         ]);
         const labels = {share: 'contact_export_share_save', save: 'contact_export_save', download: 'contact_export_download'};
-        const capabilities = () => ['share', 'save', 'download'].filter(name => name === 'download' || (name === 'share' ? actions.canShare() : actions.canSave()));
+        const capabilities = () => {
+            const native = ['share', 'save'].filter(name => name === 'share' ? actions.canShare() : actions.canSave());
+            return native.length ? native : ['download'];
+        };
         let selected;
         const updateSelection = () => {
             selected = method.value;

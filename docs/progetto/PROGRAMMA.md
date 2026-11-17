@@ -1,5 +1,20 @@
 # Programma
 
+<a id="rilascio-1282-programma-2026-11-17"></a>
+
+## Contatti1.2.282 — completare la pubblicazione
+
+Diego ordina la pubblicazione del correttivo; completare confezione, riesame immutabile, CI/merge, Hosting protetto e verifica pubblica, poi ricevuta. Superato il precedente limite locale per questo solo delta. Dopo il rilascio restano prova del telefono su ingresso e contatti, RG-01/RG-04, cornice, sicurezza/recupero, prodotto e ciclo finale secondo la scaletta corrente. Alla domanda di Diego sulla delega a Claude è proposta una revisione indipendente delle otto lingue/guida o dei residui grafici su checkout separato: nessun nuovo incarico inviato o iniziato, nessuna scrittura concorrente.
+
+
+<a id="contatto-opzioni-programma-2026-11-17"></a>
+
+## Riscontro telefono — contatto senza alternativa Download
+
+Primo riscontro fisico dopo la281: «Scarica file» è ridondante e poco chiaro rispetto a Salva in File del sistema. Preparare il correttivo per entrambe le Tessere secondo il [contratto delle capacità native](../regole/INTERFACCIA.md#contatto-opzioni-ui-2026-11-17), con regressioni di annullamento/errori/riprova, geometria e palette. Il salvataggio browser resta soltanto l’unica primaria nei browser privi di entrambe le API native. Conservare nome file e spiegazione veritiera; niente fallback automatico.
+
+Il seguito è locale, senza nuova versione o pubblicazione. Raccogliere anche il riscontro di Diego sull’ingresso e sulle due Tessere prima del prossimo rilascio; non dedurre PASS fisici dai test automatici. La281 resta online; RG-01/RG-04 e altri residui restano aperti.
+
 <a id="rilascio-1281-programma-2026-11-17"></a>
 
 ## Ingresso e contatti — distribuiti nella1.2.281

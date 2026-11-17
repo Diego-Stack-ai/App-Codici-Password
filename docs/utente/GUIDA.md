@@ -1,5 +1,12 @@
 # Guida
 
+<a id="rilascio-1282-guida-2026-11-17"></a>
+
+## Contatto — nuova scelta preparata per1.2.282
+
+Nel correttivo in pubblicazione, Salva o condividi contatto conserva nome del file e un comando principale. Altre opzioni compare solo se puoi sia condividere sia scegliere dove salvare; nessuna scelta Scarica file aggiuntiva. Se entrambe le funzioni mancano, Salva file contatto avvia il salvataggio gestito dal browser, con nome e indicazioni per trovarlo. Il file non entra automaticamente in rubrica. Annullamento/errori richiedono nuova preparazione e conferma, senza esportazione automatica. Produzione ancora281 fino alla ricevuta; guide contestuali16/reviewed282 allineate nelle otto lingue. [Stato](../progetto/STATO.md#rilascio-1282-stato-2026-11-17).
+
+
 <a id="rilascio-1281-guida-2026-11-17"></a>
 
 ## Ingresso e contatti — disponibili nella1.2.281
