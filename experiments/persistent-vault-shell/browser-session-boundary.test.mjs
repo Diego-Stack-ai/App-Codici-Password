@@ -15,7 +15,7 @@ function realPresentationGate() {
     const body = {hidden: true, inert: true}, redirects = [];
     const window = {addEventListener() {}, dispatchEvent() {}, location: {replace: value => redirects.push(value), reload() {}}};
     runInNewContext(readFileSync(new URL('../../Frontend/public/assets/js/private-auth-gate.js', import.meta.url), 'utf8'), {
-        window, document: {body}, sessionStorage: {getItem: () => null, removeItem() {}},
+        window, document: {body,documentElement:{dataset:{}}}, sessionStorage: {getItem: () => null, removeItem() {}},
         Event, setTimeout: () => 1, clearTimeout() {}
     });
     return {gate: window.privateAuthGate, body, redirects};

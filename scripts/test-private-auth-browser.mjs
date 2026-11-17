@@ -32,7 +32,11 @@ const server = createServer(async (request, response) => {
                 const {authSessionFence} = await import('/assets/js/auth-session-fence.js');
                 const fenceTicket = await authSessionFence.readPermit();
                 window.__authPhase = 'pending';
-                setTimeout(async () => {
+                const delayProbe = () => new Promise(resolve => setTimeout(resolve, 10));
+                (async () => {
+                    // Start the scenario only after the first observed hidden frame.
+                    // CPU scheduling must not turn a missing sample into a false exposure.
+                    while (window.__authProbeReady !== true) await delayProbe();
                     if (${JSON.stringify(scenario)} === 'timeout') return;
                     if (${JSON.stringify(scenario)} === 'null') { gate.begin(null); gate.reject(); return; }
                     if (${JSON.stringify(scenario)} === 'error') { gate.reject('error'); return; }
@@ -50,7 +54,7 @@ const server = createServer(async (request, response) => {
                                 localCleared:sessionStorage.getItem('vault_session_v1')===null}));
                         });
                     }
-                }, 250);
+                })();
             `;
             response.setHeader('Content-Type', 'text/html');
             response.end(home.replace('<head>', '<head><script src="/assets/js/private-auth-gate.js"></script>')
@@ -103,7 +107,7 @@ async function checkBrowser(executable) {
                     const state={page:location.pathname, phase:window.__authPhase||'pending',
                         visible:!!document.body && getComputedStyle(document.body).display!=='none' && getComputedStyle(document.body).visibility!=='hidden'};
                     const value=JSON.stringify(state); if(value!==previous){previous=value;window.__authProbe(value);}
-                    requestAnimationFrame(sample);
+                    window.__authProbeReady=true; requestAnimationFrame(sample);
                 }; requestAnimationFrame(sample);
             });`});
         for (const scenario of published ? ['published'] : ['null','valid','error','timeout','logout']) {
@@ -130,7 +134,7 @@ async function checkBrowser(executable) {
     } finally {
         socket?.close();
         if (browser.exitCode === null) { browser.kill(); await exited; }
-        if (path.dirname(profile) === os.tmpdir() && path.basename(profile).startsWith('codex-auth-gate-')) await rm(profile,{recursive:true,force:true});
+        if (path.dirname(profile) === os.tmpdir() && path.basename(profile).startsWith('codex-auth-gate-')) await rm(profile,{recursive:true,force:true,maxRetries:10,retryDelay:250});
     }
 }
 try {
