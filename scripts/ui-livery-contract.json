@@ -1,12 +1,29 @@
 {
   "schemaVersion": 1,
   "source": "Ordine diretto di Diego, 16/11/2026: base evoluta comune; bicolore e saturazione card +15% solo Nuova.",
-  "graphics": ["classic", "new"],
+  "graphics": [
+    "classic",
+    "new"
+  ],
   "baseRevision": "tre-livelli",
   "expectedPageCount": 22,
-  "palettes": ["blue", "green", "red", "sand", "petrol", "lavender", "dusty-rose"],
-  "themes": ["light", "dark"],
-  "widths": [320, 1280],
+  "palettes": [
+    "blue",
+    "green",
+    "red",
+    "sand",
+    "petrol",
+    "lavender",
+    "dusty-rose"
+  ],
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "widths": [
+    320,
+    1280
+  ],
   "cardSaturationMultiplier": 1.15,
   "colorSource": "Frontend/public/assets/css/core.css",
   "decorationsSource": "Frontend/public/assets/js/components-v129.js",
@@ -23,8 +40,13 @@
     "Frontend/public/assets/js/modules/privato/profilo-widgets.js"
   ],
   "pairNames": {
-    "blue": "Rame", "green": "Oro", "red": "Petrolio grigio", "sand": "Blu ardesia",
-    "petrol": "Terracotta", "lavender": "Salvia", "dusty-rose": "Blu polvere"
+    "blue": "Rame",
+    "green": "Oro",
+    "red": "Petrolio grigio",
+    "sand": "Blu ardesia",
+    "petrol": "Terracotta",
+    "lavender": "Salvia",
+    "dusty-rose": "Blu polvere"
   },
   "cardGlyphs": [
     ".dashboard-list-item .item-icon-box > .material-symbols-outlined",
@@ -44,7 +66,11 @@
   "footer": {
     "producer": "Frontend/public/assets/js/components-v129.js",
     "homeProducer": "Frontend/public/assets/js/modules/home/home.js",
-    "homeActions": ["Nuovo account privato", "Nuova scadenza", "Nuovo account azienda: scegli azienda"],
+    "homeActions": [
+      "Nuovo account privato",
+      "Nuova scadenza",
+      "Nuovo account azienda: scegli azienda"
+    ],
     "inkRole": "--companion-ink",
     "fillRole": "--companion-fill",
     "deepRole": "--companion-fill-deep",
@@ -76,6 +102,303 @@
       "file": "tests/ui-livery.browser.test.mjs",
       "name": "approved profile typography keeps values and QR intact across both liveries"
     }
+  },
+  "contactExport": {
+    "pages": [
+      "profilo_privato.html",
+      "dati_azienda.html"
+    ],
+    "producer": "Frontend/public/assets/js/modules/shared/contact-export.js",
+    "models": [
+      "Frontend/public/assets/js/modules/shared/contact-export-model.js"
+    ],
+    "entries": [
+      {
+        "page": "profilo_privato.html",
+        "selector": ".digital-card-actions button",
+        "producer": "Frontend/public/assets/js/modules/privato/profilo_privato.js"
+      },
+      {
+        "page": "dati_azienda.html",
+        "selector": ".digital-card-actions button",
+        "producer": "Frontend/public/assets/js/modules/azienda/company-profile-ui.js"
+      }
+    ],
+    "styles": [
+      "Frontend/public/assets/css/core_ui.css",
+      "Frontend/public/assets/css/profile-layout.css"
+    ],
+    "selectors": [
+      "#contact-export-modal",
+      ".contact-export-dialog",
+      ".contact-export-name",
+      "#contact-export-modal [role=status]",
+      ".contact-export-actions"
+    ],
+    "states": [
+      "open",
+      "save-unavailable",
+      "share-unavailable",
+      "saved",
+      "shared",
+      "save-error",
+      "share-error",
+      "cancelled",
+      "download-started",
+      "revoked",
+      "pending"
+    ],
+    "nonVisualStates": [
+      "revoked"
+    ],
+    "paints": [
+      {
+        "selector": ".contact-export-dialog",
+        "property": "backgroundColor",
+        "role": "--rev-popup",
+        "states": [
+          "open",
+          "save-unavailable",
+          "share-unavailable",
+          "saved",
+          "shared",
+          "save-error",
+          "share-error",
+          "cancelled",
+          "download-started",
+          "pending"
+        ]
+      },
+      {
+        "selector": ".contact-export-dialog .modal-title",
+        "property": "color",
+        "role": "--text-primary",
+        "minimum": 4.5,
+        "states": [
+          "open",
+          "save-unavailable",
+          "share-unavailable",
+          "saved",
+          "shared",
+          "save-error",
+          "share-error",
+          "cancelled",
+          "download-started",
+          "pending"
+        ]
+      },
+      {
+        "selector": ".contact-export-name",
+        "property": "color",
+        "role": "--text-primary",
+        "minimum": 4.5,
+        "states": [
+          "open",
+          "save-unavailable",
+          "share-unavailable",
+          "saved",
+          "shared",
+          "save-error",
+          "share-error",
+          "cancelled",
+          "download-started",
+          "pending"
+        ]
+      },
+      {
+        "selector": ".contact-export-dialog .modal-description:not(:empty)",
+        "property": "color",
+        "role": "--text-primary",
+        "minimum": 4.5,
+        "states": [
+          "open",
+          "save-unavailable",
+          "share-unavailable",
+          "saved",
+          "shared",
+          "save-error",
+          "share-error",
+          "cancelled",
+          "download-started",
+          "pending"
+        ]
+      },
+      {
+        "selector": ".contact-export-actions .btn-primary",
+        "property": "backgroundColor",
+        "role": "--rev-fill",
+        "states": [
+          "open",
+          "saved",
+          "shared",
+          "save-error",
+          "share-error",
+          "cancelled",
+          "download-started",
+          "pending"
+        ]
+      }
+    ],
+    "tests": [
+      {
+        "file": "tests/contact-export.browser.test.mjs",
+        "name": "private and company contact commands announce names and save through a trusted native click",
+        "states": [
+          "open",
+          "saved",
+          "shared"
+        ]
+      },
+      {
+        "file": "tests/contact-export.browser.test.mjs",
+        "name": "unsupported sharing and rejected or cancelled native actions always have an explicit result",
+        "states": [
+          "save-unavailable",
+          "share-unavailable",
+          "save-error",
+          "share-error",
+          "cancelled",
+          "download-started"
+        ]
+      },
+      {
+        "file": "tests/contact-export.browser.test.mjs",
+        "name": "a pending native picker cannot write after lock and re-entry with the same identity",
+        "states": [
+          "revoked"
+        ]
+      },
+      {
+        "file": "tests/contact-export.browser.test.mjs",
+        "name": "contact export stays readable and contained in all seven themes and both graphics",
+        "states": [
+          "open"
+        ]
+      },
+      {
+        "file": "tests/contact-export.browser.test.mjs",
+        "name": "pending contact actions remain closable and ignore late native completion",
+        "states": [
+          "pending"
+        ]
+      }
+    ],
+    "modelTests": [
+      {
+        "file": "tests/contact-export.test.mjs",
+        "name": "vCard names identify the holder and safely retain the extension"
+      },
+      {
+        "file": "tests/contact-export.test.mjs",
+        "name": "the session permit is rechecked after the picker before creating a writable"
+      }
+    ]
+  },
+  "companyCardQr": {
+    "pages": [
+      "dati_azienda.html"
+    ],
+    "producer": "Frontend/public/assets/js/modules/azienda/dati_azienda.js",
+    "models": [
+      "Frontend/public/assets/js/modules/azienda/company-vcard.js",
+      "Frontend/public/assets/js/modules/shared/qr_code_utils.js"
+    ],
+    "entries": [
+      {
+        "page": "dati_azienda.html",
+        "selector": ".company-qr-zoom-trigger",
+        "producer": "Frontend/public/assets/js/modules/azienda/company-profile-ui.js"
+      },
+      {
+        "page": "dati_azienda.html",
+        "selector": "#btn-zoom-qr",
+        "producer": "Frontend/public/assets/js/modules/azienda/dati_azienda.js"
+      }
+    ],
+    "styles": [
+      "Frontend/public/assets/css/core_ui.css",
+      "Frontend/public/assets/css/dati_azienda.css"
+    ],
+    "selectors": [
+      ".company-qr-zoom-trigger",
+      ".company-qr-preview",
+      "#qr-zoom-modal",
+      "#qrcode-zoom-container",
+      "#btn-close-qr"
+    ],
+    "states": [
+      "card-inline",
+      "card-zoom",
+      "unsaved-selection-zoom",
+      "header-zoom",
+      "closed",
+      "revoked"
+    ],
+    "nonVisualStates": [
+      "closed",
+      "revoked"
+    ],
+    "paints": [
+      {
+        "selector": ".company-qr-zoom-trigger .qr-zoom-indicator",
+        "property": "backgroundColor",
+        "role": "--accent",
+        "states": [
+          "card-inline"
+        ]
+      },
+      {
+        "selector": "#qr-zoom-modal .modal-box",
+        "property": "backgroundColor",
+        "role": "--rev-popup",
+        "states": [
+          "card-zoom",
+          "unsaved-selection-zoom",
+          "header-zoom"
+        ]
+      },
+      {
+        "selector": "#btn-close-qr",
+        "property": "backgroundColor",
+        "role": "--rev-surface-2",
+        "states": [
+          "card-zoom",
+          "unsaved-selection-zoom",
+          "header-zoom"
+        ]
+      },
+      {
+        "selector": "#btn-close-qr [data-t=close]",
+        "property": "color",
+        "role": "--text-primary",
+        "minimum": 4.5,
+        "states": [
+          "card-zoom",
+          "unsaved-selection-zoom",
+          "header-zoom"
+        ]
+      }
+    ],
+    "tests": [
+      {
+        "file": "tests/contact-export.browser.test.mjs",
+        "name": "company digital-card zoom uses the current unsaved selection and retains the header QR",
+        "states": [
+          "card-inline",
+          "card-zoom",
+          "unsaved-selection-zoom",
+          "header-zoom",
+          "closed",
+          "revoked"
+        ]
+      }
+    ],
+    "modelTests": [
+      {
+        "file": "tests/company-profile.test.mjs",
+        "name": "tessera: selezione rispettata, valori escapati e credenziali escluse"
+      }
+    ]
   },
   "limits": "Local real producers with synthetic repositories; no real Auth/Vault, physical devices or production certification. Gradients are measured by the existing ancestor compositor; sibling glow/watermark optical occlusion is assessed separately in screenshots."
 }

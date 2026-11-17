@@ -1,4 +1,4 @@
-import {executeFrameNativeAction} from '../core/vault-frame-client.js';
+import {frameMediaLifetime} from '../core/vault-frame-client.js';
 import { changeProfileAccount, unlinkProfileAccount } from '../shared/profile-account-management.js';
 import { auth, db } from '../../firebase-config.js?v=1.2.280';
 import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
@@ -139,7 +139,7 @@ function startCompanyPdfLifecycle() {
         pdfOwnerUid = user?.uid;
     });
 }
-export function initCompanyProfile(data, companyId, {buildVCard, reload}) {
+export function initCompanyProfile(data, companyId, {buildVCard, reload, openQRZoom}) {
     startCompanyPdfLifecycle();
     clearCompanyPdf();
     const ownerUid = auth.currentUser?.uid;
@@ -196,13 +196,29 @@ export function initCompanyProfile(data, companyId, {buildVCard, reload}) {
     const refresh=()=>{ const vcard=buildVCard({...data,qrConfig:config}); renderQRCode(preview,vcard,{width:220,height:220,colorDark:'#000000',colorLight:'#ffffff'}); const capacity=document.getElementById('company-qr-capacity'); if(capacity) { const bytes=new TextEncoder().encode(vcard).length; capacity.textContent=bytes>1200 ? formatTranslation('digital_card_capacity_warning',{bytes}) : formatTranslation('digital_card_capacity_used',{bytes}); capacity.classList.toggle('is-warning',bytes>1200); } };
     const checks=options.map(([key,label])=>createElement('label',{className:'digital-card-choice'},[createElement('input',{type:'checkbox',checked:config[key]===undefined?!['adminEmail','persEmail','telefonoAzienda'].includes(key):Boolean(config[key]),onchange:event=>{config[key]=event.target.checked;refresh();}}),text(label)]));
     const save=button(t('company_card_save_selection'),async()=>{try{save.disabled=true;await updateDoc(doc(db,'users',auth.currentUser.uid,'aziende',companyId),{qrConfig:config});showToast(t('company_card_updated'),'success');await reload();}catch{showToast(t('company_card_update_error'),'error');}finally{save.disabled=false;}});
-    const download=button(t('company_card_download_contact'),()=>{const value=buildVCard({...data,qrConfig:config});return executeFrameNativeAction({scope:'company-vcard',companyId,snapshotBytes:new TextEncoder().encode(value)},()=>{if(auth.currentUser?.uid!==ownerUid||!qr.isConnected)throw Error('FRAME_TARGET_CHANGED');const blob=new Blob([value],{type:'text/vcard;charset=utf-8'});const url=URL.createObjectURL(blob);const a=createElement('a',{href:url,download:'contatto-azienda.vcf'});a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});});
+    const exportContact = mode => {
+        const opener = document.activeElement;
+        const lifetime = frameMediaLifetime({signal: new AbortController().signal, requireUnlocked: false});
+        const value = buildVCard({...data, qrConfig: config});
+        const isCurrent = () => lifetime.valid() && ownerUid && auth.currentUser?.uid === ownerUid && qr.isConnected && opener?.isConnected;
+        return import('../shared/contact-export.js?v=1.2.280').then(module => {
+            if (isCurrent()) return module.openContactExport({value, holder: {company: true, companyName: data.ragioneSociale},
+                mode, opener, isCurrent, signal: lifetime.signal, target: {scope: 'company-vcard', companyId}});
+        }).catch(() => {if (isCurrent()) showToast(t('contact_export_failed'), 'error');}).finally(() => lifetime.dispose());
+    };
+    const download = button(t('contact_export_entry'), () => exportContact('save'));
+    const share = button(t('digital_card_share'), () => exportContact('share'));
+    const zoom = createElement('button', {type: 'button', className: 'company-qr-zoom-trigger',
+        title: t('click_to_enlarge'), 'aria-label': t('aria_zoom_card'),
+        onclick: event => openQRZoom({payload: buildVCard({...data, qrConfig: config}), opener: event.currentTarget})}, [
+        preview, createElement('span', {className: 'qr-zoom-indicator material-symbols-outlined notranslate', textContent: 'zoom_in'})
+    ]);
     setChildren(qr,[createElement('div',{className:'digital-card-layout'},[
         createElement('section',{className:'form-card digital-card-preview'},[
-            createElement('h2',{className:'form-section-title',textContent:t('digital_card_preview_title')}),preview,
+            createElement('h2',{className:'form-section-title',textContent:t('digital_card_preview_title')}),zoom,
             createElement('p',{className:'digital-card-warning',textContent:t('digital_card_plaintext_warning')}),
             createElement('p',{className:'digital-card-capacity',id:'company-qr-capacity'}),
-            createElement('div',{className:'digital-card-actions'},[download])
+            createElement('div',{className:'digital-card-actions'},[download, share])
         ]),
         createElement('section',{className:'form-card digital-card-fields'},[
             createElement('h2',{className:'form-section-title',textContent:t('digital_card_included_data')}),

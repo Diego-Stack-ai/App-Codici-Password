@@ -1,4 +1,4 @@
-import {executeFrameNativeAction} from '../core/vault-frame-client.js';
+import {frameMediaLifetime} from '../core/vault-frame-client.js';
 import {confirmFrameRemoval, confirmFrameAction} from '../core/vault-frame-client.js';
 import { readErrorMessage } from '../shared/read-error-message.js';
 const changeProfileAccount = (...args) => import('../shared/profile-account-management.js').then(module => module.changeProfileAccount(...args));
@@ -397,23 +397,19 @@ function renderAllSections() {
     focusAssistantDocument();
 }
 
-function saveProfileVCard(value) {
-    const url = URL.createObjectURL(new Blob([value], {type: 'text/vcard;charset=utf-8'}));
-    const link = document.createElement('a'); link.href = url; link.download = 'profilo.vcf';
-    link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-function downloadVCard() {
+function exportProfileContact(mode) {
+    const uid = currentUserUid, version = profileEditVersion, opener = document.activeElement;
+    const lifetime = frameMediaLifetime({signal: new AbortController().signal, requireUnlocked: false});
     const value = getProfileVCard();
-    return executeFrameNativeAction({scope: 'profile-vcard', snapshotBytes: new TextEncoder().encode(value)}, () => saveProfileVCard(value));
+    const holder = {name: currentUserData.nome, surname: currentUserData.cognome};
+    const isCurrent = () => lifetime.valid() && uid && uid === currentUserUid && auth.currentUser?.uid === uid &&
+        profileEditVersion === version && profileTabs?.isConnected && opener?.isConnected;
+    return import('../shared/contact-export.js?v=1.2.280').then(module => {
+        if (isCurrent()) return module.openContactExport({value, holder, mode, opener, isCurrent, signal: lifetime.signal, target: {scope: 'profile-vcard'}});
+    }).catch(() => {if (isCurrent()) showToast(t('contact_export_failed'), 'error');}).finally(() => lifetime.dispose());
 }
-function shareVCard() {
-    const value = getProfileVCard();
-    return executeFrameNativeAction({scope: 'profile-vcard-share', snapshotBytes: new TextEncoder().encode(value)}, () => {
-        const file = new File([value], 'profilo.vcf', {type: 'text/vcard'});
-        if (navigator.share && navigator.canShare?.({files: [file]})) return navigator.share({files: [file], title: 'Profilo'});
-        saveProfileVCard(value); showToast('Condivisione non disponibile: vCard scaricata.', 'info');
-    });
-}
+function downloadVCard() {return exportProfileContact('save');}
+function shareVCard() {return exportProfileContact('share');}
 
 function focusAssistantDocument() {
     const rawIndex = new URLSearchParams(window.location.search).get('assistantDoc');

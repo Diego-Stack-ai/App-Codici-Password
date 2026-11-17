@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": 13,
+  "contentVersion": 14,
   "reviewedAppVersion": "1.2.280",
   "fallbackLocale": "it",
   "pages": [
@@ -1217,7 +1217,7 @@
       "guide.pages.profilo_privato.step-3": "Telefoni ed email possono essere autonomi o collegati a un Account; il collegamento non è una nuova copia delle credenziali.",
       "guide.pages.profilo_privato.step-4": "Organizza indirizzi e utenze dalle sezioni dedicate e controlla il risultato delle modifiche.",
       "guide.pages.profilo_privato.step-5": "Ogni documento raccoglie dati, note, allegati e collegamenti ad Account o Scadenza. Per rimuovere un allegato usa il cestino e la conferma.",
-      "guide.pages.profilo_privato.step-6": "Scegli esplicitamente i dati da includere nella tessera e nel QR. Controlla cosa rendi condivisibile prima di inviarlo.",
+      "guide.pages.profilo_privato.step-6": "Scegli i dati della tessera e del QR. Salva contatto mostra il nome contatto-Nome-Cognome.vcf e le opzioni disponibili: scelta della destinazione, condivisione o download. Nessuna importazione automatica nella rubrica.",
       "guide.pages.lista_aziende.title": "Aziende",
       "guide.pages.lista_aziende.purpose": "Scegli l’azienda e accedi ai dati oppure direttamente ad Account, Condivisi, Memorandum e Memo condivisi.",
       "guide.pages.lista_aziende.step-1": "Apri i Dati azienda oppure scegli una delle quattro categorie con contatore. I dati aziendali restano separati dagli Account privati.",
@@ -1225,7 +1225,7 @@
       "guide.pages.dati_azienda.title": "Dati azienda",
       "guide.pages.dati_azienda.purpose": "Consulta il profilo aziendale, i contatti e le proiezioni condivisibili.",
       "guide.pages.dati_azienda.step-1": "Consulta il riepilogo e le sezioni dell’azienda scelta. Con la grafica Nuova, usa Modifica nella sezione per mostrarne i comandi di gestione e Fine per tornare alla consultazione.",
-      "guide.pages.dati_azienda.step-2": "Seleziona i dati ammessi nella tessera digitale e nel QR; non includere segreti.",
+      "guide.pages.dati_azienda.step-2": "Scegli i dati ammessi e usa la lente per ingrandire il QR con la selezione corrente, anche prima di Salva selezione. Salva contatto mostra contatto-azienda-Nome-Ditta.vcf e le opzioni disponibili. I segreti restano esclusi.",
       "guide.pages.dati_azienda.step-3": "Prepara il riepilogo PDF e controllane il contenuto prima di salvarlo o condividerlo.",
       "guide.pages.dati_azienda.step-4": "Contatti e sedi possono richiamare Account collegati. Modifica i dati nel percorso previsto dall’app.",
       "guide.pages.modifica_azienda.title": "Crea o modifica azienda",
@@ -1353,36 +1353,50 @@
       "guide.pages.app.step-1": "Quando il Vault è bloccato, usa Sblocca e riprendi e segui l’esito dell’app. Inserisci la Master Password soltanto nella finestra dell’app."
     },
     "en": {
+      "guide.pages.profilo_privato.step-6": "Choose the card and QR details. Save contact shows contatto-Name-Surname.vcf and the available options: choose a location, share or download. Contacts are not imported automatically.",
+      "guide.pages.dati_azienda.step-2": "Choose the permitted details and use the magnifier to enlarge the QR with the current selection, even before saving it. Save contact shows contatto-azienda-Company-Name.vcf and the available options. Secrets stay excluded.",
       "guide.pages.app.title": "Vault frame",
       "guide.pages.app.purpose": "The frame manages persistent navigation for admitted accounts.",
       "guide.pages.app.step-1": "When the Vault is locked, use Unlock and resume and follow the app’s response. Enter the Master Password only in the app’s dialog."
     },
     "es": {
+      "guide.pages.profilo_privato.step-6": "Elige los datos de la tarjeta y del QR. Guardar contacto muestra contatto-Nombre-Apellido.vcf y las opciones disponibles: elegir ubicación, compartir o descargar. No se importa automáticamente a los contactos.",
+      "guide.pages.dati_azienda.step-2": "Elige los datos permitidos y usa la lupa para ampliar el QR con la selección actual, incluso antes de guardarla. Guardar contacto muestra contatto-azienda-Nombre-Empresa.vcf y las opciones disponibles. Los secretos quedan excluidos.",
       "guide.pages.app.title": "Marco de la bóveda",
       "guide.pages.app.purpose": "El marco gestiona la navegación persistente para las cuentas admitidas.",
       "guide.pages.app.step-1": "Cuando la bóveda esté bloqueada, usa Desbloquear y continuar y sigue la respuesta de la app. Introduce la Master Password solo en el diálogo de la app."
     },
     "fr": {
+      "guide.pages.profilo_privato.step-6": "Choisissez les données de la carte et du QR. Enregistrer le contact affiche contatto-Prénom-Nom.vcf et les options disponibles : emplacement, partage ou téléchargement. Aucun ajout automatique aux contacts.",
+      "guide.pages.dati_azienda.step-2": "Choisissez les données autorisées et utilisez la loupe pour agrandir le QR avec la sélection actuelle, même avant de l’enregistrer. Enregistrer le contact affiche contatto-azienda-Nom-Entreprise.vcf et les options disponibles. Les secrets restent exclus.",
       "guide.pages.app.title": "Cadre du coffre",
       "guide.pages.app.purpose": "Le cadre gère la navigation persistante pour les comptes autorisés.",
       "guide.pages.app.step-1": "Lorsque le coffre est verrouillé, utilisez Déverrouiller et reprendre et suivez la réponse de l’app. Saisissez la Master Password uniquement dans la boîte de dialogue de l’app."
     },
     "de": {
+      "guide.pages.profilo_privato.step-6": "Wählen Sie die Daten für Karte und QR. Kontakt speichern zeigt contatto-Vorname-Nachname.vcf und die verfügbaren Optionen: Speicherort, Teilen oder Download. Kontakte werden nicht automatisch importiert.",
+      "guide.pages.dati_azienda.step-2": "Wählen Sie die zulässigen Daten und vergrößern Sie den QR mit der Lupe anhand der aktuellen Auswahl, auch vor dem Speichern. Kontakt speichern zeigt contatto-azienda-Firmenname.vcf und die verfügbaren Optionen. Geheimnisse bleiben ausgeschlossen.",
       "guide.pages.app.title": "Tresorrahmen",
       "guide.pages.app.purpose": "Der Rahmen verwaltet die dauerhafte Navigation für zugelassene Konten.",
       "guide.pages.app.step-1": "Wenn der Tresor gesperrt ist, verwenden Sie Entsperren und fortsetzen und folgen Sie der Rückmeldung der App. Geben Sie die Master Password nur im Dialog der App ein."
     },
     "pt": {
+      "guide.pages.profilo_privato.step-6": "Escolha os dados do cartão e do QR. Guardar contacto mostra contatto-Nome-Apelido.vcf e as opções disponíveis: escolher localização, partilhar ou descarregar. Não existe importação automática para os contactos.",
+      "guide.pages.dati_azienda.step-2": "Escolha os dados permitidos e use a lupa para ampliar o QR com a seleção atual, mesmo antes de a guardar. Guardar contacto mostra contatto-azienda-Nome-Empresa.vcf e as opções disponíveis. Os segredos ficam excluídos.",
       "guide.pages.app.title": "Estrutura do cofre",
       "guide.pages.app.purpose": "A estrutura gere a navegação persistente para as contas autorizadas.",
       "guide.pages.app.step-1": "Quando o cofre estiver bloqueado, use Desbloquear e retomar e siga a resposta da app. Introduza a Master Password apenas na caixa de diálogo da app."
     },
     "zh": {
+      "guide.pages.profilo_privato.step-6": "选择名片和二维码中的信息。“保存联系人”会显示 contatto-姓名.vcf 文件名以及可用的保存位置、分享或下载选项。不会自动导入通讯录。",
+      "guide.pages.dati_azienda.step-2": "选择允许的信息，点击放大镜即可放大当前选择生成的二维码，无需先保存选择。“保存联系人”会显示 contatto-azienda-公司名称.vcf 以及可用选项。机密信息始终排除。",
       "guide.pages.app.title": "保险库框架",
       "guide.pages.app.purpose": "框架为获准的账户管理持久导航。",
       "guide.pages.app.step-1": "保险库锁定时，使用“解锁并继续”，然后按应用的提示操作。仅在应用的对话框中输入 Master Password。"
     },
     "hi": {
+      "guide.pages.profilo_privato.step-6": "कार्ड और QR के लिए जानकारी चुनें। संपर्क सहेजें में contatto-नाम-उपनाम.vcf और उपलब्ध विकल्प दिखते हैं: जगह चुनना, साझा करना या डाउनलोड करना। संपर्क अपने आप आयात नहीं होता।",
+      "guide.pages.dati_azienda.step-2": "अनुमत जानकारी चुनें और आवर्धक से मौजूदा चयन का QR बड़ा करें, चयन सहेजने से पहले भी। संपर्क सहेजें में contatto-azienda-कंपनी-नाम.vcf और उपलब्ध विकल्प दिखते हैं। गोपनीय जानकारी बाहर रहती है।",
       "guide.pages.app.title": "वॉल्ट फ़्रेम",
       "guide.pages.app.purpose": "फ़्रेम अनुमत खातों के लिए स्थायी नेविगेशन का प्रबंधन करता है।",
       "guide.pages.app.step-1": "वॉल्ट लॉक होने पर अनलॉक करके जारी रखें का उपयोग करें और ऐप के निर्देशों का पालन करें। Master Password केवल ऐप के संवाद में दर्ज करें।"

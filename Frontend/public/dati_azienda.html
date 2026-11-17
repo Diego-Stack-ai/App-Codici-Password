@@ -57,14 +57,14 @@
                         </div>
 
                         <!-- QR Code Brief -->
-                        <div id="btn-zoom-qr" class="qr-btn-container group">
-                            <div id="qrcode-container" class="qr-code-box">
+                        <button type="button" id="btn-zoom-qr" class="qr-btn-container group" data-t-aria="aria_zoom_card" aria-label="Ingrandisci QR">
+                            <span id="qrcode-container" class="qr-code-box">
                                 <!-- Injected via JS -->
-                            </div>
-                            <div class="qr-zoom-indicator">
+                            </span>
+                            <span class="qr-zoom-indicator">
                                 <span class="material-symbols-outlined icon-tiny notranslate" translate="no">zoom_in</span>
-                            </div>
-                        </div>
+                            </span>
+                        </button>
                     </div>
 
                     <div class="hero-title-container">
@@ -301,9 +301,9 @@
 
         <!-- QR Zoom Modal -->
         <div id="qr-zoom-modal" class="modal-overlay">
-            <div class="modal-box modal-box-qr">
+            <div class="modal-box modal-box-qr" role="dialog" aria-modal="true" aria-labelledby="qr-zoom-title">
                 <div id="qrcode-zoom-container" class="qr-zoom-container"></div>
-                <p class="qr-scan-text" data-t="scan_to_import">Scansiona per importare in rubrica</p>
+                <p id="qr-zoom-title" class="qr-scan-text" data-t="scan_to_import">Scansiona per importare in rubrica</p>
                 <button id="btn-close-qr" class="btn-modal-close">
                     <span class="material-symbols-outlined modal-confirm-icon notranslate" translate="no">check_circle</span>
                     <span data-t="close">CHIUDI</span>

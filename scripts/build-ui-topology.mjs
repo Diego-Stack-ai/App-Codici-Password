@@ -424,13 +424,20 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
     {id:'footer-ink',pages,selectors:['#search-status','.footer-settings-link'],roles:[registry.footer?.inkRole,'--theme-ink','--text-primary'],producers:[registry.footer?.producer]},
     {id:'home-actions',pages:['home_page.html'],selectors:['.fab-group .btn-fab-privato','.fab-group .btn-fab-scadenza','.fab-group .btn-fab-azienda'],roles:[registry.footer?.fillRole,registry.footer?.deepRole,'--theme-fill','--theme-fill-deep'],producers:[registry.footer?.homeProducer]},
     {id:'profile-guide',pages:['profilo_privato.html'],selectors:[registry.footer?.guide],roles:[registry.footer?.inkRole,'--text-primary'],producers:[registry.footer?.producer]},
-    {id:'profile-typography',pages:[registry.profileTypography?.page],selectors:registry.profileTypography?.selectors,roles:[],producers:[registry.profileTypography?.producer],styles:registry.profileTypography?.styles,test:registry.profileTypography?.test,translations:registry.profileTypography?.translations}
+    {id:'profile-typography',pages:[registry.profileTypography?.page],selectors:registry.profileTypography?.selectors,roles:[],producers:[registry.profileTypography?.producer],styles:registry.profileTypography?.styles,test:registry.profileTypography?.test,translations:registry.profileTypography?.translations},
+    ...[
+      {id:'contact-export',metadata:registry.contactExport,expectedPages:['profilo_privato.html','dati_azienda.html'],requiredStates:['open','save-unavailable','share-unavailable','saved','shared','save-error','share-error','cancelled','download-started','revoked','pending']},
+      {id:'company-card-qr',metadata:registry.companyCardQr,expectedPages:['dati_azienda.html'],requiredStates:['card-inline','card-zoom','unsaved-selection-zoom','header-zoom','closed','revoked']}
+    ].map(component=>({...component,native:true,pages:Array.isArray(component.metadata?.pages)?component.metadata.pages:[],
+      selectors:component.metadata?.selectors,styles:component.metadata?.styles,
+      producers:[component.metadata?.producer,...(Array.isArray(component.metadata?.entries)?component.metadata.entries.map(entry=>entry?.producer):[])],
+      roles:[...new Set((Array.isArray(component.metadata?.paints)?component.metadata.paints:[]).map(paint=>paint?.role).filter(role=>typeof role==='string'&&role.startsWith('--')))]}))
   ];
   for(const component of components){
     const id=collector.addNode(uiNode(`ui:livery-component:${component.id}`,component.id,'ui_livery_component',{...declared,...(component.test?{test_name:component.test.name}:{})}));
     for(const variant of variants)collector.addEdge(uiEdge(variant,id,'ui_shares_component',{...declared,graphics:['classic','new']}));
     for(const page of component.pages){if(!pages.includes(page)){errors.push(`liveries: ${component.id} has unknown page ${page}`);continue;}collector.addEdge(uiEdge(`ui:page:${page}`,id,'ui_declares_livery_component',declared));}
-    for(const target of [styles,testSource].filter(Boolean))collector.addEdge(uiEdge(id,target,target===testSource?'ui_declares_test':'ui_loads_stylesheet',declared));
+    for(const target of [styles,!component.native&&testSource].filter(Boolean))collector.addEdge(uiEdge(id,target,target===testSource?'ui_declares_test':'ui_loads_stylesheet',declared));
     for(const file of Array.isArray(component.styles)?component.styles:[]){const target=source(file);if(target)collector.addEdge(uiEdge(id,target,'ui_loads_stylesheet',declared));}
     let componentTestSource=null;
     if(component.test){componentTestSource=source(component.test.file);if(componentTestSource)collector.addEdge(uiEdge(id,componentTestSource,'ui_declares_test',declared));if(!component.test.name)errors.push(`liveries: ${component.id} has no named test`);}
@@ -446,6 +453,64 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
         collector.addEdge(uiEdge(id,translationId,'ui_uses_translation',declared));if(target)collector.addEdge(uiEdge(translationId,target,'ui_translation_defined_in',declared));
       }
     }
+    if(component.native){
+      const metadata=component.metadata||{},states=new Map(),covered=new Set();
+      if(!equalList(metadata.pages,component.expectedPages)||!equalList(metadata.states,component.requiredStates))errors.push(`liveries: ${component.id} has incomplete pages or states`);
+      for(const state of Array.isArray(metadata.states)?metadata.states:[]){
+        if(typeof state!=='string'||!state||states.has(state)){errors.push(`liveries: ${component.id} has invalid or duplicate state`);continue;}
+        const stateId=collector.addNode(uiNode(`${id}:state:${state}`,state,'ui_livery_state',declared));states.set(state,stateId);
+        collector.addEdge(uiEdge(id,stateId,'ui_declares_state',declared));
+      }
+      if(!Array.isArray(metadata.styles)||!metadata.styles.length)errors.push(`liveries: ${component.id} has no native stylesheets`);
+      if(!Array.isArray(metadata.models)||!metadata.models.length)errors.push(`liveries: ${component.id} has no models`);
+      for(const file of Array.isArray(metadata.models)?metadata.models:[]){const target=source(file);if(target)collector.addEdge(uiEdge(id,target,'ui_uses_model',declared));}
+      const entries=new Set();
+      if(!Array.isArray(metadata.entries)||metadata.entries.length!==2)errors.push(`liveries: ${component.id} has incomplete entries`);
+      for(const [index,entry] of (Array.isArray(metadata.entries)?metadata.entries:[]).entries()){
+        const entryKey=`${entry?.page}:${entry?.selector}`;
+        if(!component.pages.includes(entry?.page)||typeof entry?.selector!=='string'||!entry.selector||entries.has(entryKey)){errors.push(`liveries: ${component.id} has invalid or duplicate entry`);continue;}
+        entries.add(entryKey);const entrySource=source(entry.producer);
+        const entryId=collector.addNode(uiNode(`${id}:entry:${index}`,entry.selector,'ui_livery_entry',{...declared,page:entry.page,selector:entry.selector}));
+        collector.addEdge(uiEdge(`ui:page:${entry.page}`,entryId,'ui_declares_entry',declared));collector.addEdge(uiEdge(entryId,id,'ui_opens_component',declared));
+        if(entrySource)collector.addEdge(uiEdge(entryId,entrySource,'ui_rendered_by',declared));
+      }
+      const namedTest=(reference,bindStates)=>{
+        const target=source(reference?.file),name=reference?.name;
+        const text=target?fs.readFileSync(path.resolve(projectRoot,reference.file),'utf8'):'';
+        const escaped=typeof name==='string'?name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'):'';
+        if(!escaped||!new RegExp("\\btest\\(\\s*(['\"])"+escaped+"\\1").test(text)){errors.push(`liveries: ${component.id} has a missing named native regression`);return;}
+        const testId=collector.addNode(uiNode(`${id}:test:${encodeURIComponent(reference.file+'#'+name)}`,name,'ui_regression',{...declared,source_file:reference.file,test_name:name}));
+        collector.addEdge(uiEdge(id,target,'ui_declares_test',declared));collector.addEdge(uiEdge(id,testId,'ui_names_regression',declared));
+        collector.addEdge(uiEdge(testId,target,'ui_test_defined_in',declared));
+        if(bindStates){
+          if(!Array.isArray(reference.states)||!reference.states.length)errors.push(`liveries: ${component.id} has an unbound native regression`);
+          for(const state of Array.isArray(reference.states)?reference.states:[]){
+            if(!states.has(state)){errors.push(`liveries: ${component.id} test binds unknown state ${state}`);continue;}
+            covered.add(state);collector.addEdge(uiEdge(states.get(state),testId,'ui_declares_state_test',declared));
+          }
+        }
+      };
+      if(!Array.isArray(metadata.tests)||!metadata.tests.length||!Array.isArray(metadata.modelTests)||!metadata.modelTests.length)errors.push(`liveries: ${component.id} has incomplete native tests`);
+      for(const reference of Array.isArray(metadata.tests)?metadata.tests:[])namedTest(reference,true);
+      for(const reference of Array.isArray(metadata.modelTests)?metadata.modelTests:[])namedTest(reference,false);
+      for(const state of states.keys())if(!covered.has(state))errors.push(`liveries: ${component.id} has untested state ${state}`);
+      const painted=new Set(),nonVisual=Array.isArray(metadata.nonVisualStates)?metadata.nonVisualStates:[];
+      if(!equalList(nonVisual,component.id==='contact-export'?['revoked']:['closed','revoked']))errors.push(`liveries: ${component.id} has invalid nonvisual states`);
+      if(nonVisual.some(state=>!states.has(state)))errors.push(`liveries: ${component.id} has unknown nonvisual state`);
+      if(!Array.isArray(metadata.paints)||!metadata.paints.length)errors.push(`liveries: ${component.id} has no paints`);
+      for(const [index,paint] of (Array.isArray(metadata.paints)?metadata.paints:[]).entries()){
+        if(typeof paint?.selector!=='string'||!paint.selector||!['color','backgroundColor'].includes(paint.property)||typeof paint.role!=='string'||!paint.role.startsWith('--')||
+          (paint.minimum!==undefined&&(!Number.isFinite(paint.minimum)||paint.minimum<=0))){errors.push(`liveries: ${component.id} has invalid native paint`);continue;}
+        const paintId=collector.addNode(uiNode(`${id}:paint:${index}`,paint.selector,'ui_declared_paint',{...declared,selector:paint.selector,property:paint.property,role:paint.role,...(paint.minimum?{minimum:paint.minimum}:{})}));
+        collector.addEdge(uiEdge(id,paintId,'ui_declares_paint',declared));collector.addEdge(uiEdge(paintId,`ui:livery-color-role:${paint.role}`,'ui_uses_color_role',declared));
+        if(!Array.isArray(paint.states)||!paint.states.length)errors.push(`liveries: ${component.id} has unbound native paint`);
+        for(const state of Array.isArray(paint.states)?paint.states:[]){
+          if(!states.has(state)||nonVisual.includes(state)){errors.push(`liveries: ${component.id} paint binds invalid state ${state}`);continue;}
+          painted.add(state);collector.addEdge(uiEdge(states.get(state),paintId,'ui_declares_state_paint',declared));
+        }
+      }
+      for(const state of states.keys())if(!painted.has(state)&&!nonVisual.includes(state))errors.push(`liveries: ${component.id} has unpainted visual state ${state}`);
+    }
     if(!Array.isArray(component.selectors)||!component.selectors.length)errors.push(`liveries: ${component.id} has no selectors`);
     for(const [index,selector] of (Array.isArray(component.selectors)?component.selectors:[]).entries()){
       if(typeof selector!=='string'||!selector.trim()){errors.push(`liveries: ${component.id} has an invalid selector`);continue;}
@@ -457,7 +522,7 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
       if(typeof role!=='string'||!role.startsWith('--')){errors.push(`liveries: ${component.id} has an invalid role`);continue;}
       const definitions=roleSources.filter(entry=>entry.text.includes(role+':'));
       if(!definitions.length)errors.push(`liveries: ${component.id} has unknown color role ${role}`);
-      const graphics=role.startsWith('--companion-')?['new']:role==='--card-icon-ink'?['classic','new']:['classic'];
+      const graphics=role.startsWith('--companion-')?['new']:component.native||role==='--card-icon-ink'?['classic','new']:['classic'];
       roles.add(role);const roleId=collector.addNode(uiNode(`ui:livery-color-role:${role}`,role,'ui_color_role',declared));collector.addEdge(uiEdge(id,roleId,'ui_expects_color_role',{...declared,graphics}));
       for(const definition of definitions)collector.addEdge(uiEdge(roleId,definition.id,'ui_role_defined_in',declared));
     }

@@ -1,5 +1,19 @@
 # Interfaccia
 
+<a id="vcard-1280-ui-2026-11-17"></a>
+
+## Esportazione contatti e QR azienda — candidata completa 1.2.280
+
+[Ordine ampliato](../progetto/INCARICO_CORRENTE.md#vcard-1280-incarico-2026-11-17). Il nome è visibile prima dell'azione: `contatto-Nome-Cognome.vcf` o `contatto-azienda-Ragione-Sociale.vcf`, sanificato, massimo180 byte UTF-8 e120 punti Unicode, con fallback `contatto.vcf`/`contatto-azienda.vcf`. Il file contiene i campi selezionati e non importa automaticamente nella rubrica. «Scegli dove salvare…» usa il picker solo se disponibile; «Condividi o salva…» richiede condivisione file supportata; «Scarica file» è un'alternativa esplicita governata dal browser.
+
+Esiti distinti: file salvato soltanto dopo chiusura dello stream; download avviato senza promettere percorso/salvataggio; consegna al sistema senza attestare destinatario/importazione. Attesa, annullamento, errore e capacità assente hanno riscontro. Durante l'attesa i tre comandi sono disabilitati e Chiudi/Escape restano disponibili: chiudono il pannello, non garantiscono l'annullamento della finestra OS o di una conferma della cornice già avviata. Nessun download automatico dopo annullamento/rifiuto.
+
+Snapshot limitati alla vita del pannello, controlli di UID/permesso/Vault e revoca alle frontiere asincrone; nessun handle persistito né vCard/nome nei log. Protocollo e conferma nativa della cornice invariati, senza un nuovo timer sull'intera scelta del file. Una copia già consegnata fuori dall'app non è ritirabile.
+
+La Tessera azienda offre sempre una lente accessibile, anche con pochi dati. Lo zoom usa la selezione corrente non ancora salvata; la lente della testata continua a usare la tessera salvata. Chiusura/revoca rimuovono anche il payload nel titolo del QR. Il QR resta nero su bianco per la lettura; il pulsante Chiudi usa una superficie del tema.
+
+[Registro livree](../../scripts/ui-livery-contract.json): `contactExport` e `companyCardQr` collegano pagine, comandi, produttori, modelli, CSS, ruoli, stati e test nominati. Totale9 componenti/14 ruoli;17 stati nativi dichiarati, `observed:false`. La [mappa](../../scripts/build-ui-topology.mjs) verifica fonti e legami; il [banco browser](../../tests/contact-export.browser.test.mjs) confronta gli stati realmente attraversati e rifiuta target mancanti/nascosti, ruoli o contrasto errati. [Evidenze e limiti](../evidenze/COLLAUDI.md#vcard-1280-verifiche-2026-11-17).
+
 <a id="rg02-rg03-ui-2026-11-17"></a>
 
 ## Contrasto delle Scadenze e tipografia del Profilo — candidata 1.2.280

@@ -1,5 +1,9 @@
 # Registro
 
+## 17/11/2026 — ampliata la candidata completa280
+
+Su nuovo ordine di Diego, vCard privata/azienda (nomi, destinazione ed esiti) e zoom Tessera azienda confluiscono nella stessa280 con la grafica già revisionata. Superata la precedente classificazione come seguiti separati; soltanto il transitorio post-passkey resta separato. Hosting#1196 annullato senza passi di deploy, produzione279 invariata. Implementazione locale completata, nuove suite/riesame/CI e Hosting da attestare sulla candidata completa. [Mandato](../progetto/INCARICO_CORRENTE.md#vcard-1280-incarico-2026-11-17), [evidenze](../evidenze/COLLAUDI.md#vcard-1280-verifiche-2026-11-17).
+
 <a id="rilascio-1280-registro-2026-11-17"></a>
 
 ## 17/11/2026 — approvazione RG-02/RG-03 e ordine della1.2.280

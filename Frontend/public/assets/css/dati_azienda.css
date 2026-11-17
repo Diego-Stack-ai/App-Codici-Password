@@ -903,3 +903,33 @@ body[data-ui-revision] .company-profile-action.profile-account-connect {
 [data-ui-revision="tre-livelli"] .profile-overview-heading > .manage-toggle {
     margin-left: var(--space-2, 0.5rem);
 }
+.qr-btn-container,
+.company-qr-zoom-trigger {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.company-qr-zoom-trigger {
+    position: relative;
+    align-self: center;
+}
+
+#qr-zoom-modal .modal-box-qr {
+    max-width: calc(100vw - 2rem);
+}
+
+#qr-zoom-modal .btn-modal-close {
+    background: var(--rev-surface-2);
+    color: var(--text-primary);
+    box-shadow: none;
+}
+
+#qrcode-zoom-container,
+#qrcode-zoom-container canvas,
+#qrcode-zoom-container img {
+    max-width: 100%;
+    height: auto;
+}

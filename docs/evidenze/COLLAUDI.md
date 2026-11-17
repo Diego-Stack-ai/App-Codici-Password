@@ -1,5 +1,19 @@
 # Collaudi
 
+<a id="vcard-1280-verifiche-2026-11-17"></a>
+
+## APP 1.2.280 completa — grafica, vCard e QR, verifica locale 17/11/2026
+
+[Incarico ampliato](../progetto/INCARICO_CORRENTE.md#vcard-1280-incarico-2026-11-17), ramo `codex/vcard-qr-1280-20261117`, base grafica **a90fd274**. #325, CI #1194/#1195 e la confezione365/345 sotto attestano soltanto il precedente perimetro grafico. Hosting **#1196 annullato**, deploy con zero passi; produzione ancora1.2.279/9cbf2d42. Nessuna attestazione della vecchia CI è trasferita alla candidata completa.
+
+Nuovi moduli comuni per nome/file e pannello; percorsi privato/azienda, zoom QR azienda, CSS, traduzioni e guida aggiornati. Il codice core della cornice/nativa resta identico alla base. Nessuna modifica backend, Auth, policy o dipendenze. Guida contentVersion14/reviewedAppVersion1.2.280,31 pagine/126 passi/111 target; le due istruzioni modificate sono tradotte nelle otto lingue, senza certificare la restante revisione editoriale.
+
+**Prove e falsificazioni.** Modello/copie21PASS: nomi e limiti, gesto trusted, singola operazione, esiti distinti, revoca dopo picker/create/write/close, distruzione dei byte e nessun fallback automatico. Primo aggregato Profilo204:195PASS/9FAIL per fixture di freschezza senza listener document/window; aggiornati solo i mock richiesti dal nuovo cleanup, prima della riesecuzione. Un controllo i18n iniziale18/19 è stato corretto nel conteggio esplicito delle nuove chiavi; non è dichiarato verde il primo aggregato fallito.
+
+Il banco usa pagine/controller reali e adattatori nativi sintetici, senza aprire finestre OS o creare contatti reali. Matrice popup aperto112contesti; QR con selezione non salvata168contesti (sette palette, due aspetti/grafiche e larghezze dichiarate). Gli altri stati sono prove funzionali distinte, non una moltiplicazione di tutta la matrice:17stati fra contatto e QR, con attesa/chiusura/completamento tardivo. Nome assente o nascosto solo in Blu chiaro rende negativo il controllo; stessa verifica per ruoli/contrasto. Il primo QR ha riprodotto Chiudi bianco su Blu chiaro a3,98:1: superficie tema corretta, soglia testuale4,5:1 poi superata.
+
+**Riesecuzione locale:** Profilo205/205PASS; dopo il successivo ritocco del focus durante attesa, banco nativo completo7/7PASS (senza focus manuale prima di Escape). i18n19/19, topologia20/20, guida12/12, offline16/16, documenti12/12 (34MD/1295link), CSS, sintassi252moduli e budget31pagine/diagnostica4/4PASS. Fondamenti UI90/90PASS; dinamici/tour/deep ancora in corso a questo checkpoint. Confezione completa367pubblici: nessuna aggiunta/rimozione rispetto allo snapshot funzionale completo e solo offline-assets.js diverso come derivato atteso; offline61export/347risorse,307riferimenti versione280. Il primo build offline senza junction non ha trovato i percorsi Firebase; ripreso con collegamento verificato alle dipendenze già installate, poi rimosso preservando il target. Nessuna installazione. Ricevute GitHub/Hosting soltanto dopo la loro conclusione. Restano prove fisiche PC/iPhone/Android/PWA, destinazione effettiva e scansione QR; una Share risolta non certifica destinatario, importazione o salvataggio. Nessun nuovo GO fisico o chiusura dell'incidente storico.
+
 <a id="rilascio-1280-verifiche-2026-11-17"></a>
 
 ## APP 1.2.280 — applicazione locale e controlli, 17/11/2026

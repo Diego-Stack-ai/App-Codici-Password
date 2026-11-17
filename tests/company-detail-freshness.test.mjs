@@ -17,10 +17,10 @@ function fixture({afterWrite = true, online = true, phone = '', failure = false,
     const location = {search: '?id=company&tab=contatti' + (afterWrite ? '&afterWrite=1' : ''), pathname: '/dati_azienda.html', hash: '#contatti'};
     const phoneNode = {tagName: 'DIV', textContent: '-'}, callNode = {href: '#'};
     const document = {getElementById: id => id === 'telefono-azienda' ? phoneNode : id === 'btn-call-tel' ? callNode : null,
-        querySelector: () => null};
+        querySelector: () => null, addEventListener() {}};
     const snapshot = (data, exists = true) => ({id: 'company', exists: () => exists, data: () => structuredClone(data)});
     const realm = vm.createContext({readErrorMessage, URLSearchParams, structuredClone, navigator, document,
-        window: {location, history: {replaceState(_, __, path) { replaced.push(path); const url = new URL(path, 'https://example.invalid'); location.search = url.search; }}},
+        window: {location, addEventListener() {}, history: {replaceState(_, __, path) { replaced.push(path); const url = new URL(path, 'https://example.invalid'); location.search = url.search; }}},
         db: {}, auth: {currentUser: {uid: 'owner'}}, doc: (_, ...path) => ({path: path.join('/')}),
         getDocFromCache: async reference => { reads.push(['cache', reference.path]); return snapshot(cached); },
         getDocFromServer: async reference => { reads.push(['server', reference.path]); if (failure) throw new Error('SERVER_UNAVAILABLE'); return snapshot(remote, !missing); },

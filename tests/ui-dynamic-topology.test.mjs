@@ -56,7 +56,7 @@ test('typography mapping rejects invalid sources and unknown translated labels',
 
 test('shared-base liveries connect all 22 pages, selectors, roles, producers and tests without inventing observations',()=>{
   const result=buildLiveryTopology();assert.deepEqual(result.errors,[]);
-  assert.deepEqual(result.summary,{pages:22,variants:2,components:7,roles:10});
+  assert.deepEqual(result.summary,{pages:22,variants:2,components:9,roles:14});
   const ids=new Set(result.nodes.map(node=>node.id));
   for(const edge of result.edges){assert.ok(ids.has(edge.source)&&ids.has(edge.target));assert.equal(edge.observed,false);assert.equal(edge.declaration,'CONTRACT');}
   for(const component of result.nodes.filter(node=>node.file_type==='ui_livery_component')){
@@ -72,6 +72,41 @@ test('shared-base liveries connect all 22 pages, selectors, roles, producers and
   assert.equal(result.nodes.find(node=>node.id==='ui:livery:new').cardSaturationMultiplier,1.15);
   assert.equal(result.nodes.find(node=>node.id==='ui:livery:classic').cardSaturationMultiplier,1);
   const topology=buildUiTopology();assert.equal(topology.summary.liveryPages,22);assert.equal(topology.summary.liveryVariants,2);
+});
+
+test('native contact topology links entries, models, visual states, roles and exact named regressions',()=>{
+  const result=buildLiveryTopology();assert.deepEqual(result.errors,[]);
+  for(const [name,count] of [['contact-export',11],['company-card-qr',6]]){
+    const id='ui:livery-component:'+name,edges=result.edges.filter(edge=>edge.source===id);
+    assert.equal(edges.filter(edge=>edge.relation==='ui_declares_state').length,count);
+    for(const relation of ['ui_uses_model','ui_names_regression','ui_declares_paint'])assert.ok(edges.some(edge=>edge.relation===relation),name+'/'+relation);
+    const states=result.nodes.filter(node=>node.id.startsWith(id+':state:'));
+    for(const state of states)assert.ok(result.edges.some(edge=>edge.source===state.id&&edge.relation==='ui_declares_state_test'),state.id);
+    assert.equal(result.nodes.filter(node=>node.id.startsWith(id+':entry:')).length,2);
+    for(const edge of edges.filter(edge=>edge.relation==='ui_expects_color_role'))assert.deepEqual(edge.graphics,['classic','new']);
+  }
+  for(const file of ['Frontend/public/assets/js/modules/shared/contact-export-model.js','Frontend/public/assets/js/modules/azienda/company-vcard.js','Frontend/public/assets/js/modules/shared/qr_code_utils.js'])assert.ok(result.edges.some(edge=>edge.target==='ui:source:'+file&&edge.relation==='ui_uses_model'),file);
+  for(const file of ['Frontend/public/assets/css/profile-layout.css','Frontend/public/assets/css/dati_azienda.css'])assert.ok(result.edges.some(edge=>edge.target==='ui:source:'+file&&edge.relation==='ui_loads_stylesheet'),file);
+  for(const edge of result.edges)assert.equal(edge.observed,false);
+});
+
+test('native contact topology rejects incomplete or invented state, source and regression bindings',async()=>{
+  const base=JSON.parse(await readFile(new URL('../scripts/ui-livery-contract.json',import.meta.url),'utf8'));
+  const mutations=[
+    [r=>{delete r.contactExport.models;},'has no models'],
+    [r=>{r.companyCardQr.models=[123];},'invalid source 123'],
+    [r=>{r.contactExport.states.push('open');},'duplicate state'],
+    [r=>{r.companyCardQr.entries.pop();},'incomplete entries'],
+    [r=>{r.contactExport.tests[0].name='contact-export';},'missing named native regression'],
+    [r=>{r.contactExport.tests[0].states=['unregistered-state'];},'test binds unknown state'],
+    [r=>{r.companyCardQr.tests=[];},'untested state'],
+    [r=>{r.companyCardQr.paints[0].role='--unknown-native-paint';},'unknown color role'],
+    [r=>{r.contactExport.nonVisualStates.push('open');},'invalid nonvisual states'],
+    [r=>{r.contactExport.paints[1].minimum='4.5';},'invalid native paint']
+  ];
+  const dir=await mkdtemp(path.join(tmpdir(),'ui-native-bindings-'));
+  try{for(const [mutate,message] of mutations){const registry=structuredClone(base);mutate(registry);const registryPath=path.join(dir,'contract.json');await writeFile(registryPath,JSON.stringify(registry));assert.ok(buildLiveryTopology({registryPath}).errors.some(error=>error.includes(message)),message);}}
+  finally{await rm(dir,{recursive:true,force:true});}
 });
 
 test('livery topology rejects a reduced matrix, missing producers, empty selectors and an unknown color role',async()=>{

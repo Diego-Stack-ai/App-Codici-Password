@@ -1,5 +1,15 @@
 # Rilascio
 
+<a id="vcard-1280-rilascio-2026-11-17"></a>
+
+## APP 1.2.280 completa — grafica, vCard e QR, solo Hosting
+
+L'[ordine ampliato](../progetto/INCARICO_CORRENTE.md#vcard-1280-incarico-2026-11-17) riunisce i correttivi nella stessa280, mai pubblicata. #325 è già unita ma il suo Hosting#1196 è stato annullato prima del deploy. Non ripetere il bump alla stessa versione: verificare307 riferimenti280 e rigenerare offline, con guida contentVersion14. La nuova candidata aggiunge due moduli pubblici; confrontare tutti367 file contro lo snapshot completo pre-confezione, ammettendo solo il derivato offline atteso.
+
+Nuovo riesame sullo SHA immutabile e nuova CI completa della PR; merge con testa attesa. CI master e validazione del workflow manuale possono partire in parallelo sullo stesso master fissato; production è approvabile soltanto dopo entrambi verdi e master invariato. Input `release_scope=hosting`, protezioni e approvazione delegata conservate; nessun deploy locale o modifica workflow. Dopo Hosting, manifest canonico dalla sorgente pulita distribuita, verifica pubblica integrale e ricevuta distinta dalla successiva documentazione. I banchi nativi simulati non sostituiscono i dispositivi fisici.
+
+Perimetro applicativo nel [contratto](INTERFACCIA.md#vcard-1280-ui-2026-11-17), prove in [COLLAUDI](../evidenze/COLLAUDI.md#vcard-1280-verifiche-2026-11-17). Cornice ordinaria/faro e policy restano invariati. Il transitorio post-passkey è un seguito separato.
+
 <a id="rilascio-1280-2026-11-17"></a>
 
 ## UI 1.2.280 — contrasto e tipografia approvati, solo Hosting
