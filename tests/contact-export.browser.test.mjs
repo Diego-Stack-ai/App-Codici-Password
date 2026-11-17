@@ -66,6 +66,10 @@ test('contact export controls stay compact and reachable on private and company 
                 assert.equal(await dialog.locator('#contact-export-method').inputValue(), expected);
                 assert.equal(await dialog.locator('option[value=save]').count(), Number(picker));
                 assert.equal(await dialog.locator('option[value=share]').count(), Number(share));
+                assert.equal(await dialog.locator('option[value=download]').count(), Number(!picker && !share), 'download is only the sole fallback');
+                assert.equal(await dialog.locator('.contact-export-options').isVisible(), picker && share, 'no alternatives menu for one operation');
+                assert.doesNotMatch(await dialog.textContent(), /Scarica file/);
+                if (!picker && !share) assert.equal(await dialog.locator('.contact-export-primary').textContent(), 'Salva file contatto');
                 if (!picker) cover('contact-export', 'save-unavailable');
                 if (!share) cover('contact-export', 'share-unavailable');
                 if (!picker && !share) {
@@ -145,7 +149,7 @@ test('unsupported sharing and rejected or cancelled native actions always have a
                 let dialog = await openContact(f); const announced = await dialog.locator('.contact-export-name').textContent();
                 assert.equal(await f.page.evaluate(() => window.contactDownloads?.length || 0), 0);
                 await dialog.locator('.contact-export-primary').click();
-                await f.page.waitForFunction(() => document.querySelector('#contact-export-modal [role=status]')?.textContent?.startsWith('Download avviato:'));
+                await f.page.waitForFunction(() => document.querySelector('#contact-export-modal [role=status]')?.textContent?.startsWith('Salvataggio del file avviato:'));
                 assert.deepEqual(await f.page.evaluate(() => window.contactDownloads), [announced]); cover('contact-export', 'download-started');
                 await f.page.keyboard.press('Escape'); assert.equal(await dialog.count(), 0);
                 for (const method of ['share', 'save']) for (const name of ['NotAllowedError', 'AbortError', 'NotSupportedError', 'DataError']) {
@@ -157,12 +161,14 @@ test('unsupported sharing and rejected or cancelled native actions always have a
                     }, {name, method});
                     dialog = await openContact(f); await choose(dialog, method); await dialog.locator('.contact-export-primary').click();
                     const expected = name === 'AbortError' ? 'Operazione annullata.' : name === 'NotSupportedError' && method === 'share'
-                        ? 'La condivisione di file non è disponibile in questo browser. Puoi salvare o scaricare il contatto.'
-                        : 'Operazione non riuscita. Riprova oppure scegli un altro comando.';
+                        ? 'La condivisione di file non è disponibile. Prepara di nuovo il contatto per verificare le funzioni disponibili.'
+                        : 'Operazione non riuscita. Prepara di nuovo il contatto e riprova.';
                     await f.page.waitForFunction(expected => document.querySelector('#contact-export-modal [role=status]')?.textContent === expected, expected);
                     assert.equal(await f.page.evaluate(() => window.contactActivation), true);
                     cover('contact-export', name === 'AbortError' ? 'cancelled' : method + '-error');
                     assert.deepEqual(await f.page.evaluate(() => window.contactDownloads), [announced], 'no automatic fallback');
+                    assert.equal(await dialog.locator('option[value=download]').count(), 0, 'native errors never introduce a download alternative');
+                    assert.equal(await dialog.locator('.contact-export-options').isVisible(), method === 'save');
                     await dialog.getByRole('button', {name: 'Chiudi', exact: true}).click();
                 }
                 assert.deepEqual(await f.page.evaluate(() => window.__viewTour.errors), []);

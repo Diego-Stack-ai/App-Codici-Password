@@ -1,5 +1,19 @@
 # Decisioni
 
+<a id="rilascio-1282-decisione-2026-11-17"></a>
+
+## 17/11/2026 — pubblicare il correttivo contatto
+
+Fonte diretta: Diego, «pubblica». Autorizzata la pubblicazione1.2.282 dello stesso correttivo già preparato: niente alternativa Download con funzioni native; un solo Salva file contatto senza funzioni native; Altre opzioni solo con due funzioni native disponibili. Il divieto di pubblicazione nel checkpoint locale sotto è superato soltanto da questo ordine. Gesto, proof, revoche, colori e ingresso conservati; [mandato](INCARICO_CORRENTE.md#rilascio-1282-incarico-2026-11-17).
+
+
+<a id="contatto-opzioni-decisione-2026-11-17"></a>
+
+## 17/11/2026 — Scarica file non è un’alternativa aggiuntiva
+
+Fonte diretta: Diego trova ridondante Scarica file sul telefono, dove Condividi o salva consente già Salva in File, e ne chiede l’eliminazione come opzione. Criterio implementativo: mostrare Share/Save solo secondo capacità effettive; Altre opzioni soltanto quando sono presenti entrambe. Download standard rimane solo il meccanismo interno dell’unica primaria Salva file contatto in assenza di tutte le capacità native, senza promettere una destinazione scelta dall’app o importazione. Un errore non aggiunge opzioni né avvia altre azioni. [Mandato locale](INCARICO_CORRENTE.md#contatto-opzioni-incarico-2026-11-17).
+
+
 <a id="rilascio-1281-decisione-eseguita-2026-11-17"></a>
 
 ## Esecuzione della scelta ingresso/contatti —1.2.281

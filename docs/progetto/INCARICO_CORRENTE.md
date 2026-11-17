@@ -1,5 +1,21 @@
 # Incarico corrente
 
+<a id="rilascio-1282-incarico-2026-11-17"></a>
+
+## Pubblicazione del correttivo contatti — ordine eseguibile
+
+Diego ordina «pubblica» dopo il correttivo locale. Il nuovo ordine supera il precedente limite al solo lavoro locale per questo stesso delta: nuova versione1.2.282, guida16/reviewed282, PR, riesame indipendente, CI sulla testa, merge con SHA atteso, CI master e validazione Hosting sullo stesso master, poi production protetto secondo la delega già concessa, verifica pubblica completa e ricevuta MD/GitHub. Solo Hosting e correzione delle alternative del contatto; nessun cambiamento backend/policy/ingresso o nuovo incarico dedotto. Produzione281 fino alla ricevuta effettiva. Root unico esecutore, supporti in lettura e34MD invariati.
+
+
+<a id="contatto-opzioni-incarico-2026-11-17"></a>
+
+## Riscontro telefono — eliminare Scarica file dalle alternative
+
+Diego, dopo la pubblicazione281, segnala «Altre opzioni/Scarica file» ridondante perché la condivisione del dispositivo consente già Salva in File; precisa che «Scarica file non si capisce… credo vada eliminato come opzione». Preparare il correttivo locale per entrambe le Tessere: niente opzione Download aggiuntiva; sole capacità native disponibili. Se mancano entrambe, un unico comando chiaro Salva file contatto usa il salvataggio browser con nome e destinazione spiegati. Nessuna scelta per user-agent o larghezza. Conservare proof, gesto trusted, esiti veritieri, revoche e assenza di fallback automatico dopo errori/annullamenti.
+
+Un solo esecutore, supporti in lettura, MD esistenti e regressioni pertinenti. Il seguito locale non cambia versione e non avvia commit/push/PR/merge/deploy o operazioni backend/policy: il riscontro del telefono non viene trasformato in un nuovo ordine di pubblicazione. Prova dell’ingresso e altri riscontri ancora in attesa di Diego.
+
+
 <a id="rilascio-1281-incarico-2026-11-17"></a>
 
 ## Ingresso e contatti1.2.281 — ordine eseguito, 17/11/2026

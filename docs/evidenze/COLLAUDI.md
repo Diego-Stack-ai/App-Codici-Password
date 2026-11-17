@@ -1,5 +1,25 @@
 # Collaudi
 
+<a id="rilascio-1282-verifiche-2026-11-17"></a>
+
+## Candidata1.2.282 — confezione e gate
+
+Correttivo su [mandato diretto](../progetto/INCARICO_CORRENTE.md#rilascio-1282-incarico-2026-11-17). Le prove del delta locale nel checkpoint successivo restano limitate alla base614504df prima della confezione:23 contatto,2 composizione,19 lingue,5 UItraduzioni,4 prestazioni,12 documenti PASS; sintassi252 moduli. Preparare snapshot funzionale, bump canonico282, guida16/reviewed282, derivati offline e inventario QA idempotente. Confezione282 verificata:307riferimenti, offline61export/347risorse. Confronto dei367file pubblici prima/dopo il bump normalizzando solo versione ed EOL: unico delta ulteriore è il catalogo guida16/reviewed282,16testi nelle otto lingue; nessun file pubblico aggiunto/rimosso. Byte testuali allineati a Git LF. Test sulla282: contatto23/23, composizione reale2/2 selezionati, offline16/16, guida12/12, lingue19/19, UItraduzioni5/5 PASS. Un primo build locale senza dipendenze del worktree era fallito; collegamento alle dipendenze workspace già installate e nuova esecuzione PASS, nessuna installazione o modifica del builder. Inventario QA31pagine/126istruzioni/111target/167campi rigenerato idempotente prima del commit. Inventario QA/unità14/14 PASS; primo banco C1 locale72/73 PASS con C1_READINESS nel caso timer all’avvio Impostazioni. Il singolo caso rieseguito1/1 PASS senza modifiche; non è una prova dell’intera suite né una deroga: la CI completa resta obbligatoria. Il controllo docs aveva rifiutato la junction temporanea node_modules; rimossa solo la junction dopo il build, documenti12/12 PASS. Riesami immutabili, CI e produzione ancora da acquisire; non trasferire il PASS281 a282.
+
+
+<a id="contatto-opzioni-verifiche-2026-11-17"></a>
+
+## Contatto — rimozione alternativa Download, locale dopo la281
+
+Base614504df, ramo codex/contact-options-20261117, correttivo non pubblicato. [Riscontro e mandato](../progetto/INCARICO_CORRENTE.md#contatto-opzioni-incarico-2026-11-17), [contratto](../regole/INTERFACCIA.md#contatto-opzioni-ui-2026-11-17). Controller invariato nei percorsi di proof/gesto/revoca; cambia soltanto l’elenco delle capacità: Share/Save effettivamente disponibili, oppure unica primaria browser Salva file contatto se mancano entrambe. Testi di attesa, fallback ed errori riallineati negli otto cataloghi.
+
+- Contatto modello/browser:23/23 PASS (15 modello,8 browser),0 skip/fail. Quattro combinazioni Share/picker ×privato/azienda ×Classica/Nuova:96 misure geometriche a320/390/1280px,568/844px d’altezza. Menu visibile solo con entrambe le API; nessuna option Download con capacità native; primaria esplicita nel solo fallback. NotAllowed/Abort/NotSupported/DataError su Share/Save: niente opzione o esportazione browser automatica. Chiusura pendente, revoca e completamenti tardivi conservati.
+- Stessa suite:112 popup nei sette temi ×chiaro/scuro ×due grafiche ×due pagine ×due larghezze, più168 osservazioni QR; ruoli, contrasti e registro14+6 stati PASS. Nessun nuovo ruolo/stato/colore introdotto.
+- Composizione reale della cornice:2/2 selezionati PASS,0 skip, sui casi pannello unico/fresh-consume/nuovo gesto alla riprova e revoca del proprietario. Identità/file e API OS sintetici; non una prova fisica di FaceID, share sheet o destinazione del file.
+- Lingue19/19, traduzioni UI5/5, budget prestazioni e diagnostica4/4, documenti12/12 PASS; sintassi252 moduli OK. Riesame indipendente statico GO, nessun P1/P2 nel delta; nessuna autorizzazione al rilascio dedotta.
+
+Produzione sempre1.2.281/6b77e6d6; nessun bump/commit/push/PR/merge/Hosting per questo seguito. Nuovo comportamento nativo su telefono ancora da provare dopo un futuro rilascio autorizzato; non trasferire il PASS Chromium al dispositivo fisico. Rimane da ricevere il riscontro di Diego sull’ingresso.
+
 <a id="rilascio-1281-verifiche-2026-11-17"></a>
 
 ## APP1.2.281 — ricevuta completa, 17/11/2026

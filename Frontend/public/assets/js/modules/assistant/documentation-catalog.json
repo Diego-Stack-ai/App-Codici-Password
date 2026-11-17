@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "contentVersion": 15,
-  "reviewedAppVersion": "1.2.281",
+  "contentVersion": 16,
+  "reviewedAppVersion": "1.2.282",
   "fallbackLocale": "it",
   "pages": [
     {
@@ -1217,7 +1217,7 @@
       "guide.pages.profilo_privato.step-3": "Telefoni ed email possono essere autonomi o collegati a un Account; il collegamento non è una nuova copia delle credenziali.",
       "guide.pages.profilo_privato.step-4": "Organizza indirizzi e utenze dalle sezioni dedicate e controlla il risultato delle modifiche.",
       "guide.pages.profilo_privato.step-5": "Ogni documento raccoglie dati, note, allegati e collegamenti ad Account o Scadenza. Per rimuovere un allegato usa il cestino e la conferma.",
-      "guide.pages.profilo_privato.step-6": "Scegli i dati della tessera e del QR. Salva o condividi contatto mostra contatto-Nome-Cognome.vcf e un comando adatto al dispositivo. Altre opzioni contiene le alternative disponibili. Dopo annullamento o errore prepara di nuovo prima di riprovare. Nessuna importazione automatica nella rubrica.",
+      "guide.pages.profilo_privato.step-6": "Scegli i dati della tessera e del QR. Salva o condividi contatto mostra contatto-Nome-Cognome.vcf e un comando adatto al dispositivo. Altre opzioni compare solo se puoi sia condividere sia scegliere dove salvare. Se mancano entrambe le funzioni, Salva file contatto avvia il salvataggio gestito dal browser. Dopo annullamento o errore prepara di nuovo prima di riprovare. Nessuna importazione automatica nella rubrica.",
       "guide.pages.lista_aziende.title": "Aziende",
       "guide.pages.lista_aziende.purpose": "Scegli l’azienda e accedi ai dati oppure direttamente ad Account, Condivisi, Memorandum e Memo condivisi.",
       "guide.pages.lista_aziende.step-1": "Apri i Dati azienda oppure scegli una delle quattro categorie con contatore. I dati aziendali restano separati dagli Account privati.",
@@ -1225,7 +1225,7 @@
       "guide.pages.dati_azienda.title": "Dati azienda",
       "guide.pages.dati_azienda.purpose": "Consulta il profilo aziendale, i contatti e le proiezioni condivisibili.",
       "guide.pages.dati_azienda.step-1": "Consulta il riepilogo e le sezioni dell’azienda scelta. Con la grafica Nuova, usa Modifica nella sezione per mostrarne i comandi di gestione e Fine per tornare alla consultazione.",
-      "guide.pages.dati_azienda.step-2": "Scegli i dati ammessi; la lente ingrandisce il QR corrente anche prima di Salva selezione. Salva o condividi contatto mostra contatto-azienda-Nome-Ditta.vcf e il comando disponibile. Altre opzioni contiene le alternative. I segreti restano esclusi.",
+      "guide.pages.dati_azienda.step-2": "Scegli i dati ammessi; la lente ingrandisce il QR corrente anche prima di Salva selezione. Salva o condividi contatto mostra contatto-azienda-Nome-Ditta.vcf e il comando disponibile. Altre opzioni compare solo se puoi sia condividere sia scegliere dove salvare. Se mancano entrambe le funzioni, Salva file contatto avvia il salvataggio gestito dal browser. I segreti restano esclusi.",
       "guide.pages.dati_azienda.step-3": "Prepara il riepilogo PDF e controllane il contenuto prima di salvarlo o condividerlo.",
       "guide.pages.dati_azienda.step-4": "Contatti e sedi possono richiamare Account collegati. Modifica i dati nel percorso previsto dall’app.",
       "guide.pages.modifica_azienda.title": "Crea o modifica azienda",
@@ -1353,50 +1353,50 @@
       "guide.pages.app.step-1": "All’ingresso attendi la verifica e lo sblocco della Vault. La Home appare quando è pronta. Se la Vault viene effettivamente bloccata o annulli lo sblocco, usa Sblocca e riprendi. Inserisci la Master Password soltanto nella finestra dell’app."
     },
     "en": {
-      "guide.pages.profilo_privato.step-6": "Choose the card and QR data. Save or share contact shows contatto-Name-Surname.vcf and a command supported by your device. More options contains available alternatives. After cancellation or an error, prepare again before retrying. No automatic address-book import.",
-      "guide.pages.dati_azienda.step-2": "Choose allowed data; the magnifier enlarges the current QR even before Save selection. Save or share contact shows contatto-azienda-Company-Name.vcf and the available command. More options contains alternatives. Secrets remain excluded.",
+      "guide.pages.profilo_privato.step-6": "Choose the card and QR data. Save or share contact shows contatto-Name-Surname.vcf and a command supported by your device. More options appears only when both sharing and choosing a save location are available. Without either function, Save contact file starts saving through the browser. After cancellation or an error, prepare again before retrying. No automatic address-book import.",
+      "guide.pages.dati_azienda.step-2": "Choose allowed data; the magnifier enlarges the current QR even before Save selection. Save or share contact shows contatto-azienda-Company-Name.vcf and the available command. More options appears only when both sharing and choosing a save location are available. Without either function, Save contact file starts saving through the browser. Secrets remain excluded.",
       "guide.pages.app.title": "Vault frame",
       "guide.pages.app.purpose": "The frame manages persistent navigation for admitted accounts.",
       "guide.pages.app.step-1": "On entry, wait for verification and Vault unlock. Home appears when ready. If the Vault is actually locked or you cancel unlocking, use Unlock and resume. Enter the Master Password only in the app dialog."
     },
     "es": {
-      "guide.pages.profilo_privato.step-6": "Elige los datos de la tarjeta y del QR. Guardar o compartir contacto muestra contatto-Nombre-Apellido.vcf y una acción compatible con el dispositivo. Más opciones incluye alternativas. Tras cancelar o un error, prepara de nuevo antes de reintentar. No se importa automáticamente a contactos.",
-      "guide.pages.dati_azienda.step-2": "Elige los datos permitidos; la lupa amplía el QR actual incluso antes de guardar la selección. Guardar o compartir contacto muestra contatto-azienda-Nombre-Empresa.vcf y la acción disponible. Más opciones incluye alternativas. Los secretos quedan excluidos.",
+      "guide.pages.profilo_privato.step-6": "Elige los datos de la tarjeta y del QR. Guardar o compartir contacto muestra contatto-Nombre-Apellido.vcf y una acción compatible con el dispositivo. Más opciones aparece solo si puedes compartir y elegir dónde guardar. Si no hay ninguna de estas funciones, Guardar archivo de contacto inicia el guardado gestionado por el navegador. Tras cancelar o un error, prepara de nuevo antes de reintentar. No se importa automáticamente a contactos.",
+      "guide.pages.dati_azienda.step-2": "Elige los datos permitidos; la lupa amplía el QR actual incluso antes de guardar la selección. Guardar o compartir contacto muestra contatto-azienda-Nombre-Empresa.vcf y la acción disponible. Más opciones aparece solo si puedes compartir y elegir dónde guardar. Si no hay ninguna de estas funciones, Guardar archivo de contacto inicia el guardado gestionado por el navegador. Los secretos quedan excluidos.",
       "guide.pages.app.title": "Marco de la bóveda",
       "guide.pages.app.purpose": "El marco gestiona la navegación persistente para las cuentas admitidas.",
       "guide.pages.app.step-1": "Al entrar, espera la verificación y el desbloqueo de la Vault. Inicio aparece cuando está listo. Si la Vault se bloquea o cancelas, usa Desbloquear y continuar. Introduce la contraseña maestra solo en la ventana de la app."
     },
     "fr": {
-      "guide.pages.profilo_privato.step-6": "Choisis les données de la carte et du QR. Enregistrer ou partager le contact affiche contatto-Prénom-Nom.vcf et une action compatible avec l’appareil. Autres options contient les alternatives. Après annulation ou erreur, prépare à nouveau avant de réessayer. Aucun ajout automatique aux contacts.",
-      "guide.pages.dati_azienda.step-2": "Choisis les données autorisées ; la loupe agrandit le QR actuel même avant d’enregistrer la sélection. Enregistrer ou partager le contact affiche contatto-azienda-Nom-Entreprise.vcf et l’action disponible. Autres options contient les alternatives. Les secrets restent exclus.",
+      "guide.pages.profilo_privato.step-6": "Choisis les données de la carte et du QR. Enregistrer ou partager le contact affiche contatto-Prénom-Nom.vcf et une action compatible avec l’appareil. Autres options apparaît seulement si tu peux partager et choisir où enregistrer. Sans ces deux fonctions, Enregistrer le fichier contact lance l’enregistrement géré par le navigateur. Après annulation ou erreur, prépare à nouveau avant de réessayer. Aucun ajout automatique aux contacts.",
+      "guide.pages.dati_azienda.step-2": "Choisis les données autorisées ; la loupe agrandit le QR actuel même avant d’enregistrer la sélection. Enregistrer ou partager le contact affiche contatto-azienda-Nom-Entreprise.vcf et l’action disponible. Autres options apparaît seulement si tu peux partager et choisir où enregistrer. Sans ces deux fonctions, Enregistrer le fichier contact lance l’enregistrement géré par le navigateur. Les secrets restent exclus.",
       "guide.pages.app.title": "Cadre du coffre",
       "guide.pages.app.purpose": "Le cadre gère la navigation persistante pour les comptes autorisés.",
       "guide.pages.app.step-1": "À l’entrée, attends la vérification et le déverrouillage du Vault. L’accueil apparaît lorsqu’il est prêt. Si le Vault est bloqué ou si tu annules, utilise Déverrouiller et reprendre. Saisis le mot de passe maître uniquement dans la fenêtre de l’app."
     },
     "de": {
-      "guide.pages.profilo_privato.step-6": "Wähle Karten- und QR-Daten. Kontakt speichern oder teilen zeigt contatto-Vorname-Nachname.vcf und eine vom Gerät unterstützte Aktion. Weitere Optionen enthält Alternativen. Nach Abbruch oder Fehler vor dem erneuten Versuch neu vorbereiten. Kein automatischer Kontakteimport.",
-      "guide.pages.dati_azienda.step-2": "Wähle erlaubte Daten; die Lupe vergrößert den aktuellen QR auch vor dem Speichern der Auswahl. Kontakt speichern oder teilen zeigt contatto-azienda-Firmenname.vcf und die verfügbare Aktion. Weitere Optionen enthält Alternativen. Geheimnisse bleiben ausgeschlossen.",
+      "guide.pages.profilo_privato.step-6": "Wähle Karten- und QR-Daten. Kontakt speichern oder teilen zeigt contatto-Vorname-Nachname.vcf und eine vom Gerät unterstützte Aktion. Weitere Optionen erscheint nur, wenn Teilen und die Wahl eines Speicherorts verfügbar sind. Ohne beide Funktionen startet Kontaktdatei speichern das vom Browser verwaltete Speichern. Nach Abbruch oder Fehler vor dem erneuten Versuch neu vorbereiten. Kein automatischer Kontakteimport.",
+      "guide.pages.dati_azienda.step-2": "Wähle erlaubte Daten; die Lupe vergrößert den aktuellen QR auch vor dem Speichern der Auswahl. Kontakt speichern oder teilen zeigt contatto-azienda-Firmenname.vcf und die verfügbare Aktion. Weitere Optionen erscheint nur, wenn Teilen und die Wahl eines Speicherorts verfügbar sind. Ohne beide Funktionen startet Kontaktdatei speichern das vom Browser verwaltete Speichern. Geheimnisse bleiben ausgeschlossen.",
       "guide.pages.app.title": "Tresorrahmen",
       "guide.pages.app.purpose": "Der Rahmen verwaltet die dauerhafte Navigation für zugelassene Konten.",
       "guide.pages.app.step-1": "Warte beim Einstieg auf Prüfung und Entsperren des Vault. Die Startseite erscheint, sobald sie bereit ist. Wird der Vault gesperrt oder brichst du ab, nutze Entsperren und fortsetzen. Gib das Master-Passwort nur im App-Dialog ein."
     },
     "pt": {
-      "guide.pages.profilo_privato.step-6": "Escolhe os dados do cartão e QR. Guardar ou partilhar contacto mostra contatto-Nome-Apelido.vcf e uma ação suportada pelo dispositivo. Mais opções contém alternativas. Após cancelamento ou erro, prepara novamente antes de tentar. Não há importação automática para contactos.",
-      "guide.pages.dati_azienda.step-2": "Escolhe os dados permitidos; a lupa amplia o QR atual antes de guardar a seleção. Guardar ou partilhar contacto mostra contatto-azienda-Nome-Empresa.vcf e a ação disponível. Mais opções contém alternativas. Os segredos continuam excluídos.",
+      "guide.pages.profilo_privato.step-6": "Escolhe os dados do cartão e QR. Guardar ou partilhar contacto mostra contatto-Nome-Apelido.vcf e uma ação suportada pelo dispositivo. Mais opções aparece apenas se puderes partilhar e escolher onde guardar. Sem qualquer destas funções, Guardar ficheiro de contacto inicia a gravação gerida pelo navegador. Após cancelamento ou erro, prepara novamente antes de tentar. Não há importação automática para contactos.",
+      "guide.pages.dati_azienda.step-2": "Escolhe os dados permitidos; a lupa amplia o QR atual antes de guardar a seleção. Guardar ou partilhar contacto mostra contatto-azienda-Nome-Empresa.vcf e a ação disponível. Mais opções aparece apenas se puderes partilhar e escolher onde guardar. Sem qualquer destas funções, Guardar ficheiro de contacto inicia a gravação gerida pelo navegador. Os segredos continuam excluídos.",
       "guide.pages.app.title": "Estrutura do cofre",
       "guide.pages.app.purpose": "A estrutura gere a navegação persistente para as contas autorizadas.",
       "guide.pages.app.step-1": "Ao entrar, aguarda a verificação e o desbloqueio do Vault. O início aparece quando está pronto. Se o Vault for bloqueado ou cancelares, usa Desbloquear e retomar. Introduz a palavra-passe mestra apenas na janela da app."
     },
     "zh": {
-      "guide.pages.profilo_privato.step-6": "选择名片和二维码数据。“保存或分享联系人”显示 contatto-姓名.vcf 以及设备支持的操作。“更多选项”提供其他可用方式。取消或出错后，请先重新准备再重试。不会自动导入通讯录。",
-      "guide.pages.dati_azienda.step-2": "选择允许的数据；放大镜可在保存选择前放大当前二维码。“保存或分享联系人”显示 contatto-azienda-公司名称.vcf 和可用操作。“更多选项”提供其他方式。机密数据仍被排除。",
+      "guide.pages.profilo_privato.step-6": "选择名片和二维码数据。“保存或分享联系人”显示 contatto-姓名.vcf 以及设备支持的操作。只有分享和选择保存位置均可用时才显示“更多选项”。如果两项功能均不可用，“保存联系人文件”将启动由浏览器管理的保存操作。取消或出错后，请先重新准备再重试。不会自动导入通讯录。",
+      "guide.pages.dati_azienda.step-2": "选择允许的数据；放大镜可在保存选择前放大当前二维码。“保存或分享联系人”显示 contatto-azienda-公司名称.vcf 和可用操作。只有分享和选择保存位置均可用时才显示“更多选项”。如果两项功能均不可用，“保存联系人文件”将启动由浏览器管理的保存操作。机密数据仍被排除。",
       "guide.pages.app.title": "保险库框架",
       "guide.pages.app.purpose": "框架为获准的账户管理持久导航。",
       "guide.pages.app.step-1": "进入时请等待验证和保险库解锁。主页准备好后才会显示。如果保险库确实被锁定或你取消解锁，请使用“解锁并继续”。仅在应用的对话框中输入主密码。"
     },
     "hi": {
-      "guide.pages.profilo_privato.step-6": "कार्ड और QR के डेटा चुनें। संपर्क सहेजें या साझा करें में contatto-नाम-उपनाम.vcf और उपकरण पर उपलब्ध कार्रवाई दिखती है। अधिक विकल्प में अन्य तरीके हैं। रद्द करने या त्रुटि के बाद फिर कोशिश से पहले दोबारा तैयार करें। संपर्क सूची में अपने आप आयात नहीं होता।",
-      "guide.pages.dati_azienda.step-2": "अनुमत डेटा चुनें; चयन सहेजने से पहले भी आवर्धक वर्तमान QR बड़ा करता है। संपर्क सहेजें या साझा करें में contatto-azienda-कंपनी-नाम.vcf और उपलब्ध कार्रवाई दिखती है। अधिक विकल्प में अन्य तरीके हैं। गोपनीय डेटा शामिल नहीं होता।",
+      "guide.pages.profilo_privato.step-6": "कार्ड और QR के डेटा चुनें। संपर्क सहेजें या साझा करें में contatto-नाम-उपनाम.vcf और उपकरण पर उपलब्ध कार्रवाई दिखती है। अधिक विकल्प तभी दिखता है जब साझा करना और सहेजने का स्थान चुनना दोनों उपलब्ध हों। दोनों के बिना संपर्क फ़ाइल सहेजें ब्राउज़र द्वारा नियंत्रित सहेजना शुरू करता है। रद्द करने या त्रुटि के बाद फिर कोशिश से पहले दोबारा तैयार करें। संपर्क सूची में अपने आप आयात नहीं होता।",
+      "guide.pages.dati_azienda.step-2": "अनुमत डेटा चुनें; चयन सहेजने से पहले भी आवर्धक वर्तमान QR बड़ा करता है। संपर्क सहेजें या साझा करें में contatto-azienda-कंपनी-नाम.vcf और उपलब्ध कार्रवाई दिखती है। अधिक विकल्प तभी दिखता है जब साझा करना और सहेजने का स्थान चुनना दोनों उपलब्ध हों। दोनों के बिना संपर्क फ़ाइल सहेजें ब्राउज़र द्वारा नियंत्रित सहेजना शुरू करता है। गोपनीय डेटा शामिल नहीं होता।",
       "guide.pages.app.title": "वॉल्ट फ़्रेम",
       "guide.pages.app.purpose": "फ़्रेम अनुमत खातों के लिए स्थायी नेविगेशन का प्रबंधन करता है।",
       "guide.pages.app.step-1": "प्रवेश पर सत्यापन और वॉल्ट खुलने की प्रतीक्षा करें। होम तैयार होने पर दिखता है। वॉल्ट सचमुच लॉक हो या आप रद्द करें तो अनलॉक करके फिर शुरू करें का उपयोग करें। मास्टर पासवर्ड केवल ऐप के संवाद में दर्ज करें।"

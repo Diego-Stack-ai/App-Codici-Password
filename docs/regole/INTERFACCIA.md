@@ -1,5 +1,20 @@
 # Interfaccia
 
+<a id="rilascio-1282-ui-2026-11-17"></a>
+
+## Alternative contatto — candidata1.2.282
+
+Il contratto del correttivo locale sotto è incluso nella candidata282 su ordine di pubblicazione. Guide private/aziendali nelle otto lingue chiariscono quando appare Altre opzioni e il fallback unico; guida16/reviewed282. Stessi14stati contatto+6QR, produttori, ruoli, palette e geometria. Nessuna variazione all’ingresso; banchi automatici distinti dalla verifica fisica.
+
+
+<a id="contatto-opzioni-ui-2026-11-17"></a>
+
+## Contatto — alternative native, correttivo locale dopo la281
+
+Un comando nella Tessera e un pannello con nome file, primaria e Chiudi. I comandi dipendono dalle capacità effettivamente rilevate: solo Share → «Condividi o salva…»; solo picker → «Scegli dove salvare…»; entrambe → primaria Share e «Altre opzioni» con sole Share/Save; nessuna → unica primaria «Salva file contatto», salvataggio browser standard con spiegazione della destinazione. Nessuna voce «Scarica file» aggiuntiva e nessun menu alternativo per un’unica operazione. Nessuna diramazione per user-agent o larghezza.
+
+Un errore/annullamento non aggiunge comandi né avvia un fallback automatico. Capacità ricalcolate normalmente; la riprova conserva nuova preparazione, proof e gesto finale trusted. Esiti distinti: file salvato dal picker, consegnato alla condivisione oppure salvataggio browser soltanto avviato; mai importazione in rubrica promessa. Stessi produttori privato/azienda, ruoli colore, geometria,14 stati del contatto e6 QR già registrati. La matrice esistente collega controller, cataloghi e test delle quattro capacità, errori e geometria; nessun nuovo colore o stato. [Mandato locale](../progetto/INCARICO_CORRENTE.md#contatto-opzioni-incarico-2026-11-17). Questa sezione supera solo la scelta delle alternative nei checkpoint281 sotto e non è ancora pubblicata.
+
 <a id="rilascio-1281-ui-2026-11-17"></a>
 
 ## Ingresso e contatti — disponibili nella1.2.281
