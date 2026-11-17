@@ -1,5 +1,12 @@
 # Programma
 
+<a id="rilascio-1281-programma-2026-11-17"></a>
+
+## Ingresso e contatti — distribuiti nella1.2.281
+
+Implementazione e rilascio chiusi: ingresso coerente e contatti con un comando/pannello compatto disponibili nella1.2.281, #328/Hosting#1208 e verifica pubblica completa PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1281-verifiche-2026-11-17). Restano la prova fisica di Diego sul nuovo ingresso FaceID/passkey e su file/condivisione in privato/azienda, oltre a RG-01/RG-04 già aperti. Nessun PASS fisico trasferito da Chromium o dagli emulatori. Cornice ordinaria e tempi di sicurezza conservati; nessun nuovo incarico di sicurezza, policy o installazione dedotto dal rilascio. Le proposte e attese dei checkpoint sotto sono superate da questa pubblicazione.
+
+
 <a id="ingresso-contatti-1281-programma-2026-11-17"></a>
 
 ## Seguito autorizzato e implementato — 1.2.281

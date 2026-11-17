@@ -1,5 +1,12 @@
 # Decisioni
 
+<a id="rilascio-1281-decisione-eseguita-2026-11-17"></a>
+
+## Esecuzione della scelta ingresso/contatti —1.2.281
+
+La [scelta autorizzata](#ingresso-contatti-1281-decisione-2026-11-17) è distribuita con #328/6b77e6d6 e Hosting#1208, dopo GO indipendenti e CI sulla testa completa. Verifica pubblica PASS; [ricevuta](../evidenze/COLLAUDI.md#rilascio-1281-verifiche-2026-11-17). Nessuna nuova scelta di palette o deroga ai gate. Restano distinti esecuzione, prova sintetica e valutazione fisica di Diego.
+
+
 <a id="ingresso-contatti-1281-decisione-2026-11-17"></a>
 
 ## Ingresso e contatti — ordine 17/11/2026

@@ -1,5 +1,12 @@
 # Incarico corrente
 
+<a id="rilascio-1281-incarico-2026-11-17"></a>
+
+## Ingresso e contatti1.2.281 — ordine eseguito, 17/11/2026
+
+Completato il [mandato ingresso/contatti](#ingresso-contatti-1281-2026-11-17): #328 unita in6b77e6d6, CI#1206/#1207 e Hosting#1208 SUCCESS, produzione1.2.281 verificata367hash/41profili/3probe e cinque GET indipendenti PASS. Approvazione production eseguita da Codex sulla delega della sessione, dopo entrambi i gate verdi e master invariato; protezioni conservate. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1281-verifiche-2026-11-17). Il seguito immediato chiude gli stessi MD/GitHub con PR soltanto documentale e controlli leggeri; nessun nuovo Hosting o operazione backend/policy. La prova del telefono resta di Diego. Le formulazioni future sotto conservano il mandato e i checkpoint, non indicano un rilascio ancora pendente.
+
+
 <a id="ingresso-contatti-1281-2026-11-17"></a>
 
 ## Ingresso e contatti — implementazione e prova sul telefono, 17/11/2026

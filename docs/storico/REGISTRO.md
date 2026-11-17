@@ -1,5 +1,12 @@
 # Registro
 
+<a id="rilascio-1281-registro-2026-11-17"></a>
+
+## 17/11/2026 —1.2.281 pubblicata e verificata
+
+Ingresso e contatti distribuiti con #328, master6b77e6d6 e Hosting#1208. CI#1206/#1207 e validateHosting:3831test ciascuno,3820PASS+11SKIP/0FAIL. Production approvato dopo entrambi i gate e master invariato, soloHosting. Pubblico367hash/41profili/3probe e cinque GET indipendenti PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1281-verifiche-2026-11-17). Chiusura degli stessi MD/GitHub in PR documentale; nessun altro runtime o test fisico attribuito.
+
+
 <a id="ingresso-contatti-1281-registro-2026-11-17"></a>
 
 ## 17/11/2026 — implementazione ingresso e contatti1.2.281

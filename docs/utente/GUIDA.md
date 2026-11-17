@@ -1,5 +1,14 @@
 # Guida
 
+<a id="rilascio-1281-guida-2026-11-17"></a>
+
+## Ingresso e contatti — disponibili nella1.2.281
+
+La **1.2.281 è pubblicata e verificata**. Aggiorna una volta l’app, poi prova l’accesso dal telefono: attendi verifica e sblocco, quindi la Home pronta. «Vault bloccata / Sblocca e riprendi» rimane per il blocco effettivo o lo sblocco annullato. Account e Vault restano due protezioni distinte.
+
+In Tessera digitale, sia privata sia aziendale, usa «Salva o condividi contatto…»: nome file visibile, una primaria disponibile sul dispositivo e «Altre opzioni» per le alternative. I pulsanti sono compatti. Dopo annullamento/errore prepara di nuovo e poi conferma la primaria; nessun download automatico di ripiego. Browser/sistema decidono destinazione e importazione; il contatto non viene aggiunto automaticamente alla rubrica. Nomi riconoscibili e zoom QR conservati. [Stato](../progetto/STATO.md#stato-corrente), [prove e limiti](../evidenze/COLLAUDI.md#rilascio-1281-verifiche-2026-11-17). Le descrizioni delle versioni precedenti sotto restano storiche.
+
+
 <a id="ingresso-contatti-1281-guida-2026-11-17"></a>
 
 ## Ingresso e contatti — preparati per la1.2.281

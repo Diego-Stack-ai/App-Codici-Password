@@ -1,5 +1,24 @@
 # Collaudi
 
+<a id="rilascio-1281-verifiche-2026-11-17"></a>
+
+## APP1.2.281 — ricevuta completa, 17/11/2026
+
+**Produzione verificata1.2.281**, runtime **6b77e6d64322e89211b274bc08559ed916333e8a**, sourceDirty=false. [#328](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/328), testa finale b312feac6c1fe56f1505cd4c16164dd9a36576e9, dopo riesami indipendenti GO. Nessun delta pubblico dalle revisioni funzionali: Git tree pubblico b0ea5f239d143f3fc916ffc0fb7ce818e9331f35.
+
+- [CI PR#1206](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44109953359) SUCCESS, conclusa16:36:36CET; checkout sintetico16f2e714. [CI master#1207](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44116536419) SUCCESS alle17:10:26CET. [Hosting#1208](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44117075505) validate job134157972709 completato17:13:53CET.
+- Ogni validate riconcilia **68 riepiloghi TAP:3831test=3820PASS+11SKIP,0FAIL/cancelled/todo**. Versione281/307riferimenti; guida15/reviewed281; offline61export/347risorse. Master e Hosting hanno stessa SHA6b77e6d6 e stesso digest pubblico4029482f5149fd980a8c3ddcdf491121a87de00d5520a212cd0c327209e51cba.
+- Approvazione production da Codex sulla delega di Diego circa17:15CET, dopo entrambi i gate verdi e ricontrollo immediato del master remoto invariato. Protezioni conservate. Deploy job134180408076:17:15:20→17:16:28CET, SUCCESS; workflow1208SUCCESS. SoloHosting, nessuna operazione backend/policy/Rules/Functions/Storage/claim/IAM.
+- Verifica pubblica integrale PASS alle **17:18:05.537CET**: **367hash,41profili header,3probe di normalizzazione**; manifesto remoto identico a quello canonico locale. SHA256 manifesto **dd86e869e2bde3c6b7019fca64539aec5db191112ecde0e7de39161b2c7a3629**. Hash albero pubblico **4029482f5149fd980a8c3ddcdf491121a87de00d5520a212cd0c327209e51cba**.
+- Controllo indipendente alle **17:18:41.074CET**: esattamente5GET HTTP200, manifest identico e hash esatti di app.html,home_page.html,main-v129.js,contact-export.js. Nessun account/dato reale o scrittura.
+
+Riconciliazione dei tentativi:1202 si ferma su quattro fixture senza documentElement, corrette conservando assert;1203 su misurazione associata a indice DOM variabile, corretta con snapshot atomico e RED/GREEN;1204 è superato dal seguito e non usato come attestazione. Il tentativo facoltativo di annullarlo è stato rifiutato dal controllo automatico ed è stato lasciato terminare, senza aggirare il rifiuto.1205 supera tutti3831test ma blocca il manifest perché l’inventario QA rigenera il vecchio titolo app; una riga viene allineata prima della1206, senza allentare require-clean. I fallimenti non diventano PASS retroattivi.
+
+Il precedente digest locale1c614e4a… era di una copia Windows con13fileCRLF. La copia di verifica viene ricostruita dai blob Git LF; zero delta Git/cached e manifest pulito4029482f… identico a CI e produzione. La normalizzazione della copia locale non cambia il runtime o la palette.
+
+Esiti funzionali e limiti: ingresso con attesa fino a chiave/init, Master accessibile e blocco/ripresa effettivi; contatti con entry/pannello unici, filename, capacità, proof singola e click trusted. Ultimi banchi locali:52ingresso/gate,12runtime-browser,206profilo,831shell,73QA; Chrome+Edge5casi ciascuno. Livree/contatti14/14 con96geometrie,112popup e168QR; dinamica8/8 con1064stati/28contesti, deep/regressioni13/13, tour14/14. Colori/tempi di sicurezza e cornice ordinaria conservati. Queste prove sintetiche non certificano FaceID/passkey/WebKit fisici, destinazione dei file o importazione in rubrica. **Prova del telefono ancora di Diego; RG-01/RG-04 aperti.**
+
+
 <a id="ingresso-contatti-1281-verifiche-2026-11-17"></a>
 
 ## Ingresso e contatti — verifica candidata 1.2.281
