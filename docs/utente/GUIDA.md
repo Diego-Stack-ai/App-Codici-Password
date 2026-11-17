@@ -1,6 +1,8 @@
 # Guida
 
-## Contatti e QR — candidata completa 1.2.280
+## Contatti e QR — disponibili nella 1.2.280
+
+La versione completa è pubblicata e verificata. Ricarica una volta l’app. [Ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-1280-completo-verifiche-2026-11-17).
 
 Il comando «Salva contatto…» mostra il nome prima di procedere: **contatto-Nome-Cognome.vcf** per il privato, **contatto-azienda-Ragione-Sociale.vcf** per l'azienda. Il file contiene i dati selezionati nella Tessera digitale; non viene aggiunto automaticamente alla rubrica.
 
@@ -8,9 +10,9 @@ Se disponibile, «Scegli dove salvare…» apre la scelta del dispositivo. «Con
 
 Nella Tessera azienda la lente ingrandisce sempre il QR con la selezione corrente; salva la selezione per conservarla anche nella tessera della testata. [Stato effettivo del rilascio](../progetto/STATO.md#stato-corrente), [verifiche e limiti](../evidenze/COLLAUDI.md#vcard-1280-verifiche-2026-11-17).
 
-## Contrasto e scrittura più naturale — candidata 1.2.280
+## Contrasto e scrittura più naturale — disponibili nella 1.2.280
 
-La candidata applica in **tutti e sette i temi**, sia Classica sia Nuova, un rosso più leggibile all'icona e alla data delle Scadenze scadute: più profondo in Chiaro e più luminoso in Scuro. Superfici e bordi delle card rimangono quelli attuali. Gli intestatari conservano la scrittura originale; nel Profilo titoli/etichette selezionati hanno maiuscole e spaziatura più naturali, con gli stessi caratteri e dimensioni. I dati personali e i QR non vengono trasformati. Impostazioni conserva la normalizzazione già presente. La pubblicazione va verificata nello [stato corrente](../progetto/STATO.md#stato-corrente), non dedotta da questa descrizione della candidata.
+La1.2.280 applica in **tutti e sette i temi**, sia Classica sia Nuova, un rosso più leggibile all'icona e alla data delle Scadenze scadute: più profondo in Chiaro e più luminoso in Scuro. Superfici e bordi delle card rimangono quelli attuali. Gli intestatari conservano la scrittura originale; nel Profilo titoli/etichette selezionati hanno maiuscole e spaziatura più naturali, con gli stessi caratteri e dimensioni. I dati personali e i QR non vengono trasformati. Impostazioni conserva la normalizzazione già presente. La pubblicazione è verificata nello [stato corrente](../progetto/STATO.md#stato-corrente).
 
 ## Icone delle singole Scadenze — disponibili nella 1.2.279
 

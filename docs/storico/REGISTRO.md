@@ -1,5 +1,11 @@
 # Registro
 
+## 17/11/2026 — pubblicata la1.2.280 completa
+
+#326 unita in d4e20c29 dopo GO sulla candidata91e1c158 e CI#1198 SUCCESS; CI master#1199 e Hosting#1200 SUCCESS. Production approvato da Codex su delega di Diego dopo i due validate verdi e master invariato; verifica pubblica completa367hash/41profili/3probe PASS alle12:11:48CET. Grafica precedente, nomi/opzioni/esiti vCard e zoom Tessera azienda nello stesso rilascio. Il precedente1196 fu annullato senza deploy. [Ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-1280-completo-verifiche-2026-11-17).
+
+Chiuso RG-02 e il perimetro RG-03 approvato; restano RG-01/RG-04 fisici/nativi e controllo post-passkey separato. Nessuna operazione Auth/policy/backend o chiusura dell'incidente storico. La ricevuta successiva modifica soltanto i Markdown, senza un nuovo deploy.
+
 ## 17/11/2026 — ampliata la candidata completa280
 
 Su nuovo ordine di Diego, vCard privata/azienda (nomi, destinazione ed esiti) e zoom Tessera azienda confluiscono nella stessa280 con la grafica già revisionata. Superata la precedente classificazione come seguiti separati; soltanto il transitorio post-passkey resta separato. Hosting#1196 annullato senza passi di deploy, produzione279 invariata. Implementazione locale completata, nuove suite/riesame/CI e Hosting da attestare sulla candidata completa. [Mandato](../progetto/INCARICO_CORRENTE.md#vcard-1280-incarico-2026-11-17), [evidenze](../evidenze/COLLAUDI.md#vcard-1280-verifiche-2026-11-17).

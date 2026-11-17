@@ -2,7 +2,9 @@
 
 <a id="vcard-1280-ui-2026-11-17"></a>
 
-## Esportazione contatti e QR azienda — candidata completa 1.2.280
+## Esportazione contatti e QR azienda — distribuiti nella 1.2.280
+
+Pubblicati con #326/Hosting#1200 e verifica integrale PASS. [Ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-1280-completo-verifiche-2026-11-17).
 
 [Ordine ampliato](../progetto/INCARICO_CORRENTE.md#vcard-1280-incarico-2026-11-17). Il nome è visibile prima dell'azione: `contatto-Nome-Cognome.vcf` o `contatto-azienda-Ragione-Sociale.vcf`, sanificato, massimo180 byte UTF-8 e120 punti Unicode, con fallback `contatto.vcf`/`contatto-azienda.vcf`. Il file contiene i campi selezionati e non importa automaticamente nella rubrica. «Scegli dove salvare…» usa il picker solo se disponibile; «Condividi o salva…» richiede condivisione file supportata; «Scarica file» è un'alternativa esplicita governata dal browser.
 

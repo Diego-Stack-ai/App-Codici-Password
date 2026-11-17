@@ -2,7 +2,15 @@
 
 <a id="stato-corrente"></a>
 
-## APP 1.2.280 completa — grafica, vCard e QR in verifica locale, 17/11/2026
+<a id="rilascio-1280-completo-stato-2026-11-17"></a>
+
+## APP 1.2.280 completa — pubblicata e verificata, 17/11/2026
+
+Online **1.2.280**, sorgente **d4e20c29b2881cb101ff984fef2c6e19c7ed5a50**, sourceDirty=false: grafica approvata, contatti con nomi riconoscibili e scelta/esiti espliciti, lente della Tessera azienda. [#326](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/326) unita dopo GO sulla candidata91e1c158 e CI#1198 verde; CI master#1199 e [Hosting#1200](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44067231219) SUCCESS. Ogni validate3817test:3806PASS/11SKIP/0FAIL.
+
+Production approvato da Codex su delega di Diego circa12:09CET, dopo entrambi i validate verdi sul master invariato. Verifica pubblica completa PASS alle12:11:48CET: **367hash / 41profili / 3probe**. [Ricevuta, SHA e limiti](../evidenze/COLLAUDI.md#rilascio-1280-completo-verifiche-2026-11-17). SoloHosting, cornice ordinaria e faro conservati. Restano prove native/fisiche e transitorio post-passkey separato; la ricevuta soltanto documentale non cambia il runtime né richiede un altro deploy. I checkpoint non pubblicati sotto sono storici.
+
+## Checkpoint precedente — candidata completa in verifica locale, 17/11/2026
 
 Su [nuovo ordine di Diego](INCARICO_CORRENTE.md#vcard-1280-incarico-2026-11-17), la 1.2.280 deve includere anche nomi/destinazione/esiti vCard e zoom della Tessera azienda. La #325 è già unita in **a90fd274** con CI #1194 verde sulla candidata grafica; i suoi esiti restano pertinenti a quel perimetro. Hosting **#1196 annullato**, nessun passo di deploy eseguito: la versione online resta **1.2.279/9cbf2d42**. La candidata completa è implementata localmente e richiede nuova revisione/CI e ricevuta; nessuna pubblicazione è dedotta dai checkpoint sotto.
 
