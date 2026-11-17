@@ -1,5 +1,21 @@
 # Collaudi
 
+<a id="rilascio-1280-completo-verifiche-2026-11-17"></a>
+
+## APP 1.2.280 completa — pubblicata e verificata, 17/11/2026
+
+[Ordine ampliato](../progetto/INCARICO_CORRENTE.md#vcard-1280-incarico-2026-11-17) eseguito. La grafica già unita nella #325 è confluita con vCard privata/azienda e zoom Tessera nella [#326](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/326). Candidata immutabile **91e1c15821857818823a7da2a9ab274ae1ed42df**, riesame indipendente GO; merge reale e sorgente distribuito **d4e20c29b2881cb101ff984fef2c6e19c7ed5a50**, `sourceDirty=false`. Lo SHA sintetico della CI PR era **b1e5d0c249cc0a94a0851d533e95788643e14506**: non è il commit pubblicato.
+
+**Gate completati.** [CI PR #1198](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44063320250) SUCCESS alle10:40:06UTC; [CI master #1199](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44067101007) SUCCESS alle11:08:13UTC; [Hosting #1200](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44067231219) validate SUCCESS alle11:06:28UTC. Ciascun validate: **68riepiloghi TAP / 3817test = 3806PASS + 11SKIP, zero FAIL/cancelled/todo**, riconciliati indipendentemente. Master e validazione Hosting avviati in parallelo; approvazione production da Codex nella sessione GitHub di Diego su delega esplicita, circa **12:09CET**, soltanto dopo entrambi verdi e controllo del master invariato. Hosting concluso SUCCESS alle **11:09:53UTC / 12:09:53CET**, scope soltantoHosting. Nessuna modifica a workflow/protezioni, backend, Rules, Storage, Auth, claim o IAM; nessun deploy dal PC.
+
+**Confezione e verifica pubblica.** Manifest canonico dalla sorgente pulita distribuita: **367file**, albero SHA-256 `dc72f61d09582533e01e53f4399a2a3516ed4e6f30c43d3049fcfb381d76f6cc`;307riferimenti280, offline61export/347risorse, guida reviewedAppVersion1.2.280/contentVersion14. Confronto completo dello snapshot funzionale prima/dopo build: solo `offline-assets.js` come derivato, nessuna aggiunta/rimozione; confronto byte con EOL normalizzato e binari raw invariati rispetto alla base. Verifica online integrale PASS alle **11:11:48.455UTC / 12:11:48CET**: **367hash / 41profili di intestazioni / 3probe canonici**; manifest SHA-256 `041ffe5e6768f0d2a35129255a734605c51fa2fb4bf5288324eb2e49c286e7bf`. Versione e sourceCommit del manifest remoto coincidono. Cinque GET indipendenti alle11:12:47.828–11:12:48.274UTC: manifest conforme; app-env, entrambi i moduli nuovi e HTML azienda byte-identici al Git distribuito, lente presente. Osservati su quei cinque URL no-cache/no-store/must-revalidate, nosniff e HSTS, senza dedurre una policy universale dalla cache osservata. Deploy job133996769657 SUCCESS11:09:12–11:09:52UTC, comando soloHosting; pubblicazione conclusa11:09:40.950UTC e verifica del job11:09:48.258UTC. Passi backend/Rules/MFA saltati.
+
+**Prove e limiti.** Giro UI locale concluso90/90 +7/7 +18/18 +9/9; Profilo205/205, banco nativo finale7/7 dopo il ritocco focus. Popup aperto112contesti, QR della selezione non salvata168;17stati nativi funzionali distinti, non tutti moltiplicati per la matrice. Il primo1197 fallito e i test inizialmente disallineati restano documentati sotto;1194/1195 attestavano soltanto la grafica e1196 fu annullato senza passi di deploy. Nessun verde retroattivo o prova fisica inventata. Restano RG-01/RG-04, salvataggio/condivisione e scansione su dispositivi reali, restante revisione editoriale e controllo post-passkey separato. Cornice ordinaria e faro preservati. Il controllo della credenziale storica è passato nel workflow manuale; non chiude l'incidente. L'inventario Git globale conserva il negativo preesistente per rami/worktree estranei; candidata pulita, pubblicata e verificata, senza pulire il lavoro altrui.
+
+Verifica documentale della ricevuta: **12/12PASS,34MD e1305collegamenti locali**, senza nuovi Markdown.
+
+La successiva PR di questa ricevuta modifica soltanto i Markdown: non richiede nuovoHosting e non cambia il sorgente runtime indicato sopra. I checkpoint locali e i mandati precedenti sotto precedono questa ricevuta.
+
 <a id="vcard-1280-verifiche-2026-11-17"></a>
 
 ## APP 1.2.280 completa — grafica, vCard e QR, verifica locale 17/11/2026

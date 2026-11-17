@@ -2,7 +2,9 @@
 
 <a id="vcard-1280-rilascio-2026-11-17"></a>
 
-## APP 1.2.280 completa — grafica, vCard e QR, solo Hosting
+## APP 1.2.280 completa — pubblicata, solo Hosting
+
+**Procedura eseguita il17/11:** #326 → master d4e20c29; CI#1198/#1199 e Hosting#1200 SUCCESS, approvazione delegata dopo entrambi i validate verdi e master invariato. Verifica pubblica367hash/41profili/3probe PASS. [Ricevuta completa](../evidenze/COLLAUDI.md#rilascio-1280-completo-verifiche-2026-11-17). Le istruzioni sotto descrivono il percorso eseguito; la PR della ricevuta soltanto documentale non richiede nuovoHosting.
 
 L'[ordine ampliato](../progetto/INCARICO_CORRENTE.md#vcard-1280-incarico-2026-11-17) riunisce i correttivi nella stessa280, mai pubblicata. #325 è già unita ma il suo Hosting#1196 è stato annullato prima del deploy. Non ripetere il bump alla stessa versione: verificare307 riferimenti280 e rigenerare offline, con guida contentVersion14. La nuova candidata aggiunge due moduli pubblici; confrontare tutti367 file contro lo snapshot completo pre-confezione, ammettendo solo il derivato offline atteso.
 
