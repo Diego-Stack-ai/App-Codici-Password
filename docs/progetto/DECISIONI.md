@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="errori-silenziosi-decisione-2026-11-17"></a>
+
+## 17/11/2026 — caccia agli errori silenziosi prima del controllo finale
+
+Fonte: Diego a Claude in chat, dopo la lettura del repository pubblico Everything Claude Code (versione 2.2.3: 72 agenti, 327 skill, 98 comandi, 122 regole, circa trenta hook, licenza MIT). Decisione: **si adotta soltanto l'idea della caccia agli errori silenziosi**, riscritta nel nostro stile, come passo della fase sicurezza prima dell'audit indipendente e di PentAGI. Non si installa il pacchetto, né hook, né skill esterne; non si adotta il controllo dei percorsi dei pulsanti («sappiamo già che fanno il loro lavoro»). Motivi del rifiuto del resto: contenuti per altri linguaggi e settori, nessun riferimento a Firebase, service worker o PWA, hook che modificano file e comandi o inviano testo di sessione a `claude -p`, memoria che impara senza controllo e strumento di scansione che scarica codice con `npx`. Il [passo](PROGRAMMA.md#errori-silenziosi-programma-2026-11-17) non è un incarico attivo né autorizza modifiche, versioni o rilasci.
+
 <a id="rilascio-1280-decisione-2026-11-17"></a>
 
 ## Applicare e pubblicare RG-02/RG-03 in tutte le palette — 17/11/2026

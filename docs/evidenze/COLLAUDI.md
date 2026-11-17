@@ -1,5 +1,13 @@
 # Collaudi
 
+<a id="errori-silenziosi-censimento-2026-11-17"></a>
+
+## Errori silenziosi — censimento iniziale in sola lettura, 17/11/2026
+
+Eseguito sul codice della **1.2.280** (`a90fd27`), senza modifiche né esecuzione di codice dell'app: scansione testuale dei 229 file JavaScript sotto `Frontend/public/assets/js` (esclusi vendor e traduzioni). Trovate **245 occorrenze**: 106 blocchi `catch` vuoti, 53 con solo un commento, 41 `catch` che restituiscono un valore neutro, 45 `.catch(() => valore neutro)`. Per area: radice 81, Impostazioni 49, moduli di base 44, dati 30, Profilo 10, condivisi 10, assistente 9, azienda 7, accesso 4, scadenze 1. File più carichi: `offline-mutation-lease.js` 24, `portable-archive-viewer.js` 18, `main-v129.js` 14, `frame-navigation.js` 12, `auth-session-fence.js` 11, `private-auth-gate.js` 11, `logout-session.js` 10.
+
+**Limiti.** Sono occorrenze, non difetti: in un campione molte sono pulizie motivate con commento (annullare una transazione già conclusa, chiudere una connessione già chiusa). Il conteggio non vede gli errori soltanto scritti nel registro né i ripieghi a più righe. Candidati da esaminare, non ancora giudicati: lettura del verificatore della Vault ignorata e recupero dalla copia remota in `security-manager.js`, `catch` con valore neutro in `crypto-utils.js`. Metodo e passi nel [programma](../progetto/PROGRAMMA.md#errori-silenziosi-programma-2026-11-17); nessuna classificazione definitiva eseguita.
+
 <a id="rilascio-1280-verifiche-2026-11-17"></a>
 
 ## APP 1.2.280 — applicazione locale e controlli, 17/11/2026

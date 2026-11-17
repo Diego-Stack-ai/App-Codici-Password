@@ -1,5 +1,11 @@
 # Incarico corrente
 
+<a id="errori-silenziosi-incarico-2026-11-17"></a>
+
+## Caccia agli errori silenziosi — preparazione, 17/11/2026
+
+Diego ordina di inserire nei documenti la [caccia agli errori silenziosi](PROGRAMMA.md#errori-silenziosi-programma-2026-11-17) tra le cose da fare prima del controllo di sicurezza finale ([decisione](DECISIONI.md#errori-silenziosi-decisione-2026-11-17)), e di far controllare a Claude, senza modificare nulla, che i documenti non siano in conflitto fra loro né obsoleti (versioni e altro). Il risultato del controllo viene consegnato a Codex da Diego. Un solo esecutore per la scrittura; il controllo è in sola lettura. Nessun incarico attivo sul codice: l'analisi degli errori silenziosi parte dopo i residui grafici, con ordine distinto.
+
 <a id="rilascio-1280-incarico-2026-11-17"></a>
 
 ## APP 1.2.280 — applicazione RG-02/RG-03 e rilascio autorizzati, 17/11/2026
