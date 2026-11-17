@@ -1,5 +1,5 @@
 // Same reviewed compositing algorithm as visual-map; no app scripts or IO at import.
-export function collectDynamicPaint() {
+export function collectDynamicPaint({paint,theme,graphics} = {}) {
   const parse = value => {
     if (!value || value === 'transparent') return null;
     if (!/^(rgba?\(|color\(srgb\s)/.test(value)) return null;
@@ -118,6 +118,45 @@ export function collectDynamicPaint() {
     return element.tagName.toLowerCase() + (element.id ? `#${element.id}` : '') + (cls ? `.${cls}` : '');
   };
   const records = [];
+  // Read roles and composites within one browser task: indices cannot drift across awaits.
+  const values = paint ? (() => {
+    const nodes=[...document.querySelectorAll(paint.selector)];
+    return nodes.map(element=>{
+      const style=getComputedStyle(element,paint.pseudo||null);
+      const rect=element.getBoundingClientRect();
+      let visible=!!rect.width&&!!rect.height;
+      for(let node=element;node;node=node.parentElement){const s=getComputedStyle(node);if(s.display==='none'||s.visibility==='hidden'||Number(s.opacity)===0)visible=false;}
+      const role=graphics==='tre-livelli'&&paint.newRole?paint.newRole:theme==='dark'&&paint.darkRole?paint.darkRole:paint.role;
+      const roleNames=role.startsWith('--')?[role]:[...role.matchAll(/var\(\s*(--[\w-]+)/g)].map(match=>match[1]);
+      const roleDeclarations=Object.fromEntries(roleNames.map(name=>[name,style.getPropertyValue(name).trim()]));
+      const roleResolved=Object.values(roleDeclarations).every(value=>value.length>0);
+      let expected=role;
+      if(!['content','transform'].includes(paint.property)) {
+        const probe=document.createElement('span');
+        probe.style[paint.property]=role.startsWith('--')?`var(${role})`:role;
+        // Inputs are void elements: an appended child has no computed style.
+        (element.matches('input,img,canvas')?element.parentElement:element).append(probe);
+        expected=getComputedStyle(probe)[paint.property];probe.remove();
+      }
+      const own=[...document.body.querySelectorAll('*')].indexOf(element);
+      const actual=style[paint.property];
+      const extra={fontSize:style.fontSize,fontWeight:style.fontWeight,opacity:style.opacity,
+        backgroundColor:style.backgroundColor,color:style.color,backgroundImage:style.backgroundImage,
+        boxShadow:style.boxShadow,filter:style.filter,outline:style.outline,
+        pseudoBefore:{content:getComputedStyle(element,'::before').content,backgroundColor:getComputedStyle(element,'::before').backgroundColor,transform:getComputedStyle(element,'::before').transform},
+        checked:element instanceof HTMLInputElement?element.checked:undefined,disabled:element.disabled===true};
+      if(paint.kind==='headerContrast') {
+        const canvas=document.createElement('canvas');canvas.width=canvas.height=1;const ctx=canvas.getContext('2d');
+        const rgba=css=>{ctx.clearRect(0,0,1,1);ctx.fillStyle=css;ctx.fillRect(0,0,1,1);return [...ctx.getImageData(0,0,1,1).data];};
+        const bg=rgba(getComputedStyle(element.closest('#header-placeholder')).backgroundColor),fg=rgba(style.color);
+        const over=(c,b)=>b.map((v,i)=>c[i]*(c[3]/255)+v*(1-c[3]/255));
+        extra.headerExtremes=[0,255].map(value=>{const backdrop=over(bg,[value,value,value]);return {bg:backdrop,fg:over(fg,backdrop)};});
+      }
+      return {own,actual,expected,visible,roleDeclarations,roleResolved,...extra};
+    });
+
+  })() : undefined;
+  if (paint && !paint.minimum && paint.kind !== 'headerContrast') return {records,values,scale,title:document.title};
   let index = 0;
   for (const element of document.body.querySelectorAll('*')) {
     const own = index++;
@@ -146,5 +185,5 @@ export function collectDynamicPaint() {
       fontWeight: Number(style.fontWeight), fontFamily: style.fontFamily.split(',')[0].replace(/["']/g, '').trim(),
       icon: /material-symbols/.test(element.className || '')});
   }
-  return {records, scale, title: document.title};
+  return {records, values, scale, title: document.title};
 }

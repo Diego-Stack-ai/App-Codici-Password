@@ -74,3 +74,26 @@ test('unsupported painted backgrounds are unmeasured and cannot be contrast PASS
   assert.equal(report.status,'FAIL');
   assert.ok(report.totals.unmeasured>0);
 });
+
+// A DOM insertion after evaluate used to invalidate the numeric join in the next evaluate.
+test('contrast and role use one DOM snapshot even when a producer inserts content between browser tasks',async()=>{
+ const {chromium}=await import('playwright'),browser=await chromium.launch({channel:'chrome',headless:true});
+ const page=await browser.newPage();try{
+ await page.setContent('<style>body{background:white}.target{color:black;--ink:black}</style><div><span class="target">Visible text</span></div>');
+ let reads=0;
+ const movingPage={evaluate:async(fn,arg)=>{
+  const result=await page.evaluate(fn,arg);reads++;
+  await page.evaluate(()=>document.body.prepend(document.createElement('aside')));
+  return result;
+ }};
+ const paint={selector:'.target',property:'color',role:'--ink',minimum:4.5};
+ const values=await inspectDynamicPaint(movingPage,paint);
+ assert.equal(await page.locator('aside').count(),1,'the adversarial insertion really occurred');
+ assert.equal(reads,1,'roles and composite are sampled in a single browser task');
+ assert.equal(values.length,1);assert.equal(values[0].rolePass,true);assert.equal(values[0].contrast.status,'measured');assert.ok(values[0].contrast.ratio>20);
+ await page.locator('.target').evaluate(node=>node.style.color='transparent');
+ assert.equal((await inspectDynamicPaint(page,paint))[0].contrast.pass,false,'unreadable paint still fails');
+ await page.locator('.target').evaluate(node=>node.remove());
+ assert.deepEqual(await inspectDynamicPaint(page,paint),[],'missing target is never a measured PASS');
+ }finally{await browser.close();}
+});
