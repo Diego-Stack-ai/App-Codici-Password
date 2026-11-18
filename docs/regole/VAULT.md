@@ -1,5 +1,12 @@
 # Vault
 
+<a id="rilascio-1283-pubblico-vault-2026-11-18"></a>
+
+## Conferma degli export — raccordo distribuito nella1.2.283
+
+Il raccordo della nuova PRF per backup-export è distribuito: modalità forzata senza riuso di RAM/restore come prova recente, segnale WebAuthn e controlli UID/generazione dopo le attese, alternativa Master completa. Gli altri scopi conservano il percorso corrente; non cambia il contratto delle autorizzazioni monouso o delle altre reautenticazioni. [Ricevuta e limiti fisici](../evidenze/COLLAUDI.md#rilascio-1283-pubblico-2026-11-18). Canary, ammissione ordinaria, timer, policy e dati non sono modificati da questo rilascio Hosting.
+
+
 <a id="ingresso-1281-vault-2026-11-17"></a>
 
 ## Ingresso e azioni native — presentazione 1.2.281

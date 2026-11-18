@@ -1,10 +1,28 @@
 # Collaudi
 
+<a id="rilascio-1283-pubblico-2026-11-18"></a>
+
+## APP 1.2.283 — ricevuta di pubblicazione verificata
+
+Produzione verificata **1.2.283**, sorgente **5d51f9f5ad2f4a1806b0ffcf9f706eee8937ae9b**, sourceDirty=false. [PR #332](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/332), testa541a0d84bf0e33e68d9b479ca0d31b9095b7a3f7, unita dopo due GO indipendenti e CI verde. Albero Git pubblico29f32a062d4ec46447977ba3c92cbed0e2f83e6a identico alla testa riesaminata.
+
+- [CI PR #1216](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44287454723), [CI master #1217](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44293176954) e validate della [Hosting #1218](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44316453957) SUCCESS. Ciascuna:68 blocchi TAP,3862 test,3851 PASS/11 SKIP/0 FAIL/0 cancellati. Scope effettivo RELEASE_SCOPE: hosting verificato nel log completato del job134843757613; stesso sorgente e digest pubblico del master.
+- Avvio manuale e approvazione production di Diego dopo i rifiuti HTTP403 della CLI; cronologia approvazioni GitHub conferma reviewer Diego-Stack-ai, stato approved, ambiente production. Job134858575353 SUCCESS, dal18/11 alle18:00:56 alle18:01:30 UTC, cioè **19:00:56–19:01:30 CET**. Step Hosting eseguito; tutti gli step backend/Rules/Functions saltati. Credenziali e protezioni conservate.
+- Verifica autonoma dal checkout sorgente pulito con byte Git LF: **367 hash/41 profili di intestazione/3 probe di normalizzazione PASS**, conclusa alle18:03:32.692 UTC (19:03:32 CET). Sei GET separati PASS alle18:05:05.969 UTC (19:05:05 CET): manifest, app-env, stylesheet condiviso e tre moduli della conferma. Nessun dato Vault richiesto.
+- Digest pubblico **31765f456b2763fd7081c18321823f4bb11c6cfe3050b16df96da043ae430ddc**; SHA256 del manifest pubblico **d04e3fb73b797d0cb4cc2eabd5a0d10f8a2c9a733e94c61e9b0522f9853c2209**. Versione283/307 riferimenti, guida16/reviewed283, offline61 export/347 risorse.
+
+Distribuiti comando contatto coerente nelle due Tessere e nuova PRF per backup-export quando configurata, con Master verificata come alternativa. forceReload, revoche, UID/generazione, proof monouso e gesto nativo successivo conservati. Mappa delle due entry e relativi stati/ruoli/test inclusa. Le prove locali sotto restano distinte dai riscontri fisici.
+
+La CI #1215 era fallita al budget statico; la rifinitura elimina solo otto blocchi descrittivi ridondanti da due moduli, con codice eseguibile identico verificato tramite esbuild. Misura locale effettiva su blob LF: **327 byte gzip** risparmiati (83+244); corretta la precedente stima322. Nessuna soglia allentata e31 pagine entro budget.
+
+Il doppio avvio #1219, stesso SHA e scope hosting con validate SUCCESS, al controllo di chiusura risulta ancora in attesa di approvazione e non è usato come ricevuta di pubblicazione. Annullamento richiesto a Diego perché l'accesso automatico non lo consente. Questa chiusura documentale non richiede un nuovo Hosting. Nessun PASS fisico Face ID/Safari/PWA o destinazione del contatto dedotto: prova di Diego ancora necessaria. Gli altri lotti e Claude restano separati.
+
+
 <a id="rilascio-1283-collaudi-2026-11-18"></a>
 
 ## Candidata1.2.283 — parità contatti e conferma biometrica
 
-La prima CI #1215 sulla testa d3f85bb4 è fallita al solo gate statico di peso: form_account_privato347,2 KB gzip oltre347 KB. Corretto nella stessa candidata283 eliminando otto blocchi descrittivi ridondanti da due moduli: risparmio322 byte gzip, nessuna soglia modificata. Trasformazione esbuild senza commenti identica prima/dopo per entrambi i moduli; tutti i controlli eseguibili conservati. Nuovo audit prestazioni:31 pagine entro budget e diagnostica4/4 PASS. Rispetto allo snapshot iniziale restano due soli delta nei commenti pubblici; le attestazioni di zero delta byte-normalizzato sotto descrivono la confezione precedente a questa rifinitura. Nuovo riesame e CI sulla testa aggiornata richiesti.
+La CI #1215 sulla testa d3f85bb4 è fallita al solo gate statico di peso: form_account_privato347,2 KB gzip oltre347 KB. Corretto nella stessa candidata283 eliminando otto blocchi descrittivi ridondanti da due moduli: risparmio327 byte gzip, nessuna soglia modificata. Trasformazione esbuild senza commenti identica prima/dopo per entrambi i moduli; tutti i controlli eseguibili conservati. Nuovo audit prestazioni:31 pagine entro budget e diagnostica4/4 PASS. Rispetto allo snapshot iniziale restano due soli delta nei commenti pubblici; le attestazioni di zero delta byte-normalizzato sotto descrivono la confezione precedente a questa rifinitura. Nuovo riesame e CI sulla testa aggiornata richiesti.
 
 [Ordine di pubblicazione](../progetto/INCARICO_CORRENTE.md#rilascio-1283-incarico-2026-11-18) successivo al correttivo locale sotto. Versione canonica283/307 riferimenti; guida16 invariata nei testi, reviewed283. Le otto lingue non obbligano la Master all'export: nessuna nuova traduzione necessaria. Offline rigenerato61 export/347 risorse; inventario QA31 pagine/126 istruzioni/111 target/167 campi aggiornato negli MD esistenti.
 

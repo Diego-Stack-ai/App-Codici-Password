@@ -1,5 +1,12 @@
 # Programma
 
+<a id="rilascio-1283-pubblico-programma-2026-11-18"></a>
+
+## Contatti1.2.283 — pubblicazione conclusa
+
+Correttivo distribuito con #332/Hosting #1218 e verificato integralmente il18/11. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1283-pubblico-2026-11-18). Chiusa la pubblicazione tecnica; questa ricevuta aggiorna MD/GitHub senza un altro Hosting. Restano prova fisica dei due comandi e della nuova biometria con alternativa Master, destinazione/condivisione del contatto, RG-01/RG-04, cornice, sicurezza/recupero, prodotto e ciclo finale secondo la scaletta. La revisione separata affidata a Claude non viene dichiarata conclusa da questo rilascio. Duplicato #1219 e relativo annullamento restano registrati nella ricevuta.
+
+
 <a id="rilascio-1283-programma-2026-11-18"></a>
 
 ## Contatti1.2.283 — completare la pubblicazione
