@@ -1,7 +1,3 @@
-/**
- * WEBAUTHN MANAGER (PRF EXTENSION)
- * Gestisce la registrazione e lo sblocco biometrico usando WebAuthn con estensione PRF.
- */
 
 // Costanti
 const PRF_SALT_SIZE = 32;
@@ -20,7 +16,6 @@ function assertCanonicalProductionOrigin() {
     }
 }
 
-/** Verifica WebAuthn e, in modo fail-closed, l'estensione PRF richiesta dalla Vault. */
 export async function isWebAuthnSupported() {
     if (window.PublicKeyCredential === undefined || typeof window.PublicKeyCredential !== 'function') {
         return false;
@@ -59,10 +54,6 @@ function base64ToBuffer(base64) {
     return bytes.buffer;
 }
 
-/**
- * Registra una nuova credenziale con estensione PRF.
- * Restituisce: { credentialId, prfSalt }
- */
 export async function setupWebAuthnPrf(userId, userEmail) {
     if (!await isWebAuthnSupported()) throw new Error("WebAuthn non supportato.");
     assertCanonicalProductionOrigin();
@@ -120,9 +111,6 @@ export async function setupWebAuthnPrf(userId, userEmail) {
     }
 }
 
-/**
- * Ottiene l'output PRF sbloccando la credenziale.
- */
 export async function getPrfOutput(credentialIdBase64, prfSaltBase64, credentialRpId = null, {signal} = {}) {
     assertCanonicalProductionOrigin();
     const assertActive = () => {
@@ -177,7 +165,6 @@ export async function getPrfOutput(credentialIdBase64, prfSaltBase64, credential
     }
 }
 
-/** Deriva chiave AES da output PRF usando HKDF */
 export async function deriveHkdfKey(prfOutput, hkdfSaltBase64) {
     const hkdfSalt = base64ToBuffer(hkdfSaltBase64);
     const keyMaterial = await crypto.subtle.importKey(
@@ -202,9 +189,6 @@ export async function deriveHkdfKey(prfOutput, hkdfSaltBase64) {
     );
 }
 
-/**
- * Cifra la Master Key usando la chiave AES derivata.
- */
 export async function encryptVaultSecret(vaultKeyMaterial, aesKey) {
     const iv = crypto.getRandomValues(new Uint8Array(AES_IV_SIZE));
     const encodedData = new TextEncoder().encode(vaultKeyMaterial);
@@ -221,9 +205,6 @@ export async function encryptVaultSecret(vaultKeyMaterial, aesKey) {
     };
 }
 
-/**
- * Decifra la Master Key usando la chiave AES derivata.
- */
 export async function decryptVaultSecret(ciphertextBase64, ivBase64, aesKey) {
     const ciphertext = base64ToBuffer(ciphertextBase64);
     const iv = base64ToBuffer(ivBase64);

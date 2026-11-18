@@ -1,9 +1,4 @@
 import {beginFrameCleanup, finishFrameCleanup} from '../../frame-navigation.js';
-/**
- * SECURITY MANAGER (V9.0 - Vault Verifier & PRF)
- * - Il materiale della Vault Key resta in RAM nel solo documento corrente.
- * - Sblocco biometrico usa WebAuthn PRF.
- */
 
 import {vaultFrameClient, confirmFrameAction, frameMediaLifetime} from './vault-frame-client.js';
 import {authSessionFence} from '../../auth-session-fence.js';
