@@ -1,5 +1,12 @@
 # Decisioni
 
+<a id="rilascio-1282-pubblico-decisione-2026-11-18"></a>
+
+## 18/11/2026 — pubblicazione autorizzata eseguita
+
+Eseguiti il comando «pubblica» del 17/11 e la conferma del 18/11: #330, gate verdi, approvazione production manuale di Diego nella #1212 e verifica pubblica completa PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1282-pubblico-2026-11-18). Conservata la scelta del contatto: alternative native effettive, menu solo con due funzioni, unico salvataggio browser in loro assenza. Questo seguito aggiorna evidenze e stato; non riapre scelte grafiche o incarichi di sicurezza.
+
+
 <a id="rilascio-1282-decisione-2026-11-17"></a>
 
 ## 17/11/2026 — pubblicare il correttivo contatto

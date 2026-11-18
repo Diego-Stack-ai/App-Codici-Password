@@ -1,5 +1,16 @@
 # Incarico corrente
 
+<a id="rilascio-1282-pubblico-incarico-2026-11-18"></a>
+
+## Ordine del 18/11 — verifica e chiusura documentale
+
+Diego comunica l'approvazione e ordina verifica della 1.2.282 e aggiornamento MD/GitHub. Il primo controllo rilevava ancora il gate pendente; dopo la risposta «Ho premuto ora Approve and deploy», #1212 ha pubblicato 4fe88340b8b16d8f4db16bd34d07f7535f8d09c3. Verifica completa e cinque GET indipendenti PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1282-pubblico-2026-11-18). Il mandato di pubblicazione del 17/11 è eseguito.
+
+Completare i nove MD esistenti, PR soltanto documentale, controlli e riesame indipendente, merge con testa attesa e aggiornamento GitHub. Root unico esecutore, supporti in lettura; elenco di 34 MD e runtime pubblico conservati. La ricevuta non richiede nuovo Hosting.
+
+Separati i punti 3–4, per cui sono state presentate le domande, e il punto 5 affidato a Claude. Claude Code avviato in sola lettura su sorgenti pubblici verificati; la risposta non contiene ancora l'elenco puntuale richiesto. Nessun lotto o audit dichiarato concluso.
+
+
 <a id="rilascio-1282-incarico-2026-11-17"></a>
 
 ## Pubblicazione del correttivo contatti — ordine eseguibile

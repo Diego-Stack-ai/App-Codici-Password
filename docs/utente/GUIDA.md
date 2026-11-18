@@ -1,5 +1,12 @@
 # Guida
 
+<a id="rilascio-1282-pubblico-guida-2026-11-18"></a>
+
+## Contatto — nuova scelta disponibile nella 1.2.282
+
+La **1.2.282 è online e verificata**. Aggiorna una volta l'app e controlla la versione, poi prova Tessera privata e aziendale. Salva o condividi contatto mostra nome del file e comando disponibile. Altre opzioni compare solo se puoi sia condividere sia scegliere dove salvare; Scarica file non è più una scelta aggiuntiva. Se mancano entrambe le funzioni, Salva file contatto avvia il salvataggio gestito dal browser. Il file non entra automaticamente in rubrica. Dopo annullamento/errore prepara di nuovo e conferma il comando, senza esportazioni automatiche. [Stato](../progetto/STATO.md#stato-corrente), [ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-1282-pubblico-2026-11-18). Le descrizioni precedenti sotto sono storiche.
+
+
 <a id="rilascio-1282-guida-2026-11-17"></a>
 
 ## Contatto — nuova scelta preparata per1.2.282

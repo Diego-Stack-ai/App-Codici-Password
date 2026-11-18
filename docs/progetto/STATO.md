@@ -2,6 +2,15 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1282-pubblico-stato-2026-11-18"></a>
+
+## APP 1.2.282 — online e verificata
+
+Online **1.2.282**, sorgente **4fe88340b8b16d8f4db16bd34d07f7535f8d09c3**, sourceDirty=false. PR #330 unita; CI #1210/#1211 e Hosting #1212 SUCCESS. Approvazione production manuale di Diego; deploy concluso il 18/11 alle **08:06:17 CET**, solo Hosting. Verifica autonoma **367 hash / 41 profili / 3 probe PASS** alle 08:07:47 CET e cinque GET indipendenti alle 08:09:53 CET. [Ricevuta completa](../evidenze/COLLAUDI.md#rilascio-1282-pubblico-2026-11-18).
+
+Contatti privato/azienda senza alternativa Scarica file ridondante: menu solo con due funzioni native; fallback browser unico se mancano entrambe. Guida16/reviewed282; gli altri comportamenti conservati. Le precedenti attese sotto sono storiche. Segue solo chiusura documentale/GitHub, senza altro deploy. Restano prova fisica post-282, RG-01/RG-04 e gli altri lotti della scaletta.
+
+
 <a id="rilascio-1282-stato-2026-11-17"></a>
 
 ## Candidata1.2.282 — pubblicazione in preparazione

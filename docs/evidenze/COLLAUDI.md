@@ -1,5 +1,22 @@
 # Collaudi
 
+<a id="rilascio-1282-pubblico-2026-11-18"></a>
+
+## APP 1.2.282 — ricevuta di pubblicazione verificata
+
+Produzione verificata **1.2.282**, sorgente **4fe88340b8b16d8f4db16bd34d07f7535f8d09c3**, sourceDirty=false. [PR #330](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/330), testa 3a72fa5cb1d7774952a3d03d194f9d034f44aad0, unita il 17/11 dopo GO indipendenti runtime/pacchetto e documenti/registri. Git tree pubblico 9fbf75fd9c525a6da9d9d6e97075e2ef2e9ac8ea; contenuto del merge identico alla testa approvata.
+
+- [CI PR #1210](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44138775340) SUCCESS, conclusa il 17/11 alle 19:06:43 CET; [CI master #1211](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44144491125) SUCCESS, validate job 134255789823 concluso alle 19:32:34 CET. [Hosting #1212](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44144611592) sul medesimo master: validate job 134256228424 SUCCESS il 17/11 alle 19:41:47 CET.
+- Ciascuna validazione completa: **68 riepiloghi TAP, 3.831 test = 3.820 PASS + 11 SKIP, 0 FAIL/cancelled/todo**. Il caso timer C1 inizialmente fallito localmente è PASS nelle CI, senza modifiche a timeout o criteri. Versione 282 e 307 riferimenti; guida contentVersion16/reviewed282; offline 61 export/347 risorse.
+- Il primo controllo del 18/11 mostrava ancora la 281 e production pendente. Il tentativo di approvazione CLI ha restituito HTTP403; l'approvazione finale è stata completata manualmente da Diego nella run esatta. Credenziali e protezioni conservate. Deploy job **134277600928 SUCCESS**, avviato alle **08:05:40 CET** e concluso alle **08:06:17 CET**. Solo Hosting; tutti i passi backend SKIPPED. Verifica manifest/asset critici del workflow PASS alle 08:06:14 CET; master invariato 4fe88340b8b16d8f4db16bd34d07f7535f8d09c3.
+- Verifica pubblica autonoma **367 hash / 41 profili di intestazioni / 3 probe canonici PASS**, il 18/11 alle **08:07:47 CET**. Public tree SHA-256 **b0c113368dadf9bbf7ca1b829396a81ddb9714aeb95afed1feee90c6a6842474**; manifest SHA-256 **63f7cfdaca2628074e51bbcd5cde76d4f6ab45fa95667a94054bdbd2034d3747**.
+- Cinque GET indipendenti PASS alle **08:09:53 CET**: manifest, app.html, home_page.html, main-v129.js e controller contact-export.js, tutti HTTP200/hash esatto. Artefatti locali ignorati release282-public-verification.json e release282-independent-gets.json; nessun generato aggiunto a Git.
+
+Distribuito il correttivo delle alternative contatto: solo funzioni native disponibili; Altre opzioni solo con Share e picker entrambi presenti; senza entrambe, unica primaria Salva file contatto. Nessun Download aggiuntivo o fallback automatico dopo errori/annulli. Pannello, proof, gesto trusted e revoche conservati; ingresso invariato.
+
+Le prove native del nuovo correttivo restano successive alla pubblicazione: il riscontro «1 ok» di Diego del 17/11 e le due foto del menu precedente non certificano il comportamento post-deploy della 282. RG-01/RG-04 e collaudi della cornice restano aperti. Le diciture candidata/locale e gli esiti intermedi sotto sono checkpoint storici superati, per la pubblicazione, da questa ricevuta.
+
+
 <a id="rilascio-1282-verifiche-2026-11-17"></a>
 
 ## Candidata1.2.282 — confezione e gate
