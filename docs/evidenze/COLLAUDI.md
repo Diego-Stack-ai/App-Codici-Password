@@ -1,5 +1,32 @@
 # Collaudi
 
+<a id="rilascio-1283-collaudi-2026-11-18"></a>
+
+## Candidata1.2.283 — parità contatti e conferma biometrica
+
+La prima CI #1215 sulla testa d3f85bb4 è fallita al solo gate statico di peso: form_account_privato347,2 KB gzip oltre347 KB. Corretto nella stessa candidata283 eliminando otto blocchi descrittivi ridondanti da due moduli: risparmio322 byte gzip, nessuna soglia modificata. Trasformazione esbuild senza commenti identica prima/dopo per entrambi i moduli; tutti i controlli eseguibili conservati. Nuovo audit prestazioni:31 pagine entro budget e diagnostica4/4 PASS. Rispetto allo snapshot iniziale restano due soli delta nei commenti pubblici; le attestazioni di zero delta byte-normalizzato sotto descrivono la confezione precedente a questa rifinitura. Nuovo riesame e CI sulla testa aggiornata richiesti.
+
+[Ordine di pubblicazione](../progetto/INCARICO_CORRENTE.md#rilascio-1283-incarico-2026-11-18) successivo al correttivo locale sotto. Versione canonica283/307 riferimenti; guida16 invariata nei testi, reviewed283. Le otto lingue non obbligano la Master all'export: nessuna nuova traduzione necessaria. Offline rigenerato61 export/347 risorse; inventario QA31 pagine/126 istruzioni/111 target/167 campi aggiornato negli MD esistenti.
+
+Snapshot367 file pubblici del correttivo prima del bump: dopo sola normalizzazione282/283 ed EOL, zero differenze funzionali, aggiunte o rimozioni; anche il derivato offline normalizzato coincide. Unità/regressioni157/157 PASS sulla confezione. Le evidenze locali di336 osservazioni/168 confronti entry, broker2/2 e mappa20/20 sotto restano riferite al delta identico. Controllo documentale12/12 PASS prima del commit; riesame immutabile e CI/Hosting ancora da acquisire. Questo checkpoint è una candidata, non attesta pubblicazione o Face ID hardware. La produzione resta282 fino alla ricevuta effettiva.
+
+
+<a id="contatti-conferma-biometrica-collaudi-2026-11-18"></a>
+
+## Riscontro post282 — correttivo locale dei contatti
+
+Base a766906c87032145e7c3332ca649c5956e44c548, ramo locale codex/contact-entry-fresh-faceid-20261118; nessuna nuova versione o operazione GitHub/Hosting. Riscontro: entry privata e aziendale con classi diverse; conferma owner forzata escludeva la PRF e apriva direttamente Master. Implementati stile condiviso circoscritto e opzione PRF fresca per backup-export, conservando forceReload, proof monouso, click nativo successivo e revoche. [Incarico](../progetto/INCARICO_CORRENTE.md#contatti-conferma-biometrica-incarico-2026-11-18), [contratto UI](../regole/INTERFACCIA.md#contatti-conferma-biometrica-ui-2026-11-18).
+
+Verifiche locali con dati sintetici:
+
+- Unità/regressioni sessione/logout/manager, confini owner, WebAuthn PRF effettivo nel VM, modello contatto e runtime cornice:157/157 PASS. Nuova cerimonia anche con RAM presente, due richieste distinte, nessun restore; default Master conservato per gli altri scopi; PRF mancante/errore richiede Master completa. Matrice aborto/blocco/UID/logout durante PRF/HKDF/decifratura e prova del blocco durante salvataggio: risultato tardivo scartato, senza nuovo grant o fallback automatico. GET autentico del modulo richiede userVerification, inoltra signal e rifiuta risposte tardive o RP errato.
+- Browser contatti/QR:9/9 PASS, incluse capacità native simulate, errori/annulli, revoca durante picker e ingrandimento QR aziendale. Entry rilanciata dopo completamento hover/focus:336 osservazioni,168 confronti privato/azienda, tutti PASS;7 palette × Chiaro/Scuro ×2 grafiche ×320/1280 ×3 stati. Confronto aspetto/ingombro e contrasto testo almeno4,5:1, con ruoli letti dal registro.
+- Broker/trasporto reali nel browser:2/2 PASS; fresh e consume separati dal nuovo click trusted, nuova prova alla riprova, lock senza azione OS.
+- Mappa UI e regressioni topologiche:20/20 PASS.31 pagine,425 controlli,0 non mappati;22 pagine livree,2 varianti,9 componenti,17 ruoli. Aggiunti sei paint delle due entry con provenienza, stati e ruoli;14 stati pannello contatto+6 QR conservati. Assenza di paint, stati inventati o ruoli ignoti rifiutati, senza inventare osservazioni fisiche.
+- Stylelint sul solo stylesheet modificato PASS; sintassi252 moduli PASS; audit statico sicurezza/offline PASS; contratti palette/colori:14/14 PASS. Documentazione:12/12 PASS,34 MD ammessi e1373 collegamenti locali verificati. Due riesami statici indipendenti GO sul correttivo locale; nessuna auto-approvazione di rilascio. Mappa Graphify aggiornata in modalità solo codice, senza estrazione semantica o file generati da versionare.
+
+Limiti: nessun accesso a dati reali, nessuna chiamata a Face ID hardware o condivisione OS effettiva. Il VM verifica il modulo reale con adattatori sintetici; non certifica Safari/PWA, gesti richiesti dal dispositivo o destinazione del file. Produzione rimane1.2.282. La prova fisica di Diego richiede eventuale successivo rilascio autorizzato; i residui della scaletta e Claude restano separati.
+
 <a id="rilascio-1282-pubblico-2026-11-18"></a>
 
 ## APP 1.2.282 — ricevuta di pubblicazione verificata

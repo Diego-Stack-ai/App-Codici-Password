@@ -116,12 +116,66 @@
       {
         "page": "profilo_privato.html",
         "selector": "[data-contact-export]",
-        "producer": "Frontend/public/assets/js/modules/privato/profilo-dashboard.js"
+        "producer": "Frontend/public/assets/js/modules/privato/profilo-dashboard.js",
+        "paints": [
+          {
+            "property": "color",
+            "role": "--rev-text-accent",
+            "minimum": 4.5,
+            "states": [
+              "normal",
+              "hover",
+              "focus"
+            ]
+          },
+          {
+            "property": "backgroundColor",
+            "role": "--rev-surface",
+            "states": [
+              "normal"
+            ]
+          },
+          {
+            "property": "backgroundColor",
+            "role": "--rev-surface-hover",
+            "states": [
+              "hover",
+              "focus"
+            ]
+          }
+        ]
       },
       {
         "page": "dati_azienda.html",
         "selector": "[data-contact-export]",
-        "producer": "Frontend/public/assets/js/modules/azienda/company-profile-ui.js"
+        "producer": "Frontend/public/assets/js/modules/azienda/company-profile-ui.js",
+        "paints": [
+          {
+            "property": "color",
+            "role": "--rev-text-accent",
+            "minimum": 4.5,
+            "states": [
+              "normal",
+              "hover",
+              "focus"
+            ]
+          },
+          {
+            "property": "backgroundColor",
+            "role": "--rev-surface",
+            "states": [
+              "normal"
+            ]
+          },
+          {
+            "property": "backgroundColor",
+            "role": "--rev-surface-hover",
+            "states": [
+              "hover",
+              "focus"
+            ]
+          }
+        ]
       }
     ],
     "styles": [
@@ -135,7 +189,8 @@
       "#contact-export-modal [role=status]",
       ".contact-export-actions",
       ".contact-export-options",
-      "#contact-export-method"
+      "#contact-export-method",
+      ".digital-card-actions > [data-contact-export]"
     ],
     "states": [
       "open",
@@ -356,6 +411,22 @@
       {
         "file": "tests/contact-export.test.mjs",
         "name": "the session permit is rechecked after the picker before creating a writable"
+      },
+      {
+        "file": "tests/contact-export.browser.test.mjs",
+        "name": "contact entry appearance matches across profiles in all seven themes and both graphics"
+      },
+      {
+        "file": "tests/vault-session-races.test.mjs",
+        "name": "fresh export confirmation performs a new PRF ceremony despite cached Vault material"
+      },
+      {
+        "file": "tests/vault-frame-boundaries.test.mjs",
+        "name": "production confirmation enables fresh biometric proof only for backup-export"
+      },
+      {
+        "file": "tests/webauthn-prf-cancellation.test.mjs",
+        "name": "actual PRF request requires user verification, a fresh challenge and the owner signal"
       }
     ]
   },

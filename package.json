@@ -12,7 +12,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.282",
+  "version": "1.2.283",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -47,7 +47,7 @@
     "test:company-pdf": "node --test tests/company-summary-*.test.mjs tests/static-reference-imports.test.mjs",
     "test:offline": "node scripts/audit-offline-shell.mjs && node --test tests/offline-asset-policy.test.mjs tests/offline-profile-readiness.test.mjs tests/offline-account-widgets.test.mjs",
     "test:security": "node scripts/audit-security-flows.mjs && node --test tests/input-autofill.test.mjs tests/private-bootstrap-offline.test.mjs tests/private-auth-gate.test.mjs tests/auth-session-fence.test.mjs tests/auth-password-fence.test.mjs tests/auth-login-fence.test.mjs",
-    "test:vault-contract": "node scripts/audit-vault-key-terminology.mjs && node --test tests/vault-session.test.mjs tests/vault-logout.test.mjs tests/vault-session-races.test.mjs && npm run test:vault-shell && npm run test:vault-frame-lab && npm run test:vault-frame-runtime",
+    "test:vault-contract": "node scripts/audit-vault-key-terminology.mjs && node --test tests/vault-session.test.mjs tests/vault-logout.test.mjs tests/vault-session-races.test.mjs tests/webauthn-prf-cancellation.test.mjs && npm run test:vault-shell && npm run test:vault-frame-lab && npm run test:vault-frame-runtime",
     "test:profile-utilities-editor": "node --test experiments/persistent-vault-shell/private-utilities-editor.test.mjs experiments/persistent-vault-shell/profile-account-create.test.mjs",
     "test:profile-documents-editor": "node --test experiments/persistent-vault-shell/private-documents.test.mjs experiments/persistent-vault-shell/private-documents-editor.test.mjs",
     "test:account-note-emulators": "node scripts/run-vault-session-emulators.mjs --account-note",

@@ -1,5 +1,22 @@
 # Interfaccia
 
+<a id="rilascio-1283-ui-2026-11-18"></a>
+
+## Contatti — candidata1.2.283
+
+Il correttivo locale del18/11 sotto è incluso nella candidata283 su ordine di pubblicazione: entry coerenti nelle due Tessere e nuova PRF nello scopo backup-export, con Master verificata come alternativa. Guida16/reviewed283; invariati i testi nelle otto lingue, le alternative del pannello e gli altri scopi sensibili. Mappa entry/ruoli/stati/test collegata senza dedurre verifiche hardware. [Confezione e limiti](../evidenze/COLLAUDI.md#rilascio-1283-collaudi-2026-11-18).
+
+
+<a id="contatti-conferma-biometrica-ui-2026-11-18"></a>
+
+## Contatti — parità delle entry e conferma recente, correttivo locale
+
+Le due Tessere usano lo stesso stile circoscritto a `.digital-card-actions > [data-contact-export]`: superficie `--rev-surface`, testo `--rev-text-accent`, bordo `--rev-border`; hover/focus usano `--rev-surface-hover` e `--rev-icon`, senza transizioni ereditate dal solo privato. Geometria compatta e focus visibile identici in entrambe le grafiche; gli altri pulsanti di caricamento conservano il proprio stile.
+
+La conferma owner di backup/export può tentare una nuova PRF configurata anche con Vault già aperta. Conserva forceReload: nessun riuso della chiave in RAM o del ripristino sessione come prova recente. Mancanza/errore PRF propone la verifica completa della Master Password; revoca, aborto o identità/generazione cambiata interrompono la procedura. Dopo la conferma resta necessario il gesto finale trusted per l'API nativa.
+
+La mappa `scripts/ui-livery-contract.json` collega entrambe le entry, produttori, stylesheet, paint di normal/hover/focus e regressione su sette palette, Chiaro/Scuro, due grafiche e larghezze320/1280. Restano14 stati pannello contatto e6 QR, senza qualificare il selettore biometrico del sistema operativo come DOM osservato. [Mandato](../progetto/INCARICO_CORRENTE.md#contatti-conferma-biometrica-incarico-2026-11-18), [evidenze e limiti](../evidenze/COLLAUDI.md#contatti-conferma-biometrica-collaudi-2026-11-18). Correttivo locale non pubblicato.
+
 <a id="rilascio-1282-pubblico-ui-2026-11-18"></a>
 
 ## Alternative contatto — distribuite nella 1.2.282

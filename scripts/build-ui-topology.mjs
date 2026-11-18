@@ -431,7 +431,9 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
     ].map(component=>({...component,native:true,pages:Array.isArray(component.metadata?.pages)?component.metadata.pages:[],
       selectors:component.metadata?.selectors,styles:component.metadata?.styles,
       producers:[component.metadata?.producer,...(Array.isArray(component.metadata?.entries)?component.metadata.entries.map(entry=>entry?.producer):[])],
-      roles:[...new Set((Array.isArray(component.metadata?.paints)?component.metadata.paints:[]).map(paint=>paint?.role).filter(role=>typeof role==='string'&&role.startsWith('--')))]}))
+      roles:[...new Set([...(Array.isArray(component.metadata?.paints)?component.metadata.paints:[]),
+        ...(Array.isArray(component.metadata?.entries)?component.metadata.entries:[]).flatMap(entry=>Array.isArray(entry?.paints)?entry.paints:[])]
+        .map(paint=>paint?.role).filter(role=>typeof role==='string'&&role.startsWith('--')))]}))
   ];
   for(const component of components){
     const id=collector.addNode(uiNode(`ui:livery-component:${component.id}`,component.id,'ui_livery_component',{...declared,...(component.test?{test_name:component.test.name}:{})}));
@@ -473,6 +475,23 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
         const entryId=collector.addNode(uiNode(`${id}:entry:${index}`,entry.selector,'ui_livery_entry',{...declared,page:entry.page,selector:entry.selector}));
         collector.addEdge(uiEdge(`ui:page:${entry.page}`,entryId,'ui_declares_entry',declared));collector.addEdge(uiEdge(entryId,id,'ui_opens_component',declared));
         if(entrySource)collector.addEdge(uiEdge(entryId,entrySource,'ui_rendered_by',declared));
+        if(component.id==='contact-export'&&(!Array.isArray(entry.paints)||!entry.paints.length))errors.push('liveries: contact-export has no entry paints');
+        if(component.id==='contact-export')for(const state of ['normal','hover','focus'])for(const property of ['color','backgroundColor']){
+          if(!(Array.isArray(entry.paints)?entry.paints:[]).some(paint=>paint?.property===property&&Array.isArray(paint.states)&&paint.states.includes(state)))
+            errors.push(`liveries: contact-export has unpainted entry state ${state}/${property}`);
+        }
+        for(const [paintIndex,paint] of (Array.isArray(entry.paints)?entry.paints:[]).entries()){
+          if(!['color','backgroundColor'].includes(paint?.property)||typeof paint?.role!=='string'||!paint.role.startsWith('--')||
+            (paint.minimum!==undefined&&(!Number.isFinite(paint.minimum)||paint.minimum<=0))||
+            (paint.property==='color'&&(!Number.isFinite(paint.minimum)||paint.minimum<4.5))||
+            !Array.isArray(paint.states)||!paint.states.length||paint.states.some(state=>!['normal','hover','focus'].includes(state))){
+            errors.push(`liveries: ${component.id} has invalid entry paint`);continue;
+          }
+          const paintId=collector.addNode(uiNode(`${entryId}:paint:${paintIndex}`,entry.selector,'ui_declared_paint',{
+            ...declared,selector:entry.selector,property:paint.property,role:paint.role,entry_states:paint.states,...(paint.minimum?{minimum:paint.minimum}:{})}));
+          collector.addEdge(uiEdge(entryId,paintId,'ui_declares_paint',declared));
+          collector.addEdge(uiEdge(paintId,`ui:livery-color-role:${paint.role}`,'ui_uses_color_role',declared));
+        }
       }
       const namedTest=(reference,bindStates)=>{
         const target=source(reference?.file),name=reference?.name;

@@ -1,5 +1,22 @@
 # Incarico corrente
 
+<a id="rilascio-1283-incarico-2026-11-18"></a>
+
+## Pubblicazione1.2.283 — ordine eseguibile
+
+Diego ordina «Pubblica» dopo la consegna del correttivo locale contatti. Il nuovo ordine autorizza nuova versione1.2.283, PR, riesame indipendente sulla testa immutabile, CI verde, merge con SHA atteso, CI master e validate Hosting sullo stesso master fissato, poi production protetto secondo la delega della sessione, verifica pubblica integrale e ricevuta MD/GitHub. Superato il limite locale sotto per questo solo delta: parità entry privata/aziendale e nuova PRF nella conferma backup-export con alternativa Master verificata.
+
+Root unico esecutore, supporti in lettura,34 MD e protezioni invariati. Solo Hosting; nessuna operazione backend/Rules/Functions/Storage/policy/claim/IAM. Nessuna prova fisica Face ID dedotta dai banchi o dal rilascio.
+
+
+<a id="contatti-conferma-biometrica-incarico-2026-11-18"></a>
+
+## Riscontro 18/11 — pulsante contatto e conferma biometrica
+
+Diego segnala che il comando della Tessera privata differisce da quello aziendale e che la conferma Vault dell'esportazione chiede solo la Master Password. Preparare un correttivo locale: stessa presentazione dei due comandi, nuova verifica PRF quando configurata per backup/export, Master Password come alternativa completa. Vault già aperta o chiave in RAM non valgono come nuova conferma; conservare proof monouso, gesto trusted, UID/fence/generazione, annullamento e revoche.
+
+Root unico esecutore, supporti indipendenti in lettura; regressioni effettive e MD esistenti aggiornati. Questo riscontro non avvia nuova versione, commit, push, PR, merge, deploy o operazioni backend/policy. Produzione1.2.282 invariata; Face ID e condivisione sul dispositivo restano prove fisiche da eseguire dopo eventuale pubblicazione autorizzata.
+
 <a id="rilascio-1282-pubblico-incarico-2026-11-18"></a>
 
 ## Ordine del 18/11 — verifica e chiusura documentale
