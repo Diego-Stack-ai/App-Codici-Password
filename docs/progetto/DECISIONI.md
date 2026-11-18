@@ -1,5 +1,12 @@
 # Decisioni
 
+<a id="rilascio-1283-pubblico-decisione-2026-11-18"></a>
+
+## 18/11/2026 — pubblicazione283 autorizzata eseguita
+
+Attuati il comando «Pubblica» e la conferma «fatto» di Diego: #332, gate verdi sul sorgente5d51f9f5, approvazione manuale production nella #1218 e verifica pubblica integrale PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1283-pubblico-2026-11-18). Conservate parità del comando contatto, nuova PRF per backup-export e alternativa Master completa, senza chiave cached come prova recente. Nessun cambiamento di policy o degli altri scopi sensibili; la ricevuta non amplia l'incarico e non chiude prove fisiche o altri lotti.
+
+
 <a id="rilascio-1283-decisione-2026-11-18"></a>
 
 ## 18/11/2026 — pubblicare la parità e la conferma biometrica dei contatti

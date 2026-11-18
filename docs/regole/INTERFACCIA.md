@@ -1,5 +1,12 @@
 # Interfaccia
 
+<a id="rilascio-1283-pubblico-ui-2026-11-18"></a>
+
+## Contatti — distribuiti nella1.2.283
+
+Distribuiti lo stile comune delle entry privata/aziendale e la conferma PRF recente nello scopo backup-export quando configurata, con Master verificata come alternativa. Geometria, focus e ruoli condivisi registrati nella mappa, con7 palette, Chiaro/Scuro e2 grafiche. Stessi14 stati del pannello contatto e6 QR; guida16/reviewed283 e testi nelle otto lingue conservati. [Pubblicazione e limiti](../evidenze/COLLAUDI.md#rilascio-1283-pubblico-2026-11-18). I checkpoint candidati e locali sotto descrivono la preparazione, non un rilascio ancora pendente; l'hardware Face ID resta una prova fisica distinta.
+
+
 <a id="rilascio-1283-ui-2026-11-18"></a>
 
 ## Contatti — candidata1.2.283

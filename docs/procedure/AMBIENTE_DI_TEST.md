@@ -1,5 +1,12 @@
 # Ambiente di test
 
+<a id="rilascio-1283-pubblico-ambiente-2026-11-18"></a>
+
+## 1.2.283 — pubblicazione e limiti del banco
+
+[Ricevuta della produzione](../evidenze/COLLAUDI.md#rilascio-1283-pubblico-2026-11-18): CI PR/master/Hosting sul sorgente5d51f9f5,3862 test per validazione con3851 PASS/11 SKIP/0 FAIL. La conferma biometrica è verificata automaticamente con moduli effettivi e adattatori sintetici; la matrice delle entry copre336 osservazioni/168 confronti in7 palette, Chiaro/Scuro,2 grafiche,320/1280 e normal/hover/focus. Questo non certifica Face ID hardware, Safari/PWA, condivisione OS o destinazione del contatto. Verifica pubblica in sola lettura su367 asset/41 profili/3 probe e sei GET separati, senza dati Vault. Prova del dispositivo di Diego ancora necessaria; nessun caso C1/C2 o audit separato viene chiuso automaticamente.
+
+
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
 > Indice e autorità: [LEGGIMI](../LEGGIMI.md). Stato verificato e limiti: [STATO](../progetto/STATO.md).
 

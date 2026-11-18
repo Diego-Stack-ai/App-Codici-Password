@@ -2,6 +2,15 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1283-pubblico-stato-2026-11-18"></a>
+
+## APP 1.2.283 — online e verificata
+
+Online **1.2.283**, sorgente **5d51f9f5ad2f4a1806b0ffcf9f706eee8937ae9b**, sourceDirty=false. PR #332 unita; CI #1216/#1217 e Hosting #1218 SUCCESS. Approvazione production manuale di Diego; pubblicazione solo Hosting conclusa il18/11 alle **19:01:30 CET**. Verifica indipendente **367 hash/41 profili/3 probe PASS** alle19:03:32 CET e sei GET separati PASS alle19:05:05 CET. [Ricevuta completa](../evidenze/COLLAUDI.md#rilascio-1283-pubblico-2026-11-18).
+
+Distribuiti pulsante contatto uniforme privato/azienda e nuova PRF nella conferma backup-export quando configurata; Master verificata come alternativa, proof e revoche conservate. Mappa e test collegati; guida16/reviewed283. Le attese e i limiti locali sotto sono checkpoint storici. Resta la prova fisica di Diego su Face ID e contatti, oltre a RG-01/RG-04 e agli altri lotti della scaletta. Il duplicato #1219 non è la pubblicazione attestata; gestione annotata nella ricevuta. La chiusura corrente aggiorna soltanto MD/GitHub e conserva il runtime distribuito.
+
+
 <a id="rilascio-1283-stato-2026-11-18"></a>
 
 ## Candidata1.2.283 — pubblicazione in preparazione

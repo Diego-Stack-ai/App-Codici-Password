@@ -1,5 +1,14 @@
 # Incarico corrente
 
+<a id="rilascio-1283-pubblico-incarico-2026-11-18"></a>
+
+## Ordine del18/11 — pubblicazione eseguita e ricevuta
+
+Eseguito l'ordine «Pubblica»: #332 unita sul sorgente5d51f9f5, CI PR/master e validate Hosting verdi, approvazione production manuale di Diego dopo i rifiuti403 del collegamento automatico, Hosting #1218 SUCCESS e verifica pubblica completa PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1283-pubblico-2026-11-18). La versione online è1.2.283; il precedente limite locale è superato solo per il delta autorizzato.
+
+Questa chiusura aggiorna i nove MD esistenti e GitHub tramite PR soltanto documentale, controlli e riesame indipendente, senza un ulteriore Hosting. Root unico esecutore e supporti in lettura; elenco34 MD, runtime, workflow, credenziali e protezioni conservati. Il doppio avvio #1219 resta distinto dalla run pubblicata. Nessun nuovo lotto o PASS fisico dedotto; prova del telefono, altri residui e Claude restano separati.
+
+
 <a id="rilascio-1283-incarico-2026-11-18"></a>
 
 ## Pubblicazione1.2.283 — ordine eseguibile

@@ -1,5 +1,12 @@
 # Rilascio
 
+<a id="rilascio-1283-pubblico-procedura-2026-11-18"></a>
+
+## APP 1.2.283 — procedura eseguita
+
+#332 unita dopo GO indipendenti e CI #1216 SUCCESS; CI master #1217 e validate Hosting #1218 sul medesimo SHA5d51f9f5 e digest pubblico. Scope hosting verificato nel log prima dell'approvazione. Dopo il rifiuto403 della CLI e l'indisponibilità della finestra browser, Diego ha completato manualmente production; deploy solo Hosting SUCCESS il18/11 alle19:01:30 CET. Workflow, credenziali e protezioni conservati. Verifica autonoma367 file/41 profili/3 probe e sei GET separati PASS. [Ricevuta completa](../evidenze/COLLAUDI.md#rilascio-1283-pubblico-2026-11-18). La chiusura documentale conserva il codice pubblico e non richiede un secondo Hosting; il doppio avvio #1219 non è parte della pubblicazione attestata.
+
+
 <a id="rilascio-1283-procedura-2026-11-18"></a>
 
 ## Candidata1.2.283 — contatti e conferma recente
