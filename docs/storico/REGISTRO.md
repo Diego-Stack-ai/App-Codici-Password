@@ -1,5 +1,12 @@
 # Registro
 
+<a id="rilascio-1282-pubblico-registro-2026-11-18"></a>
+
+## 18/11/2026 — 1.2.282 pubblicata e verificata
+
+Conclusa #330: sorgente4fe88340, CI #1210/#1211 e Hosting #1212 SUCCESS, approvazione production manuale di Diego e deploy alle 08:06:17 CET. Pubblico367 hash/41 profili/3 probe e cinque GET indipendenti PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1282-pubblico-2026-11-18). Segue solo chiusura MD/GitHub; prove fisiche e altri lotti restano distinti.
+
+
 <a id="rilascio-1282-registro-2026-11-17"></a>
 
 ## 17/11/2026 — ordine pubblicazione correttivo contatto

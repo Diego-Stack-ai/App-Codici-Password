@@ -1,5 +1,14 @@
 # Programma
 
+<a id="rilascio-1282-pubblico-programma-2026-11-18"></a>
+
+## Contatti 1.2.282 — pubblicazione conclusa
+
+Correttivo distribuito con #330/Hosting #1212 e verificato integralmente il 18/11. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1282-pubblico-2026-11-18). Chiusa la pubblicazione tecnica; restano prova fisica del nuovo pannello, RG-01/RG-04, cornice, sicurezza/recupero, prodotto e ciclo finale secondo la scaletta. Il riscontro «1 ok» del 17/11 non è esteso a casi non identificati o al nuovo codice allora non online.
+
+Diego ha chiesto domande sui punti 3–4: presentate le scelte sui collaudi della cornice e sulla priorità sicurezza/recupero; risposte non ancora ricevute qui. Per il punto 5 ha autorizzato Claude: avviata revisione editoriale/di pianificazione in sola lettura, senza strumenti o scritture, con quattro sorgenti pubblici verificati. La prima risposta termina annunciando una scrittura ineseguita e manca dei rilievi puntuali richiesti: consegna da completare, nessun risultato convalidato o audit chiuso. La precedente dicitura «nessun incarico inviato» sotto è storica.
+
+
 <a id="rilascio-1282-programma-2026-11-17"></a>
 
 ## Contatti1.2.282 — completare la pubblicazione

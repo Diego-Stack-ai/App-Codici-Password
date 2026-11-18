@@ -1,5 +1,12 @@
 # Interfaccia
 
+<a id="rilascio-1282-pubblico-ui-2026-11-18"></a>
+
+## Alternative contatto — distribuite nella 1.2.282
+
+Distribuito il contratto del 17/11: nelle due Tessere, primaria secondo la funzione disponibile; Altre opzioni solo con Share e picker entrambi presenti, senza Download aggiuntivo. Senza entrambe resta Salva file contatto, con nome e destinazione browser spiegati. Errori/annulli e riprova conservano preparazione, proof, gesto finale e revoche. Guida16/reviewed282 nelle otto lingue; stessi 14 stati contatto + 6 QR, palette e geometria. [Pubblicazione e limiti](../evidenze/COLLAUDI.md#rilascio-1282-pubblico-2026-11-18). Nessun PASS nativo/fisico dedotto dalla distribuzione.
+
+
 <a id="rilascio-1282-ui-2026-11-17"></a>
 
 ## Alternative contatto — candidata1.2.282
