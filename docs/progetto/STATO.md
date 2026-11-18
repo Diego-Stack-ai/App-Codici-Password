@@ -1,5 +1,7 @@
 # Stato
 
+<a id="stato-corrente"></a>
+
 <a id="rilascio-1283-stato-2026-11-18"></a>
 
 ## Candidata1.2.283 — pubblicazione in preparazione
@@ -7,7 +9,6 @@
 Su ordine esplicito di Diego si confeziona il correttivo contatti già verificato localmente: stessa entry nelle due Tessere e nuova PRF per backup-export. Nuova versione, PR, CI/riesame, merge e Hosting protetto; produzione1.2.282 invariata fino alla ricevuta effettiva. [Mandato](INCARICO_CORRENTE.md#rilascio-1283-incarico-2026-11-18). Il limite al solo lavoro locale sotto è storico per questo delta; Face ID sul dispositivo resta da provare.
 
 
-<a id="stato-corrente"></a>
 
 <a id="contatti-conferma-biometrica-stato-2026-11-18"></a>
 
