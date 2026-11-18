@@ -1,5 +1,12 @@
 # Rilascio
 
+<a id="rilascio-1283-procedura-2026-11-18"></a>
+
+## Candidata1.2.283 — contatti e conferma recente
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#rilascio-1283-incarico-2026-11-18): snapshot funzionale pre-bump, versione canonica283, guida reviewed283 e derivati offline/QA aggiornati senza mutare le soglie. Riesame indipendente sulla testa immutabile e CI completa verde; merge con SHA atteso. CI master e workflow firebase-deploy.yml sul medesimo master fissato, release_scope=hosting; production dopo entrambi i validate verdi e master invariato, secondo la delega della sessione, senza cambiare protezioni o credenziali. Poi manifest pulito con byte Git LF, verifica integrale file/header/probe e GET indipendenti. Ricevuta documentale senza secondo Hosting. Nessuna operazione backend/policy; prove native fisiche ancora distinte.
+
+
 <a id="rilascio-1282-pubblico-procedura-2026-11-18"></a>
 
 ## APP 1.2.282 — procedura eseguita

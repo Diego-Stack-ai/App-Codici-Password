@@ -61,7 +61,7 @@ test('microphone stream resolving after cancellation stops every late track',asy
 });
 const productionSource=await source('vault-frame-production.js');
 function productionFixture(started=true){
- const state={snap:null,error:null,updates:[],locks:[],valid:()=>Promise.resolve(true),resume:0};
+ const state={snap:null,error:null,updates:[],locks:[],valid:()=>Promise.resolve(true),resume:0,confirmations:[],clears:0};
  const elements=Object.fromEntries(['frame-status','frame-loading','vault-frame'].map(id=>[id,{hidden:id==='frame-status'}]));
  const anchor=new EventTarget();const owner={session:{state:()=>({expiresAt:1}),lock:reason=>state.locks.push(reason)},start:async()=>{if(started==='throw')throw Error('synthetic startup error');return started;},
  updatePreference:v=>state.updates.push(v),resume:()=>{state.resume++;return true;},dispose(){}};
@@ -69,10 +69,33 @@ function productionFixture(started=true){
  URL,APP_VERSION:'fixture',auth:{currentUser:{uid:'synthetic'}},db:{},doc:()=>({}),getUserProfile:async()=>({lock_timeout:3}),
  createProductionFrameAdmission:()=>({read:async()=>null,dispose(){}}),
  installFramePushNavigation:()=>()=>{}, emitFrameDiagnostic:()=>{},
- authSessionFence:{isCurrent:()=>state.valid(),isLocallyAllowed:()=>true},createVaultFrameOwner:options=>{state.onState=options.onState;return owner;},
+ authSessionFence:{isCurrent:()=>state.valid(),isLocallyAllowed:()=>true},createVaultFrameOwner:options=>{state.onState=options.onState;state.confirmSensitive=options.confirmSensitive;return owner;},
  onSnapshot:(_ref,next,error)=>{state.snap=next;state.error=error;return()=>{};}});
- vm.runInContext(productionSource,context);return {state,anchor,elements,start:()=>vm.runInContext("startVaultFrame({user:{uid:'synthetic'},fenceTicket:{revision:1,nonce:'n'},securityManager:{setFrameExpiryAuthority(){}}})",context)};
+ context.securityManager={setFrameExpiryAuthority(){},clearSession(){state.clears++;},ensureVaultKeyMaterial:async options=>{state.confirmations.push(options);return 'fixture-material';}};
+ vm.runInContext(productionSource,context);return {state,anchor,elements,context,start:()=>vm.runInContext("startVaultFrame({user:{uid:'synthetic'},fenceTicket:{revision:1,nonce:'n'},securityManager})",context)};
 }
+test('production confirmation enables fresh biometric proof only for backup-export',async()=>{
+ const f=productionFixture();await f.start();
+ for(const purpose of ['backup-export','portable-export','master-change','sharing-change','permanent-delete','session-unlock',undefined]){
+  const signal=new AbortController().signal;
+  assert.equal(await f.state.confirmSensitive({purpose,signal}),true);
+  const options=f.state.confirmations.at(-1);
+  assert.equal(options.forceReload,true);assert.equal(options.promptImmediately,true);
+  assert.equal(options.allowBiometricForReload,purpose==='backup-export');assert.equal(options.signal,signal);
+ }
+ f.state.valid=async()=>false;
+ assert.equal(await f.state.confirmSensitive({purpose:'backup-export',signal:new AbortController().signal}),false);
+ assert.equal(f.state.confirmations.length,7);
+});
+
+test('production confirmation aborted during fresh proof clears material and never grants',async()=>{
+ const f=productionFixture();await f.start();const entered=pause(),pending=pause(),controller=new AbortController();
+ f.context.securityManager.ensureVaultKeyMaterial=async()=>{entered.resolve();return pending.promise;};
+ const result=f.state.confirmSensitive({purpose:'backup-export',signal:controller.signal});
+ await entered.promise;controller.abort();pending.resolve('fixture-late');
+ assert.equal(await result,false);assert.equal(f.state.clears,1);
+});
+
 test('out-of-order preference snapshots cannot extend the newer short timeout',async()=>{
  const f=productionFixture();await f.start();const old=pause();let call=0;f.state.valid=()=>++call===1?old.promise:Promise.resolve(true);
  f.state.snap({exists:()=>true,data:()=>({lock_timeout:720})});f.state.snap({exists:()=>true,data:()=>({lock_timeout:1})});

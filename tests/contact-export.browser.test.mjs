@@ -49,6 +49,59 @@ async function openFixture(harness, company, graphics) {
         graphics, query: company ? '?id=doc-0&profileTab=digital-card' : '?profileTab=digital-card'});
 }
 
+test('contact entry appearance matches across profiles in all seven themes and both graphics', {timeout: 240000}, async () => {
+    const harness = await createTourHarness({memory: true}), measurements = new Map();
+    try {
+        for (const graphics of ['classica', 'tre-livelli']) for (const company of [false, true]) {
+            const f = await openFixture(harness, company, graphics);
+            try {
+                const entry = f.page.locator('[data-contact-export]');
+                assert.equal(await entry.count(), 1); assert.equal(await entry.textContent(), entryName);
+                for (const width of [320, 1280]) {
+                    await f.page.setViewportSize({width, height: 844});
+                    for (const theme of livery.themes) for (const palette of livery.palettes) {
+                        await f.page.evaluate(({theme, palette}) => {
+                            document.documentElement.classList.toggle('dark', theme === 'dark');
+                            document.documentElement.dataset.colorTheme = palette;
+                        }, {theme, palette});
+                        await entry.scrollIntoViewIfNeeded();
+                        for (const state of ['normal', 'hover', 'focus']) {
+                        await f.page.mouse.move(0, 0);
+                        await entry.evaluate(element => element.blur());
+                        if (state === 'hover') await entry.hover();
+                        if (state === 'focus') await entry.focus();
+                        const label = `${graphics}/${width}/${theme}/${palette}/${state}`;
+                        const appearance = await entry.evaluate(element => {
+                            const style = getComputedStyle(element), bounds = element.getBoundingClientRect();
+                            return {style: Object.fromEntries(['color','backgroundColor','borderTopColor',
+                                'borderTopWidth','borderTopStyle','borderRadius','padding','fontSize','fontWeight',
+                                'lineHeight','letterSpacing','textTransform','margin','display','minHeight',
+                                'outlineColor','outlineStyle','outlineWidth','outlineOffset'].map(key => [key, style[key]])),
+                                height: bounds.height, width: bounds.width, x: bounds.x,
+                                clipped: element.scrollWidth > element.clientWidth + 1};
+                        });
+                        assert.ok(appearance.height >= 44 && appearance.height <= 90, label + ': compact touch target');
+                        assert.ok(appearance.x >= -1 && appearance.x + appearance.width <= width + 1, label + ': entry fits');
+                        assert.equal(appearance.clipped, false, label + ': entry text fits');
+                        const definition = livery.contactExport.entries.find(item => item.page === (company ? 'dati_azienda.html' : 'profilo_privato.html'));
+                        const statePaints = definition.paints.filter(paint => paint.states.includes(state));
+                        assert.ok(statePaints.some(paint => paint.property === 'color' && paint.minimum >= 4.5), label + ': mapped text contrast');
+                        assert.ok(statePaints.some(paint => paint.property === 'backgroundColor'), label + ': mapped background');
+                        for (const paint of statePaints) {
+                            const values = await inspectDynamicPaint(f.page, {...paint, selector: definition.selector}, {theme, graphics});
+                            assert.ok(registeredPaintPass(values, paint), label + ': ' + JSON.stringify(values));
+                        }
+                        if (company) assert.deepEqual(appearance.style, measurements.get(label), label + ': same entry style');
+                        else measurements.set(label, appearance.style);
+                        }
+                    }
+                }
+            } finally {await f.page.close();}
+        }
+        assert.equal(measurements.size, 168);
+    } finally {await harness.close();}
+});
+
 test('contact export controls stay compact and reachable on private and company pages', {timeout: 120000}, async () => {
     const harness = await createTourHarness({memory: true}), measurements = [];
     try {

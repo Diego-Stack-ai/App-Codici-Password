@@ -1,5 +1,12 @@
 # Decisioni
 
+<a id="rilascio-1283-decisione-2026-11-18"></a>
+
+## 18/11/2026 — pubblicare la parità e la conferma biometrica dei contatti
+
+Fonte diretta: Diego, «Pubblica». Autorizzata la pubblicazione1.2.283 dello stesso correttivo locale consegnato: entry uniforme privata/azienda e nuova PRF quando configurata nello scopo backup-export, senza usare la chiave in RAM come prova. Master verificata e gesto nativo finale conservati. [Mandato e gate](INCARICO_CORRENTE.md#rilascio-1283-incarico-2026-11-18). Gli altri lotti e Claude restano separati.
+
+
 <a id="rilascio-1282-pubblico-decisione-2026-11-18"></a>
 
 ## 18/11/2026 — pubblicazione autorizzata eseguita

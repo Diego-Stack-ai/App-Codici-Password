@@ -51,6 +51,36 @@
 .profile-tab.is-active { background: var(--accent); color: #fff; }
 .profile-tab-panel.hidden { display: none !important; }
 
+/* One contact action on both digital cards, without changing upload controls. */
+.digital-card-actions > [data-contact-export] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 44px;
+    margin: 0;
+    padding: 10px 14px;
+    border: 1px solid var(--rev-border);
+    border-radius: 12px;
+    background: var(--rev-surface);
+    color: var(--rev-text-accent, var(--theme-ink));
+    font: var(--font-button);
+    white-space: normal;
+    transition: none;
+    cursor: pointer;
+}
+
+.digital-card-actions > [data-contact-export]:is(:hover, :focus-visible) {
+    background: var(--rev-surface-hover);
+    border-color: var(--rev-icon);
+}
+.digital-card-actions > [data-contact-export]:focus-visible {
+    outline: 2px solid var(--rev-icon);
+    outline-offset: 2px;
+}
+
 .profile-overview-heading,
 .digital-card-actions {
     display: flex;

@@ -1,6 +1,19 @@
 # Stato
 
+<a id="rilascio-1283-stato-2026-11-18"></a>
+
+## Candidata1.2.283 — pubblicazione in preparazione
+
+Su ordine esplicito di Diego si confeziona il correttivo contatti già verificato localmente: stessa entry nelle due Tessere e nuova PRF per backup-export. Nuova versione, PR, CI/riesame, merge e Hosting protetto; produzione1.2.282 invariata fino alla ricevuta effettiva. [Mandato](INCARICO_CORRENTE.md#rilascio-1283-incarico-2026-11-18). Il limite al solo lavoro locale sotto è storico per questo delta; Face ID sul dispositivo resta da provare.
+
+
 <a id="stato-corrente"></a>
+
+<a id="contatti-conferma-biometrica-stato-2026-11-18"></a>
+
+## Dopo282 — correttivo contatti locale
+
+Sul nuovo riscontro di Diego, preparati stesso stile delle entry privata/aziendale e tentativo di nuova PRF nella conferma backup/export, con Master Password verificata come alternativa. Restano proof monouso e click finale trusted. Produzione1.2.282 invariata; nessuna nuova versione o pubblicazione avviata. [Incarico locale](INCARICO_CORRENTE.md#contatti-conferma-biometrica-incarico-2026-11-18), [evidenze](../evidenze/COLLAUDI.md#contatti-conferma-biometrica-collaudi-2026-11-18). Face ID effettivo e destinazione del contatto restano prove fisiche dopo eventuale rilascio autorizzato.
 
 <a id="rilascio-1282-pubblico-stato-2026-11-18"></a>
 
@@ -8,7 +21,7 @@
 
 Online **1.2.282**, sorgente **4fe88340b8b16d8f4db16bd34d07f7535f8d09c3**, sourceDirty=false. PR #330 unita; CI #1210/#1211 e Hosting #1212 SUCCESS. Approvazione production manuale di Diego; deploy concluso il 18/11 alle **08:06:17 CET**, solo Hosting. Verifica autonoma **367 hash / 41 profili / 3 probe PASS** alle 08:07:47 CET e cinque GET indipendenti alle 08:09:53 CET. [Ricevuta completa](../evidenze/COLLAUDI.md#rilascio-1282-pubblico-2026-11-18).
 
-Contatti privato/azienda senza alternativa Scarica file ridondante: menu solo con due funzioni native; fallback browser unico se mancano entrambe. Guida16/reviewed282; gli altri comportamenti conservati. Le precedenti attese sotto sono storiche. Segue solo chiusura documentale/GitHub, senza altro deploy. Restano prova fisica post-282, RG-01/RG-04 e gli altri lotti della scaletta.
+Contatti privato/azienda senza alternativa Scarica file ridondante: menu solo con due funzioni native; fallback browser unico se mancano entrambe. Guida16/reviewed282; gli altri comportamenti conservati. Le precedenti attese sotto sono storiche. Ricevuta documentale chiusa con PR #331/a766906c senza altro Hosting. Il nuovo riscontro è trattato nel correttivo locale sopra. Restano prova fisica post-282, RG-01/RG-04 e gli altri lotti della scaletta.
 
 
 <a id="rilascio-1282-stato-2026-11-17"></a>

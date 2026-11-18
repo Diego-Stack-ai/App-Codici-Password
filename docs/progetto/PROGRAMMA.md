@@ -1,5 +1,18 @@
 # Programma
 
+<a id="rilascio-1283-programma-2026-11-18"></a>
+
+## Contatti1.2.283 — completare la pubblicazione
+
+Diego ha autorizzato il rilascio del correttivo locale: confezione canonica, riesame e CI sulla testa, merge, CI master/validate Hosting, gate production e verifica pubblica, poi ricevuta negli MD/GitHub. Superato il precedente limite locale solo per questo delta. [Incarico](INCARICO_CORRENTE.md#rilascio-1283-incarico-2026-11-18). Dopo il rilascio resta la verifica fisica di Diego: nuova biometria e alternativa Master, salvataggio/condivisione nelle due Tessere. Nessun altro lotto chiuso automaticamente.
+
+
+<a id="contatti-conferma-biometrica-programma-2026-11-18"></a>
+
+## Riscontro post282 — parità e nuova biometria
+
+Seguito locale limitato al comando contatto privato/azienda e alla conferma PRF recente per backup/export; regressioni e mappa componenti/ruoli/test aggiornate. Nessun nuovo rilascio dedotto dal riscontro. Dopo eventuale pubblicazione autorizzata, Diego prova sul telefono sia il comando coerente nelle due Tessere sia la nuova richiesta biometrica e il ripiego Master; non sono PASS fisici automatici. [Mandato](INCARICO_CORRENTE.md#contatti-conferma-biometrica-incarico-2026-11-18). Gli altri punti della scaletta e l'incarico separato di Claude restano distinti.
+
 <a id="rilascio-1282-pubblico-programma-2026-11-18"></a>
 
 ## Contatti 1.2.282 — pubblicazione conclusa

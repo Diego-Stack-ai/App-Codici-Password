@@ -56,7 +56,7 @@ test('typography mapping rejects invalid sources and unknown translated labels',
 
 test('shared-base liveries connect all 22 pages, selectors, roles, producers and tests without inventing observations',()=>{
   const result=buildLiveryTopology();assert.deepEqual(result.errors,[]);
-  assert.deepEqual(result.summary,{pages:22,variants:2,components:9,roles:14});
+  assert.deepEqual(result.summary,{pages:22,variants:2,components:9,roles:17});
   const ids=new Set(result.nodes.map(node=>node.id));
   for(const edge of result.edges){assert.ok(ids.has(edge.source)&&ids.has(edge.target));assert.equal(edge.observed,false);assert.equal(edge.declaration,'CONTRACT');}
   for(const component of result.nodes.filter(node=>node.file_type==='ui_livery_component')){
@@ -82,7 +82,17 @@ test('native contact topology links entries, models, visual states, roles and ex
     for(const relation of ['ui_uses_model','ui_names_regression','ui_declares_paint'])assert.ok(edges.some(edge=>edge.relation===relation),name+'/'+relation);
     const states=result.nodes.filter(node=>node.id.startsWith(id+':state:'));
     for(const state of states)assert.ok(result.edges.some(edge=>edge.source===state.id&&edge.relation==='ui_declares_state_test'),state.id);
-    assert.equal(result.nodes.filter(node=>node.id.startsWith(id+':entry:')).length,2);
+    const entries=result.nodes.filter(node=>node.id.startsWith(id+':entry:')&&!node.id.includes(':paint:'));
+    assert.equal(entries.length,2);
+    if(name==='contact-export')for(const entry of entries){
+      const paints=result.edges.filter(edge=>edge.source===entry.id&&edge.relation==='ui_declares_paint');
+      assert.equal(paints.length,3);
+      for(const edge of paints){
+        const paint=result.nodes.find(node=>node.id===edge.target);
+        assert.ok(paint.entry_states.length>0);
+        assert.ok(result.edges.some(binding=>binding.source===paint.id&&binding.relation==='ui_uses_color_role'));
+      }
+    }
     for(const edge of edges.filter(edge=>edge.relation==='ui_expects_color_role'))assert.deepEqual(edge.graphics,['classic','new']);
   }
   for(const file of ['Frontend/public/assets/js/modules/shared/contact-export-model.js','Frontend/public/assets/js/modules/azienda/company-vcard.js','Frontend/public/assets/js/modules/shared/qr_code_utils.js'])assert.ok(result.edges.some(edge=>edge.target==='ui:source:'+file&&edge.relation==='ui_uses_model'),file);
@@ -97,6 +107,11 @@ test('native contact topology rejects incomplete or invented state, source and r
     [r=>{r.companyCardQr.models=[123];},'invalid source 123'],
     [r=>{r.contactExport.states.push('open');},'duplicate state'],
     [r=>{r.companyCardQr.entries.pop();},'incomplete entries'],
+    [r=>{delete r.contactExport.entries[0].paints;},'no entry paints'],
+    [r=>{r.contactExport.entries[0].paints[0].role='--unknown-entry-paint';},'unknown color role'],
+    [r=>{r.contactExport.entries[0].paints[0].states=['invented'];},'invalid entry paint'],
+    [r=>{r.contactExport.entries[0].paints.pop();},'unpainted entry state'],
+    [r=>{r.contactExport.entries[0].paints[0].minimum=3;},'invalid entry paint'],
     [r=>{r.contactExport.tests[0].name='contact-export';},'missing named native regression'],
     [r=>{r.contactExport.tests[0].states=['unregistered-state'];},'test binds unknown state'],
     [r=>{r.companyCardQr.tests=[];},'untested state'],

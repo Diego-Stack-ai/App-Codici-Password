@@ -2,7 +2,7 @@ import {emitFrameDiagnostic} from '../../frame-navigation.js';
 import {createProductionFrameAdmission} from './vault-frame-admission.js';
 import {doc, onSnapshot} from '/assets/js/vendor/firebase-runtime.js';
 import {APP_VERSION} from '../../app-env.js';
-import {auth, db} from '../../firebase-config.js?v=1.2.282';
+import {auth, db} from '../../firebase-config.js?v=1.2.283';
 import {authSessionFence} from '../../auth-session-fence.js';
 import {getUserProfile} from '../data/vault-repository.js';
 import {createVaultFrameOwner} from './vault-frame-owner.mjs';
@@ -34,12 +34,13 @@ export async function startVaultFrame({user, securityManager, fenceTicket}) {
       try {return await securityManager.ensureVaultKeyMaterial({signal});}
       finally {signal.removeEventListener('abort', cancel);}
     },
-    confirmSensitive: async ({signal}) => {
+    confirmSensitive: async ({purpose, signal}) => {
       if (signal.aborted || !await valid({uid: user.uid, epoch}) || signal.aborted) return false;
       const cancel = () => securityManager.clearSession();
       signal.addEventListener('abort', cancel, {once: true});
       try {
-        await securityManager.ensureVaultKeyMaterial({forceReload: true, promptImmediately: true, signal});
+        await securityManager.ensureVaultKeyMaterial({forceReload: true, promptImmediately: true,
+          allowBiometricForReload: purpose === 'backup-export', signal});
         return !signal.aborted && await valid({uid: user.uid, epoch}) && !signal.aborted;
       } finally {signal.removeEventListener('abort', cancel);}
     }, clearMaterial: () => {if (generation === mountGeneration) securityManager.clearSession();},

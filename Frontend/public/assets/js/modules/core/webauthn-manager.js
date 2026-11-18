@@ -123,8 +123,16 @@ export async function setupWebAuthnPrf(userId, userEmail) {
 /**
  * Ottiene l'output PRF sbloccando la credenziale.
  */
-export async function getPrfOutput(credentialIdBase64, prfSaltBase64, credentialRpId = null) {
+export async function getPrfOutput(credentialIdBase64, prfSaltBase64, credentialRpId = null, {signal} = {}) {
     assertCanonicalProductionOrigin();
+    const assertActive = () => {
+        if (signal?.aborted) {
+            const error = new Error('WebAuthn request aborted');
+            error.name = 'AbortError';
+            throw error;
+        }
+    };
+    assertActive();
     const challenge = crypto.getRandomValues(new Uint8Array(32));
     const rawId = base64ToBuffer(credentialIdBase64);
     const prfSalt = base64ToBuffer(prfSaltBase64);
@@ -154,7 +162,8 @@ export async function getPrfOutput(credentialIdBase64, prfSaltBase64, credential
     };
 
     try {
-        const assertion = await navigator.credentials.get({ publicKey });
+        const assertion = await navigator.credentials.get({ publicKey, ...(signal ? {signal} : {}) });
+        assertActive();
         const extResults = assertion.getClientExtensionResults();
 
         if (!extResults.prf || !extResults.prf.results || !extResults.prf.results.first) {

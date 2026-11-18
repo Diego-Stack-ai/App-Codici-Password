@@ -114,6 +114,108 @@ function securityFixture(overrides = {}) {
     return {context, auth, saves, authObserver, run: code => vm.runInContext(code, context)};
 }
 
+function freshBiometricFixture(overrides = {}) {
+    const calls = {prf: [], restore: 0, master: 0, success: 0};
+    const f = securityFixture({
+        restoreVaultSession: async () => {calls.restore++; return 'fixture-restored';},
+        getPrfOutput: async (...args) => {calls.prf.push(args); return 'fixture-prf';},
+        deriveHkdfKey: async () => 'fixture-aes',
+        decryptVaultSecret: async () => 'fixture-fresh',
+        showInputModal: async () => {calls.master++; return 'fixture-password';},
+        showToast: (_text, kind) => {if (kind === 'success') calls.success++;},
+        logErrorLabel: () => 'fixture-error',
+        fixtureVerify: async () => true,
+        ...overrides
+    });
+    f.run("verifyMasterPassword = fixtureVerify; isNewVault = async () => false; resolveVaultKey = async () => 'fixture-master'; _vaultKeyMaterial = 'fixture-cached';");
+    f.context.localStorage.setItem(f.run("getStorageKey('uid-a')"), JSON.stringify({version: 2,
+        credentialId: 'fixture-id', prfSalt: 'fixture-salt', hkdfSalt: 'fixture-hkdf',
+        encryptedVaultKey: 'fixture-ciphertext', iv: 'fixture-iv'}));
+    f.context.freshOptions = {forceReload: true, promptImmediately: true, allowBiometricForReload: true};
+    return {...f, calls, fresh: () => f.run('ensureVaultKeyMaterial(freshOptions)')};
+}
+
+test('fresh export confirmation performs a new PRF ceremony despite cached Vault material', async () => {
+    const f = freshBiometricFixture();
+    const controller = new AbortController();
+    f.context.freshOptions.signal = controller.signal;
+    assert.equal(await f.fresh(), 'fixture-fresh');
+    assert.equal(await f.fresh(), 'fixture-fresh');
+    assert.equal(f.calls.prf.length, 2);
+    assert.equal(f.calls.prf[0][3].signal, controller.signal);
+    assert.equal(f.calls.restore, 0);
+    assert.equal(f.calls.master, 0);
+    assert.equal(f.saves.length, 2);
+});
+
+for (const flag of [undefined, false]) test(`forced confirmation preserves Master Password default with biometric flag ${flag}`, async () => {
+    const f = freshBiometricFixture();
+    f.context.freshOptions.allowBiometricForReload = flag;
+    assert.equal(await f.fresh(), 'fixture-master');
+    assert.equal(f.calls.prf.length, 0);
+    assert.equal(f.calls.restore, 0);
+    assert.equal(f.calls.master, 1);
+});
+
+for (const condition of ['unconfigured', 'prf-error', 'wrong-master', 'cancel-master']) {
+    test(`fresh export ${condition} requires the complete Master Password alternative`, async () => {
+        const f = freshBiometricFixture({getPrfOutput: async () => {throw Error('fixture-prf-unavailable');}});
+        if (condition === 'unconfigured') f.context.localStorage.removeItem(f.run("getStorageKey('uid-a')"));
+        if (condition === 'wrong-master') f.run('verifyMasterPassword = async () => false');
+        if (condition === 'cancel-master') f.context.showInputModal = async () => {f.calls.master++; return null;};
+        if (condition === 'wrong-master' || condition === 'cancel-master') {
+            await assert.rejects(f.fresh());
+            assert.equal(f.saves.length, 0);
+            assert.equal(f.run('_vaultKeyMaterial'), 'fixture-cached');
+        } else {
+            assert.equal(await f.fresh(), 'fixture-master');
+            assert.equal(f.saves.length, 1);
+        }
+        assert.equal(f.calls.master, 1);
+        assert.equal(f.calls.restore, 0);
+    });
+}
+
+test('fresh PRF confirmation cannot return material after lock during session save', async () => {
+    const entered = deferred(), pending = deferred();
+    const f = freshBiometricFixture({saveVaultSession: () => {entered.resolve(); return pending.promise;}});
+    const rejected = assert.rejects(f.fresh(), {code: 'vault/session-invalidated'});
+    await entered.promise;
+    const successesBeforeLock = f.calls.success;
+    f.run('clearSession()'); pending.resolve(true);
+    await rejected;
+    assert.equal(f.run('_vaultKeyMaterial'), null);
+    assert.equal(f.calls.master, 0); assert.equal(f.calls.success, successesBeforeLock);
+});
+
+test('already aborted fresh export never opens WebAuthn or Master Password', async () => {
+    const f = freshBiometricFixture(), controller = new AbortController();
+    controller.abort(); f.context.freshOptions.signal = controller.signal;
+    await assert.rejects(f.fresh(), {name: 'AbortError'});
+    assert.equal(f.calls.prf.length, 0); assert.equal(f.calls.master, 0);
+    assert.equal(f.saves.length, 0); assert.equal(f.calls.success, 0);
+});
+
+for (const phase of ['getPrfOutput', 'deriveHkdfKey', 'decryptVaultSecret'])
+for (const invalidation of ['abort', 'clearSession()', 'softLock()', 'change-uid', 'auth-logout']) {
+    test(`fresh PRF ${phase} ignores a late result after ${invalidation}`, async () => {
+        const entered = deferred(), pending = deferred(), controller = new AbortController();
+        const f = freshBiometricFixture({[phase]: () => {entered.resolve(); return pending.promise;}});
+        f.context.freshOptions.signal = controller.signal;
+        const rejected = assert.rejects(f.fresh(), invalidation === 'abort'
+            ? {name: 'AbortError'} : {code: 'vault/session-invalidated'});
+        await entered.promise;
+        if (invalidation === 'abort') controller.abort();
+        else if (invalidation === 'change-uid') {f.auth.currentUser = {uid: 'uid-b'}; f.authObserver(f.auth.currentUser);}
+        else if (invalidation === 'auth-logout') {f.auth.currentUser = null; f.authObserver(null);}
+        else f.run(invalidation);
+        pending.resolve('fixture-late');
+        await rejected;
+        assert.equal(f.saves.length, 0); assert.equal(f.calls.success, 0); assert.equal(f.calls.master, 0);
+        assert.equal(f.run('_vaultKeyMaterial'), invalidation === 'abort' ? 'fixture-cached' : null);
+    });
+}
+
 test('read-only unlock predicate requires current identity, RAM key and unexpired unlocked session', () => {
     let expiry = null;
     const f = securityFixture({getVaultSessionExpiry: () => expiry});

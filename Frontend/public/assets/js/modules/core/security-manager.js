@@ -9,7 +9,7 @@ import {vaultFrameClient, confirmFrameAction, frameMediaLifetime} from './vault-
 import {authSessionFence} from '../../auth-session-fence.js';
 import { encrypt, decrypt, isEncryptedValue, generateVaultKey, createVaultKeyring, wrapVaultKey, unwrapVaultKey, createVaultVerifier, verifyVaultVerifier } from './crypto-utils.js';
 import { showInputModal, showToast, showConfirmModal } from '../../ui-core-v129.js';
-import { db, auth } from '../../firebase-config.js?v=1.2.282';
+import { db, auth } from '../../firebase-config.js?v=1.2.283';
 import { doc, setDoc, updateDoc, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';
@@ -32,7 +32,12 @@ function invalidatePendingUnlock() {
     _unlockPromise = null;
 }
 
-function assertCurrentSession(uid, generation) {
+function assertCurrentSession(uid, generation, signal) {
+    if (signal?.aborted) {
+        const error = new Error('Sblocco Vault annullato.');
+        error.name = 'AbortError';
+        throw error;
+    }
     if (!uid || auth.currentUser?.uid !== uid || generation !== _sessionGeneration) {
         const error = new Error('Sblocco Vault scaduto. Riprova.');
         error.code = 'vault/session-invalidated';
@@ -351,11 +356,12 @@ async function ensureVaultKeyMaterialInternal(options = {}) {
     const generation = _sessionGeneration;
     const forceReload = typeof options === 'boolean' ? options : !!options.forceReload;
     const promptImmediately = typeof options === 'object' && options.promptImmediately === true;
+    const allowBiometricForReload = typeof options === 'object' && options.allowBiometricForReload === true;
 
     if (_vaultKeyMaterial && !forceReload) return _vaultKeyMaterial;
 
     const uid = auth.currentUser?.uid;
-    const assertCurrent = () => assertCurrentSession(uid, generation);
+    const assertCurrent = () => assertCurrentSession(uid, generation, options.signal);
     assertCurrent();
     if (!forceReload && uid) {
         const sessionKey = await restoreVaultSession(uid);
@@ -369,8 +375,8 @@ async function ensureVaultKeyMaterialInternal(options = {}) {
         }
     }
 
-    if (!forceReload) {
-        const recovered = await tryBiometricUnlock();
+    if (!forceReload || allowBiometricForReload) {
+        const recovered = await tryBiometricUnlock({signal: options.signal});
         assertCurrent();
         if (recovered) {
             _vaultKeyMaterial = recovered;
@@ -486,9 +492,12 @@ export async function resetVault() {
     } finally {if (cleanupToken) finishFrameCleanup(cleanupToken);}
 }
 
-async function tryBiometricUnlock() {
+async function tryBiometricUnlock({signal} = {}) {
     const uid = auth.currentUser?.uid;
     if (!uid) return null;
+    const generation = _sessionGeneration;
+    const assertCurrent = () => assertCurrentSession(uid, generation, signal);
+    assertCurrent();
     
     const encryptedSecret = localStorage.getItem(getStorageKey(uid));
     
@@ -502,9 +511,12 @@ async function tryBiometricUnlock() {
         const data = JSON.parse(encryptedSecret);
         if (![1, 2].includes(data.version) || !data.credentialId || !(data.encryptedVaultKey || data.encryptedMasterKey)) return null;
 
-        const prfOutput = await getPrfOutput(data.credentialId, data.prfSalt, data.rpId || null);
+        const prfOutput = await getPrfOutput(data.credentialId, data.prfSalt, data.rpId || null, {signal});
+        assertCurrent();
         const aesKey = await deriveHkdfKey(prfOutput, data.hkdfSalt);
+        assertCurrent();
         const secret = await decryptVaultSecret(data.encryptedVaultKey || data.encryptedMasterKey, data.iv, aesKey);
+        assertCurrent();
         
         // VERIFY WITH VAULT VERIFIER
         if (data.version === 2) {
@@ -513,16 +525,24 @@ async function tryBiometricUnlock() {
         }
 
         const verificationResult = await verifyMasterPassword(secret, uid);
+        assertCurrent();
         
         if (verificationResult === true) {
-            const vaultKey = await resolveVaultKey(secret, uid, await isNewVault(uid));
+            const isNew = await isNewVault(uid);
+            assertCurrent();
+            const vaultKey = await resolveVaultKey(secret, uid, isNew);
+            assertCurrent();
             showToast('Accesso Biometrico Confermato', 'success');
             return vaultKey;
         } else if (verificationResult === 'LEGACY_MIGRATION_NEEDED') {
             const migrated = await migrateLegacyVault(secret, uid);
+            assertCurrent();
             if (migrated) {
+                const isNew = await isNewVault(uid);
+                assertCurrent();
+                const vaultKey = await resolveVaultKey(secret, uid, isNew);
+                assertCurrent();
                 showToast('Accesso Biometrico Confermato (Migrato)', 'success');
-                const vaultKey = await resolveVaultKey(secret, uid, await isNewVault(uid));
                 return vaultKey;
             }
         }
@@ -531,6 +551,7 @@ async function tryBiometricUnlock() {
         return null;
         
     } catch (e) {
+        assertCurrent();
         if (e.message === 'NETWORK_REQUIRED_FOR_SECURITY_SYNC') {
             showToast('Connessione necessaria per verifica sicurezza offline.', 'warning');
         } else {
