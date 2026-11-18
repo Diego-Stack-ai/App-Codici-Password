@@ -1,5 +1,21 @@
 # Incarico corrente
 
+<a id="urgenze-home-1284-incarico-2026-11-18"></a>
+
+## Ordine del 18/11 — Urgenze Home, nuova versione e pubblicazione
+
+Diego ordina la correzione del triangolo e delle icone delle singole scadenze nella sola card Urgenze della Home: rosso di stato coerente con le card interne, tutti i sette temi, Chiaro/Scuro e Classica/Nuova. Autorizza nuova versione 1.2.284, PR, riesame indipendente, CI verde, merge con testa attesa, Hosting protetto e verifica pubblica, con aggiornamento degli MD esistenti e GitHub. Il precedente limite al solo controllo fisico è superato per questo delta.
+
+Root unico esecutore e supporti in lettura. Conservare glifi salvati, dati, badge, sfondi, link e icone delle Scadenze ordinarie; nessuna modifica Auth/Vault/cornice o backend/policy. Confezione canonica, CI PR/master e validate Hosting sul medesimo SHA, approvazione production secondo la delega già concessa dopo i gate verdi, poi verifica integrale e ricevuta. I riscontri fisici della 1.2.283 non attestano il correttivo ancora non pubblicato; la conferma generale «tutti i colori sono ok» non diventa automaticamente una matrice fisica di 28 PASS.
+
+<a id="telefono-grafica-incarico-2026-11-18"></a>
+
+## Ordine del 18/11 — punto 1 confermato, passare ai controlli grafici fisici
+
+Diego conferma «1 ok passiamo al 2»: registrare il riscontro complessivo sul punto 1 della scaletta della sessione, relativo ad accesso/sblocco Face ID e contatti nella 1.2.283, e avviare il punto 2, controllo a vista di card Scadenze/rosso, QR, popup e contenuti tagliati. Per il nuovo giro dichiara app dalla schermata Home, Blu, Chiaro, Nuova. [Evidenza e limiti](../evidenze/COLLAUDI.md#telefono-1283-riscontro-grafica-2026-11-18).
+
+Controllo guidato con osservazioni di Diego, senza dati nuovi o operazioni di modifica/cancellazione per completare i casi. Separare PASS riferiti, difetti e casi non osservati; non trasferire il riscontro a Master fallback, altre piattaforme o all'intera matrice grafica. Aggiornare i registri esistenti; il passaggio al punto 2 non avvia un nuovo rilascio o un lotto sulla cornice/sicurezza. Root unico esecutore, supporto in lettura; niente nuove pubblicazioni o operazioni backend dedotte dal controllo.
+
 <a id="rilascio-1283-pubblico-incarico-2026-11-18"></a>
 
 ## Ordine del18/11 — pubblicazione eseguita e ricevuta

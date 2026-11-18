@@ -56,7 +56,14 @@ test('typography mapping rejects invalid sources and unknown translated labels',
 
 test('shared-base liveries connect all 22 pages, selectors, roles, producers and tests without inventing observations',()=>{
   const result=buildLiveryTopology();assert.deepEqual(result.errors,[]);
-  assert.deepEqual(result.summary,{pages:22,variants:2,components:9,roles:17});
+  assert.deepEqual(result.summary,{pages:22,variants:2,components:10,roles:18});
+  const urgencyId='ui:livery-component:home-urgency',urgency=result.edges.filter(edge=>edge.source===urgencyId);
+  assert.deepEqual(result.edges.filter(edge=>edge.target===urgencyId&&edge.relation==='ui_declares_livery_component').map(edge=>edge.source),['ui:page:home_page.html']);
+  for(const file of ['Frontend/public/home_page.html','Frontend/public/assets/js/modules/home/home-deadline-dashboard.js'])assert.ok(urgency.some(edge=>edge.relation==='ui_rendered_by'&&edge.target==='ui:source:'+file));
+  assert.equal(urgency.filter(edge=>edge.relation==='ui_declares_selector').length,2);
+  assert.deepEqual(urgency.find(edge=>edge.relation==='ui_expects_color_role'&&edge.target==='ui:livery-color-role:--home-urgency-ink')?.graphics,['classic','new']);
+  assert.ok(urgency.some(edge=>edge.relation==='ui_declares_test'&&edge.target==='ui:source:tests/ui-livery.browser.test.mjs'));
+  assert.equal(result.nodes.find(node=>node.id===urgencyId)?.test_name,'individual deadline identities follow both liveries without recoloring expired alerts or replacing saved glyphs');
   const ids=new Set(result.nodes.map(node=>node.id));
   for(const edge of result.edges){assert.ok(ids.has(edge.source)&&ids.has(edge.target));assert.equal(edge.observed,false);assert.equal(edge.declaration,'CONTRACT');}
   for(const component of result.nodes.filter(node=>node.file_type==='ui_livery_component')){

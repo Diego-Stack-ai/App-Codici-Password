@@ -1,5 +1,21 @@
 # Programma
 
+<a id="urgenze-home-1284-programma-2026-11-18"></a>
+
+## Urgenze Home — seguito del controllo fisico, 18/11/2026
+
+Diego riferisce positivamente tutti i colori ma segnala che nella card Urgenze della Home triangolo e icone seguono la palette mentre all'interno sono rossi. Il nuovo [ordine](INCARICO_CORRENTE.md#urgenze-home-1284-incarico-2026-11-18) autorizza il correttivo e il rilascio 1.2.284: regole circoscritte → matrice sette temi/Chiaro-Scuro/due grafiche → confezione e riesame immutabile → CI PR/merge → CI master e Hosting protetto sullo stesso SHA → verifica pubblica e ricevuta. [Esiti effettivi](../evidenze/COLLAUDI.md#urgenze-home-1284-collaudi-2026-11-18).
+
+Il seguito conserva i riscontri fisici precedenti con i loro limiti; nessuna chiusura automatica dell'intera RG-04, degli altri dispositivi o della consegna di Claude. Non richiede operazioni backend o cambi alla cornice.
+
+<a id="telefono-grafica-programma-2026-11-18"></a>
+
+## Dopo 1.2.283 — riscontro del telefono e punto 2 grafico
+
+Diego conferma il punto 1 della scaletta della sessione (accesso/sblocco Face ID e contatti) e ordina di passare al punto 2. Il controllo fisico guidato, con app dalla schermata Home, comprende Home e card Scadenze/Scadute/Archiviate, rosso delle scadute, ingrandimento/chiusura dei QR e geometria/chiusura dei popup contatto privato/azienda. Procede per tema, mantenendo distinte Chiaro/Scuro e Nuova/Classica; per i colori successivi al Blu si raggruppa la domanda sulle quattro combinazioni, ammettendo riscontri parziali dichiarati. Risposte ed esiti aggiornati per caso hanno sede nel [registro delle osservazioni](../evidenze/COLLAUDI.md#telefono-1283-riscontro-grafica-2026-11-18), senza replicarne qui ogni checkpoint.
+
+La conferma complessiva del punto 1 non chiude la matrice grafica o l'alternativa Master. Gli altri contesti restano da osservare; il lavoro sulla cornice, sicurezza/recupero, prodotto, ciclo finale e la consegna separata di Claude conservano ordine e limiti della [scaletta](#scaletta-chiusura-2026-11-17). Nessun nuovo deploy necessario per questo controllo.
+
 <a id="rilascio-1283-pubblico-programma-2026-11-18"></a>
 
 ## Contatti1.2.283 — pubblicazione conclusa

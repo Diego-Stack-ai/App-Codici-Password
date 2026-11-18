@@ -1,5 +1,13 @@
 # Rilascio
 
+<a id="urgenze-home-1284-rilascio-2026-11-18"></a>
+
+## Candidata 1.2.284 — Urgenze Home, solo Hosting
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#urgenze-home-1284-incarico-2026-11-18): correzione delle icone e registri, snapshot pre-bump, script canonico284, guida16/reviewed284, offline e inventario QA rigenerati. Confronto dopo normalizzazione delle sole versioni/EOL senza differenze funzionali. Nessuna soglia modificata.
+
+Sequenza richiesta: riesame indipendente dello SHA finale e CI PR completa verde → merge con testa attesa → CI master e validate del workflow manuale sullo stesso master fissato, scope hosting verificato → production protetto dopo entrambi verdi e master invariato, secondo la delega della sessione → verifica pubblica integrale manifest/hash/intestazioni/probe e GET indipendenti → ricevuta MD/GitHub senza un ulteriore Hosting. Nessuna modifica workflow, credenziali, protezioni, Auth, backend, Rules, Functions, Storage, policy o cornice. [Evidenze](../evidenze/COLLAUDI.md#urgenze-home-1284-collaudi-2026-11-18).
+
 <a id="rilascio-1283-pubblico-procedura-2026-11-18"></a>
 
 ## APP 1.2.283 — procedura eseguita

@@ -1,5 +1,13 @@
 # Ambiente di test
 
+<a id="urgenze-home-1284-ambiente-2026-11-18"></a>
+
+## Urgenze Home — banco 1.2.284
+
+Il banco usa createTourHarness e produttori reali di Home/Scadenze contro memoria sintetica locale, senza Auth/Vault reali o scritture esterne. Il test delle identità verifica RGB indipendenti dal token, contrasto almeno3:1, icone ordinarie, glifi/conteggi e una mutazione negativa che rimette le Urgenze nel tema. Matrice: sette palette, Chiaro/Scuro, Classica/Nuova e320/1280; risultati e limiti nella [ricevuta locale](../evidenze/COLLAUDI.md#urgenze-home-1284-collaudi-2026-11-18).
+
+Dipendenze già installate riusate tramite collegamento locale temporaneo e Chrome headless; nessuna installazione, espansione di credenziali o prova fisica del correttivo dedotta dal banco. I riscontri telefonici sulla283 restano separati dalla284.
+
 <a id="rilascio-1283-pubblico-ambiente-2026-11-18"></a>
 
 ## 1.2.283 — pubblicazione e limiti del banco

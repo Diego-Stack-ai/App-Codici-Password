@@ -1,5 +1,43 @@
 # Collaudi
 
+<a id="urgenze-home-1284-collaudi-2026-11-18"></a>
+
+## Urgenze Home 1.2.284 — correttivo locale e confezione
+
+Base 2d725ef97e1e51cd37a081b5a98c22f60611641c, ramo codex/home-urgency-red-1284-20261118. Il riscontro di Diego sulle Urgenze è riprodotto dal test reale delle identità Scadenze: prima della correzione il triangolo in Blu/Chiaro/Classica ha la tinta del tema invece dell'RGB rosso atteso; dopo la correzione il banco passa. Regole locali in core_ui.css: --home-urgency-ink e override di --card-icon-ink sulla sola .area-urgenze. Nessuna modifica dei produttori o dei dati.
+
+La regressione usa la Home e la pagina Scadenze effettive con repository sintetico: 56 contesti Home (7 palette × 2 aspetti × 2 grafiche × 320/1280), 56 contesti elenco e 56 archiviate. Verifica i rossi espliciti, contrasto icone almeno3:1, colori ordinari, simboli salvati/fallback e conteggi; il negativo che forza Urgenze al tema deve essere rifiutato. La verifica di superficie/badge/link confronta prima e dopo quella mutazione negativa, non uno screenshot della versione precedente.
+
+Esiti locali acquisiti: regressione RED prima del CSS e GREEN dopo; gruppo palette/colori/topologia 34/34 PASS; banco browser generale sulla confezione finale 36/36 PASS e regressione mirata finale 1/1 PASS, senza sommare le esecuzioni sovrapposte come test unici. Guida, offline, budget prestazioni (31 pagine), sintassi JS, riferimenti statici, CSS, topologia e documentazione (12/12) PASS. Il grafo dichiara ora 10 componenti/18 ruoli, collegando la card Home ai due produttori, alle regole, alle due grafiche e alla regressione nominata, sempre come dichiarazione e non osservazione.
+
+Confezione canonica 1.2.284: 307 riferimenti in112 file, guida contentVersion16 invariata/reviewed284, offline61 export/347 risorse. Snapshot completo pre-confezione e confronto successivo: zero aggiunte/rimozioni o delta funzionali dopo normalizzazione delle sole versioni/EOL. CI dello SHA finale, riesame immutabile, merge, Hosting e verifica pubblica ancora da acquisire; produzione 1.2.283 invariata. [Procedura](../regole/RILASCIO.md#urgenze-home-1284-rilascio-2026-11-18).
+
+<a id="telefono-1283-riscontro-grafica-2026-11-18"></a>
+
+## Telefono 1.2.283 — riscontro di Diego e avvio dei residui grafici
+
+Il 18/11, dopo la pubblicazione verificata sotto, Diego risponde «1 ok passiamo al 2» alla scaletta della sessione. Il punto 1 comprendeva accesso/sblocco Face ID, comando contatto uniforme nelle Tessere privata e aziendale, salvataggio/condivisione e nome del file. Registrato **PASS riferito da Diego sul proprio telefono**, come riscontro complessivo di quel punto; non è una misura strumentale della PRF, una prova dell'alternativa Master o delle singole destinazioni/API native.
+
+Per il successivo giro grafico Diego identifica **app avviata dalla schermata Home, Blu, Chiaro, Nuova**. Modello/versione del telefono e motore browser non rilevati; non si attribuisce una versione Safari o un esito ad Android. Il contesto appena dichiarato non viene esteso retroattivamente al PASS complessivo precedente, per cui non erano specificati tutti i parametri.
+
+Il punto 2 avvia il controllo fisico RG-01/RG-04. Completati come riscontri riferiti i casi TEL283-G01–G09: temi Blu e Rosso in Chiaro e Scuro, Nuova e Classica, con card e date leggibili, rosso delle scadute distinguibile, ingrandimento/chiusura dei QR e geometria/chiusura dei popup contatto OK nelle due Tessere. Le risposte effettive sono registrate per caso sotto. Alla domanda sul Verde Diego riferisce poi in generale «tutti i colori sono ok», segnalando l'incoerenza delle icone Urgenze Home con ogni tema; non dettaglia le combinazioni dei cinque colori rimanenti. Nessuna matrice fisica di 28 PASS, misura strumentale o scansione QR reale viene dedotta da quel riscontro generale.
+
+| Caso | Percorso e osservazione | Esito corrente |
+|---|---|---|
+| TEL283-G01 | Home → Scadenze: card, testi, date e assenza di tagli | PASS riferito da Diego: «Tutto leggibile, nessun taglio»; nessuna conferma distinta della presenza di scadute |
+| TEL283-G02 | Elenco → Scadute/Archiviate, dove disponibili: testi e comandi interi, scorrimento fino all'ultima card e rosso delle scadute leggibile | PASS riferito da Diego: «Entrambe OK, rosso leggibile» |
+| TEL283-G03 | Tessera digitale privata/azienda → ingrandimento QR → Chiudi: codice intero, chiusura raggiungibile e ritorno alla pagina | PASS riferito da Diego: «Entrambe OK» |
+| TEL283-G04 | Pannello contatto privato/azienda → Chiudi: nome e pulsanti leggibili, nessun taglio o pulsante enorme; nessuna nuova conferma di esportazione necessaria | PASS riferito da Diego: «Entrambi OK» |
+| TEL283-G05 | Confronto Blu/Chiaro/Classica: Home e card Scadenze/Scadute/Archiviate, leggibilità testi/date/rosso e assenza di tagli | PASS riferito da Diego: «Classica OK» |
+| TEL283-G06 | Blu/Chiaro/Classica: ingrandimento/chiusura QR e popup contatto nelle Tessere privata/azienda, contenuti interi e comandi raggiungibili | PASS riferito da Diego: «Tutto OK in entrambe» |
+| TEL283-G07 | Blu/Scuro/Nuova: card Scadenze/Scadute/Archiviate, leggibilità testi/rosso, ingrandimento QR e popup contatto nelle due Tessere, contenuti interi e chiusura raggiungibile | PASS riferito da Diego: «Tutto OK anche in Scuro · Nuova» |
+| TEL283-G08 | Blu/Scuro/Classica: stesso giro card, rosso, QR e popup contatto delle due Tessere | PASS riferito da Diego: «Tutto OK anche in Scuro · Classica» |
+| TEL283-G09 | Rosso, Chiaro/Scuro × Nuova/Classica: card Scadenze e rosso delle scadute, QR ingranditi e popup contatto nelle due Tessere, leggibilità/ingombro/chiusura | PASS riferito da Diego: «Rosso OK in tutte e quattro» |
+| TEL283-G10 | Verde e successivo riscontro generale sui colori | Diego riferisce «tutti i colori sono ok», con una sola incoerenza Urgenze Home; le combinazioni dei cinque colori rimanenti non sono dettagliate singolarmente |
+| TEL283-G11 | Urgenze Home: triangolo e icone delle scadenze seguono il tema mentre internamente sono rosse | Difetto riferito da Diego per tutti i temi; correzione autorizzata e riprodotta nel banco della candidata284 sopra, non ancora attestata sul telefono |
+
+Raccogliere per ogni caso OK, difetto con pagina/azione, oppure NON OSSERVATO se manca un elemento adatto; nessuna creazione, modifica o cancellazione di dati per completare il giro. Non occorrono nomi, contatti o QR personali nel rapporto. Un giro fisico vale per il contesto dichiarato, senza estenderlo agli altri temi, aspetti, grafiche, browser/dispositivi o alla scansione QR reale. [Programma](../progetto/PROGRAMMA.md#telefono-grafica-programma-2026-11-18), [mandato](../progetto/INCARICO_CORRENTE.md#telefono-grafica-incarico-2026-11-18).
+
 <a id="rilascio-1283-pubblico-2026-11-18"></a>
 
 ## APP 1.2.283 — ricevuta di pubblicazione verificata

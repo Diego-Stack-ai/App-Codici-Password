@@ -3,6 +3,20 @@
   "source": "Decisioni giro #313; revisione Codex 16/11/2026. Ogni eccezione ammette solo selettore, proprietà e valore esatti; nessuna esenzione per antenato o nome generico.",
   "exceptions": [
     {
+      "file": "core_ui.css",
+      "selector": "body.home-page .area-urgenze",
+      "prop": "--home-urgency-ink",
+      "value": "#a61b1b",
+      "reason": "scadenza scaduta (valutazione a vista di Diego)"
+    },
+    {
+      "file": "core_ui.css",
+      "selector": ".dark body.home-page .area-urgenze",
+      "prop": "--home-urgency-ink",
+      "value": "#fecaca",
+      "reason": "scadenza scaduta (valutazione a vista di Diego)"
+    },
+    {
       "file": "accesso.css",
       "selector": ".password-requirements li.is-valid",
       "prop": "color",

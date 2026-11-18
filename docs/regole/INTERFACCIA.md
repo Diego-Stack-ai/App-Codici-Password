@@ -1,5 +1,13 @@
 # Interfaccia
 
+<a id="urgenze-home-1284-ui-2026-11-18"></a>
+
+## Urgenze Home — rosso funzionale in entrambe le grafiche
+
+Ordine di Diego del18/11: nella sola .home-page .area-urgenze, triangolo e glifi delle righe sono rossi di stato in tutte le sette palette, Chiaro/Scuro e Classica/Nuova. Token locale --home-urgency-ink: #A61B1B in Chiaro, #FECACA in Scuro, come il rosso delle scadute interne; --card-icon-ink viene riassegnato solo nel contenitore Urgenze. Le icone funzionali non ricevono il bicolore o la saturazione aggiuntiva. Glifi salvati/default, righe, conteggi, link, superfici e card Scadenze ordinarie sono conservati.
+
+scripts/ui-livery-contract.json collega homeUrgency, selettori, produttori, stylesheet, ruolo e regressione nominata; il grafo li dichiara per entrambe le varianti. scripts/ui-color-decisions.json registra il triangolo statico e scripts/ui-fixed-color-exceptions.json ammette soltanto le due definizioni esatte di colore. Nessuna deroga per antenato o allargamento dei controlli. [Decisione](../progetto/DECISIONI.md#urgenze-home-1284-decisione-2026-11-18), [prove e stato](../evidenze/COLLAUDI.md#urgenze-home-1284-collaudi-2026-11-18).
+
 <a id="rilascio-1283-pubblico-ui-2026-11-18"></a>
 
 ## Contatti — distribuiti nella1.2.283

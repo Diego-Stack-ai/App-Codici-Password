@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "source": "Registro Codex sulla #308 (14/11/2026): 171 occorrenze in 45 gruppi, 131 Tema e 40 Funzione. Ordine di Diego: entrambe le grafiche. Aggiornato il 15/11/2026 (incarico #313): rosso solo sui comandi che cancellano o fanno uscire; Scadenze, Urgenze e avvisi ambra passano al tema.",
+  "source": "Registro Codex sulla #308 (14/11/2026), seguito #313. Ordine del 18/11/2026: eccezione rossa per triangolo e glifi delle righe nella card Urgenze Home, entrambe le grafiche; le altre superfici e icone ordinarie seguono la palette.",
   "scope": "Markup statico delle pagine con i CSS reali, script esclusi. Contenuti generati dopo il login, hover/focus e modali chiusi non sono coperti da questo registro.",
   "theme": [
     {
@@ -37,7 +37,7 @@
       "count": 4,
       "property": "backgroundImage",
       "role": "--rev-hub-gradient",
-      "reason": "Privato, Azienda, Scadenze e Urgenze: decisione di Diego del 15/11/2026, tutto in tema; le card si distinguono per icona e testo."
+      "reason": "Sfondi Privato, Azienda, Scadenze e Urgenze nella palette; ordine 18/11/2026: solo le icone della card Urgenze sono rosse di stato."
     },
     {
       "id": "configuration_section_icons",
@@ -172,6 +172,22 @@
     "reason": "Icone di argomento delle pagine legali, inclusa report_problem: testi legali e avviso «In sviluppo» invariati."
   },
   "function": [
+    {
+      "id": "home-urgency-warning",
+      "page": "home_page.html",
+      "selector": ".area-urgenze .matrix-icon-box > .material-symbols-outlined",
+      "count": 1,
+      "property": "color",
+      "hue": "red",
+      "reason": "Urgenze Home: triangolo rosso di stato, ordine di Diego 18/11/2026; righe dinamiche nel registro livree.",
+      "paints": [
+        {
+          "selector": ".area-urgenze .matrix-icon-box > .material-symbols-outlined",
+          "properties": ["color"],
+          "hue": "red"
+        }
+      ]
+    },
     {
       "id": "archive-empty-trash",
       "page": "archivio_account.html",

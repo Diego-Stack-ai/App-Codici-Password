@@ -421,6 +421,7 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
     {id:'decorations',pages,selectors:['.archive-watermark','.header-title::before','.page-container::after'],roles:[],producers:[registry.decorationsSource]},
     {id:'card-glyphs',pages,selectors:registry.cardGlyphs,roles:['--card-icon-ink','--theme-ink','--companion-card-ink'],producers:registry.cardProducers},
     {id:'filled-card-glyphs',pages,selectors:registry.filledCardGlyphs,roles:['--companion-card-fill','--theme-fill'],producers:registry.cardProducers},
+    {id:'home-urgency',pages:[registry.homeUrgency?.page],selectors:registry.homeUrgency?.selectors,roles:[registry.homeUrgency?.role],producers:registry.homeUrgency?.producers,styles:registry.homeUrgency?.styles,test:registry.homeUrgency?.test},
     {id:'footer-ink',pages,selectors:['#search-status','.footer-settings-link'],roles:[registry.footer?.inkRole,'--theme-ink','--text-primary'],producers:[registry.footer?.producer]},
     {id:'home-actions',pages:['home_page.html'],selectors:['.fab-group .btn-fab-privato','.fab-group .btn-fab-scadenza','.fab-group .btn-fab-azienda'],roles:[registry.footer?.fillRole,registry.footer?.deepRole,'--theme-fill','--theme-fill-deep'],producers:[registry.footer?.homeProducer]},
     {id:'profile-guide',pages:['profilo_privato.html'],selectors:[registry.footer?.guide],roles:[registry.footer?.inkRole,'--text-primary'],producers:[registry.footer?.producer]},
@@ -541,7 +542,7 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
       if(typeof role!=='string'||!role.startsWith('--')){errors.push(`liveries: ${component.id} has an invalid role`);continue;}
       const definitions=roleSources.filter(entry=>entry.text.includes(role+':'));
       if(!definitions.length)errors.push(`liveries: ${component.id} has unknown color role ${role}`);
-      const graphics=role.startsWith('--companion-')?['new']:component.native||role==='--card-icon-ink'?['classic','new']:['classic'];
+      const graphics=role.startsWith('--companion-')?['new']:component.native||component.id==='home-urgency'||role==='--card-icon-ink'?['classic','new']:['classic'];
       roles.add(role);const roleId=collector.addNode(uiNode(`ui:livery-color-role:${role}`,role,'ui_color_role',declared));collector.addEdge(uiEdge(id,roleId,'ui_expects_color_role',{...declared,graphics}));
       for(const definition of definitions)collector.addEdge(uiEdge(roleId,definition.id,'ui_role_defined_in',declared));
     }

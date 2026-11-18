@@ -63,6 +63,31 @@
     ".matrix-icon-box:is(.icon-blue,.icon-purple) > .material-symbols-outlined",
     ".account-icon-box > span.account-default-logo"
   ],
+  "homeUrgency": {
+    "page": "home_page.html",
+    "selectors": [
+      ".area-urgenze .matrix-icon-box > .material-symbols-outlined",
+      "#expired-list-container .item-icon-box > .material-symbols-outlined"
+    ],
+    "role": "--home-urgency-ink",
+    "scopedOverride": "--card-icon-ink",
+    "colors": {
+      "light": "#a61b1b",
+      "dark": "#fecaca"
+    },
+    "producers": [
+      "Frontend/public/home_page.html",
+      "Frontend/public/assets/js/modules/home/home-deadline-dashboard.js"
+    ],
+    "styles": [
+      "Frontend/public/assets/css/core_ui.css"
+    ],
+    "test": {
+      "file": "tests/ui-livery.browser.test.mjs",
+      "name": "individual deadline identities follow both liveries without recoloring expired alerts or replacing saved glyphs"
+    },
+    "scope": "Solo triangolo e glifi delle righe nella card Urgenze; Scadenze ordinarie restano nella livrea. Sfondi, badge, link e glifi salvati conservati."
+  },
   "footer": {
     "producer": "Frontend/public/assets/js/components-v129.js",
     "homeProducer": "Frontend/public/assets/js/modules/home/home.js",
