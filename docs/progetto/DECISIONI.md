@@ -1,5 +1,13 @@
 # Decisioni
 
+<a id="urgenze-home-1284-decisione-2026-11-18"></a>
+
+## 18/11/2026 — eccezione rossa delle icone Urgenze Home
+
+Su riscontro fisico di Diego e successivo ordine esplicito, triangolo e glifi delle righe nella sola card Urgenze della Home usano lo stesso rosso funzionale leggibile delle card interne: #A61B1B Chiaro / #FECACA Scuro, in tutti i sette temi e in entrambe le grafiche. Questa scelta supera per quei glifi la precedente assegnazione alla palette; sfondi, badge, altre card e identità ordinarie restano nella livrea. Non si ricolora la generale card Scadenze.
+
+Autorizzati nuova versione 1.2.284, PR/merge/Hosting con gate e aggiornamento dei registri esistenti. [Mandato](INCARICO_CORRENTE.md#urgenze-home-1284-incarico-2026-11-18), [contratto UI](../regole/INTERFACCIA.md#urgenze-home-1284-ui-2026-11-18).
+
 <a id="rilascio-1283-pubblico-decisione-2026-11-18"></a>
 
 ## 18/11/2026 — pubblicazione283 autorizzata eseguita

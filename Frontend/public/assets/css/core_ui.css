@@ -1447,6 +1447,16 @@ html[data-ui-graphics="new"] body[data-ui-revision] {
     --card-icon-ink: var(--companion-card-ink);
 }
 
+/* Urgenze Home: rosso di stato come nelle card scadute, in entrambe le grafiche. */
+body.home-page .area-urgenze {
+    --home-urgency-ink: #a61b1b;
+    --card-icon-ink: var(--home-urgency-ink);
+}
+
+.dark body.home-page .area-urgenze {
+    --home-urgency-ink: #fecaca;
+}
+
 html[data-ui-graphics="new"] body[data-ui-revision] :is(.search-status, .footer-settings-link, #profile-guide-button),
 html[data-ui-graphics="new"] body[data-ui-revision] .base-header .btn-icon-header:not(#header-logout-btn) {
     color: var(--companion-ink);

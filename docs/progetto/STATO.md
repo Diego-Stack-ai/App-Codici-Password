@@ -2,13 +2,23 @@
 
 <a id="stato-corrente"></a>
 
+<a id="urgenze-home-1284-stato-2026-11-18"></a>
+
+## Candidata 1.2.284 — icone Urgenze Home
+
+Preparata localmente su ordine di Diego la correzione delle sole icone nella card Urgenze: triangolo e righe usano il rosso di stato #A61B1B in Chiaro / #FECACA in Scuro, tutte le sette palette e le due grafiche. Il token locale --home-urgency-ink non altera la provenienza del distinto --deadline-expired-ink della pagina Scadenze. Scadenze ordinarie, badge, sfondi, link e glifi conservati.
+
+Confezione 1.2.284 coerente, 307 riferimenti, guida16/reviewed284 e offline61/347. Registri e grafo aggiornati; [evidenze e gate](../evidenze/COLLAUDI.md#urgenze-home-1284-collaudi-2026-11-18). Produzione ancora 1.2.283 fino a merge, CI/Hosting protetto e verifica pubblica; nessun PASS fisico della candidata dedotto dal giro precedente.
+
 <a id="rilascio-1283-pubblico-stato-2026-11-18"></a>
 
 ## APP 1.2.283 — online e verificata
 
 Online **1.2.283**, sorgente **5d51f9f5ad2f4a1806b0ffcf9f706eee8937ae9b**, sourceDirty=false. PR #332 unita; CI #1216/#1217 e Hosting #1218 SUCCESS. Approvazione production manuale di Diego; pubblicazione solo Hosting conclusa il18/11 alle **19:01:30 CET**. Verifica indipendente **367 hash/41 profili/3 probe PASS** alle19:03:32 CET e sei GET separati PASS alle19:05:05 CET. [Ricevuta completa](../evidenze/COLLAUDI.md#rilascio-1283-pubblico-2026-11-18).
 
-Distribuiti pulsante contatto uniforme privato/azienda e nuova PRF nella conferma backup-export quando configurata; Master verificata come alternativa, proof e revoche conservate. Mappa e test collegati; guida16/reviewed283. Le attese e i limiti locali sotto sono checkpoint storici. Resta la prova fisica di Diego su Face ID e contatti, oltre a RG-01/RG-04 e agli altri lotti della scaletta. Il duplicato #1219 non è la pubblicazione attestata; gestione annotata nella ricevuta. La chiusura corrente aggiorna soltanto MD/GitHub e conserva il runtime distribuito.
+Distribuiti pulsante contatto uniforme privato/azienda e nuova PRF nella conferma backup-export quando configurata; Master verificata come alternativa, proof e revoche conservate. Mappa e test collegati; guida16/reviewed283. Le attese e i limiti locali sotto sono checkpoint storici.
+
+Il 18/11 Diego conferma il punto 1 della sessione su Face ID e contatti sul proprio telefono e avvia il punto 2, controllo fisico grafico dall'app della schermata Home. Riscontri, contesti effettivamente provati e domande ancora pendenti sono mantenuti nel [registro delle osservazioni](../evidenze/COLLAUDI.md#telefono-1283-riscontro-grafica-2026-11-18), per evitare che una sintesi trasferisca PASS ad altre combinazioni. Gli altri dispositivi, lotti e il runtime distribuito sono conservati.
 
 
 <a id="rilascio-1283-stato-2026-11-18"></a>

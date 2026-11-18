@@ -203,14 +203,20 @@ test('individual deadline identities follow both liveries without recoloring exp
   for(const file of ['home_page.html','scadenze.html'])for(const graphics of ['classica','tre-livelli']){
    const f=await harness.open(file,{graphics,memorySeeds});
    try{
-    const selector=file==='home_page.html'?'.dashboard-list-item .item-icon-box > .material-symbols-outlined':'.deadline-card:not(.deadline-card-expired) .deadline-icon-box > .material-symbols-outlined';
+    const selector=file==='home_page.html'?'#upcoming-list-container .item-icon-box > .material-symbols-outlined':'.deadline-card:not(.deadline-card-expired) .deadline-icon-box > .material-symbols-outlined';
+    const urgencySelector='.area-urgenze :is(.matrix-icon-box,.item-icon-box) > .material-symbols-outlined';
     await f.page.locator(selector).first().waitFor();
-    const check=async(label)=>{
+    const check=async(label,theme)=>{
      const groups=file==='home_page.html'?[['#upcoming-list-container .item-icon-box > span',2],['#expired-list-container .item-icon-box > span',1]]:[['.deadline-card-expired .deadline-icon-box > span',1],['.deadline-card-upcoming .deadline-icon-box > span',2],['.deadline-card-info .deadline-icon-box > span',1]];
      for(const [group,count] of groups)assert.equal(await f.page.locator(group).count(),count,label+': row identity count '+group);
      const values=await inspectDynamicPaint(f.page,{selector,property:'color',role:'--card-icon-ink',minimum:3});
-     assert.equal(values.length,3,label+': real row identities exist');
+     assert.equal(values.length,file==='home_page.html'?2:3,label+': real themed row identities exist');
      for(const value of values)assert.ok(value.visible&&value.rolePass&&value.contrast?.pass,label+': row color and contrast '+JSON.stringify(value));
+     if(file==='home_page.html'){
+      const urgency=await inspectDynamicPaint(f.page,{selector:urgencySelector,property:'color',role:theme==='dark'?'#fecaca':'#a61b1b',minimum:3});
+      assert.equal(urgency.length,2,label+': real warning and urgent row exist');
+      for(const value of urgency)assert.ok(value.visible&&value.rolePass&&value.contrast?.pass,label+': urgency stays explicitly red with contrast '+JSON.stringify(value));
+     }
      if(file==='scadenze.html'){
       assert.equal(await f.page.locator('.deadline-card[data-id="doc-0"] .deadline-card-category').textContent(),'Collaudo Sintetico 0',label+': preserve original owner spelling');
       for(const [expiredSelector,minimum] of [['.deadline-card-expired .deadline-icon-box > .material-symbols-outlined',3],['.deadline-card-expired .deadline-date-badge',4.5]]){
@@ -222,10 +228,18 @@ test('individual deadline identities follow both liveries without recoloring exp
     };
     for(const width of contract.widths){await f.page.setViewportSize({width,height:844});for(const theme of contract.themes)for(const palette of contract.palettes){
      await f.page.evaluate(({theme,palette})=>{document.documentElement.classList.toggle('dark',theme==='dark');document.documentElement.dataset.colorTheme=palette;},{theme,palette});
-     await check(`${file}/${graphics}/${width}/${theme}/${palette}`);results.push({file,graphics,width,theme,palette});
+     await check(`${file}/${graphics}/${width}/${theme}/${palette}`,theme);results.push({file,graphics,width,theme,palette});
     }}
     const glyphs=await f.page.locator(selector).allTextContents();
     assert.ok(glyphs.includes('directions_car'),'saved symbol preserved');assert.ok(glyphs.includes(file==='home_page.html'?'event':'event_note'),'existing default symbol preserved');
+    if(file==='home_page.html'){
+     assert.deepEqual(await f.page.locator(urgencySelector).allTextContents(),['warning','warning'],'warning and saved urgent identity preserved');
+     const before=await f.page.locator('.area-urgenze').evaluate(e=>({surface:getComputedStyle(e).backgroundImage,badge:document.getElementById('expired-count').textContent,href:e.getAttribute('href')}));
+     await f.page.addStyleTag({content:'.home-page .area-urgenze{--card-icon-ink:var(--theme-ink)!important}'});
+     const wrongTheme=await inspectDynamicPaint(f.page,{selector:urgencySelector,property:'color',role:'#fecaca'});
+     assert.equal(wrongTheme.length,2);assert.ok(wrongTheme.every(v=>!v.rolePass),'returning urgent icons to the theme is rejected');
+     assert.deepEqual(await f.page.locator('.area-urgenze').evaluate(e=>({surface:getComputedStyle(e).backgroundImage,badge:document.getElementById('expired-count').textContent,href:e.getAttribute('href')})),before,'the scoped icon override keeps surfaces, counts and link unchanged');
+    }
     if(file==='scadenze.html'){
      await f.page.locator('[data-filter=completed]').click();await f.page.locator('.deadline-card-completed').waitFor();
      for(const width of contract.widths){await f.page.setViewportSize({width,height:844});for(const theme of contract.themes)for(const palette of contract.palettes){

@@ -304,8 +304,8 @@ body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .matrix-card .card-tex
     height: auto;
 }
 
-/* Decisione di Diego (15/11/2026): tutto in tema, anche Scadenze e Urgenze. Icone e contatori
-   seguono la palette come le altre card; le due card si distinguono per icona e testo. */
+/* Sfondi e contatori seguono la palette. Le icone Urgenze usano il rosso
+   di stato definito in core_ui.css (decisione di Diego, 18/11/2026). */
 body[data-ui-revision="tre-livelli"][data-ui-model="hub"] .top10-title {
     font: var(--font-label);
     letter-spacing: normal;
