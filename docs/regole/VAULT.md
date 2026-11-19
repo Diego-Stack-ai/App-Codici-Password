@@ -1,5 +1,12 @@
 # Vault
 
+<a id="ripresa-contatori-1286-pubblico-2026-11-19-vault"></a>
+
+## Ripresa — feedback distribuito nella 1.2.286
+
+Distribuito il feedback di presentazione nel percorso di ripresa già esistente. Reload, guardie, lease/inattività e autorità delle chiavi conservati. [Ricevuta](../evidenze/COLLAUDI.md#ripresa-contatori-1286-pubblico-2026-11-19). Il nuovo feedback non certifica né modifica lo sblocco nativo: riscontro fisico della versione 1.2.286 successivo, distinto dalle prove locali e dai riscontri della 1.2.285.
+
+
 <a id="ripresa-contatori-1286-2026-11-19-vault"></a>
 
 ## Ripresa — feedback di presentazione candidato 1.2.286

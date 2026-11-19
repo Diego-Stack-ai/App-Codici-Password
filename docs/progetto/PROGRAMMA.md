@@ -1,5 +1,12 @@
 # Programma
 
+<a id="ripresa-contatori-1286-pubblico-2026-11-19-programma"></a>
+
+## 1.2.286 pubblicata — prossimo passo sul telefono
+
+Rilascio dei due correttivi e verifica pubblica completati. [Ricevuta](../evidenze/COLLAUDI.md#ripresa-contatori-1286-pubblico-2026-11-19). Prossimo passo: confermare 1.2.286 nell'app dalla schermata Home, poi controllare separatamente attesa dello sblocco e contatori e proseguire la guida manuale. D02/D04/D08/C1/C2 completi, D15/D18, altri dispositivi e lotti sicurezza/prodotto conservano i propri gate; i riscontri della 1.2.285 non attestano automaticamente la 1.2.286.
+
+
 <a id="ripresa-contatori-1286-2026-11-19-programma"></a>
 
 ## Prossimo rilascio — 1.2.286, poi collaudo telefono

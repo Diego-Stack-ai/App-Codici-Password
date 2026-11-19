@@ -2,6 +2,13 @@
 
 <a id="stato-corrente"></a>
 
+<a id="ripresa-contatori-1286-pubblico-2026-11-19-stato"></a>
+
+## APP 1.2.286 — online e verificata
+
+Online 1.2.286 dal sorgente `9490020fbfe2f0075b9ec5f4d5975101ddd151f0`, sourceDirty=false. PR #340, CI #1235/#1236, [Hosting #1237](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44569946642) SUCCESS; pubblicazione solo Hosting il 19/11/26, 18:53:10 Europe/Rome. Verifica integrale: 367 hash / 41 profili / probe e 11 GET indipendenti PASS. [Ricevuta](../evidenze/COLLAUDI.md#ripresa-contatori-1286-pubblico-2026-11-19). Rotellina e contatori distribuiti; conferma sul telefono della versione 1.2.286 ancora attesa. I riscontri TEL285-F09–F15 e gli altri casi mantengono il proprio perimetro. Le attese/candidate sotto sono storiche.
+
+
 <a id="ripresa-contatori-1286-2026-11-19-stato"></a>
 
 ## Candidata 1.2.286 — ripresa e contatori; online 1.2.285
