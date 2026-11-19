@@ -8,7 +8,7 @@
 
 Online 1.2.285 dal sorgente `56fe4167e999c3baafa1857fc28b66acf49dff7f`, sourceDirty=false. PR #337 e CI #1230/#1231/Hosting #1232 SUCCESS; pubblicazione solo Hosting conclusa 19/11/2026, 13:35:53 Europe/Rome, verifica integrale 367 hash / 41 profili / normalizzazioni e sette GET PASS. [Ricevuta completa](../evidenze/COLLAUDI.md#logout-mobile-1285-pubblico-2026-11-19).
 
-Il correttivo del ritorno ad Accedi è distribuito; TEL285-F09 sul telefono resta atteso e issue #336 aperta. TEL284-F09 conserva il FAIL storico; 12 ore già ripristinate. D15/D18, altri dispositivi e contatori dell'Area Privata restano separati. Le candidate e le attese sotto sono storiche e non descrivono la versione attuale.
+Diego conferma versione 1.2.285, ritorno immediato al login dopo Esci e permanenza su Accedi nella domanda separata dei 10 secondi senza interazione: [TEL285-F09 PASS riferito](../evidenze/COLLAUDI.md#logout-mobile-1285-telefono-2026-11-19), issue #336 chiusa nel contesto provato. Segue il rientro con nuovo sblocco, ancora da eseguire; D08/C1/C2 completi restano aperti. TEL284-F09 conserva il FAIL storico; 12 ore già ripristinate. D15/D18, altri dispositivi e contatori dell'Area Privata restano separati. Le candidate e le attese sotto sono storiche e non descrivono la versione attuale.
 
 <a id="logout-mobile-1285-stato-2026-11-19"></a>
 

@@ -4,7 +4,7 @@
 
 ## Logout mobile — ordine eseguito e limiti conservati
 
-Attuato l'ordine di Diego: correttivo 1.2.285 tramite PR #337, riesami e gate verdi, Hosting protetto e verifica pubblica integrale. [Ricevuta](../evidenze/COLLAUDI.md#logout-mobile-1285-pubblico-2026-11-19). Autorizzazione e disponibilità ordinaria della cornice conservate, nessuna scrittura backend/policy o modifica MFA. La pubblicazione non converte il FAIL fisico 284 in un PASS 285: issue #336 e ricollaudo TEL285-F09 restano aperti; ricevuta documentale senza altro Hosting.
+Attuato l'ordine di Diego: correttivo 1.2.285 tramite PR #337, riesami e gate verdi, Hosting protetto e verifica pubblica integrale. [Ricevuta](../evidenze/COLLAUDI.md#logout-mobile-1285-pubblico-2026-11-19). Autorizzazione e disponibilità ordinaria della cornice conservate, nessuna scrittura backend/policy o modifica MFA. La pubblicazione da sola non attestava un PASS sul telefono; il successivo [riscontro esplicito TEL285-F09](../evidenze/COLLAUDI.md#logout-mobile-1285-telefono-2026-11-19) consente la chiusura della sola issue #336 nel contesto provato, conservando il FAIL 284 e gli altri casi aperti. Registrazione documentale senza altro Hosting.
 
 <a id="logout-mobile-1285-decisione-2026-11-19"></a>
 

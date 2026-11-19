@@ -1,5 +1,17 @@
 # Collaudi
 
+<a id="logout-mobile-1285-telefono-2026-11-19"></a>
+
+## Cornice 1.2.285 — ricollaudo del logout sul telefono
+
+Il 19/11/2026, nella prosecuzione del giro personale sulla PWA dalla schermata Home dell'iPhone, Diego conferma esplicitamente «Vedo 1.2.285». Modello e versione iOS non raccolti; nessuna estensione a Safari, Chrome, Android o altri dispositivi.
+
+**TEL285-F09 — PASS riferito per la prova 8, sottoinsieme D08:** Diego esegue Esci e riferisce che compare subito il login. La stabilità non viene dedotta dal solo ritorno immediato: alla successiva domanda esplicita di lasciare Accedi aperta per almeno 10 secondi senza interagire, risponde «Rimane sulla pagina Accedi». Nel percorso osservato non riferisce rientro automatico né ritorno a «Verifica accesso in corso…». Durata e comportamento sono dichiarati dall'utente, non misurati da strumenti.
+
+Il riscontro consente la chiusura del solo [difetto #336](https://github.com/Diego-Stack-ai/App-Codici-Password/issues/336), ora chiuso come risolto nel contesto provato. Il FAIL TEL284-F09 resta storico e non viene sovrascritto. Nessuna attestazione aggiuntiva su RAM, chiavi, completamento server di signOut, revoca di altre postazioni o logout offline; D08 completo e C1/C2 non sono chiusi. I sette riscontri operativi precedenti e il ripristino delle 12 ore conservano il proprio perimetro.
+
+Segue il normale rientro da Accedi e il nuovo sblocco della Vault prima di usare i dati, una prova alla volta; non ancora eseguito in questo ricollaudo. Altri dispositivi, D15/D18 e contatori rettangolari restano separati. Registrazione soltanto MD/GitHub: runtime e versione pubblicata conservati, nessun nuovo Hosting. Le attese nella ricevuta sotto descrivono il checkpoint precedente a questo riscontro fisico.
+
 <a id="logout-mobile-1285-pubblico-2026-11-19"></a>
 
 ## APP 1.2.285 — logout mobile pubblicato e verificato

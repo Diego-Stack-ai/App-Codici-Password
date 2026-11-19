@@ -4,7 +4,7 @@
 
 ## Uscita dalla cornice — raccordo distribuito nella 1.2.285
 
-Distribuita la presa in carico dell'uscita nel task del documento proprietario, con blocco/revoca e pulizia del materiale sincroni, figlio nascosto/inert fino alla navigazione top-level, guardie e watchdog conservati. [Ricevuta](../evidenze/COLLAUDI.md#logout-mobile-1285-pubblico-2026-11-19). Nessun cambio ad Auth/MFA, lease, inattività o ammissione ordinaria; nessuna scrittura policy/backend. La distribuzione non certifica lo stato RAM o Auth sul telefono: ricollaudo TEL285-F09 atteso e issue #336 aperta.
+Distribuita la presa in carico dell'uscita nel task del documento proprietario, con blocco/revoca e pulizia del materiale sincroni, figlio nascosto/inert fino alla navigazione top-level, guardie e watchdog conservati. [Ricevuta](../evidenze/COLLAUDI.md#logout-mobile-1285-pubblico-2026-11-19). Nessun cambio ad Auth/MFA, lease, inattività o ammissione ordinaria; nessuna scrittura policy/backend. Il successivo [TEL285-F09 PASS riferito da Diego](../evidenze/COLLAUDI.md#logout-mobile-1285-telefono-2026-11-19) riguarda il ritorno stabile al login e chiude la sola issue #336; non misura RAM o Auth sul telefono né certifica D08/C1/C2 completi.
 
 <a id="logout-mobile-1285-vault-2026-11-19"></a>
 

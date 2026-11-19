@@ -2,11 +2,11 @@
 
 <a id="logout-mobile-1285-pubblico-2026-11-19-incarico"></a>
 
-## Logout mobile — pubblicazione eseguita, ricollaudo atteso
+## Logout mobile — pubblicazione eseguita, ricollaudo riferito positivo
 
 Eseguito l'ordine di correzione, PR #337, merge e Hosting 1.2.285 sul sorgente `56fe4167e999c3baafa1857fc28b66acf49dff7f`, con gate e verifica pubblica PASS. [Ricevuta](../evidenze/COLLAUDI.md#logout-mobile-1285-pubblico-2026-11-19). Chiusura tramite soli MD/GitHub, root unico scrittore, supporti in lettura e 34 MD conservati; nessun secondo Hosting per questa ricevuta.
 
-Segue la sola ripetizione guidata della prova 8 sul telefono, una prova alla volta; issue #336 aperta fino al riscontro. Gli altri lotti e il FAIL 284 conservano autorità e limiti dei checkpoint storici sotto.
+Prova 8/TEL285-F09 confermata positivamente da Diego dopo verifica della versione e domanda separata sulla stabilità di Accedi; issue #336 chiusa nel contesto provato. [Riscontro e limiti](../evidenze/COLLAUDI.md#logout-mobile-1285-telefono-2026-11-19). Riprende la guida una prova alla volta dal normale rientro con nuovo sblocco, senza dedurre D08/C1/C2 completi o ulteriori permessi. Gli altri lotti e il FAIL 284 conservano autorità e limiti dei checkpoint storici sotto.
 
 <a id="logout-mobile-1285-incarico-2026-11-19"></a>
 
