@@ -38,6 +38,27 @@ test('old helper cannot navigate a successor through the stable WindowProxy', ()
   const f = fixture(); f.window.document = {};
   vm.runInContext("navigateDocument('/login.html', true)", f.context); assert.deepEqual(f.calls, []);
 });
+
+test('framed Back consumes owner refusal without a native or standalone fallback', () => {
+  const f=fixture();
+  f.window.parent.vaultFrameNavigation.backFromChild=(_source,_doc,target,prefer)=>{f.calls.push(['back',target,prefer]);return false;};
+  assert.equal(vm.runInContext("handleFrameBack('/home_page.html',true)",f.context),true);
+  assert.deepEqual(f.calls,[['back','/home_page.html',true]]);
+});
+test('stale Back is consumed and standalone Back remains owned by its component', () => {
+  const stale=fixture();stale.window.document={};
+  assert.equal(vm.runInContext("handleFrameBack('/home_page.html')",stale.context),true);assert.deepEqual(stale.calls,[]);
+  const standalone=fixture(false);
+  assert.equal(vm.runInContext("handleFrameBack('/home_page.html')",standalone.context),false);assert.deepEqual(standalone.calls,[]);
+});
+test('a legacy owner receives only a safe replacement when it has no Back facade', () => {
+  const f=fixture();assert.equal(vm.runInContext("handleFrameBack('/home_page.html')",f.context),true);
+  assert.deepEqual(f.calls,[['frame','/home_page.html',true,true]]);
+});
+test('a recognized frame consumes Back while its facade is unavailable', () => {
+  const f=fixture();f.window.parent.location.pathname='/app.html';delete f.window.parent.vaultFrameNavigation;
+  assert.equal(vm.runInContext("handleFrameBack('/home_page.html')",f.context),true);assert.deepEqual(f.calls,[]);
+});
 for (const sdkFailure of [false, true]) test(`real logout preserves the child until durable fence and SDK settle (${sdkFailure})`, async () => {
   const f = fixture(), fence = pause(), sdk = pause();
   f.window.authSessionFence = {deny: () => {f.calls.push(['deny']);return fence.promise;}};

@@ -1,5 +1,21 @@
 # Collaudi
 
+<a id="profilo-indietro-1287-collaudi-2026-11-19"></a>
+
+## Freccia Indietro — candidata tecnica 1.2.287
+
+Perimetro autorizzato: correttivo della navigazione condivisa, regressioni, nuova versione, PR/merge/Hosting e aggiornamenti documentali. Base4306b14e, ramo codex/profile-back-1287-20261119. La documentazione pubblica riporta soltanto dettagli tecnici e prove sintetiche; i riscontri manuali dettagliati restano nel registro locale separato. La proposta grafica compatta non è inclusa.
+
+Header con un solo gestore; ingresso Profilo e ritorno coordinati con owner/facade. Cronologia etichettata nel padre e registro RAM per owner, senza autorità sulle chiavi. Precedente verificato oppure fallback interno; comandi duplicati, documenti non correnti, logout e blocco non ricadono nella cronologia nativa. Traversal mancante/errore ha fallback finito; cronologia non gestita del figlio invalida le etichette precedenti. Ammissione, lease, inattività e isolamento conservati.
+
+[Banco browser](../../tests/vault-frame-back.browser.test.mjs) nella suite obbligatoria: shell/pagine/header/cleanup/tab e owner/transport reali, un singleton client e APP_VERSION allineata. Auth e dati inventati, sola origine loopback. La fixture sincronizza il proprio Auth con il load tramite un messaggio test-only, senza sleep d'avvio. I casi ordinari usano la cronologia nativa; due casi dichiarati iniettano traversal assente/errore. Oracoli su destinazione, documento padre, caricamenti persistenti, un solo unlock, zero lock/clear/errori asincroni; ripetizioni, ingresso diretto, query/frammento, Forward/Back, standalone e confini del documento. La revoca su anchor invalido deve produrre route-denied, iframe assente ed errori pagina vuoti; è ammesso solo il distacco previsto del contesto chiamante.
+
+Suite funzionale cornice310/310 PASS, con il nuovo banco14/14 incluso. Sottoinsieme confezionato48/48 PASS, già incluso e non sommato nuovamente. Navigazione199/199 e topologia20/20 PASS. Guida12/12, offline16/16, diagnostica4/4, CSS, sintassi252moduli e riferimenti343file PASS. Budget31pagine rispettato senza cambiare soglie: ridotti commenti ridondanti della navigazione, senza modificare guardie o espressioni. QA:14/14 e C1 locale73/73, distinti da esecuzioni reali.
+
+Confezione canonica287:307riferimenti, guida contentVersion16/reviewed287 senza testi nuovi, offline61export/347risorse, inventario31pagine/126istruzioni/111target/167campi. Snapshot dei367file prima del bump e confronto dopo sola normalizzazione versioni/EOL: nessuna aggiunta/rimozione o differenza funzionale ulteriore. Confronto contro la base: quattro pubblici funzionali, components-v129.js, frame-navigation.js, vault-frame-owner.mjs e vault-frame-transport.mjs. UI275-05 collega produttori e test funzionali, mantenendo stati/dipinti e matrice cromatica; nessuna nuova copertura colori dedotta.
+
+Riesami sul commit finale, CI PR/master/Hosting e verifica pubblica ancora da acquisire; online resta1.2.286. Banco Chrome e ridimensionamento sintetici, non certificazione dei dispositivi. Nessun nuovo rilascio dedotto dai test locali.
+
 <a id="ripresa-contatori-1286-pubblico-2026-11-19"></a>
 
 ## APP 1.2.286 — ripresa e contatori pubblicati e verificati

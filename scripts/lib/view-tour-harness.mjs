@@ -79,17 +79,23 @@ const unsupported=()=>{throw Error('Synthetic UI fixture does not exercise Vault
 export const generateVaultKey=unsupported,createVaultKeyring=unsupported,createVaultVerifier=unsupported,verifyVaultVerifier=unsupported,wrapVaultKey=unsupported,unwrapVaultKey=unsupported;
 `;
 
-export async function buildTourBundle({initializers=pages,sourceBase='http://view-tour.invalid',memory=false}={}) {
+export async function buildTourBundle({initializers=pages,sourceBase='http://view-tour.invalid',memory=false,frameIntegration=false}={}) {
   const entry = `
 import * as Pages from '/PUBLIC/assets/js/pages-init.js';
 import {initComponents,installPageDecorations} from '/PUBLIC/assets/js/components-v129.js';
 import {loadLanguage, applyGlobalTranslations} from '/PUBLIC/assets/js/translations.js';
+${frameIntegration?"import {initCleanup} from '/PUBLIC/assets/js/cleanup.js';\nimport {vaultFrameClient} from '/PUBLIC/assets/js/modules/core/vault-frame-client.js';":''}
 import * as Ui from '/PUBLIC/assets/js/ui-core-v129.js';
 window.__viewTour={errors:[],Ui,installPageDecorations};
 window.addEventListener('error',e=>window.__viewTour.errors.push(String(e.message)));
 window.addEventListener('unhandledrejection',e=>window.__viewTour.errors.push('rejection: '+String(e.reason?.message||e.reason)));
+${frameIntegration?`// Synthetic Auth settles after the owner has loaded this document; no timing sleep.
+const frameLoaded=vaultFrameClient.isChild()?new Promise(resolve=>{
+ const loaded=event=>{if(event.source!==window.parent||event.origin!==location.origin||event.data!=='view-tour-frame-loaded')return;window.removeEventListener('message',loaded);resolve();};
+ window.addEventListener('message',loaded);
+}):Promise.resolve();`:''}
 (async()=>{ const init=${JSON.stringify(initializers)}[location.pathname.split('/').pop()];
-  try { await loadLanguage('it'); await initComponents(); if(init) await Pages[init](window.__viewTourUser); try{applyGlobalTranslations()}catch{} }
+  try { await loadLanguage('it'); ${frameIntegration?"initCleanup(); await frameLoaded; if(vaultFrameClient.isChild())await vaultFrameClient.request('key');":''} await initComponents(); if(init) await Pages[init](window.__viewTourUser); try{applyGlobalTranslations()}catch{} }
   catch(error){ window.__viewTour.bootError=String(error?.stack||error); }
   document.body.hidden=false;document.body.inert=false;document.documentElement.dataset.i18n='ready';window.__viewTour.ready=true; })();
 window.__viewTourUser={uid:'synthetic-local-only',email:'fixture@example.invalid',emailVerified:true,displayName:'Prova locale'};`;
@@ -127,6 +133,8 @@ export async function createTourHarness(options={}) {
   const server = createServer(async (req, res) => {
     try {
       const url = new URL(req.url, 'http://local.invalid');
+      const fixture=options.localFixtures?.[url.pathname];
+      if(fixture){res.writeHead(200,{'Content-Type':fixture.type,'Cache-Control':'no-store'});res.end(fixture.body);return;}
       if (url.pathname === '/__view-tour.js') { res.writeHead(200, {'Content-Type': 'text/javascript'}); res.end(code); return; }
       if(options.missingAssets?.includes(url.pathname))throw Error('Synthetic missing asset');
       assets.served.add(url.pathname);
@@ -139,7 +147,7 @@ export async function createTourHarness(options={}) {
         .replace(/<body([^>]*)>/i, (m, a) => `<body${a.replace(/\s(?:hidden|inert)(?=[\s>])/g, '')}>`)
         .replace('</head>','<style id="ui313-stable-motion">*,*::before,*::after{animation:none!important;transition:none!important}</style></head>')
         .replace('</body>', '<script type="module" src="/__view-tour.js"></script></body>');
-      const type = {'.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.png': 'image/png', '.svg': 'image/svg+xml'}[path.extname(file)] || 'application/octet-stream';
+      const type = {'.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.png': 'image/png', '.svg': 'image/svg+xml'}[path.extname(file)] || 'application/octet-stream';
       res.writeHead(200, {'Content-Type': type}); res.end(body);
     } catch { assets.missing.add(new URL(req.url,'http://local.invalid').pathname);res.writeHead(404);res.end(); }
   });

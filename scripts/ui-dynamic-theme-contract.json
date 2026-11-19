@@ -370,6 +370,10 @@
       "sources": [
         "Frontend/public/profilo_privato.html",
         "Frontend/public/assets/js/components-v129.js",
+        "Frontend/public/assets/js/frame-navigation.js",
+        "Frontend/public/assets/js/cleanup.js",
+        "Frontend/public/assets/js/modules/core/vault-frame-owner.mjs",
+        "Frontend/public/assets/js/modules/core/vault-frame-transport.mjs",
         "Frontend/public/assets/css/core.css",
         "Frontend/public/assets/css/core_ui.css",
         "Frontend/public/assets/css/profile-layout.css",
@@ -418,7 +422,9 @@
         }
       ],
       "tests": [
-        "tests/ui-dynamic-themes.browser.test.mjs"
+        "tests/ui-dynamic-themes.browser.test.mjs",
+        "tests/vault-frame-back.browser.test.mjs",
+        "tests/vault-frame-navigation.test.mjs"
       ]
     },
     {

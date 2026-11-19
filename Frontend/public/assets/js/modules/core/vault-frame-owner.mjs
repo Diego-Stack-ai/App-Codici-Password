@@ -2,6 +2,7 @@ import {FRAME_PROTOCOL, privateFrameUrl, residualInsets, inactivityMilliseconds,
 import {frameLockCode} from './vault-frame-diagnostics.mjs';
 import {createFrameSession} from './vault-frame-session.mjs';
 import {beginFrameModalFocus} from './frame-modal-focus.js';
+let historyOwnerSequence = 0;
 
 // Injectable host, used by the canonical authenticated bootstrap and browser tests.
 // No writable client-side admission switch; the production adapter defaults DENY.
@@ -18,6 +19,11 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
   let logoutHold = false, logoutDone = false, logoutTimer = null, queuedExit = null, logoutContext = null;
   const ownerDocument = win.document;
   let exitRequest = null, exitTimer = null, exitWatchdog = null;
+  // Non-secret navigation labels, never admission or key authority. A new owner
+  // cannot trust entries from a previous mount, reload or unknown child history.
+  const historyOwner = win.crypto?.randomUUID?.() || String(++historyOwnerSequence), historyEntries = new Map();
+  let historySequence = 0, backPending = false, backTimer = null;
+  function cancelBack() {backPending = false; win.clearTimeout(backTimer); backTimer = null;}
   const handlers = [], identity = getIdentity;
   const currentUrl = () => {try {return iframe.contentWindow.location.href;} catch {return '';} };
   const currentDocument = () => {try {return iframe.contentDocument;} catch {return null;} };
@@ -29,6 +35,7 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
     readPermit, validateIdentity, unlock, confirmSensitive,
     refreshPreference: readTimeout,
     onLock(reason) {
+      cancelBack();
       if (disposed || locked) return;
       lastBlock = frameLockCode(reason); diagnose(lastBlock);
       locked = true; visibilityEpoch++; mask(true);
@@ -45,11 +52,23 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
     documentObject === currentDocument() && !!documentObject;
   const isOwnChild = (source, documentObject = currentDocument()) => ownsDocument(source, documentObject) && !!privateFrameUrl(currentUrl(), origin);
   function outerUrl(url) { const outer = new URL('/app.html', origin); outer.searchParams.set('route', url.pathname + url.search + url.hash); return outer; }
+  function historyEntry() {
+    const state = win.history.state;
+    const entry = state?.frameNavigationOwner === historyOwner ? historyEntries.get(state.frameNavigationEntry) : null;
+    return entry && outerUrl(new URL(entry.url)).href === String(win.location.href) ? entry : null;
+  }
+  function rememberRoute(url, replace) {
+    const current = historyEntry();
+    const entry = replace && current ? current : {id: ++historySequence, previous: replace ? null : current?.id ?? null};
+    entry.url = url.href;
+    win.history[replace ? 'replaceState' : 'pushState']({frameNavigationOwner: historyOwner, frameNavigationEntry: entry.id}, '', outerUrl(url));
+    historyEntries.set(entry.id, entry);
+  }
   function navigate(target, replace = false) {
     const url = privateFrameUrl(target, origin);
     if (!url || disposed || locked) return false;
-    session.retireDocument(); nonce = null; mask(true); route = url;
-    win.history[replace ? 'replaceState' : 'pushState'](null, '', outerUrl(url));
+    cancelBack(); session.retireDocument(); nonce = null; mask(true); route = url;
+    rememberRoute(url, replace);
     // replace avoids duplicate iframe + parent history entries.
     iframe.contentWindow.location.replace(url.href);
     return true;
@@ -65,6 +84,7 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
     const url = new URL(target, origin);
     if (url.origin !== origin || !['https:', 'http:'].includes(url.protocol) || url.username || url.password) return false;
     if (disposed || win.document !== ownerDocument) return false;
+    cancelBack();
     if (exitRequest) return true;
     const standalone = frameStandaloneTarget(url.href, origin);
     if (standalone) url.search = standalone.search;
@@ -149,12 +169,18 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
       try {if (new URL(raw).origin === origin) exit(raw, true);} catch { /* Cross-origin/opaque document stays blocked. */ }
       return;
     }
-    route = url; win.history.replaceState(null, '', outerUrl(url));
+    cancelBack();
+    if (route?.href !== url.href) historyEntries.clear();
+    route = url; rememberRoute(url, true);
     nonce = session.beginDocument(); post({kind: 'challenge'});
   });
   listen(win, 'popstate', () => {
-    const target = new URL(win.location.href).searchParams.get('route');
-    if (!navigate(target || '/home_page.html', true)) session.lock('history-denied');
+    if (disposed || locked || logoutHold || exitRequest || win.document !== ownerDocument) return;
+    if (new URL(win.location.href).pathname !== '/app.html') {session.lock('history-denied'); return;}
+    cancelBack();
+    const entry = historyEntry(), target = entry?.url || '/home_page.html';
+    if (nonce && route?.href === target && currentUrl() === target) return;
+    if (!navigate(target, true)) session.lock('history-denied');
   });
   listen(win.document, 'visibilitychange', () => {
     mask(true); const epoch = ++visibilityEpoch;
@@ -212,8 +238,27 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
       return () => {if (released) return; released = true; modalHolds.delete(token); applyInert();};
     },
     diagnosticsFromChild(source, documentObject) {return isOwnChild(source, documentObject) ? diagnosticSnapshot() : null;},
+    backFromChild(source, documentObject, fallback, preferHistory = true) {
+      if (!isOwnChild(source, documentObject)) return false;
+      if (disposed || locked || logoutHold || exitRequest || backPending || win.document !== ownerDocument) return true;
+      const target = privateFrameUrl(fallback, origin);
+      if (!target) return true;
+      const entry = historyEntry();
+      if (preferHistory && entry && historyEntries.has(entry.previous) && win.history.length > 1) {
+        session.retireDocument(); nonce = null; mask(true); backPending = true;
+        // A missing traversal cannot leave the owner masked indefinitely.
+        backTimer = win.setTimeout(() => {
+          if (!backPending || disposed || locked || logoutHold || exitRequest || win.document !== ownerDocument) return;
+          navigate(target.href, true);
+        }, 3000);
+        try {win.history.back();} catch {navigate(target.href, true);}
+        return true;
+      }
+      return navigate(target.href, true);
+    },
     navigateFromChild(source, documentObject, target, replace) {
       if (!isOwnChild(source, documentObject)) return false;
+      if (backPending) return true;
       if (logoutHold && documentObject !== logoutContext?.documentObject) return false;
       if (logoutHold && !logoutDone) {queuedExit = {target, replace}; return true;}
       return privateFrameUrl(target, origin) ? navigate(target, replace) : exit(target, replace);
@@ -250,11 +295,12 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
       queuedExit = {target, replace}; return true;
     },
     revokeFromChild(source, documentObject) {if (isOwnChild(source, documentObject)) session.lock('child-revoked');},
-    syncFromChild(source, documentObject) {
-      if (!ownsDocument(source, documentObject) || locked) return;
+    syncFromChild(source, documentObject, operation = 'replace') {
+      if (!ownsDocument(source, documentObject) || locked || backPending || disposed || logoutHold || exitRequest) return;
       route = privateFrameUrl(currentUrl(), origin);
       if (!route) {session.lock('route-denied'); return;}
-      win.history.replaceState(null, '', outerUrl(route));
+      if (operation !== 'replace') historyEntries.clear();
+      rememberRoute(route, true);
     }
   });
   win.vaultFrameNavigation = facade;
@@ -285,7 +331,7 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
   }, updatePreference(value) {
     if (!disposed && !locked) {diagnosticIdleMs = inactivityMilliseconds(value);session.setTimeouts(diagnosticIdleMs, invalidInactivityPreference(value));}
   }, resume() {if (logoutHold || exitRequest) return true; if (!route) return false; session.lock('reload'); win.location.reload(); return true;}, dispose() {
-    session.lock('dispose'); iframe.remove(); disposed = true; win.clearInterval(timer); win.clearTimeout(logoutTimer); resizeObserver?.disconnect();
+    cancelBack(); session.lock('dispose'); iframe.remove(); disposed = true; win.clearInterval(timer); win.clearTimeout(logoutTimer); resizeObserver?.disconnect();
     win.clearTimeout(exitTimer); win.clearTimeout(exitWatchdog);
     for (const remove of handlers) remove(); if (win.vaultFrameNavigation === facade) delete win.vaultFrameNavigation; onDispose();
   }});

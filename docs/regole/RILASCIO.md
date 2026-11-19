@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="profilo-indietro-1287-rilascio-2026-11-19"></a>
+
+## Candidata1.2.287 — procedura solo Hosting
+
+[Mandato](../progetto/INCARICO_CORRENTE.md#profilo-indietro-1287-incarico-2026-11-19): snapshot funzionale, bump canonico287, guida16/reviewed287, offline/QA e confronto normalizzato. Due riesami indipendenti e CI PR sulla testa finale; merge con SHA atteso. CI master e validate Hosting sullo stesso sorgente/digest, scope hosting e master invariato prima di production protetto secondo la delega della sessione. Workflow e protezioni conservati. Manifest dai byte Git LF, verifica pubblica integrale e GET indipendenti; ricevuta MD/GitHub senza ulteriore Hosting. [Evidenze](../evidenze/COLLAUDI.md#profilo-indietro-1287-collaudi-2026-11-19); collaudo fisico successivo, distinto dai test locali.
+
 <a id="ripresa-contatori-1286-pubblico-2026-11-19-rilascio"></a>
 
 ## APP 1.2.286 — procedura eseguita

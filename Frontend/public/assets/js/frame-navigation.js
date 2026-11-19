@@ -1,4 +1,17 @@
 const requestingDocument = document;
+// A rejected/stale framed request is still consumed: never fall through to a
+// native Back that could leave the owner and discard its in-memory material.
+export function handleFrameBack(target, preferHistory = true) {
+  if (requestingDocument !== window.document) return true;
+  try {
+    if (window.parent === window || window.parent.location.origin !== window.location.origin) return false;
+    const owner = window.parent.vaultFrameNavigation;
+    if (!owner) return window.parent.location.pathname === '/app.html';
+    if (typeof owner.backFromChild === 'function') owner.backFromChild(window, requestingDocument, target, preferHistory);
+    else owner.navigateFromChild(window, requestingDocument, target, true);
+    return true;
+  } catch {return window.parent !== window;}
+}
 // The classic guard can use the same synchronous, non-secret navigation facade.
 export function navigateDocument(target, replace = false) {
   if (requestingDocument !== window.document) return;

@@ -1,5 +1,11 @@
 # Vault
 
+<a id="profilo-indietro-1287-vault-2026-11-19"></a>
+
+## Indietro — candidato di navigazione1.2.287
+
+Etichette non segrete e registro RAM del singolo owner orientano la navigazione, senza concedere ammissione, materiale o conferme. Il ritorno ritira il documento precedente e maschera il figlio, conservando i limiti già esistenti della sessione. Fallback interno per cronologia sconosciuta o traversal fallito; documenti non correnti, logout e lock non possono riaprire tramite la freccia. Eventi tardivi rispettano owner e stato corrente. [Verifiche e limiti](../evidenze/COLLAUDI.md#profilo-indietro-1287-collaudi-2026-11-19); nessuna nuova persistenza delle chiavi o modifica ai gate.
+
 <a id="ripresa-contatori-1286-pubblico-2026-11-19-vault"></a>
 
 ## Ripresa — feedback distribuito nella 1.2.286

@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="profilo-indietro-1287-incarico-2026-11-19"></a>
+
+## Mandato corrente — navigazione Indietro e rilascio1.2.287
+
+Autorizzati correzione della freccia, verifica del ritorno senza sblocchi aggiuntivi nella normale navigazione, PR/merge/Hosting con nuova versione e MD/GitHub, poi ripresa del collaudo. Base master4306b14e17fc7326785ebacd7130b47e19173d2e, ramo codex/profile-back-1287-20261119 isolato; root unico scrittore e revisori indipendenti in lettura. Proposta grafica compatta separata ed esclusa. [Evidenze tecniche](../evidenze/COLLAUDI.md#profilo-indietro-1287-collaudi-2026-11-19); dettagli manuali nel registro locale, senza pubblicarne la sequenza.
+
+Singolo gestore e ritorno del padre su cronologia verificata o fallback interno; conservare ammissione, lease, inattività, revoca e isolamento dei documenti. Snapshot prima del bump canonico287, guida16/reviewed287 e derivati offline/QA coerenti, confronto normalizzato. Due GO sulla testa finale e CI PR completa verde, merge con SHA atteso; CI master e validate Hosting sullo stesso sorgente/digest, scope hosting e master invariato prima di production protetto secondo la delega della sessione. Verifica pubblica integrale e GET indipendenti, poi ricevuta MD/GitHub senza secondo Hosting. Backend, workflow, protezioni e dati reali conservati; collaudo successivo distinto dalle prove sintetiche.
+
 <a id="ripresa-contatori-1286-pubblico-2026-11-19-incarico"></a>
 
 ## Rilascio 1.2.286 eseguito — riprende il collaudo telefono

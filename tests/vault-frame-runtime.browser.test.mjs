@@ -164,8 +164,13 @@ test('allowed section anchors synchronize; an unknown anchor locks without expos
   await f.child().waitForFunction(()=>window.fixtureChild?.keys===1);
   await f.child().evaluate(()=>{location.hash='documenti-view-container';});
   await f.page.waitForFunction(()=>new URL(location.href).searchParams.get('route').endsWith('#documenti-view-container'));
-  await f.child().evaluate(()=>{location.hash='not-approved';});
+  // Revocation may synchronously detach the document that triggered it. Keep
+  // the positive lock/removal oracles and reject every unrelated evaluation error.
+  await f.child().evaluate(()=>{location.hash='not-approved';}).catch(error=>{
+    assert.match(error.message,/Frame was detached|Execution context was destroyed/);
+  });
   await f.page.waitForFunction(()=>!window.frameOwner.session.state().unlocked);
+  assert.equal(await f.page.evaluate(()=>window.fixture.locks.at(-1)),'route-denied');
   assert.equal(await f.page.locator('iframe').count(),0);assert.deepEqual(f.errors,[]);
  }finally{await f.context.close();}
 });
