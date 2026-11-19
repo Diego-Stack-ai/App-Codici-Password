@@ -14,6 +14,8 @@ Suite funzionale cornice310/310 PASS, con il nuovo banco14/14 incluso. Sottoinsi
 
 Confezione canonica287:307riferimenti, guida contentVersion16/reviewed287 senza testi nuovi, offline61export/347risorse, inventario31pagine/126istruzioni/111target/167campi. Snapshot dei367file prima del bump e confronto dopo sola normalizzazione versioni/EOL: nessuna aggiunta/rimozione o differenza funzionale ulteriore. Confronto contro la base: quattro pubblici funzionali, components-v129.js, frame-navigation.js, vault-frame-owner.mjs e vault-frame-transport.mjs. UI275-05 collega produttori e test funzionali, mantenendo stati/dipinti e matrice cromatica; nessuna nuova copertura colori dedotta.
 
+Allineamento del banco cromatico: la prima CI PR si ferma in compilazione perché lo stub sintetico della navigazione non espone il nuovo `handleFrameBack`. Aggiunto lo stesso export con il divieto di effetti laterali già usato dal banco; nessun caso o soglia rimosso. Matrice dinamica locale 8/8 PASS, comprese le 1.064 combinazioni di stato nei 28 contesti e le controprove negative. Il primo tentativo locale, con loopback negato dal sandbox, è una prova ambientale non valida; il risultato PASS usa il server locale autorizzato con soli dati inventati. Nessuna ulteriore modifica ai file pubblici.
+
 Riesami sul commit finale, CI PR/master/Hosting e verifica pubblica ancora da acquisire; online resta1.2.286. Banco Chrome e ridimensionamento sintetici, non certificazione dei dispositivi. Nessun nuovo rilascio dedotto dai test locali.
 
 <a id="ripresa-contatori-1286-pubblico-2026-11-19"></a>
