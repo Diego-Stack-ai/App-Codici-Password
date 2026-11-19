@@ -1,5 +1,11 @@
 # Programma
 
+<a id="logout-mobile-1285-pubblico-2026-11-19-programma"></a>
+
+## Logout mobile — rilascio 1.2.285 concluso
+
+Completati correzione, riesami, CI PR/master/Hosting e verifica pubblica. [Ricevuta](../evidenze/COLLAUDI.md#logout-mobile-1285-pubblico-2026-11-19). Il prossimo passo è il ricollaudo fisico TEL285-F09 della prova 8; soltanto dopo il suo riscontro riprende il giro della cornice. Restano separati i contatori rettangolari, D15/D18, altri browser/dispositivi e i lotti sicurezza/prodotto. I checkpoint candidati sotto sono storici.
+
 <a id="logout-mobile-1285-programma-2026-11-19"></a>
 
 ## Prima della ripresa del collaudo: logout mobile

@@ -1,5 +1,11 @@
 # Ambiente di test
 
+<a id="logout-mobile-1285-pubblico-2026-11-19-ambiente"></a>
+
+## 1.2.285 — pubblicazione e copertura effettiva
+
+CI PR #1230 sulla candidata `6585d17bbf3d30f056ebc6b26c1b4dfdf349f221` e master/validate Hosting sul merge `56fe4167e999c3baafa1857fc28b66acf49dff7f` SUCCESS, con digest pubblico comune e conteggi nella [ricevuta](../evidenze/COLLAUDI.md#logout-mobile-1285-pubblico-2026-11-19); verifica pubblica 367 hash / 41 profili / normalizzazioni e sette GET PASS. Il banco locale conserva owner/gate/fence/cleanup reali ma Auth/SDK sintetici e rete esterna bloccata; Chrome non attesta WebKit o l'iPhone fisico. TEL285-F09 ancora atteso, TEL284-F09 FAIL storico conservato; nessun caso C1/C2 completo chiuso dalla pubblicazione.
+
 <a id="logout-mobile-1285-ambiente-2026-11-19"></a>
 
 ## Logout mobile — ambiente del correttivo285

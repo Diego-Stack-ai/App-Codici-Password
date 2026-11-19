@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="logout-mobile-1285-pubblico-2026-11-19-rilascio"></a>
+
+## APP 1.2.285 — procedura eseguita
+
+PR #337 unita dopo due GO sulla testa `6585d17bbf3d30f056ebc6b26c1b4dfdf349f221` e CI PR #1230 SUCCESS. CI master #1231 e validate Hosting #1232 sul medesimo merge `56fe4167e999c3baafa1857fc28b66acf49dff7f` e digest pubblico; scope hosting verificato e master invariato prima di production. Approvazione manuale di Diego dopo HTTP403 della CLI; gate production conservato; deploy solo Hosting SUCCESS e verifica pubblica integrale PASS. [Ricevuta](../evidenze/COLLAUDI.md#logout-mobile-1285-pubblico-2026-11-19). Workflow, credenziali e protezioni conservati; ricevuta soltanto documentale senza nuovo Hosting. Ricollaudo telefonico distinto ancora atteso; candidate sotto storiche.
+
 <a id="logout-mobile-1285-rilascio-2026-11-19"></a>
 
 ## Candidata1.2.285 — logout, solo Hosting

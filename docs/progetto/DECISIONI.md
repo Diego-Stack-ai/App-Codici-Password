@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="logout-mobile-1285-pubblico-2026-11-19-decisione"></a>
+
+## Logout mobile — ordine eseguito e limiti conservati
+
+Attuato l'ordine di Diego: correttivo 1.2.285 tramite PR #337, riesami e gate verdi, Hosting protetto e verifica pubblica integrale. [Ricevuta](../evidenze/COLLAUDI.md#logout-mobile-1285-pubblico-2026-11-19). Autorizzazione e disponibilità ordinaria della cornice conservate, nessuna scrittura backend/policy o modifica MFA. La pubblicazione non converte il FAIL fisico 284 in un PASS 285: issue #336 e ricollaudo TEL285-F09 restano aperti; ricevuta documentale senza altro Hosting.
+
 <a id="logout-mobile-1285-decisione-2026-11-19"></a>
 
 ## 19/11/2026 — correggere e pubblicare il logout mobile

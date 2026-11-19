@@ -1,5 +1,26 @@
 # Collaudi
 
+<a id="logout-mobile-1285-pubblico-2026-11-19"></a>
+
+## APP 1.2.285 — logout mobile pubblicato e verificato
+
+Produzione verificata **1.2.285**, sorgente `56fe4167e999c3baafa1857fc28b66acf49dff7f`, sourceDirty=false. [PR #337](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/337), testa `6585d17bbf3d30f056ebc6b26c1b4dfdf349f221`, unita dopo due GO indipendenti sullo stesso SHA e CI finale verde. Albero Git pubblico `5a5eeaa09659fe06b8153b8cc76839e19f746fb2`, identico nel merge alla testa revisionata.
+
+- [CI PR #1230](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44489715142) SUCCESS: 68 blocchi TAP, 3875 test: 3864 PASS / 11 SKIP / 0 FAIL / 0 cancellati.
+- [CI master #1231](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44494594442) SUCCESS: 68 blocchi TAP, 3875 test: 3864 PASS / 11 SKIP / 0 FAIL / 0 cancellati.
+- Validate della [Hosting #1232](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44519482603) SUCCESS: 68 blocchi TAP, 3875 test: 3864 PASS / 11 SKIP / 0 FAIL / 0 cancellati. Scope hosting verificato nel log; stesso sorgente e digest del master prima dell'approvazione, master invariato.
+- Production: manuale di Diego dopo HTTP403 della CLI; gate production conservato; deploy job 135561460946 solo Hosting SUCCESS, concluso 19/11/2026, 13:35:53 Europe/Rome. Workflow, credenziali e protezioni conservati; nessun deploy backend o scrittura policy.
+- Verifica pubblica autonoma dai byte Git LF: 367 hash, 41 profili di intestazione e normalizzazioni PASS, conclusa 19/11/2026, 13:37:16 Europe/Rome. Sette GET indipendenti PASS alle 19/11/2026, 13:37:17 Europe/Rome: manifest, owner della cornice, logout-session, private-auth-gate, app-env, app.html e Home.
+- Digest pubblico `2c43969573be53eb82cfffedf14ecaf3af2004d4a99d98a236fdc84dfa76aa41`; SHA256 manifest `e36e915655e98edca203340e5d9158149b0307480c764392cea0e12886591972`. Versione 1.2.285, 307 riferimenti, guida contentVersion 16 / reviewedAppVersion 1.2.285, offline 61 export / 347 risorse.
+
+Distribuita la presa in carico dell'uscita nel padre della cornice: blocco, revoca e pulizia del materiale restano immediati; la richiesta di navigazione top-level non rimuove prima il contesto figlio chiamante. Conservati destinazioni reauth/recovery, replace/assign, token cleanup, guardia del documento e watchdog. Cambia funzionalmente solo vault-frame-owner.mjs dopo normalizzazione versioni/EOL; nessun correttivo grafico, dato reale, modifica Auth/MFA, ammissione ordinaria, inattività, Rules o Functions.
+
+Lo stress locale RED/GREEN e i test Chrome integrati sono prove sintetiche, con Auth/SDK e dati inventati: non dimostrano la causa WebKit né la riuscita sul dispositivo. Restano distinti i 129/129 mirati locali, i 6 stress owner e i 7 casi browser già inclusi; i conteggi CI sopra non vengono sommati fra esecuzioni.
+
+**TEL285-F09 — ricollaudo fisico atteso:** dopo l'aggiornamento della PWA sul telefono ripetere la prova 8, Home → Esci → osservazione di Accedi per circa 10 secondi senza interagire. Il FAIL storico TEL284-F09 resta registrato; [issue #336](https://github.com/Diego-Stack-ai/App-Codici-Password/issues/336) aperta fino al riscontro. Le 12 ore erano state ripristinate e i sette esiti operativi precedenti conservano il loro perimetro. Nessun C1/C2 completo, D15/D18 o altro dispositivo chiuso dalla pubblicazione. Contatori rettangolari TEL284-G01 separati e non corretti.
+
+Ricevuta soltanto MD/GitHub, senza un ulteriore Hosting. Le sezioni candidate e le relative attese sotto sono checkpoint storici; la conferma fisica della 1.2.285 resta pendente.
+
 <a id="logout-mobile-1285-collaudi-2026-11-19"></a>
 
 ## Logout mobile — candidata1.2.285 e verifica locale
