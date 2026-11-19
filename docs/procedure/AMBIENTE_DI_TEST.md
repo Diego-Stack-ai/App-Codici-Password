@@ -1,5 +1,12 @@
 # Ambiente di test
 
+<a id="ripresa-contatori-1286-2026-11-19-ambiente"></a>
+
+## 1.2.286 — banco dei due correttivi e limiti
+
+Worktree isolato sulla base88f5eb3a; root unico scrittore e due riesami indipendenti sul commit finale. I contatori consumano record inventati tramite i produttori reali; il feedback usa shell/gate/adattatore/owner/transport/modale/clic/reload reali con identità/ammissione/acquisizione sintetiche e sola rete loopback. Matrici colore, movimento ridotto e viewport non attestano iPhone fisico o passkey nativa. [Confezione e prove](../evidenze/COLLAUDI.md#ripresa-contatori-1286-2026-11-19). I PASS riferiti TEL285-F09–F15 restano della285; il ricollaudo della286 segue la pubblicazione. Nessun nuovo giro C1 live o C2 autorizzato dal banco locale.
+
+
 <a id="logout-mobile-1285-pubblico-2026-11-19-ambiente"></a>
 
 ## 1.2.285 — pubblicazione e copertura effettiva

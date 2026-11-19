@@ -56,7 +56,15 @@ test('typography mapping rejects invalid sources and unknown translated labels',
 
 test('shared-base liveries connect all 22 pages, selectors, roles, producers and tests without inventing observations',()=>{
   const result=buildLiveryTopology();assert.deepEqual(result.errors,[]);
-  assert.deepEqual(result.summary,{pages:22,variants:2,components:10,roles:18});
+  assert.deepEqual(result.summary,{pages:22,variants:2,components:11,roles:18});
+  const countersId='ui:livery-component:account-mode-counts',counters=result.edges.filter(edge=>edge.source===countersId);
+  assert.deepEqual(result.edges.filter(edge=>edge.target===countersId&&edge.relation==='ui_declares_livery_component').map(edge=>edge.source),['ui:page:area_privata.html','ui:page:lista_aziende.html']);
+  assert.ok(counters.some(edge=>edge.relation==='ui_rendered_by'&&edge.target==='ui:source:Frontend/public/assets/js/modules/azienda/lista_aziende.js'));
+  assert.ok(counters.some(edge=>edge.relation==='ui_rendered_by'&&edge.target==='ui:source:Frontend/public/assets/js/modules/privato/area_privata.js'));
+  assert.ok(counters.some(edge=>edge.relation==='ui_loads_stylesheet'&&edge.target==='ui:source:Frontend/public/assets/css/core_pagine.css'));
+  assert.ok(counters.some(edge=>edge.relation==='ui_declares_test'&&edge.target==='ui:source:tests/ui-account-mode-counts.browser.test.mjs'));
+  assert.deepEqual(counters.filter(edge=>edge.relation==='ui_expects_color_role').map(edge=>edge.target),['ui:livery-color-role:--text-primary','ui:livery-color-role:--accent']);
+  for(const edge of counters.filter(edge=>edge.relation==='ui_expects_color_role'))assert.deepEqual(edge.graphics,['classic','new']);
   const urgencyId='ui:livery-component:home-urgency',urgency=result.edges.filter(edge=>edge.source===urgencyId);
   assert.deepEqual(result.edges.filter(edge=>edge.target===urgencyId&&edge.relation==='ui_declares_livery_component').map(edge=>edge.source),['ui:page:home_page.html']);
   for(const file of ['Frontend/public/home_page.html','Frontend/public/assets/js/modules/home/home-deadline-dashboard.js'])assert.ok(urgency.some(edge=>edge.relation==='ui_rendered_by'&&edge.target==='ui:source:'+file));

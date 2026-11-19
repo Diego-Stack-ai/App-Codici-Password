@@ -33,7 +33,8 @@
         "Frontend/public/assets/js/theme-init.js",
         "Frontend/public/assets/css/core.css",
         "Frontend/public/assets/css/core_ui.css",
-        "Frontend/public/assets/css/vault-frame.css"
+        "Frontend/public/assets/css/vault-frame.css",
+        "Frontend/public/assets/js/modules/core/vault-frame-production.js"
       ],
       "trigger": {
         "kind": "real-producer",
@@ -53,7 +54,9 @@
         }
       ],
       "tests": [
-        "tests/ui-dynamic-themes.browser.test.mjs"
+        "tests/ui-dynamic-themes.browser.test.mjs",
+        "tests/vault-frame-resume.browser.test.mjs",
+        "tests/vault-frame-boundaries.test.mjs"
       ]
     },
     {
@@ -67,7 +70,8 @@
         "Frontend/public/app.html",
         "Frontend/public/assets/css/core.css",
         "Frontend/public/assets/css/core_ui.css",
-        "Frontend/public/assets/css/vault-frame.css"
+        "Frontend/public/assets/css/vault-frame.css",
+        "Frontend/public/assets/js/modules/core/vault-frame-production.js"
       ],
       "trigger": {
         "kind": "real-producer",
@@ -91,7 +95,9 @@
         }
       ],
       "tests": [
-        "tests/ui-dynamic-themes.browser.test.mjs"
+        "tests/ui-dynamic-themes.browser.test.mjs",
+        "tests/vault-frame-resume.browser.test.mjs",
+        "tests/vault-frame-boundaries.test.mjs"
       ]
     },
     {

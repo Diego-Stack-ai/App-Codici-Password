@@ -561,5 +561,37 @@
       }
     ]
   },
-  "limits": "Local real producers with synthetic repositories; no real Auth/Vault, physical devices or production certification. Gradients are measured by the existing ancestor compositor; sibling glow/watermark optical occlusion is assessed separately in screenshots."
+  "limits": "Local real producers with synthetic repositories; no real Auth/Vault, physical devices or production certification. Gradients are measured by the existing ancestor compositor; sibling glow/watermark optical occlusion is assessed separately in screenshots.",
+  "accountModeCounts": {
+    "pages": [
+      "area_privata.html",
+      "lista_aziende.html"
+    ],
+    "selectors": [
+      "#count-standard",
+      "#count-shared",
+      "#count-memo",
+      "#count-shared-memo",
+      ".company-mode-count"
+    ],
+    "inkRole": "--text-primary",
+    "fillRole": "--accent",
+    "fillMixPercentage": 16,
+    "minimumContrast": 4.5,
+    "producers": [
+      "Frontend/public/area_privata.html",
+      "Frontend/public/assets/js/modules/privato/area_privata.js",
+      "Frontend/public/assets/js/modules/azienda/lista_aziende.js"
+    ],
+    "styles": [
+      "Frontend/public/assets/css/core_pagine.css",
+      "Frontend/public/assets/css/area_privata.css",
+      "Frontend/public/assets/css/lista_aziende.css"
+    ],
+    "test": {
+      "file": "tests/ui-account-mode-counts.browser.test.mjs",
+      "name": "private account counters match Companies across seven palettes and both liveries"
+    },
+    "scope": "Quattro contatori Privato con la stessa UI Aziende; palette principale in entrambe le grafiche. Identita, valori e destinazioni conservati; badge Home separati."
+  }
 }

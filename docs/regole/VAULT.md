@@ -1,5 +1,12 @@
 # Vault
 
+<a id="ripresa-contatori-1286-2026-11-19-vault"></a>
+
+## Ripresa — feedback di presentazione candidato 1.2.286
+
+Il comando Sblocca e riprendi conserva il reload e le verifiche correnti; lo stato visivo occupato copre l’attesa e non concede chiavi o ammissione. Cleanup del feedback su conclusione/blocco, guardie di generazione e modale reale utilizzabile. [Prove e perimetro](../evidenze/COLLAUDI.md#ripresa-contatori-1286-2026-11-19). Materiale, lease, inattività, identità e autorizzazioni restano governati dai contratti esistenti. Questa confezione non chiude casi completi della cornice né attesta passkey o RAM sul telefono.
+
+
 <a id="logout-mobile-1285-pubblico-2026-11-19-vault"></a>
 
 ## Uscita dalla cornice — raccordo distribuito nella 1.2.285

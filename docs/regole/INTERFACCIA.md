@@ -1,5 +1,24 @@
 # Interfaccia
 
+<a id="ripresa-contatori-1286-2026-11-19-ui"></a>
+
+## Ripresa e contatori — candidata 1.2.286
+
+Conservati [feedback di attesa e relativi stati](../evidenze/COLLAUDI.md#ripresa-contatori-1286-2026-11-19) e componente condiviso company-mode-count per i quattro contatori privati. Link occupato dopo ripresa accettata, animazione durante verifica e attesa della prova, modale utilizzabile, chiusura del feedback su conclusione/blocco e isolamento tra mount; movimento ridotto rispettato. Contatori con fondo tenue della palette principale, testo leggibile e cifre lunghe contenute, stessa resa in Classica/Nuova. Mappa e regressioni nominano pagine, produttori, CSS e ruoli; la pubblicazione e il riscontro fisico restano da acquisire.
+
+
+## Feedback durante la ripresa della Vault — candidato locale
+
+Dopo un comando di ripresa accettato, mostrare lo stato occupato e impedire attivazioni duplicate. Il feedback prosegue nella verifica iniziale dopo reload e nell'attesa della prova Vault, con colori del tema, movimento ridotto rispettato e tocchi della modale reali disponibili. Chiuderlo su conclusione o blocco; il mount corrente possiede il proprio stato visivo. [Richiesta, sorgenti e regressioni](../evidenze/COLLAUDI.md#cornice-attesa-sblocco-2026-11-19). Le associazioni esistenti UI275-01/UI275-02 collegano anche adattatore e test del feedback; mappa dichiarata e prove effettive restano distinte.
+
+<a id="contatori-ui-aziende-2026-11-19"></a>
+
+## Contatori dei tipi Account — parità Privato/Aziende, candidata locale
+
+I quattro ID `count-standard`/`count-shared`/`count-memo`/`count-shared-memo` dell'Area Privata riusano la classe `.company-mode-count` della lista Aziende. Regola unica in `core_pagine.css`: fondo della palette principale al 16%, testo `--text-primary`, font `--font-badge`, padding e raggio arrotondato del riferimento, senza restringere il badge sotto le cifre. Stessa resa in Classica/Nuova; valori, destinazioni e produttori conservati. Badge di stato Home e altre superfici mantengono il proprio ruolo.
+
+[Scelta e matrice locale](../evidenze/COLLAUDI.md#contatori-area-privata-telefono-2026-11-19); contratto livree, topologia e test collegano pagine → quattro contatori → produttori → CSS/ruoli → regressione nominata. Dichiarazione della mappa, prove browser sintetiche e riscontri del telefono restano distinti; questo blocco non attesta la distribuzione grafica.
+
 <a id="logout-mobile-1285-pubblico-2026-11-19-ui"></a>
 
 ## Esci — ritorno top-level distribuito nella 1.2.285

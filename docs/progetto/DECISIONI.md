@@ -1,5 +1,22 @@
 # Decisioni
 
+<a id="ripresa-contatori-1286-2026-11-19-decisione"></a>
+
+## Ripresa e contatori — ordine di pubblicazione 1.2.286
+
+Diego approva il rilascio con nuova versione dei due correttivi già preparati: attesa visibile fino alla richiesta Vault/passkey e quattro contatori dell’Area Privata con lo stesso badge Aziende. Il nuovo ordine comprende PR, merge, deploy Hosting e manutenzione MD/GitHub; supera il precedente limite locale per questo perimetro. [Prove e limiti](../evidenze/COLLAUDI.md#ripresa-contatori-1286-2026-11-19). Le osservazioni telefoniche della285 e i test sintetici della286 restano distinti; la guida manuale riprende dopo la verifica pubblica.
+
+
+## Attesa dello sblocco — feedback richiesto, 19/11/2026
+
+Diego chiede una rotellina dopo «Sblocca e riprendi», perché la richiesta Vault/passkey impiega alcuni secondi a comparire. Il feedback deve coprire anche la ricarica e la verifica prima della richiesta, conservando il flusso di accesso. [Implementazione locale e limiti](../evidenze/COLLAUDI.md#cornice-attesa-sblocco-2026-11-19). Nessuna misura della latenza o scelta sulla sua causa deriva da questa segnalazione.
+
+<a id="contatori-ui-aziende-decisione-2026-11-19"></a>
+
+## 19/11/2026 — contatori privati con la UI Aziende
+
+Dopo la nuova foto dei piccoli riquadri colorati in Area Privata, Diego risponde «stessa ui di aziende». Riferimento: i quattro contatori delle tipologie Account nella lista Le mie aziende. Riutilizzare quel badge arrotondato, fondo tenue della palette principale e testo leggibile in entrambe le grafiche; conservare dati e collegamenti. [Evidenze e candidato locale](../evidenze/COLLAUDI.md#contatori-area-privata-telefono-2026-11-19). I risultati sul logout e i giri aziendali della cornice restano distinti dalla modifica grafica.
+
 <a id="logout-mobile-1285-pubblico-2026-11-19-decisione"></a>
 
 ## Logout mobile — ordine eseguito e limiti conservati

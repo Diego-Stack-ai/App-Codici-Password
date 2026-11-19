@@ -1,12 +1,27 @@
 # Incarico corrente
 
+<a id="ripresa-contatori-1286-2026-11-19-incarico"></a>
+
+## Rilascio 1.2.286 — rotellina e contatori autorizzati
+
+Ordine diretto di Diego: «Procedi con PR, merge e deploy della rotellina di attesa e dei contatori dell’Area Privata, con nuova versione e aggiornamento di MD e GitHub. Poi riprendiamo il collaudo dal cellulare». Superato per questi due soli correttivi il precedente limite di preparazione locale senza pubblicazione. Root unico scrittore; revisori indipendenti in sola lettura; conservati 34 MD e i riscontri manuali della 1.2.285.
+
+Confezionare 1.2.286 sul master verificato 88f5eb3a, ramo codex/resume-counters-1286-20261119. Perimetro: feedback occupato e animazione nella ripresa esistente della cornice, più i quattro contatori privati con la UI Aziende. Guardie, dati, destinazioni, ammissione e backend conservati. Snapshot prima del bump, versione canonica, guida 16/reviewed286 e derivati offline/QA; confronto dei 367 file dopo sola normalizzazione versioni/EOL. Riesame indipendente sul commit finale e CI PR completa verde; merge con testa attesa; CI master e validate Hosting sullo stesso merge immutabile. Production protetto solo dopo entrambi verdi e master invariato, secondo la delega della sessione, senza cambiare workflow o protezioni. Scope hosting; poi verifica pubblica integrale e ricevuta MD/GitHub. [Prove e checkpoint](../evidenze/COLLAUDI.md#ripresa-contatori-1286-2026-11-19). Riprendere il collaudo fisico una prova alla volta soltanto dopo pubblicazione e verifica della versione sul telefono.
+
+
+## Seguito manuale — attesa dopo Sblocca e riprendi
+
+TEL285-F15/prova 14 confermato da Diego. Nuova richiesta esplicita: mostrare una rotellina nei secondi tra il tocco su «Sblocca e riprendi» e la richiesta Vault/passkey. Implementare e verificare il feedback nel percorso reale, con stati conclusivi, modale accessibile e protezione dai doppi clic. [Evidenze del candidato locale](../evidenze/COLLAUDI.md#cornice-attesa-sblocco-2026-11-19); si aggiunge ai contatori, senza un nuovo ordine di pubblicazione. La guida del collaudo resta una prova alla volta.
+
 <a id="logout-mobile-1285-pubblico-2026-11-19-incarico"></a>
 
 ## Logout mobile — pubblicazione eseguita, ricollaudo riferito positivo
 
 Eseguito l'ordine di correzione, PR #337, merge e Hosting 1.2.285 sul sorgente `56fe4167e999c3baafa1857fc28b66acf49dff7f`, con gate e verifica pubblica PASS. [Ricevuta](../evidenze/COLLAUDI.md#logout-mobile-1285-pubblico-2026-11-19). Chiusura tramite soli MD/GitHub, root unico scrittore, supporti in lettura e 34 MD conservati; nessun secondo Hosting per questa ricevuta.
 
-Prova 8/TEL285-F09 confermata positivamente da Diego dopo verifica della versione e domanda separata sulla stabilità di Accedi; issue #336 chiusa nel contesto provato. [Riscontro e limiti](../evidenze/COLLAUDI.md#logout-mobile-1285-telefono-2026-11-19). Riprende la guida una prova alla volta dal normale rientro con nuovo sblocco, senza dedurre D08/C1/C2 completi o ulteriori permessi. Gli altri lotti e il FAIL 284 conservano autorità e limiti dei checkpoint storici sotto.
+Prova 8/TEL285-F09 confermata positivamente da Diego dopo verifica della versione e domanda separata sulla stabilità di Accedi; issue #336 chiusa nel contesto provato. [Riscontro e limiti](../evidenze/COLLAUDI.md#logout-mobile-1285-telefono-2026-11-19). I [successivi TEL285-F10–F14](../evidenze/COLLAUDI.md#cornice-telefono-rientro-1285-2026-11-19) confermano nuovo sblocco e giri aziendali nel proprio perimetro. La guida prosegue una prova alla volta, senza dedurre casi completi o ulteriori permessi.
+
+Per il distinto rilievo dei contatori Diego sceglie esplicitamente «stessa ui di aziende»: applicare ai quattro numeri privati lo stile già usato dalle tipologie Account di Le mie aziende, conservando ID, dati e link, e verificarlo nelle due grafiche e nei sette temi. Il riferimento esistente viene reso condiviso; nessuna modifica alla logica dei dati, Auth/Vault, backend o altri controlli. [Correttivo locale e prove](../evidenze/COLLAUDI.md#contatori-area-privata-telefono-2026-11-19); la produzione285 resta distinta dal candidato grafico. Gli altri lotti e il FAIL284 conservano autorità e limiti dei checkpoint storici sotto.
 
 <a id="logout-mobile-1285-incarico-2026-11-19"></a>
 

@@ -1,10 +1,21 @@
 # Programma
 
+<a id="ripresa-contatori-1286-2026-11-19-programma"></a>
+
+## Prossimo rilascio — 1.2.286, poi collaudo telefono
+
+Autorizzati PR/merge/Hosting dei due correttivi di presentazione, [confezione ed evidenze](../evidenze/COLLAUDI.md#ripresa-contatori-1286-2026-11-19). Completare i gate sulla candidata immutabile e la verifica pubblica; poi conferma versione sul telefono, controllo mirato di rotellina/contatori e ripresa della guida una prova alla volta. La produzione resta285 fino alla ricevuta. I casi D02/D04/D08/C1/C2 completi, altri dispositivi, D15/D18 e gli altri lotti conservano limiti e prerequisiti.
+
+
+## Seguito del collaudo — attesa sblocco
+
+TEL285-F15/Ricerca PASS riferito. Preparato su richiesta il [feedback di attesa Vault/passkey](../evidenze/COLLAUDI.md#cornice-attesa-sblocco-2026-11-19), distinto dalla durata e dalla causa del ritardo non misurate. Candidato locale insieme alla parità dei contatori Privato/Aziende; nessuna pubblicazione aggiuntiva. Riprendere la guida manuale una prova alla volta; non chiudere i casi completi sulla base dei soli percorsi già riferiti.
+
 <a id="logout-mobile-1285-pubblico-2026-11-19-programma"></a>
 
 ## Logout mobile — rilascio 1.2.285 concluso
 
-Completati correzione, riesami, CI PR/master/Hosting e verifica pubblica. [Ricevuta](../evidenze/COLLAUDI.md#logout-mobile-1285-pubblico-2026-11-19). Diego conferma il ricollaudo fisico TEL285-F09 della prova 8: ritorno immediato al login e Accedi stabile nella domanda separata dei 10 secondi, [PASS riferito con limiti](../evidenze/COLLAUDI.md#logout-mobile-1285-telefono-2026-11-19); issue #336 chiusa per il difetto osservato. Il prossimo passo è il normale rientro con nuovo sblocco prima dei dati, una prova alla volta. D08/C1/C2 completi restano aperti. Restano separati i contatori rettangolari, D15/D18, altri browser/dispositivi e i lotti sicurezza/prodotto. I checkpoint candidati sotto sono storici.
+Completati correzione, riesami, CI PR/master/Hosting e verifica pubblica. [Ricevuta](../evidenze/COLLAUDI.md#logout-mobile-1285-pubblico-2026-11-19). Diego conferma TEL285-F09 e i successivi [TEL285-F10–F14](../evidenze/COLLAUDI.md#cornice-telefono-rientro-1285-2026-11-19): nuovo accesso/sblocco e giri aziendali con ritorni corretti senza ulteriori sblocchi. Issue #336 chiusa per il logout osservato; guida alle altre prove una alla volta. D02/D04/D08/C1/C2 completi restano aperti. Per i contatori sceglie la UI Aziende: [correttivo locale e matrice verificata](../evidenze/COLLAUDI.md#contatori-area-privata-telefono-2026-11-19), distinto dalla produzione285 e dai collaudi funzionali. D15/D18, altri browser/dispositivi e i lotti sicurezza/prodotto mantengono i rispettivi gate. I checkpoint candidati sotto sono storici.
 
 <a id="logout-mobile-1285-programma-2026-11-19"></a>
 
