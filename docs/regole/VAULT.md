@@ -1,5 +1,11 @@
 # Vault
 
+<a id="logout-mobile-1285-pubblico-2026-11-19-vault"></a>
+
+## Uscita dalla cornice — raccordo distribuito nella 1.2.285
+
+Distribuita la presa in carico dell'uscita nel task del documento proprietario, con blocco/revoca e pulizia del materiale sincroni, figlio nascosto/inert fino alla navigazione top-level, guardie e watchdog conservati. [Ricevuta](../evidenze/COLLAUDI.md#logout-mobile-1285-pubblico-2026-11-19). Nessun cambio ad Auth/MFA, lease, inattività o ammissione ordinaria; nessuna scrittura policy/backend. La distribuzione non certifica lo stato RAM o Auth sul telefono: ricollaudo TEL285-F09 atteso e issue #336 aperta.
+
 <a id="logout-mobile-1285-vault-2026-11-19"></a>
 
 ## Uscita dalla cornice — candidata285

@@ -1,5 +1,11 @@
 # Interfaccia
 
+<a id="logout-mobile-1285-pubblico-2026-11-19-ui"></a>
+
+## Esci — ritorno top-level distribuito nella 1.2.285
+
+Distribuito il raccordo Home/Esci → cleanup/navigation → owner della cornice → login top-level utilizzabile, con presa in carico del padre e revoca/mascheramento immediati. [Ricevuta e limiti](../evidenze/COLLAUDI.md#logout-mobile-1285-pubblico-2026-11-19). Restano invariati palette, geometria, testi e altri comandi; i contatori rettangolari non rientrano nel correttivo. Il risultato fisico TEL285-F09 resta da acquisire, senza cancellare il FAIL 284 o estendere i PASS ad altri dispositivi.
+
 <a id="logout-mobile-1285-ui-2026-11-19"></a>
 
 ## Esci — ritorno top-level candidato285
