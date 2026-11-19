@@ -1,5 +1,11 @@
 # Interfaccia
 
+<a id="logout-mobile-1285-ui-2026-11-19"></a>
+
+## Esci — ritorno top-level candidato285
+
+Percorso registrato: Home/Esci → components-v129.js → logout-session.js/frame-navigation.js → vault-frame-owner.mjs → login top-level, con gate e fence condivisi. [Test e riscontri](../evidenze/COLLAUDI.md#logout-mobile-1285-collaudi-2026-11-19) collegano il click reale del figlio al login utilizzabile. L'uscita sincrona nasconde/revoca; il task del padre richiede la navigazione senza staccare prima il chiamante. Target reauth/recovery e comandi sostitutivi conservati, nessuna modifica a palette, geometria o testi. Il FAIL telefonico284 resta aperto alla conferma del correttivo dopo pubblicazione.
+
 <a id="urgenze-home-1284-pubblico-2026-11-19-ui"></a>
 
 ## Urgenze Home — rosso distribuito nella1.2.284

@@ -1,5 +1,11 @@
 # Ambiente di test
 
+<a id="logout-mobile-1285-ambiente-2026-11-19"></a>
+
+## Logout mobile — ambiente del correttivo285
+
+Worktree isolato sulla base8847d750; dati di fixture e rete esterna bloccata. [Banco integrato e riscontri fisici distinti](../evidenze/COLLAUDI.md#logout-mobile-1285-collaudi-2026-11-19): owner/gate/fence/cleanup reali con Auth e SDK sintetici, Chrome locale, interruzione del chiamante simulata. WebKit non installato, nessuna certificazione iPhone dalla viewport o dallo stress. La conferma sul telefono della candidata segue la pubblicazione; nessun caso C1/C2 completo chiuso dal129/129 locale.
+
 <a id="urgenze-home-1284-pubblico-2026-11-19-ambiente"></a>
 
 ## 1.2.284 — pubblicazione e limiti delle prove
