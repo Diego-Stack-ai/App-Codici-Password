@@ -1,5 +1,11 @@
 # Interfaccia
 
+<a id="urgenze-home-1284-pubblico-2026-11-19-ui"></a>
+
+## Urgenze Home — rosso distribuito nella1.2.284
+
+Distribuita l'eccezione locale --home-urgency-ink per triangolo e glifi delle righe Urgenze, identica in Classica/Nuova e indipendente dalle sette palette: #A61B1B Chiaro / #FECACA Scuro. Registri e topologia collegano produttori, selettori, ruolo e regressione; glifi, superfici e icone ordinarie conservati. [Pubblicazione verificata e limiti](../evidenze/COLLAUDI.md#urgenze-home-1284-pubblico-2026-11-19). Le sezioni candidate sotto descrivono la preparazione; la valutazione fisica della284 resta distinta.
+
 <a id="urgenze-home-1284-ui-2026-11-18"></a>
 
 ## Urgenze Home — rosso funzionale in entrambe le grafiche

@@ -1,5 +1,11 @@
 # Ambiente di test
 
+<a id="urgenze-home-1284-pubblico-2026-11-19-ambiente"></a>
+
+## 1.2.284 — pubblicazione e limiti delle prove
+
+CI PR/master/validate Hosting sul sorgente d4f09597b41ff86fe069b036aaed95f2b7f3f821 SUCCESS, con i conteggi distinti e la verifica pubblica 367 hash/41 profili/normalizzazioni e sei GET PASS nella [ricevuta](../evidenze/COLLAUDI.md#urgenze-home-1284-pubblico-2026-11-19). Il banco locale dei produttori reali è sintetico e non sostituisce il controllo sul telefono della nuova icona rossa. I riscontri precedenti della283 conservano il loro perimetro; nessun caso cornice o audit separato chiuso automaticamente.
+
 <a id="urgenze-home-1284-ambiente-2026-11-18"></a>
 
 ## Urgenze Home — banco 1.2.284

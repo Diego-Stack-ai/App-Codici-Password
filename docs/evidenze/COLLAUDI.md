@@ -1,5 +1,22 @@
 # Collaudi
 
+<a id="urgenze-home-1284-pubblico-2026-11-19"></a>
+
+## APP 1.2.284 — Urgenze Home pubblicate e verificate
+
+Produzione verificata 1.2.284, sorgente d4f09597b41ff86fe069b036aaed95f2b7f3f821, sourceDirty=false. [PR #334](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/334), testa8245a1c74b0676ac5b049f688f4f373b245612c0, unita dopo due GO indipendenti e CI verde. Albero Git pubblico e38545feefdee97b35a333dc0734f33a421fb330, invariato rispetto alla testa riesaminata.
+
+- [CI PR #1221](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44393615755) SUCCESS: 68 blocchi TAP, 3862 test: 3851 PASS / 11 SKIP / 0 FAIL / 0 cancellati.
+- [CI master #1222](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44399368549) SUCCESS: 68 blocchi TAP, 3862 test: 3851 PASS / 11 SKIP / 0 FAIL / 0 cancellati.
+- Validate della [Hosting #1223](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44399762307) SUCCESS: 68 blocchi TAP, 3862 test: 3851 PASS / 11 SKIP / 0 FAIL / 0 cancellati. Scope hosting verificato nel log e stesso sorgente/digest del master prima dell'approvazione.
+- Production: manuale di Diego dopo HTTP403 del collegamento automatico; deploy solo Hosting SUCCESS, concluso 19/11/2026, 04:06:25 Europe/Rome. Workflow, credenziali e protezioni conservati; nessun passaggio di deploy backend eseguito.
+- Verifica pubblica autonoma da byte Git LF: 367 hash, 41 profili di intestazione e normalizzazioni PASS, conclusa 19/11/2026, 04:07:48 Europe/Rome. Sei GET separati PASS alle 19/11/2026, 04:07:49 Europe/Rome: manifest, core_ui.css, core_pagine.css, app-env.js, Home e produttore della dashboard.
+- Digest pubblico 223087541c51636025e20e716fa9bcefba86cd8eb1dc0a39dfb1501c80fafd6b; SHA256 manifest 64842ea825815ed80e2a3a613a4a87c50f415bd7c286342b4a85b9b089728217. Versione284/307 riferimenti, guida16/reviewed284, offline61 export/347 risorse.
+
+Distribuiti il triangolo e i glifi delle righe Urgenze Home nel rosso di stato #A61B1B Chiaro / #FECACA Scuro, tutti i sette temi e le due grafiche. Scadenze ordinarie, glifi salvati/default, superfici, badge, link e dati conservati. Mappa10 componenti/18 ruoli, regressione RGB/contrasto e negativo inclusi. La prova fisica del correttivo284 resta successiva al rilascio; i riscontri283 e gli altri residui mantengono i propri limiti.
+
+Ricevuta tramite soli MD/GitHub, senza un altro Hosting. I checkpoint candidati sotto conservano preparazione e prove locali, non indicano un rilascio ancora pendente.
+
 <a id="urgenze-home-1284-collaudi-2026-11-18"></a>
 
 ## Urgenze Home 1.2.284 — correttivo locale e confezione

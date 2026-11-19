@@ -1,5 +1,11 @@
 # Incarico corrente
 
+<a id="urgenze-home-1284-pubblico-2026-11-19-incarico"></a>
+
+## Ordine Urgenze Home — pubblicazione eseguita e ricevuta
+
+Eseguito il mandato del18/11: #334, riesami e CI PR/master/Hosting verdi, production manuale di Diego dopo HTTP403 del collegamento automatico, sorgente d4f09597b41ff86fe069b036aaed95f2b7f3f821 pubblicato e verificato integralmente. [Ricevuta](../evidenze/COLLAUDI.md#urgenze-home-1284-pubblico-2026-11-19). Chiudere MD/GitHub con PR soltanto documentale, controlli e riesame indipendente; nessun ulteriore Hosting. Root unico esecutore, supporti in lettura e34MD conservati. Nessun nuovo lotto o PASS fisico dedotto dalla pubblicazione.
+
 <a id="urgenze-home-1284-incarico-2026-11-18"></a>
 
 ## Ordine del 18/11 — Urgenze Home, nuova versione e pubblicazione

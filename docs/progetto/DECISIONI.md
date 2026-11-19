@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="urgenze-home-1284-pubblico-2026-11-19-decisione"></a>
+
+## Urgenze Home — ordine del18/11 eseguito
+
+Attuata l'eccezione approvata da Diego per le sole icone Urgenze e la pubblicazione1.2.284: #334, gate verdi sul sorgente d4f09597b41ff86fe069b036aaed95f2b7f3f821, production manuale di Diego dopo HTTP403 del collegamento automatico, verifica pubblica integrale PASS. [Ricevuta](../evidenze/COLLAUDI.md#urgenze-home-1284-pubblico-2026-11-19). Restano le prove fisiche del correttivo; nessun ampliamento dei permessi o degli altri lotti.
+
 <a id="urgenze-home-1284-decisione-2026-11-18"></a>
 
 ## 18/11/2026 — eccezione rossa delle icone Urgenze Home

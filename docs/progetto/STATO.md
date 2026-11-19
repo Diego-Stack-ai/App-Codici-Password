@@ -2,6 +2,14 @@
 
 <a id="stato-corrente"></a>
 
+<a id="urgenze-home-1284-pubblico-2026-11-19-stato"></a>
+
+## APP 1.2.284 — online e verificata
+
+Online 1.2.284, sorgente d4f09597b41ff86fe069b036aaed95f2b7f3f821, sourceDirty=false. #334 unita dopo due GO e CI PR #1221 verde; CI master #1222 e Hosting #1223 SUCCESS sul medesimo sorgente. Production manuale di Diego dopo HTTP403 del collegamento automatico; pubblicazione solo Hosting conclusa 19/11/2026, 04:06:25 Europe/Rome. Verifica pubblica 367 hash/41 profili e normalizzazioni PASS, sei GET indipendenti PASS. [Ricevuta completa](../evidenze/COLLAUDI.md#urgenze-home-1284-pubblico-2026-11-19).
+
+Le icone della sola card Urgenze Home usano il rosso di stato nei sette temi e nelle due grafiche. Gli altri elementi della livrea e il comportamento della cornice sono conservati. Restano la prova fisica della284 e gli altri lotti della scaletta; i checkpoint candidati e le attese sotto sono storici. La chiusura documentale conserva il runtime pubblicato.
+
 <a id="urgenze-home-1284-stato-2026-11-18"></a>
 
 ## Candidata 1.2.284 — icone Urgenze Home

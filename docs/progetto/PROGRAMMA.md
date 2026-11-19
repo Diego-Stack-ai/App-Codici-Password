@@ -1,5 +1,11 @@
 # Programma
 
+<a id="urgenze-home-1284-pubblico-2026-11-19-programma"></a>
+
+## Urgenze Home — rilascio 1.2.284 concluso
+
+Correttivo distribuito con #334/Hosting #1223 e verifica pubblica integrale PASS. [Ricevuta](../evidenze/COLLAUDI.md#urgenze-home-1284-pubblico-2026-11-19). La chiusura tecnica aggiorna MD/GitHub senza un altro Hosting. Prossimo riscontro: icone rosse nella card Urgenze della Home sul telefono aggiornato alla284. Gli altri residui grafici/nativi, collaudi della cornice, sicurezza/recupero, prodotto e consegna separata di Claude mantengono ordine e limiti della scaletta.
+
 <a id="urgenze-home-1284-programma-2026-11-18"></a>
 
 ## Urgenze Home — seguito del controllo fisico, 18/11/2026
