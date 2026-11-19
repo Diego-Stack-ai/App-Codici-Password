@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="urgenze-home-1284-pubblico-2026-11-19-rilascio"></a>
+
+## APP 1.2.284 — procedura eseguita
+
+#334 unita dopo due GO e CI PR #1221 SUCCESS; CI master #1222 e validate Hosting #1223 sullo stesso sorgente d4f09597b41ff86fe069b036aaed95f2b7f3f821 e digest pubblico. Scope hosting verificato prima dell'approvazione; production manuale di Diego dopo HTTP403 del collegamento automatico, deploy solo Hosting SUCCESS e verifica pubblica completa PASS. [Ricevuta](../evidenze/COLLAUDI.md#urgenze-home-1284-pubblico-2026-11-19). La successiva PR della ricevuta conserva workflow, credenziali, protezioni e runtime e non richiede un secondo Hosting.
+
 <a id="urgenze-home-1284-rilascio-2026-11-18"></a>
 
 ## Candidata 1.2.284 — Urgenze Home, solo Hosting
