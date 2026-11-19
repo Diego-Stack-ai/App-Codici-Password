@@ -103,12 +103,13 @@ export function createFrameTransport({window: win, release, enabled = false, now
         if (win.parent.vaultFrameNavigation?.navigateFromChild(win, requestingDocument, url.href, false)) event.preventDefault();
       } catch { /* No navigation authority. */ }
     });
-    listen(win, 'hashchange', () => {try {win.parent.vaultFrameNavigation?.syncFromChild(win, requestingDocument);} catch {clear();}});
+    listen(win, 'hashchange', () => {try {win.parent.vaultFrameNavigation?.syncFromChild(win, requestingDocument, 'push');} catch {clear();}});
+    listen(win, 'popstate', () => {try {win.parent.vaultFrameNavigation?.syncFromChild(win, requestingDocument, 'pop');} catch {clear();}});
     for (const method of ['replaceState', 'pushState']) {
       const original = win.history[method].bind(win.history);
       const wrapper = (...args) => {
         const result = original(...args);
-        try { win.parent.vaultFrameNavigation?.syncFromChild(win, requestingDocument); } catch { /* Parent gone. */ }
+        try { win.parent.vaultFrameNavigation?.syncFromChild(win, requestingDocument, method === 'pushState' ? 'push' : 'replace'); } catch { /* Parent gone. */ }
         return result;
       };
       win.history[method] = wrapper;

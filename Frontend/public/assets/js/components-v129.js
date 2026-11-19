@@ -1,7 +1,7 @@
-import {beginFrameLogout} from './frame-navigation.js';
+import {beginFrameLogout,handleFrameBack,navigateDocument} from './frame-navigation.js';
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.286';
+import { auth } from './firebase-config.js?v=1.2.287';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
@@ -66,12 +66,9 @@ const AUTH_PATHS = new Set([
     '/imposta_nuova_password.html'
 ]);
 
-/**
- * Torna alla pagina interna realmente precedente quando il browser la espone.
- * Dopo refresh, deep-link, login o provenienza esterna usa invece il parent
- * gerarchico indicato dalla pagina corrente.
- */
+// The frame owns Back; standalone uses safe history or the hierarchical parent.
 function navigateBack(fallbackHref, preferHistory = true) {
+    if (handleFrameBack(fallbackHref, preferHistory)) return;
     try {
         const previous = document.referrer ? new URL(document.referrer) : null;
         const current = new URL(window.location.href);
@@ -89,14 +86,11 @@ function navigateBack(fallbackHref, preferHistory = true) {
         LOG('[NAV] Referrer non utilizzabile, applico il fallback gerarchico', error);
     }
 
-    window.location.replace(fallbackHref);
+    navigateDocument(fallbackHref, true);
 }
 
 
-/**
- * Inizializza i componenti condivisi (Header/Footer)
- * Rileva automaticamente se siamo su una pagina Auth o App.
- */
+/** Initialize the shared header and footer once for the current document. */
 export async function initComponents() {
     // Guard idempotente: evita doppia inizializzazione e fetch multipli
     if (_componentsInitialized) return;
@@ -134,7 +128,7 @@ export async function initComponents() {
                     type: 'button',
                     className: 'header-avatar-box header-profile-trigger',
                     title: t('page_title_profile') || 'Profilo',
-                    onclick: () => window.location.href = 'profilo_privato.html'
+                    onclick: () => navigateDocument('profilo_privato.html')
                 }, [
                     createElement('img', {
                         id: 'user-avatar-img',
@@ -151,17 +145,14 @@ export async function initComponents() {
                 let preferHistory = true;
                 const urlParams = new URLSearchParams(window.location.search);
 
-                // Mapping Logico Navigazione
-                // La pagina precedente reale ha priorità; questa mappa interviene
-                // soltanto dopo refresh, deep-link o provenienza non attendibile.
+                // Hierarchical fallback when previous history cannot be trusted.
                 if (path.endsWith('lista_aziende.html') || path.endsWith('scadenze.html')) {
                     fallbackHref = 'home_page.html';
                 } else if (path.endsWith('area_privata.html')) {
                     fallbackHref = 'home_page.html';
                 } else if (path.endsWith('dettaglio_scadenza.html')) {
                     fallbackHref = 'scadenze.html';
-                    // Il dettaglio appartiene sempre al contenitore Scadenze:
-                    // non seguire la history, che potrebbe riportare alla Home.
+                    // Deadline details always return to Scadenze.
                     preferHistory = false;
                 } else if (path.endsWith('aggiungi_scadenza.html')) {
                     const id = urlParams.get('id');
@@ -178,9 +169,7 @@ export async function initComponents() {
                     fallbackHref = 'impostazioni.html';
                 } else if (path.endsWith('account_azienda.html') || path.endsWith('dati_azienda.html')) {
                     fallbackHref = 'lista_aziende.html';
-                    // Sono entrambe viste principali dell'azienda: la freccia
-                    // deve tornare sempre all'elenco, non seguire percorsi
-                    // intermedi rimasti nella history del browser/PWA.
+                    // Company roots always return to the company list.
                     preferHistory = false;
                 } else if (path.endsWith('dettaglio_account_azienda.html')) {
                     const aziendaId = urlParams.get('aziendaId') || urlParams.get('id_azienda');
@@ -193,8 +182,7 @@ export async function initComponents() {
                 } else if (path.endsWith('modifica_azienda.html')) {
                     const id = urlParams.get('id');
                     fallbackHref = id ? `dati_azienda.html?id=${id}` : 'lista_aziende.html';
-                    // Modifica con id e nuova azienda senza id hanno due parent
-                    // distinti e deterministici: non dipendono dalla history.
+                    // New and existing companies have different fixed parents.
                     preferHistory = false;
                 } else if (path.endsWith('profilo_privato.html')) {
                     fallbackHref = 'home_page.html';
@@ -210,7 +198,7 @@ export async function initComponents() {
                 const backFn = () => navigateBack(fallbackHref, preferHistory);
 
                 headerLeft.appendChild(
-                    createElement('button', { className: 'btn-icon-header', dataset: { action: 'back' }, onclick: backFn }, [
+                    createElement('button', { type: 'button', className: 'btn-icon-header', onclick: backFn }, [
                         createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'arrow_back' })
                     ])
                 );
@@ -228,7 +216,7 @@ export async function initComponents() {
                         type: 'button',
                         className: 'header-greeting-trigger',
                         title: t('page_title_profile') || 'Profilo',
-                        onclick: () => window.location.href = 'profilo_privato.html'
+                        onclick: () => navigateDocument('profilo_privato.html')
                     }, [
                         createElement('span', { id: 'home-greeting-text', className: 'header-greeting', textContent: timeGreeting }),
                         createElement('h1', { id: 'home-user-name', className: 'header-title', textContent: initialName })

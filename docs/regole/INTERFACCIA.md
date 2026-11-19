@@ -1,5 +1,11 @@
 # Interfaccia
 
+<a id="profilo-indietro-1287-ui-2026-11-19"></a>
+
+## Freccia — candidata con un solo comando
+
+L'header possiede il clic della freccia, senza una seconda delega dello stesso elemento a cleanup. Nella cornice il padre verifica documento e cronologia, oppure applica il parent gerarchico interno. Richieste rifiutate, pendenti o rivolte a owner non disponibile sono consumate senza Back nativo. Saluto/avatar usano la medesima navigazione coordinata. Standalone conserva precedente interno attendibile o fallback gerarchico. [Regressioni](../evidenze/COLLAUDI.md#profilo-indietro-1287-collaudi-2026-11-19); colori, dimensioni e decorazioni conservati, nessun delta della proposta compatta.
+
 <a id="ripresa-contatori-1286-pubblico-2026-11-19-ui"></a>
 
 ## Rotellina e contatori — distribuiti nella 1.2.286

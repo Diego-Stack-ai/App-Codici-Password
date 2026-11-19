@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="profilo-indietro-1287-decisione-2026-11-19"></a>
+
+## Indietro — mandato di correzione e pubblicazione
+
+Autorizzato il correttivo con nuova versione287, PR/merge/Hosting e aggiornamento degli MD esistenti/GitHub; [perimetro](INCARICO_CORRENTE.md#profilo-indietro-1287-incarico-2026-11-19). Un solo gestore applicativo, cronologia del padre verificata o fallback gerarchico interno; nessun Back nativo da richieste framed rifiutate. Nessuna deroga Auth/Vault o estensione al candidato grafico separato. I riscontri manuali dettagliati restano nella copia locale del registro.
+
 <a id="ripresa-contatori-1286-pubblico-2026-11-19-decisione"></a>
 
 ## Ordine di pubblicazione dei due correttivi eseguito

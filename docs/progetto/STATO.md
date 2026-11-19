@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+<a id="profilo-indietro-1287-stato-2026-11-19"></a>
+
+## Navigazione Indietro — candidata1.2.287, online1.2.286
+
+Correttivo e confezione locali completati, [prove tecniche](../evidenze/COLLAUDI.md#profilo-indietro-1287-collaudi-2026-11-19) positive. Singolo gestore, cronologia coordinata con owner o fallback interno; nessuna nuova autorità Auth/Vault. Proposta grafica compatta esclusa. Riesami sul commit finale, CI PR/master/Hosting e verifica pubblica ancora richiesti; nessuna pubblicazione dedotta dai test. I checkpoint sotto conservano la propria data/versione.
+
 <a id="ripresa-contatori-1286-pubblico-2026-11-19-stato"></a>
 
 ## APP 1.2.286 — online e verificata

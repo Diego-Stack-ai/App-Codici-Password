@@ -1,5 +1,11 @@
 # Programma
 
+<a id="profilo-indietro-1287-programma-2026-11-19"></a>
+
+## Prossimo passo — completare il rilascio tecnico287
+
+[Mandato](INCARICO_CORRENTE.md#profilo-indietro-1287-incarico-2026-11-19): riesami immutabili, CI e PR/merge, Hosting protetto e verifica pubblica, ricevuta MD/GitHub; poi conferma della versione e ripresa del collaudo guidato. Proposta grafica compatta e altri lotti restano distinti. I risultati sintetici non chiudono casi fisici o gli audit completi.
+
 <a id="ripresa-contatori-1286-pubblico-2026-11-19-programma"></a>
 
 ## 1.2.286 pubblicata — prossimo passo sul telefono

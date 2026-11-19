@@ -1,5 +1,11 @@
 # Ambiente di test
 
+<a id="profilo-indietro-1287-ambiente-2026-11-19"></a>
+
+## Indietro — banco integrato del candidato287
+
+Shell/pagine/header/cleanup e client nella stessa catena di moduli, owner reale e APP_VERSION allineata; Auth/dati inventati e sola origine loopback. Il messaggio della fixture ordina la disponibilità dell'Auth dopo il load, senza un secondo client o ritardi artificiali d'avvio. Cronologia nativa nei casi ordinari; fault injection dichiarata nei due casi traversal assente/errore. [Oracoli e risultati](../evidenze/COLLAUDI.md#profilo-indietro-1287-collaudi-2026-11-19). Dipendenze locali preesistenti collegate temporaneamente e poi scollegate, senza installazioni; nessuna modifica a manifest o controlli documentali. Chrome e resize sintetici non certificano dispositivi fisici o audit completi.
+
 <a id="ripresa-contatori-1286-pubblico-2026-11-19-ambiente"></a>
 
 ## 1.2.286 — pubblicazione e limiti delle prove
