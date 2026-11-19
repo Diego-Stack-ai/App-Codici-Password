@@ -1,5 +1,12 @@
 # Ambiente di test
 
+<a id="ripresa-contatori-1286-pubblico-2026-11-19-ambiente"></a>
+
+## 1.2.286 — pubblicazione e limiti delle prove
+
+Candidata `d3713327b1fa9a288a70153e4d33d36828c3f26a` e merge `9490020fbfe2f0075b9ec5f4d5975101ddd151f0` con riesami e CI richiesti verdi; Hosting #1237 e verifica pubblica integrale PASS. [Ricevuta](../evidenze/COLLAUDI.md#ripresa-contatori-1286-pubblico-2026-11-19). Banchi locali e dati inventati restano distinti da iPhone fisico/passkey nativa. TEL285-F09–F15 restano riscontri della 1.2.285; conferma fisica della versione 1.2.286 ancora attesa, nessun caso completo C1/C2 chiuso dalla distribuzione.
+
+
 <a id="ripresa-contatori-1286-2026-11-19-ambiente"></a>
 
 ## 1.2.286 — banco dei due correttivi e limiti

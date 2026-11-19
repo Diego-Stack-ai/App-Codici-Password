@@ -1,5 +1,12 @@
 # Incarico corrente
 
+<a id="ripresa-contatori-1286-pubblico-2026-11-19-incarico"></a>
+
+## Rilascio 1.2.286 eseguito — riprende il collaudo telefono
+
+Eseguito l'ordine PR/merge/Hosting dei due correttivi con i gate verdi sul sorgente `9490020fbfe2f0075b9ec5f4d5975101ddd151f0` e verifica pubblica PASS. [Ricevuta](../evidenze/COLLAUDI.md#ripresa-contatori-1286-pubblico-2026-11-19). Chiusura MD/GitHub con 34 MD conservati, root unico scrittore e revisori in sola lettura; nessun secondo Hosting per la ricevuta. Segue la conferma della versione286 sul telefono, poi controllo mirato e ripresa della cornice una prova alla volta. Nessun giro C1 live o C2 nuovo dedotto.
+
+
 <a id="ripresa-contatori-1286-2026-11-19-incarico"></a>
 
 ## Rilascio 1.2.286 — rotellina e contatori autorizzati

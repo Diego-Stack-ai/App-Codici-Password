@@ -1,5 +1,12 @@
 # Interfaccia
 
+<a id="ripresa-contatori-1286-pubblico-2026-11-19-ui"></a>
+
+## Rotellina e contatori — distribuiti nella 1.2.286
+
+Distribuiti feedback occupato nella ripresa e componente condiviso dei quattro contatori privati, con mappa e test collegati ai produttori/CSS/ruoli. [Ricevuta e limiti](../evidenze/COLLAUDI.md#ripresa-contatori-1286-pubblico-2026-11-19). Matrici sintetiche separate dal ricollaudo sul telefono. Le sezioni candidate sotto conservano la cronologia, non indicano una pubblicazione ancora in attesa.
+
+
 <a id="ripresa-contatori-1286-2026-11-19-ui"></a>
 
 ## Ripresa e contatori — candidata 1.2.286

@@ -1,5 +1,12 @@
 # Decisioni
 
+<a id="ripresa-contatori-1286-pubblico-2026-11-19-decisione"></a>
+
+## Ordine di pubblicazione dei due correttivi eseguito
+
+Attuato l'ordine di Diego con nuova versione 1.2.286, PR #340, riesami indipendenti e CI sullo stesso candidato, merge atteso e Hosting protetto, poi verifica pubblica integrale. [Ricevuta](../evidenze/COLLAUDI.md#ripresa-contatori-1286-pubblico-2026-11-19). Rotellina e contatori distribuiti; riscontro fisico successivo, distinto dalle prove sintetiche. Nessuna estensione agli altri lotti o agli strumenti amministrativi.
+
+
 <a id="ripresa-contatori-1286-2026-11-19-decisione"></a>
 
 ## Ripresa e contatori — ordine di pubblicazione 1.2.286

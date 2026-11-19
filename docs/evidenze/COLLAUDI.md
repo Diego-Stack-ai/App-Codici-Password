@@ -1,5 +1,18 @@
 # Collaudi
 
+<a id="ripresa-contatori-1286-pubblico-2026-11-19"></a>
+
+## APP 1.2.286 — ripresa e contatori pubblicati e verificati
+
+Pubblicata **1.2.286** con [PR #340](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/340), dopo due GO indipendenti sul commit immutabile `d3713327b1fa9a288a70153e4d33d36828c3f26a` e CI PR #1235 SUCCESS. Merge e sorgente distribuito `9490020fbfe2f0075b9ec5f4d5975101ddd151f0`, sourceDirty=false. CI master #1236 e validate Hosting #1237 SUCCESS sullo stesso sorgente e digest pubblico. Scope hosting verificato prima di production, con master remoto invariato. Diego ha approvato manualmente production su GitHub dopo i controlli PR/master/Hosting verdi e la verifica del master immutato. Deploy solo Hosting SUCCESS concluso 19/11/26, 18:53:10 Europe/Rome.
+
+Le tre validazioni [PR #1235](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44550401914/job/135652268226), [master #1236](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44556189753/job/135672749396) e [Hosting #1237](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44569946642/job/135721937251) riportano ciascuna 68 blocchi e 3886 test: 3875 PASS, 11 SKIP, zero FAIL o annullati. Nessuna soglia o guardia ridotta; backend e workflow conservati.
+
+Verifica autonoma integrale PASS il 19/11/26, 18:53:58 Europe/Rome: **367 file/hash, 41 profili di intestazione, normalizzazioni/probe canonici**, più 11 GET indipendenti PASS alle 19/11/26, 18:53:59 Europe/Rome. Digest pubblico SHA256 `091c3e66037dcafc2a27d906b8bdcbda2bc73a2566ccbdde64188bdea80fe610`; manifest SHA256 `0b82bd256cd07cf648f82e4493c07c7f660284be76bc8f625bb71798229b08a8`. I GET comprendono i due punti d'ingresso e CSS/adattatore corretti; il manifest attesta il merge distribuito, non un candidato locale.
+
+Risultato distribuito: attesa visibile dopo Sblocca e riprendi, nella verifica dopo reload e nell'attesa Vault/passkey; quattro contatori dell’Area Privata con il badge Aziende. Il banco locale 124/124 e le matrici dei sette temi restano sintetici. **Ricollaudo fisico della versione 1.2.286 ancora da acquisire**, una prova alla volta; TEL285-F09–F15 conservati come riscontri della versione 1.2.285. La #313 resta aperta per i residui. Questa ricevuta soltanto documentale conserva i file pubblici e non richiede un nuovo Hosting. Le candidate e le attese sotto sono checkpoint storici.
+
+
 <a id="ripresa-contatori-1286-2026-11-19"></a>
 
 ## Candidata 1.2.286 — confezione di rotellina e contatori

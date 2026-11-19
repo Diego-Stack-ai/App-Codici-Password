@@ -1,5 +1,12 @@
 # Rilascio
 
+<a id="ripresa-contatori-1286-pubblico-2026-11-19-rilascio"></a>
+
+## APP 1.2.286 — procedura eseguita
+
+PR #340 unita dopo due GO sulla testa `d3713327b1fa9a288a70153e4d33d36828c3f26a` e CI PR #1235 SUCCESS. CI master #1236 e validate Hosting #1237 sul merge `9490020fbfe2f0075b9ec5f4d5975101ddd151f0` e medesimo digest pubblico; scope hosting verificato e master invariato prima di production. Diego ha approvato manualmente production su GitHub dopo i controlli PR/master/Hosting verdi e la verifica del master immutato; deploy solo Hosting SUCCESS e verifica pubblica integrale PASS. [Ricevuta](../evidenze/COLLAUDI.md#ripresa-contatori-1286-pubblico-2026-11-19). Workflow/protezioni conservati, ricevuta soltanto documentale senza altro Hosting.
+
+
 <a id="ripresa-contatori-1286-2026-11-19-rilascio"></a>
 
 ## Candidata 1.2.286 — procedura autorizzata, solo Hosting
