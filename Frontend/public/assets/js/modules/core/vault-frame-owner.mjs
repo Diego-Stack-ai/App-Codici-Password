@@ -16,6 +16,8 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
   const modalHolds = new Set();
   let checking = null, internalClear = false, nextCheck = 0;
   let logoutHold = false, logoutDone = false, logoutTimer = null, queuedExit = null, logoutContext = null;
+  const ownerDocument = win.document;
+  let exitRequest = null, exitTimer = null, exitWatchdog = null;
   const handlers = [], identity = getIdentity;
   const currentUrl = () => {try {return iframe.contentWindow.location.href;} catch {return '';} };
   const currentDocument = () => {try {return iframe.contentDocument;} catch {return null;} };
@@ -34,7 +36,7 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
       if (nonce) post({kind: 'revoke'});
       try {iframe.contentWindow?.dispatchEvent(new win.Event('vault-frame-revoked'));} catch { /* Detached or opaque child. */ }
       nonce = null;
-      if (!logoutHold) iframe.remove();
+      if (!logoutHold && !exitRequest) iframe.remove();
       if (!internalClear) { internalClear = true; try { clearMaterial(); } finally { internalClear = false; } }
       onState({locked: true, reason});
     }
@@ -52,15 +54,27 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
     iframe.contentWindow.location.replace(url.href);
     return true;
   }
+  function requestTopLevelExit() {
+    if (disposed || win.document !== ownerDocument || !exitRequest) return;
+    try {
+      if (exitRequest.replace) win.location.replace(exitRequest.href);
+      else win.location.assign(exitRequest.href);
+    } catch { /* Remain revoked; the parent's bounded watchdog can retry. */ }
+  }
   function exit(target, replace = true) {
     const url = new URL(target, origin);
     if (url.origin !== origin || !['https:', 'http:'].includes(url.protocol) || url.username || url.password) return false;
-    win.clearTimeout(logoutTimer); logoutHold = false;
-    diagnose('FRAME_EXIT');
-    session.lock('exit'); iframe.remove();
+    if (disposed || win.document !== ownerDocument) return false;
+    if (exitRequest) return true;
     const standalone = frameStandaloneTarget(url.href, origin);
     if (standalone) url.search = standalone.search;
-    if (replace) win.location.replace(url.href); else win.location.assign(url.href);
+    exitRequest = {href: url.href, replace};
+    diagnose('FRAME_EXIT');
+    // Lock synchronously, but keep the calling child attached. A parent-owned
+    // task requests navigation; committing that navigation tears the child down.
+    session.lock('exit');
+    exitTimer = win.setTimeout(requestTopLevelExit, 0);
+    if (!logoutTimer) exitWatchdog = win.setTimeout(requestTopLevelExit, 20000);
     return true;
   }
   function insets() {
@@ -153,7 +167,10 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
     }).catch(() => {if (!disposed && epoch === visibilityEpoch) session.lock('resume-denied');});
   });
   for (const name of ['pointerdown', 'keydown']) listen(win.document, name, event => {if (event.isTrusted) session.touch();}, {passive: true});
-  listen(win, 'pagehide', () => session.lock('pagehide'));
+  listen(win, 'pagehide', () => {
+    win.clearTimeout(exitTimer); win.clearTimeout(exitWatchdog); win.clearTimeout(logoutTimer);
+    session.lock('pagehide');
+  });
   listen(win.document, 'freeze', () => session.lock('freeze'));
   listen(win, 'private-auth-blocked', () => session.lock('auth-revoked'));
   listen(win, 'pageshow', event => {if (event.persisted) session.lock('bfcache');});
@@ -210,7 +227,11 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
       win.clearTimeout(logoutTimer);
       logoutTimer = win.setTimeout(() => {
         if (disposed) return;
-        if (logoutContext.kind === 'logout') exit(queuedExit?.target || '/login.html', true);
+        logoutTimer = null;
+        if (logoutContext.kind === 'logout') {
+          if (exitRequest) requestTopLevelExit();
+          else exit(queuedExit?.target || '/login.html', true);
+        }
         else {logoutHold = false; iframe.remove();}
       }, 20000);
       return logoutContext.token;
@@ -263,8 +284,9 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
     return started;
   }, updatePreference(value) {
     if (!disposed && !locked) {diagnosticIdleMs = inactivityMilliseconds(value);session.setTimeouts(diagnosticIdleMs, invalidInactivityPreference(value));}
-  }, resume() {if (logoutHold) return true; if (!route) return false; session.lock('reload'); win.location.reload(); return true;}, dispose() {
+  }, resume() {if (logoutHold || exitRequest) return true; if (!route) return false; session.lock('reload'); win.location.reload(); return true;}, dispose() {
     session.lock('dispose'); iframe.remove(); disposed = true; win.clearInterval(timer); win.clearTimeout(logoutTimer); resizeObserver?.disconnect();
+    win.clearTimeout(exitTimer); win.clearTimeout(exitWatchdog);
     for (const remove of handlers) remove(); if (win.vaultFrameNavigation === facade) delete win.vaultFrameNavigation; onDispose();
   }});
 }

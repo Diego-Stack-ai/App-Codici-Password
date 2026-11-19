@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="logout-mobile-1285-rilascio-2026-11-19"></a>
+
+## Candidata1.2.285 — logout, solo Hosting
+
+[Ordine esplicito](../progetto/INCARICO_CORRENTE.md#logout-mobile-1285-incarico-2026-11-19), confezione canonica285 e derivati verificati; solo vault-frame-owner.mjs cambia funzionalmente nel runtime dopo normalizzazione versioni/EOL. Due riesami indipendenti della testa finale e CI PR verde prima del merge con SHA atteso. Poi CI master e validate del workflow manuale sullo stesso sorgente immutabile, release_scope=hosting verificato e master invariato, production protetto secondo la delega corrente, verifica pubblica integrale manifest/hash/intestazioni/probe e GET indipendenti. Ricevuta MD/GitHub distinta, senza nuovo Hosting per i soli documenti. Nessun cambiamento a workflow, credenziali, protezioni, policy, Rules o Functions. La ripetizione fisica della prova8 segue il rilascio e resta necessaria per riprendere il giro personale.
+
 <a id="urgenze-home-1284-pubblico-2026-11-19-rilascio"></a>
 
 ## APP 1.2.284 — procedura eseguita

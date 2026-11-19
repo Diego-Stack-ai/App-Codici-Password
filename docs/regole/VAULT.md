@@ -1,5 +1,11 @@
 # Vault
 
+<a id="logout-mobile-1285-vault-2026-11-19"></a>
+
+## Uscita dalla cornice — candidata285
+
+La presa in carico di un'uscita valida revoca e maschera immediatamente il figlio, cancella materiale e grant e conserva il diniego. Il task che richiede la navigazione top-level appartiene al padre: non deve dipendere dalla continuazione di un contesto figlio già staccato. Il documento nascosto/inert viene eliminato dal commit della navigazione; non viene sbloccato mentre l'uscita è pendente. Guardia del documento proprietario, cleanup/dispose, watchdog finito e diniego in caso di errore restano obbligatori. Reset locale e pulizia logout conservano token, scopo e destinazioni finali. [Evidenze e limiti](../evidenze/COLLAUDI.md#logout-mobile-1285-collaudi-2026-11-19); nessun cambio a MFA, lease, inattività o disponibilità ordinaria.
+
 <a id="rilascio-1283-pubblico-vault-2026-11-18"></a>
 
 ## Conferma degli export — raccordo distribuito nella1.2.283

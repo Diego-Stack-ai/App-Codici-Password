@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="logout-mobile-1285-decisione-2026-11-19"></a>
+
+## 19/11/2026 — correggere e pubblicare il logout mobile
+
+Dopo foto e ripetizione del blocco su «Verifica accesso in corso…» in uscita dalla PWA iPhone, Diego ordina correzione, verifica, PR, merge e deploy con nuova versione, MD e GitHub aggiornati; il collaudo riprende dopo il rilascio. Il [mandato285](INCARICO_CORRENTE.md#logout-mobile-1285-incarico-2026-11-19) supera il precedente limite di sola osservazione per questo difetto. I sette riscontri positivi e il timeout12ore restano registrati nel loro perimetro; nessuna autorizzazione a cambiare policy, backend o MFA e nessun PASS fisico dedotto dal banco sintetico.
+
 <a id="urgenze-home-1284-pubblico-2026-11-19-decisione"></a>
 
 ## Urgenze Home — ordine del18/11 eseguito

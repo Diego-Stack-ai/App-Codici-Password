@@ -1,5 +1,11 @@
 # Programma
 
+<a id="logout-mobile-1285-programma-2026-11-19"></a>
+
+## Prima della ripresa del collaudo: logout mobile
+
+Il giro personale284 è fermo al FAIL di Esci, dopo sette riscontri operativi positivi circoscritti. [Correttivo candidato285 e prove](../evidenze/COLLAUDI.md#logout-mobile-1285-collaudi-2026-11-19), [ordine di rilascio](INCARICO_CORRENTE.md#logout-mobile-1285-incarico-2026-11-19). Completare riesame/CI/merge/Hosting/verifica pubblica; poi ripetere la prova8 sul telefono, con12ore già ripristinate. Riprendere le prove residue soltanto dopo quel riscontro. Contatori rettangolari dell'Area Privata annotati separatamente; D15/D18, altri dispositivi, sicurezza/recupero e lotti successivi conservano i rispettivi gate.
+
 <a id="urgenze-home-1284-pubblico-2026-11-19-programma"></a>
 
 ## Urgenze Home — rilascio 1.2.284 concluso

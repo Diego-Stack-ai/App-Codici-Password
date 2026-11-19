@@ -2,6 +2,18 @@
 
 <a id="stato-corrente"></a>
 
+<a id="logout-mobile-1285-stato-2026-11-19"></a>
+
+## Candidata1.2.285 — logout mobile, produzione1.2.284
+
+Preparato il correttivo del ritorno al login dopo Esci: la cornice blocca/revoca immediatamente e richiede la navigazione in un task proprio, conservando la pagina interna fino alla navigazione del padre. Stress RED sul codice precedente e GREEN sul correttivo; regressione mirata129/129 PASS, sicurezza/guida/offline/budget/riferimenti/sintassi PASS. Confezione285 coerente; [evidenze e limiti](../evidenze/COLLAUDI.md#logout-mobile-1285-collaudi-2026-11-19). Restano riesami sullo SHA finale, CI PR/master, Hosting protetto e verifica pubblica. Nessun rilascio o PASS iPhone della candidata dedotto dai test locali; il giro guidato riparte dalla prova8 solo dopo pubblicazione e conferma fisica.
+
+<a id="cornice-telefono-logout-stato-2026-11-19"></a>
+
+## Cornice — giro telefonico fermato al logout
+
+19/11/2026: app dalla schermata Home su iPhone,1.2.284 confermata. Diego riferisce esiti positivi per navigazione, ritorno Account, inattività temporanea a1minuto, ripresa Face ID, ripristino12ore, breve background, blocco schermo e riapertura con passkey. Alla prova8 di uscita locale resta invece per minuti «Verifica accesso in corso…»; foto e successiva ripetizione dopo nuovo login con Authenticator confermano il difetto riferito. PC esente secondo Diego, senza nuova attestazione strumentata desktop. Giro fermato, collaudo non concluso; indagine locale in sola lettura e104/104 unitari PASS che non riproducono il problema fisico. [Registro e limiti](../evidenze/COLLAUDI.md#cornice-telefono-guidato-2026-11-19). Produzione e runtime restano1.2.284; nessuna operazione policy, modifica applicativa o pubblicazione eseguita da questo seguito.
+
 <a id="urgenze-home-1284-pubblico-2026-11-19-stato"></a>
 
 ## APP 1.2.284 — online e verificata
