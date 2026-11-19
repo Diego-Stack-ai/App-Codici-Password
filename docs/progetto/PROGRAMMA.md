@@ -4,7 +4,7 @@
 
 ## Urgenze Home — rilascio 1.2.284 concluso
 
-Correttivo distribuito con #334/Hosting #1223 e verifica pubblica integrale PASS. [Ricevuta](../evidenze/COLLAUDI.md#urgenze-home-1284-pubblico-2026-11-19). La chiusura tecnica aggiorna MD/GitHub senza un altro Hosting. Prossimo riscontro: icone rosse nella card Urgenze della Home sul telefono aggiornato alla284. Gli altri residui grafici/nativi, collaudi della cornice, sicurezza/recupero, prodotto e consegna separata di Claude mantengono ordine e limiti della scaletta.
+Correttivo distribuito con #334/Hosting #1223 e verifica pubblica integrale PASS. [Ricevuta](../evidenze/COLLAUDI.md#urgenze-home-1284-pubblico-2026-11-19). La chiusura tecnica aggiorna MD/GitHub senza un altro Hosting. Diego conferma sul telefono le icone Urgenze rosse nella284, senza precisare la combinazione grafica. Il prossimo lotto principale resta il collaudo della cornice già attiva; gli altri residui grafici/nativi, sicurezza/recupero, prodotto e consegna separata di Claude mantengono ordine e limiti della scaletta, senza avvio automatico di nuovi incarichi.
 
 <a id="urgenze-home-1284-programma-2026-11-18"></a>
 
