@@ -1,5 +1,60 @@
 # Collaudi
 
+<a id="ripresa-contatori-1286-2026-11-19"></a>
+
+## Candidata 1.2.286 — confezione di rotellina e contatori
+
+Ordine di PR/merge/deploy nuova versione per i due correttivi; base88f5eb3a, ramo codex/resume-counters-1286-20261119. Restano autoritativi i dettagli e i limiti dei banchi locali sotto: contatori con produttori reali e dati inventati, feedback con clic/reload/modale reali e dipendenze sintetiche. TEL285-F09–F15 restano PASS manuali della285, non della candidata.
+
+Snapshot funzionale pre-bump su tutti367 file pubblici. Script canonico285→286,307 riferimenti; guida contentVersion16/reviewedAppVersion1.2.286, senza modifica dei testi. Offline61export/347risorse e inventarioQA31pagine/126istruzioni/111target/167campi rigenerati. Nessun file pubblico aggiunto/rimosso; confronto dopo sola normalizzazione versioni/EOL: zero delta ulteriori dal candidato funzionale. I sette pubblici funzionalmente modificati rispetto alla produzione285 restano app.html, area_privata.html, area_privata.css, core_pagine.css, lista_aziende.css, vault-frame.css e vault-frame-production.js.
+
+Guida 12/12, offline 16/16, budget 31 pagine/diagnostica 4/4 e CSS PASS sulla confezione286. Nuova esecuzione contatori/cornice/modale/ingresso/logout: 124/124 PASS, inclusi due contatori, quattro browser del feedback e 28 confini; non si sommano nuovamente i casi già inclusi. Topologia 20/20 PASS; documenti 12/12 PASS, 34 MD/1477 collegamenti; riferimenti 343 file e sintassi 252 moduli PASS. Riesame sullo SHA finale, CI PR/master, Hosting e verifica pubblica restano da acquisire. Online 1.2.285; nessun rilascio dedotto dai test locali. La successiva ricevuta dovrà indicare sorgente, run, scope e verifica pubblica separatamente dal ricollaudo telefonico.
+
+
+<a id="cornice-attesa-sblocco-2026-11-19"></a>
+
+## Cornice — feedback di attesa dello sblocco, candidato locale
+
+Dopo TEL285-F15 Diego riferisce che, trovata la pagina bloccata nella PWA iPhone, il tocco su «Sblocca e riprendi» precede di alcuni secondi la richiesta Vault/passkey. Chiede una rotellina. Durata riferita, senza misura né diagnosi della causa della latenza; il nuovo riscontro non annulla i PASS di navigazione.
+
+Feedback locale in [app.html](../../Frontend/public/app.html), [CSS della cornice](../../Frontend/public/assets/css/vault-frame.css) e [adattatore di produzione](../../Frontend/public/assets/js/modules/core/vault-frame-production.js): indicatore sul comando accettato e durante verifica iniziale/ricarica, poi durante la verifica dell'identità e l'attesa della prova Vault. Doppio clic trattenuto; modale reale utilizzabile; animazione disattivata con movimento ridotto. Successo, annullamento, errore e blocco chiudono l'attesa; una promessa del mount precedente non può modificare il feedback del successore. Il percorso originale di reload e le guardie esistenti restano operativi.
+
+[Regressione browser dedicata](../../tests/vault-frame-resume.browser.test.mjs) 4/4 PASS: clic reale con snapshot sincrono degli attributi/stili già prodotti, reload effettivo, identità/prova differite, modale Master annullabile e chiusura dell'attesa su successo/errore. Due fasi visive, verifica iniziale e attesa Vault, ciascuna controllata nei 56 contesti sette palette × Chiaro/Scuro × Classica/Nuova × 320/1280; percorso interattivo a 393 px. Dipendenze inventate e traffico solo loopback: nessuna prova fisica della passkey nativa. I primi due assert unitari fallivano prima del correttivo; test dei confini 28/28 PASS dopo il delta e i casi del mount successore. Il primo banco browser tratteneva la navigazione e non riusciva a leggere il vecchio DOM: fixture corretta lasciando il reload reale, senza rimuovere asserzioni del prodotto.
+
+Regressioni finali del pacchetto cornice, modale, ingresso e logout: 122/122 PASS, inclusi i 28 casi dei confini e i quattro browser dedicati, senza sommarli nuovamente. CSS, sintassi dei 252 moduli, HTML puro su 31 pagine e riferimenti statici su 343 file PASS; topologia 12/12 PASS. I casi esistenti UI275-01/UI275-02 collegano ora anche adattatore e regressioni di attesa nel [registro dinamico](../../scripts/ui-dynamic-theme-contract.json). Il loro inventario storico di stati non viene aumentato deducendo copertura automatica da questo riscontro. Versione online 1.2.285; modifica di presentazione locale, insieme al candidato contatori, senza nuova pubblicazione.
+
+<a id="cornice-telefono-rientro-1285-2026-11-19"></a>
+
+## Cornice 1.2.285 — rientro e percorsi aziendali sul telefono
+
+Prosecuzione del 19/11/2026 nella stessa PWA iPhone della sessione guidata, con versione 1.2.285 dichiarata da Diego. **TEL285-F10 — PASS riferito per la prova 9, sottoinsieme D08:** dopo Accedi inserisce il codice Authenticator e raggiunge «Vault bloccata — Sblocca e riprendi»; premuto il comando, riferisce un controllo seguito dalla passkey. Alla domanda separata sull'esito finale conferma «Sì, Home utilizzabile». Registrata la passkey riferita, senza dedurre Face ID anziché altro metodo di verifica del dispositivo.
+
+Il rientro include quindi un nuovo sblocco Vault prima della Home utilizzabile nel percorso dichiarato. Il passaggio sulla schermata bloccata resta parte dell'osservazione; non viene omesso o qualificato automaticamente come difetto. Nessuna misura PRF, RAM, revoca server, altre schede o nuova epoca; D08 completo e C1/C2 restano aperti.
+
+Seguiti nella stessa sessione, senza modificare dati, come sottoinsiemi della navigazione D02 e del ritorno D04:
+
+| Caso | Percorso proposto | Esito riferito da Diego |
+|---|---|---|
+| TEL285-F11 — prova 10 | Home → Azienda → casetta → Home | «Ritorno corretto, nessun nuovo sblocco». |
+| TEL285-F12 — prova 11 | Home → Azienda → nome azienda → elenco Account → freccia Indietro → Le mie aziende → casetta → Home | «Elenco aperto, ritorno corretto, nessun nuovo sblocco». |
+| TEL285-F13 — prova 12 | Home → Azienda → Dati azienda → profilo aziendale → freccia Indietro → elenco → casetta → Home | «Profilo aperto, ritorno corretto, nessun nuovo sblocco». |
+| TEL285-F14 — prova 13 | Home → Azienda → nome azienda → Account esistente → dettaglio → freccia Indietro → elenco Account dell'azienda → casetta → Home | «Dettaglio aperto, ritorno corretto, nessun nuovo sblocco». |
+| TEL285-F15 — prova 14 | Home → Ricerca → punto di domanda/istruzioni → × → Privato → casetta → Home | «Tutto corretto, nessun nuovo sblocco». |
+
+PASS riferiti limitati ai cinque giri proposti, non misure strumentali o prove di tutte le route. D02/D04 completi, gli altri casi e gli altri dispositivi restano aperti. Produzione e versione conservate; questi riscontri non richiedono Hosting.
+
+<a id="contatori-area-privata-telefono-2026-11-19"></a>
+
+## Area Privata — contatori rettangolari osservati anche sul telefono
+
+Nella successiva foto ricevuta da Diego il 19/11/2026, l'Area Privata della PWA iPhone mostra i quattro contatori delle card ancora dentro piccoli rettangoli viola. È un nuovo riscontro telefonico dello stesso rilievo grafico TEL284-G01, prima documentato su Chrome PC; la foto non mostra i selettori di tema, aspetto o grafica e non attesta quei valori. Nessun contenuto personale della foto viene copiato nel registro.
+
+Il correttivo logout 1.2.285 non comprendeva questa geometria, rimasta separata nella #313. Alla scelta sulla resa Diego risponde «stessa ui di aziende»: riferimento effettivo sono i quattro pulsanti delle tipologie Account in Le mie aziende. È preparato localmente il riuso della loro classe `.company-mode-count`, con regola condivisa in [core_pagine.css](../../Frontend/public/assets/css/core_pagine.css), quattro span di [area_privata.html](../../Frontend/public/area_privata.html) e rimozione delle regole locali duplicate/conflittuali. Una proprietà impedisce al badge di restringersi sotto il numero lungo; ID, valori, link e produttori dei dati restano invariati.
+
+[Regressione dedicata](../../tests/ui-account-mode-counts.browser.test.mjs): 2/2 PASS, 56 contesti (sette palette × due aspetti × due grafiche × 320/1280), confronto con i produttori reali delle due pagine su fixture locali 0/12/123/1001. Il vecchio stile fallisce sul raggio del rettangolo a 320 px/Blu/Chiaro/Classica; il primo candidato evidenzia anche il restringimento del numero lungo, poi corretto. L'iniziale diniego di rete loopback del sandbox non è contato come RED. Parità degli stili, ID/valori/destinazioni, contenimento delle cifre e contrasto misurato almeno 4,5:1; minimo dei contatori privati 5,91:1. Negativi che rendono entrambi i componenti rettangolari o illeggibili rifiutati.
+
+Regressioni esistenti colori/livree/accessibilità 58/58 PASS, comprese le eccezioni funzionali e i badge Home; topologia 12/12 PASS. Mappa dichiarata aggiornata a 11 componenti/18 ruoli nel [contratto livree](../../scripts/ui-livery-contract.json), con due pagine, produttori, regola condivisa e test nominato; non è una certificazione di tutti i clic. CSS, HTML puro (31 pagine) e riferimenti statici (343 file) PASS. Nessuna nuova eccezione per colori fissi. Il correttivo grafico è locale e non ancora distribuito: la versione online resta 1.2.285; questi PASS browser non sostituiscono il controllo sul telefono dopo un eventuale rilascio.
+
 <a id="logout-mobile-1285-telefono-2026-11-19"></a>
 
 ## Cornice 1.2.285 — ricollaudo del logout sul telefono
@@ -10,7 +65,7 @@ Il 19/11/2026, nella prosecuzione del giro personale sulla PWA dalla schermata H
 
 Il riscontro consente la chiusura del solo [difetto #336](https://github.com/Diego-Stack-ai/App-Codici-Password/issues/336), ora chiuso come risolto nel contesto provato. Il FAIL TEL284-F09 resta storico e non viene sovrascritto. Nessuna attestazione aggiuntiva su RAM, chiavi, completamento server di signOut, revoca di altre postazioni o logout offline; D08 completo e C1/C2 non sono chiusi. I sette riscontri operativi precedenti e il ripristino delle 12 ore conservano il proprio perimetro.
 
-Segue il normale rientro da Accedi e il nuovo sblocco della Vault prima di usare i dati, una prova alla volta; non ancora eseguito in questo ricollaudo. Altri dispositivi, D15/D18 e contatori rettangolari restano separati. Registrazione soltanto MD/GitHub: runtime e versione pubblicata conservati, nessun nuovo Hosting. Le attese nella ricevuta sotto descrivono il checkpoint precedente a questo riscontro fisico.
+Al checkpoint TEL285-F09 restava da eseguire il normale rientro da Accedi con nuovo sblocco prima dei dati; il successivo TEL285-F10 è registrato sopra. Altri dispositivi, D15/D18 e contatori rettangolari restano separati. Registrazione soltanto MD/GitHub: runtime e versione pubblicata conservati, nessun nuovo Hosting. Le attese nella ricevuta sotto descrivono il checkpoint precedente a questo riscontro fisico.
 
 <a id="logout-mobile-1285-pubblico-2026-11-19"></a>
 

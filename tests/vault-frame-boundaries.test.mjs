@@ -62,14 +62,15 @@ test('microphone stream resolving after cancellation stops every late track',asy
 const productionSource=await source('vault-frame-production.js');
 function productionFixture(started=true){
  const state={snap:null,error:null,updates:[],locks:[],valid:()=>Promise.resolve(true),resume:0,confirmations:[],clears:0};
- const elements=Object.fromEntries(['frame-status','frame-loading','vault-frame'].map(id=>[id,{hidden:id==='frame-status'}]));
- const anchor=new EventTarget();const owner={session:{state:()=>({expiresAt:1}),lock:reason=>state.locks.push(reason)},start:async()=>{if(started==='throw')throw Error('synthetic startup error');return started;},
- updatePreference:v=>state.updates.push(v),resume:()=>{state.resume++;return true;},dispose(){}};
+ const attributes=()=>{const values=new Map();return {setAttribute:(k,v)=>values.set(k,v),getAttribute:k=>values.get(k)??null,removeAttribute:k=>values.delete(k)};};
+ const elements=Object.fromEntries(['frame-status','frame-loading','vault-frame'].map(id=>[id,{hidden:id==='frame-status',...attributes()}]));
+ const anchor=Object.assign(new EventTarget(),attributes());const owner={session:{state:()=>({expiresAt:1}),lock:reason=>state.locks.push(reason)},start:async()=>{if(started==='throw')throw Error('synthetic startup error');return state.startResult??started;},
+ updatePreference:v=>state.updates.push(v),resume:()=>{state.resume++;if(state.resumeMode==='throw')throw Error('synthetic reload failure');return state.resumeMode!==false;},dispose(){state.onState?.({locked:true,reason:'dispose'});}};
  const context=vm.createContext({window:{location:{href:'https://fixture.invalid/app.html'}},document:{getElementById:id=>id==='frame-resume'?anchor:elements[id]},
  URL,APP_VERSION:'fixture',auth:{currentUser:{uid:'synthetic'}},db:{},doc:()=>({}),getUserProfile:async()=>({lock_timeout:3}),
  createProductionFrameAdmission:()=>({read:async()=>null,dispose(){}}),
  installFramePushNavigation:()=>()=>{}, emitFrameDiagnostic:()=>{},
- authSessionFence:{isCurrent:()=>state.valid(),isLocallyAllowed:()=>true},createVaultFrameOwner:options=>{state.onState=options.onState;state.confirmSensitive=options.confirmSensitive;return owner;},
+ authSessionFence:{isCurrent:()=>state.valid(),isLocallyAllowed:()=>true},createVaultFrameOwner:options=>{state.onState=options.onState;state.confirmSensitive=options.confirmSensitive;state.unlock=options.unlock;return owner;},
  onSnapshot:(_ref,next,error)=>{state.snap=next;state.error=error;return()=>{};}});
  context.securityManager={setFrameExpiryAuthority(){},clearSession(){state.clears++;},ensureVaultKeyMaterial:async options=>{state.confirmations.push(options);return 'fixture-material';}};
  vm.runInContext(productionSource,context);return {state,anchor,elements,context,start:()=>vm.runInContext("startVaultFrame({user:{uid:'synthetic'},fenceTicket:{revision:1,nonce:'n'},securityManager})",context)};
@@ -132,4 +133,60 @@ test('a throwing frame start ends waiting and retains the standalone exit',async
  assert.equal(f.elements['frame-loading'].hidden,true);assert.equal(f.elements['frame-status'].hidden,false);
  const click=new Event('click',{cancelable:true});f.anchor.dispatchEvent(click);
  assert.equal(click.defaultPrevented,false);assert.equal(f.state.resume,0);
+});
+
+test('accepted resume shows busy immediately and rejects duplicate clicks while fallback stays usable',async()=>{
+ const f=productionFixture();await f.start();
+ const click=new Event('click',{cancelable:true});f.anchor.dispatchEvent(click);
+ assert.equal(click.defaultPrevented,true);assert.equal(f.state.resume,1);
+ assert.equal(f.anchor.getAttribute('aria-busy'),'true');assert.equal(f.anchor.getAttribute('aria-disabled'),'true');
+ const repeat=new Event('click',{cancelable:true});f.anchor.dispatchEvent(repeat);
+ assert.equal(repeat.defaultPrevented,true);assert.equal(f.state.resume,1);
+ for(const mode of [false,'throw']){
+  const fallback=productionFixture();await fallback.start();fallback.state.resumeMode=mode;
+  const event=new Event('click',{cancelable:true});fallback.anchor.dispatchEvent(event);
+  assert.equal(event.defaultPrevented,false);assert.equal(fallback.anchor.getAttribute('aria-busy'),null);
+  assert.equal(fallback.anchor.getAttribute('aria-disabled'),null);
+ }
+});
+
+test('unlock feedback covers the identity read and pending proof, then clears on every settlement',async()=>{
+ for(const outcome of ['success','cancel','error']){
+  const f=productionFixture();await f.start();const identity=pause(),proof=pause();
+  f.state.valid=()=>identity.promise;f.context.securityManager.ensureVaultKeyMaterial=()=>proof.promise;
+  const pending=f.state.unlock('synthetic',{signal:new AbortController().signal});
+  assert.equal(f.elements['frame-loading'].hidden,false);
+  assert.equal(f.elements['frame-loading'].getAttribute('aria-busy'),'true');
+  f.state.onState({locked:false,visible:true});assert.equal(f.elements['frame-loading'].hidden,false);
+  identity.resolve(true);await flush();
+  if(outcome==='error'){proof.resolve(Promise.reject(Error('synthetic failure')));await assert.rejects(pending,/synthetic failure/);}
+  else {proof.resolve(outcome==='success'?'fixture-material':null);assert.equal(await pending,outcome==='success'?'fixture-material':null);}
+  assert.equal(f.elements['frame-loading'].hidden,true);assert.equal(f.elements['frame-loading'].getAttribute('aria-busy'),null);
+ }
+});
+
+test('actual lock stops unlock feedback even while an identity check is pending',async()=>{
+ const f=productionFixture();await f.start();const identity=pause(),controller=new AbortController();f.state.valid=()=>identity.promise;
+ const pending=f.state.unlock('synthetic',{signal:controller.signal});
+ controller.abort();f.state.onState({locked:true});
+ assert.equal(f.elements['frame-loading'].hidden,true);assert.equal(f.elements['frame-status'].hidden,false);
+ identity.resolve(true);await assert.rejects(pending,/FRAME_AUTH_DENIED/);
+ assert.equal(f.elements['frame-loading'].getAttribute('aria-busy'),null);
+});
+
+test('an old unlock settlement cannot hide the successor mount feedback',async()=>{
+ const f=productionFixture();await f.start();const old=pause(),current=pause();let calls=0;
+ f.context.securityManager.ensureVaultKeyMaterial=()=>++calls===1?old.promise:current.promise;
+ const previous=f.state.unlock('synthetic',{signal:new AbortController().signal});await flush();
+ await f.start();const successor=f.state.unlock('synthetic',{signal:new AbortController().signal});await flush();
+ old.resolve('fixture-old');await previous;
+ assert.equal(f.elements['frame-loading'].hidden,false);assert.equal(f.elements['frame-loading'].getAttribute('aria-busy'),'true');
+ current.resolve('fixture-current');await successor;assert.equal(f.elements['frame-loading'].hidden,true);
+});
+
+test('a stale busy click listener cannot disable a failed successor standalone exit',async()=>{
+ const f=productionFixture();await f.start();f.anchor.dispatchEvent(new Event('click',{cancelable:true}));
+ assert.equal(f.anchor.getAttribute('aria-busy'),'true');f.state.startResult=false;await f.start();
+ const click=new Event('click',{cancelable:true});f.anchor.dispatchEvent(click);
+ assert.equal(click.defaultPrevented,false);assert.equal(f.state.resume,1);assert.equal(f.anchor.getAttribute('aria-busy'),null);
 });

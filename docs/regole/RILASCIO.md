@@ -1,5 +1,14 @@
 # Rilascio
 
+<a id="ripresa-contatori-1286-2026-11-19-rilascio"></a>
+
+## Candidata 1.2.286 — procedura autorizzata, solo Hosting
+
+[Mandato](../progetto/INCARICO_CORRENTE.md#ripresa-contatori-1286-2026-11-19-incarico): snapshot funzionale pre-bump, script canonico286 e 307 riferimenti, guida 16/reviewed286, offline e inventario QA rigenerati. Confronto dei 367 file dopo sola normalizzazione versioni/EOL senza differenze ulteriori dal candidato funzionale. Nessuna soglia, workflow o protezione modificata.
+
+Riesame indipendente sulla testa finale e CI PR completa verde → merge con SHA atteso → CI master e validate del workflow manuale firebase-deploy.yml sullo stesso master fissato, release_scope=hosting → production protetto dopo entrambi verdi e master remoto invariato, secondo la delega della sessione → manifest dai byte Git LF del sorgente distribuito, verifica integrale hash/intestazioni/probe e GET indipendenti → ricevuta MD/GitHub senza altro Hosting. Nessuna operazione backend, Rules, Functions, Storage, Auth o policy. [Evidenze](../evidenze/COLLAUDI.md#ripresa-contatori-1286-2026-11-19).
+
+
 <a id="logout-mobile-1285-pubblico-2026-11-19-rilascio"></a>
 
 ## APP 1.2.285 — procedura eseguita

@@ -2,7 +2,7 @@ import {emitFrameDiagnostic} from '../../frame-navigation.js';
 import {createProductionFrameAdmission} from './vault-frame-admission.js';
 import {doc, onSnapshot} from '/assets/js/vendor/firebase-runtime.js';
 import {APP_VERSION} from '../../app-env.js';
-import {auth, db} from '../../firebase-config.js?v=1.2.285';
+import {auth, db} from '../../firebase-config.js?v=1.2.286';
 import {authSessionFence} from '../../auth-session-fence.js';
 import {getUserProfile} from '../data/vault-repository.js';
 import {createVaultFrameOwner} from './vault-frame-owner.mjs';
@@ -23,16 +23,30 @@ export async function startVaultFrame({user, securityManager, fenceTicket}) {
   const status = document.getElementById('frame-status'), resume = document.getElementById('frame-resume');
   const loading = document.getElementById('frame-loading');
   let owner;
+  let unlockPending = false;
+  const showUnlockProgress = pending => {
+    if (generation !== mountGeneration || mounted !== owner) return;
+    unlockPending = pending;
+    if (loading) {
+      loading.hidden = !pending;
+      if (pending) loading.setAttribute('aria-busy', 'true');
+      else loading.removeAttribute('aria-busy');
+    }
+  };
+  resume.removeAttribute('aria-busy'); resume.removeAttribute('aria-disabled');
   const admission = createProductionFrameAdmission({user, fenceTicket, onDeny: () => owner?.session.lock('policy-revoked')});
   owner = createVaultFrameOwner({window, iframe: document.getElementById('vault-frame'), release: APP_VERSION,
     getIdentity, validateIdentity: valid, readPermit: admission.read, onDiagnostic: emitFrameDiagnostic,
     readTimeout: async () => (await getUserProfile(user.uid))?.lock_timeout,
     unlock: async (uid, {signal}) => {
-      if (uid !== user.uid || !await valid({uid, epoch}) || signal.aborted) throw Error('FRAME_AUTH_DENIED');
-      const cancel = () => securityManager.clearSession();
-      signal.addEventListener('abort', cancel, {once: true});
-      try {return await securityManager.ensureVaultKeyMaterial({signal});}
-      finally {signal.removeEventListener('abort', cancel);}
+      showUnlockProgress(true);
+      try {
+        if (uid !== user.uid || !await valid({uid, epoch}) || signal.aborted) throw Error('FRAME_AUTH_DENIED');
+        const cancel = () => securityManager.clearSession();
+        signal.addEventListener('abort', cancel, {once: true});
+        try {return await securityManager.ensureVaultKeyMaterial({signal});}
+        finally {signal.removeEventListener('abort', cancel);}
+      } finally {showUnlockProgress(false);}
     },
     confirmSensitive: async ({purpose, signal}) => {
       if (signal.aborted || !await valid({uid: user.uid, epoch}) || signal.aborted) return false;
@@ -45,12 +59,21 @@ export async function startVaultFrame({user, securityManager, fenceTicket}) {
       } finally {signal.removeEventListener('abort', cancel);}
     }, clearMaterial: () => {if (generation === mountGeneration) securityManager.clearSession();},
     onDispose: () => {stopPush(); stopPreference(); admission.dispose();},
-    onState: state => {if (generation !== mountGeneration) return; if (state.locked) {stopPush(); stopPreference(); admission.dispose();} if (loading && (state.locked || state.visible)) loading.hidden = true; status.hidden = !state.locked; resume.hidden = !state.locked;}
+    onState: state => {if (generation !== mountGeneration) return; if (state.locked) {showUnlockProgress(false); stopPush(); stopPreference(); admission.dispose();} if (loading && (state.locked || (state.visible && !unlockPending))) loading.hidden = true; status.hidden = !state.locked; resume.hidden = !state.locked;}
   });
   mounted = owner;
   stopPush = installFramePushNavigation({window, owner});
   securityManager.setFrameExpiryAuthority(() => owner.session.state().expiresAt);
-  resume.addEventListener('click', event => {if (mounted === owner && owner.resume()) event.preventDefault();});
+  resume.addEventListener('click', event => {
+    if (mounted !== owner) return;
+    if (resume.getAttribute('aria-busy') === 'true') {event.preventDefault(); return;}
+    try {
+      if (owner.resume()) {
+        event.preventDefault();
+        resume.setAttribute('aria-busy', 'true'); resume.setAttribute('aria-disabled', 'true');
+      }
+    } catch { /* Preserve the standalone anchor if reload cannot start. */ }
+  });
   const route = new URL(window.location.href).searchParams.get('route') || '/home_page.html';
   let started = false;
   try {started = await owner.start(route);} catch { /* Keep a usable blocked/standalone exit on bootstrap failure. */ }

@@ -2,13 +2,30 @@
 
 <a id="stato-corrente"></a>
 
+<a id="ripresa-contatori-1286-2026-11-19-stato"></a>
+
+## Candidata 1.2.286 — ripresa e contatori; online 1.2.285
+
+Diego autorizza PR, merge e pubblicazione dei due correttivi locali: rotellina durante ripresa/verifica/sblocco e contatori dell’Area Privata uguali alle tipologie Account Aziende. Confezione canonica286, 307 riferimenti, guida 16/reviewed286, offline 61 export/347 risorse e 367 file pubblici; nessun file pubblico aggiunto/rimosso e nessun delta dopo normalizzazione delle sole versioni/EOL rispetto al candidato funzionale prima del bump. [Evidenze](../evidenze/COLLAUDI.md#ripresa-contatori-1286-2026-11-19). Riesame dello SHA finale, CI PR/master, Hosting protetto e verifica pubblica ancora da acquisire. Online resta 1.2.285. TEL285-F09–F15 sono riscontri fisici circoscritti della285; nessun PASS telefonico della286 dedotto.
+
+
+## Attesa sblocco e contatori — due correttivi locali, online 1.2.285
+
+Prova 14/Ricerca confermata senza nuovi sblocchi, registrata come TEL285-F15. Diego segnala poi alcuni secondi prima della richiesta Vault/passkey e chiede una rotellina: [feedback di attesa implementato e verificato localmente](../evidenze/COLLAUDI.md#cornice-attesa-sblocco-2026-11-19), con reload effettivo e modale utilizzabile. Si aggiunge al candidato contatori sotto; entrambi non distribuiti. I riscontri fisici, la revisione del ramo e una futura pubblicazione restano stati distinti.
+
+<a id="contatori-ui-aziende-stato-2026-11-19"></a>
+
+## Contatori Area Privata — correttivo locale, produzione 1.2.285
+
+Su scelta «stessa ui di aziende», i quattro contatori privati riusano il badge Aziende: stesso fondo tenue del tema, testo, font e forma arrotondata, con cifre lunghe contenute. [Evidenze locali e foto originaria](../evidenze/COLLAUDI.md#contatori-area-privata-telefono-2026-11-19): nuova regressione 2/2 su 56 contesti, gruppi esistenti 58/58 e topologia 12/12 PASS; nessuna distribuzione grafica attestata. I successivi riscontri funzionali TEL285-F10–F14 sono registrati separatamente; gli altri casi e dispositivi mantengono i propri limiti.
+
 <a id="logout-mobile-1285-pubblico-2026-11-19-stato"></a>
 
 ## APP 1.2.285 — online e verificata
 
 Online 1.2.285 dal sorgente `56fe4167e999c3baafa1857fc28b66acf49dff7f`, sourceDirty=false. PR #337 e CI #1230/#1231/Hosting #1232 SUCCESS; pubblicazione solo Hosting conclusa 19/11/2026, 13:35:53 Europe/Rome, verifica integrale 367 hash / 41 profili / normalizzazioni e sette GET PASS. [Ricevuta completa](../evidenze/COLLAUDI.md#logout-mobile-1285-pubblico-2026-11-19).
 
-Diego conferma versione 1.2.285, ritorno immediato al login dopo Esci e permanenza su Accedi nella domanda separata dei 10 secondi senza interazione: [TEL285-F09 PASS riferito](../evidenze/COLLAUDI.md#logout-mobile-1285-telefono-2026-11-19), issue #336 chiusa nel contesto provato. Segue il rientro con nuovo sblocco, ancora da eseguire; D08/C1/C2 completi restano aperti. TEL284-F09 conserva il FAIL storico; 12 ore già ripristinate. D15/D18, altri dispositivi e contatori dell'Area Privata restano separati. Le candidate e le attese sotto sono storiche e non descrivono la versione attuale.
+Diego conferma versione 1.2.285, ritorno immediato al login dopo Esci e permanenza su Accedi nella domanda separata dei 10 secondi senza interazione: [TEL285-F09 PASS riferito](../evidenze/COLLAUDI.md#logout-mobile-1285-telefono-2026-11-19), issue #336 chiusa nel contesto provato. Conferma poi rientro con Authenticator/passkey e Home utilizzabile, area Azienda, elenco Account, profilo e dettaglio Account aziendale con ritorni corretti senza nuovi sblocchi: [TEL285-F10–F14 riferiti](../evidenze/COLLAUDI.md#cornice-telefono-rientro-1285-2026-11-19). D02/D04/D08/C1/C2 completi restano aperti. TEL284-F09 conserva il FAIL storico; 12 ore già ripristinate. Il rilievo dei contatori è trattato nel candidato locale sopra. D15/D18 e altri dispositivi restano distinti. Le candidate e le attese sotto sono storiche e non descrivono la versione attuale.
 
 <a id="logout-mobile-1285-stato-2026-11-19"></a>
 

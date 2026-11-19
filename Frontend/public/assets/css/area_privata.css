@@ -198,18 +198,6 @@
     margin: 0;
 }
 
-.badge-count {
-    font-size: var(--fs-xs);
-    font-weight: var(--font-title-weight);
-    color: var(--text-primary);
-    padding: 0;
-    background: transparent;
-    border-radius: 0;
-    backdrop-filter: none;
-    box-shadow: none;
-    opacity: 1;
-}
-
 .micro-visto-inline {
     font-size: var(--fs-micro);
     font-weight: var(--font-label-weight);
