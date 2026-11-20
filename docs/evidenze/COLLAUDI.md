@@ -1,5 +1,17 @@
 # Collaudi
 
+<a id="rilascio-1291-pubblico-2026-11-20"></a>
+
+## APP 1.2.291 — cleanup tardivo pubblicato e verificato
+
+[PR #350](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/350) unita dopo due GO sulla testa 6d4393360459da1c3c0739aa2480ca8a533f5abc; sorgente distribuito 634fff06eae9afa75b7abd40001e6e1757982f7e, sourceDirty=false e albero identico al contenuto riesaminato. CI [PR #1263](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44790166930), [master #1264](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44795101972) e [Hosting #1265](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44796112599) SUCCESS con digest concorde: ciascuna 68 blocchi/3963 test, 3952 PASS, 11 SKIP e zero FAIL/annullati.
+
+Deploy solo Hosting concluso 21/11/2026, 00:13:23 Europe/Rome, con approvazione production registrata. Verifica pubblica autonoma PASS 21/11/2026, 00:14:22 Europe/Rome:367 hash,41 profili header e probe/normalizzazioni.19 GET indipendenti PASS 21/11/2026, 00:14:25 Europe/Rome, incluso security-manager.js e le pagine interessate. Digest pubblico 636dd292d16c8548596506822df4c5c7f51ed9f852a238287474bad9a8e60501; manifest SHA256 81383425b5afd44ea81a982020a9d6e7af85a7c42108ff35513a7328f28c94ab.
+
+Distribuito il cleanup riservato all'operazione framed corrente; l'errore superato continua a rigettare, mentre l'errore corrente conserva la revoca. [Confezione e prove](#cleanup-tardivo-1291-2026-11-20):12 casi aggiunti e78 sessione/fence,7 cancellazione,356 cornice,199 navigazione e altri controlli locali PASS. Blocco, lease, inattività e autorità delle chiavi conservati. Il rapporto nativo non dimostra la race riprodotta né isola il sottotipo della scadenza. Ricollaudo fisico successivo, nessun PASS o audit completo dedotto.
+
+Ricevuta soltanto documentale in otto MD esistenti e GitHub, senza secondo Hosting. I checkpoint inferiori conservano la propria data/base; dettagli personali solo locali.
+
 <a id="cleanup-tardivo-1291-2026-11-20"></a>
 
 ## Cleanup tardivo 1.2.291 — confezione autorizzata

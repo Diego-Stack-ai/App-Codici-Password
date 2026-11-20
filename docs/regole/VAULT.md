@@ -1,5 +1,11 @@
 # Vault
 
+<a id="rilascio-1291-pubblico-2026-11-20"></a>
+
+## Cleanup tardivo291 — distribuzione verificata
+
+Distribuita la titolarità del cleanup nell'operazione framed corrente. Errori superati rigettati senza revocare lo sblocco successivo; errori correnti e controlli di identità/fence conservati. Lease, inattività, blocco e autorità delle chiavi invariati. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1291-pubblico-2026-11-20). Verifica dei file pubblici distinta da RAM/passkey e ricollaudo fisico.
+
 <a id="cleanup-tardivo-1291-2026-11-20"></a>
 
 ## Cleanup tardivo — candidata 1.2.291
