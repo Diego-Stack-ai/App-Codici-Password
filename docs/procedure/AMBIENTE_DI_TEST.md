@@ -1,5 +1,11 @@
 # Ambiente di test
 
+<a id="rilascio-1289-pubblico-2026-11-20-ambiente"></a>
+
+## 1.2.289 — limiti delle verifiche distribuite
+
+Correttivo pubblicato e verificato. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1289-pubblico-2026-11-20). Banco331cornice con35Back inclusi e199navigazione sintetici, con record inventati e browser su loopback. Il limite sul fault injection filtrato resta dichiarato. Conferma della versione e ricollaudo fisico successivi; nessun audit completo o altro dispositivo certificato dalla CI.
+
 <a id="scadenze-indietro-1289-2026-11-20-ambiente"></a>
 
 ## Banco del rilascio289 — contenuto e pubblicazione separati

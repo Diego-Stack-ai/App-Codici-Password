@@ -1,5 +1,11 @@
 # Incarico corrente
 
+<a id="rilascio-1289-pubblico-2026-11-20-incarico"></a>
+
+## Ordine289 eseguito — ricevuta e ripresa del collaudo
+
+Eseguito l'ordine «Pubblica» sul correttivo Back Scadenze con due nuovi GO, gate PR/master/Hosting e verifica pubblica. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1289-pubblico-2026-11-20). Completare MD/GitHub con PR soltanto documentale, controlli e riesame indipendente, senza secondo Hosting. Root unico scrittore e supporti in lettura,34MD conservati. Segue conferma della versione e ricollaudo mirato una prova alla volta; nessun nuovo lotto o caso completo dedotto.
+
 <a id="scadenze-indietro-1289-2026-11-20-incarico"></a>
 
 ## Ordine di pubblicazione — Back Scadenze1.2.289

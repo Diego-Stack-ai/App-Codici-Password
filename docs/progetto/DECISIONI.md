@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="rilascio-1289-pubblico-2026-11-20-decisione"></a>
+
+## Back Scadenze289 — ordine attuato
+
+L'ordine «Pubblica» è eseguito per il solo correttivo approvato. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1289-pubblico-2026-11-20). Confezione, riesami, CI e pubblicazione verificati; il ricollaudo sul dispositivo resta distinto. Nessuna estensione ad altri lotti o operazioni amministrative.
+
 <a id="scadenze-indietro-1289-2026-11-20-decisione"></a>
 
 ## Pubblicare il correttivo Back Scadenze —20/11/2026

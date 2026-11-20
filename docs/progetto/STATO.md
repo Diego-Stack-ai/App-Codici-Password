@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1289-pubblico-2026-11-20-stato"></a>
+
+## APP1.2.289 — online e verificata
+
+Online1.2.289 dal sorgente e3169cb070439059a91e8f8066b787acfffcb15f, sourceDirty=false. PR #346, due GO sulla testa finale, CI PR/master/Hosting e digest concordi; solo Hosting e verifica pubblica367hash/41profili/18GET PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1289-pubblico-2026-11-20). Distribuiti ritorno Scadenze filtrato e clic unico della card. Prossimo passo confermare la versione e ripetere il ritorno sul dispositivo; nessun PASS fisico dedotto. Candidate e attese sotto sono checkpoint storici.
+
 <a id="scadenze-indietro-1289-2026-11-20-stato"></a>
 
 ## Candidata1.2.289 — ritorno Scadenze; online1.2.288

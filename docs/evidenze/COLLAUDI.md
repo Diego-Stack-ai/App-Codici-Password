@@ -1,5 +1,17 @@
 # Collaudi
 
+<a id="rilascio-1289-pubblico-2026-11-20"></a>
+
+## APP1.2.289 — ritorno Scadenze pubblicato e verificato
+
+[PR #346](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/346) unita dopo due GO sulla testa ea1f1f823e02a0c65c1fa26a83721bbd43092bf9; sorgente distribuito e3169cb070439059a91e8f8066b787acfffcb15f, sourceDirty=false, albero identico al contenuto riesaminato. CI [PR #1250](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44727523513), [master #1251](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44731675990) e [Hosting #1252](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44732061651) SUCCESS e digest pubblico concorde: ciascuna 68blocchi/3926test,3915PASS,11SKIP,zeroFAIL/annullati.
+
+Deploy solo Hosting concluso 20/11/2026, 14:19:30 Europe/Rome, con scope hosting e approvazione production registrata. Verifica pubblica autonoma PASS 20/11/2026, 14:20:00 Europe/Rome:367hash,41profili header e probe/normalizzazioni.18GET indipendenti PASS 20/11/2026, 14:20:03 Europe/Rome, compresi i tre JS funzionali e Home/lista/dettaglio Scadenze. Digest pubblico b9ac38953133852fb730dd1e6e1d36b20c15d2010c4e997c59b90ebafa9fcfa9; manifest SHA256 18ca8048de165200eaa7642cde6640101500301f049e9adb3bb1dd63e5150366.
+
+Distribuiti il ritorno al contenitore Scadenze con filtro/regola verificati e il clic unico della card, conservando fallback canonico e guardie. [Confezione e prove sintetiche](#scadenze-indietro-1289-2026-11-20):331cornice con35Back inclusi,199navigazione e altri controlli pertinenti PASS. Limite sul fault injection filtrato conservato; nessun PASS fisico289 o caso completo dedotto. Conferma della versione e ricollaudo mirato successivi, una prova alla volta.
+
+Ricevuta soltanto documentale nei nove MD esistenti e GitHub, senza secondo Hosting. Candidate e attese seguenti conservano la propria data/base; nessun dato personale o nuovo lotto.
+
 <a id="scadenze-indietro-1289-2026-11-20"></a>
 
 ## Back Scadenze — candidata1.2.289 autorizzata

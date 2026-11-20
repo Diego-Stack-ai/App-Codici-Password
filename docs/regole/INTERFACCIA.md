@@ -1,5 +1,11 @@
 # Interfaccia
 
+<a id="rilascio-1289-pubblico-2026-11-20-ui"></a>
+
+## Contenitore Scadenze — distribuito nella289
+
+Distribuiti ritorno al precedente Scadenze con filtro/regola verificati e clic unico della card, conservando query esplicite e fallback canonico senza precedente valido. Nessuna modifica grafica. [Ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-1289-pubblico-2026-11-20); il ricollaudo sul dispositivo resta successivo e distinto dalle prove sintetiche.
+
 <a id="scadenze-indietro-1289-2026-11-20-interfaccia"></a>
 
 ## Ritorno Scadenze — confezione289
