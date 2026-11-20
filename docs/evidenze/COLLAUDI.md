@@ -1,5 +1,17 @@
 # Collaudi
 
+<a id="rilascio-1290-pubblico-2026-11-20"></a>
+
+## APP1.2.290 — filtri manuali pubblicati e verificati
+
+[PR #348](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/348) unita dopo due GO sulla testa f7df6d967772e47dc6a9d5c81eb1d473425656a4; sorgente distribuito 1cc3c341bb9179307f57dcfd95b63e0858b94406, sourceDirty=false, albero identico al contenuto riesaminato. CI [PR #1254](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44753966332), [master #1255](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44758880279) e [Hosting #1256](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44759008004) SUCCESS e digest concorde: ciascuna 68blocchi/3951test,3940PASS,11SKIP,zeroFAIL/annullati.
+
+Deploy solo Hosting concluso 20/11/2026, 16:59:24 Europe/Rome, con scope hosting e approvazione production registrata. Verifica pubblica autonoma PASS 20/11/2026, 17:00:58 Europe/Rome:367hash,41profili header e probe/normalizzazioni.18GET indipendenti PASS 20/11/2026, 17:01:01 Europe/Rome, compresi scadenze.js, vault-frame-policy.mjs e Home/lista/dettaglio. Digest pubblico f5c5415a5b71f3e366bc075d8a9a79565a8b301c8416f6f88ff3775a3d66799b; manifest SHA256 e5ea568974df8f0244c1bf790b30bf4738bbc142e866c450edf8328eef76c83c.
+
+Distribuita la selezione dei quattro filtri nella voce corrente, conservata dopo il dettaglio senza ricarica o voci aggiuntive. Solo archiviate estende l'enum URL, con guardie conservate. [Confezione e prove](#filtri-scadenze-1290-2026-11-20):356cornice con55Back/16matrice,199navigazione e altri controlli pertinenti PASS. Ricerca libera dopo ricreazione e rilievo visivo iniziale separati; nessun PASS fisico290 o caso completo dedotto. Conferma della versione e ricollaudo Archiviate successivi, una prova alla volta.
+
+Ricevuta soltanto documentale nei nove MD esistenti e GitHub, senza secondo Hosting. Candidate e attese sotto conservano data/base; nessun dato personale o nuovo lotto.
+
 <a id="filtri-scadenze-1290-2026-11-20"></a>
 
 ## Filtri Scadenze — candidata1.2.290 autorizzata

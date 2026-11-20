@@ -1,5 +1,11 @@
 # Ambiente di test
 
+<a id="rilascio-1290-pubblico-2026-11-20-ambiente"></a>
+
+## 1.2.290 — limiti delle verifiche distribuite
+
+Correttivo pubblicato e verificato. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1290-pubblico-2026-11-20). Banco356cornice con55Back e matrice16casi, più199navigazione, sintetici con record inventati e browser su loopback. Ricerca libera dopo ricreazione e rilievo visivo iniziale separati. Conferma della versione e ricollaudo fisico successivi; nessun audit completo o altro dispositivo certificato dalla CI.
+
 <a id="filtri-scadenze-1290-2026-11-20-ambiente"></a>
 
 ## Rilascio290 — isolamento ed evidenze

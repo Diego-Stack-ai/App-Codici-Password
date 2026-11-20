@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="rilascio-1290-pubblico-2026-11-20-rilascio"></a>
+
+## APP1.2.290 — procedura eseguita, solo Hosting
+
+PR #348 dopo due GO sulla testa finale, CI PR/master/Hosting e digest concordi; master fissato e scope hosting prima di production protetto, approvazione registrata e deploy SUCCESS. Verifica pubblica367hash/41profili/18GET PASS, compresi i due runtime modificati. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1290-pubblico-2026-11-20). Backend, regole server, workflow e protezioni conservati. La chiusura documentale mantiene il runtime distribuito senza un secondo Hosting.
+
 <a id="filtri-scadenze-1290-2026-11-20-rilascio"></a>
 
 ## Filtri manuali1.2.290 — solo Hosting

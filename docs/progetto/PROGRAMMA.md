@@ -1,5 +1,11 @@
 # Programma
 
+<a id="rilascio-1290-pubblico-2026-11-20-programma"></a>
+
+## 1.2.290 pubblicata — conferma e ricollaudo Archiviate
+
+Rilascio tecnico completato e verificato. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1290-pubblico-2026-11-20). Confermare1.2.290 sul dispositivo e ripetere Home→Scadenze→Archiviate→dettaglio→freccia alla stessa lista Archiviate→freccia alla Home. Proseguire una prova alla volta; ricerca libera dopo ricreazione, rilievo visivo iniziale e casi completi conservano i propri gate.
+
 <a id="filtri-scadenze-1290-2026-11-20-programma"></a>
 
 ## Prossimo passo — pubblicare290, poi ricollaudo Archiviate

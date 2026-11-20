@@ -1,5 +1,11 @@
 # Vault
 
+<a id="rilascio-1290-pubblico-2026-11-20-vault"></a>
+
+## Filtro Archiviate290 — distribuzione verificata
+
+Distribuito il solo nuovo valore archiviate nella policy URL Scadenze, con sincronizzazione replaceState e guardie del documento/owner conservate. Regole server, revoca, ammissione, lease, chiavi e timer invariati. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1290-pubblico-2026-11-20). La verifica del codice pubblico non certifica hardware, passkey o casi completi della cornice.
+
 <a id="filtri-scadenze-1290-2026-11-20-vault"></a>
 
 ## Archiviate — candidata290

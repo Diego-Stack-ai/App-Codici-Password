@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="rilascio-1290-pubblico-2026-11-20-decisione"></a>
+
+## Filtri manuali290 — ordine attuato
+
+L'ordine «pubblica» è eseguito per il solo correttivo consegnato. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1290-pubblico-2026-11-20). Confezione, riesami, CI e pubblicazione verificati; il ricollaudo sul dispositivo resta distinto. Nessuna estensione ad altri lotti o operazioni amministrative.
+
 <a id="filtri-scadenze-1290-2026-11-20-decisione"></a>
 
 ## Pubblicare i filtri manuali —20/11/2026
