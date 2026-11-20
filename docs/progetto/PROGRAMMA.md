@@ -1,5 +1,11 @@
 # Programma
 
+<a id="rilascio-1291-pubblico-2026-11-20"></a>
+
+## 1.2.291 pubblicata — conferma e ritorno in uso continuo
+
+Rilascio tecnico completato e verificato. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1291-pubblico-2026-11-20). Confermare1.2.291 sul dispositivo; poi ricollaudare il ritorno dal dettaglio alla lista Archiviate e alla Home durante uso continuo. Il blocco dopo scadenza del permesso rimane quello confermato. Prove fisiche e casi completi della cornice conservano i propri gate.
+
 <a id="cleanup-tardivo-1291-2026-11-20"></a>
 
 ## Pubblicare 1.2.291; poi ricollaudo del ritorno

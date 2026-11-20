@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1291-pubblico-2026-11-20"></a>
+
+## APP 1.2.291 — online e verificata
+
+Online1.2.291 dal sorgente 634fff06eae9afa75b7abd40001e6e1757982f7e, sourceDirty=false. PR #350, due GO sulla testa finale, CI PR/master/Hosting e digest concordi; solo Hosting e verifica pubblica367 hash/41 profili/19 GET PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1291-pubblico-2026-11-20). Corretto il cleanup di richieste superate; comportamento del blocco conservato. Prossimo passo confermare la versione e ricollaudare il ritorno durante uso continuo; nessun PASS fisico dedotto. Candidate e attese sotto sono checkpoint storici.
+
 <a id="cleanup-tardivo-1291-2026-11-20"></a>
 
 ## Candidata 1.2.291 — cleanup tardivo; online 1.2.290

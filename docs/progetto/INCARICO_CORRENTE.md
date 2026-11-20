@@ -1,5 +1,11 @@
 # Incarico corrente
 
+<a id="rilascio-1291-pubblico-2026-11-20"></a>
+
+## Ordine291 eseguito — ricevuta e ricollaudo
+
+Eseguito l'ordine di pubblicare il correttivo con nuova versione e MD/GitHub, mantenendo il blocco. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1291-pubblico-2026-11-20). Completare la chiusura documentale con PR, controlli e riesame indipendente senza secondo Hosting. Root unico scrittore e supporti in lettura;34 MD conservati. Segue conferma della versione e ricollaudo mirato una prova alla volta, senza dedurre altri lotti o casi completi.
+
 <a id="cleanup-tardivo-1291-2026-11-20"></a>
 
 ## Pubblicazione 1.2.291 — cleanup delle richieste superate

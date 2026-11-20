@@ -1,5 +1,11 @@
 # Ambiente di test
 
+<a id="rilascio-1291-pubblico-2026-11-20"></a>
+
+## 1.2.291 — limiti delle verifiche distribuite
+
+Correttivo pubblicato e verificato. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1291-pubblico-2026-11-20).78 prove sessione/fence con12 casi aggiunti sul gestore reale in VM;356 cornice/199 navigazione e altre verifiche locali con record inventati. I banchi UI simulano Auth e parte del gestore: non certificano iOS, RAM o passkey fisica. Ricollaudo sul dispositivo successivo, senza trasformare l'episodio di scadenza in prova della race. Nessun dato personale negli artefatti pubblici.
+
 <a id="cleanup-tardivo-1291-2026-11-20"></a>
 
 ## 1.2.291 — perimetro delle prove del cleanup

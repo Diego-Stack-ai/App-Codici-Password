@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="rilascio-1291-pubblico-2026-11-20"></a>
+
+## APP 1.2.291 — procedura eseguita, solo Hosting
+
+PR #350 dopo due nuovi GO, CI PR/master/Hosting con sorgente e digest concordi, scope hosting e master fissato prima di production protetto, approvazione registrata e deploy SUCCESS. Verifica pubblica367 hash/41 profili/19 GET PASS, incluso il gestore modificato. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1291-pubblico-2026-11-20). Backend, regole server, workflow e protezioni conservati; chiusura documentale senza secondo Hosting.
+
 <a id="cleanup-tardivo-1291-2026-11-20"></a>
 
 ## Cleanup tardivo 1.2.291 — solo Hosting

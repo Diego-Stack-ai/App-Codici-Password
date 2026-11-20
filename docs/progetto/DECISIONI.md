@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="rilascio-1291-pubblico-2026-11-20"></a>
+
+## Pubblicazione291 attuata; blocco conservato
+
+Ordine di pubblicazione eseguito per il solo cleanup consegnato. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1291-pubblico-2026-11-20). Confezione, riesami, CI e distribuzione verificati; comportamento del blocco, lease e inattività conservati secondo la scelta già registrata. Nessuna causa fisica o autorizzazione ad altri lotti dedotta.
+
 <a id="cleanup-tardivo-1291-2026-11-20"></a>
 
 ## Pubblicare il correttivo; blocco conservato —20/11/2026
