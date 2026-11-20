@@ -1,5 +1,11 @@
 # Ambiente di test
 
+<a id="profilo-indietro-1287-pubblico-2026-11-19-ambiente"></a>
+
+## 1.2.287 — distribuzione e limiti delle prove
+
+Pubblicata e verificata 1.2.287 dal sorgente `08b19165e1124e958ca2d01189153c10fdb3904a`, sourceDirty=false. PR #342, due GO sulla testa finale e CI PR/master/Hosting concordi; scope solo Hosting e protezioni conservate. [Ricevuta](../evidenze/COLLAUDI.md#profilo-indietro-1287-pubblico-2026-11-19). Nessuna nuova certificazione dei dispositivi o chiusura degli audit completi; proposta grafica separata. I banchi locali e la CI usano dati inventati e non attestano hardware, provider nativi o tutti i dispositivi. Il seguito manuale conserva il proprio registro locale.
+
 <a id="profilo-indietro-1287-ambiente-2026-11-19"></a>
 
 ## Indietro — banco integrato del candidato287

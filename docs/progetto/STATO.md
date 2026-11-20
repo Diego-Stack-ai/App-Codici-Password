@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+<a id="profilo-indietro-1287-pubblico-2026-11-19-stato"></a>
+
+## APP 1.2.287 — online e verificata
+
+Pubblicata e verificata 1.2.287 dal sorgente `08b19165e1124e958ca2d01189153c10fdb3904a`, sourceDirty=false. PR #342, due GO sulla testa finale e CI PR/master/Hosting concordi; scope solo Hosting e protezioni conservate. [Ricevuta](../evidenze/COLLAUDI.md#profilo-indietro-1287-pubblico-2026-11-19). Nessuna nuova certificazione dei dispositivi o chiusura degli audit completi; proposta grafica separata. Deploy solo Hosting concluso 20/11/2026, 07:36:58 Europe/Rome; verifica di 367 hash e 41 profili e 11 GET PASS. I checkpoint sotto conservano data e versione, non indicano una pubblicazione ancora in attesa.
+
 <a id="profilo-indietro-1287-stato-2026-11-19"></a>
 
 ## Navigazione Indietro — candidata1.2.287, online1.2.286

@@ -1,5 +1,11 @@
 # Interfaccia
 
+<a id="profilo-indietro-1287-pubblico-2026-11-19-ui"></a>
+
+## Navigazione condivisa — correttivo distribuito
+
+Pubblicata e verificata 1.2.287 dal sorgente `08b19165e1124e958ca2d01189153c10fdb3904a`, sourceDirty=false. PR #342, due GO sulla testa finale e CI PR/master/Hosting concordi; scope solo Hosting e protezioni conservate. [Ricevuta](../evidenze/COLLAUDI.md#profilo-indietro-1287-pubblico-2026-11-19). Nessuna nuova certificazione dei dispositivi o chiusura degli audit completi; proposta grafica separata. Header e owner coordinano il ritorno con cronologia verificata o fallback interno; stili e decorazioni conservati. La mappa collega produttori e regressioni, senza dedurre nuova copertura cromatica.
+
 <a id="profilo-indietro-1287-ui-2026-11-19"></a>
 
 ## Freccia — candidata con un solo comando

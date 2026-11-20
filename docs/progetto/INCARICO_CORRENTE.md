@@ -1,5 +1,11 @@
 # Incarico corrente
 
+<a id="profilo-indietro-1287-pubblico-2026-11-19-incarico"></a>
+
+## Correttivo 287 pubblicato — chiusura documentale e collaudo
+
+Pubblicata e verificata 1.2.287 dal sorgente `08b19165e1124e958ca2d01189153c10fdb3904a`, sourceDirty=false. PR #342, due GO sulla testa finale e CI PR/master/Hosting concordi; scope solo Hosting e protezioni conservate. [Ricevuta](../evidenze/COLLAUDI.md#profilo-indietro-1287-pubblico-2026-11-19). Nessuna nuova certificazione dei dispositivi o chiusura degli audit completi; proposta grafica separata. Ricevuta nei nove MD esistenti; merge documentale subordinato a controlli e riesame indipendente, senza secondo Hosting. Root unico scrittore, supporti in lettura e 34 MD conservati. Segue conferma della versione sul dispositivo e ricollaudo mirato del ritorno, poi ripresa guidata; nessun nuovo lotto o C1/C2 dedotto.
+
 <a id="profilo-indietro-1287-incarico-2026-11-19"></a>
 
 ## Mandato corrente — navigazione Indietro e rilascio1.2.287
