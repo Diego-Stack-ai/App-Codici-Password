@@ -1,4 +1,4 @@
-import {auth} from '../../firebase-config.js?v=1.2.288';
+import {auth} from '../../firebase-config.js?v=1.2.289';
 import {authSessionFence} from '../../auth-session-fence.js';
 import {privateFrameUrl, consumeFrameStandaloneMarker} from './vault-frame-policy.mjs';
 import {createProductionFrameAdmission} from './vault-frame-admission.js';

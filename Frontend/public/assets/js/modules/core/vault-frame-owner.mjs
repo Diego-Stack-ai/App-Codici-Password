@@ -244,16 +244,22 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
       const target = privateFrameUrl(fallback, origin);
       if (!target) return true;
       const entry = historyEntry(), previous = entry && historyEntries.get(entry.previous);
-      // A fixed parent may traverse only an exact, already verified predecessor.
-      // Replacing that same predecessor would otherwise leave duplicate parents.
-      if (previous && (preferHistory || previous.url === target.href) && win.history.length > 1) {
+      const previousUrl = previous && privateFrameUrl(previous.url, origin);
+      // Deadline detail stays in its canonical list, including the verified
+      // predecessor's filter. Explicit targets and other pages still match exactly.
+      const deadlineListParent = route?.pathname === '/dettaglio_scadenza.html'
+        && target.pathname === '/scadenze.html' && !target.search && !target.hash
+        && previousUrl?.pathname === '/scadenze.html';
+      const backTarget = deadlineListParent ? previousUrl : target;
+      // Traversing a verified predecessor avoids inserting a duplicate parent.
+      if (previous && (preferHistory || previous.url === target.href || deadlineListParent) && win.history.length > 1) {
         session.retireDocument(); nonce = null; mask(true); backPending = true;
         // A missing traversal cannot leave the owner masked indefinitely.
         backTimer = win.setTimeout(() => {
           if (!backPending || disposed || locked || logoutHold || exitRequest || win.document !== ownerDocument) return;
-          navigate(target.href, true);
+          navigate(backTarget.href, true);
         }, 3000);
-        try {win.history.back();} catch {navigate(target.href, true);}
+        try {win.history.back();} catch {navigate(backTarget.href, true);}
         return true;
       }
       return navigate(target.href, true);

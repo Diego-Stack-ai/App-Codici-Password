@@ -1,11 +1,12 @@
 import {confirmFrameAction} from '../core/vault-frame-client.js';
+import {navigateDocument} from '../../frame-navigation.js';
 /**
  * SCADENZE MODULE (V4.1)
  * Gestione della pagina scadenze (lista completa) e utility per la home.
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.288';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.289';
 import { getFooterReady } from '../../footer-state.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
@@ -14,7 +15,7 @@ import { updateDoc, deleteDoc, doc, onAuthStateChanged, runTransaction, serverTi
 import {deleteObject, ref} from "/assets/js/vendor/firebase-runtime.js";
 import { deadlineDate, deadlineBucket, deadlinePresentation } from './deadline-model.js';
 import { t } from '../../translations.js';
-import { initComponents } from '../../components-v129.js?v=1.2.288';
+import { initComponents } from '../../components-v129.js?v=1.2.289';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import {listDeadlines, listReceivedDeadlines} from '../data/vault-repository.js';
@@ -410,7 +411,6 @@ function createScadenzaCard(scadenza) {
         dataset: {
             id: scadenza.id,
             archived: String(Boolean(scadenza.completed)),
-            action: 'navigate',
             href: scadenza.received
                 ? `dettaglio_scadenza.html?received=${encodeURIComponent(scadenza.id)}`
                 : `dettaglio_scadenza.html?id=${encodeURIComponent(scadenza.id)}`
@@ -419,7 +419,7 @@ function createScadenzaCard(scadenza) {
 
     card.onclick = () => {
         if (mount !== listMount || !listActive()) return;
-        window.location.href = card.dataset.href;
+        navigateDocument(card.dataset.href);
     };
 
     return card;

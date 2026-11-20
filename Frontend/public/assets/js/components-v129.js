@@ -1,7 +1,7 @@
 import {beginFrameLogout,handleFrameBack,navigateDocument} from './frame-navigation.js';
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.288';
+import { auth } from './firebase-config.js?v=1.2.289';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
@@ -78,7 +78,9 @@ function navigateBack(fallbackHref, preferHistory = true) {
             && previous.href !== current.href
             && !AUTH_PATHS.has(previousPath);
 
-        if (preferHistory && isSafeInternalPrevious && window.history.length > 1) {
+        const deadlineListParent = current.pathname === '/dettaglio_scadenza.html'
+            && fallbackHref === 'scadenze.html' && previous?.pathname === '/scadenze.html';
+        if ((preferHistory || deadlineListParent) && isSafeInternalPrevious && window.history.length > 1) {
             window.history.back();
             return;
         }
@@ -152,7 +154,7 @@ export async function initComponents() {
                     fallbackHref = 'home_page.html';
                 } else if (path.endsWith('dettaglio_scadenza.html')) {
                     fallbackHref = 'scadenze.html';
-                    // Deadline details always return to Scadenze.
+                    // Keep the canonical Scadenze parent; verified list filters survive Back.
                     preferHistory = false;
                 } else if (path.endsWith('aggiungi_scadenza.html')) {
                     const id = urlParams.get('id');

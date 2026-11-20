@@ -1,5 +1,17 @@
 # Programma
 
+<a id="scadenze-indietro-1289-2026-11-20-programma"></a>
+
+## Prossimo passo — pubblicare289, poi ripetere il ritorno Scadenze
+
+Eseguire il [mandato289](INCARICO_CORRENTE.md#scadenze-indietro-1289-2026-11-20-incarico) con controlli e nuovi riesami sulla confezione effettiva, CI PR/master/Hosting, production protetto e verifica pubblica; ricevuta MD/GitHub senza altro Hosting. Poi conferma della versione e ricollaudo guidato del ritorno diretto da Dettaglio alla lista Scadenze/Urgenze di provenienza e alla Home. Altri casi completi e dispositivi mantengono i propri gate; nessun PASS fisico dedotto.
+
+<a id="scadenze-indietro-locale-2026-11-20-programma"></a>
+
+## Prossimo passo — chiudere il ritorno Scadenze
+
+Il [correttivo locale](../evidenze/COLLAUDI.md#scadenze-indietro-locale-2026-11-20) ha completato verifiche e due riesami indipendenti; resta da ordinare l'eventuale pubblicazione. Riprendere il collaudo guidato dal ritorno alla stessa lista Scadenze/Urgenze, senza la tappa Tutte, soltanto dopo il rilascio e la conferma della versione. Altri casi completi, dispositivi e lotti conservano i propri gate; nessuna certificazione complessiva dedotta.
+
 <a id="rilascio-1288-pubblico-2026-11-20-programma"></a>
 
 ## 1.2.288 pubblicata — conferma e ricollaudo mirato

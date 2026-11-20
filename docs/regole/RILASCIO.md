@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="scadenze-indietro-1289-2026-11-20-rilascio"></a>
+
+## Back Scadenze1.2.289 — procedura solo Hosting
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#scadenze-indietro-1289-2026-11-20-incarico): snapshot funzionale pre-bump, versione canonica289, guida16/reviewed289 e derivati offline/QA; confronto dei367pubblici con tre soli JS funzionali. Due nuovi GO sullo SHA finale e CI PR completa verde, merge con testa attesa; CI master e validate Hosting sullo stesso sorgente/digest, release_scope=hosting e master remoto invariato prima di production protetto. Workflow/protezioni conservati, nessuna operazione backend/policy. Manifest dai byte Git LF, verifica pubblica integrale e GET dei tre JS e delle pagine interessate; ricevuta MD/GitHub senza secondo Hosting. [Evidenze e limiti](../evidenze/COLLAUDI.md#scadenze-indietro-1289-2026-11-20); nessun PASS fisico o pubblicazione dedotto dai soli test locali.
+
 <a id="rilascio-1288-pubblico-2026-11-20-rilascio"></a>
 
 ## APP1.2.288 — procedura eseguita, solo Hosting

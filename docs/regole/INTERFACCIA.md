@@ -1,5 +1,17 @@
 # Interfaccia
 
+<a id="scadenze-indietro-1289-2026-11-20-interfaccia"></a>
+
+## Ritorno Scadenze — confezione289
+
+Il [contratto locale del contenitore](#scadenze-indietro-locale-2026-11-20-interfaccia) viene confezionato nella289: filtro/regola del precedente Scadenze affidabile conservati, fallback canonico senza precedente valido e query esplicite distinte. La card mantiene un unico gestore e le guardie di attività. [Prove e limiti](../evidenze/COLLAUDI.md#scadenze-indietro-1289-2026-11-20); nessuna modifica grafica o nuova prova fisica dedotta dalla confezione.
+
+<a id="scadenze-indietro-locale-2026-11-20-interfaccia"></a>
+
+## Dettaglio Scadenza — filtro del contenitore, candidato locale
+
+Il ritorno al contenitore canonico Scadenze conserva filter/rule del precedente verificato quando il dettaglio viene aperto dalla lista. Non inserire Tutte prima della lista originaria. Senza un precedente affidabile su quella stessa pagina, usare Scadenze senza filtro, senza tornare direttamente alla Home. Una destinazione con query esplicita conserva il proprio significato e non può essere sostituita da un altro filtro. Un clic sulla card usa un solo gestore e conserva i controlli del ciclo di vita. [Implementazione locale e prove](../evidenze/COLLAUDI.md#scadenze-indietro-locale-2026-11-20); nessuna distribuzione dedotta.
+
 <a id="rilascio-1288-pubblico-2026-11-20-ui"></a>
 
 ## Back e card quadrate — distribuiti nella1.2.288
