@@ -1,5 +1,12 @@
 # Decisioni
 
+<a id="filtri-scadenze-1290-2026-11-20-decisione"></a>
+
+## Pubblicare i filtri manuali —20/11/2026
+
+Fonte: nuovo ordine di Diego «pubblica» dopo il correttivo locale. Autorizzati1.2.290, PR/merge/Hosting e ricevuta MD/GitHub, con due nuovi GO sul contenuto confezionato. [Mandato](INCARICO_CORRENTE.md#filtri-scadenze-1290-2026-11-20-incarico). La selezione resta nella voce corrente tramite replaceState; solo archiviate estende l'enum URL. Il testo libero dopo ricreazione e il rilievo visivo iniziale restano separati. Test locali, pubblicazione e ricollaudo nativo non sono equivalenti.
+
+
 <a id="rilascio-1289-pubblico-2026-11-20-decisione"></a>
 
 ## Back Scadenze289 — ordine attuato

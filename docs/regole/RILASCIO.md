@@ -1,5 +1,12 @@
 # Rilascio
 
+<a id="filtri-scadenze-1290-2026-11-20-rilascio"></a>
+
+## Filtri manuali1.2.290 — solo Hosting
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#filtri-scadenze-1290-2026-11-20-incarico): snapshot pre-bump, versione290, guida16/reviewed290 e derivati offline/QA, confronto367pubblici con due runtime funzionali. Due nuovi GO sullo SHA finale e CI PR completa, merge con testa attesa; CI master/validate Hosting e digest concordi, scope hosting e master invariato prima di production protetto. Backend/regole server, workflow e protezioni conservati. Manifest da byte Git LF e verifica pubblica integrale, GET indipendenti di scadenze.js e vault-frame-policy.mjs e delle pagine interessate. Ricevuta MD/GitHub senza secondo Hosting. [Evidenze](../evidenze/COLLAUDI.md#filtri-scadenze-1290-2026-11-20); nessun PASS fisico dedotto.
+
+
 <a id="rilascio-1289-pubblico-2026-11-20-rilascio"></a>
 
 ## APP1.2.289 — procedura eseguita, solo Hosting

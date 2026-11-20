@@ -6,7 +6,7 @@ import {navigateDocument} from '../../frame-navigation.js';
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.289';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.290';
 import { getFooterReady } from '../../footer-state.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
@@ -15,7 +15,7 @@ import { updateDoc, deleteDoc, doc, onAuthStateChanged, runTransaction, serverTi
 import {deleteObject, ref} from "/assets/js/vendor/firebase-runtime.js";
 import { deadlineDate, deadlineBucket, deadlinePresentation } from './deadline-model.js';
 import { t } from '../../translations.js';
-import { initComponents } from '../../components-v129.js?v=1.2.289';
+import { initComponents } from '../../components-v129.js?v=1.2.290';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import {listDeadlines, listReceivedDeadlines} from '../data/vault-repository.js';
@@ -23,6 +23,7 @@ import {listDeadlines, listReceivedDeadlines} from '../data/vault-repository.js'
 let currentUser = null;
 let allScadenze = [];
 let activeFilter = 'all';
+const deadlineFilterParams = Object.freeze({all: '', urgent: 'urgenti', expiring: 'in_scadenza', completed: 'archiviate'});
 let searchQuery = '';
 let activeRuleFilter = '';
 let sortType = 'date-asc';
@@ -70,8 +71,7 @@ export async function initScadenze(user) {
     const urlParams = new URLSearchParams(window.location.search);
     const urlFilter = urlParams.get('filter');
     activeRuleFilter = String(urlParams.get('rule') || '').trim();
-    if (urlFilter === 'urgenti') activeFilter = 'urgent';
-    else if (urlFilter === 'in_scadenza') activeFilter = 'expiring';
+    activeFilter = Object.keys(deadlineFilterParams).find(filter => deadlineFilterParams[filter] === (urlFilter || '')) || 'all';
 
     if (searchInput) {
         searchInput.value = activeRuleFilter;
@@ -87,9 +87,18 @@ export async function initScadenze(user) {
     // Filter Chips Events
     filterChips.forEach(chip => {
         chip.addEventListener('click', () => {
+            const selectedFilter = chip.dataset.filter;
+            if (!active() || !Object.hasOwn(deadlineFilterParams, selectedFilter)) return;
+            const url = new URL(window.location.href);
+            const parameter = deadlineFilterParams[selectedFilter];
+            if (parameter) url.searchParams.set('filter', parameter);
+            else url.searchParams.delete('filter');
+            if (url.href !== window.location.href) {
+                window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+            }
             filterChips.forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
-            activeFilter = chip.dataset.filter;
+            activeFilter = selectedFilter;
             renderFilteredScadenze();
         });
     });

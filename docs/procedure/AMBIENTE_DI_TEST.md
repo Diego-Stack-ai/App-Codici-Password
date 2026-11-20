@@ -1,5 +1,12 @@
 # Ambiente di test
 
+<a id="filtri-scadenze-1290-2026-11-20-ambiente"></a>
+
+## Rilascio290 — isolamento ed evidenze
+
+Worktree isolata .codex-tmp/deadline-filter-state-20261120, base master0f2c6fb7e3f6e62594843e87d1c1f0aeb5d47c63. Il checkout principale conserva le lavorazioni preesistenti. Banchi localhost con dati inventati e dipendenze già presenti; collegamento locale rimosso prima dell'audit documentale. [Confezione](../evidenze/COLLAUDI.md#filtri-scadenze-1290-2026-11-20). Artefatti tecnici ignorati nella .codex-tmp della worktree; osservazioni personali dettagliate private. Nuovi SHA/digest per CI e manifest; ricollaudo nativo dopo la verifica pubblica.
+
+
 <a id="rilascio-1289-pubblico-2026-11-20-ambiente"></a>
 
 ## 1.2.289 — limiti delle verifiche distribuite

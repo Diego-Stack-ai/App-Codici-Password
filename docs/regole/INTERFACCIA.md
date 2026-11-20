@@ -1,5 +1,18 @@
 # Interfaccia
 
+<a id="filtri-scadenze-1290-2026-11-20-ui"></a>
+
+## Filtri nella voce corrente — confezione290
+
+Confezionato il [contratto dei quattro filtri manuali](#filtri-scadenze-locale-2026-11-20-ui): selezione conservata dopo il dettaglio, replaceState senza nuova voce, rule e ricerca corrente mantenuti durante il cambio. [Prove e limiti](../evidenze/COLLAUDI.md#filtri-scadenze-1290-2026-11-20). Nessuna modifica grafica; testo libero dopo ricreazione e rilievo visivo iniziale separati dal delta.
+
+
+<a id="filtri-scadenze-locale-2026-11-20-ui"></a>
+
+## Filtri Scadenze nella voce corrente — candidato locale
+
+La selezione manuale dei chip identifica la lista da ripristinare dopo il dettaglio: Tutte elimina filter, Urgenti usa urgenti, In scadenza usa in_scadenza, Archiviate usa archiviate. Aggiornare soltanto quel parametro tramite replaceState, senza ricaricare o aggiungere una pagina alla cronologia; mantenere rule e la ricerca corrente durante il cambio. Il callback richiede mount attivo e valore conosciuto. Il secondo Indietro continua verso il predecessore della lista. [Implementazione locale e prove](../evidenze/COLLAUDI.md#filtri-scadenze-locale-2026-11-20); ripristino della ricerca libera dopo ricreazione e rilievo visivo iniziale sono ambiti distinti, senza nuova attestazione fisica.
+
 <a id="rilascio-1289-pubblico-2026-11-20-ui"></a>
 
 ## Contenitore Scadenze — distribuito nella289

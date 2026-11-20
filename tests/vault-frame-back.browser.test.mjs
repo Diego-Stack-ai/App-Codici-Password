@@ -171,6 +171,34 @@ test('real deadline list rule Back retains the canonical list query',{timeout:60
  }finally{await f.context.close();}
 });
 
+const selectedDeadlineFilters=[
+ ['all',null,'doc-0'],['urgent','urgenti','doc-0'],
+ ['expiring','in_scadenza','doc-1'],['completed','archiviate','doc-3']
+];
+for(const framed of [true,false])for(const entry of ['in_scadenza','urgenti'])for(const [selected,query,id]of selectedDeadlineFilters)
+test('selected '+selected+' deadline from '+entry+' returns to the selected list in '+(framed?'frame':'standalone'),{timeout:60000},async()=>{
+ const f=framed?await fixture():await harness.open('home_page.html');
+ const view=()=>framed?child(f):f.page;
+ const wait=async file=>{if(framed)return ready(f,file);await f.page.waitForFunction(file=>location.pathname==='/'+file&&window.__viewTour?.ready,file);assert.equal(await f.page.evaluate(()=>window.__viewTour.bootError),undefined);};
+ try{
+  await view().locator('a[href="scadenze.html?filter='+entry+'"]').click();await wait('scadenze.html');
+  const marker=await view().evaluate(()=>window.selectedFilterProbe=crypto.randomUUID()),length=await f.page.evaluate(()=>history.length);
+  await view().locator('.filter-chip[data-filter="'+selected+'"]').click();
+  assert.equal(await view().evaluate(()=>window.selectedFilterProbe),marker,'selecting a filter must keep the list document');
+  assert.equal(await f.page.evaluate(()=>history.length),length,'selecting a filter must not push an intermediate history entry');
+  assert.equal(await view().locator('.filter-chip.active').getAttribute('data-filter'),selected);
+  await view().locator('#scadenze-list .deadline-card[data-id="'+id+'"] .deadline-card-title').click();await wait('dettaglio_scadenza.html');
+  assert.equal(new URL(view().url()).searchParams.get('id'),id);
+  await view().locator('#header-left button.btn-icon-header').click();await wait('scadenze.html');
+  assert.equal(await view().locator('.filter-chip.active').getAttribute('data-filter'),selected,'Back must restore the manually selected filter');
+  assert.equal(await view().locator('#scadenze-list .deadline-card[data-id="'+id+'"]').count(),1);
+  assert.equal(new URL(view().url()).searchParams.get('filter'),query);
+  assert.equal(await view().locator('#scadenze-list .deadline-card[data-id="'+id+'"]').getAttribute('data-archived'),String(selected==='completed'));
+  if(framed)await intact(f);
+  await view().locator('#header-left button.btn-icon-header').click();await wait('home_page.html');if(framed)await intact(f);
+ }finally{await f.context.close();}
+});
+
 test('deadline card navigation respects its inactive-list guard',{timeout:45000},async()=>{
  const f=await fixture('scadenze.html?filter=urgenti');
  try{
@@ -182,6 +210,45 @@ test('deadline card navigation respects its inactive-list guard',{timeout:45000}
   await child(f).evaluate(()=>{window.__viewTourUser.uid='synthetic-inactive-list';document.querySelector('#scadenze-list .deadline-card .deadline-card-title').click();});
   assert.equal(await f.page.evaluate(()=>backProbe.navigations),0,'inactive card must not delegate a second navigation');
   assert.equal(child(f).url(),before);await intact(f);
+ }finally{await f.context.close();}
+});
+
+test('selected deadline filter preserves the rule through detail Back',{timeout:45000},async()=>{
+ const f=await fixture('scadenze.html?rule=Documento');
+ try{
+  await child(f).locator('.filter-chip[data-filter="completed"]').click();
+  assert.equal(new URL(child(f).url()).searchParams.get('rule'),'Documento');
+  assert.equal(await child(f).locator('#deadline-search').inputValue(),'Documento');
+  await child(f).locator('#scadenze-list .deadline-card[data-id="doc-3"] .deadline-card-title').click();await ready(f,'dettaglio_scadenza.html');
+  await back(f);await ready(f,'scadenze.html');
+  assert.equal(await child(f).locator('.filter-chip.active').getAttribute('data-filter'),'completed');
+  assert.equal(new URL(child(f).url()).searchParams.get('rule'),'Documento');
+  assert.equal(await child(f).locator('#deadline-search').inputValue(),'Documento');await intact(f);
+ }finally{await f.context.close();}
+});
+
+test('selected deadline filter leaves the current free-text search usable',{timeout:45000},async()=>{
+ const f=await fixture('scadenze.html?filter=in_scadenza');
+ try{
+  await child(f).locator('#deadline-search').fill('Scadenza sintetica');
+  await child(f).locator('.filter-chip[data-filter="completed"]').click();
+  assert.equal(await child(f).locator('#deadline-search').inputValue(),'Scadenza sintetica');
+  assert.equal(await child(f).locator('#scadenze-list .deadline-card[data-id="doc-3"]').count(),1);await intact(f);
+ }finally{await f.context.close();}
+});
+
+for(const fault of ['inactive','unknown'])test('selected deadline filter ignores '+fault+' chip callbacks',{timeout:45000},async()=>{
+ const f=await fixture('scadenze.html?filter=in_scadenza');
+ try{
+  const before={url:child(f).url(),filter:await child(f).locator('.filter-chip.active').getAttribute('data-filter')};
+  await child(f).evaluate(fault=>{
+   const button=document.querySelector('.filter-chip[data-filter="completed"]');
+   if(fault==='inactive')window.__viewTourUser.uid='synthetic-inactive-list';
+   else button.dataset.filter='__proto__';
+   button.click();
+  },fault);
+  assert.equal(child(f).url(),before.url);
+  assert.equal(await child(f).locator('.filter-chip.active').getAttribute('data-filter'),before.filter);await intact(f);
  }finally{await f.context.close();}
 });
 

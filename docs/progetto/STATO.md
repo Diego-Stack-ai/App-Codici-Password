@@ -2,6 +2,19 @@
 
 <a id="stato-corrente"></a>
 
+<a id="filtri-scadenze-1290-2026-11-20-stato"></a>
+
+## Candidata1.2.290 — filtri manuali; online1.2.289
+
+Confezionato il correttivo autorizzato: selezione dei quattro filtri sincronizzata nella voce corrente, con solo valore archiviate aggiunto alla policy URL. Versione290/307riferimenti, guida16/reviewed290, offline e QA allineati;367pubblici senza delta ulteriore dopo normalizzazione versioni/EOL. [Evidenze](../evidenze/COLLAUDI.md#filtri-scadenze-1290-2026-11-20). Due runtime funzionali, nessun CSS. Nuove verifiche locali del pacchetto PASS, incluse356cornice e199navigazione; nuovi GO e gate PR/master/Hosting ancora richiesti prima della verifica pubblica. Online resta289; nessun nuovo PASS fisico dedotto.
+
+
+<a id="filtri-scadenze-locale-2026-11-20-stato"></a>
+
+## Filtri Scadenze manuali — candidato locale; online1.2.289
+
+Riprodotta la perdita di Archiviate al ritorno dal dettaglio: il chip cambiava la vista mentre la URL conservava il filtro d'ingresso. Preparata sincronizzazione simmetrica dei quattro filtri sulla voce corrente con replaceState, senza ricarica o voce aggiuntiva. [Prove e limiti](../evidenze/COLLAUDI.md#filtri-scadenze-locale-2026-11-20).55/55 Back,356/356 cornice,199/199 navigazione,71/71 modello/calendario/policy e20/20 topologia PASS. Riesame indipendente e una futura pubblicazione restano distinti dai test. Versione289 e produzione invariate, nessun nuovo rilascio. Ricollaudo nativo successivo e distinto; il rilievo visivo sulla selezione iniziale resta separato.
+
 <a id="rilascio-1289-pubblico-2026-11-20-stato"></a>
 
 ## APP1.2.289 — online e verificata
