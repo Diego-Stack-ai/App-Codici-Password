@@ -1,5 +1,5 @@
 import {confirmFrameAction} from '../core/vault-frame-client.js';
-import {auth, functions} from '../../firebase-config.js?v=1.2.287';
+import {auth, functions} from '../../firebase-config.js?v=1.2.288';
 import {httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
 import {
     decryptAttachmentBytesWithFileKey,

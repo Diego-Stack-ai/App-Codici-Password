@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="azienda-indietro-1288-2026-11-20-decisione"></a>
+
+## Indietro aziendale — ordine di pubblicazione
+
+Il nuovo «Pubblica» autorizza la candidata1.2.288 con PR/merge/Hosting e MD/GitHub, superando il precedente limite locale per il correttivo consegnato. [Mandato e gate](INCARICO_CORRENTE.md#azienda-indietro-1288-2026-11-20-incarico). Destinazioni distinte, produttori coordinati e precedente esatto verificato; nessuna deroga alle autorità Auth/Vault o estensione grafica. Il ricollaudo fisico resta successivo alla verifica del rilascio.
+
 <a id="profilo-indietro-1287-pubblico-2026-11-19-decisione"></a>
 
 ## Mandato tecnico 287 eseguito

@@ -1,5 +1,11 @@
 # Ambiente di test
 
+<a id="azienda-indietro-1288-2026-11-20-ambiente"></a>
+
+## Indietro aziendale — banco della candidata288
+
+Banco Back reale per shell/header/pagine/owner e cronologia, Auth/dati inventati e origine loopback; ID azienda e Account distinti. Casi completi di ritorno, query, Forward, Modifica, ingressi diretti e standalone, con padre persistente e un solo unlock. [Oracoli, conteggi e limiti](../evidenze/COLLAUDI.md#azienda-indietro-1288-2026-11-20). Le dipendenze esistenti vengono collegate temporaneamente senza installazioni e scollegate prima del controllo documentale. Non è certificazione hardware, WebKit, passkey o audit completi; registro manuale dettagliato locale.
+
 <a id="profilo-indietro-1287-pubblico-2026-11-19-ambiente"></a>
 
 ## 1.2.287 — distribuzione e limiti delle prove

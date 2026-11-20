@@ -1,5 +1,17 @@
 # Programma
 
+<a id="azienda-indietro-1288-2026-11-20-programma"></a>
+
+## Prossimo passo — rilascio tecnico288, poi ricollaudo
+
+Eseguire il [mandato di pubblicazione](INCARICO_CORRENTE.md#azienda-indietro-1288-2026-11-20-incarico) con riesami immutabili, CI e gate Hosting invariati, verifica pubblica e ricevuta. Poi confermare la versione sul dispositivo e ripetere il ritorno dal dettaglio alla lista Account dell'azienda prima di Le mie aziende, una prova alla volta. Altri casi, ambienti e proposta grafica compatta conservano il proprio perimetro; nessun PASS fisico dedotto dai test locali.
+
+<a id="azienda-indietro-locale-2026-11-20-programma"></a>
+
+## Indietro aziendale — seguito locale prima del ricollaudo
+
+Correttivo locale e regressioni positivi; [stato e limiti](STATO.md#azienda-indietro-locale-2026-11-20-stato), [mappa dei collegamenti/test](../evidenze/COLLAUDI.md#azienda-indietro-locale-2026-11-20). Online resta1.2.287. Dopo un eventuale ordine di pubblicazione: confezione, riesami sullo SHA finale e gate invariati, quindi verifica della versione e nuova prova fisica del ritorno dal dettaglio alla lista Account dell'azienda prima di Le mie aziende. Non proseguire quel caso come PASS sulla base dei test sintetici; altri lotti e casi completi conservano il proprio perimetro.
+
 <a id="profilo-indietro-1287-pubblico-2026-11-19-programma"></a>
 
 ## 1.2.287 pubblicata — prossimo passo di collaudo

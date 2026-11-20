@@ -6,6 +6,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  */
 
 import { LOG } from '../../logger.js';
+import { navigateDocument } from '../../frame-navigation.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -183,7 +184,7 @@ function createAziendaCard(a) {
             ariaLabel: `${label}: ${countLabel}`,
             onclick: event => {
                 event.stopPropagation();
-                window.location.href = `account_azienda.html?id=${encodeURIComponent(a.id)}&type=${encodeURIComponent(action.view)}`;
+                navigateDocument(`account_azienda.html?id=${encodeURIComponent(a.id)}&type=${encodeURIComponent(action.view)}`);
             }
         }, [
             createElement('span', { className: 'material-symbols-outlined company-mode-icon notranslate', translate: 'no', textContent: action.icon }),
@@ -200,7 +201,7 @@ function createAziendaCard(a) {
                 deleteAziendaList(a.id, a.ragioneSociale);
                 return;
             }
-            window.location.href = `account_azienda.html?id=${a.id}`;
+            navigateDocument(`account_azienda.html?id=${a.id}`);
         }
     }, [
         // Delete Indicator (Solo in modalità elimina)

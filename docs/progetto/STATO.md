@@ -2,6 +2,18 @@
 
 <a id="stato-corrente"></a>
 
+<a id="azienda-indietro-1288-2026-11-20-stato"></a>
+
+## Candidata1.2.288 — Indietro aziendale; online1.2.287
+
+Ordine di pubblicazione acquisito. Confezionati i sei runtime del correttivo, versione canonica288, guida16/reviewed288 e derivati offline/QA;367file e nessuna differenza funzionale ulteriore dopo normalizzazione versioni/EOL rispetto al candidato locale. [Prove e limiti](../evidenze/COLLAUDI.md#azienda-indietro-1288-2026-11-20). Riesami immutabili, CI PR/master/Hosting, produzione protetta e verifica pubblica ancora da acquisire. Online resta1.2.287; nessun PASS fisico o modifica grafica dedotto.
+
+<a id="azienda-indietro-locale-2026-11-20-stato"></a>
+
+## Indietro aziendale — candidato locale; online 1.2.287
+
+Preparato il correttivo del salto della lista Account: fallback distinti, produttori aziendali coordinati e ritorno forzato senza duplicare il parent verificato. [Evidenze e collegamenti](../evidenze/COLLAUDI.md#azienda-indietro-locale-2026-11-20): runtime321/321, navigazione199/199 e controlli pertinenti PASS. Versione e produzione invariate; nessun commit/PR/merge/Hosting di questo seguito. Ricollaudo fisico ancora da acquisire dopo un'eventuale pubblicazione autorizzata. Le osservazioni manuali dettagliate restano locali; casi completi e proposta grafica separati.
+
 <a id="profilo-indietro-1287-pubblico-2026-11-19-stato"></a>
 
 ## APP 1.2.287 — online e verificata

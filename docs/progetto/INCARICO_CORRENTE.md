@@ -1,5 +1,19 @@
 # Incarico corrente
 
+<a id="azienda-indietro-1288-2026-11-20-incarico"></a>
+
+## Pubblicazione 1.2.288 — ordine eseguibile
+
+Diego ordina «Pubblica» dopo la consegna del correttivo locale Indietro aziendale. Superato il limite locale del checkpoint seguente per questo solo delta: nuova versione1.2.288, PR, due riesami indipendenti sulla testa finale, CI PR completa, merge con SHA atteso, CI master e validate Hosting sullo stesso sorgente/digest, poi production protetto secondo la delega della sessione e verifica pubblica integrale. [Confezione ed evidenze](../evidenze/COLLAUDI.md#azienda-indietro-1288-2026-11-20).
+
+Base e0f60f3fd26373dc9f3845307b78be8e1086a260, ramo codex/company-header-back-20261120; root unico scrittore e supporti indipendenti in lettura,34MD conservati. Snapshot prima del bump, guida16/reviewed288 e derivati offline/QA, confronto normalizzato sui367file. Scope hosting; nessuna modifica backend, workflow, protezioni, policy, dati reali, chiavi o timer. Proposta grafica compatta esclusa. Master remoto invariato prima di production, ricevuta MD/GitHub senza secondo Hosting; ricollaudo fisico successivo, distinto dai banchi sintetici. I riscontri manuali dettagliati restano locali.
+
+<a id="azienda-indietro-locale-2026-11-20-incarico"></a>
+
+## Seguito del ricollaudo — Indietro aziendale locale
+
+Riprodurre e correggere localmente il ritorno dal dettaglio aziendale, conservando azienda, filtro e sessione del padre, nel seguito del collaudo della freccia. Root unico scrittore e supporti indipendenti in lettura; dati inventati, documenti esistenti e 34 MD conservati. [Perimetro tecnico e verifiche](../evidenze/COLLAUDI.md#azienda-indietro-locale-2026-11-20). Versione online1.2.287 invariata: il riscontro non costituisce un nuovo ordine di bump, commit/push, PR/merge o pubblicazione. Nessuna modifica backend, workflow, protezioni, policy, chiavi o timer; proposta grafica compatta esclusa. Completare prova locale e riesame, poi presentare il risultato concreto; ripresa fisica dopo eventuale rilascio autorizzato.
+
 <a id="profilo-indietro-1287-pubblico-2026-11-19-incarico"></a>
 
 ## Correttivo 287 pubblicato — chiusura documentale e collaudo

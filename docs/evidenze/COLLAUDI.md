@@ -1,5 +1,43 @@
 # Collaudi
 
+<a id="azienda-indietro-1288-2026-11-20"></a>
+
+## Candidata1.2.288 — confezione Indietro aziendale
+
+Ordine «Pubblica», base e0f60f3f e ramo codex/company-header-back-20261120. Conservati causa, collegamenti componente/test, controprove RED e limiti del [correttivo locale](#azienda-indietro-locale-2026-11-20). Pubblicazione ancora da eseguire; online1.2.287. Registro manuale dettagliato locale, nessuna sequenza personale pubblicata.
+
+Snapshot dei367file prima del bump; script canonico287→288 e307riferimenti asset, guida contentVersion16/reviewedAppVersion1.2.288 senza nuovi testi, offline61export/347risorse e QA31pagine/126istruzioni/111target/167campi. Nessuna aggiunta/rimozione pubblica o ulteriore differenza dopo normalizzazione delle sole versioni/EOL rispetto al candidato funzionale. Confronto contro la base: soltanto i sei pubblici funzionali già indicati nel checkpoint locale; nessun CSS o proposta compatta.
+
+Il primo confezionamento si è fermato nella generazione offline per il collegamento alle dipendenze assente nella worktree, dopo il bump già riuscito. Ripreso senza downgrade né riscrittura dello snapshot originale, usando solo dipendenze preesistenti e senza installazioni; confronto finale PASS. I risultati runtime321/321 e navigazione199/199 precedenti al bump sono distinti dalle nuove verifiche del pacchetto.
+
+Sulla confezione288: runtime cornice321/321 PASS, con il banco Back25/25 incluso; guida12/12, offline16/16, diagnostica4/4, sintassi252moduli, riferimenti343file, CSS e budget31pagine PASS. Versione canonica288 e307riferimenti coerenti. Dipendenze temporanee scollegate dopo i controlli; prove sintetiche senza nuovi dati reali. Conteggi sovrapposti non sommati.
+
+Riesami sulla testa finale, CI PR completa, CI master e validate Hosting concordi per sorgente/digest, scope hosting e master invariato, approvazione protetta e verifica pubblica restano da acquisire. Nessuna certificazione fisica o chiusura degli audit completi dedotta; dettagli del nuovo ricollaudo dopo il rilascio.
+
+<a id="azienda-indietro-locale-2026-11-20"></a>
+
+## Indietro aziendale — correttivo locale, produzione 1.2.287
+
+Seguito tecnico del ricollaudo: candidato sul ramo codex/company-header-back-20261120, base e0f60f3fd26373dc9f3845307b78be8e1086a260. Nessun bump, commit, PR, merge o deploy di questo seguito; online resta la 1.2.287 descritta nella ricevuta sotto. I riscontri manuali dettagliati restano nel registro locale; le prove seguenti usano soltanto dati inventati e origine loopback. La proposta grafica compatta resta separata.
+
+Causa riprodotta: il predicato endsWith('account_azienda.html') catturava anche dettaglio e form prima dei relativi rami; la freccia del dettaglio forzava quindi Le mie aziende. Il confine /account_azienda.html rende raggiungibili i fallback specifici. Lo stesso controllo sugli altri predicati individua endsWith('scadenze.html') che intercettava regole_scadenze.html nell'ingresso diretto: corretto con il confine /scadenze.html. Non è un secondo clic del medesimo pulsante.
+
+| Collegamento | Componenti del candidato | Regressione |
+|---|---|---|
+| Destinazione della freccia | [Header condiviso](../../Frontend/public/assets/js/components-v129.js), fallback distinti per elenco, dettaglio e form | [Banco Back](../../tests/vault-frame-back.browser.test.mjs): dettaglio e form diretti; Regole da Impostazioni e ingresso diretto |
+| Aziende → Account, anche filtrati | [Elenco Aziende](../../Frontend/public/assets/js/modules/azienda/lista_aziende.js) e [Account aziendali](../../Frontend/public/assets/js/modules/azienda/account_azienda.js), navigazione tramite navigateDocument | Banco Back: nome azienda e tipologia, ritorno all'esatta URL con azienda e filtro; Forward e ritorno fino alla Home |
+| Dettaglio → Modifica → dettaglio | [Dettaglio](../../Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js), navigazione coordinata; [Form](../../Frontend/public/assets/js/modules/azienda/form_account_azienda.js), header condiviso senza override locale | Banco Back: apertura effettiva di Modifica, ritorno al dettaglio e alla lista filtrata |
+| Parent forzato e cronologia | [Owner](../../Frontend/public/assets/js/modules/core/vault-frame-owner.mjs), traversal solo per precedente verificato esattamente uguale al parent quando preferHistory=false | Banco Back: nessun duplicato del parent; destinazione o query diverse restano fallback forzati |
+| Standalone e accesso in lettura | Adattatore esistente, lifecycle e callback conservati; [fixture read-only](../../tests/company-detail-readonly.test.mjs) allineata con withStandaloneFrame | Banco Back standalone sulla lista filtrata e test read-only esistenti |
+
+Il banco usa produttori reali delle pagine, ID azienda e Account distinti, URL complete e dati caricati; controlla documento padre invariato, un solo caricamento/unlock, zero lock/clear/errori asincroni. Il caso Modifica copre la freccia nell'header: Annulla del footer e salvataggio restano percorsi distinti, senza nuova attestazione. Nessuna modifica CSS o nuova copertura delle palette dedotta.
+
+Controprove prima della correzione: 5 FAIL su 6 casi aziendali (il form diretto in modifica era già positivo); dopo i soli confini corretti, 2 FAIL su 6 per perdita del filtro; dopo il coordinamento dei produttori, 2 FAIL su 8 per duplicazione di Le mie aziende nella cronologia. Ingresso diretto Regole: FAIL separato, destinazione Home anziché Impostazioni. La correzione dell'owner riusa il precedente soltanto se verificato ed esattamente uguale alla destinazione forzata, query inclusa.
+
+Verifica finale locale: suite runtime cornice **321/321 PASS**, incluso il banco Back ampliato da 14 a **25 casi**; navigazione **199/199**, topologia **20/20**, diagnostica **4/4**, sintassi **252 moduli**, riferimenti **343 file** e budget **31 pagine** PASS. Sono suite con possibili sovrapposizioni: i conteggi non si sommano. Il primo tentativo runtime aveva cinque errori ambientali per il percorso Firebase Tools assente nella worktree; ripetuto dopo un collegamento temporaneo alle dipendenze esistenti, senza installazioni. Collegamento rimosso dopo il PASS; nessun errore ambientale contato come prova RED del prodotto.
+
+Riesame funzionale indipendente sul diff locale favorevole; non equivale al GO su un futuro commit confezionato. Produzione e versione invariate. Restano eventuale mandato di pubblicazione, confezione, riesami immutabili e gate di rilascio, poi ricollaudo fisico. Banco Chrome sintetico, non certificazione iPhone/WebKit, Android o C1/C2 completi.
+
 <a id="profilo-indietro-1287-pubblico-2026-11-19"></a>
 
 ## APP 1.2.287 — navigazione pubblicata e verificata

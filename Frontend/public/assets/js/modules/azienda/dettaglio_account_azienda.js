@@ -8,12 +8,13 @@ import { canReadCachedAccount } from '../shared/cached-account-access.js';
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.287';
+import { auth, db } from '../../firebase-config.js?v=1.2.288';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError, sharingCycleOf } from '../../utils.js';
+import { navigateDocument } from '../../frame-navigation.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { openExternalUrl } from '../shared/attachment-security.js';
@@ -122,7 +123,7 @@ function initProtocolUI(active) {
                 title: t('edit') || 'Modifica',
                 onclick: () => {
                     if (!active() || isReadOnly || ownerId !== currentUid) return;
-                    window.location.href = `form_account_azienda.html?id=${currentId}&aziendaId=${currentAziendaId}`;
+                    navigateDocument(`form_account_azienda.html?id=${currentId}&aziendaId=${currentAziendaId}`);
                 }
             }, [
                 createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'edit' })
@@ -289,7 +290,7 @@ async function loadAccount(mount = mounted) {
         if (!active()) return;
         const widgetContext = {compactView: true, uid: loadViewerId, context: 'company', accountId, companyId, readOnly: isReadOnly, active: actionActive, signal};
         for (const [path, initializer] of [['account-shared-credentials', 'initAccountSharedCredentials'], ['account-embedded-widgets', 'initAccountEmbeddedWidgets']]) {
-            import(`../shared/${path}.js?v=1.2.287`).then(async module => {
+            import(`../shared/${path}.js?v=1.2.288`).then(async module => {
                 if (!active()) return;
                 const controller = await module[initializer](widgetContext);
                 if (!active()) controller?.destroy();
@@ -376,7 +377,7 @@ function render(acc, active) {
         isReadOnly, isActive: active,
         onAddBanking: () => {
             if (!active()) return;
-            window.location.href = `form_account_azienda.html?id=${currentId}&aziendaId=${currentAziendaId}`;
+            navigateDocument(`form_account_azienda.html?id=${currentId}&aziendaId=${currentAziendaId}`);
         }
     });
 

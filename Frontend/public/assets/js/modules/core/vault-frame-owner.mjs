@@ -243,8 +243,10 @@ export function createVaultFrameOwner({window: win, iframe, release, getIdentity
       if (disposed || locked || logoutHold || exitRequest || backPending || win.document !== ownerDocument) return true;
       const target = privateFrameUrl(fallback, origin);
       if (!target) return true;
-      const entry = historyEntry();
-      if (preferHistory && entry && historyEntries.has(entry.previous) && win.history.length > 1) {
+      const entry = historyEntry(), previous = entry && historyEntries.get(entry.previous);
+      // A fixed parent may traverse only an exact, already verified predecessor.
+      // Replacing that same predecessor would otherwise leave duplicate parents.
+      if (previous && (preferHistory || previous.url === target.href) && win.history.length > 1) {
         session.retireDocument(); nonce = null; mask(true); backPending = true;
         // A missing traversal cannot leave the owner masked indefinitely.
         backTimer = win.setTimeout(() => {
