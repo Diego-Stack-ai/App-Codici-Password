@@ -354,6 +354,74 @@ test('session expiry reached during decryption prevents key delivery', async () 
     assert.equal(f.sessionStorage.getItem('vault_session_v1'), null);
 });
 
+function pendingFrameSecurity(phase) {
+    const paused = deferred(), entered = deferred(), listeners = new Map();
+    let reads = 0, checks = 0, locks = 0, requests = 0, transportGeneration = 0;
+    const client = {isChild: () => true, onClear() {}, generation: () => transportGeneration,
+        isUnlocked: () => true,
+        request: async () => ({kind: 'key', material: 'synthetic-frame-' + (++requests)}),
+        lock: () => {locks++;}};
+    const f = securityFixture({vaultFrameClient: client,
+        window: {addEventListener: (name, callback) => listeners.set(name, callback)},
+        authSessionFence: {
+            readPermit: () => {
+                if (phase === 'readPermit' && ++reads === 1) {entered.resolve(); return paused.promise;}
+                return Promise.resolve({});
+            },
+            isCurrent: () => {
+                if (phase === 'isCurrent' && ++checks === 1) {entered.resolve(); return paused.promise;}
+                return Promise.resolve(true);
+            }, isLocallyCurrent: () => true
+        }});
+    return {...f, paused, entered: entered.promise, locks: () => locks,
+        pagehide() {listeners.get('pagehide')(); transportGeneration++;}};
+}
+
+for (const phase of ['readPermit', 'isCurrent']) for (const finish of ['resolve', 'reject'])
+for (const invalidation of ['pagehide', 'uid'])
+test(`stale frame ${phase} ${finish} after ${invalidation} cannot lock a newer session`, async () => {
+    const f = pendingFrameSecurity(phase);
+    const old = f.run('ensureVaultKeyMaterial()');
+    const rejected = assert.rejects(old);
+    await f.entered;
+    if (invalidation === 'pagehide') f.pagehide();
+    else {f.auth.currentUser = {uid: 'uid-b'}; f.authObserver(f.auth.currentUser);}
+    const material = await f.run('ensureVaultKeyMaterial()'), locks = f.locks();
+    assert.equal(f.run('isVaultUnlocked()'), true);
+    if (finish === 'reject') f.paused.reject(Error('synthetic-old-frame-failure'));
+    else f.paused.resolve(phase === 'readPermit' ? {} : true);
+    await rejected;
+    assert.equal(f.run('_vaultKeyMaterial'), material, 'old failure must not erase the newer key');
+    assert.equal(f.run('isVaultUnlocked()'), true);
+    assert.equal(f.locks(), locks, 'old failure must not notify a new owner lock');
+    assert.deepEqual(f.saves, [], 'frame key remains RAM only');
+});
+
+for (const phase of ['readPermit', 'isCurrent'])
+test(`superseded frame ${phase} failure cannot lock a completed fresh confirmation`, async () => {
+    const f = pendingFrameSecurity(phase);
+    const old = f.run('ensureVaultKeyMaterial()'), rejected = assert.rejects(old);
+    await f.entered;
+    const material = await f.run('ensureVaultKeyMaterial({forceReload: true})');
+    f.paused.reject(Error('synthetic-superseded-frame-failure'));
+    await rejected;
+    assert.equal(f.run('_vaultKeyMaterial'), material);
+    assert.equal(f.run('isVaultUnlocked()'), true);
+    assert.equal(f.locks(), 0);
+});
+
+for (const phase of ['readPermit', 'isCurrent'])
+test(`current frame ${phase} failure still revokes the session`, async () => {
+    const f = pendingFrameSecurity(phase);
+    const current = f.run('ensureVaultKeyMaterial()'), rejected = assert.rejects(current);
+    await f.entered;
+    f.paused.reject(Error('synthetic-current-frame-failure'));
+    await rejected;
+    assert.equal(f.run('_vaultKeyMaterial'), null);
+    assert.equal(f.locks(), 1);
+    assert.equal(f.run('isVaultUnlocked()'), false);
+});
+
 for (const change of ['uid', 'fence', 'generation']) test(`real manager refuses frame adoption after changed ${change}`, async () => {
     const pause = deferred(); let generation = 0, fence = true, locks = 0;
     const client = {isChild: () => true, onClear() {}, generation: () => generation,

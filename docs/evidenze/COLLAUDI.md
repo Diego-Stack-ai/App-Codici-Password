@@ -1,5 +1,29 @@
 # Collaudi
 
+<a id="cleanup-tardivo-1291-2026-11-20"></a>
+
+## Cleanup tardivo 1.2.291 — confezione autorizzata
+
+Base f16a787f3d5a50439a6f9e6186d2700627119c85, ramo codex/deadline-back-lock-20261120. Unico delta runtime funzionale: security-manager.js limita il cleanup del catch all'operazione ancora corrente; throw e controllo del finally conservati. Le prove locali precedenti riproducono 10 FAIL su12 casi e, dopo la correzione,12/12 nuovi casi e78/78 sessione/fence PASS, con controlli negativi di revoca corrente. [Diagnosi e limiti](#frame-cleanup-tardivo-locale-2026-11-20).
+
+Snapshot prima del bump,307 riferimenti/112 file applicativi, guida contentVersion16/reviewed291; offline61 export/347 risorse e QA31 pagine/126 istruzioni/111 target/167 campi. Confronto iniziale dei367 pubblici subito dopo il bump: nessuna aggiunta/rimozione o differenza dopo normalizzazione versione/EOL. Nella confezione finale la rimozione dei due commenti dal gestore costituisce un ulteriore delta testuale normalizzato, verificato senza variazioni alla logica del guard. Dal master cambia funzionalmente soltanto il gestore. Verifiche del pacchetto PASS:78/78 sessione/fence,7/7 logout/cancellazione,356/356 cornice,199/199 navigazione,12/12 guida,16/16 offline, budget31 pagine e4/4 diagnostica, sintassi252 moduli e riferimenti343 file. Il primo budget ha rilevato un lieve superamento sul form privato; rimossi soltanto i commenti esplicativi dal guard già approvato, verificando il sorgente esatto contro base+guard+bump. Nessun limite o configurazione alzato. Nuovi GO sullo SHA finale e CI ancora richiesti.
+
+Lease300000ms, inattività selezionata, blocchi, formati delle chiavi, gate Auth e regole server conservati. Il rapporto nativo documenta una famiglia di scadenza, senza isolare il sottotipo o dimostrare la race del catch. Dettagli personali conservati solo negli artefatti locali ignorati. Nessun PASS fisico, audit completo o distribuzione dedotto dalla confezione.
+
+<a id="frame-cleanup-tardivo-locale-2026-11-20"></a>
+
+## Pulizia tardiva della richiesta framed — candidato locale
+
+Base f16a787f3d5a50439a6f9e6186d2700627119c85, runtime1.2.290. Banco VM sul sorgente reale security-manager.js con dipendenze e chiavi inventate. Barriera su readPermit o isCurrent; callback reale pagehide oppure cambio UID; nuovo sblocco riuscito; completamento/rifiuto vecchio. Il vecchio catch cancella la nuova chiave e notifica lock. Due casi aggiuntivi coprono errore superato da una conferma fresca; due negativi impongono ancora la revoca per l'errore corrente.
+
+RED sul runtime precedente:12casi,10FAIL e2PASS negativi. GREEN con cleanup condizionato a _unlockPromise===frameOperation:12/12 nuovi casi,78/78 complessivi sessione/fence PASS. Gli errori precedenti continuano a rigettare e non scrivono storage; errori correnti e controlli UID/fence/generazione conservati. Altri controlli PASS:356/356 cornice con55Back,199/199 navigazione,7/7 logout/cancellazione,16/16 offline e sintassi252moduli. Riesame indipendente locale e nuova pubblicazione restano distinti.
+
+Controllo aggiuntivo della sequenza UI: Analisi dati è il loader HTML della lista Scadenze. Due giri sintetici ritardano separatamente le letture proprie e ricevute: durante il ritorno la lista resta sul filtro Archiviate con loader, poi mostra il record inventato e torna alla Home. Stesso documento padre, un solo sblocco, zero cancellazioni e lock. Non è un ulteriore test di ammissione nativa: owner/transport/UI reali, Auth e security-manager simulati come nel banco Back. La misura non attesta tempi di rete o comportamento fisico.
+
+Verifica separata dei limiti già presenti:5test pertinenti PASS e4casi a orologio simulato con inattività12ore e permesso300000ms. Nel modello di sessione20/299secondi nascosti conservano lo sblocco,301/509,762secondi producono expired. Non misura la vecchia lease del dispositivo. Il codice expired accorpa più scadenze; una snapshot valida successiva non prova lo stato precedente. [Diego conferma il comportamento](../progetto/DECISIONI.md#blocco-confermato-cleanup-locale-2026-11-20); nessun delta alla policy.
+
+La VM dimostra il difetto asincrono, non che sia la causa del comportamento fisico osservato. Il banco UI Back corrente simula il security-manager ed esclude il gate privato: non certifica gli ordini di eventi iOS/BFCache. La diagnosi sul dispositivo resta aperta; non rimuovere blocchi pagehide/BFCache, lease o revoca. Nessuna nuova versione, commit, PR o distribuzione; produzione1.2.290 invariata. Dettagli personali solo nel registro locale ignorato.
+
 <a id="rilascio-1290-pubblico-2026-11-20"></a>
 
 ## APP1.2.290 — filtri manuali pubblicati e verificati

@@ -4,7 +4,7 @@ import {vaultFrameClient, confirmFrameAction, frameMediaLifetime} from './vault-
 import {authSessionFence} from '../../auth-session-fence.js';
 import { encrypt, decrypt, isEncryptedValue, generateVaultKey, createVaultKeyring, wrapVaultKey, unwrapVaultKey, createVaultVerifier, verifyVaultVerifier } from './crypto-utils.js';
 import { showInputModal, showToast, showConfirmModal } from '../../ui-core-v129.js';
-import { db, auth } from '../../firebase-config.js?v=1.2.290';
+import { db, auth } from '../../firebase-config.js?v=1.2.291';
 import { doc, setDoc, updateDoc, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';
@@ -312,7 +312,10 @@ export async function ensureVaultKeyMaterial(options = {}) {
         const frameOperation = ensureFrameMaterial(forceReload);
         _unlockPromise = frameOperation;
         try {return await frameOperation;}
-        catch (error) {clearSession({notifyFrame: error?.message !== 'FRAME_HIDDEN'}); throw error;}
+        catch (error) {
+            if (_unlockPromise === frameOperation) clearSession({notifyFrame: error?.message !== 'FRAME_HIDDEN'});
+            throw error;
+        }
         finally {if (_unlockPromise === frameOperation) _unlockPromise = null;}
     }
     if (_vaultKeyMaterial && !isVaultUnlocked()) softLock();

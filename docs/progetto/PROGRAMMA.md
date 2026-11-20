@@ -1,5 +1,17 @@
 # Programma
 
+<a id="cleanup-tardivo-1291-2026-11-20"></a>
+
+## Pubblicare 1.2.291; poi ricollaudo del ritorno
+
+Ordine di pubblicazione ricevuto per il solo cleanup di richieste superate. [Mandato](INCARICO_CORRENTE.md#cleanup-tardivo-1291-2026-11-20) e [prove](../evidenze/COLLAUDI.md#cleanup-tardivo-1291-2026-11-20). Completare pacchetto, nuovi riesami, CI e Hosting, verifica pubblica e ricevuta. Il comportamento del blocco resta confermato. Dopo il rilascio confermare la versione e controllare il ritorno durante uso continuo, una prova alla volta; il rapporto di standby non certifica la causa del precedente rilievo della freccia.
+
+<a id="frame-cleanup-tardivo-locale-2026-11-20"></a>
+
+## Blocco durante Indietro — punto aperto prima di proseguire
+
+Correttivo locale della pulizia tardiva riprodotto e verificato con prova rossa/verde; riesame indipendente e rilascio restano distinti. [Evidenze](../evidenze/COLLAUDI.md#frame-cleanup-tardivo-locale-2026-11-20). Rapporto nativo esaminato: scadenza registrata, sottotipo non separato. [Blocco attuale confermato](DECISIONI.md#blocco-confermato-cleanup-locale-2026-11-20); conservare lease e relativi blocchi legittimi. Il ricollaudo dopo un eventuale rilascio resta distinto dalla prova della race. Nessuna ripetizione di altri casi o certificazione globale dedotta. Produzione1.2.290; un eventuale rilascio richiede un nuovo ordine.
+
 <a id="rilascio-1290-pubblico-2026-11-20-programma"></a>
 
 ## 1.2.290 pubblicata — conferma e ricollaudo Archiviate

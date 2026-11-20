@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="cleanup-tardivo-1291-2026-11-20"></a>
+
+## Cleanup tardivo 1.2.291 — solo Hosting
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#cleanup-tardivo-1291-2026-11-20): snapshot pre-bump, versione291, guida16/reviewed291 e derivati offline/QA;367 pubblici con un solo runtime funzionale. Nuovi due GO sulla testa finale e CI PR completa, merge con testa attesa; master e validate Hosting con stesso sorgente/digest, scope hosting e master invariato prima di production protetto. Backend, regole server, workflow e protezioni conservati. Manifest costruito dai byte Git LF; verifica pubblica integrale e GET indipendente del gestore modificato. Ricevuta negli MD esistenti e GitHub senza secondo Hosting. [Evidenze](../evidenze/COLLAUDI.md#cleanup-tardivo-1291-2026-11-20).
+
 <a id="rilascio-1290-pubblico-2026-11-20-rilascio"></a>
 
 ## APP1.2.290 — procedura eseguita, solo Hosting

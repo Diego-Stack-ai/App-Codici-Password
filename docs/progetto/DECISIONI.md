@@ -1,5 +1,20 @@
 # Decisioni
 
+<a id="cleanup-tardivo-1291-2026-11-20"></a>
+
+## Pubblicare il correttivo; blocco conservato —20/11/2026
+
+Fonte: nuovo ordine esplicito di Diego di pubblicare con nuova versione e aggiornare MD/GitHub, lasciando invariato il comportamento del blocco. [Mandato](INCARICO_CORRENTE.md#cleanup-tardivo-1291-2026-11-20). Autorizzata 1.2.291 soltanto per il cleanup tardivo già dimostrato, con nuovi GO sulla confezione, gate PR/master/Hosting e verifica pubblica. La scelta sul blocco già registrata resta valida; nessuna modifica di lease, timer, revoca o altre autorità. Ricollaudo fisico distinto dai test.
+
+<a id="blocco-confermato-cleanup-locale-2026-11-20"></a>
+
+## Blocco confermato; correggere il cleanup tardivo —20/11/2026
+
+Fonte: Diego ordina di sistemare gli errori e conferma «per quanto riguarda il blocco va bene così», dopo la spiegazione dei due limiti. Conservati inattività selezionata a12ore e permesso server finito di5minuti, senza polling di rinnovo durante la sospensione; un permesso scaduto può richiedere un nuovo sblocco. [Contratto della cornice](../regole/VAULT.md#cornice-ordinaria-vault-2026-11-14).
+
+Il correttivo locale riguarda soltanto il cleanup di richieste superate: non cambia questi limiti, non riapre sessioni revocate e non attesta la causa fisica del blocco durante uso attivo. [Prove](../evidenze/COLLAUDI.md#frame-cleanup-tardivo-locale-2026-11-20). Nessun nuovo ordine di pubblicazione dedotto dalla correzione.
+
+
 <a id="rilascio-1290-pubblico-2026-11-20-decisione"></a>
 
 ## Filtri manuali290 — ordine attuato

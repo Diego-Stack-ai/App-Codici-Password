@@ -1,5 +1,17 @@
 # Vault
 
+<a id="cleanup-tardivo-1291-2026-11-20"></a>
+
+## Cleanup tardivo — candidata 1.2.291
+
+Il correttivo già dimostrato è confezionato per il rilascio: solo il proprietario dell'operazione corrente può pulire materiale e notificare il blocco dopo un errore; le richieste superate continuano a rigettare. Lease, timer, revoca, ammissione, identità/fence e autorità delle chiavi conservati secondo la scelta di Diego. [Confezione e limiti](../evidenze/COLLAUDI.md#cleanup-tardivo-1291-2026-11-20). La pubblicazione e il ricollaudo fisico restano gate distinti; online290 fino alla verifica del rilascio.
+
+<a id="frame-cleanup-tardivo-locale-2026-11-20"></a>
+
+## Cleanup framed — titolarità della richiesta, candidato locale
+
+Un errore asincrono può pulire o notificare il blocco soltanto se la richiesta conserva la titolarità dell'operazione corrente. Un'operazione già ritirata o superata continua a rigettare il proprio errore, senza cancellare materiale o interrompere uno sblocco successivo. Il finally conserva la stessa titolarità prima di liberare la richiesta pendente. Controlli di identità, fence, generazione, ammissione, lease, inattività e revoca restano obbligatori; un errore corrente conserva il blocco. [Prove e limiti](../evidenze/COLLAUDI.md#frame-cleanup-tardivo-locale-2026-11-20). Solo candidato locale, nessuna nuova attestazione sul dispositivo o distribuzione. [Confermata da Diego](../progetto/DECISIONI.md#blocco-confermato-cleanup-locale-2026-11-20) la conservazione del comportamento di blocco e della lease già definita sotto.
+
 <a id="rilascio-1290-pubblico-2026-11-20-vault"></a>
 
 ## Filtro Archiviate290 — distribuzione verificata
