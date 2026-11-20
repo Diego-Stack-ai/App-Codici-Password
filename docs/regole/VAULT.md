@@ -1,5 +1,18 @@
 # Vault
 
+<a id="filtri-scadenze-1290-2026-11-20-vault"></a>
+
+## Archiviate — candidata290
+
+La [policy URL candidata](#filtri-scadenze-locale-2026-11-20-vault) aggiunge soltanto archiviate all'enum di Scadenze, mantenendo rifiuto dei valori ignoti/duplicati e guardie del transport/owner. Non modifica regole server, ammissione, chiavi, lease o timer. [Confezione e prove](../evidenze/COLLAUDI.md#filtri-scadenze-1290-2026-11-20). Pubblicazione e ricollaudo fisico richiedono le rispettive verifiche; online289 fino alla verifica del rilascio.
+
+
+<a id="filtri-scadenze-locale-2026-11-20-vault"></a>
+
+## Filtro Archiviate — valore di rotta candidato locale
+
+Per /scadenze.html l'enum filter ammette anche archiviate, oltre ai due valori già previsti urgenti e in_scadenza; Tutte conserva la rotta senza filter. Valori ignoti, nomi interni e query duplicate restano rifiutati. La sostituzione della URL riusa transport/syncFromChild già esistenti, con verifiche del documento corrente e guardie lock/logout/uscita/Back pendente. Non crea una nuova voce né autorità su ammissione, chiavi, lease o timer. Il callback della pagina controlla mount e identità attivi prima della mutazione. [Prove e limiti](../evidenze/COLLAUDI.md#filtri-scadenze-locale-2026-11-20); versione pubblicata289 invariata, nessun PASS nativo o caso completo dedotto.
+
 <a id="rilascio-1289-pubblico-2026-11-20-vault"></a>
 
 ## Back Scadenze289 — distribuzione verificata

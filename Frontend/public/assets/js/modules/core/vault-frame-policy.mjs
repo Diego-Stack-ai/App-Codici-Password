@@ -54,7 +54,7 @@ export function privateFrameUrl(value, origin, nested = false) {
       const enums = {
         type: ['standard', 'shared', 'memo', 'shared_memo'],
         profileTab: ['overview', 'personal', 'contacts', 'addresses', 'documents', 'digital-card', ...(match[1] === 'dati_azienda' ? ['pdf-summary'] : [])],
-        filter: ['urgenti', 'in_scadenza'], source: ['deadlineConfig', 'deadlineConfigDocuments', 'generalConfig'],
+        filter: ['urgenti', 'in_scadenza', 'archiviate'], source: ['deadlineConfig', 'deadlineConfigDocuments', 'generalConfig'],
         domain: ['personal', 'vehicles', 'home', 'health', 'sport', 'contracts', 'user-company', 'company'],
         companyKind: ['external', 'company']
       };

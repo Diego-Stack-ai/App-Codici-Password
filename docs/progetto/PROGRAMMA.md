@@ -1,5 +1,18 @@
 # Programma
 
+<a id="filtri-scadenze-1290-2026-11-20-programma"></a>
+
+## Prossimo passo — pubblicare290, poi ricollaudo Archiviate
+
+Eseguire il [mandato290](INCARICO_CORRENTE.md#filtri-scadenze-1290-2026-11-20-incarico), con controlli e riesami sulla nuova testa, CI PR/master/Hosting e verifica pubblica. Chiudere MD/GitHub senza secondo Hosting. Poi confermare la versione e ripetere il ritorno dal dettaglio alla lista Archiviate selezionata manualmente, proseguendo una prova alla volta. Ricerca libera dopo ricreazione, rilievo visivo iniziale e casi completi restano distinti.
+
+
+<a id="filtri-scadenze-locale-2026-11-20-programma"></a>
+
+## Prossimo passo — conservare i filtri scelti nella lista
+
+Presentare il [correttivo locale verificato](../evidenze/COLLAUDI.md#filtri-scadenze-locale-2026-11-20), con riesame indipendente, per l'eventuale ordine di pubblicazione. Dopo un rilascio autorizzato e la conferma della versione ripetere il ritorno da un dettaglio archiviato alla stessa lista Archiviate. Proseguire il collaudo una prova alla volta; altri dispositivi e casi completi mantengono i propri gate.
+
 <a id="rilascio-1289-pubblico-2026-11-20-programma"></a>
 
 ## 1.2.289 pubblicata — conferma e ricollaudo mirato

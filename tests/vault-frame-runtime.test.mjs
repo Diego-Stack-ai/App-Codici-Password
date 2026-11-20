@@ -145,10 +145,12 @@ test('banking removal authorization uses identifiers/counts and excludes normal 
 });
 for (const url of ['blob:https://fixture.invalid/x', 'data:text/html,x', 'about:blank', '/privacy.html', '/app.html',
   '/impostazioni.html?recovery=complete', '/home_page.html?uid=foreign', '/scadenze.html?filter=a&filter=b',
+  '/scadenze.html?filter=all', '/scadenze.html?filter=completed', '/scadenze.html?filter=archiviate&filter=urgenti',
   '/profilo_privato.html?m6pilot=1', '/gestione_destinatari.html?return=https://other.invalid/',
   '/regole_scadenze.html?return=/form_account_privato.html', '/home_page.html#%00', '/%2568ome_page.html'])
   test(`route denied: ${url}`, () => assert.equal(privateFrameUrl(url, origin), null));
 for (const url of ['/home', '/profilo_privato.html?profileDocumentId=synthetic#documenti-view-container',
+  '/scadenze.html?filter=archiviate', '/scadenze.html?filter=archiviate&rule=Documento',
   '/form_account_privato.html?type=standard&linkShared=1#shared-credentials-section',
   '/regole_scadenze.html?return=aggiungi_scadenza.html%3FaccountSource%3D1',
   '/gestione_destinatari.html?return=form_account_azienda.html%3FaziendaId%3Dsynthetic',

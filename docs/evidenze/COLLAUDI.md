@@ -1,5 +1,26 @@
 # Collaudi
 
+<a id="filtri-scadenze-1290-2026-11-20"></a>
+
+## Filtri Scadenze — candidata1.2.290 autorizzata
+
+Base master0f2c6fb7e3f6e62594843e87d1c1f0aeb5d47c63, ramo codex/deadline-filter-state-20261120. Ordine «pubblica» dopo il [candidato locale](#filtri-scadenze-locale-2026-11-20), la cui patch riesaminata è fissata prima del bump. Snapshot367file, versione290/307riferimenti, guida contentVersion16/reviewed290, offline61export/347risorse, QA31pagine/126istruzioni/111target/167campi. Nessuna aggiunta/rimozione o differenza ulteriore dopo sola normalizzazione versioni/EOL. Rispetto al master due soli runtime funzionali: modules/scadenze/scadenze.js e modules/core/vault-frame-policy.mjs; nessun CSS.
+
+Pacchetto290 verificato: cornice356/356 (incluse55prove Back), navigazione199/199, calendario11/11, guida12/12, offline16/16 e topologia20/20 PASS; CSS, budget31pagine, diagnostica4/4, versione307riferimenti, sintassi252moduli e riferimenti343file OK. Audit documentale e due nuovi riesami immutabili richiesti sul contenuto effettivo, senza trasferire i GO locali. Restano registrati RED4 del runtime precedente. Il filtro mantiene rule e ricerca corrente durante il cambio, senza promettere il ripristino del testo libero dopo ricreazione; rilievo visivo iniziale separato. CI PR/master/Hosting, deploy e verifica pubblica ancora da acquisire; online289. Nessun nuovo PASS fisico o C1/C2 completo dedotto.
+
+
+<a id="filtri-scadenze-locale-2026-11-20"></a>
+
+## Scadenze — stato dei filtri manuali, candidato locale
+
+Base master0f2c6fb7e3f6e62594843e87d1c1f0aeb5d47c63, ramo codex/deadline-filter-state-20261120. Diagnosi e banco localhost riproducono il difetto del filtro Archiviate: il chip aggiorna activeFilter ma la rotta conserva In scadenza/Urgenti. Il ritorno del dettaglio ripristina correttamente quella rotta, che non rappresenta più la selezione manuale. I dettagli personali della prova restano nel registro privato locale; nessun dato reale nel banco.
+
+Due runtime: modules/scadenze/scadenze.js usa una mappa simmetrica dei quattro filtri, valida il chip e il mount attivo, cambia soltanto filter con history.replaceState conservando history.state, rule e il testo corrente della ricerca; modules/core/vault-frame-policy.mjs ammette il solo nuovo valore archiviate. Tutte elimina filter. Transport e owner esistenti sincronizzano la sostituzione della voce corrente senza ricarica, voci aggiuntive, nuova autorità o modifiche alle guardie. Nessun CSS o versione modificati.
+
+RED4 sul runtime precedente: scelta di Archiviate da entrambe le card Home, nella cornice e standalone; Back torna al filtro d'ingresso anziché ad Archiviate. GREEN55/55 Back, inclusa matrice16casi con quattro filtri × due ingressi × due modalità, documento e lunghezza della cronologia conservati durante la scelta, contenuto/filtro ripristinati e secondo Back alla Home. Casi aggiuntivi verificano rule, ricerca corrente e callback con UID inattivo o valore ignoto. Test modello/calendario/policy71/71 PASS; nuovo valore URL accettato, nomi interni e parametri duplicati rifiutati. Nel banco con cornice il padre resta lo stesso con un solo sblocco sintetico.
+
+Suite cornice356/356, navigazione199/199 e topologia20/20 PASS; sintassi252moduli e riferimenti343file OK. La ricerca libera viene conservata durante il cambio filtro; il suo ripristino dopo la ricreazione della lista non è parte del delta e non è attestato. Il rilievo visivo della selezione iniziale Tutte resta separato. Riesami, pubblicazione e ricollaudo nativo sono passaggi distinti; artefatti tecnici ignorati nella .codex-tmp della worktree. Nessun bump/commit/PR/merge/Hosting di questo seguito, online1.2.289; nessun nuovo PASS fisico o C1/C2 completo dedotto.
+
 <a id="rilascio-1289-pubblico-2026-11-20"></a>
 
 ## APP1.2.289 — ritorno Scadenze pubblicato e verificato

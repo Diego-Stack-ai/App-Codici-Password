@@ -1,5 +1,22 @@
 # Incarico corrente
 
+<a id="filtri-scadenze-1290-2026-11-20-incarico"></a>
+
+## Pubblicazione1.2.290 — filtri scelti nella lista
+
+Diego ordina «pubblica» dopo la consegna del correttivo locale: autorizzati confezione1.2.290, commit/push/PR, merge e solo Hosting, MD/GitHub e verifica pubblica. Superato per questo solo delta il limite locale del checkpoint seguente. Base master0f2c6fb7e3f6e62594843e87d1c1f0aeb5d47c63, ramo codex/deadline-filter-state-20261120; root unico scrittore e revisori in lettura. [Confezione](../evidenze/COLLAUDI.md#filtri-scadenze-1290-2026-11-20).34MD conservati e dettagli personali del collaudo locali.
+
+Snapshot prima del bump, guida16/reviewed290 e derivati offline/QA, confronto normalizzato367pubblici con due JS funzionali. Due nuovi GO sullo SHA confezionato, CI PR completa, merge con testa attesa; CI master/validate Hosting sullo stesso sorgente/digest, scope hosting e master invariato prima di production protetto secondo la delega della sessione. Conservare regole server, workflow, protezioni, chiavi, lease, timer e dati. Verifica pubblica integrale e GET anche della policy URL; ricevuta documentale senza secondo Hosting. Ricollaudo fisico distinto e successivo.
+
+
+<a id="filtri-scadenze-locale-2026-11-20-incarico"></a>
+
+## Seguito del collaudo — filtri Scadenze scelti nella lista, solo locale
+
+Il rilievo durante il collaudo289 apre diagnosi e correttivo locale della selezione Archiviate persa dopo il ritorno dal dettaglio. Conservare tutti i quattro filtri scelti nella lista, sostituendo la sola query della voce corrente, senza un nuovo passaggio di cronologia. Base master0f2c6fb7e3f6e62594843e87d1c1f0aeb5d47c63, ramo/worktree codex/deadline-filter-state-20261120; root unico scrittore e supporti in lettura. [Evidenze](../evidenze/COLLAUDI.md#filtri-scadenze-locale-2026-11-20). Guardie, chiavi, ammissione, lease e timer conservati. Dettagli personali del collaudo nel registro locale privato.
+
+Nessun nuovo ordine di bump/commit/push/PR/merge/deploy dedotto dal rilievo: produzione1.2.289 invariata. Consegnare il risultato locale verificato; ricollaudo guidato fermo su questo caso fino all'eventuale rilascio autorizzato.34MD conservati, nessun PASS fisico del candidato o caso completo dedotto.
+
 <a id="rilascio-1289-pubblico-2026-11-20-incarico"></a>
 
 ## Ordine289 eseguito — ricevuta e ripresa del collaudo
