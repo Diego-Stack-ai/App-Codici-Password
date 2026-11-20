@@ -1,5 +1,27 @@
 # Collaudi
 
+<a id="scadenze-indietro-1289-2026-11-20"></a>
+
+## Back Scadenze — candidata1.2.289 autorizzata
+
+Base master c047415823e38ed83976fa805c974b38a22754a1 e ramo codex/deadline-list-back-20261120. Ordine «Pubblica» dopo il [correttivo locale](#scadenze-indietro-locale-2026-11-20): nuova confezione distinta dai suoi GO. Snapshot dei367file prima del bump; versione canonica289/307riferimenti, guida contentVersion16/reviewed289, offline61export/347risorse, QA31pagine/126istruzioni/111target/167campi. Nessun pubblico aggiunto/rimosso; zero ulteriori differenze dopo sola normalizzazione versioni/EOL. Confronto con master: tre JS funzionali, components-v129.js, modules/core/vault-frame-owner.mjs e modules/scadenze/scadenze.js; nessun CSS.
+
+Pacchetto289 verificato: cornice331/331 (incluse35prove Back), navigazione199/199, guida12/12, offline16/16 e topologia20/20 PASS; CSS, budget31pagine, diagnostica4/4, versione307riferimenti, sintassi252moduli e riferimenti343file OK. Audit documentale e due nuovi riesami immutabili da acquisire sul contenuto effettivo. Restano registrati RED6 del candidato locale. Limite noto non bloccante: fault injection assente/errore sul ramo generico, ripiego filtrato verificato dal riesame. PR, CI complete, merge e Hosting ancora da acquisire; online1.2.288. Manifest da byte Git LF, verifica pubblica e GET indipendenti prima della ricevuta; nessun PASS fisico289 o caso completo dedotto.
+
+<a id="scadenze-indietro-locale-2026-11-20"></a>
+
+## Dettaglio Scadenza — ritorno alla lista filtrata, candidato locale
+
+Base master c047415823e38ed83976fa805c974b38a22754a1, ramo codex/deadline-list-back-20261120. La diagnosi del sorgente e il banco sintetico localhost riproducono il ritorno forzato alla URL senza query: sostituisce il dettaglio con Tutte lasciando sotto la lista filtrata. Il registro personale del collaudo rimane privato e locale; qui si descrivono soltanto comportamento tecnico e prove inventate.
+
+Tre runtime coinvolti: components-v129.js ammette in standalone il precedente interno Scadenze per questo solo dettaglio; vault-frame-owner.mjs conserva il precedente RAM verificato su /scadenze.html quando il fallback del dettaglio è canonico e senza query; modules/scadenze/scadenze.js usa un solo navigateDocument, senza delegazione parallela e mantenendo i controlli mount/auth. Query esplicite, altre pagine, documento corrente, lock/logout/uscita, cronologia ignota e fallback finito mantengono i limiti precedenti. La lista canonica può avere filter/rule: non significa necessariamente Tutte.
+
+Test esistente tests/vault-frame-back.browser.test.mjs ampliato con le vere anchor Home, card lista, dettaglio e freccia header, usando soltanto record sintetici locali. Sul runtime precedente sei casi RED: due filtri Home nella cornice, filtro regola, due filtri standalone e guardia della card inattiva. Con il candidato35/35 Back PASS, inclusi Forward, ritorno diretto lista→Home, ingresso diretto al dettaglio o da Home, query esplicita diversa e pagina diversa. Verificato nello stesso banco: padre conservato, un solo sblocco sintetico e nessuna cancellazione di materiale o errore asincrono. Non è una prova di Face ID, iOS fisico o cryptography reale.
+
+Suite cornice331/331 e navigazione199/199 PASS; sintassi252moduli e riferimenti343file OK, documenti12/12 PASS e34MD conservati. Due GO indipendenti locali sulla patch immutabile SHA256 1fbeb16d285cadf9678ccd409ec8eaa38834286df85c7fc78aa98c80e4fa7bb1, prima di questa ricevuta soltanto documentale. Nessun rilievo bloccante. Limite di copertura: le prove di traversal assente/errore esercitano il percorso generico; il ripiego filtrato è verificato dal riesame del codice, senza uno specifico fault injection.
+
+Evidenze locali ignorate sotto .codex-tmp/deadline-list-back-20261120/.codex-tmp; nessun nuovo MD o dato reale. Nessun bump, commit, PR, merge o deploy di questo seguito: online resta1.2.288. Ricollaudo nativo e casi completi restano distinti.
+
 <a id="rilascio-1288-pubblico-2026-11-20"></a>
 
 ## APP1.2.288 — Back e card quadrate pubblicati e verificati

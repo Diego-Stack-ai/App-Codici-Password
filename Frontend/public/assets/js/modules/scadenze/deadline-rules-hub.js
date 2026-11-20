@@ -1,4 +1,4 @@
-import {auth, db} from '../../firebase-config.js?v=1.2.288';
+import {auth, db} from '../../firebase-config.js?v=1.2.289';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {createElement, setChildren} from '../../dom-utils.js';
 import {getCurrentLanguage, t} from '../../translations.js';

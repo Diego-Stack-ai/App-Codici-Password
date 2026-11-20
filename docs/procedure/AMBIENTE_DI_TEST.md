@@ -1,5 +1,11 @@
 # Ambiente di test
 
+<a id="scadenze-indietro-1289-2026-11-20-ambiente"></a>
+
+## Banco del rilascio289 — contenuto e pubblicazione separati
+
+Worktree isolata .codex-tmp/deadline-list-back-20261120, ramo omonimo codex/, base master c047415823e38ed83976fa805c974b38a22754a1. Il checkout principale conserva le lavorazioni preesistenti. Banchi localhost con dati inventati e dipendenze già presenti, senza login personale o scritture esterne; collegamento locale alle dipendenze rimosso prima dell'audit documentale. [Confezione e verifiche](../evidenze/COLLAUDI.md#scadenze-indietro-1289-2026-11-20). Artefatti tecnici ignorati nella .codex-tmp della worktree; osservazioni manuali dettagliate private, senza pubblicarne la sequenza. CI e manifest richiedono nuovo SHA/digest; collaudo nativo successivo alla verifica pubblica, senza certificazione generale.
+
 <a id="rilascio-1288-pubblico-2026-11-20-ambiente"></a>
 
 ## 1.2.288 — limiti delle verifiche distribuite

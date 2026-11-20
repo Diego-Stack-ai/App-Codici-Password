@@ -2,6 +2,18 @@
 
 <a id="stato-corrente"></a>
 
+<a id="scadenze-indietro-1289-2026-11-20-stato"></a>
+
+## Candidata1.2.289 — ritorno Scadenze; online1.2.288
+
+Acquisito l'ordine di pubblicazione del correttivo locale. Confezionati versione canonica289/307riferimenti, guida16/reviewed289 e derivati offline/QA, senza ulteriori differenze dopo normalizzazione versioni/EOL. [Confezione e limiti](../evidenze/COLLAUDI.md#scadenze-indietro-1289-2026-11-20). Tre JS funzionali, nessun CSS o dato reale. Nuove verifiche del pacchetto PASS, incluse331cornice e199navigazione; due GO sul nuovo SHA e gate PR/master/Hosting da acquisire prima della verifica pubblica. Le prove locali non sono una pubblicazione o un PASS fisico della289; produzione resta1.2.288.
+
+<a id="scadenze-indietro-locale-2026-11-20-stato"></a>
+
+## Ritorno Scadenze — correttivo locale; online1.2.288
+
+Riprodotto localmente il passaggio aggiuntivo da Dettaglio a Tutte prima della lista filtrata. Preparato il ritorno al precedente verificato su Scadenze, conservando filtro/regola; nessun ritorno diretto alla Home da un dettaglio senza precedente lista. Unificato il clic della card mantenendo il controllo di attività. [Evidenze](../evidenze/COLLAUDI.md#scadenze-indietro-locale-2026-11-20).35/35 prove Back,331/331 cornice e199/199 navigazione PASS; due GO locali sul candidato prima della ricevuta documentale. Nessun nuovo rilascio, versione invariata. Ricollaudo sul telefono ancora da acquisire dopo eventuale pubblicazione autorizzata; dettagli personali locali.
+
 <a id="rilascio-1288-pubblico-2026-11-20-stato"></a>
 
 ## APP1.2.288 — online e verificata

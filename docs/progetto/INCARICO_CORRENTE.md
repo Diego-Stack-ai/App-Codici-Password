@@ -1,5 +1,21 @@
 # Incarico corrente
 
+<a id="scadenze-indietro-1289-2026-11-20-incarico"></a>
+
+## Ordine di pubblicazione — Back Scadenze1.2.289
+
+Diego ordina «Pubblica» dopo la consegna del correttivo locale: autorizzati nuova1.2.289, commit/push/PR, merge e solo Hosting, MD/GitHub e verifica pubblica. Il limite locale del checkpoint seguente è superato per questo solo delta. Base master c047415823e38ed83976fa805c974b38a22754a1, ramo codex/deadline-list-back-20261120; root unico scrittore e revisori indipendenti in lettura. [Confezione e prove](../evidenze/COLLAUDI.md#scadenze-indietro-1289-2026-11-20).34MD conservati, dettagli del collaudo personale locali.
+
+Snapshot funzionale prima del bump, guida16/reviewed289 e derivati offline/QA; confronto normalizzato dei367pubblici con soli tre JS funzionali. Due nuovi GO sulla testa confezionata e CI PR completa, merge con testa attesa; CI master e validate Hosting sullo stesso sorgente/digest, scope hosting e master invariato prima di production protetto secondo la delega della sessione. Nessuna modifica backend, policy, workflow, protezioni, chiavi, timer o dati reali. Verifica pubblica integrale e GET dei produttori corretti; ricevuta documentale senza secondo Hosting. Il ricollaudo nativo rimane successivo e distinto dai banchi sintetici.
+
+<a id="scadenze-indietro-locale-2026-11-20-incarico"></a>
+
+## Seguito del collaudo — ritorno Scadenze, solo locale
+
+Il rilievo durante il collaudo288 apre la diagnosi e il correttivo locale del ritorno dal Dettaglio Scadenza alla lista di provenienza, mantenendo il filtro e senza inserire Tutte nella catena. Base master c047415823e38ed83976fa805c974b38a22754a1, worktree/ramo codex/deadline-list-back-20261120; root unico scrittore e supporti in lettura. [Prove e limiti](../evidenze/COLLAUDI.md#scadenze-indietro-locale-2026-11-20). Conservare guardie, ammissione, lease, dati e timer; un solo gestore per la card. Dettagli del riscontro manuale nel registro privato locale.
+
+Nessun nuovo ordine di commit/push/PR/merge/deploy o bump dedotto dal rilievo: produzione1.2.288 e ricevute precedenti invariate. Consegnare il risultato locale verificato prima dell'eventuale ordine di pubblicazione; collaudo guidato fermo su questo caso.34MD conservati, nessuna nuova certificazione di dispositivo o C1/C2.
+
 <a id="rilascio-1288-pubblico-2026-11-20-incarico"></a>
 
 ## Ordine288 eseguito — ricevuta e ripresa del collaudo

@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="scadenze-indietro-1289-2026-11-20-decisione"></a>
+
+## Pubblicare il correttivo Back Scadenze —20/11/2026
+
+Fonte: ordine esplicito di Diego «Pubblica» dopo la consegna locale. Autorizzati confezione1.2.289, PR/merge/solo Hosting e ricevuta MD/GitHub, con controlli e due nuovi riesami sul contenuto finale. [Mandato](INCARICO_CORRENTE.md#scadenze-indietro-1289-2026-11-20-incarico). Conservare il filtro del contenitore canonico e il clic unico della card senza ampliare autorità Auth/Vault. Produzione e ricollaudo fisico si attestano soltanto dopo le rispettive verifiche; i GO della patch locale non sostituiscono quelli della confezione.
+
 <a id="rilascio-1288-pubblico-2026-11-20-decisione"></a>
 
 ## Layout e Back288 — ordine attuato

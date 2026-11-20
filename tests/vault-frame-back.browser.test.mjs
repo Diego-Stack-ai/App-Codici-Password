@@ -143,6 +143,89 @@ test('direct deadline rules Back uses Settings as its hierarchical parent',{time
  try{await back(f);await ready(f,'impostazioni.html');await intact(f);}finally{await f.context.close();}
 });
 
+for(const [filter,id]of [['in_scadenza','doc-1'],['urgenti','doc-0']])test('real deadline list '+filter+' Back retains its filter and returns straight to Home',{timeout:60000},async()=>{
+ const f=await fixture();
+ try{
+  await child(f).locator('a[href="scadenze.html?filter='+filter+'"]').click();await ready(f,'scadenze.html');
+  const listUrl=child(f).url();
+  const activeChip=filter==='urgenti'?'urgent':'expiring';
+  assert.equal(await child(f).locator('.filter-chip.active').getAttribute('data-filter'),activeChip);
+  await child(f).locator('#scadenze-list .deadline-card[data-id="'+id+'"] .deadline-card-title').click();
+  await ready(f,'dettaglio_scadenza.html');assert.equal(new URL(child(f).url()).searchParams.get('id'),id);await intact(f);
+  await back(f);await ready(f,'scadenze.html');assert.equal(child(f).url(),listUrl);
+  assert.equal(await child(f).locator('.filter-chip.active').getAttribute('data-filter'),activeChip);await intact(f);
+  await f.page.goForward();await ready(f,'dettaglio_scadenza.html');await intact(f);
+  await back(f);await ready(f,'scadenze.html');assert.equal(child(f).url(),listUrl);await intact(f);
+  await back(f);await ready(f,'home_page.html');await intact(f);
+ }finally{await f.context.close();}
+});
+
+test('real deadline list rule Back retains the canonical list query',{timeout:60000},async()=>{
+ const f=await fixture('scadenze.html?rule=Documento');
+ try{
+  const listUrl=child(f).url();
+  await child(f).locator('#scadenze-list .deadline-card[data-id="doc-0"] .deadline-card-title').click();
+  await ready(f,'dettaglio_scadenza.html');await back(f);await ready(f,'scadenze.html');
+  assert.equal(child(f).url(),listUrl);assert.equal(await child(f).locator('#deadline-search').inputValue(),'Documento');await intact(f);
+  await back(f);await ready(f,'home_page.html');await intact(f);
+ }finally{await f.context.close();}
+});
+
+test('deadline card navigation respects its inactive-list guard',{timeout:45000},async()=>{
+ const f=await fixture('scadenze.html?filter=urgenti');
+ try{
+  const before=child(f).url();
+  await f.page.evaluate(()=>{
+   const nav=window.vaultFrameNavigation;backProbe.navigations=0;
+   window.vaultFrameNavigation={...nav,navigateFromChild(...args){backProbe.navigations++;return nav.navigateFromChild(...args);}};
+  });
+  await child(f).evaluate(()=>{window.__viewTourUser.uid='synthetic-inactive-list';document.querySelector('#scadenze-list .deadline-card .deadline-card-title').click();});
+  assert.equal(await f.page.evaluate(()=>backProbe.navigations),0,'inactive card must not delegate a second navigation');
+  assert.equal(child(f).url(),before);await intact(f);
+ }finally{await f.context.close();}
+});
+
+for(const initial of ['dettaglio_scadenza.html?id=doc-0','home_page.html'])test('deadline detail from '+initial+' uses the canonical list without returning directly Home',{timeout:45000},async()=>{
+ const f=await fixture(initial);
+ try{
+  if(initial==='home_page.html'){
+   await f.page.evaluate(()=>{const frame=document.querySelector('iframe');window.vaultFrameNavigation.navigateFromChild(frame.contentWindow,frame.contentDocument,'/dettaglio_scadenza.html?id=doc-0');});
+   await ready(f,'dettaglio_scadenza.html');
+  }
+  await back(f);await ready(f,'scadenze.html');assert.equal(new URL(child(f).url()).search,'');await intact(f);
+  await back(f);await ready(f,'home_page.html');await intact(f);
+ }finally{await f.context.close();}
+});
+
+test('forced deadline Back honors an explicitly different list filter',{timeout:45000},async()=>{
+ const f=await fixture('scadenze.html?filter=urgenti');
+ try{
+  await child(f).locator('#scadenze-list .deadline-card[data-id="doc-0"] .deadline-card-title').click();await ready(f,'dettaglio_scadenza.html');
+  await f.page.evaluate(()=>{const frame=document.querySelector('iframe');window.vaultFrameNavigation.backFromChild(frame.contentWindow,frame.contentDocument,'/scadenze.html?filter=in_scadenza',false);});
+  await ready(f,'scadenze.html');assert.equal(new URL(child(f).url()).search,'?filter=in_scadenza');await intact(f);
+ }finally{await f.context.close();}
+});
+
+test('a non-deadline detail cannot restore the filter of a forced canonical target',{timeout:45000},async()=>{
+ const f=await fixture('scadenze.html?filter=urgenti');
+ try{
+  await child(f).locator('a[href="impostazioni.html"]').click();await ready(f,'impostazioni.html');
+  await f.page.evaluate(()=>{const frame=document.querySelector('iframe');window.vaultFrameNavigation.backFromChild(frame.contentWindow,frame.contentDocument,'/scadenze.html',false);});
+  await ready(f,'scadenze.html');assert.equal(new URL(child(f).url()).search,'');await intact(f);
+ }finally{await f.context.close();}
+});
+
+for(const filter of ['in_scadenza','urgenti'])test('real standalone deadline '+filter+' Back retains its list',{timeout:45000},async()=>{
+ const f=await harness.open('home_page.html');
+ const wait=async file=>{await f.page.waitForFunction(file=>location.pathname==='/'+file&&window.__viewTour?.ready,file);assert.equal(await f.page.evaluate(()=>window.__viewTour.bootError),undefined);};
+ try{
+  await f.page.locator('a[href="scadenze.html?filter='+filter+'"]').click();await wait('scadenze.html');const listUrl=f.page.url();
+  await f.page.locator('#scadenze-list .deadline-card[data-id="'+(filter==='urgenti'?'doc-0':'doc-1')+'"] .deadline-card-title').click();await wait('dettaglio_scadenza.html');
+  await f.page.locator('#header-left button.btn-icon-header').click();await wait('scadenze.html');assert.equal(f.page.url(),listUrl);
+  await f.page.locator('#header-left button.btn-icon-header').click();await wait('home_page.html');
+ }finally{await f.context.close();}
+});
+
 test('forced Back does not traverse a verified previous page with a different target',{timeout:45000},async()=>{
  const f=await fixture();
  try{

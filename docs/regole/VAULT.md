@@ -1,5 +1,17 @@
 # Vault
 
+<a id="scadenze-indietro-1289-2026-11-20-vault"></a>
+
+## Contenitore Scadenze — candidata289
+
+Confezionata l'[eccezione mirata del precedente verificato](#scadenze-indietro-locale-2026-11-20-vault), senza modificare guardie, ammissione, revoca, lease, chiavi o timer. Le etichette di cronologia non concedono accesso. [Prove e gate](../evidenze/COLLAUDI.md#scadenze-indietro-1289-2026-11-20): due nuovi GO e CI sul contenuto effettivo prima della pubblicazione; ricollaudo nativo distinto e successivo. Produzione1.2.288 fino a verifica del rilascio.
+
+<a id="scadenze-indietro-locale-2026-11-20-vault"></a>
+
+## Back Scadenze — eccezione di contenitore, candidata locale
+
+Per il solo Dettaglio Scadenza con fallback /scadenze.html senza query/fragment, il precedente può conservare filter/rule se appartiene al registro RAM verificato dello stesso owner ed è sulla pagina canonica /scadenze.html. Fuori da questo caso, il ritorno forzato richiede ancora la coincidenza completa della URL; query esplicite diverse e cronologia ignota non diventano equivalenti. Anche il fallback finito di una traversata fallita conserva la destinazione filtrata validata. Restano tutte le guardie di documento corrente, lock/logout/uscita, richiesta pendente, ritiro/mascheramento e nessuna autorità aggiuntiva su chiavi, ammissione, lease o attività. [Prove e limiti](../evidenze/COLLAUDI.md#scadenze-indietro-locale-2026-11-20); online1.2.288 invariata.
+
 <a id="rilascio-1288-pubblico-2026-11-20-vault"></a>
 
 ## Navigazione288 — distribuzione verificata
