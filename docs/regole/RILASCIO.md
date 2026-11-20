@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="rilascio-1288-pubblico-2026-11-20-rilascio"></a>
+
+## APP1.2.288 — procedura eseguita, solo Hosting
+
+PR #344 dopo due GO sulla testa finale; CI PR/master/validate Hosting e digest concordi. Master fissato prima di production protetto, scope hosting e approvazione registrati; deploy SUCCESS e verifica autonoma integrale più18GET. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1288-pubblico-2026-11-20). Workflow/protezioni conservati; nessun backend/policy modificato. La chiusura dei nove MD conserva il runtime distribuito e non richiede un secondo Hosting.
+
 <a id="rilascio-1288-integrato-2026-11-20-rilascio"></a>
 
 ## Ripresa288 — nuova testa per il contenuto combinato

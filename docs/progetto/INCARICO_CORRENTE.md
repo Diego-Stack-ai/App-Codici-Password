@@ -1,5 +1,11 @@
 # Incarico corrente
 
+<a id="rilascio-1288-pubblico-2026-11-20-incarico"></a>
+
+## Ordine288 eseguito — ricevuta e ripresa del collaudo
+
+Eseguito l'ordine di aggiornare la pagina e pubblicare il contenuto integrato, con riesami immutabili, gate PR/master/Hosting e verifica pubblica. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1288-pubblico-2026-11-20). Completare MD/GitHub con PR soltanto documentale, controlli e riesame indipendente; nessun secondo Hosting. Root unico scrittore e supporti in lettura,34MD conservati. Segue conferma della versione sul telefono e ricollaudo mirato, una prova alla volta; nessun nuovo lotto o caso completo dedotto.
+
 <a id="rilascio-1288-integrato-2026-11-20-incarico"></a>
 
 ## Ripresa1.2.288 — pagina approvata e pubblicazione

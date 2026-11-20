@@ -1,5 +1,17 @@
 # Collaudi
 
+<a id="rilascio-1288-pubblico-2026-11-20"></a>
+
+## APP1.2.288 — Back e card quadrate pubblicati e verificati
+
+[PR #344](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/344) unita dopo due GO indipendenti sulla testa facf58af14abc62b5189f55a65e0532fe855384e; sorgente distribuito 535f620812f5588cbcd6ec561d02d35cb553d340, sourceDirty=false e albero identico al contenuto riesaminato. CI [PR #1246](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44709456588), [master #1247](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44713427918) e [Hosting #1248](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44713710923) SUCCESS sul medesimo contenuto pubblico. Ciascuna validazione: 68blocchi, 3916test, 3905PASS e 11SKIP, zeroFAIL/annullati. Soglie e guardie conservate.
+
+Deploy solo Hosting SUCCESS concluso 20/11/2026, 11:32:31 Europe/Rome, dopo CI concordi, scope hosting, master remoto fissato e approvazione production registrata. Verifica pubblica autonoma integrale PASS 20/11/2026, 11:33:25 Europe/Rome:367file/hash,41profili header e probe/normalizzazioni;18GET indipendenti PASS 20/11/2026, 11:33:27 Europe/Rome, compresi CSS delle card, sei JS funzionali e pagine interessate. Digest pubblico 4654fc4d33ef05cfde3cb1a5e44a2ac455c1d410e1b919b0dd27ce634a7c5ec0; manifest SHA256 53fda41ee6660659fa5e8dd389b8c16f4807d244c6faece7a8de16682485bef2.
+
+Distribuiti ritorno dal dettaglio alla lista Account corretta, conservazione del filtro e parent non duplicato; quattro card private quadrate entro600px con titoli/badge interi, font18px e icone48px. Package e prove sintetiche restano quelle del [contenuto integrato](#rilascio-1288-integrato-2026-11-20), compresa matrice196contesti; l'approvazione dell'anteprima non certifica il telefono sulla nuova produzione. Conferma della versione e ricollaudo mirato ancora da acquisire, una prova alla volta. Gli altri casi completi restano aperti.
+
+Ricevuta soltanto documentale sui nove MD esistenti e GitHub, senza ulteriore Hosting. Checkpoint candidati, pausa e attese seguenti sono storici. Nessun nuovo lotto, dato personale o certificazione fisica dedotto.
+
 <a id="rilascio-1288-integrato-2026-11-20"></a>
 
 ## Candidata1.2.288 — contenuto combinato autorizzato
