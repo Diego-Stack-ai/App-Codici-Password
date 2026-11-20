@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1288-pubblico-2026-11-20-stato"></a>
+
+## APP1.2.288 — online e verificata
+
+Online1.2.288 dal sorgente 535f620812f5588cbcd6ec561d02d35cb553d340, sourceDirty=false. PR #344, due GO sulla testa finale, CI PR/master/Hosting concordi; solo Hosting e verifica pubblica367hash/41profili/18GET PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1288-pubblico-2026-11-20). Distribuiti Back aziendale e card quadrate approvate; prossimo passo confermare la versione e ripetere il controllo sul dispositivo. Nessun nuovo PASS fisico dedotto. Le pause e le candidate sotto conservano la propria data/base.
+
 <a id="rilascio-1288-integrato-2026-11-20-stato"></a>
 
 ## Candidata1.2.288 integrata — ripresa autorizzata; online1.2.287

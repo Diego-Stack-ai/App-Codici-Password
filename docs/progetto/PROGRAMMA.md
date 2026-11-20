@@ -1,5 +1,11 @@
 # Programma
 
+<a id="rilascio-1288-pubblico-2026-11-20-programma"></a>
+
+## 1.2.288 pubblicata — conferma e ricollaudo mirato
+
+Rilascio tecnico completato e verificato. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1288-pubblico-2026-11-20). Confermare1.2.288 sul dispositivo, poi verificare ritorno dal dettaglio alla lista Account della stessa azienda prima di Le mie aziende e proporzioni quadrate delle quattro card private. Proseguire il collaudo una prova alla volta; altri ambienti, casi completi e residui conservano i propri gate.
+
 <a id="rilascio-1288-integrato-2026-11-20-programma"></a>
 
 ## Prossimo passo — pubblicare Back e card quadrate insieme

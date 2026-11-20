@@ -1,5 +1,11 @@
 # Interfaccia
 
+<a id="rilascio-1288-pubblico-2026-11-20-ui"></a>
+
+## Back e card quadrate — distribuiti nella1.2.288
+
+Distribuiti parent distinti e ritorno alla lista verificata con azienda/filtro, più geometria quadrata delle quattro card private entro600px; icone, titoli, badge e ruoli colore conservati. [Ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-1288-pubblico-2026-11-20). Mappa e regressioni collegano produttori, destinazioni e CSS; matrice sintetica196contesti distinta dal ricollaudo sul dispositivo.
+
 <a id="rilascio-1288-integrato-2026-11-20-ui"></a>
 
 ## Area Privata e Back — candidata288 integrata

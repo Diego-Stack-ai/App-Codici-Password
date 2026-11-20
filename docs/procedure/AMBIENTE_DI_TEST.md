@@ -1,5 +1,11 @@
 # Ambiente di test
 
+<a id="rilascio-1288-pubblico-2026-11-20-ambiente"></a>
+
+## 1.2.288 — limiti delle verifiche distribuite
+
+Contenuto integrato pubblicato e verificato. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1288-pubblico-2026-11-20). Runtime cornice321casi con25Back inclusi e banco card3casi/196contesti sono sintetici, con dati inventati; test browser su loopback. Il ricollaudo fisico resta da acquisire dopo la conferma della versione. Nessun audit completo o altro dispositivo certificato dalla CI.
+
 <a id="rilascio-1288-integrato-2026-11-20-ambiente"></a>
 
 ## Candidata288 integrata — verifiche del contenuto effettivo

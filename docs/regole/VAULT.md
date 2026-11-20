@@ -1,5 +1,11 @@
 # Vault
 
+<a id="rilascio-1288-pubblico-2026-11-20-vault"></a>
+
+## Navigazione288 — distribuzione verificata
+
+Distribuito il ritorno coordinato della candidata integrata. Guardie, revoca, ammissione, lease, chiavi e timer conservati; la geometria delle card è presentazione. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1288-pubblico-2026-11-20). La verifica del codice pubblico non certifica hardware, passkey o audit completi della cornice.
+
 <a id="rilascio-1288-integrato-2026-11-20-vault"></a>
 
 ## Candidata288 integrata — presentazione e navigazione

@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="rilascio-1288-pubblico-2026-11-20-decisione"></a>
+
+## Layout e Back288 — ordine attuato
+
+Il layout approvato e il ritorno aziendale sono distribuiti nella1.2.288 dopo i controlli previsti. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1288-pubblico-2026-11-20). La ripresa autorizzata è eseguita; approvazione dell'anteprima, verifiche sintetiche, pubblicazione e successivo ricollaudo fisico restano distinti. Nessuna estensione ad altri lotti o operazioni amministrative.
+
 <a id="rilascio-1288-integrato-2026-11-20-decisione"></a>
 
 ## Layout approvato — ordine di integrazione e rilascio
