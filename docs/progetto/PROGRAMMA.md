@@ -1,5 +1,29 @@
 # Programma
 
+<a id="rilascio-1288-integrato-2026-11-20-programma"></a>
+
+## Prossimo passo — pubblicare Back e card quadrate insieme
+
+[Ordine di ripresa](INCARICO_CORRENTE.md#rilascio-1288-integrato-2026-11-20-incarico): integrare il layout approvato, confezione e controlli nuovi, riesami immutabili, CI PR/master/Hosting e verifica pubblica; ricevuta MD/GitHub senza secondo deploy. Poi conferma1.2.288 sul dispositivo e ricollaudo del ritorno aziendale e delle proporzioni delle card. Altri casi e lotti conservano il proprio perimetro.
+
+<a id="area-privata-quadrata-locale-2026-11-20-programma"></a>
+
+## Card quadrate approvate — attendere la ripresa
+
+Anteprima approvata da Diego; conservare la [correzione locale e le prove](../evidenze/COLLAUDI.md#area-privata-quadrata-locale-2026-11-20) mantenendo la pubblicazione in pausa. Eventuale integrazione con il ritorno aziendale della PR #344 solo dopo nuova indicazione: aggiornare confezione/riesami e CI per il contenuto effettivo, senza riusare i GO del vecchio SHA per codice nuovo. Il ricollaudo sul telefono resta successivo a un rilascio autorizzato; gli altri lotti conservano il proprio perimetro.
+
+<a id="azienda-indietro-1288-2026-11-20-programma"></a>
+
+## Prossimo passo — rilascio tecnico288, poi ricollaudo
+
+Eseguire il [mandato di pubblicazione](INCARICO_CORRENTE.md#azienda-indietro-1288-2026-11-20-incarico) con riesami immutabili, CI e gate Hosting invariati, verifica pubblica e ricevuta. Poi confermare la versione sul dispositivo e ripetere il ritorno dal dettaglio alla lista Account dell'azienda prima di Le mie aziende, una prova alla volta. Altri casi, ambienti e proposta grafica compatta conservano il proprio perimetro; nessun PASS fisico dedotto dai test locali.
+
+<a id="azienda-indietro-locale-2026-11-20-programma"></a>
+
+## Indietro aziendale — seguito locale prima del ricollaudo
+
+Correttivo locale e regressioni positivi; [stato e limiti](STATO.md#azienda-indietro-locale-2026-11-20-stato), [mappa dei collegamenti/test](../evidenze/COLLAUDI.md#azienda-indietro-locale-2026-11-20). Online resta1.2.287. Dopo un eventuale ordine di pubblicazione: confezione, riesami sullo SHA finale e gate invariati, quindi verifica della versione e nuova prova fisica del ritorno dal dettaglio alla lista Account dell'azienda prima di Le mie aziende. Non proseguire quel caso come PASS sulla base dei test sintetici; altri lotti e casi completi conservano il proprio perimetro.
+
 <a id="profilo-indietro-1287-pubblico-2026-11-19-programma"></a>
 
 ## 1.2.287 pubblicata — prossimo passo di collaudo

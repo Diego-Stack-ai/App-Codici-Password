@@ -4,12 +4,13 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * Gestione lista account per una specifica azienda, allineata allo stile Account Privati.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.287';
+import { db } from '../../firebase-config.js?v=1.2.288';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
+import { navigateDocument } from '../../frame-navigation.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import {listCompanyAccounts} from '../data/vault-repository.js';
 import { createAccountListView } from '../shared/account-list-view.js';
@@ -36,7 +37,7 @@ export function mountAccountAziendaList(user, options = {}) {
     const navigate = url => {
         if (signal.aborted) return;
         if (options.navigate) options.navigate(url);
-        else window.location.href = url;
+        else navigateDocument(url);
     };
     const content = document.getElementById('accounts-container');
     function assertActive() { if (signal.aborted) throw new DOMException('Page unmounted', 'AbortError'); }

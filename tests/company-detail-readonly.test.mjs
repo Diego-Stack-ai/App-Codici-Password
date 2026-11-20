@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
+import {withStandaloneFrame} from './lib/standalone-frame-context.mjs';
 const accessSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/cached-account-access.js', import.meta.url), 'utf8');
 const {canReadCachedAccount} = await import('data:text/javascript;base64,' + Buffer.from(accessSource).toString('base64'));
 
@@ -30,7 +31,7 @@ function fixture({suspended = false, denied = false, networkError = false, onlin
     };
     let read = async () => ({nomeAccount: 'Synthetic company account'});
     const window = {location: {search: '?id=account&aziendaId=company', pathname: '/dettaglio_account_azienda.html', href: ''}, history: {replaceState() {}}};
-    const context = vm.createContext({URLSearchParams, AbortController, auth:{currentUser:null}, onAuthStateChanged:()=>()=>{}, window, navigator: {onLine: online}, console,
+    const context = vm.createContext(withStandaloneFrame({URLSearchParams, AbortController, auth:{currentUser:null}, onAuthStateChanged:()=>()=>{}, window, navigator: {onLine: online}, console,
         canReadCachedAccount, readErrorMessage, accountModeFromRecord, inviteIdForGuest, sanitizeEmail, sharingCycleOf,
         document: {getElementById: id => id === 'footer-center-actions' ? footer : find(footer.children, id),
             querySelector: () => null, querySelectorAll: () => []},
@@ -57,7 +58,7 @@ function fixture({suspended = false, denied = false, networkError = false, onlin
         renderSharingMap() {}, loadAttachments: async () => {}, renderAccountBanking() {},
         loadModule: async () => ({initAccountNoteEditor() {}, initAccountSharedCredentials() {}, initAccountEmbeddedWidgets() {}}),
         setTimeout() {}, history: {back() {}}
-    });
+    }));
     vm.runInContext(source.replace(/^import[\s\S]*?;\s*$/gm, '').replace('export async function', 'async function').replace(/\bimport\(/g, 'loadModule('), context);
     return {writes, reads, errors, modules, footer, classes, window, suspendedReads,
         button: () => find(footer.children, 'btn-edit-footer'),

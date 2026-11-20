@@ -1,5 +1,23 @@
 # Vault
 
+<a id="rilascio-1288-integrato-2026-11-20-vault"></a>
+
+## Candidata288 integrata — presentazione e navigazione
+
+Il layout quadrato non cambia il contratto del ritorno verificato già preparato per288. Documento corrente, revoca, ammissione, lease, chiavi e timer conservati. [Perimetro combinato e prove](../evidenze/COLLAUDI.md#rilascio-1288-integrato-2026-11-20); un'approvazione visiva o un PASS sintetico non attestano lo sblocco nativo o i casi completi.
+
+<a id="azienda-indietro-1288-2026-11-20-vault"></a>
+
+## Ritorno aziendale — confezione1.2.288
+
+Confezionata la precisazione locale del precedente esatto verificato, senza autorità su ammissione o chiavi. Guardie, documento corrente, revoca, fallback finito e timer conservati. [Verifiche e limiti](../evidenze/COLLAUDI.md#azienda-indietro-1288-2026-11-20); online1.2.287 fino al rilascio. Nessun nuovo PASS nativo o chiusura C1/C2 dedotto.
+
+<a id="azienda-indietro-locale-2026-11-20-vault"></a>
+
+## Cronologia forzata — precisazione candidata locale
+
+Quando preferHistory=false, la freccia può percorrere il precedente soltanto se appartiene al registro verificato dello stesso owner e la sua URL completa coincide esattamente con il fallback interno validato, query inclusa. Un'altra destinazione o filtro conserva il ritorno forzato; cronologia ignota resta inaffidabile. Guardie di documento corrente, lock/logout/uscita, richiesta pendente, ritiro del documento, mascheramento e fallback finito conservati. Queste etichette non concedono ammissione, chiavi o rinnovo dei timer. [Prove e perimetro](../evidenze/COLLAUDI.md#azienda-indietro-locale-2026-11-20); produzione1.2.287 invariata, nessuna nuova certificazione fisica.
+
 <a id="profilo-indietro-1287-pubblico-2026-11-19-vault"></a>
 
 ## Ritorno nella cornice — distribuito nella287

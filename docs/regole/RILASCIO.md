@@ -1,5 +1,17 @@
 # Rilascio
 
+<a id="rilascio-1288-integrato-2026-11-20-rilascio"></a>
+
+## Ripresa288 — nuova testa per il contenuto combinato
+
+[Mandato](../progetto/INCARICO_CORRENTE.md#rilascio-1288-integrato-2026-11-20-incarico):288 ancora inedita, snapshot nuovo dopo integrazione e prima dei derivati, confronto sette pubblici funzionali. Due GO sul nuovo SHA e CI PR completa; merge con testa attesa. CI master/validate Hosting sullo stesso sorgente/digest, scope hosting e master invariato prima di production protetto. Manifest dai byte Git LF, verifica pubblica integrale e GET anche del CSS; ricevuta MD/GitHub senza secondo Hosting. Vecchio digest/GO della testa a7db687e non riusati.
+
+<a id="azienda-indietro-1288-2026-11-20-rilascio"></a>
+
+## Candidata1.2.288 — solo Hosting
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#azienda-indietro-1288-2026-11-20-incarico): snapshot funzionale originale, bump canonico288, guida16/reviewed288, derivati offline/QA e confronto normalizzato. Due GO sulla testa finale e CI PR completa verde; merge con SHA atteso. Poi CI master e validate del workflow manuale sullo stesso master fissato e digest pubblico, release_scope=hosting verificato e master remoto invariato prima di production protetto secondo la delega della sessione. Nessuna modifica workflow/protezioni o operazione backend/policy. Manifest dai byte Git LF, verifica pubblica integrale e GET indipendenti sui produttori corretti, poi ricevuta MD/GitHub senza secondo Hosting. [Evidenze](../evidenze/COLLAUDI.md#azienda-indietro-1288-2026-11-20); ricollaudo fisico distinto e successivo.
+
 <a id="profilo-indietro-1287-pubblico-2026-11-19-rilascio"></a>
 
 ## APP 1.2.287 — procedura eseguita

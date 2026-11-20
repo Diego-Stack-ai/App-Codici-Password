@@ -1,5 +1,35 @@
 # Incarico corrente
 
+<a id="rilascio-1288-integrato-2026-11-20-incarico"></a>
+
+## Ripresa1.2.288 — pagina approvata e pubblicazione
+
+Nuovo ordine di Diego: «Ok aggiorna la pagina e poi pubblichiamo». Superata la pausa per integrare nella PR #344 le quattro card quadrate approvate insieme al ritorno aziendale. Root unico scrittore; supporti in lettura;9MD esistenti e nessun nuovo documento. Nuova confezione sul contenuto combinato, due GO sul nuovo SHA, CI PR completa e merge con testa attesa; CI master e validate Hosting sullo stesso sorgente/digest, master invariato e scope hosting prima di production protetto. [Evidenze](../evidenze/COLLAUDI.md#rilascio-1288-integrato-2026-11-20).
+
+La versione288 non è stata distribuita: resta1.2.288 con snapshot nuovo prima dei derivati, senza attribuire prove o GO della precedente testa a7db687e al CSS integrato. Conservare guardie, chiavi, timer, dati, backend, workflow e protezioni. Nuova verifica pubblica integrale e GET anche del CSS, ricevuta MD/GitHub senza secondo Hosting, poi ricollaudo fisico una prova alla volta. I checkpoint di pausa/separazione sotto sono storici.
+
+<a id="area-privata-quadrata-locale-2026-11-20-incarico"></a>
+
+## Pubblicazione sospesa — correzione locale delle quattro card
+
+Diego ha approvato l'anteprima delle card quadrate; [decisione registrata](DECISIONI.md#area-privata-quadrata-approvata-2026-11-20). Pubblicazione ancora sospesa, candidato locale e PR #344 distinti.
+
+Diego chiede di attendere prima di pubblicare e segnala le quattro card dell'Area Privata troppo alte/rettangolari. Preparare localmente il ripristino delle proporzioni quadrate sul telefono, conservando badge, icone, testi e palette. [Evidenze e limiti](../evidenze/COLLAUDI.md#area-privata-quadrata-locale-2026-11-20). Nuova worktree separata dalla PR #344; root unico scrittore e supporti in lettura,34MD conservati. Nessun ordine di nuovo bump/commit/push/PR/merge/deploy dedotto dal rilievo. Il precedente ordine di pubblicazione resta sospeso fino a una nuova indicazione di Diego; CI già avviata può terminare senza sbloccare merge o produzione.
+
+<a id="azienda-indietro-1288-2026-11-20-incarico"></a>
+
+## Pubblicazione 1.2.288 — ordine eseguibile
+
+Diego ordina «Pubblica» dopo la consegna del correttivo locale Indietro aziendale. Superato il limite locale del checkpoint seguente per questo solo delta: nuova versione1.2.288, PR, due riesami indipendenti sulla testa finale, CI PR completa, merge con SHA atteso, CI master e validate Hosting sullo stesso sorgente/digest, poi production protetto secondo la delega della sessione e verifica pubblica integrale. [Confezione ed evidenze](../evidenze/COLLAUDI.md#azienda-indietro-1288-2026-11-20).
+
+Base e0f60f3fd26373dc9f3845307b78be8e1086a260, ramo codex/company-header-back-20261120; root unico scrittore e supporti indipendenti in lettura,34MD conservati. Snapshot prima del bump, guida16/reviewed288 e derivati offline/QA, confronto normalizzato sui367file. Scope hosting; nessuna modifica backend, workflow, protezioni, policy, dati reali, chiavi o timer. Proposta grafica compatta esclusa. Master remoto invariato prima di production, ricevuta MD/GitHub senza secondo Hosting; ricollaudo fisico successivo, distinto dai banchi sintetici. I riscontri manuali dettagliati restano locali.
+
+<a id="azienda-indietro-locale-2026-11-20-incarico"></a>
+
+## Seguito del ricollaudo — Indietro aziendale locale
+
+Riprodurre e correggere localmente il ritorno dal dettaglio aziendale, conservando azienda, filtro e sessione del padre, nel seguito del collaudo della freccia. Root unico scrittore e supporti indipendenti in lettura; dati inventati, documenti esistenti e 34 MD conservati. [Perimetro tecnico e verifiche](../evidenze/COLLAUDI.md#azienda-indietro-locale-2026-11-20). Versione online1.2.287 invariata: il riscontro non costituisce un nuovo ordine di bump, commit/push, PR/merge o pubblicazione. Nessuna modifica backend, workflow, protezioni, policy, chiavi o timer; proposta grafica compatta esclusa. Completare prova locale e riesame, poi presentare il risultato concreto; ripresa fisica dopo eventuale rilascio autorizzato.
+
 <a id="profilo-indietro-1287-pubblico-2026-11-19-incarico"></a>
 
 ## Correttivo 287 pubblicato — chiusura documentale e collaudo

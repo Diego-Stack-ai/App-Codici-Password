@@ -1,5 +1,71 @@
 # Collaudi
 
+<a id="rilascio-1288-integrato-2026-11-20"></a>
+
+## Candidata1.2.288 — contenuto combinato autorizzato
+
+Nuovo ordine di aggiornare la pagina approvata e pubblicare: integrati il [Back aziendale](#azienda-indietro-locale-2026-11-20) e le [quattro card quadrate](#area-privata-quadrata-locale-2026-11-20) nella PR #344, sul ramo codex/company-header-back-20261120. Base e0f60f3f, precedente testa a7db687e conservata come checkpoint. Versione288 ancora inedita; produzione1.2.287. I dettagli manuali personali restano locali.
+
+Nuovo snapshot dopo integrazione e prima dei derivati. Confronto pubblico verificato:367file, sette funzionali (sei JS più area_privata.css), nessuna aggiunta/rimozione o differenza ulteriore dopo sola normalizzazione versioni/EOL. Versione canonica288/307riferimenti, guida16/reviewed288, offline61export/347risorse, QA31pagine/126istruzioni/111target/167campi allineati. La vecchia proposta fissa160px resta esclusa: integrata solo la geometria quadrata approvata.
+
+Sul pacchetto integrato: runtime cornice321/321 (Back25casi incluso), geometria/contatori3/3 con196contesti, topologia20/20, guida12/12, offline16/16, diagnostica4/4, sintassi252moduli, riferimenti343file, CSS e budget31pagine PASS. Conteggi sovrapposti non sommati. Nuovi riesami e CI sulla testa effettiva ancora richiesti; nessun GO della vecchia candidata trasferito.
+
+Pausa e separazione dei checkpoint seguenti sono superate dal nuovo ordine per questo delta. I precedenti GO, digest45b51e2e e CI della testa a7db687e non certificano la nuova candidata. Nessun PASS fisico o pubblicazione dedotto dai test locali.
+
+<a id="area-privata-quadrata-locale-2026-11-20"></a>
+
+## Area Privata — quattro card quadrate, candidato locale separato
+
+Diego ha approvato l'anteprima delle card quadrate; [decisione registrata](../progetto/DECISIONI.md#area-privata-quadrata-approvata-2026-11-20). Pubblicazione ancora sospesa, candidato locale e PR #344 distinti.
+
+Seguito della richiesta di ripristinare proporzioni quadrate alle quattro card. Preparazione locale sul ramo codex/private-square-cards-20261120, base a7db687eb259437d385c81d0bd306925e48fa9d3 della candidata288. La PR #344 resta immutata e la pubblicazione è sospesa su richiesta di Diego; online1.2.287. Nessun nuovo bump, commit/push, PR, merge o deploy per questa grafica. La vecchia proposta fissa160px resta distinta: non garantiva quadrati alle diverse larghezze.
+
+Causa riprodotta: padding e altezza minima del blocco testo conservavano uno spacer per la vecchia icona filigrana. A393px le card risultavano174,5×226px; ora174,5×174,5px, con103px recuperati sulle due righe. A320px passano da138×226 a138×138. Override soltanto delle quattro card entro600px: aspect-ratio1, min-height0, rimozione dello spacer e wrapping; padding ridotto entro359px. Titoli18px, icone48px e stile dei contatori conservati, senza CSS di colore nuovo. Desktop oltre600px conserva le regole precedenti.
+
+Collegamenti registrati nella sezione contatori del [contratto livree](../../scripts/ui-livery-contract.json): [pagina](../../Frontend/public/area_privata.html), produttori reali Privato/Aziende, [CSS corretto](../../Frontend/public/assets/css/area_privata.css), ruoli testo/badge e [test browser](../../tests/ui-account-mode-counts.browser.test.mjs). Il test consuma record inventati e distinti fino a1001; nessuna sostituzione diretta dei numeri o markup copiato.
+
+RED prima del CSS: il nuovo oracolo fallisce su138×226px. GREEN finale3/3, inclusa matrice196contesti: sette palette × Chiaro/Scuro × Classica/Nuova × sette larghezze320/359/360/393/600/601/1280. Per tutte le quattro card entro600px richiede differenza fra lato e altezza al massimo1px, testo e badge interi/separati, font e icone invariati e spacer assente. Restano le verifiche di cifre/identità/destinazioni e contrasto almeno4,5:1; due controprove rigettano spacer rettangolare e badge rettangolari/illeggibili. Stile CSS e budget31pagine PASS. Anteprime locali con dati inventati, non prova fisica del telefono.
+
+Questi risultati appartengono solo al nuovo candidato grafico: non estendono il confronto funzionale o i GO immutabili della PR #344. Ogni futura integrazione richiede nuova confezione e verifiche; la pausa della pubblicazione resta valida.
+
+<a id="azienda-indietro-1288-2026-11-20"></a>
+
+## Candidata1.2.288 — confezione Indietro aziendale
+
+Ordine «Pubblica», base e0f60f3f e ramo codex/company-header-back-20261120. Conservati causa, collegamenti componente/test, controprove RED e limiti del [correttivo locale](#azienda-indietro-locale-2026-11-20). Pubblicazione ancora da eseguire; online1.2.287. Registro manuale dettagliato locale, nessuna sequenza personale pubblicata.
+
+Snapshot dei367file prima del bump; script canonico287→288 e307riferimenti asset, guida contentVersion16/reviewedAppVersion1.2.288 senza nuovi testi, offline61export/347risorse e QA31pagine/126istruzioni/111target/167campi. Nessuna aggiunta/rimozione pubblica o ulteriore differenza dopo normalizzazione delle sole versioni/EOL rispetto al candidato funzionale. Confronto contro la base: soltanto i sei pubblici funzionali già indicati nel checkpoint locale; nessun CSS o proposta compatta.
+
+Il primo confezionamento si è fermato nella generazione offline per il collegamento alle dipendenze assente nella worktree, dopo il bump già riuscito. Ripreso senza downgrade né riscrittura dello snapshot originale, usando solo dipendenze preesistenti e senza installazioni; confronto finale PASS. I risultati runtime321/321 e navigazione199/199 precedenti al bump sono distinti dalle nuove verifiche del pacchetto.
+
+Sulla confezione288: runtime cornice321/321 PASS, con il banco Back25/25 incluso; guida12/12, offline16/16, diagnostica4/4, sintassi252moduli, riferimenti343file, CSS e budget31pagine PASS. Versione canonica288 e307riferimenti coerenti. Dipendenze temporanee scollegate dopo i controlli; prove sintetiche senza nuovi dati reali. Conteggi sovrapposti non sommati.
+
+Riesami sulla testa finale, CI PR completa, CI master e validate Hosting concordi per sorgente/digest, scope hosting e master invariato, approvazione protetta e verifica pubblica restano da acquisire. Nessuna certificazione fisica o chiusura degli audit completi dedotta; dettagli del nuovo ricollaudo dopo il rilascio.
+
+<a id="azienda-indietro-locale-2026-11-20"></a>
+
+## Indietro aziendale — correttivo locale, produzione 1.2.287
+
+Seguito tecnico del ricollaudo: candidato sul ramo codex/company-header-back-20261120, base e0f60f3fd26373dc9f3845307b78be8e1086a260. Nessun bump, commit, PR, merge o deploy di questo seguito; online resta la 1.2.287 descritta nella ricevuta sotto. I riscontri manuali dettagliati restano nel registro locale; le prove seguenti usano soltanto dati inventati e origine loopback. La proposta grafica compatta resta separata.
+
+Causa riprodotta: il predicato endsWith('account_azienda.html') catturava anche dettaglio e form prima dei relativi rami; la freccia del dettaglio forzava quindi Le mie aziende. Il confine /account_azienda.html rende raggiungibili i fallback specifici. Lo stesso controllo sugli altri predicati individua endsWith('scadenze.html') che intercettava regole_scadenze.html nell'ingresso diretto: corretto con il confine /scadenze.html. Non è un secondo clic del medesimo pulsante.
+
+| Collegamento | Componenti del candidato | Regressione |
+|---|---|---|
+| Destinazione della freccia | [Header condiviso](../../Frontend/public/assets/js/components-v129.js), fallback distinti per elenco, dettaglio e form | [Banco Back](../../tests/vault-frame-back.browser.test.mjs): dettaglio e form diretti; Regole da Impostazioni e ingresso diretto |
+| Aziende → Account, anche filtrati | [Elenco Aziende](../../Frontend/public/assets/js/modules/azienda/lista_aziende.js) e [Account aziendali](../../Frontend/public/assets/js/modules/azienda/account_azienda.js), navigazione tramite navigateDocument | Banco Back: nome azienda e tipologia, ritorno all'esatta URL con azienda e filtro; Forward e ritorno fino alla Home |
+| Dettaglio → Modifica → dettaglio | [Dettaglio](../../Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js), navigazione coordinata; [Form](../../Frontend/public/assets/js/modules/azienda/form_account_azienda.js), header condiviso senza override locale | Banco Back: apertura effettiva di Modifica, ritorno al dettaglio e alla lista filtrata |
+| Parent forzato e cronologia | [Owner](../../Frontend/public/assets/js/modules/core/vault-frame-owner.mjs), traversal solo per precedente verificato esattamente uguale al parent quando preferHistory=false | Banco Back: nessun duplicato del parent; destinazione o query diverse restano fallback forzati |
+| Standalone e accesso in lettura | Adattatore esistente, lifecycle e callback conservati; [fixture read-only](../../tests/company-detail-readonly.test.mjs) allineata con withStandaloneFrame | Banco Back standalone sulla lista filtrata e test read-only esistenti |
+
+Il banco usa produttori reali delle pagine, ID azienda e Account distinti, URL complete e dati caricati; controlla documento padre invariato, un solo caricamento/unlock, zero lock/clear/errori asincroni. Il caso Modifica copre la freccia nell'header: Annulla del footer e salvataggio restano percorsi distinti, senza nuova attestazione. Nessuna modifica CSS o nuova copertura delle palette dedotta.
+
+Controprove prima della correzione: 5 FAIL su 6 casi aziendali (il form diretto in modifica era già positivo); dopo i soli confini corretti, 2 FAIL su 6 per perdita del filtro; dopo il coordinamento dei produttori, 2 FAIL su 8 per duplicazione di Le mie aziende nella cronologia. Ingresso diretto Regole: FAIL separato, destinazione Home anziché Impostazioni. La correzione dell'owner riusa il precedente soltanto se verificato ed esattamente uguale alla destinazione forzata, query inclusa.
+
+Verifica finale locale: suite runtime cornice **321/321 PASS**, incluso il banco Back ampliato da 14 a **25 casi**; navigazione **199/199**, topologia **20/20**, diagnostica **4/4**, sintassi **252 moduli**, riferimenti **343 file** e budget **31 pagine** PASS. Sono suite con possibili sovrapposizioni: i conteggi non si sommano. Il primo tentativo runtime aveva cinque errori ambientali per il percorso Firebase Tools assente nella worktree; ripetuto dopo un collegamento temporaneo alle dipendenze esistenti, senza installazioni. Collegamento rimosso dopo il PASS; nessun errore ambientale contato come prova RED del prodotto.
+
+Riesame funzionale indipendente sul diff locale favorevole; non equivale al GO su un futuro commit confezionato. Produzione e versione invariate. Restano eventuale mandato di pubblicazione, confezione, riesami immutabili e gate di rilascio, poi ricollaudo fisico. Banco Chrome sintetico, non certificazione iPhone/WebKit, Android o C1/C2 completi.
+
 <a id="profilo-indietro-1287-pubblico-2026-11-19"></a>
 
 ## APP 1.2.287 — navigazione pubblicata e verificata

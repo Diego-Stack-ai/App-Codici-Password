@@ -48,7 +48,7 @@ async function fixture(initial='home_page.html'){
  try{
   await f.page.goto(harness.base+'/login.html');
   await f.page.goto(harness.base+'/app.html?route='+encodeURIComponent('/'+initial));
-  await ready(f,initial);
+  await ready(f,initial.split(/[?#]/)[0]);
   f.ownerId=await f.page.evaluate(()=>backProbe.id);
   return f;
  }catch(error){await f.context.close();throw error;}
@@ -62,6 +62,107 @@ async function intact(f){
  assert.deepEqual(value.errors,[],'no asynchronous child errors');
 }
 const back=f=>child(f).locator('#header-left button.btn-icon-header').click();
+
+async function companyDetail(f,view=''){
+ await child(f).locator('a[href="lista_aziende.html"]').click();await ready(f,'lista_aziende.html');
+ const company=child(f).locator('.azienda-card').filter({hasText:'Azienda inventata 0'});
+ if(view)await company.locator('.btn-company-account-mode.mode-'+view).click();
+ else await company.locator('.card-name').click();
+ await ready(f,'account_azienda.html');const listUrl=child(f).url();
+ assert.equal(new URL(listUrl).searchParams.get('id'),'doc-0');
+ assert.equal(new URL(listUrl).searchParams.get('type'),view||null);
+ // Distinct Account/company IDs catch accidental interchange of query fields.
+ await child(f).locator('#accounts-container .account-card[data-id="doc-1"] .account-card-title').click();
+ await ready(f,'dettaglio_account_azienda.html');const detailUrl=child(f).url();
+ assert.equal(new URL(detailUrl).searchParams.get('id'),'doc-1');
+ assert.equal(new URL(detailUrl).searchParams.get('aziendaId'),'doc-0');
+ assert.equal(await child(f).locator('#detail-nomeAccount').inputValue(),'Account sintetico 1');
+ assert.equal(await child(f).locator('#btn-edit-footer').count(),1);await intact(f);
+ return {listUrl,detailUrl};
+}
+
+for(const view of ['', 'standard'])test('real company '+(view||'name')+' Back returns to the exact Account list before companies',{timeout:60000},async()=>{
+ const f=await fixture();
+ try{
+  const {listUrl}=await companyDetail(f,view);
+  await back(f);await ready(f,'account_azienda.html');assert.equal(child(f).url(),listUrl);
+  assert.equal(await child(f).locator('#accounts-container .account-card[data-id="doc-1"]').count(),1);await intact(f);
+  await back(f);await ready(f,'lista_aziende.html');await intact(f);
+  await f.page.goForward();await ready(f,'account_azienda.html');assert.equal(child(f).url(),listUrl);await intact(f);
+  await back(f);await ready(f,'lista_aziende.html');await intact(f);
+  await back(f);await ready(f,'home_page.html');await intact(f);
+ }finally{await f.context.close();}
+});
+
+test('real company edit Back returns to detail and keeps the filtered Account list',{timeout:60000},async()=>{
+ const f=await fixture();
+ try{
+  const {listUrl,detailUrl}=await companyDetail(f,'standard');
+  await child(f).locator('#btn-edit-footer').click();await ready(f,'form_account_azienda.html');
+  assert.equal(await child(f).locator('#account-name').inputValue(),'Account sintetico 1');
+  await back(f);await ready(f,'dettaglio_account_azienda.html');assert.equal(child(f).url(),detailUrl);await intact(f);
+  await back(f);await ready(f,'account_azienda.html');assert.equal(child(f).url(),listUrl);await intact(f);
+ }finally{await f.context.close();}
+});
+
+test('real standalone company Back preserves the filtered Account list',{timeout:45000},async()=>{
+ const f=await harness.open('lista_aziende.html');
+ const wait=async file=>{await f.page.waitForFunction(file=>location.pathname==='/'+file&&window.__viewTour?.ready,file);assert.equal(await f.page.evaluate(()=>window.__viewTour.bootError),undefined);};
+ try{
+  await f.page.locator('.azienda-card').filter({hasText:'Azienda inventata 0'}).locator('.btn-company-account-mode.mode-standard').click();
+  await wait('account_azienda.html');const listUrl=f.page.url();
+  await f.page.locator('#accounts-container .account-card[data-id="doc-1"] .account-card-title').click();await wait('dettaglio_account_azienda.html');
+  assert.equal(await f.page.locator('#detail-nomeAccount').inputValue(),'Account sintetico 1');
+  await f.page.locator('#header-left button.btn-icon-header').click();await f.page.waitForURL(listUrl);await wait('account_azienda.html');
+ }finally{await f.context.close();}
+});
+
+for(const [route,expected]of [
+ ['dettaglio_account_azienda.html?id=doc-1&aziendaId=doc-0','account_azienda.html?id=doc-0'],
+ ['form_account_azienda.html?id=doc-1&aziendaId=doc-0','dettaglio_account_azienda.html?id=doc-1&aziendaId=doc-0'],
+ ['form_account_azienda.html?aziendaId=doc-0','account_azienda.html?id=doc-0']
+])test('direct company '+route+' Back uses the correct hierarchical parent',{timeout:45000},async()=>{
+ const f=await fixture(route);
+ try{
+  await back(f);await ready(f,expected.split('?')[0]);
+  assert.equal(child(f).url(),harness.base+'/'+expected);await intact(f);
+ }finally{await f.context.close();}
+});
+
+test('real deadline rules Back returns to Settings rather than matching the Scadenze root',{timeout:45000},async()=>{
+ const f=await fixture();
+ try{
+  await child(f).locator('a[href="impostazioni.html"]').click();await ready(f,'impostazioni.html');
+  await child(f).locator('#btn-expiry-rules').click();await ready(f,'regole_scadenze.html');
+  await back(f);await ready(f,'impostazioni.html');await intact(f);
+ }finally{await f.context.close();}
+});
+
+test('direct deadline rules Back uses Settings as its hierarchical parent',{timeout:45000},async()=>{
+ const f=await fixture('regole_scadenze.html');
+ try{await back(f);await ready(f,'impostazioni.html');await intact(f);}finally{await f.context.close();}
+});
+
+test('forced Back does not traverse a verified previous page with a different target',{timeout:45000},async()=>{
+ const f=await fixture();
+ try{
+  await child(f).locator('.header-greeting-trigger').click();await ready(f,'profilo_privato.html');
+  await f.page.evaluate(()=>{const frame=document.querySelector('iframe');
+   window.vaultFrameNavigation.backFromChild(frame.contentWindow,frame.contentDocument,'/impostazioni.html',false);});
+  await ready(f,'impostazioni.html');await intact(f);
+ }finally{await f.context.close();}
+});
+
+test('forced Back does not treat a different list filter as the same previous target',{timeout:45000},async()=>{
+ const f=await fixture();
+ try{
+  await companyDetail(f,'standard');
+  await f.page.evaluate(()=>{const frame=document.querySelector('iframe');
+   window.vaultFrameNavigation.backFromChild(frame.contentWindow,frame.contentDocument,'/account_azienda.html?id=doc-0&type=memo',false);});
+  await ready(f,'account_azienda.html');
+  assert.equal(new URL(child(f).url()).search,'?id=doc-0&type=memo');await intact(f);
+ }finally{await f.context.close();}
+});
 
 test('real header and cleanup: repeated Profile tab returns keep one unlock and the parent',{timeout:90000},async()=>{
  const f=await fixture();

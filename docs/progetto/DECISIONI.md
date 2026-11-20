@@ -1,5 +1,23 @@
 # Decisioni
 
+<a id="rilascio-1288-integrato-2026-11-20-decisione"></a>
+
+## Layout approvato — ordine di integrazione e rilascio
+
+Dopo «Ok così era come prima e vanno bene», Diego ordina «Ok aggiorna la pagina e poi pubblichiamo»: integrare le card quadrate nella candidata288 e riprendere PR/merge/Hosting con i gate invariati. [Mandato](INCARICO_CORRENTE.md#rilascio-1288-integrato-2026-11-20-incarico). Superata la pausa per questo contenuto; nuova testa e nuovi GO/CI, senza trasferire l'approvazione dell'anteprima a un PASS fisico della produzione.
+
+<a id="area-privata-quadrata-approvata-2026-11-20"></a>
+
+## Card quadrate — anteprima approvata, pubblicazione sospesa
+
+Diego conferma «Ok così era come prima e vanno bene» dopo l'anteprima locale: approvato il layout quadrato delle quattro card dell'Area Privata sul telefono, con badge, icone e testi correnti. [Candidato e prove](../evidenze/COLLAUDI.md#area-privata-quadrata-locale-2026-11-20). La conferma riguarda il layout mostrato; la precedente pausa della pubblicazione resta valida e non risultano nuovi ordini di commit/push, integrazione, merge o deploy. Nessun nuovo PASS fisico della produzione dedotto.
+
+<a id="azienda-indietro-1288-2026-11-20-decisione"></a>
+
+## Indietro aziendale — ordine di pubblicazione
+
+Il nuovo «Pubblica» autorizza la candidata1.2.288 con PR/merge/Hosting e MD/GitHub, superando il precedente limite locale per il correttivo consegnato. [Mandato e gate](INCARICO_CORRENTE.md#azienda-indietro-1288-2026-11-20-incarico). Destinazioni distinte, produttori coordinati e precedente esatto verificato; nessuna deroga alle autorità Auth/Vault o estensione grafica. Il ricollaudo fisico resta successivo alla verifica del rilascio.
+
 <a id="profilo-indietro-1287-pubblico-2026-11-19-decisione"></a>
 
 ## Mandato tecnico 287 eseguito

@@ -1,5 +1,29 @@
 # Interfaccia
 
+<a id="rilascio-1288-integrato-2026-11-20-ui"></a>
+
+## Area Privata e Back — candidata288 integrata
+
+Integrata la geometria quadrata approvata: solo quattro card private entro600px, adattamento stretto entro359px, titoli18px e icone48px conservati; badge e ruoli cromatici correnti. Si aggiunge al ritorno aziendale senza modificare azioni o destinazioni. [Componenti, prove e perimetro](../evidenze/COLLAUDI.md#rilascio-1288-integrato-2026-11-20); nuova confezione/riesami, nessuna certificazione fisica dedotta.
+
+<a id="area-privata-quadrata-locale-2026-11-20-ui"></a>
+
+## Area Privata — geometria quadrata candidata
+
+Le quattro card di navigazione entro600px usano proporzioni1:1 senza il vecchio spacer del testo. Titoli e badge possono andare a capo restando interi e separati; padding e spazio sotto l'icona si adattano alle larghezze più strette. Font18px, icone48px, badge e ruoli cromatici correnti conservati nelle due grafiche. Oltre600px valgono le regole precedenti. [Componenti, misure e regressioni](../evidenze/COLLAUDI.md#area-privata-quadrata-locale-2026-11-20); candidato locale, pubblicazione sospesa e prova fisica distinta.
+
+<a id="azienda-indietro-1288-2026-11-20-ui"></a>
+
+## Parent aziendali — candidata1.2.288
+
+Confezionate le regole del precedente correttivo locale: fallback di elenco/dettaglio/form distinti, navigazione coordinata dei produttori aziendali e unico header condiviso. Ritorno all'esatta lista precedente verificata, inclusi azienda e filtro; parent forzato senza duplicare il medesimo precedente. [Mappa componente/test e limiti](../evidenze/COLLAUDI.md#azienda-indietro-1288-2026-11-20). Colori, decorazioni e stili conservati; online1.2.287 fino alla verifica pubblica.
+
+<a id="azienda-indietro-locale-2026-11-20-ui"></a>
+
+## Parent aziendali — correzione candidata locale
+
+I predicati di pagina dell'header distinguono il pathname completo dell'elenco da dettaglio/form: un suffisso condiviso non seleziona il parent di un'altra pagina. Gli ingressi da nome azienda o tipologia e il passaggio dal dettaglio al form usano la navigazione coordinata; il form conserva l'unico header condiviso. Indietro dal dettaglio ripristina la lista precedente verificata, inclusi azienda e filtro, oppure il parent gerarchico interno. Un parent forzato già uguale all'esatto precedente verificato viene percorso senza duplicarlo nella cronologia. [Produttori, casi e limiti](../evidenze/COLLAUDI.md#azienda-indietro-locale-2026-11-20); nessun delta a stili, decorazioni o colori. Solo candidato locale, non attestazione del dispositivo.
+
 <a id="profilo-indietro-1287-pubblico-2026-11-19-ui"></a>
 
 ## Navigazione condivisa — correttivo distribuito

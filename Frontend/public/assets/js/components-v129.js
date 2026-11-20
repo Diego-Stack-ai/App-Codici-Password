@@ -1,7 +1,7 @@
 import {beginFrameLogout,handleFrameBack,navigateDocument} from './frame-navigation.js';
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.287';
+import { auth } from './firebase-config.js?v=1.2.288';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
@@ -146,7 +146,7 @@ export async function initComponents() {
                 const urlParams = new URLSearchParams(window.location.search);
 
                 // Hierarchical fallback when previous history cannot be trusted.
-                if (path.endsWith('lista_aziende.html') || path.endsWith('scadenze.html')) {
+                if (path.endsWith('lista_aziende.html') || path.endsWith('/scadenze.html')) {
                     fallbackHref = 'home_page.html';
                 } else if (path.endsWith('area_privata.html')) {
                     fallbackHref = 'home_page.html';
@@ -167,7 +167,7 @@ export async function initComponents() {
                     fallbackHref = 'regole_scadenze.html';
                 } else if (path.endsWith('archivio_account.html')) {
                     fallbackHref = 'impostazioni.html';
-                } else if (path.endsWith('account_azienda.html') || path.endsWith('dati_azienda.html')) {
+                } else if (path.endsWith('/account_azienda.html') || path.endsWith('dati_azienda.html')) {
                     fallbackHref = 'lista_aziende.html';
                     // Company roots always return to the company list.
                     preferHistory = false;

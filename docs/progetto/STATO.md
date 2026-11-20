@@ -2,6 +2,32 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1288-integrato-2026-11-20-stato"></a>
+
+## Candidata1.2.288 integrata — ripresa autorizzata; online1.2.287
+
+Ripresa autorizzata dopo l'approvazione dell'anteprima: PR #344 aggiornata con Back aziendale e card quadrate, nuova confezione/riesami/CI richiesti sul contenuto effettivo. [Perimetro e prove](../evidenze/COLLAUDI.md#rilascio-1288-integrato-2026-11-20). Sette pubblici funzionali attesi:6JS e area_privata.css; testi, palette e contatori conservati. Le pause e le esclusioni grafiche seguenti restano checkpoint storici. Nessuna pubblicazione o nuova prova fisica ancora attestata.
+
+<a id="area-privata-quadrata-locale-2026-11-20-stato"></a>
+
+## Pausa della pubblicazione — card quadrate in candidato locale
+
+Diego ha approvato l'anteprima delle card quadrate; [decisione registrata](DECISIONI.md#area-privata-quadrata-approvata-2026-11-20). Pubblicazione ancora sospesa, candidato locale e PR #344 distinti.
+
+Online1.2.287; PR #344/candidata288 aperta e pubblicazione sospesa su richiesta di Diego. La correzione grafica delle quattro card è preparata in una worktree separata, senza modificare la testa della PR. [Prove e collegamenti](../evidenze/COLLAUDI.md#area-privata-quadrata-locale-2026-11-20): quadrati entro600px, matrice196contesti e3/3 test PASS, font/icone/colori conservati. Nessuna pubblicazione o prova fisica dedotta. Confezione e GO della PR restano riferiti al proprio SHA, non al delta grafico locale.
+
+<a id="azienda-indietro-1288-2026-11-20-stato"></a>
+
+## Candidata1.2.288 — Indietro aziendale; online1.2.287
+
+Ordine di pubblicazione acquisito. Confezionati i sei runtime del correttivo, versione canonica288, guida16/reviewed288 e derivati offline/QA;367file e nessuna differenza funzionale ulteriore dopo normalizzazione versioni/EOL rispetto al candidato locale. [Prove e limiti](../evidenze/COLLAUDI.md#azienda-indietro-1288-2026-11-20). Riesami immutabili, CI PR/master/Hosting, produzione protetta e verifica pubblica ancora da acquisire. Online resta1.2.287; nessun PASS fisico o modifica grafica dedotto.
+
+<a id="azienda-indietro-locale-2026-11-20-stato"></a>
+
+## Indietro aziendale — candidato locale; online 1.2.287
+
+Preparato il correttivo del salto della lista Account: fallback distinti, produttori aziendali coordinati e ritorno forzato senza duplicare il parent verificato. [Evidenze e collegamenti](../evidenze/COLLAUDI.md#azienda-indietro-locale-2026-11-20): runtime321/321, navigazione199/199 e controlli pertinenti PASS. Versione e produzione invariate; nessun commit/PR/merge/Hosting di questo seguito. Ricollaudo fisico ancora da acquisire dopo un'eventuale pubblicazione autorizzata. Le osservazioni manuali dettagliate restano locali; casi completi e proposta grafica separati.
+
 <a id="profilo-indietro-1287-pubblico-2026-11-19-stato"></a>
 
 ## APP 1.2.287 — online e verificata
