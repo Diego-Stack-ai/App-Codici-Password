@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="rilascio-1288-integrato-2026-11-20-rilascio"></a>
+
+## Ripresa288 — nuova testa per il contenuto combinato
+
+[Mandato](../progetto/INCARICO_CORRENTE.md#rilascio-1288-integrato-2026-11-20-incarico):288 ancora inedita, snapshot nuovo dopo integrazione e prima dei derivati, confronto sette pubblici funzionali. Due GO sul nuovo SHA e CI PR completa; merge con testa attesa. CI master/validate Hosting sullo stesso sorgente/digest, scope hosting e master invariato prima di production protetto. Manifest dai byte Git LF, verifica pubblica integrale e GET anche del CSS; ricevuta MD/GitHub senza secondo Hosting. Vecchio digest/GO della testa a7db687e non riusati.
+
 <a id="azienda-indietro-1288-2026-11-20-rilascio"></a>
 
 ## Candidata1.2.288 — solo Hosting

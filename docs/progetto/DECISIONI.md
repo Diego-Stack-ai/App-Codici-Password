@@ -1,5 +1,17 @@
 # Decisioni
 
+<a id="rilascio-1288-integrato-2026-11-20-decisione"></a>
+
+## Layout approvato — ordine di integrazione e rilascio
+
+Dopo «Ok così era come prima e vanno bene», Diego ordina «Ok aggiorna la pagina e poi pubblichiamo»: integrare le card quadrate nella candidata288 e riprendere PR/merge/Hosting con i gate invariati. [Mandato](INCARICO_CORRENTE.md#rilascio-1288-integrato-2026-11-20-incarico). Superata la pausa per questo contenuto; nuova testa e nuovi GO/CI, senza trasferire l'approvazione dell'anteprima a un PASS fisico della produzione.
+
+<a id="area-privata-quadrata-approvata-2026-11-20"></a>
+
+## Card quadrate — anteprima approvata, pubblicazione sospesa
+
+Diego conferma «Ok così era come prima e vanno bene» dopo l'anteprima locale: approvato il layout quadrato delle quattro card dell'Area Privata sul telefono, con badge, icone e testi correnti. [Candidato e prove](../evidenze/COLLAUDI.md#area-privata-quadrata-locale-2026-11-20). La conferma riguarda il layout mostrato; la precedente pausa della pubblicazione resta valida e non risultano nuovi ordini di commit/push, integrazione, merge o deploy. Nessun nuovo PASS fisico della produzione dedotto.
+
 <a id="azienda-indietro-1288-2026-11-20-decisione"></a>
 
 ## Indietro aziendale — ordine di pubblicazione

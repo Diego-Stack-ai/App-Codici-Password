@@ -1,5 +1,17 @@
 # Programma
 
+<a id="rilascio-1288-integrato-2026-11-20-programma"></a>
+
+## Prossimo passo — pubblicare Back e card quadrate insieme
+
+[Ordine di ripresa](INCARICO_CORRENTE.md#rilascio-1288-integrato-2026-11-20-incarico): integrare il layout approvato, confezione e controlli nuovi, riesami immutabili, CI PR/master/Hosting e verifica pubblica; ricevuta MD/GitHub senza secondo deploy. Poi conferma1.2.288 sul dispositivo e ricollaudo del ritorno aziendale e delle proporzioni delle card. Altri casi e lotti conservano il proprio perimetro.
+
+<a id="area-privata-quadrata-locale-2026-11-20-programma"></a>
+
+## Card quadrate approvate — attendere la ripresa
+
+Anteprima approvata da Diego; conservare la [correzione locale e le prove](../evidenze/COLLAUDI.md#area-privata-quadrata-locale-2026-11-20) mantenendo la pubblicazione in pausa. Eventuale integrazione con il ritorno aziendale della PR #344 solo dopo nuova indicazione: aggiornare confezione/riesami e CI per il contenuto effettivo, senza riusare i GO del vecchio SHA per codice nuovo. Il ricollaudo sul telefono resta successivo a un rilascio autorizzato; gli altri lotti conservano il proprio perimetro.
+
 <a id="azienda-indietro-1288-2026-11-20-programma"></a>
 
 ## Prossimo passo — rilascio tecnico288, poi ricollaudo

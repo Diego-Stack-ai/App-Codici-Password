@@ -1,5 +1,11 @@
 # Vault
 
+<a id="rilascio-1288-integrato-2026-11-20-vault"></a>
+
+## Candidata288 integrata — presentazione e navigazione
+
+Il layout quadrato non cambia il contratto del ritorno verificato già preparato per288. Documento corrente, revoca, ammissione, lease, chiavi e timer conservati. [Perimetro combinato e prove](../evidenze/COLLAUDI.md#rilascio-1288-integrato-2026-11-20); un'approvazione visiva o un PASS sintetico non attestano lo sblocco nativo o i casi completi.
+
 <a id="azienda-indietro-1288-2026-11-20-vault"></a>
 
 ## Ritorno aziendale — confezione1.2.288

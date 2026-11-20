@@ -1,5 +1,11 @@
 # Ambiente di test
 
+<a id="rilascio-1288-integrato-2026-11-20-ambiente"></a>
+
+## Candidata288 integrata — verifiche del contenuto effettivo
+
+Banchi esistenti con dati inventati e loopback: Back321casi e geometria/contatori3casi con196contesti, distinti dal ricollaudo nativo. [Oracoli e conteggi effettivi](../evidenze/COLLAUDI.md#rilascio-1288-integrato-2026-11-20). Nuove esecuzioni e riesami riferiti al contenuto integrato; nessun PASS dei dispositivi dedotto, registro manuale dettagliato locale.
+
 <a id="azienda-indietro-1288-2026-11-20-ambiente"></a>
 
 ## Indietro aziendale — banco della candidata288

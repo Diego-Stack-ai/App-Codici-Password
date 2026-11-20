@@ -1,5 +1,33 @@
 # Collaudi
 
+<a id="rilascio-1288-integrato-2026-11-20"></a>
+
+## Candidata1.2.288 — contenuto combinato autorizzato
+
+Nuovo ordine di aggiornare la pagina approvata e pubblicare: integrati il [Back aziendale](#azienda-indietro-locale-2026-11-20) e le [quattro card quadrate](#area-privata-quadrata-locale-2026-11-20) nella PR #344, sul ramo codex/company-header-back-20261120. Base e0f60f3f, precedente testa a7db687e conservata come checkpoint. Versione288 ancora inedita; produzione1.2.287. I dettagli manuali personali restano locali.
+
+Nuovo snapshot dopo integrazione e prima dei derivati. Confronto pubblico verificato:367file, sette funzionali (sei JS più area_privata.css), nessuna aggiunta/rimozione o differenza ulteriore dopo sola normalizzazione versioni/EOL. Versione canonica288/307riferimenti, guida16/reviewed288, offline61export/347risorse, QA31pagine/126istruzioni/111target/167campi allineati. La vecchia proposta fissa160px resta esclusa: integrata solo la geometria quadrata approvata.
+
+Sul pacchetto integrato: runtime cornice321/321 (Back25casi incluso), geometria/contatori3/3 con196contesti, topologia20/20, guida12/12, offline16/16, diagnostica4/4, sintassi252moduli, riferimenti343file, CSS e budget31pagine PASS. Conteggi sovrapposti non sommati. Nuovi riesami e CI sulla testa effettiva ancora richiesti; nessun GO della vecchia candidata trasferito.
+
+Pausa e separazione dei checkpoint seguenti sono superate dal nuovo ordine per questo delta. I precedenti GO, digest45b51e2e e CI della testa a7db687e non certificano la nuova candidata. Nessun PASS fisico o pubblicazione dedotto dai test locali.
+
+<a id="area-privata-quadrata-locale-2026-11-20"></a>
+
+## Area Privata — quattro card quadrate, candidato locale separato
+
+Diego ha approvato l'anteprima delle card quadrate; [decisione registrata](../progetto/DECISIONI.md#area-privata-quadrata-approvata-2026-11-20). Pubblicazione ancora sospesa, candidato locale e PR #344 distinti.
+
+Seguito della richiesta di ripristinare proporzioni quadrate alle quattro card. Preparazione locale sul ramo codex/private-square-cards-20261120, base a7db687eb259437d385c81d0bd306925e48fa9d3 della candidata288. La PR #344 resta immutata e la pubblicazione è sospesa su richiesta di Diego; online1.2.287. Nessun nuovo bump, commit/push, PR, merge o deploy per questa grafica. La vecchia proposta fissa160px resta distinta: non garantiva quadrati alle diverse larghezze.
+
+Causa riprodotta: padding e altezza minima del blocco testo conservavano uno spacer per la vecchia icona filigrana. A393px le card risultavano174,5×226px; ora174,5×174,5px, con103px recuperati sulle due righe. A320px passano da138×226 a138×138. Override soltanto delle quattro card entro600px: aspect-ratio1, min-height0, rimozione dello spacer e wrapping; padding ridotto entro359px. Titoli18px, icone48px e stile dei contatori conservati, senza CSS di colore nuovo. Desktop oltre600px conserva le regole precedenti.
+
+Collegamenti registrati nella sezione contatori del [contratto livree](../../scripts/ui-livery-contract.json): [pagina](../../Frontend/public/area_privata.html), produttori reali Privato/Aziende, [CSS corretto](../../Frontend/public/assets/css/area_privata.css), ruoli testo/badge e [test browser](../../tests/ui-account-mode-counts.browser.test.mjs). Il test consuma record inventati e distinti fino a1001; nessuna sostituzione diretta dei numeri o markup copiato.
+
+RED prima del CSS: il nuovo oracolo fallisce su138×226px. GREEN finale3/3, inclusa matrice196contesti: sette palette × Chiaro/Scuro × Classica/Nuova × sette larghezze320/359/360/393/600/601/1280. Per tutte le quattro card entro600px richiede differenza fra lato e altezza al massimo1px, testo e badge interi/separati, font e icone invariati e spacer assente. Restano le verifiche di cifre/identità/destinazioni e contrasto almeno4,5:1; due controprove rigettano spacer rettangolare e badge rettangolari/illeggibili. Stile CSS e budget31pagine PASS. Anteprime locali con dati inventati, non prova fisica del telefono.
+
+Questi risultati appartengono solo al nuovo candidato grafico: non estendono il confronto funzionale o i GO immutabili della PR #344. Ogni futura integrazione richiede nuova confezione e verifiche; la pausa della pubblicazione resta valida.
+
 <a id="azienda-indietro-1288-2026-11-20"></a>
 
 ## Candidata1.2.288 — confezione Indietro aziendale

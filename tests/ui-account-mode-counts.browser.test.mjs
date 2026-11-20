@@ -10,6 +10,28 @@ const ids=['count-standard','count-shared','count-memo','count-shared-memo'];
 const privateSelector=ids.map(id=>'#'+id).join(',');
 const companySelector='.company-mode-count';
 const output='.codex-tmp/account-mode-counts';
+const layoutWidths=[...new Set([...livery.widths,359,360,393,600,601])].sort((a,b)=>a-b);
+const privateCardSelector='.matrix-grid > .matrix-card:is(.area-standard,.area-shared,.area-memo,.area-shared-memo)';
+const cardLayout=page=>page.evaluate(selector=>{
+ const rect=e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};};
+ return [...document.querySelectorAll(selector)].map(card=>{
+  const title=card.querySelector('h3'),badge=card.querySelector('.company-mode-count'),icon=card.querySelector('.matrix-icon-box'),range=document.createRange();range.selectNodeContents(title);
+  const c=rect(card),b=rect(badge),i=rect(icon),lines=[...range.getClientRects()];
+  return {card:c,icon:i,titleFont:getComputedStyle(title).fontSize,
+   wholeTitle:lines.every(r=>r.left>=c.left-.5&&r.right<=c.right+.5&&r.top>=c.top-.5&&r.bottom<=c.bottom+.5),
+   wholeBadge:b.left>=c.left&&b.right<=c.right&&b.top>=c.top&&b.bottom<=c.bottom,
+   separate:lines.every(r=>r.right<=b.left+.5||r.left>=b.right-.5||r.bottom<=b.top+.5||r.top>=b.bottom-.5),
+   iconTitleGap:rect(title).top-i.bottom};
+ });
+},privateCardSelector);
+function verifyLayout(values,width,label){
+ assert.equal(values.length,4,label+': four private cards');
+ for(const value of values){
+  assert.ok(value.wholeTitle&&value.wholeBadge&&value.separate,label+': entire title and separate badge');
+  assert.equal(value.titleFont,'18px',label+': original title size');assert.equal(value.icon.width,48,label+': original icon size');
+  if(width<=600){assert.ok(Math.abs(value.card.width-value.card.height)<=1,label+': square mobile card '+JSON.stringify(value.card));assert.ok(value.iconTitleGap>=0&&value.iconTitleGap<=16,label+': no obsolete text spacer');}
+ }
+}
 
 // Real producers consume records in the local memory adapter. No copied card markup,
 // real identities, network access or direct replacement of the counter text.
@@ -79,7 +101,7 @@ test('private account counters match Companies across seven palettes and both li
    const {privateView,companyView}=await pair(harness,graphics);
    try{
     const original=await styles(privateView.page,privateSelector);
-    for(const width of livery.widths)for(const theme of livery.themes)for(const palette of livery.palettes){
+    for(const width of layoutWidths)for(const theme of livery.themes)for(const palette of livery.palettes){
      const context={graphics,width,theme,palette},label=JSON.stringify(context);
      for(const view of [privateView,companyView]){await view.page.setViewportSize({width,height:844});await setContext(view.page,context);}
      const actual=await styles(privateView.page,privateSelector),reference=await styles(companyView.page,companySelector);
@@ -87,15 +109,26 @@ test('private account counters match Companies across seven palettes and both li
       await mkdir(output,{recursive:true});await writeFile(output+'/'+process.env.COUNTER_CAPTURE_STAGE+'-first-context.json',JSON.stringify({context,actual,reference},null,2));
      }
      verifyShape(actual,label+'/private');verifyShape(reference,label+'/companies');
+     const layout=await cardLayout(privateView.page);verifyLayout(layout,width,label);
      assert.deepEqual(actual.map(v=>v.style),reference.map(v=>v.style),label+': shared Companies UI');
      assert.deepEqual(actual.map(v=>({id:v.id,text:v.text,href:v.href})),original.map(v=>({id:v.id,text:v.text,href:v.href})),label+': identities, values and destinations unchanged');
      const ratios=await paint(privateView.page,privateSelector,context);await paint(companyView.page,companySelector,context);
-     results.push({...context,minimumContrast:Math.min(...ratios)});
+     results.push({...context,minimumContrast:Math.min(...ratios),layout});
     }
    }finally{await privateView.context.close();await companyView.context.close();}
   }
-  assert.equal(results.length,56);await mkdir(output,{recursive:true});await writeFile(output+'/matrix.json',JSON.stringify({status:'PASS',contexts:results},null,2));
+  assert.equal(results.length,196);await mkdir(output,{recursive:true});await writeFile(output+'/matrix.json',JSON.stringify({status:'PASS',contexts:results},null,2));
  }finally{await harness.close();}
+});
+
+test('private mobile card regression rejects the old rectangular spacer',{timeout:60000},async()=>{
+ const harness=await createTourHarness({memory:true});
+ try{const {privateView,companyView}=await pair(harness,'tre-livelli');try{
+  await privateView.page.setViewportSize({width:393,height:844});await privateView.page.evaluate(()=>document.fonts.ready);
+  verifyLayout(await cardLayout(privateView.page),393,'current mobile cards');
+  await privateView.page.addStyleTag({content:privateCardSelector+'{aspect-ratio:auto!important;padding:1.5rem!important;min-height:180px!important}'+privateCardSelector+' .card-text-block{padding:1.5rem!important;min-height:120px!important;flex-wrap:nowrap!important}'});
+  const obsolete=await cardLayout(privateView.page);assert.throws(()=>verifyLayout(obsolete,393,'old mobile cards'),/square mobile card/);
+ }finally{await privateView.context.close();await companyView.context.close();}}finally{await harness.close();}
 });
 
 test('counter regression rejects shared rectangular or unreadable paint',{timeout:60000},async()=>{

@@ -1,5 +1,17 @@
 # Interfaccia
 
+<a id="rilascio-1288-integrato-2026-11-20-ui"></a>
+
+## Area Privata e Back — candidata288 integrata
+
+Integrata la geometria quadrata approvata: solo quattro card private entro600px, adattamento stretto entro359px, titoli18px e icone48px conservati; badge e ruoli cromatici correnti. Si aggiunge al ritorno aziendale senza modificare azioni o destinazioni. [Componenti, prove e perimetro](../evidenze/COLLAUDI.md#rilascio-1288-integrato-2026-11-20); nuova confezione/riesami, nessuna certificazione fisica dedotta.
+
+<a id="area-privata-quadrata-locale-2026-11-20-ui"></a>
+
+## Area Privata — geometria quadrata candidata
+
+Le quattro card di navigazione entro600px usano proporzioni1:1 senza il vecchio spacer del testo. Titoli e badge possono andare a capo restando interi e separati; padding e spazio sotto l'icona si adattano alle larghezze più strette. Font18px, icone48px, badge e ruoli cromatici correnti conservati nelle due grafiche. Oltre600px valgono le regole precedenti. [Componenti, misure e regressioni](../evidenze/COLLAUDI.md#area-privata-quadrata-locale-2026-11-20); candidato locale, pubblicazione sospesa e prova fisica distinta.
+
 <a id="azienda-indietro-1288-2026-11-20-ui"></a>
 
 ## Parent aziendali — candidata1.2.288
