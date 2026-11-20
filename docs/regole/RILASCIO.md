@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="profilo-indietro-1287-pubblico-2026-11-19-rilascio"></a>
+
+## APP 1.2.287 — procedura eseguita
+
+Pubblicata e verificata 1.2.287 dal sorgente `08b19165e1124e958ca2d01189153c10fdb3904a`, sourceDirty=false. PR #342, due GO sulla testa finale e CI PR/master/Hosting concordi; scope solo Hosting e protezioni conservate. [Ricevuta](../evidenze/COLLAUDI.md#profilo-indietro-1287-pubblico-2026-11-19). Nessuna nuova certificazione dei dispositivi o chiusura degli audit completi; proposta grafica separata. CI PR/master/Hosting e digest pubblico concordi, master fissato prima di production, scope Hosting e backend/protezioni conservati. Approvazione protetta, deploy SUCCESS e verifica integrale; ricevuta documentale senza secondo Hosting.
+
 <a id="profilo-indietro-1287-rilascio-2026-11-19"></a>
 
 ## Candidata1.2.287 — procedura solo Hosting

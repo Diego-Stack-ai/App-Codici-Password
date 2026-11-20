@@ -1,5 +1,11 @@
 # Programma
 
+<a id="profilo-indietro-1287-pubblico-2026-11-19-programma"></a>
+
+## 1.2.287 pubblicata — prossimo passo di collaudo
+
+Pubblicata e verificata 1.2.287 dal sorgente `08b19165e1124e958ca2d01189153c10fdb3904a`, sourceDirty=false. PR #342, due GO sulla testa finale e CI PR/master/Hosting concordi; scope solo Hosting e protezioni conservate. [Ricevuta](../evidenze/COLLAUDI.md#profilo-indietro-1287-pubblico-2026-11-19). Nessuna nuova certificazione dei dispositivi o chiusura degli audit completi; proposta grafica separata. Pubblicazione e verifica tecnica completate; seguono conferma della versione e ricollaudo del ritorno con la freccia, una prova alla volta. Altri dispositivi, casi completi e lotti separati conservano i propri gate.
+
 <a id="profilo-indietro-1287-programma-2026-11-19"></a>
 
 ## Prossimo passo — completare il rilascio tecnico287

@@ -1,5 +1,15 @@
 # Collaudi
 
+<a id="profilo-indietro-1287-pubblico-2026-11-19"></a>
+
+## APP 1.2.287 — navigazione pubblicata e verificata
+
+Pubblicata con [PR #342](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/342), riesami indipendenti sulla testa `637680577b65501754c1f6e8ae785d8b80f4b15f` e merge `08b19165e1124e958ca2d01189153c10fdb3904a`, sourceDirty=false. CI [PR #1240](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44623447760), [master #1241](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44629861202) e [Hosting #1242](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44630817494) SUCCESS sullo stesso contenuto pubblico. Ciascuna validazione riporta 68 blocchi, 3904 test, 3893 PASS e 11 SKIP, zero FAIL o annullati. Nessuna soglia o guardia ridotta.
+
+Deploy solo Hosting SUCCESS concluso 20/11/2026, 07:36:58 Europe/Rome, dopo gate verdi e approvazione protetta. Verifica pubblica autonoma integrale PASS il 20/11/2026, 07:37:56 Europe/Rome: 367 file/hash, 41 profili di intestazione e normalizzazioni/probe canonici, più 11 GET indipendenti PASS il 20/11/2026, 07:37:58. SHA256 pubblico `af5f468b5346b462e61a2cdea1b01536ffa4dd412c6ad72813dd892da0d46356`; manifest `f2687c86e72b8a1b88278301a78a8768b9165b9eb9ae9ad8c133796daf873198`.
+
+Distribuito il correttivo della navigazione condivisa con singolo gestore e ritorno coordinato con il padre. Banchi sintetici e confezione conservano i limiti descritti nel checkpoint candidato. I riscontri manuali dettagliati restano locali; collaudo del rilascio successivo e distinto dalle prove automatiche. Gli altri residui restano aperti. Ricevuta solo documentale, nessun ulteriore Hosting; le candidate sotto sono storiche.
+
 <a id="profilo-indietro-1287-collaudi-2026-11-19"></a>
 
 ## Freccia Indietro — candidata tecnica 1.2.287
