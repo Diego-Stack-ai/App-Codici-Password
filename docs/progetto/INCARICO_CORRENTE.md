@@ -1,5 +1,11 @@
 # Incarico corrente
 
+<a id="rilascio-1290-pubblico-2026-11-20-incarico"></a>
+
+## Ordine290 eseguito — ricevuta e ripresa del collaudo
+
+Eseguito l'ordine «pubblica» sul correttivo dei filtri manuali con due nuovi GO, gate PR/master/Hosting e verifica pubblica. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1290-pubblico-2026-11-20). Completare MD/GitHub con PR soltanto documentale, controlli e riesame indipendente, senza secondo Hosting. Root unico scrittore e supporti in lettura,34MD conservati. Segue conferma della versione e ricollaudo mirato una prova alla volta; nessun nuovo lotto o caso completo dedotto.
+
 <a id="filtri-scadenze-1290-2026-11-20-incarico"></a>
 
 ## Pubblicazione1.2.290 — filtri scelti nella lista

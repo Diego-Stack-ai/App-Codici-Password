@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1290-pubblico-2026-11-20-stato"></a>
+
+## APP1.2.290 — online e verificata
+
+Online1.2.290 dal sorgente 1cc3c341bb9179307f57dcfd95b63e0858b94406, sourceDirty=false. PR #348, due GO sulla testa finale, CI PR/master/Hosting e digest concordi; solo Hosting e verifica pubblica367hash/41profili/18GET PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1290-pubblico-2026-11-20). Distribuita la conservazione dei quattro filtri manuali. Prossimo passo confermare la versione e ripetere Archiviate sul dispositivo; nessun PASS fisico dedotto. Candidate e attese sotto sono checkpoint storici.
+
 <a id="filtri-scadenze-1290-2026-11-20-stato"></a>
 
 ## Candidata1.2.290 — filtri manuali; online1.2.289

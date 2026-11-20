@@ -1,5 +1,11 @@
 # Interfaccia
 
+<a id="rilascio-1290-pubblico-2026-11-20-ui"></a>
+
+## Filtri manuali — distribuiti nella290
+
+Distribuita la selezione simmetrica dei quattro filtri sulla voce corrente, conservando rule e la ricerca corrente durante il cambio, con ritorno dal dettaglio alla lista selezionata. Nessuna voce aggiuntiva o modifica grafica. [Ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-1290-pubblico-2026-11-20); il ricollaudo sul dispositivo resta successivo e distinto dalle prove sintetiche.
+
 <a id="filtri-scadenze-1290-2026-11-20-ui"></a>
 
 ## Filtri nella voce corrente — confezione290
