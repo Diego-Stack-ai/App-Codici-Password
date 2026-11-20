@@ -1,5 +1,11 @@
 # Programma
 
+<a id="rilascio-1289-pubblico-2026-11-20-programma"></a>
+
+## 1.2.289 pubblicata — conferma e ricollaudo mirato
+
+Rilascio tecnico completato e verificato. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1289-pubblico-2026-11-20). Confermare1.2.289 sul dispositivo e ripetere Home→lista Scadenze/Urgenze→dettaglio→freccia alla stessa lista→freccia alla Home, senza tappa Tutte. Proseguire una prova alla volta; altri dispositivi e casi completi conservano i propri gate.
+
 <a id="scadenze-indietro-1289-2026-11-20-programma"></a>
 
 ## Prossimo passo — pubblicare289, poi ripetere il ritorno Scadenze

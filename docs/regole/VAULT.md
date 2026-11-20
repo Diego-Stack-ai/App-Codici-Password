@@ -1,5 +1,11 @@
 # Vault
 
+<a id="rilascio-1289-pubblico-2026-11-20-vault"></a>
+
+## Back Scadenze289 — distribuzione verificata
+
+Distribuita l'eccezione mirata del contenitore Scadenze già riesaminata, senza variazioni a guardie, revoca, ammissione, lease, chiavi o timer. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1289-pubblico-2026-11-20). La verifica del codice pubblico non certifica hardware, passkey o casi completi della cornice.
+
 <a id="scadenze-indietro-1289-2026-11-20-vault"></a>
 
 ## Contenitore Scadenze — candidata289
