@@ -1,5 +1,11 @@
 # Ambiente di test
 
+<a id="cleanup-tardivo-1291-2026-11-20"></a>
+
+## 1.2.291 — perimetro delle prove del cleanup
+
+[Confezione](../evidenze/COLLAUDI.md#cleanup-tardivo-1291-2026-11-20) basata sul difetto asincrono riprodotto sul gestore reale in VM, con dipendenze e chiavi inventate. Il banco Back usa owner/transport/UI reali ma simula il security-manager e omette il gate privato; non certifica iOS o l'ordine dei suoi eventi. Le barriere su letture/fence coprono richieste superate e controlli negativi di errori correnti. Ricollaudo fisico dopo la pubblicazione, distinto da CI e verifica dei file pubblici. Nessun dato reale nei test né nel repository.
+
 <a id="rilascio-1290-pubblico-2026-11-20-ambiente"></a>
 
 ## 1.2.290 — limiti delle verifiche distribuite

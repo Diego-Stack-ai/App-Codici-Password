@@ -1,5 +1,21 @@
 # Incarico corrente
 
+<a id="cleanup-tardivo-1291-2026-11-20"></a>
+
+## Pubblicazione 1.2.291 — cleanup delle richieste superate
+
+Diego ordina esplicitamente di pubblicare il correttivo con nuova versione e aggiornamento MD/GitHub, mantenendo il comportamento del blocco. Autorizzati confezione 1.2.291, commit/push/PR, merge e solo Hosting, ricevuta e verifica pubblica; superato per questo solo delta il limite locale dei checkpoint seguenti. Base master f16a787f3d5a50439a6f9e6186d2700627119c85, ramo codex/deadline-back-lock-20261120. Root unico scrittore, supporti in lettura; 34 MD conservati. [Evidenze](../evidenze/COLLAUDI.md#cleanup-tardivo-1291-2026-11-20).
+
+Snapshot pre-bump, guida16/reviewed291 e derivati offline/QA; controllo normalizzato dei 367 pubblici con un solo runtime funzionale. Nuovi due GO sullo SHA confezionato e CI PR completa; merge con testa attesa, CI master/Hosting sullo stesso sorgente e digest, scope hosting e master invariato prima di production protetto. Lease, inattività, blocco, Auth, chiavi, regole server, workflow e protezioni conservati. Verifica pubblica integrale e GET indipendente anche di security-manager.js; ricevuta documentale senza secondo Hosting. Dati del rapporto nativo restano locali; nessuna causa fisica o PASS nativo dedotto.
+
+<a id="frame-cleanup-tardivo-locale-2026-11-20"></a>
+
+## Verifica locale del blocco durante Indietro
+
+Diego ordina di sistemare gli errori e conferma il comportamento attuale del blocco. Completare il correttivo locale del cleanup tardivo dimostrato, conservando lease, inattività e revoca. [Scelta sul blocco](DECISIONI.md#blocco-confermato-cleanup-locale-2026-11-20). Base master f16a787f3d5a50439a6f9e6186d2700627119c85, ramo codex/deadline-back-lock-20261120; root unico scrittore, supporti in lettura. [Evidenze](../evidenze/COLLAUDI.md#frame-cleanup-tardivo-locale-2026-11-20). Conservare controlli di identità, lease, inattività e revoca. Dettagli del collaudo nel registro locale privato; nessun dato personale nei documenti.
+
+Nessun nuovo bump, commit/push, PR, merge o deploy dedotto dal rilievo: produzione1.2.290 invariata. Controlli locali e due riesami del runtime completati; chiudere la documentazione aggiornata, mantenendo distinto il ricollaudo fisico. Non dedurre che la race riprodotta sia la causa del precedente episodio durante uso attivo.
+
 <a id="rilascio-1290-pubblico-2026-11-20-incarico"></a>
 
 ## Ordine290 eseguito — ricevuta e ripresa del collaudo

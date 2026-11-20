@@ -2,6 +2,18 @@
 
 <a id="stato-corrente"></a>
 
+<a id="cleanup-tardivo-1291-2026-11-20"></a>
+
+## Candidata 1.2.291 — cleanup tardivo; online 1.2.290
+
+Confezionato il correttivo del catch framed: soltanto la richiesta ancora corrente può pulire e notificare il blocco; l'errore superato continua a rigettare. Un solo runtime funzionale, senza cambi di lease, inattività o revoca. Versione291/307 riferimenti, guida16/reviewed291, offline e QA allineati; 367 pubblici senza delta ulteriore dopo normalizzazione di versione/EOL. [Evidenze](../evidenze/COLLAUDI.md#cleanup-tardivo-1291-2026-11-20). Controlli del pacchetto PASS:78 sessione/fence,7 cancellazione,356 cornice,199 navigazione,12 guida,16 offline, budget31 pagine/4 prove, sintassi252 moduli e riferimenti343 file. Nuovi riesami sullo SHA finale e gate di rilascio restano richiesti. Online resta290; il ricollaudo del ritorno sul telefono resta successivo e distinto.
+
+<a id="frame-cleanup-tardivo-locale-2026-11-20"></a>
+
+## Blocco durante Indietro — verifica locale; online1.2.290
+
+Riprodotta nel gestore reale una pulizia tardiva: dopo il ritiro di una richiesta e un nuovo sblocco riuscito, il vecchio errore cancella la nuova chiave e notifica un blocco. Corretto localmente il cleanup affinché appartenga soltanto all'operazione corrente, mantenendo il rifiuto dell'errore vecchio e la revoca per errori correnti. [Evidenze](../evidenze/COLLAUDI.md#frame-cleanup-tardivo-locale-2026-11-20). Dodici nuovi casi e78/78 sessione/fence,356/356 cornice e199/199 navigazione PASS. Riesame locale e distribuzione restano stati distinti. Diagnostica esaminata privatamente: famiglia di scadenza registrata, compatibile con permesso scaduto durante sospensione; il sottotipo preciso resta indistinto. [Diego conferma il comportamento del blocco](DECISIONI.md#blocco-confermato-cleanup-locale-2026-11-20). Il difetto asincrono è verificato e corretto localmente; nessun PASS nativo o nuova pubblicazione dedotto.
+
 <a id="rilascio-1290-pubblico-2026-11-20-stato"></a>
 
 ## APP1.2.290 — online e verificata
