@@ -10,7 +10,7 @@ Ogni validazione: 68 blocchi/3985 test, 3974 PASS e11 SKIP dichiarati, zero FAIL
 
 Avvio Hosting e approvazione production eseguiti da Codex nel browser integrato sull'ordine esplicito di Diego; nessuna protezione o permesso generale modificato. Verifica autonoma367 hash/41 profili e23 GET indipendenti PASS, inclusi i tre runtime e la pagina Destinatari; manifest sourceDirty=false. Nessuna aggiunta/rimozione pubblica e soli tre runtime funzionali dopo normalizzazione versione/EOL; [preparazione e limiti](#destinatari-ritorni-1293-2026-11-21).
 
-Freccia e Torna al modulo precedente conservano il modulo; il ritorno successivo raggiunge la lista filtrata e la Home senza duplicare Destinatari. Bozza/contesti/allowlist, blocco, lease, inattività, Auth/chiavi, backend, workflow e lotti Claude conservati. Nuovo riscontro fisico iPhone293 ancora da acquisire;18/22 destinazioni positive cumulative e C1/C2 restano aperti. Ricevuta documentale senza secondo Hosting.
+Freccia e Torna al modulo precedente conservano il modulo; il ritorno successivo raggiunge la lista filtrata e la Home senza duplicare Destinatari. Bozza/contesti/allowlist, blocco, lease, inattività, Auth/chiavi, backend, workflow e lotti Claude conservati. Diego conferma «293 in linea» nel seguito del collaudo; il solo numero di versione non attesta i ritorni da Destinatari. Ricollaudo mirato ancora da acquisire;18/22 destinazioni positive cumulative e C1/C2 restano aperti. Ricevuta documentale senza secondo Hosting.
 
 <a id="destinatari-ritorni-1293-2026-11-21"></a>
 
