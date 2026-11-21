@@ -1,5 +1,11 @@
 # Interfaccia
 
+<a id="destinatari-ritorni-1293-2026-11-21"></a>
+
+## Ritorno da Destinatari — correzione293 in corso
+
+Nel percorso Nuova Scadenza → Gestisci destinatari, la freccia e Torna al modulo precedente devono riaprire lo stesso modulo senza aggiungere duplicati; la freccia successiva torna alla lista con il filtro di origine, poi alla Home. Il target esplicito resta limitato ai tre moduli già ammessi, comprese le query; bozze e contesti conservano i controlli esistenti. Gli ingressi Account e Regole mantengono i rispettivi predecessori. [Ordine e limiti](../progetto/INCARICO_CORRENTE.md#destinatari-ritorni-1293-2026-11-21). Nessun nuovo comportamento del blocco o esito fisico dedotto.
+
 <a id="rilascio-1290-pubblico-2026-11-20-ui"></a>
 
 ## Filtri manuali — distribuiti nella290

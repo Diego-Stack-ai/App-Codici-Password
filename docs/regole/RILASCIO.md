@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="destinatari-ritorni-1293-2026-11-21"></a>
+
+## Ritorni Destinatari1.2.293 — solo Hosting
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#destinatari-ritorni-1293-2026-11-21): regressioni negative prima del delta, snapshot prima del bump, versione293, guida16/reviewed293 e derivati offline/QA. Confronto normalizzato dei pubblici e due GO indipendenti sulla testa finale prima del merge con CI PR completa. CI master/validate Hosting concordi sul sorgente/digest, scope hosting e master invariato prima di production protetto; workflow, protezioni e backend conservati. Verifica pubblica integrale e GET indipendenti dei produttori modificati; ricevuta MD/GitHub senza secondo Hosting. Ricollaudo iPhone distinto e successivo.
+
 <a id="nuova-scadenza-filtro-1292-pubblico-2026-11-21"></a>
 
 ## APP1.2.292 — procedura eseguita, solo Hosting

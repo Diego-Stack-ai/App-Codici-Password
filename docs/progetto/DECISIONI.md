@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="destinatari-ritorni-1293-2026-11-21"></a>
+
+## Correggere entrambi i ritorni da Destinatari — 21/11/2026
+
+Diego ordina la correzione della freccia e del comando Torna al modulo precedente, PR/merge/deploy con nuova versione, MD/GitHub e successivo ricollaudo dal cellulare. [Mandato](INCARICO_CORRENTE.md#destinatari-ritorni-1293-2026-11-21). Il percorso deve conservare modulo, bozza e lista filtrata senza rientrare in Destinatari né saltare alla Home. Blocco, lease, inattività, chiavi e lotti Claude conservano il perimetro esistente.
+
 <a id="nuova-scadenza-filtro-1292-pubblico-2026-11-21"></a>
 
 ## Rilascio292 eseguito; ricollaudo distinto —21/11/2026

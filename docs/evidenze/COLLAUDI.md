@@ -1,5 +1,43 @@
 # Collaudi
 
+<a id="destinatari-ritorni-1293-2026-11-21"></a>
+
+## Ritorni Destinatari1.2.293 — candidata e regressioni
+
+Base cf15df64cab6ede2bad17992c642f8be8ffc9600, ramo codex/recipient-returns-293-20261121. Ingresso dal modulo tramite navigateDocument, senza cambiare bozza o parametri aziendali. Il link esplicito riusa navigateBack con target già validato e preferHistory=false; in standalone è ammesso Back soltanto con referrer interno attendibile e corrispondenza esatta del target, query inclusa. Tre soli runtime funzionali: components-v129.js, aggiungi_scadenza.js e gestione-destinatari.js; nessun delta owner, policy/allowlist, chiavi, lease, inattività o blocco.
+
+Controprova prima del delta:8 casi del percorso completo,6 FAIL e2 PASS già standalone con freccia. Dopo il delta gli stessi8 PASS. Banco ampliato:22/22 casi mirati PASS, comprendenti entrambi gli ingressi e controlli in cornice/standalone, bozza ripristinata, modulo → lista filtrata → Home, regressioni Account privato/azienda e Regole senza return, target esplicito con query diversa dal predecessore e target non ammessi standalone. Stesso owner e un solo sblocco sintetico, zero clear/lock/errori e scritture dei record simulati nei percorsi positivi verificati.
+
+Limiti separati: il + della lista Account privata usa già una propria navigazione non coordinata prima di Destinatari; nei due casi in cornice si verifica l'URL esatta del modulo e poi il padre canonico senza attestare la query della lista privata. L'assenza di type equivale al modo standard; quel produttore non è modificato in293. Nei primi test aggiuntivi sono state corrette fixture che pretendevano un record su un form aziendale nuovo o il bootstrap di return già negati dalla policy della cornice, senza indebolire quest'ultima.
+
+Tre test del modello bozza PASS: vincoli URL/UID/TTL e consumo singolo. Una distinta vecchia asserzione testuale opzionale attende ancora titoli italiani hardcoded già assenti alla base: FAIL preesistente, non introdotto né corretto da293 e non incluso nel comando di navigazione della CI. Conservata separatamente, senza presentare l'intero file opzionale come verde.
+
+Snapshot prima del bump,307 riferimenti/112 file applicativi, guida16/reviewed293, offline61 export/347 risorse e inventario QA invariato.367 pubblici senza aggiunte/rimozioni né altre differenze dopo normalizzazione versione/EOL;116 pubblici aggiornati. Build inizialmente fermo per il collegamento alle dipendenze assente: collegamento temporaneo ripristinato con permesso filesystem, build completato, collegamento rimosso prima dei documenti/commit; nessuna installazione. Verificati378 casi distinti di cornice (77 Back, inclusi i22 nuovi casi):373 verdi al primo giro, i5 header inizialmente fermi per il percorso mancante di firebase-tools diventano verdi dopo ripristino del solo collegamento alle dipendenze, a runtime invariato. Verdi anche199 navigazione,12 guida,16 offline,12 documenti, budget/sintassi/riferimenti. Due GO sulla testa finale, CI PR/master/Hosting e pubblicazione ancora da completare.
+
+Banco Chromium locale con produttori/owner/transport/header reali, Auth/gestore e record simulati, gate privato omesso e rete/SW bloccati; nessun PASS fisico della293 o C1/C2 completo dedotto. I due PASS292 precedenti e18/22 destinazioni cumulative positive restano distinti; Destinatari richiede ricollaudo iPhone dopo pubblicazione.
+
+<a id="destinatari-freccia-1292-2026-11-21"></a>
+
+## Destinatari292 — freccia alla Home, diagnosi locale
+
+TEL292-F11, PWA iPhone dalla schermata Home: Diego riferisce Home → Scadenze oppure Urgenze → + Nuova Scadenza → Gestisci destinatari → freccia Indietro dentro l'header Destinatari; in entrambi i percorsi arriva alla Home anziché al modulo. Il comando usato è stato chiarito senza chiedere una ripetizione. Nessuna nuova prova fisica del distinto link Torna al modulo precedente, né esito esplicito sulle ulteriori richieste di sblocco, dedotti da questa risposta.
+
+Riproduzione locale contro il runtime292: quattro segmenti con produttori e comandi reali. La freccia torna alla Home nei due ingressi; il link esplicito riapre il modulo in entrambi, ma la freccia successiva riporta a Destinatari anziché alla lista. Il PASS locale storico L21-04 conserva il solo ritorno immediato del link: non copriva il passaggio successivo. Stesso documento owner, un solo sblocco sintetico, zero clear/lock/errori e zero scritture dei record simulati in tutti i segmenti; la bozza tecnica di ritorno in sessionStorage è distinta dai record della Vault.
+
+Diagnosi nel banco: openRecipientManager di aggiungi_scadenza.js usa location.href; l'arrivo non coordinato invalida il predecessore verificato e l'header Destinatari usa il fallback Home. Il link esplicito aggiunge invece un nuovo passaggio al modulo, lasciando Destinatari nella catena. Proposta da implementare e verificare: ingresso coordinato e ritorno allo stesso modulo senza duplicati, conservando bozza/contesto e filtro della lista, con regressioni per gli ingressi Account e Regole. Nessuna modifica runtime, versione, commit o pubblicazione eseguita da questa diagnosi.
+
+Banco Chromium locale con owner/transport/header reali, Auth/gestore simulati, gate privato omesso, record in memoria e rete esterna/SW bloccati; non prova nativa, ammissione server o C1/C2 completi. Guida fisica ferma sul caso. I due PASS292 del filtro restano validi;18/22 destinazioni cumulative positive invariato, Destinatari non aggiunta ai percorsi positivi.
+
+<a id="nuova-scadenza-1292-telefono-2026-11-21"></a>
+
+## PWA iPhone1.2.292 — ritorno Nuova Scadenza confermato
+
+Diego conferma la versione1.2.292 nell'app dalla schermata Home, poi due ricollaudi separati, con Vault già sbloccata e uso continuo. TEL292-F09-RECHECK: Home → Scadenze → + Aggiungi → modulo vuoto → una freccia Indietro dell'app; PASS riferito, filtro Scadenze corretto e nessun nuovo sblocco. TEL292-F10: stesso percorso da Urgenze; PASS riferito, filtro Urgenze corretto e nessun nuovo sblocco. Il protocollo non richiedeva compilazione o salvataggio; nessuna misura strumentale delle scritture o della RAM sul telefono dedotta.
+
+Il FAIL TEL291-F09 rimane storico; il ritorno segnalato è ricollaudato positivamente in questi due percorsi sulla292. Non dedurre il successivo ritorno alla Home, Annulla footer o un ciclo completo D02/D04 da questi esiti. La destinazione aggiungi_scadenza ha ora un percorso positivo:18/22 destinazioni cumulative osservate, non18 tutte sulla292 né C1/C2 completi.
+
+Prossima prova proposta: Nuova Scadenza → Gestisci destinatari → Torna al modulo precedente, senza aggiungere contatti o salvare. Riscontro ancora atteso; configuratore e due legacy conservano i propri prerequisiti. Nessun nuovo codice, versione o Hosting da queste osservazioni.
+
 <a id="nuova-scadenza-filtro-1292-pubblico-2026-11-21"></a>
 
 ## APP1.2.292 — pubblicazione del filtro verificata
