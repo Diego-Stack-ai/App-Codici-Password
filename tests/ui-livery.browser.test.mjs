@@ -41,6 +41,11 @@ test('approved profile typography keeps values and QR intact across both liverie
    try{
     await f.page.locator('[data-profile-tab-target=personal]').click();
     await f.page.locator('#nome-view').waitFor();
+    // Profile data precede the idle QR render and its async canvas-to-image conversion.
+    await f.page.waitForFunction(() => {
+     const img=document.querySelector('#qrcode-header img');
+     return img?.src.startsWith('data:image/png')&&img.complete&&img.naturalWidth>0;
+    },undefined,{timeout:10000});
     const stable=()=>f.page.evaluate(()=>({name:document.querySelector('#nome-view').textContent,cf:document.querySelector('#cf-view').textContent,
      qr:document.querySelector('#qrcode-header').innerHTML,choices:[...document.querySelectorAll('.qr-checkbox')].map(e=>[e.id,e.checked]),writes:window.__viewTourWrites||0}));
     const before=await stable();assert.equal(before.name,'Nome fittizio Locale');assert.equal(before.cf,'QA-CF-0001');assert.ok(before.qr.length>100);

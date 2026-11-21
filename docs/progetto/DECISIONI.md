@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="nuova-scadenza-filtro-1292-2026-11-21"></a>
+
+## Pubblicazione del filtro Nuova Scadenza —21/11/2026
+
+Fonte: ordine esplicito di Diego per PR, merge e deploy, nuova versione e MD/GitHub, poi ripresa del collaudo dal cellulare. [Mandato](INCARICO_CORRENTE.md#nuova-scadenza-filtro-1292-2026-11-21). Autorizzata1.2.292 sul solo produttore + che conserva la cronologia della cornice. Blocco e autorità Vault invariati; due nuovi GO e gate di rilascio sul candidato confezionato. La consegna documenti/lingue/prodotto a Claude rimane distinta; nessuna sua proposta integrata da questo ordine.
+
 <a id="rilascio-1291-pubblico-2026-11-20"></a>
 
 ## Pubblicazione291 attuata; blocco conservato

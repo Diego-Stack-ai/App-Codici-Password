@@ -6,7 +6,7 @@ import {navigateDocument} from '../../frame-navigation.js';
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.291';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.292';
 import { getFooterReady } from '../../footer-state.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
@@ -15,7 +15,7 @@ import { updateDoc, deleteDoc, doc, onAuthStateChanged, runTransaction, serverTi
 import {deleteObject, ref} from "/assets/js/vendor/firebase-runtime.js";
 import { deadlineDate, deadlineBucket, deadlinePresentation } from './deadline-model.js';
 import { t } from '../../translations.js';
-import { initComponents } from '../../components-v129.js?v=1.2.291';
+import { initComponents } from '../../components-v129.js?v=1.2.292';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import {listDeadlines, listReceivedDeadlines} from '../data/vault-repository.js';
@@ -545,7 +545,7 @@ function setupFAB() {
             className: 'btn-fab-action btn-fab-scadenza',
             title: t('add_deadline') || 'Aggiungi Scadenza',
             dataset: { label: t('add_short') || 'Aggiungi' },
-            onclick: () => window.location.href = 'aggiungi_scadenza.html'
+            onclick: () => navigateDocument('aggiungi_scadenza.html')
         }, [
             createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add' })
         ]);

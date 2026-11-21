@@ -2,6 +2,38 @@
 
 <a id="stato-corrente"></a>
 
+<a id="nuova-scadenza-filtro-1292-2026-11-21"></a>
+
+## Candidata1.2.292 — ritorno dal modulo Nuova Scadenza
+
+Online resta1.2.291. Confezionata292: il + usa la navigazione coordinata e conserva il predecessore filtrato per la freccia del modulo. Un solo runtime funzionale; versioni, guida16/reviewed292, offline61export/347risorse e QA allineati,367 pubblici senza ulteriori differenze dopo normalizzazione versione/EOL. [Evidenze](../evidenze/COLLAUDI.md#nuova-scadenza-filtro-1292-2026-11-21). Verifiche confezione PASS:356 cornice,199 navigazione,12 guida,16 offline,12 documenti, budget, sintassi e riferimenti; due nuovi GO e gate PR/master/Hosting da completare. Il FAIL TEL291-F09 conserva il suo contesto; ricollaudo292 successivo al rilascio, nessuna chiusura C1/C2.
+
+Primo giro CI della PR #352 fermo sul test tipografico QR (attesa mancante prima della baseline); nessun merge o deploy. Lacuna riprodotta localmente con callback idle controllato in entrambe le grafiche; aggiunta la sola attesa dell'immagine completa nel test, senza altro delta applicativo. Nuova testa, riesami e CI restano da acquisire, come descritto nelle evidenze.
+
+<a id="nuova-scadenza-filtro-2026-11-21"></a>
+
+## Cornice — correttivo locale del filtro dopo creazione vuota, 21/11/2026
+
+[Evidenza e diagnosi](../evidenze/COLLAUDI.md#nuova-scadenza-filtro-2026-11-21): TEL291-F08 nuova azienda PASS riferito; TEL291-F09 Nuova Scadenza → freccia ritorna a Tutti stabilmente, FAIL del filtro confermato. Nel seguito locale, il produttore + usa ora navigateDocument: quattro controprove rosse prima della modifica;17 mirate e55/55 dell'intero banco Back verdi dopo, oltre a199 navigazione,16 offline e252 moduli sintatticamente validi. Stesso owner e un solo sblocco sintetico; comportamento del blocco invariato. Nessun nuovo riscontro fisico o sblocco nativo dedotto. Produzione1.2.291 invariata, candidata locale senza bump/commit/pubblicazione; matrice con17 route positive cumulative, C1/C2 aperti.
+
+Separati i lotti Claude documenti/otto lingue/residui prodotto per ordine successivo di Diego: tre analisi in sola lettura completate, proposte non integrate. Il riesame individua rettifiche da fare nelle bozze; nessun loro esito diventa automaticamente modifica applicativa o audit finale. [Ripartizione](PROGRAMMA.md#claude-consegne-separate-2026-11-21).
+
+<a id="cornice-ingressi-locali-2026-11-21"></a>
+
+## Cornice — controlli locali degli ingressi, 21/11/2026
+
+[Esiti](../evidenze/COLLAUDI.md#cornice-ingressi-locali-2026-11-21):5/5 segmenti browser locali PASS, relativi a quattro ingressi/ritorni e all'editor generico non-veicolo; zero scritture del repository simulato, stesso owner e un solo sblocco sintetico. Claude ha completato una revisione consultiva in sola lettura; rilievi verificati dal root. Le suite già verdi del pacchetto291 restano riferite alla loro esecuzione, non risultano nuovi PASS fisici.
+
+Le due legacy hanno risultati Ricerca per titolo, ma possono scrivere default all'apertura; query apri Configurazione Documenti registrata L21-R01 da approfondire. Pronto il riscontro fisico Nuova azienda → ritorno, una prova alla volta. I sette checkpoint291 e16/22 route osservate cumulativamente sono conservati: non aumentano con il banco locale. App1.2.291, blocco, codice e cloud invariati; nessun C1/C2 completo o nuova pubblicazione.
+
+<a id="cornice-matrice-riconciliata-2026-11-21"></a>
+
+## Cornice — raccordo dei collaudi, 21/11/2026
+
+Riconciliati i risultati già raccolti, senza nuove prove: [matrice ed evidenze](../evidenze/COLLAUDI.md#cornice-matrice-riconciliata-2026-11-21), [residui e responsabili](PROGRAMMA.md#cornice-matrice-riconciliata-2026-11-21). Produzione 1.2.291 invariata e confermata sul telefono. Ricollaudo Archiviate completato, insieme ad Archivio Account, moduli Account privato/azienda e Regole: sette checkpoint/cinque percorsi PWA riusciti senza nuovi sblocchi. Ulteriori risultati284–290 restano associati al loro contesto; sei PASS storici QA2/Chrome 270 conservati.
+
+D02 ordinario: 16 delle 22 route osservate cumulativamente,6 senza riscontro fisico specifico; non è un D02 completo sulla 291. Restano sottocasi delle 19 famiglie, Safari/Android e raccordo Chrome corrente, D15 live e D18 con vecchio contesto durante rilascio. C2/riesame aperti, nessuna CORNICE CHIUSA. La v2 ordinaria è già attiva e non richiede riattivazione pilot. Solo quattro MD aggiornati localmente; nessun codice, versione, cloud o nuovo Hosting modificato da questo ordine.
+
 <a id="rilascio-1291-pubblico-2026-11-20"></a>
 
 ## APP 1.2.291 — online e verificata
