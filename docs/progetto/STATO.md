@@ -8,6 +8,8 @@
 
 Online resta1.2.291. Confezionata292: il + usa la navigazione coordinata e conserva il predecessore filtrato per la freccia del modulo. Un solo runtime funzionale; versioni, guida16/reviewed292, offline61export/347risorse e QA allineati,367 pubblici senza ulteriori differenze dopo normalizzazione versione/EOL. [Evidenze](../evidenze/COLLAUDI.md#nuova-scadenza-filtro-1292-2026-11-21). Verifiche confezione PASS:356 cornice,199 navigazione,12 guida,16 offline,12 documenti, budget, sintassi e riferimenti; due nuovi GO e gate PR/master/Hosting da completare. Il FAIL TEL291-F09 conserva il suo contesto; ricollaudo292 successivo al rilascio, nessuna chiusura C1/C2.
 
+Primo giro CI della PR #352 fermo sul test tipografico QR (attesa mancante prima della baseline); nessun merge o deploy. Lacuna riprodotta localmente con callback idle controllato in entrambe le grafiche; aggiunta la sola attesa dell'immagine completa nel test, senza altro delta applicativo. Nuova testa, riesami e CI restano da acquisire, come descritto nelle evidenze.
+
 <a id="nuova-scadenza-filtro-2026-11-21"></a>
 
 ## Cornice — correttivo locale del filtro dopo creazione vuota, 21/11/2026

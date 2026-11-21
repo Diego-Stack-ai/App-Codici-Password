@@ -10,6 +10,10 @@ Snapshot pre-bump nuovo,307 riferimenti/112 file applicativi, guida contentVersi
 
 Verifiche della confezione finale: cornice356/356, navigazione199/199, guida12/12, offline16/16, budget31pagine e4 test diagnostica PASS; sintassi252 moduli e riferimenti343 file PASS. Il controllo documentale iniziale rifiuta correttamente il collegamento temporaneo node_modules: rimosso il solo collegamento dopo i test, il controllo passa12/12 con34 MD e1684 collegamenti, senza cambiare scanner o dipendenze. Riesami sullo SHA finale e gate PR/master/Hosting ancora da completare. Banco locale con owner/transport/UI reali e dati inventati, Auth/gestore simulati: nessun nuovo esito nativo o audit completo dedotto. Produzione291 invariata fino a deploy e verifica pubblica.
 
+Prima CI PR #352/#1268 sullo SHA2f59750e fallisce nell'unico caso tipografico QR di ui-livery:92/93 nel segmento UI, asserzione before.qr.length>100; nessun merge/deploy. Il test e il generatore QR sono funzionalmente identici alla base. Verificata una lacuna di attesa: bootstrap/nome precedono il callback idle del QR e la conversione asincrona canvas→immagine. Un probe locale che trattiene/rilascia il callback riproduce in entrambe le grafiche nome pronto con QR vuoto e poi QR104px completo. Non dimostra l'intera sequenza temporale della run CI.
+
+Stabilizzato il solo test prima della baseline: attesa limitata all'immagine PNG reale caricata, senza sleep, rigenerazione, retry o indebolimento di asserzioni; lunghezza e confronti esatti di QR/valori/preferenze/scritture restano invariati. Nessuna modifica runtime aggiuntiva; nuova testa e nuovi due GO/CI richiesti, non riutilizzare il verde dei controlli sulla testa precedente.
+
 <a id="nuova-scadenza-filtro-2026-11-21"></a>
 
 ## Nuova Scadenza — filtro perso al ritorno, 21/11/2026
