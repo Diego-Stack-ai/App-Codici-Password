@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="regole-tab-1294-pubblico-2026-11-21"></a>
+
+## APP1.2.294 — procedura eseguita, solo Hosting
+
+PR #356, due GO sulla testa finale, CI PR/master/validate Hosting concordi, master fissato e scope hosting prima di production protetto. Deploy SUCCESS e verifica pubblica367 hash/41 profili/25 GET PASS. [Ricevuta](../evidenze/COLLAUDI.md#regole-tab-1294-pubblico-2026-11-21). Nessuna modifica a backend/workflow/protezioni/blocco; chiusura dei soli documenti senza secondo Hosting.
+
 <a id="regole-tab-1294-2026-11-21"></a>
 
 ## Linguetta Regole1.2.294 — solo Hosting

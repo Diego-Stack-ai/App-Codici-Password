@@ -1,5 +1,11 @@
 # Incarico corrente
 
+<a id="regole-tab-1294-pubblico-2026-11-21"></a>
+
+## Ordine294 eseguito — ricevuta e ricollaudo
+
+Eseguito l'ordine di correzione, PR/merge/Hosting e nuova versione con MD/GitHub: [ricevuta](../evidenze/COLLAUDI.md#regole-tab-1294-pubblico-2026-11-21). Chiudere la sola ricevuta documentale tramite PR/check/due riesami e merge, senza altro Hosting; root unico scrittore e supporti in lettura. Poi conferma294 sul telefono e ricollaudo Automezzi una prova alla volta, senza modifiche/salvataggi. Nessun PASS fisico dedotto; blocco e lotti Claude separati.
+
 <a id="regole-tab-1294-2026-11-21"></a>
 
 ## Ordine294 — ritorno alla linguetta scelta

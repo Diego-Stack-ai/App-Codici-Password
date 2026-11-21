@@ -1,5 +1,15 @@
 # Collaudi
 
+<a id="regole-tab-1294-pubblico-2026-11-21"></a>
+
+## APP1.2.294 — ritorno alla linguetta pubblicato
+
+PR #356 integrata dopo due GO sulla testa finale a84468a7ad9b3d732ba9315de597dd553f01f68f; merge/sorgente 97eb7f019944ea290e2d2e9ccbbb4fd0e6158350. CI PR #1279, master #1280 e [Hosting #1281](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44914438976) SUCCESS: PR sulla testa riesaminata, master e Hosting sul merge indicato, stesso digest pubblico 81eda2465ed09cce12580302ebb7a3cffdda3643ec82ac5511712b7ef1d435f5; scope hosting, master invariato e production protetto. Ogni validazione: 68 blocchi/4010 test,3999 PASS/11 SKIP dichiarati, zero FAIL/annullati. Deploy completato 21/11/26, 16:04:54 Europe/Rome.
+
+Avvio e approvazione eseguiti da Codex nel browser integrato sull'ordine esplicito di Diego, senza modificare permessi/protezioni. Verifica pubblica367 hash/41 profili e25 GET unici PASS, inclusi due runtime, Regole e configuratore; manifest sourceDirty=false. Due soli JS funzionali, oltre a versioni/derivati; [preparazione e limiti](#regole-tab-1294-2026-11-21).
+
+La linguetta scelta sopravvive al ritorno dal configuratore; fallback diretto con dominio valido e legacy canoniche. Blocco, lease, inattività, owner/policy, Auth/chiavi, bozze e dati, backend/workflow/protezioni invariati. Ricollaudo fisico294 ancora da acquisire; F16 resta misto sulla293,20 destinazioni cumulative osservate =19 positive +1 mista, due legacy mai osservate e C1/C2 aperti. Ricevuta documentale senza secondo Hosting.
+
 <a id="regole-tab-1294-2026-11-21"></a>
 
 ## Regole1.2.294 — correttivo del ritorno alla linguetta
