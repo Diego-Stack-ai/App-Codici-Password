@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="nuova-scadenza-filtro-1292-pubblico-2026-11-21"></a>
+
+## Rilascio292 eseguito; ricollaudo distinto —21/11/2026
+
+L'ordine di Diego è eseguito con PR #352, due GO sulla testa finale e [Hosting verificato](../evidenze/COLLAUDI.md#nuova-scadenza-filtro-1292-pubblico-2026-11-21). La correzione riguarda il ritorno dal modulo Nuova Scadenza e mantiene il comportamento del blocco. La stabilizzazione dell'attesa QR è soltanto del test. Il rilascio non integra le proposte Claude e non certifica C1/C2 o il telefono: ricollaudo successivo e distinto.
+
 <a id="nuova-scadenza-filtro-1292-2026-11-21"></a>
 
 ## Pubblicazione del filtro Nuova Scadenza —21/11/2026

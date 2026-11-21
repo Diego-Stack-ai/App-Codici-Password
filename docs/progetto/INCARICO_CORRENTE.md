@@ -1,5 +1,11 @@
 # Incarico corrente
 
+<a id="nuova-scadenza-filtro-1292-pubblico-2026-11-21"></a>
+
+## Ordine292 eseguito — ricevuta e ricollaudo
+
+Eseguito l'ordine PR/merge/deploy del correttivo del filtro con nuova versione e MD/GitHub: [ricevuta](../evidenze/COLLAUDI.md#nuova-scadenza-filtro-1292-pubblico-2026-11-21). Autorizzata la chiusura della sola ricevuta nei documenti esistenti tramite PR/check/riesami e merge, senza secondo Hosting. Il seguito guidato richiede prima conferma della versione sul telefono, poi ricollaudo F09 una prova alla volta. Nessuna prova fisica già superata dedotta dal rilascio; blocco e tre lotti Claude restano separati.
+
 <a id="nuova-scadenza-filtro-1292-2026-11-21"></a>
 
 ## Rilascio 1.2.292 — filtro di Nuova Scadenza

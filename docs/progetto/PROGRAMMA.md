@@ -1,5 +1,11 @@
 # Programma
 
+<a id="nuova-scadenza-filtro-1292-pubblico-2026-11-21"></a>
+
+## Dopo292 — conferma e ricollaudo dal cellulare
+
+[Pubblicazione verificata](../evidenze/COLLAUDI.md#nuova-scadenza-filtro-1292-pubblico-2026-11-21) conclusa per il correttivo F09. Completare l'integrazione documentale della ricevuta senza nuovo Hosting; poi confermare1.2.292 nell'app iPhone dalla schermata Home. A Vault sbloccata controllare, una prova alla volta, Scadenze → + → modulo vuoto → freccia → stesso filtro e ritorno Home senza nuovi sblocchi. Il blocco mantiene il comportamento concordato. Dopo F09 riprendere i residui della matrice con i propri prerequisiti; i lotti Claude restano separati.
+
 <a id="nuova-scadenza-filtro-1292-2026-11-21"></a>
 
 ## Pubblicare292 e ricollaudare Nuova Scadenza

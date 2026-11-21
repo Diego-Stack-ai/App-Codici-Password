@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="nuova-scadenza-filtro-1292-pubblico-2026-11-21"></a>
+
+## APP1.2.292 — procedura eseguita, solo Hosting
+
+PR #352 dopo due GO sulla testa finale; CI PR/master/validate Hosting con sorgente e digest concordi, master fissato e scope hosting prima di production protetto. Approvazione registrata e deploy SUCCESS; verifica pubblica367 hash/41 profili/19 GET PASS. [Ricevuta](../evidenze/COLLAUDI.md#nuova-scadenza-filtro-1292-pubblico-2026-11-21). Backend, workflow, protezioni e blocco invariati; chiusura documentale senza secondo Hosting. Ricollaudo iPhone successivo.
+
 <a id="nuova-scadenza-filtro-1292-2026-11-21"></a>
 
 ## Filtro Nuova Scadenza1.2.292 — solo Hosting
