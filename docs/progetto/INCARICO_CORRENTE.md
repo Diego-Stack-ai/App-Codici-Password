@@ -1,5 +1,11 @@
 # Incarico corrente
 
+<a id="destinatari-1293-pubblico-2026-11-21"></a>
+
+## Ordine293 eseguito — ricevuta e ricollaudo
+
+Eseguito l'ordine di correggere entrambi i ritorni e procedere con PR/merge/Hosting, nuova versione e MD/GitHub: [ricevuta](../evidenze/COLLAUDI.md#destinatari-1293-pubblico-2026-11-21). Chiudere la sola ricevuta documentale tramite PR/check/due riesami e merge, senza secondo Hosting. Root unico scrittore, supporti in lettura e34 MD conservati. Diego conferma «293 in linea»; seguire con ricollaudo dei due comandi, una prova alla volta; nessun PASS fisico dedotto dal deploy, blocco e lotti Claude separati.
+
 <a id="destinatari-ritorni-1293-2026-11-21"></a>
 
 ## Ordine293 — entrambi i ritorni da Destinatari

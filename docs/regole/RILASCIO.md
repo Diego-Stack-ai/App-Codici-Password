@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="destinatari-1293-pubblico-2026-11-21"></a>
+
+## APP1.2.293 — procedura eseguita, solo Hosting
+
+PR #354 dopo due GO sulla testa finale, CI PR/master/validate Hosting concordi per sorgente/digest, master fissato e scope hosting prima di production protetto. Approvazione registrata e deploy SUCCESS; verifica pubblica367 hash/41 profili/23 GET PASS. [Ricevuta](../evidenze/COLLAUDI.md#destinatari-1293-pubblico-2026-11-21). Backend, workflow, protezioni e blocco conservati; chiusura soltanto documentale senza secondo Hosting.
+
 <a id="destinatari-ritorni-1293-2026-11-21"></a>
 
 ## Ritorni Destinatari1.2.293 — solo Hosting

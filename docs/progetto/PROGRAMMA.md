@@ -1,5 +1,11 @@
 # Programma
 
+<a id="destinatari-1293-pubblico-2026-11-21"></a>
+
+## Dopo293 — riprendere il telefono su Destinatari
+
+[Pubblicazione verificata](../evidenze/COLLAUDI.md#destinatari-1293-pubblico-2026-11-21) per entrambi i ritorni; completare la sola ricevuta MD/GitHub senza nuovo Hosting. Dopo la conferma di Diego «293 in linea», provare Home → Scadenze → + → Destinatari → freccia, modulo → lista con filtro → Home; successivamente lo stesso comando esplicito e gli ingressi Urgenze, una prova alla volta e senza salvare. I due PASS292 restano validi; nessun aumento di18/22 o chiusura C1/C2 dai banchi. Configuratore e due legacy seguono con i propri prerequisiti.
+
 <a id="destinatari-ritorni-1293-2026-11-21"></a>
 
 ## Correggere e pubblicare293, poi riprendere il telefono
