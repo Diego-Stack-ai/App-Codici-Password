@@ -2,6 +2,19 @@
 
 <a id="stato-corrente"></a>
 
+<a id="regole-tab-1294-2026-11-21"></a>
+
+## Candidata294 — ritorno alla linguetta Regole
+
+Online resta1.2.293. [Correttivo294 autorizzato](INCARICO_CORRENTE.md#regole-tab-1294-2026-11-21) implementato localmente: scelta conservata nella voce corrente e fallback dell'editor attivo con dominio valido. Due runtime funzionali, owner/policy/blocco invariati. Prime23 regressioni mirate verdi dopo20 FAIL/3 PASS prima del delta; quattro ulteriori controlli su tastiera e produttore Nuova regola verdi. Confezione367 pubblici allineata; suite cornice403/403 e banco Back finale102/102 (inclusi25 nuovi casi) PASS. Verdi navigazione199, guida12, offline16, budget/sintassi/riferimenti e documenti. Due GO sulla testa finale e gate PR/master/Hosting ancora da acquisire. F16 fisico resta misto, nessun nuovo PASS nativo dedotto.
+
+
+<a id="destinatari-1293-telefono-2026-11-21"></a>
+
+## Cornice293 — Destinatari riusciti; linguetta Regole da conservare
+
+Diego conferma i [quattro giri Destinatari](../evidenze/COLLAUDI.md#destinatari-1293-telefono-2026-11-21): modulo, lista filtrata e Home corretti, nessun nuovo sblocco. Il successivo [F16 dal configuratore](../evidenze/COLLAUDI.md#regole-tab-1293-2026-11-21) ha apertura e ritorni alle pagine corretti senza nuovo sblocco, ma perde la linguetta scelta e torna a Documenti personali: esito misto PARZ, riprodotto localmente per Automezzi e Contratti.20/22 destinazioni cumulative osservate =19 positive +1 mista, non20 PASS; due legacy mai osservate con prerequisiti distinti. C1/C2 aperti. Proposta di conservare domain nella voce corrente, non applicata; guida ferma sul rilievo senza ripetizioni. Produzione293 invariata, quattro MD locali senza nuova pubblicazione.
+
 <a id="destinatari-1293-pubblico-2026-11-21"></a>
 
 ## APP1.2.293 — online e verificata

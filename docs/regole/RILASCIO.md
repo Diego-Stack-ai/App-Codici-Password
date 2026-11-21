@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="regole-tab-1294-2026-11-21"></a>
+
+## Linguetta Regole1.2.294 — solo Hosting
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#regole-tab-1294-2026-11-21): snapshot pre-bump e derivati canonici, due GO sulla testa finale e CI PR completa prima del merge con testa attesa. Master/validate Hosting sullo stesso sorgente e digest, scope hosting, master invariato e production protetto. Verifica pubblica integrale e GET dei due runtime, Regole e configuratore; ricevuta MD/GitHub senza secondo Hosting. Blocco/backend/workflow/protezioni invariati e prova iPhone successiva distinta.
+
 <a id="destinatari-1293-pubblico-2026-11-21"></a>
 
 ## APP1.2.293 — procedura eseguita, solo Hosting

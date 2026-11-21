@@ -1,5 +1,17 @@
 # Programma
 
+<a id="regole-tab-1294-2026-11-21"></a>
+
+## Correggere e pubblicare294, poi ricollaudare Regole
+
+[Mandato](INCARICO_CORRENTE.md#regole-tab-1294-2026-11-21): conservare la sezione nei sette ambiti del configuratore e verificare click/tastiera, query/return/bozza, fallback diretto e catena fino alla Home, in cornice e standalone. Completare confezione, riesami, PR/master/Hosting e ricevuta pubblica. Poi conferma294 sull'iPhone e ricollaudo Automezzi una prova alla volta. F16 resta misto finché ricollaudato;20 osservate =19 positive +1 mista, due legacy con prerequisiti e C1/C2 aperti.
+
+<a id="destinatari-1293-telefono-2026-11-21"></a>
+
+## Dopo293 — conservare la linguetta delle Regole
+
+Conservati i quattro PASS Destinatari. Il [F16](../evidenze/COLLAUDI.md#regole-tab-1293-2026-11-21) apre il configuratore e torna alle pagine corrette senza nuovi sblocchi, ma resetta la linguetta: fermare la guida sul rilievo, senza ripetere il giro. Proposta distinta: conservare il domain corrente senza nuova navigazione e verificare tutti gli ambiti, click/tastiera, return/bozza e fallback diretto; due riproduzioni locali del difetto già raccolte. Nessuna correzione o pubblicazione dedotta.20/22 destinazioni osservate,19 positive e1 mista; le due legacy mai osservate richiedono prerequisiti sugli effetti automatici. C1/C2 aperti; sempre una prova alla volta dopo il seguito del difetto.
+
 <a id="destinatari-1293-pubblico-2026-11-21"></a>
 
 ## Dopo293 — riprendere il telefono su Destinatari
