@@ -1,5 +1,11 @@
 # Programma
 
+<a id="regole-tab-1294-pubblico-2026-11-21"></a>
+
+## Dopo294 — ricollaudare la linguetta sul telefono
+
+[Pubblicazione verificata](../evidenze/COLLAUDI.md#regole-tab-1294-pubblico-2026-11-21); chiudere la sola ricevuta MD/GitHub senza secondo Hosting. Dopo conferma294, Home → Impostazioni → Regole invio scadenze → Automezzi → Gestisci configurazione → una freccia: Regole con Automezzi selezionato, poi Impostazioni e Home; senza modifiche/salvataggi e senza nuovi sblocchi durante il giro. Una prova alla volta. Conservare i precedenti PASS e F16 misto finché ricollaudato; due legacy con prerequisiti, C1/C2 aperti.
+
 <a id="regole-tab-1294-2026-11-21"></a>
 
 ## Correggere e pubblicare294, poi ricollaudare Regole

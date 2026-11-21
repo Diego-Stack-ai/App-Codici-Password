@@ -2,6 +2,13 @@
 
 <a id="stato-corrente"></a>
 
+<a id="regole-tab-1294-pubblico-2026-11-21"></a>
+
+## APP1.2.294 — online e verificata
+
+Online294 dal sorgente 97eb7f019944ea290e2d2e9ccbbb4fd0e6158350, sourceDirty=false; PR #356, due GO e CI PR/master/[Hosting #1281](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44914438976) concordi e SUCCESS. Verifica pubblica367 hash/41 profili/25 GET PASS. [Ricevuta](../evidenze/COLLAUDI.md#regole-tab-1294-pubblico-2026-11-21). Corretta la linguetta al ritorno dal configuratore; blocco invariato. Conferma versione e ricollaudo iPhone ancora attesi; F16 misto sulla293 e C1/C2 aperti,20 osservate =19 positive +1 mista. I checkpoint sotto sono storici.
+
+
 <a id="regole-tab-1294-2026-11-21"></a>
 
 ## Candidata294 — ritorno alla linguetta Regole

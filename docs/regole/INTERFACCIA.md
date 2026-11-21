@@ -1,5 +1,11 @@
 # Interfaccia
 
+<a id="regole-tab-1294-pubblico-2026-11-21"></a>
+
+## Linguetta Regole294 — distribuita, prova fisica successiva
+
+Distribuita la conservazione della sezione corrente e il fallback ristretto del configuratore attivo. [Ricevuta](../evidenze/COLLAUDI.md#regole-tab-1294-pubblico-2026-11-21); test sintetici e verifica pubblica distinti dal ricollaudo iPhone. Blocco della Vault e decorazioni/temi invariati.
+
 <a id="regole-tab-1294-2026-11-21"></a>
 
 ## Regole — conservare la linguetta al ritorno dal configuratore
