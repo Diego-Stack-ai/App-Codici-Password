@@ -1,5 +1,17 @@
 # Collaudi
 
+<a id="nuova-scadenza-filtro-1292-pubblico-2026-11-21"></a>
+
+## APP1.2.292 — pubblicazione del filtro verificata
+
+PR #352 integrata dopo due GO sulla testa finale 57de4986f19355d2c48834fedd55d727fc89a4ee, CI PR #1269 SUCCESS; merge/sorgente ea79a0e118944fd0eca87ded7797a626253cbb29. CI master #1270 e [Hosting #1271](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44891454086) verdi sullo stesso sorgente e digest ee09ca07b8dfd28f55252549ee09b1f8fb94f0fdde267b294ec6ae2ffc7b38a9. Master verificato invariato prima di production protetto; approvazione registrata, scope solo hosting e backend saltato. Deploy completato 21/11/26, 11:19:16 Europe/Rome.
+
+Ciascuna delle tre validazioni ha68 blocchi/3963 test:3952 PASS,11 SKIP dichiarati, zero FAIL o annullati. Avvio Hosting e approvazione production eseguiti da Codex nel browser integrato sull'ordine esplicito di Diego per questo rilascio, dopo i rifiuti API403; la ricevuta GitHub conferma production approvata. Nessuna protezione o autorizzazione generale modificata.
+
+Verifica autonoma del manifest e dei367 hash pubblici,41 profili di header e19 GET indipendenti PASS, incluso scadenze.js e le pagine del percorso. sourceDirty=false; nessuna aggiunta/rimozione e unico delta runtime funzionale il produttore + di Nuova Scadenza, al netto di versioni/EOL. Prove e primo giro CI non riuscito conservati nella [preparazione](#nuova-scadenza-filtro-1292-2026-11-21); la testa finale include soltanto l'attesa QR del test come correzione aggiuntiva non applicativa.
+
+Il vecchio duplicato1266 termina prima del deploy al controllo del master, senza cambiare la291 allora online; non blocca il nuovo rilascio. Nessuna modifica a lease, inattività, blocco, Auth/chiavi, backend, workflow o protezioni. I tre lotti Claude restano separati. Ricollaudo iPhone292 ancora da acquisire: TEL291-F09 resta il FAIL storico,17/22 route positive cumulative e C1/C2 non diventano completi. Ricevuta soltanto documentale, senza secondo Hosting.
+
 <a id="nuova-scadenza-filtro-1292-2026-11-21"></a>
 
 ## Filtro Nuova Scadenza1.2.292 — confezione autorizzata

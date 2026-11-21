@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+<a id="nuova-scadenza-filtro-1292-pubblico-2026-11-21"></a>
+
+## APP1.2.292 — online e verificata
+
+Online1.2.292 dal sorgente ea79a0e118944fd0eca87ded7797a626253cbb29, sourceDirty=false. PR #352, due GO sulla testa finale, CI PR/master/Hosting concordi e [Hosting #1271](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44891454086) SUCCESS. Verifica pubblica367 hash/41 profili/19 GET PASS. [Ricevuta](../evidenze/COLLAUDI.md#nuova-scadenza-filtro-1292-pubblico-2026-11-21). Il + di Nuova Scadenza conserva il predecessore filtrato; blocco della Vault invariato. Aggiornamento delle sole ricevute MD/GitHub, senza secondo Hosting. Conferma della versione sul telefono e ricollaudo F09 ancora da acquisire;17 route cumulative e C1/C2 conservano i propri limiti. Le candidate sotto sono checkpoint storici.
+
 <a id="nuova-scadenza-filtro-1292-2026-11-21"></a>
 
 ## Candidata1.2.292 — ritorno dal modulo Nuova Scadenza
