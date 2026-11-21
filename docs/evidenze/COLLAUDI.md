@@ -1,5 +1,48 @@
 # Collaudi
 
+<a id="regole-tab-1294-2026-11-21"></a>
+
+## Regole1.2.294 — correttivo del ritorno alla linguetta
+
+Base734f61024f3059863652a67baa359e970a2983e0. Hub: click e tastiera aggiornano il solo domain con replaceState dopo la guardia active; prima idratazione invariata. Stato/query/return/hash conservati, nessuna voce aggiunta. Header condiviso: fallback con dominio dell'enum soltanto per l'editor attivo, predecessore verificato prioritario; legacy canoniche. Nessun delta owner, policy, lease, inattività, blocco, Auth/chiavi o dati.
+
+Controprova iniziale corretta:23 casi mirati,20 FAIL e3 PASS; dopo il delta23/23 PASS. Prime fixture corrette prima della controprova: return con query ammessa, niente hash Regole nel frame e niente dominio vietato forzato nel frame; nessun allargamento della policy. Aggiunte verifiche Home/End/frecce e due produttori reali Nuova regola: quattro casi verdi, in parte sovrapposti ai23, da non sommare. Copertura mirata finale25 casi:14 catene dei sette ambiti × cornice/standalone; due tastiera; sette fallback diretti; due ingressi reali Nuova regola con bozza e return conservati fino al ritorno dal configuratore. Non si attesta il successivo ritorno al modulo di quell'ingresso non coordinato preesistente.
+
+Banco locale con produttori/header/owner/transport reali, Auth/gestore e record sintetici, gate privato omesso, rete esterna e SW bloccati. Continuità verificata con intact e zero scritture dei record nei percorsi testati; non prova fisica iPhone, ammissione server o cancellazione RAM. Confezione canonica294:307 riferimenti/112 file, guida16/reviewed294,61 export offline/347 risorse, inventario QA31 pagine invariato. Snapshot367 pubblici senza aggiunte/rimozioni o altre differenze dopo normalizzazione versioni/EOL. Il successivo controllo di peso supera di poco il limite del modulo privato: rimosse soltanto quattro righe di commento da components, senza cambiare logica o budget. Suite locale cornice403/403, navigazione199/199, guida12/12, offline16/16, budget31 pagine/4 casi, sintassi252 moduli e riferimenti343 file PASS. Riesame preliminare richiede oracoli più precisi: marker del documento figlio e nota sintetica non vuota con UID/target della bozza; aggiunti nel banco Back:102/102 casi finali PASS, inclusi i25 del correttivo; controllo successivo dell’intera sequenza tastiera2/2 PASS, sovrapposto ai102. Dipendenze preesistenti usate con un collegamento temporaneo, poi rimosso prima del controllo documentale. Nessuna installazione; gate immutabili ancora da completare; F16 riferito e C1/C2 restano distinti.
+
+<a id="destinatari-1293-telefono-2026-11-21"></a>
+
+## Cornice293 — quattro ritorni Destinatari, PASS riferiti
+
+Seguito guidato nella PWA iPhone dalla schermata Home, versione293 già confermata e Vault già sbloccata prima di ogni giro. Quattro risposte distinte di Diego «Percorso corretto, nessun nuovo sblocco». Il protocollo non richiedeva compilazione o salvataggio; nessuna misura strumentale delle scritture o della RAM dedotta.
+
+| Caso | Ingresso dalla Home | Comando dentro Destinatari | Ritorni riferiti | Esito |
+|---|---|---|---|---|
+| TEL293-F11-HEADER-RECHECK | Scadenze → + Aggiungi → Gestisci destinatari | Freccia dentro l'app | Nuova Scadenza → freccia → lista con Scadenze selezionato → freccia → Home | PASS, nessun nuovo sblocco |
+| TEL293-F12-EXPLICIT-SCADENZE | Scadenze → + Aggiungi → Gestisci destinatari | Torna al modulo precedente | Nuova Scadenza → freccia → lista con Scadenze selezionato → freccia → Home | PASS, nessun nuovo sblocco |
+| TEL293-F13-HEADER-URGENZE | Urgenze → + Aggiungi → Gestisci destinatari | Freccia dentro l'app | Nuova Scadenza → freccia → lista con Urgenze selezionato → freccia → Home | PASS, nessun nuovo sblocco |
+| TEL293-F14-EXPLICIT-URGENZE | Urgenze → + Aggiungi → Gestisci destinatari | Torna al modulo precedente | Nuova Scadenza → freccia → lista con Urgenze selezionato → freccia → Home | PASS, nessun nuovo sblocco |
+
+Ricollaudo dei due ritorni del correttivo293 riuscito nei quattro percorsi proposti. Il FAIL292 e i precedenti PASS292 restano storici. Gestione destinatari ha almeno un percorso positivo osservato:19/22 destinazioni cumulative, non19 tutte nella stessa sessione/versione e non C1/C2 completi. Le quattro varianti riguardano la stessa destinazione e non aumentano il conteggio a20.
+
+Al checkpoint F14, le tre destinazioni senza percorso fisico positivo erano configurazione_automezzi.html e le due legacy configurazione_documenti.html/configurazione_generali.html. Il successivo F16 qui sotto osserva il configuratore con esito misto. Verificato in sola lettura il raccordo293 fra [router](../../Frontend/public/assets/js/pages-init.js), [hub Regole](../../Frontend/public/assets/js/modules/scadenze/deadline-rules-hub.js) ed [editor v2](../../Frontend/public/assets/js/modules/scadenze/configurazione_automezzi_v2.js): l'apertura dell'hub/tab non esegue seed e l'editor della regola esistente legge senza salvare automaticamente. Questa analisi non è un PASS fisico.
+
+TEL293-F15-VEHICLE-PREP: Diego conferma «Vedo una regola con “Gestisci configurazione”» dopo il percorso Home → Impostazioni → Regole invio scadenze → Automezzi. Presenza della regola esistente confermata, senza apertura richiesta né nome comunicato; questa preparazione non attesta il configuratore o la continuità della Vault e non aumenta19/22.
+
+<a id="regole-tab-1293-2026-11-21"></a>
+
+### TEL293-F16 — ritorno dal configuratore: continuità riuscita, linguetta persa
+
+Diego riferisce apertura di Gestisci configurazione dalla regola Automezzi esistente e ritorni alla pagina Regole invio scadenze, Impostazioni e Home. Conferma separatamente «Nessun nuovo sblocco». Apertura, catena delle pagine e continuità della Vault: PASS riferiti. La freccia dal configuratore seleziona però Documenti personali anziché Automezzi; stesso reset riferito anche su altre linguette non specificate. Conservazione della sezione: FAIL UI; esito complessivo PARZ, senza inventare quali altre linguette siano state provate.
+
+D02 cumulativo:20/22 destinazioni osservate, delle quali19 con percorso positivo e1 con esito misto; non20 PASS né una sola sessione/versione. Il configuratore non è più una destinazione mai osservata; il difetto del suo stato di ritorno resta aperto nei casi di navigazione/stato D03/D04. Due destinazioni mai osservate: configurazione_documenti.html e configurazione_generali.html; richiedono ancora prerequisiti sugli effetti automatici/default, senza apertura forzata. C1/C2 restano aperti.
+
+Riproduzione locale sul runtime293 invariato: due catene con produttori e comandi reali, Home → Impostazioni → Regole → tab Automezzi oppure Contratti → Gestisci configurazione → editor v2 → freccia → Regole → Impostazioni → Home. In entrambi i casi il tab prima è corretto e al ritorno è personal. Stesso documento owner, un solo sblocco sintetico, zero clear/lock/errori e zero scritture dei record simulati. Banco Chromium locale con Auth/gestore e dati inventati, gate privato omesso, rete esterna e SW bloccati: diagnosi riprodotta, non un nuovo PASS fisico o prova di ammissione server/RAM.
+
+Causa verificata nell'hub: activate cambia solo DOM/aria; la URL non conserva il tab e il rimontaggio applica il default Documenti personali. Il parametro domain è già ammesso dalla policy e letto all'ingresso. Proposta minima, non applicata: sincronizzare il solo domain nella voce corrente tramite history.replaceState, conservando history.state, return, query e hash, senza creare una voce o ricaricare; coprire click e tastiera. Verificare anche fallback dell'header da ingresso diretto, tutti gli ambiti ammessi, catena fino alla Home e ingresso con return/bozza, senza allargare owner/policy né modificare blocco o dati. I due segmenti locali sono la prova del difetto, non la verifica di un correttivo.
+
+Guida fisica ferma sul rilievo; nessuna ripetizione chiesta. Quattro MD e rapporto tecnico privato aggiornati localmente; runtime293, versione, commit, GitHub e Hosting invariati.
+
 <a id="destinatari-1293-pubblico-2026-11-21"></a>
 
 ## APP1.2.293 — entrambi i ritorni Destinatari pubblicati

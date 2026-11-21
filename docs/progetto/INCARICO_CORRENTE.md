@@ -1,5 +1,17 @@
 # Incarico corrente
 
+<a id="regole-tab-1294-2026-11-21"></a>
+
+## Ordine294 — ritorno alla linguetta scelta
+
+Diego ordina correzione, PR, merge e deploy con nuova versione, MD/GitHub e successivo collaudo dal cellulare. Autorizzati delta minimo e regressioni, confezione1.2.294, due GO indipendenti sulla testa finale, CI PR/master/validate Hosting concordi e production protetto, sola pubblicazione Hosting e verifica pubblica. Base734f61024f3059863652a67baa359e970a2983e0, ramo codex/rules-tab-return-294-20261121; root unico scrittore e supporti in lettura. Conservare blocco, lease, inattività, Auth/chiavi, owner/policy, backend/workflow/protezioni, bozze/return e lotti Claude. L'ordine supera per questo solo difetto il precedente limite di diagnosi. [Evidenze](../evidenze/COLLAUDI.md#regole-tab-1294-2026-11-21).
+
+<a id="destinatari-1293-telefono-2026-11-21"></a>
+
+## Seguito guidato293 — diagnosi della linguetta Regole
+
+Nell'ordine di riprendere il collaudo, conservati i quattro PASS TEL293-F11–F14 e registrato il [F16 misto](../evidenze/COLLAUDI.md#regole-tab-1293-2026-11-21): configuratore aperto, catena delle pagine e continuità della Vault riuscite; linguetta ripristinata errata. Diagnosi/probe locale sul runtime invariato e proposta minima concluse, senza ripetizione fisica. Aggiornamenti dei quattro MD nel mandato; root unico scrittore e supporti in lettura. Nessun nuovo runtime, commit, PR, merge o Hosting dedotto dalle risposte, né chiusura C1/C2.
+
 <a id="destinatari-1293-pubblico-2026-11-21"></a>
 
 ## Ordine293 eseguito — ricevuta e ricollaudo

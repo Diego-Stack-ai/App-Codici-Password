@@ -1,7 +1,7 @@
 import {beginFrameLogout,handleFrameBack,navigateDocument} from './frame-navigation.js';
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.293';
+import { auth } from './firebase-config.js?v=1.2.294';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
@@ -125,7 +125,6 @@ export async function initComponents() {
             const headerRight = createElement('div', { id: 'header-right', className: 'header-right' });
 
             if (isHome) {
-                // EXCEPTION 2.1: Home Page Left -> Avatar Utente (V7.0 Standard)
                 const avatarLink = createElement('button', {
                     id: 'header-user-avatar',
                     type: 'button',
@@ -166,7 +165,11 @@ export async function initComponents() {
                     fallbackHref = 'impostazioni.html';
                 } else if (path.endsWith('privacy.html') || path.endsWith('termini.html')) {
                     fallbackHref = 'impostazioni.html';
-                } else if (path.endsWith('configurazione_automezzi.html') || path.endsWith('configurazione_documenti.html') || path.endsWith('configurazione_generali.html')) {
+                } else if (path.endsWith('configurazione_automezzi.html')) {
+                    const domain = urlParams.get('domain');
+                    fallbackHref = ['personal', 'vehicles', 'home', 'health', 'sport', 'contracts', 'user-company', 'company'].includes(domain)
+                        ? `regole_scadenze.html?domain=${encodeURIComponent(domain)}` : 'regole_scadenze.html';
+                } else if (path.endsWith('configurazione_documenti.html') || path.endsWith('configurazione_generali.html')) {
                     fallbackHref = 'regole_scadenze.html';
                 } else if (path.endsWith('archivio_account.html')) {
                     fallbackHref = 'impostazioni.html';
@@ -211,8 +214,6 @@ export async function initComponents() {
             if (!isAuth) {
                 if (isHome) {
                     const user = auth.currentUser;
-                    // [FIX V8.1] Fallback neutro: email-prefix se disponibile, altrimenti '...'
-                    // Evita la parola 'Utente' che l'utente interpreta come un errore.
                     const initialName = user?.displayName?.split(' ')[0] || user?.email?.split('@')[0] || '...';
 
                     const greetingCont = createElement('button', {
@@ -326,7 +327,6 @@ export async function initComponents() {
 
             const footerRight = createElement('div', { id: 'footer-right-actions', className: 'header-right' });
 
-            // Settings Link
             if (!isAuth) {
                 if (!isOnSettings) {
                     const settLink = createElement('div', { id: 'footer-settings-link' });

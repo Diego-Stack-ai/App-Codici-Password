@@ -43,8 +43,8 @@ async function ready(f,file){
   assert.fail('Real header return must retain the frame at '+file+': '+JSON.stringify(actual)+'; '+error.message);
  }
 }
-async function fixture(initial='home_page.html'){
- const f=await harness.open('home_page.html',{graphics:'tre-livelli',theme:'light',palette:'lavender'});
+async function fixture(initial='home_page.html',options={}){
+ const f=await harness.open('home_page.html',{graphics:'tre-livelli',theme:'light',palette:'lavender',...options});
  try{
   await f.page.goto(harness.base+'/login.html');
   await f.page.goto(harness.base+'/app.html?route='+encodeURIComponent('/'+initial));
@@ -553,5 +553,99 @@ for(const method of ['push','hash','native'])test('unmanaged child '+method+' us
   await ready(f,'profilo_privato.html');
   if(method==='hash')await f.page.waitForFunction(()=>new URL(location.href).searchParams.get('route').endsWith('#documenti-view-container'));
   await back(f);await ready(f,'home_page.html');await intact(f);
+ }finally{await f.context.close();}
+});
+
+
+// Actual rule tab, producer, editor and shared-header returns. Records remain local.
+const ruleDomains=['vehicles','home','health','sport','contracts','user-company','company'];
+const ruleSeeds=[{path:'users/synthetic-local-only/settings/generalConfig',value:{
+ deadlineTypes:ruleDomains.filter(d=>d!=='vehicles').map(domain=>({id:'tab-'+domain,name:'Synthetic '+domain,domain,freq:7,period:14,
+  emailObjects:[{id:'object-'+domain,objectText:'Synthetic object',freq:7,period:14}]})),emailTemplates:['Synthetic message']}}];
+const ruleOptions={memorySeeds:ruleSeeds};
+async function standaloneReady(f,file){
+ await f.page.waitForFunction(file=>location.pathname==='/'+file&&window.__viewTour?.ready,file);
+ assert.equal(await f.page.evaluate(()=>window.__viewTour.bootError),undefined);
+ assert.deepEqual(await f.page.evaluate(()=>window.__viewTour.errors),[]);
+}
+async function noRuleWrites(f){assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('ui313-local-mutation-count')||0)),0);}
+for(const framed of [true,false])for(const domain of ruleDomains)test('rules selected tab '+domain+' survives real editor Back '+(framed?'framed':'standalone'),{timeout:45000},async()=>{
+ const f=framed?await fixture('home_page.html',ruleOptions):await harness.open('home_page.html',ruleOptions);
+ const ui=()=>framed?child(f):f.page,wait=file=>framed?ready(f,file):standaloneReady(f,file);
+ try{
+  await ui().locator('a[href="impostazioni.html"]').click();await wait('impostazioni.html');
+  await ui().locator('#btn-expiry-rules').click();await wait('regole_scadenze.html');
+  const length=await f.page.evaluate(()=>history.length);
+  await ui().evaluate(()=>{window.rulesDocumentProbe='same-local-document';history.replaceState({syntheticRuleMarker:3},'',location.href);});
+  await ui().locator('#deadline-tab-'+domain).click();
+  assert.equal(new URL(ui().url()).searchParams.get('domain'),domain);
+  assert.equal(await ui().evaluate(()=>window.rulesDocumentProbe),'same-local-document','tab change keeps the child document');
+  assert.deepEqual(await ui().evaluate(()=>history.state),{syntheticRuleMarker:3});
+  assert.equal(await f.page.evaluate(()=>history.length),length,'selecting a tab creates no history entry');
+  const hubUrl=ui().url();
+  await ui().locator('#deadline-panel-'+domain+' a[href^="configurazione_automezzi.html"]').first().click();await wait('configurazione_automezzi.html');
+  assert.equal(await ui().locator('#vehicle-rule-editor').isVisible(),true);
+  await ui().locator('#header-left button.btn-icon-header').click();await wait('regole_scadenze.html');
+  assert.equal(ui().url(),hubUrl,'exact selected hub URL restored');
+  assert.equal(await ui().locator('[data-deadline-domain][aria-selected="true"]').getAttribute('data-deadline-domain'),domain);
+  assert.equal(await ui().locator('#deadline-panel-'+domain).isVisible(),true);
+  await ui().locator('#header-left button.btn-icon-header').click();await wait('impostazioni.html');
+  await ui().locator('#header-left button.btn-icon-header').click();await wait('home_page.html');
+  if(framed)await intact(f);await noRuleWrites(f);
+ }finally{await f.context.close();}
+});
+for(const framed of [true,false])test('rules keyboard tab preserves return query hash and current entry '+(framed?'framed':'standalone'),{timeout:45000},async()=>{
+ const target='regole_scadenze.html?return='+encodeURIComponent('aggiungi_scadenza.html?id=doc-0')+'&domain=vehicles'+(framed?'':'#deadline-hub-title');
+ const f=framed?await fixture(target,ruleOptions):await harness.open('regole_scadenze.html',{...ruleOptions,query:new URL(target,'https://example.invalid/').search+new URL(target,'https://example.invalid/').hash});
+ const ui=()=>framed?child(f):f.page;
+ try{
+  const previous=new URL(ui().url());const length=await f.page.evaluate(()=>history.length);
+  await ui().locator('#deadline-tab-vehicles').press('ArrowRight');
+  const selected=await ui().locator('[data-deadline-domain][aria-selected="true"]').getAttribute('data-deadline-domain');
+  const url=new URL(ui().url());assert.equal(selected,'home');assert.equal(url.searchParams.get('domain'),selected);
+  assert.equal(url.searchParams.get('return'),previous.searchParams.get('return'));assert.equal(url.hash,previous.hash);
+  assert.equal(await f.page.evaluate(()=>history.length),length);
+  await ui().locator('#deadline-tab-home').press('Home');
+  assert.equal(new URL(ui().url()).searchParams.get('domain'),'personal');
+  assert.equal(await ui().locator('#deadline-panel-personal').isVisible(),true);
+  await ui().locator('#deadline-tab-personal').press('End');
+  assert.equal(new URL(ui().url()).searchParams.get('domain'),'company');
+  await ui().locator('#deadline-tab-company').press('ArrowLeft');
+  assert.equal(new URL(ui().url()).searchParams.get('domain'),'user-company');
+  assert.equal(await f.page.evaluate(()=>history.length),length,'whole keyboard sequence creates no history entry');
+  if(framed)await intact(f);await noRuleWrites(f);
+ }finally{await f.context.close();}
+});
+for(const framed of [true,false])for(const domain of (framed?['vehicles','contracts','']:['vehicles','contracts','', 'not-allowed']))test('direct rule editor fallback domain '+(domain||'absent')+' '+(framed?'framed':'standalone'),{timeout:45000},async()=>{
+ const initial='configurazione_automezzi.html?source=deadlineConfig&rule=tour-rule'+(domain?'&domain='+domain:'');
+ const f=framed?await fixture(initial,ruleOptions):await harness.open('configurazione_automezzi.html',{...ruleOptions,query:new URL(initial,'https://example.invalid/').search}),ui=()=>framed?child(f):f.page;
+ try{
+  await ui().locator('#header-left button.btn-icon-header').click();
+  if(framed)await ready(f,'regole_scadenze.html');else await standaloneReady(f,'regole_scadenze.html');
+  assert.equal(new URL(ui().url()).searchParams.get('domain'),['vehicles','contracts'].includes(domain)?domain:null);
+  assert.equal(await ui().locator('[data-deadline-domain][aria-selected="true"]').getAttribute('data-deadline-domain'),['vehicles','contracts'].includes(domain)?domain:'personal');
+  if(framed)await intact(f);await noRuleWrites(f);
+ }finally{await f.context.close();}
+});
+
+for(const framed of [true,false])test('real new-rule producer preserves return and draft through rule tab editor '+(framed?'framed':'standalone'),{timeout:45000},async()=>{
+ const f=framed?await fixture('aggiungi_scadenza.html',ruleOptions):await harness.open('aggiungi_scadenza.html',{...ruleOptions,query:''});
+ const ui=()=>framed?child(f):f.page,wait=file=>framed?ready(f,file):standaloneReady(f,file);
+ try{
+  await ui().locator('#deadline-domain-tabs [data-deadline-domain="vehicles"]').click();
+  await ui().locator('#notes').fill('Synthetic draft retained during rule navigation');
+  await ui().locator('#btn-add-deadline-rule').click();await wait('regole_scadenze.html');
+  const before=new URL(ui().url());assert.equal(before.searchParams.get('return'),'aggiungi_scadenza.html');assert.equal(before.searchParams.get('domain'),'vehicles');
+  const draft=await ui().evaluate(()=>sessionStorage.getItem('deadline-editor-return-draft'));assert.ok(draft);
+  assert.equal(JSON.parse(draft).fields.notes,'Synthetic draft retained during rule navigation');
+  assert.equal(JSON.parse(draft).ownerUid,'synthetic-local-only');assert.equal(JSON.parse(draft).returnTarget,'aggiungi_scadenza.html');
+  await ui().locator('#deadline-tab-home').click();const hubUrl=ui().url();assert.equal(new URL(hubUrl).searchParams.get('domain'),'home');
+  assert.equal(new URL(hubUrl).searchParams.get('return'),before.searchParams.get('return'));
+  await ui().locator('#deadline-panel-home a[href^="configurazione_automezzi.html"]').first().click();await wait('configurazione_automezzi.html');
+  assert.equal(new URL(ui().url()).searchParams.has('return'),false,'editor receives no broadened return context');
+  await ui().locator('#header-left button.btn-icon-header').click();await wait('regole_scadenze.html');
+  assert.equal(ui().url(),hubUrl);assert.equal(await ui().locator('#deadline-tab-home').getAttribute('aria-selected'),'true');
+  assert.equal(await ui().evaluate(()=>sessionStorage.getItem('deadline-editor-return-draft')),draft);
+  if(framed)await intact(f);await noRuleWrites(f);
  }finally{await f.context.close();}
 });

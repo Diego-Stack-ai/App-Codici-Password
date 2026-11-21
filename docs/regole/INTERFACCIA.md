@@ -1,5 +1,11 @@
 # Interfaccia
 
+<a id="regole-tab-1294-2026-11-21"></a>
+
+## Regole — conservare la linguetta al ritorno dal configuratore
+
+La scelta della linguetta aggiorna il solo domain della voce corrente senza ricaricare o aggiungere history, preservando stato, return, query e hash ammessi. Freccia e tastiera hanno lo stesso comportamento. Il Back del configuratore attivo conserva il predecessore verificato; senza predecessore usa Regole con il dominio già ammesso, altrimenti il padre canonico. Le due configurazioni legacy conservano il fallback canonico. Nessuna nuova allowlist, preferenza globale, scrittura dei dati o modifica del blocco. [Ordine](../progetto/INCARICO_CORRENTE.md#regole-tab-1294-2026-11-21).
+
 <a id="destinatari-1293-pubblico-2026-11-21"></a>
 
 ## Ritorni Destinatari — distribuiti nella1.2.293

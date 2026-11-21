@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="regole-tab-1294-2026-11-21"></a>
+
+## Correggere il ritorno alla linguetta scelta — 21/11/2026
+
+Diego ordina il correttivo, nuova versione, PR/merge/Hosting e MD/GitHub; poi ricollaudo dal cellulare. La sezione scelta resta nella navigazione locale, senza nuove preferenze o modifiche al blocco della Vault. [Mandato](INCARICO_CORRENTE.md#regole-tab-1294-2026-11-21).
+
 <a id="destinatari-ritorni-1293-2026-11-21"></a>
 
 ## Correggere entrambi i ritorni da Destinatari — 21/11/2026

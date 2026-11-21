@@ -1,4 +1,4 @@
-import {auth, db} from '../../firebase-config.js?v=1.2.293';
+import {auth, db} from '../../firebase-config.js?v=1.2.294';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {createElement, setChildren} from '../../dom-utils.js';
 import {getCurrentLanguage, t} from '../../translations.js';
@@ -431,7 +431,7 @@ export function initDeadlineRulesHub(user) {
     const active = () => root.isConnected && !controller.signal.aborted
         && Boolean(user?.uid) && auth.currentUser?.uid === user.uid;
 
-    const activate = (domain, {focus = false} = {}) => {
+    const activate = (domain, {focus = false, persist = false} = {}) => {
         const next = tabs.find(tab => tab.dataset.deadlineDomain === domain) || tabs[0];
         if (!next || !active()) return;
         for (const tab of tabs) {
@@ -441,18 +441,25 @@ export function initDeadlineRulesHub(user) {
             tab.tabIndex = selected ? 0 : -1;
         }
         for (const panel of panels) panel.hidden = panel.dataset.deadlinePanel !== next.dataset.deadlineDomain;
+        if (persist) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('domain', next.dataset.deadlineDomain);
+            if (url.href !== window.location.href) {
+                window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+            }
+        }
         if (focus) next.focus();
     };
 
     for (const tab of tabs) {
-        tab.addEventListener('click', () => activate(tab.dataset.deadlineDomain), {signal: controller.signal});
+        tab.addEventListener('click', () => activate(tab.dataset.deadlineDomain, {persist: true}), {signal: controller.signal});
         tab.addEventListener('keydown', event => {
             if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
             event.preventDefault();
             const index = tabs.indexOf(tab);
             const nextIndex = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1
                 : event.key === 'ArrowRight' ? (index + 1) % tabs.length : (index - 1 + tabs.length) % tabs.length;
-            activate(tabs[nextIndex]?.dataset.deadlineDomain, {focus: true});
+            activate(tabs[nextIndex]?.dataset.deadlineDomain, {focus: true, persist: true});
         }, {signal: controller.signal});
     }
 
