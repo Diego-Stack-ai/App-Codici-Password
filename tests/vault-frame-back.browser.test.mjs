@@ -171,6 +171,104 @@ test('real deadline list rule Back retains the canonical list query',{timeout:60
  }finally{await f.context.close();}
 });
 
+for(const framed of [true,false])for(const entry of ['in_scadenza','urgenti'])for(const control of ['header','link'])
+test('recipient return '+control+' from '+entry+' retains the full form-list-Home chain in '+(framed?'frame':'standalone'),{timeout:60000},async()=>{
+ const f=framed?await fixture():await harness.open('home_page.html');
+ const view=()=>framed?child(f):f.page;
+ const wait=async file=>{if(framed)return ready(f,file);await f.page.waitForFunction(file=>location.pathname==='/'+file&&window.__viewTour?.ready,file,{timeout:10000});assert.equal(await f.page.evaluate(()=>window.__viewTour.bootError),undefined);};
+ try{
+  const writesBefore=await f.page.evaluate(()=>Number(sessionStorage.getItem('ui313-local-mutation-count')||0));
+  await view().locator('a[href="scadenze.html?filter='+entry+'"]').click();await wait('scadenze.html');
+  const listUrl=view().url(),selected=entry==='urgenti'?'urgent':'expiring';
+  await view().locator('#footer-center-actions .btn-fab-scadenza').click();await wait('aggiungi_scadenza.html');
+  const formUrl=view().url(),note='Bozza locale per il ritorno '+entry;
+  await view().locator('#notes').fill(note);
+  await view().locator('#btn-manage-deadline-contacts').click();await wait('gestione_destinatari.html');
+  assert.equal(new URL(view().url()).searchParams.get('return'),new URL(formUrl).pathname.slice(1)+new URL(formUrl).search);
+  await view().locator(control==='header'?'#header-left button.btn-icon-header':'#recipient-return').click();await wait('aggiungi_scadenza.html');
+  assert.equal(view().url(),formUrl,'recipient return must restore the exact editor');
+  assert.equal(await view().locator('#notes').inputValue(),note,'the owner-scoped draft must be restored');
+  if(framed)await intact(f);
+  await view().locator('#header-left button.btn-icon-header').click();await wait('scadenze.html');
+  assert.equal(view().url(),listUrl,'the next Back must reach the originating list without another recipient/editor entry');
+  assert.equal(await view().locator('.filter-chip.active').getAttribute('data-filter'),selected);
+  await view().locator('#header-left button.btn-icon-header').click();await wait('home_page.html');
+  if(framed)await intact(f);
+  assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('ui313-local-mutation-count')||0)),writesBefore,'recipient navigation must not save records');
+ }finally{await f.context.close();}
+});
+
+for(const framed of [true,false])for(const company of [false,true])for(const control of ['header','link'])
+test('recipient Account '+(company?'company':'private')+' '+control+' preserves its form query in '+(framed?'frame':'standalone'),{timeout:60000},async()=>{
+ const file=company?'form_account_azienda.html?aziendaId=doc-0':'form_account_privato.html?type=standard';
+ const f=framed?await fixture():await harness.open('home_page.html');
+ const view=()=>framed?child(f):f.page;
+ const wait=async name=>{if(framed)return ready(f,name);await f.page.waitForFunction(name=>location.pathname==='/'+name&&window.__viewTour?.ready,name,{timeout:10000});assert.equal(await f.page.evaluate(()=>window.__viewTour.bootError),undefined);};
+ try{
+  const writesBefore=await f.page.evaluate(()=>Number(sessionStorage.getItem('ui313-local-mutation-count')||0));
+  await view().locator('a[href="'+(company?'lista_aziende.html':'area_privata.html')+'"]').click();await wait(company?'lista_aziende.html':'area_privata.html');
+  if(company){
+   await view().locator('.azienda-card').filter({hasText:'Azienda inventata 0'}).locator('.card-name').click();await wait('account_azienda.html');
+  }else{
+   await view().locator('a[href="account_privati.html?type=standard"]').click();await wait('account_privati.html');
+  }
+  const listUrl=view().url();
+  await view().locator(company?'#add-company-account-link':'#add-account-btn').click();await wait(file.split('?')[0]);
+  const formUrl=view().url();
+  await view().locator('#account-name').fill('Conto sintetico per ritorno');
+  await view().locator('label[data-account-mode-choice="account-shared"]').click();
+  await view().locator('#shared-management:not(.hidden)').waitFor({state:'visible'});
+  await view().locator('.manage-recipients-link').click();await wait('gestione_destinatari.html');
+  assert.equal(new URL(view().url()).searchParams.get('return'),file);
+  await view().locator(control==='header'?'#header-left button.btn-icon-header':'#recipient-return').click();await wait(file.split('?')[0]);
+  assert.equal(view().url(),formUrl,'recipient return must retain Account/company query');
+  await view().locator('#header-left button.btn-icon-header').click();await wait(company?'account_azienda.html':'account_privati.html');
+  // The private list's existing + can already lose its predecessor in frame;
+  // this regression covers recipient -> exact form, then its canonical parent.
+  if(company||!framed)assert.equal(view().url(),listUrl,'the coordinated Account entry must retain its originating list');
+  if(company)assert.equal(new URL(view().url()).searchParams.get('id'),'doc-0');
+  if(framed)await intact(f);
+  assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('ui313-local-mutation-count')||0)),writesBefore,'opening the recipient manager must not save an Account or invitation');
+ }finally{await f.context.close();}
+});
+
+for(const framed of [true,false])test('recipient rules entry without return retains its hierarchical chain in '+(framed?'frame':'standalone'),{timeout:60000},async()=>{
+ const f=framed?await fixture('impostazioni.html'):await harness.open('impostazioni.html');
+ const view=()=>framed?child(f):f.page;
+ const wait=async name=>{if(framed)return ready(f,name);await f.page.waitForFunction(name=>location.pathname==='/'+name&&window.__viewTour?.ready,name,{timeout:10000});assert.equal(await f.page.evaluate(()=>window.__viewTour.bootError),undefined);};
+ try{
+  await view().locator('#btn-expiry-rules').click();await wait('regole_scadenze.html');
+  await view().locator('a[href="gestione_destinatari.html"]').click();await wait('gestione_destinatari.html');
+  assert.equal(await view().locator('#recipient-return').isVisible(),false);
+  await view().locator('#header-left button.btn-icon-header').click();await wait('regole_scadenze.html');
+  await view().locator('#header-left button.btn-icon-header').click();await wait('impostazioni.html');
+  if(framed)await intact(f);
+ }finally{await f.context.close();}
+});
+
+test('standalone explicit recipient return cannot treat a different query as its exact predecessor',{timeout:45000},async()=>{
+ const f=await harness.open('form_account_privato.html',{query:'?type=shared'});
+ try{
+  const previous=f.page.url(),target='form_account_privato.html?type=standard';
+  await f.page.goto(harness.base+'/gestione_destinatari.html?return='+encodeURIComponent(target),{referer:previous});
+  await f.page.waitForFunction(()=>window.__viewTour?.ready);
+  assert.equal(await f.page.evaluate(()=>document.referrer),previous,'negative fixture must have the real internal, different-query referrer');
+  await f.page.locator('#recipient-return').click();
+  await f.page.waitForFunction(()=>location.pathname==='/form_account_privato.html'&&window.__viewTour?.ready);
+  assert.equal(f.page.url(),harness.base+'/'+target,'an explicit different query must use its validated target instead of Back');
+ }finally{await f.context.close();}
+});
+
+for(const target of ['https://example.invalid/form_account_privato.html','login.html','../aggiungi_scadenza.html'])
+test('standalone recipient return rejects unapproved target '+target,{timeout:45000},async()=>{
+ const f=await harness.open('gestione_destinatari.html',{query:'?return='+encodeURIComponent(target)});
+ try{
+  assert.equal(await f.page.locator('#recipient-return').isVisible(),false);
+  await f.page.locator('#header-left button.btn-icon-header').click();
+  await f.page.waitForFunction(()=>location.pathname==='/home_page.html'&&window.__viewTour?.ready);
+ }finally{await f.context.close();}
+});
+
 const selectedDeadlineFilters=[
  ['all',null,'doc-0'],['urgent','urgenti','doc-0'],
  ['expiring','in_scadenza','doc-1'],['completed','archiviate','doc-3']

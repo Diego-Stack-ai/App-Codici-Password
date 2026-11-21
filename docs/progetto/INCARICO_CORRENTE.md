@@ -1,5 +1,23 @@
 # Incarico corrente
 
+<a id="destinatari-ritorni-1293-2026-11-21"></a>
+
+## Ordine293 — entrambi i ritorni da Destinatari
+
+Diego ordina la correzione di freccia e link esplicito, poi PR, merge e deploy con nuova versione e MD/GitHub, infine ricollaudo dal cellulare. Autorizzati implementazione minima, regressioni del percorso completo, confezione1.2.293 e pubblicazione solo Hosting dopo due GO indipendenti sulla testa finale, CI PR/master/validate Hosting concordi, master e digest verificati e production protetto. Base cf15df64cab6ede2bad17992c642f8be8ffc9600, ramo codex/recipient-returns-293-20261121; root unico scrittore e supporti in lettura. [Diagnosi](../evidenze/COLLAUDI.md#destinatari-freccia-1292-2026-11-21). Superato il limite di sola diagnosi per questi due ritorni. Conservare bozze/contesti/allowlist, lease, inattività, blocco, Auth/chiavi, backend, workflow e protezioni; lotti Claude separati. Ricevuta pubblica nei documenti esistenti senza secondo Hosting, prova fisica successiva.
+
+<a id="destinatari-freccia-1292-2026-11-21"></a>
+
+## Seguito del controllo292 — diagnosi Destinatari
+
+Il chiarimento di Diego identifica la freccia dentro Destinatari, non il link Torna al modulo precedente. Registrare il [ritorno errato alla Home e la diagnosi locale](../evidenze/COLLAUDI.md#destinatari-freccia-1292-2026-11-21), distinguendo il successivo ritorno del link verificato soltanto nel banco. Nel mandato di osservazione/probe, root unico scrittore e supporti in lettura; nessuna ripetizione fisica richiesta, nessun cambiamento runtime, commit, PR, merge o Hosting dedotto. Consegnare la proposta per il percorso completo; blocco e tre lotti Claude restano separati.
+
+<a id="nuova-scadenza-1292-telefono-2026-11-21"></a>
+
+## Seguito guidato292 — filtri ricollaudati, destinatari successivi
+
+Nell'ordine di riprendere il collaudo dal cellulare, registrati [due PASS riferiti](../evidenze/COLLAUDI.md#nuova-scadenza-1292-telefono-2026-11-21) dopo la conferma292: ritorno dal modulo a Scadenze e Urgenze, senza nuovi sblocchi. Proseguire una prova alla volta con apertura Destinatari e Torna al modulo precedente, senza compilazione/salvataggi. Nessuna autorizzazione a nuovi cambi runtime, commit, PR, merge o Hosting dedotta da queste risposte; aggiornamenti locali della matrice e controlli documentali nel mandato in corso.
+
 <a id="nuova-scadenza-filtro-1292-pubblico-2026-11-21"></a>
 
 ## Ordine292 eseguito — ricevuta e ricollaudo

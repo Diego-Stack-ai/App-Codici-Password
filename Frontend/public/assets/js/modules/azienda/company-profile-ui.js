@@ -1,6 +1,6 @@
 import {frameMediaLifetime} from '../core/vault-frame-client.js';
 import { changeProfileAccount, unlinkProfileAccount } from '../shared/profile-account-management.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.292';
+import { auth, db } from '../../firebase-config.js?v=1.2.293';
 import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
 import { doc, runTransaction, deleteField, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { createElement, setChildren } from '../../dom-utils.js';
@@ -201,7 +201,7 @@ export function initCompanyProfile(data, companyId, {buildVCard, reload, openQRZ
         const lifetime = frameMediaLifetime({signal: new AbortController().signal, requireUnlocked: false});
         const value = buildVCard({...data, qrConfig: config});
         const isCurrent = () => lifetime.valid() && ownerUid && auth.currentUser?.uid === ownerUid && qr.isConnected && opener?.isConnected;
-        return import('../shared/contact-export.js?v=1.2.292').then(module => {
+        return import('../shared/contact-export.js?v=1.2.293').then(module => {
             if (isCurrent()) return module.openContactExport({value, holder: {company: true, companyName: data.ragioneSociale},
                 mode, opener, isCurrent, signal: lifetime.signal, target: {scope: 'company-vcard', companyId}});
         }).catch(() => {if (isCurrent()) showToast(t('contact_export_failed'), 'error');}).finally(() => lifetime.dispose());

@@ -1,5 +1,23 @@
 # Programma
 
+<a id="destinatari-ritorni-1293-2026-11-21"></a>
+
+## Correggere e pubblicare293, poi riprendere il telefono
+
+[Mandato](INCARICO_CORRENTE.md#destinatari-ritorni-1293-2026-11-21) per i due ritorni Destinatari: implementare ingresso coordinato e ritorno senza duplicati, verificare bozza e intera catena fino alla Home in cornice/standalone, inclusi Account e Regole. Confezionare293, riesaminare testa immutabile e completare PR/master/Hosting e verifica pubblica. Registrare MD/GitHub e poi chiedere soltanto conferma versione e ricollaudo mirato, una prova alla volta. Non ripetere automaticamente i due PASS292 precedenti né dedurre19/22 o C1/C2 dai test locali.
+
+<a id="destinatari-freccia-1292-2026-11-21"></a>
+
+## Fermare il giro292 sul ritorno Destinatari
+
+Il [FAIL della freccia e il secondo difetto locale della catena](../evidenze/COLLAUDI.md#destinatari-freccia-1292-2026-11-21) richiedono una correzione distinta prima di riprendere il telefono. Proposta: conservare il predecessore all'apertura di Destinatari e unificare il ritorno al modulo senza duplicati; verificare poi modulo → lista con filtro di origine → Home, oltre agli ingressi Account e Regole. Non allargare policy, allowlist o blocco. I precedenti due PASS292 e18/22 route positive cumulative sono conservati; configuratore e due legacy restano successivi con i propri prerequisiti. Nessuna pubblicazione dedotta dal rilievo.
+
+<a id="nuova-scadenza-1292-telefono-2026-11-21"></a>
+
+## Dopo i due PASS292 — Destinatari e ritorno al modulo
+
+[Versione e ritorni Scadenze/Urgenze confermati](../evidenze/COLLAUDI.md#nuova-scadenza-1292-telefono-2026-11-21). Riprendere i soli residui: prima Home → Scadenze → + → Gestisci destinatari → Torna al modulo precedente, senza compilare, aggiungere contatti o salvare; poi configuratore da regola esistente. Le due legacy richiedono stato/fixture controllati per i default automatici. Non chiedere di ripetere per default i due giri appena superati;18/22 route positive cumulative non chiudono tutte le famiglie. Un gesto/caso alla volta; blocco e lotti Claude invariati, nessun nuovo rilascio necessario per registrare questi esiti.
+
 <a id="nuova-scadenza-filtro-1292-pubblico-2026-11-21"></a>
 
 ## Dopo292 — conferma e ricollaudo dal cellulare
