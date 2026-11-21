@@ -159,6 +159,12 @@ Fonte diretta: Diego, «Pubblica». Autorizzata la pubblicazione1.2.283 dello st
 Eseguiti il comando «pubblica» del 17/11 e la conferma del 18/11: #330, gate verdi, approvazione production manuale di Diego nella #1212 e verifica pubblica completa PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1282-pubblico-2026-11-18). Conservata la scelta del contatto: alternative native effettive, menu solo con due funzioni, unico salvataggio browser in loro assenza. Questo seguito aggiorna evidenze e stato; non riapre scelte grafiche o incarichi di sicurezza.
 
 
+<a id="errori-silenziosi-decisione-2026-11-21"></a>
+
+## 17/11/2026 — caccia agli errori silenziosi prima del controllo finale (registrata il 21/11)
+
+Fonte: Diego a Claude in chat il 17/11, dopo la lettura in sola lettura di un repository pubblico di configurazioni per assistenti di programmazione. Decisione: **si adotta soltanto l'idea della caccia agli errori silenziosi**, riscritta nel nostro stile, come passo della fase sicurezza **prima** dell'audit finale e di PentAGI; è pianificata, non eseguita. Non si installa il pacchetto, né hook, né skill esterne; non si adotta il controllo dei percorsi dei pulsanti («sappiamo già che fanno il loro lavoro»). Motivi del rifiuto del resto: contenuti per altri linguaggi e settori, nessun riferimento a Firebase, service worker o PWA, hook che modificano file e comandi o inviano testo di sessione a un modello, memoria che impara senza controllo, strumento di scansione che scarica codice con `npx`. [Passo pianificato](PROGRAMMA.md#errori-silenziosi-programma-2026-11-21) e [censimento storico](../evidenze/COLLAUDI.md#errori-silenziosi-censimento-2026-11-17). Non è un incarico attivo né autorizza modifiche, versioni o rilasci.
+
 <a id="rilascio-1282-decisione-2026-11-17"></a>
 
 ## 17/11/2026 — pubblicare il correttivo contatto
@@ -285,6 +291,8 @@ Questa destinazione non attesta i gate mancanti né attiva il vecchio singleton.
 <a id="materiali-classica-entrambe-grafiche-2026-11-14"></a>
 
 ## 14/11/2026 — materiali Classica e colori corretti in entrambe le grafiche
+
+> **Voce storica, parzialmente superata.** Le differenze funzionali e strutturali fra Classica e Nuova qui descritte (marcatore `classica`, comando Modifica/Fine, filigrane e tipografia riservati alla Nuova) sono state superate dalla decisione del 16/11/2026 ([base evoluta comune](#livree-comuni-decisione-2026-11-16), pubblicata nella 1.2.278): oggi un'unica interfaccia evoluta con livrea monocolore in Classica e bicolore in Nuova. Restano valide le parti su vetro, colori a palette e header; vedi anche il [contratto](../regole/INTERFACCIA.md#livree-comuni-ui-2026-11-16).
 
 Fonte: ordine di Diego trasmesso da Codex sulla [#308](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/308#issuecomment-6881634027) e confermato a Claude in chat («procedi»): effetti della Classica (vetro, sfocatura, ombre, movimento) con le sette palette, le correzioni cromatiche e i ruoli attuali dei pulsanti, in **entrambe** le grafiche; header del Profilo di nuovo trasparente. Supera il limite «sola Nuova / Classica invariata» e le superfici piene «Rifinita». Scelta tecnica dichiarata: in Classica il segno `data-ui-revision` diventa `classica` invece di sparire, così colori, ruoli e materiali sono condivisi mentre Modifica/Fine, filigrane e tipografia delle etichette restano della Nuova; la preferenza salvata (`ui_graphics`) e i flussi non cambiano. Eccezione motivata: le schede a scorrimento degli elenchi restano piene perché coprono le azioni sottostanti. Nessun merge, versione o deploy da questa decisione.
 

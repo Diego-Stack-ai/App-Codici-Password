@@ -56,19 +56,25 @@ Questa configurazione è disponibile nella **1.2.278 pubblicata**; [stato e rice
 
 In **Impostazioni → Tema App → Grafica**, Classica e Nuova offrono le stesse funzioni, disposizione e modalità Modifica/Fine. Entrambe mostrano l'iconcina accanto al titolo, la piccola filigrana finale e la filigrana di sfondo. **Classica** usa il colore principale scelto; **Nuova** abbina un secondo colore alle icone e ai comandi previsti e rende più intenso del 15% il colore delle icone delle card. La scelta non cambia i colori di errore o avviso, le personalizzazioni né il funzionamento della Vault. Il faro mantiene il suo effetto attuale. Disponibilità pubblicata nello [stato corrente](../progetto/STATO.md#stato-corrente).
 
-## Navigazione con la cornice ordinaria — candidata 1.2.275
+<a id="cornice-ordinaria-guida-1275"></a>
+
+## Navigazione con la cornice ordinaria — introdotta nella 1.2.275
 
 Quando la cornice è disponibile e la connessione è attiva, sblocchi la Vault una volta e puoi passare tra le pagine private senza reinserire la Master Password a ogni passaggio. Dopo l'aggiornamento occorre ricaricare una volta l'app; nella navigazione con cornice l'indirizzo principale resta app.html.
 
-Il blocco per inattività, logout e revoca resta attivo. Ricaricare o chiudere l'intera app, oppure una sospensione lunga, può richiedere un nuovo sblocco: la Master Password non viene salvata permanentemente. La grafica Nuova/Classica non governa la cornice, e «Registra eventi della cornice» accende soltanto la diagnostica. La pubblicazione e i dispositivi effettivamente provati sono indicati nello [stato corrente](../progetto/STATO.md#stato-corrente); questa nota descrive la candidata e non anticipa l'attivazione.
+Il blocco per inattività, logout e revoca resta attivo. Ricaricare o chiudere l'intera app, oppure una sospensione lunga, può richiedere un nuovo sblocco: la Master Password non viene salvata permanentemente. La grafica Nuova/Classica non governa la cornice, e «Registra eventi della cornice» accende soltanto la diagnostica. La pubblicazione e i dispositivi effettivamente provati sono indicati nello [stato corrente](../progetto/STATO.md#stato-corrente); la cornice ordinaria è disponibile dalla 1.2.275 per gli utenti verificati e ammessi; questa sezione descrive come si usa e non attesta le prove sui singoli dispositivi.
 
-## Schermata di blocco — produzione 1.2.270, 11/11/2026
+## Schermata di blocco — storico della 1.2.270, 11/11/2026
+
+> **Sezione storica.** Descrive lo stato osservato l'11/11/2026, quando la cornice era ancora un pilota con il canary spento. Dalla 1.2.275 la cornice ordinaria è disponibile per tutti gli utenti verificati e ammessi: per lo stato di oggi vedi [Navigazione con la cornice ordinaria](#cornice-ordinaria-guida-1275) e lo [stato corrente](../progetto/STATO.md#stato-corrente). La schermata «Vault bloccata / Sblocca e riprendi» resta quella descritta qui per i blocchi effettivi.
 
 Nella 1.2.270, dopo il blocco della cornice compare **Vault bloccata** e il comando **Sblocca e riprendi**. Se la sessione e ancora ammessa, dopo il nuovo sblocco ritrovi la pagina precedente. Se l'accesso alla cornice non e piu disponibile, resta il normale percorso verso Home. La schermata comune puo comparire per motivi diversi: non indica sempre inattivita.
 
 La 1.2.270 e pubblicata e verificata sul sito. Su Chrome QA2 la navigazione interna del percorso provato mantiene lo sblocco; ricaricando l'intera cornice dal pulsante Chrome e invece atteso un nuovo sblocco. Nell'ultimo collaudo Diego conferma una sola nuova Master e ritorno alla stessa pagina Account Personali/categoria, poi il canary spento. Sono risultati circoscritti ai percorsi provati, senza abilitare altri account o certificare tutti i dispositivi. Con cornice spenta, il normale percorso standalone puo richiedere la Master Password al cambio pagina. La voce enabled nel rapporto della Diagnostica indica il registro locale e non l'interruttore Firebase. Per verificare la versione caricata nella tua scheda, apri la Home e leggi «Versione app» in fondo; su Chrome desktop puoi prima premere Ctrl+R. La verifica del sito e i singoli percorsi provati non certificano l'aggiornamento di ogni scheda/PWA o il completamento di C1. [Stato corrente](../progetto/STATO.md#stato-corrente). Le sezioni sotto conservano i checkpoint precedenti.
 
-## Cornice in collaudo — produzione 1.2.269, 11/11/2026
+## Cornice in collaudo — storico della 1.2.269, 11/11/2026
+
+> **Sezione storica.** «Produzione 1.2.269», «canary spento» e «prove da completare» descrivono l'11/11/2026 e **non sono lo stato attuale**: vedi lo [stato corrente](../progetto/STATO.md#stato-corrente) e la sezione [Navigazione con la cornice ordinaria](#cornice-ordinaria-guida-1275). Il testo sotto è conservato come cronologia.
 
 La produzione attestata è **1.2.269**. Il canary della cornice resta spento; il normale sblocco delle pagine resta invariato. Il rilascio corregge la visibilità e l'interazione della finestra di sblocco nella cornice; le prove della navigazione persistente restano da completare e il canary resta OFF fino a un nuovo ordine personale. Per verificare la versione caricata, riapri la Home dell'app e leggi «Versione app» in fondo; su Chrome desktop puoi prima usare Ctrl+R. La conferma di v1.2.269 su un browser non certifica l'aggiornamento di ogni PWA installata. Il catalogo delle 31 pagine mantiene testi, comandi e target; la matrice non certifica prove su dispositivi fisici. Per stato e limiti consultare [STATO](../progetto/STATO.md#stato-corrente). Le sezioni datate successive conservano il contesto dei rilasci precedenti.
 

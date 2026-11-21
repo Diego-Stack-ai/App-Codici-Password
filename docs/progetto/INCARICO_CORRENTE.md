@@ -18,6 +18,14 @@ Esecuzione locale conclusa: delta del solo produttore + e test comportamentali e
 
 Nell'incarico di controllo l'utente conferma il ritorno corretto da Nuova azienda e segnala la perdita stabile del filtro dopo il modulo Nuova Scadenza. Completate diagnosi locale e proposta minima, [esiti](../evidenze/COLLAUDI.md#nuova-scadenza-filtro-2026-11-21). Nessun cambiamento applicativo, commit o pubblicazione dedotto dalla sola segnalazione. La guida si ferma sul caso; il seguito di correzione resta distinto dal collaudo e conserva i gate di versione/rilascio.
 
+<a id="lotto-a-incarico-2026-11-21"></a>
+
+## Lotto A — coerenza dei documenti (Claude), 21/11/2026
+
+Diego avvia il lotto A della consegna a tre incarichi, **solo documenti**, su un ramo separato da quello della PR #352 (`claude/lotto-a-docs-20261121`), con base `2f59750e2ded801282d5615c13ec22b2aa2cf592` (testa della #352, che contiene gli ultimi aggiornamenti della matrice). Perimetro: sei MD esistenti (COLLAUDI, DECISIONI, INCARICO_CORRENTE, PROGRAMMA, GUIDA, INTERFACCIA); nessun nuovo Markdown, elenco di 34 invariato. Contenuto: pianificazione (non esecuzione) della [caccia agli errori silenziosi](PROGRAMMA.md#errori-silenziosi-programma-2026-11-21) prima dell'audit finale, qualificazione come storici di riferimenti vecchi della Guida e dell'header opaco, retention Archivio, successione Classica/Nuova. Consegna come delta e riepilogo per la revisione di Codex; non applicare automaticamente il vecchio commit `4277d2be`.
+
+**Non cambia l'incarico dell'app.** Il rilascio 1.2.292 e il lavoro di Codex sul filtro di Nuova Scadenza restano il mandato applicativo corrente, descritto nella prima sezione; il comportamento del blocco della Vault non è toccato. Nessun commit applicativo, merge, versione o deploy da questo lotto. I lotti B (otto lingue) e C (residui prodotto) restano successivi e separati.
+
 <a id="cornice-ingressi-locali-2026-11-21"></a>
 
 ## Eseguire i controlli locali; Claude in parallelo — 21/11/2026

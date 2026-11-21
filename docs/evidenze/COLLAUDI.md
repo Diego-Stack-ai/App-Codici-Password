@@ -661,6 +661,14 @@ Base614504df, ramo codex/contact-options-20261117, correttivo non pubblicato. [R
 
 Produzione sempre1.2.281/6b77e6d6; nessun bump/commit/push/PR/merge/Hosting per questo seguito. Nuovo comportamento nativo su telefono ancora da provare dopo un futuro rilascio autorizzato; non trasferire il PASS Chromium al dispositivo fisico. Rimane da ricevere il riscontro di Diego sull’ingresso.
 
+<a id="errori-silenziosi-censimento-2026-11-17"></a>
+
+## Errori silenziosi — censimento iniziale in sola lettura, 17/11/2026
+
+Eseguito sul codice della **1.2.280** (`a90fd27`), senza modifiche né esecuzione di codice dell'app: scansione testuale dei 229 file JavaScript sotto `Frontend/public/assets/js` (esclusi vendor e traduzioni). Trovate **245 occorrenze**: 106 blocchi `catch` vuoti, 53 con solo un commento, 41 `catch` che restituiscono un valore neutro, 45 `.catch(() => valore neutro)`. Per area: radice 81, Impostazioni 49, moduli di base 44, dati 30, Profilo 10, condivisi 10, assistente 9, azienda 7, accesso 4, scadenze 1. File più carichi: `offline-mutation-lease.js` 24, `portable-archive-viewer.js` 18, `main-v129.js` 14, `frame-navigation.js` 12, `auth-session-fence.js` 11, `private-auth-gate.js` 11, `logout-session.js` 10.
+
+**Occorrenze non significa difetti.** In un campione molte sono pulizie motivate con commento (annullare una transazione già conclusa, chiudere una connessione già chiusa). Il conteggio non vede gli errori soltanto scritti nel registro né i ripieghi a più righe, ed è **storico**: dopo le versioni 1.2.281–1.2.291 va rifatto sulla base che sarà esaminata. Candidati da esaminare, non giudicati: lettura del verificatore della Vault ignorata e recupero dalla copia remota in `security-manager.js`, `catch` con valore neutro in `crypto-utils.js`. Nessuna classificazione definitiva eseguita e nessuna correzione. Il passo è **pianificato, non eseguito**: [programma](../progetto/PROGRAMMA.md#errori-silenziosi-programma-2026-11-21), [decisione](../progetto/DECISIONI.md#errori-silenziosi-decisione-2026-11-21).
+
 <a id="rilascio-1281-verifiche-2026-11-17"></a>
 
 ## APP1.2.281 — ricevuta completa, 17/11/2026
@@ -1073,6 +1081,8 @@ La ricevuta attesta Hosting e non un collaudo autenticato della cornice: i sei P
 <a id="materiali-classica-verifiche-2026-11-14"></a>
 
 ## Materiali Classica e colori in entrambe le grafiche — verifiche locali, 14/11/2026
+
+> **Voce storica.** Le differenze Classica/Nuova qui descritte (marcatore `classica`, funzioni riservate alla Nuova) sono state superate dalla base evoluta comune della 1.2.278, [decisione del 16/11/2026](../progetto/DECISIONI.md#livree-comuni-decisione-2026-11-16). Restano valide le misure su vetro, colori a palette e header trasparente.
 
 Candidata #308 dopo la [decisione](../progetto/DECISIONI.md#materiali-classica-entrambe-grafiche-2026-11-14), confrontata con la mappa di Codex su `338663e`. Non unita, non versionata, non pubblicata.
 
