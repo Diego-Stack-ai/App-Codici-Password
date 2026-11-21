@@ -1,5 +1,172 @@
 # Collaudi
 
+<a id="nuova-scadenza-filtro-1292-2026-11-21"></a>
+
+## Filtro Nuova Scadenza1.2.292 — confezione autorizzata
+
+Base40135f1b8e341e9b9a7df709b07dcb8d0971c75c; unico delta pubblico funzionale: scadenze.js sostituisce location.href del + con navigateDocument già importato. Il modulo e la freccia usano così il predecessore conservato dall'owner. [Riproduzione e prove prima del bump](#nuova-scadenza-filtro-2026-11-21):4 controprove rosse; dopo il delta17 mirate incluse nelle55 dell'intero file Back,199 navigazione e16 offline verdi. Nessun cambio di lease, timer, chiavi o comportamento del blocco. Annulla footer resta fuori dal correttivo.
+
+Snapshot pre-bump nuovo,307 riferimenti/112 file applicativi, guida contentVersion16/reviewed292, offline61export/347risorse, QA31pagine/126istruzioni/111target/167campi. Confronto367 pubblici senza aggiunte/rimozioni né ulteriori differenze dopo normalizzazione versione/EOL;116 file pubblici aggiornati. Il primo build locale si interrompe per il collegamento assente alle dipendenze già installate; dopo ripristino del solo collegamento, build e confronto completati senza installazioni o modifiche di dipendenze.
+
+Verifiche della confezione finale: cornice356/356, navigazione199/199, guida12/12, offline16/16, budget31pagine e4 test diagnostica PASS; sintassi252 moduli e riferimenti343 file PASS. Il controllo documentale iniziale rifiuta correttamente il collegamento temporaneo node_modules: rimosso il solo collegamento dopo i test, il controllo passa12/12 con34 MD e1684 collegamenti, senza cambiare scanner o dipendenze. Riesami sullo SHA finale e gate PR/master/Hosting ancora da completare. Banco locale con owner/transport/UI reali e dati inventati, Auth/gestore simulati: nessun nuovo esito nativo o audit completo dedotto. Produzione291 invariata fino a deploy e verifica pubblica.
+
+<a id="nuova-scadenza-filtro-2026-11-21"></a>
+
+## Nuova Scadenza — filtro perso al ritorno, 21/11/2026
+
+TEL291-F08, seguito della guida PWA iPhone1.2.291: Home → Azienda → Aggiungi Azienda → modulo vuoto → freccia ha ritorno corretto a Le mie aziende e nessun nuovo sblocco riferito. È una nuova route con percorso positivo; le osservazioni cumulative positive passano da16 a17/22, non un C1 completo. Nessun campo compilato o salvato.
+
+TEL291-F09: Home → Scadenze → Aggiungi → modulo vuoto → freccia torna alla lista ma con Tutti. Alla domanda separata l'utente conferma che rimane Tutti dopo diversi secondi: **FAIL del filtro**, distinto dal flash iniziale già noto. Il nuovo sblocco non è stato ribadito in questa risposta: non dedurre un PASS nativo della continuità né un difetto della Vault.
+
+Riprodotto sul banco dei veri produttori, header e owner con dati inventati: da in_scadenza/expiring e da urgenti/urgent, dopo il vero clic + e freccia si ottengono scadenze.html senza query e chip all. Due FAIL attesi della riproduzione; stesso owner, uno sblocco sintetico, zero clear/blocchi e scritture. Non sono nuovi FAIL fisici Urgenze né prova dello stato RAM del telefono.
+
+Catena verificata: [pulsante +](../../Frontend/public/assets/js/modules/scadenze/scadenze.js) usa location.href su button; il [transport](../../Frontend/public/assets/js/modules/core/vault-frame-transport.mjs) coordina gli anchor; al caricamento non coordinato l'[owner](../../Frontend/public/assets/js/modules/core/vault-frame-owner.mjs) perde il predecessore nel proprio registro. La freccia del modulo usa quindi il fallback Scadenze senza filtro. Non è stato osservato un doppio handler. Il precedente probe L21-02 partiva dalla lista senza filtro: conserva il suo PASS circoscritto ma non copriva questa variante.
+
+Nel seguito «separare Claude e continuare con l'app», applicata localmente la sola sostituzione del produttore + con navigateDocument già importato. Nessun cambio a owner, guardie, lease, timer o chiavi; Annulla nel footer è un percorso distinto e non incluso in questo correttivo. Nessuna nuova versione, commit o pubblicazione. Giro fisico fermo suF09, altri casi conservati; [programma](../progetto/PROGRAMMA.md#nuova-scadenza-filtro-2026-11-21).
+
+Regressione comportamentale nell'[esistente banco Back](../../tests/vault-frame-back.browser.test.mjs): le quattro controprove urgenti/in_scadenza su entrambi gli ingressi Home falliscono prima del delta, ottenendo la lista senza query. Dopo il delta passano17/17 casi mirati: tutti e quattro i filtri, due ingressi, frame/standalone e un caso con rule conservata, ciascuno con vero clic +, modulo vuoto e freccia header; la sequenza prosegue con dettaglio e ritorno. Nel frame rimangono stesso padre, un solo sblocco sintetico, zero clear/blocchi/errori; il passaggio sul modulo non aumenta le scritture del repository in memoria. La successiva esecuzione dell'intero file Back passa55/55, includendo gli stessi17, non altri17 casi distinti.
+
+Ulteriori controlli della candidata locale: navigazione199/199 e audit dei31 canonici PASS, offline16/16 e347 risorse PASS, sintassi252 moduli PASS. Un riesame in sola lettura non rileva blocchi nel delta minimo e conferma il perimetro dei test. Auth, passkey e dati sono sintetici sul banco: nessuna prova fisica iPhone o nuova attestazione C1/C2 dedotta; il ricollaudo dopo futura pubblicazione resta necessario. Il FAIL TEL291-F09 continua a descrivere la291 distribuita.
+
+<a id="cornice-ingressi-locali-2026-11-21"></a>
+
+## Cornice — ingressi reali verificati sul banco locale, 21/11/2026
+
+[Ordine di esecuzione locale e revisione Claude](../progetto/INCARICO_CORRENTE.md#cornice-ingressi-locali-2026-11-21), successivo al [raccordo della matrice](#cornice-matrice-riconciliata-2026-11-21). Base40135f1b8e341e9b9a7df709b07dcb8d0971c75c, runtime pubblicato634fff06eae9afa75b7abd40001e6e1757982f7e/1.2.291 invariati. Nessuna nuova osservazione sul telefono o esecuzione cloud.
+
+Cinque segmenti browser locali PASS, con i veri produttori/clic, moduli, header/cleanup, owner e transport. Per ciascuno: stesso padre, un solo sblocco sintetico, zero clear/blocchi inattesi, zero scritture del repository in memoria e nessun errore asincrono nel segmento osservato. Gli iniziali errori di sintassi/import del probe riguardavano soltanto il suo allestimento e sono stati corretti prima della ricevuta finale5/5; nessun FAIL applicativo dedotto da quegli errori.
+
+| ID locale | Percorso effettivamente osservato | Risultato |
+|---|---|---|
+| L21-01 | Lista aziende → pulsante Aggiungi Azienda → modifica_azienda senza id → freccia | Ritorno alla Lista aziende; condizioni comuni sopra rispettate. |
+| L21-02 | Scadenze → pulsante Aggiungi → aggiungi_scadenza → freccia | Ritorno a Scadenze; nessun campo compilato o Salva. |
+| L21-03 | Regole → Automezzi → Gestisci configurazione su regola sintetica esistente → configuratore → freccia | source=deadlineConfig, rule=tour-rule e domain=vehicles prodotti dal vero link; editor caricato e ritorno a Regole. |
+| L21-04 | Nuova Scadenza → Gestisci destinatari → gestione_destinatari → Torna al modulo precedente | return=aggiungi_scadenza.html validato e ritorno al modulo. Nessun contatto creato; sola bozza tecnica di ritorno in sessionStorage del banco. |
+| L21-05 | Regole → Contratti e documenti → Gestisci configurazione → editor generico → freccia | Dominio contracts e sorgente prodotti dal link conservati; schede generiche presenti, nessuna scheda veicolo; ritorno a Regole. È un ambito non-veicolo, non una prova di tutti i sette ambiti. |
+
+**Limiti del banco:** createTourHarness(memory=true, frameIntegration=true) riusato; il padre parte dalla pagina origine di ciascun segmento, non da un itinerario unico delle22 route. Auth/Firebase/security-manager/materiale e record sono sintetici; bootstrap/gate privato rimossi dal tour; rete esterna e Service Worker bloccati, clipboard/media/share/picker sostituiti. Browser Chromium locale a viewport telefono: non è PWA iPhone, PRF, ammissione server, cancellazione RAM o C1/C2 completo. Non sono state rieseguite per inerzia le suite356/199/78 già verdi sulla stessa logica; restano associate alla [ricevuta291](#rilascio-1291-pubblico-2026-11-20).
+
+### Precisazione sui due ingressi legacy e sulla Ricerca
+
+I menu del gestore Regole producono l'editor unificato configurazione_automezzi con source/rule/domain; [pages-init](../../Frontend/public/assets/js/pages-init.js) carica configurazione_automezzi_v2, che interpreta la sorgente e il tipo. Il nome della route non basta per dedurre un editor sbagliato. Documenti/Generali restano nel [catalogo Ricerca](../../Frontend/public/assets/js/modules/assistant/documentation-catalog.json): quindi l'assenza dai menu Regole non è assenza assoluta di un produttore.
+
+Prova pura del catalogo, ranking e conversation-engine reali, italiano/Home/record sintetici vuoti: cercare il solo titolo Configurazione Documenti o Configurazione Generali restituisce una card con la rispettiva route. Nessuna apertura delle pagine legacy in questa prova. La variante apri Configurazione Generali produce navigateTo corretto; apri Configurazione Documenti non produce navigateTo e restituisce altri risultati. Registrato **L21-R01 — limite/rilievo locale di query da approfondire**, non un nuovo FAIL fisico o una correzione distribuita.
+
+Le due legacy possono creare o integrare default all'apertura ([Documenti](../../Frontend/public/assets/js/modules/scadenze/configurazione_documenti.js), [Generali](../../Frontend/public/assets/js/modules/scadenze/configurazione_generali.js)). Prima di proporle sul telefono servono stato/fixture e possibili effetti dichiarati; non usare un URL incollato per fingere un ingresso D02 o una prova senza scritture. Queste due route restano NE/LIMITE fisico con prerequisiti, mentre quattro route hanno ora ingressi locali verificati e attendono i rispettivi riscontri sul dispositivo. Le16/22 osservazioni PWA precedenti non aumentano per questi PASS locali.
+
+### Revisione consultiva di Claude
+
+Su richiesta esplicita, Claude Code disponibile sul PC è stato eseguito in modalità restricted/plan, strumenti Read/Grep/Glob, senza shell, MCP, scritture o UI; nessun dato Vault o credenziale nel compito. Referto completato e conservato solo negli artefatti privati. I rilievi sono stati verificati dal root, non adottati come GO formale.
+
+Il richiamo alla vecchia prova funzionale QA/1.2.253 di modifica_azienda è conservato come fonte storica: non era una prova fisica PWA della cornice, che allora non era disponibile. L'ipotesi di assenza assoluta degli ingressi legacy non comprendeva la Ricerca; quella di instradamento errato dal solo nome Automezzi non comprendeva l'entry v2 effettiva. L21-05 e la lettura della v2 non confermano quel difetto per il segmento provato. Rimangono il rilievo di query L21-R01 e i limiti legacy sopra, senza allargare l'incarico a modifiche dell'app.
+
+<a id="cornice-matrice-riconciliata-2026-11-21"></a>
+
+## Cornice ordinaria — matrice riconciliata e residui, 21/11/2026
+
+Fonte: nuovo ordine in [INCARICO_CORRENTE](../progetto/INCARICO_CORRENTE.md#cornice-matrice-riconciliata-2026-11-21), [19 requisiti conservati](#cornice-b2-lista-2026-11-09), [metodo AUTO + giro fisico](../procedure/COLLAUDI.md#cornice-c1-e2e-piano-2026-11-12) e risposte della sessione guidata. Produzione 1.2.291 dal sorgente 634fff06eae9afa75b7abd40001e6e1757982f7e; baseline documentale 40135f1b8e341e9b9a7df709b07dcb8d0971c75c. Nessuna nuova esecuzione applicativa, cloud o prova fisica in questa riconciliazione.
+
+La [v2 ordinaria](../regole/VAULT.md#cornice-ordinaria-vault-2026-11-14) supera il pilot individuale. Le matrici canary/fasi sotto restano storico: nessuna modifica dei loro verdetti, riaccensione del pilot, nuovo claim o ripetizione automatica di due coorti. C1 è la copertura dei requisiti; C2 è il raccordo delle ricevute e il riesame per la chiusura, non una nuova attivazione. I sei PASS QA2/Chrome 270 non sono trasferiti agli altri ambienti.
+
+**Legenda:** PASS riferito = azione/esito confermati dall'utente, limitati al percorso; PARZ = sottocasi acquisiti, famiglia non completa; NE = manca una prova pertinente; H = ricevuta storica, L = laboratorio locale. NE non significa difetto. Mancano modello/build iOS e versioni del browser: non inventarli. Le versioni di contesto erano confermate all'inizio del giro, non rilette a ogni azione; nessun orario o misura RAM ricostruiti dal dialogo. Dettagli tecnici personali restano fuori Git.
+
+### Evidenze riutilizzate
+
+| Fonte | Ambiente/versione | Acquisito e limite |
+|---|---|---|
+| E01 H | QA2/Chrome Windows 1.2.270 | [Sei sottocasi](#cornice-c1-fase1-prioritari-2026-11-13): D02 allora10 pagine, D04-core, D05-A, D06-1, D06-3, D08-local. Non diventano22 route o PASS sui telefoni. |
+| E02 | PWA iPhone, contesto 1.2.284 | [TEL284-F01–F08](#cornice-telefono-guidato-2026-11-19): navigazione, dettaglio privato, timer1 minuto/ripresa, background e schermo bloccato brevi, swipe/riapertura. Preferenza 12 ore ripristinata. TEL284-F03 è lettura, non prova timer. |
+| E03 | PWA iPhone, contesto 1.2.285 | [Logout stabile](#logout-mobile-1285-telefono-2026-11-19) e [TEL285-F10–F15](#cornice-telefono-rientro-1285-2026-11-19): rientro con Authenticator/passkey, elenco/dati/dettaglio aziendale e Ricerca. Nessuna prova RAM o altre schede. |
+| E04 | PWA iPhone, contesto 1.2.286 nella sessione | Rotellina visibile, ripresa riuscita e 12 ore ripristinate; tutte le sezioni Profilo; Anagrafica a fondo pagina verticale/orizzontale con comandi raggiungibili. Il difetto successivo della freccia resta distinto dalla geometria. |
+| E05 | PWA iPhone, contesti 1.2.287–1.2.288 nella sessione | Ritorno dal Profilo, Ricerca con tastiera/chiusura e guida; sulla 288 ritorno aziendale corretto, Note private, Account/Note condivisi e card quadrate. Nei giri espressamente confermati nessun nuovo sblocco; non estendere risposte generiche a un nuovo sottocaso. |
+| E06 | PWA iPhone, contesti 1.2.289–1.2.290 | Sulla 289 Scadenze/Urgenze tornano alla lista di origine senza nuovo sblocco; il ritorno completo alla Home non è stato ribadito separatamente, resta il flash iniziale del chip Tutti. Sulla 290 registro acceso e rapporto ricevuto; l'episodio di scadenza e la sua causa non diventano PASS del ritorno. |
+| E07 | PWA iPhone 1.2.291 confermata | Sette checkpoint sotto, cinque percorsi senza nuovi sblocchi; ricollaudo mirato completato. Non certifica C1/C2, tutte le 22 route o altri dispositivi. |
+| E08 | Telefono non precisato per il punto1; PWA iPhone per il successivo giro grafico, contesto 1.2.283 | [Fonte del punto1 e giro grafico](#telefono-1283-riscontro-grafica-2026-11-18): PASS complessivo riferito per accesso/Face ID, comando contatto nelle due Tessere, salvataggio/condivisione e nome file; il contesto del punto1 non è precisato e non viene attribuito retroattivamente alla PWA. Separatamente, QR/popup interi e richiudibili nel giro PWA. Nessuna prova delle singole API/destinazioni native, stampa, PRF o Master alternativa. |
+| E09 L | Pacchetto 1.2.291, dati inventati | [Ricevuta locale e pubblicazione](#rilascio-1291-pubblico-2026-11-20): 78 sessione/fence, 356 cornice, 199 navigazione e controlli correlati. Non sono nuovi test fisici; source/digest e limiti del banco restano quelli della ricevuta. |
+
+### Sette checkpoint acquisiti sulla1.2.291
+
+| ID | Percorso osservato | Esito riferito |
+|---|---|---|
+| TEL291-F01 | Home → Scadenze → Archiviate → dettaglio → freccia interna | PASS: elenco Archiviate corretto, nessun nuovo sblocco. |
+| TEL291-F02 | Archiviate raggiunte daF01 → freccia interna | PASS: Home utilizzabile direttamente, nessun nuovo sblocco. |
+| TEL291-F03 | Home → Privato → Archivio Account nel footer | PASS: apertura senza nuovo sblocco. |
+| TEL291-F04 | Archivio Account → freccia → Area Privata → freccia → Home | PASS: entrambi i ritorni corretti senza nuovi sblocchi. |
+| TEL291-F05 | Account Personali → Aggiungi → modulo vuoto → freccia | PASS: ritorno allo stesso elenco senza nuovo sblocco. |
+| TEL291-F06 | Azienda esistente → elenco Account → Aggiungi → modulo vuoto → freccia | PASS: stesso elenco aziendale senza salto o nuovo sblocco. |
+| TEL291-F07 | Impostazioni → Regole invio scadenze → freccia | PASS: ritorno a Impostazioni senza nuovo sblocco. |
+
+Nessun campo compilato o salvato, nessun ripristino/eliminazione. X/Annulla non è stato dedotto dalla prova della freccia. I precedenti FAIL restano datati; F01/F02 chiudono il ricollaudo di quel percorso, senza dimostrare la causa fisica del precedente episodio. Timer 12 ore e comportamento del blocco conservati.
+
+### Copertura delle 22 route ordinarie nella PWA
+
+Sedici destinazioni hanno un riscontro nella somma dei giri E02–E07, non in una singola prova D02 né tutte sulla 291. Dieci pagine del vecchio D02 QA2 non sostituiscono questo inventario. Fra le dieci destinazioni del vecchio itinerario, la PWA ha osservazioni cumulative per otto: Configurazione documenti e Destinatari restano senza riscontro. Il perimetro ordinario porta l'inventario a ventidue. Corrispondenza confrontata con FRAME_ROUTES nel [contratto eseguibile](../../Frontend/public/assets/js/modules/core/vault-frame-policy.mjs).
+
+| Route osservata | Fonte |
+|---|---|
+| home_page.html | E02/E03/E07 |
+| area_privata.html | E02/E05/E07 |
+| lista_aziende.html | E03/E05/E07 |
+| archivio_account.html | E07 |
+| account_privati.html | E02/E05/E07 |
+| form_account_privato.html | E07 |
+| dettaglio_account_privato.html | E02/E05 |
+| account_azienda.html | E03/E05/E07 |
+| form_account_azienda.html | E07 |
+| dettaglio_account_azienda.html | E03/E05 |
+| dati_azienda.html | E03 |
+| profilo_privato.html | E02/E04/E05 |
+| impostazioni.html | E02/E07 |
+| scadenze.html | E06/E07 |
+| dettaglio_scadenza.html | E06/E07 |
+| regole_scadenze.html | E07 |
+
+| Residuo D02 | Route senza riscontro fisico specifico | Controllo da completare | Responsabile |
+|---|---|---|---|
+| D02.doc | configurazione_documenti.html | Configurazione documenti; prima verificare il collegamento UI reale. | Codex: ingresso UI/banco locale; Diego: apertura e ritorno reali. |
+| D02.general | configurazione_generali.html | Configurazioni generali; apertura e ritorno senza cambiare valori. | Codex: ingresso UI/banco locale; Diego: apertura e ritorno reali. |
+| D02.company-edit | modifica_azienda.html | Modulo azienda; apertura/annullamento senza salvare. | Codex: ingresso UI/banco locale; Diego: apertura e ritorno reali. |
+| D02.deadline-form | aggiungi_scadenza.html | Modulo scadenza; apertura/annullamento senza salvare. | Codex: ingresso UI/banco locale; Diego: apertura e ritorno reali. |
+| D02.vehicle | configurazione_automezzi.html | Configurazione automezzi; ingresso da una regola esistente, senza salvare. | Codex: ingresso UI/banco locale; Diego: apertura e ritorno reali. |
+| D02.recipients | gestione_destinatari.html | Gestione destinatari; sola apertura e ritorno, senza inviti o modifiche. | Codex: ingresso UI/banco locale; Diego: apertura e ritorno reali. |
+
+Per queste sei occorre un ingresso UI effettivo e, dove necessario, una fixture già autorizzata: assenza di link/record è NE o LIMITE, non permesso di inventare link, creare dati o salvare configurazioni. Il numero sei riguarda destinazioni, non il totale di gesti o prove su tutti i dispositivi.
+
+### Matrice delle 19 famiglie — stato PWA e sottocasi residui
+
+| Famiglia | Acquisito nella PWA iPhone | Mancante per la famiglia completa |
+|---|---|---|
+| D01 avvio | PARZ E03/E04: accesso con Authenticator, passkey e Home utilizzabile. | D01.auth: preflight identità/ammissione e ingresso completo sul banco/versione dichiarati; non ripetere il login PWA soltanto per riottenere la stessa osservazione UI. |
+| D02 navigazione | PARZ E02/E03/E05/E06/E07: 16 route osservate cumulativamente. | Le sei destinazioni elencate sopra; dati pronti, ritorno corretto e continuità. Non sono22 route nella stessa sessione o tutte sulla 291. |
+| D03 sezioni/parità | PARZ E04/E05: linguette Profilo e guida/Ricerca aperte e chiuse. | D03.parity: query/anchor, copia di valore innocuo, annullamento e confronto con lo standalone; sezioni aziendali non osservate specificamente. |
+| D04 cronologia | PARZ E05/E06/E07: frecce interne e ritorni corretti nei percorsi riferiti. | D04.browser/state: Indietro/Avanti del browser, query/anchor e mancato ripristino di form sensibili; X/Annulla distinto dalla freccia. |
+| D05 reload/link/scheda | PARZ E02: chiusura con swipe e riapertura con nuovo sblocco. | D05.parent/child/link/tab: ricarica padre, ricarica solo figlio se disponibile, link privato diretto e nuova scheda isolata. Swipe non equivale a reload. |
+| D06 inattività | PARZ E02/E04: blocco a 1 minuto, ripresa e 12 ore ripristinate. | D06.activity/passive/three: attività reale rinnova, navigazione passiva non rinnova, soglia 3 minuti; ripristinare la preferenza finale. |
+| D07 background | PARZ E02: rientro breve e sblocco del telefono senza ulteriore sblocco app. | D07.expiry/lifecycle: ritorno oltre la scadenza e distinti pagehide/BFCache/freeze/scarto OS; non forzare o attribuire uno scarto non osservato. |
+| D08 logout/fence | PARZ E03: logout stabile e nuovo accesso/sblocco. FAIL 284 conservato, ricollaudo 285 riuscito. | D08.local-back/other-tab/epoch: Back dopo logout, logout da altra scheda e nuova epoca dello stesso utente; vecchie viste non riapribili. |
+| D09 biometria | PARZ E02/E03/E04: cerimonia passkey/Face ID e ingresso riusciti come riferiti. | D09.fresh/cancel/fallback: conferma fresca, annullamento/errore che non sblocca, alternativa Master. La cerimonia UI non misura PRF o RAM. |
+| D10 camera/voce | NE fisico per il requisito della cornice. | D10.media: consenso/rifiuto/annullamento scanner, camera, voce e picker; arresto stream e rifiuto del risultato tardivo. |
+| D11 notifiche | NE fisico; pushReady o i soli test locali non attestano consegna. | D11.push: worker attivo e notifica reale con app pronta/bloccata/assente, ACK/fallback/risposta tardiva e riuso PWA. |
+| D12 allegati/export/stampa | PARZ E08: QR/popup PWA interi e richiudibili. Separato il PASS complessivo contatto sul telefono non precisato, senza trasferirlo alla PWA. | D12.preview/export-print: allegato sintetico preesistente, apertura esterna/ritorno; conferma fresca, specifici picker/destinazioni non osservati e stampa annullata. Conservare il riscontro salvataggio/condivisione già acquisito senza richiederlo di nuovo come se mancasse l'intero caso contatto. |
+| D13 azioni sensibili | NE fisico completo per le cinque azioni del contratto. | D13.gates: backup/export, archivio portabile, cambio Master, condivisione e cancellazione definitiva; nuova conferma e annullamento prima di qualsiasi scrittura. |
+| D14 uscite | NE fisico per uscite esterne/top-level previste. | D14.exit/native-return: privacy/termini/login e link web senza opener; tel/mailto/picker e ritorno senza dati scaduti, senza inviare messaggi o chiamare. |
+| D15 rete/revoca | NE controllato; la lettura OFF storica e il rapporto di scadenza non sono revoca live. | D15.network/live-off: offline iniziale/perdita rete e OFF server mentre una sessione è aperta, con osservazione delimitata della revoca. |
+| D16 confini | Prove locali E09, senza nuovo PASS fisico. | D16.boundaries: raccordare origine/URL/UID/fence e canali vietati ai test reali; eventuale secondo account solo già disponibile e autorizzato, niente dump o attacchi produttivi. |
+| D17 safe area | PARZ E04: Anagrafica PWA verticale/orizzontale, fondo e comandi raggiungibili. | D17.safe-area: Safari separato e stati nativi non osservati; non estendere Anagrafica a ogni pagina/popup o a un altro browser. |
+| D18 cambio versione | NE: nessuna ricevuta di vecchio contesto mantenuto aperto durante il rilascio. | D18.real-upgrade: cornice vecchia realmente aperta attraverso un rilascio successivo, destinazione valida e recupero pulito. |
+| D19 diagnostica | PARZ E06: registro attivato e rapporto pervenuto; il gesto sul comando Copia non è stato confermato separatamente. | D19.diag-cycle: default OFF, comando Copia reale con gesto/esito riferiti, Cancella mantenendo la scelta, OFF che elimina e pulizia dopo logout/cambio account. Un getter o il solo incollaggio non certificano il comando; non serve una misura strumentale per registrare un futuro PASS riferito. |
+
+### Ambienti e chiusura
+
+| Ambiente | Stato documentato | Trattamento |
+|---|---|---|
+| PWA iPhone | E02–E08, con versione di ogni contesto e i sette checkpoint 291 sopra | Conservare i PASS circoscritti; completare solo sottocasi mancanti e metadati utili. |
+| Chrome Windows | E01 storico, sei sottocasi QA2/1.2.270 | Raccordare al perimetro ordinario/versione corrente; non ripetere automaticamente i sei né dedurre nuova certificazione. |
+| Safari iPhone | Nessuna ricevuta specifica dei 19 requisiti in questa riconciliazione | Giro breve e capacità native pertinenti, distinto dalla PWA. |
+| Chrome Android | Nessuna ricevuta specifica dei 19 requisiti in questa riconciliazione | Occorre un dispositivo reale disponibile; emulazione non sostitutiva. |
+
+Responsabilità, prerequisiti e ordine dei soli residui nel [PROGRAMMA](../progetto/PROGRAMMA.md#cornice-matrice-riconciliata-2026-11-21). Questo elenco non ordina nuove run, login automatici, invii Push, operazioni server o release. D15 richiede un'operazione globale concordata sulla policy ordinaria con una sessione aperta; D18 un contesto vecchio mantenuto davvero aperto durante un rilascio già autorizzato. C2 richiede riesame dei residui e ricevute finali, senza attribuire PASS a capacità assenti o dichiarare CORNICE CHIUSA con obbligatori mancanti. Audit generale sicurezza/prodotto resta separato.
+
 <a id="rilascio-1291-pubblico-2026-11-20"></a>
 
 ## APP 1.2.291 — cleanup tardivo pubblicato e verificato

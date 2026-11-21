@@ -1,5 +1,70 @@
 # Programma
 
+<a id="nuova-scadenza-filtro-1292-2026-11-21"></a>
+
+## Pubblicare292 e ricollaudare Nuova Scadenza
+
+[Ordine](INCARICO_CORRENTE.md#nuova-scadenza-filtro-1292-2026-11-21) ricevuto per il solo correttivo F09 con nuova versione e MD/GitHub. Completare controlli della confezione, due riesami finali, PR/CI, merge e Hosting; verificare i file online e registrare la ricevuta senza secondo Hosting. Poi confermare la versione sul telefono e provare Home → Scadenze → + → modulo vuoto → freccia: stesso filtro, nessun nuovo sblocco durante uso continuo. Non compilare/salvare per il ricollaudo. Destinatari/configuratore e legacy restano successivi con i propri prerequisiti; i lotti Claude restano separati.
+
+<a id="nuova-scadenza-filtro-2026-11-21"></a>
+
+## Nuova Scadenza — fermare il giro sul filtro, 21/11/2026
+
+[TEL291-F08 riuscito e F09 FAIL](../evidenze/COLLAUDI.md#nuova-scadenza-filtro-2026-11-21): nuova azienda apre/ritorna correttamente senza nuovi sblocchi; il modulo Nuova Scadenza torna stabilmente a Tutti. Riproduzione locale negativa con Scadenze e Urgenze, senza reset della sessione sintetica. La positività delle17 route osservate non chiude questo ritorno né C1.
+
+Non proporre altri giri o chiedere di ripetere il FAIL per una registrazione mancante. Il seguito locale applica il delta minimo del solo produttore +; regressioni e riesame sono registrati nelle evidenze. Produzione1.2.291 invariata; preparazione di nuova versione/PR e pubblicazione conservano il proprio ordine, poi ricollaudo sul telefono del ritorno dal modulo senza compilare o salvare. Destinatari/configuratore e le due legacy conservano prerequisiti e restano successivi al ricollaudo del correttivo. Il report di Claude sui sei ingressi è concluso e consultivo, con ipotesi verificate dal root.
+
+<a id="claude-consegne-separate-2026-11-21"></a>
+
+## Tre consegne separate per Claude — 21/11/2026
+
+Diego chiede di dividere il lavoro per dare poi l'ordine a Claude e continuare con l'app. Preparata consegna privata in tre lotti indipendenti: A, coerenza dei sei MD esistenti e pianificazione della caccia agli errori silenziosi; B, revisione editoriale dei testi curati Profilo/contatto/accesso e Guida nelle otto lingue; C, residui prodotto con fonti, prerequisiti, responsabilità e criteri di chiusura. Le tre analisi CLI già avviate terminano in sola lettura; le loro proposte restano bozze separate, non integrate.
+
+Prima del futuro riuso: rettificare nelle proposte documentali la collocazione contraddittoria dell'attività prima/dopo l'audit finale; distinguere nei rilievi linguistici errori semantici, glossario e registro, ricostruendo i testi completi dove il rapporto usa ellissi; nel prodotto non riaprire priorità già decise né confondere contenitore cifrato, visualizzatore e proiezione ODS. La chiave indirizzo usata da Dati azienda ma assente dai cataloghi caricati resta un rilievo separato da verificare nel lotto linguistico. Nessuna traduzione o contratto modificato; nessuna nuova attività di sicurezza, installazione o pubblicazione da queste bozze. Il correttivo F09 resta il lavoro corrente di Codex.
+
+<a id="cornice-ingressi-locali-2026-11-21"></a>
+
+## Controlli locali conclusi; prossimo riscontro fisico — 21/11/2026
+
+[Cinque segmenti reali sul banco PASS](../evidenze/COLLAUDI.md#cornice-ingressi-locali-2026-11-21): quattro ingressi disponibili con ritorno e una controprova dell'editor generico non-veicolo. Stesso owner/unlock e nessuna scrittura del repository simulato nei segmenti; limiti Auth/OS del tour espliciti. Riutilizzate le ricevute delle regressioni291, senza ripetere l'intera suite sul codice invariato. Claude ha fornito una consulenza in sola lettura, valutata dal root, senza GO formale o modifiche applicative.
+
+Prossimo passo pronto sul telefono: Home → Azienda → Aggiungi Azienda → freccia verso Le mie aziende, senza compilare né salvare. Seguono, una alla volta, Nuova Scadenza, Destinatari con Torna al modulo precedente e una regola esistente nel configuratore. Non chiedere di nuovo moduli Account o Archiviate già confermati.
+
+Documenti/Generali legacy sono restituite dalla Ricerca cercandone il titolo, ma possono scrivere default all'apertura: prima dichiarare stato/fixture ed effetti, non trattarle come due aperture innocue o riempire D02 con link artificiali. La query apri Configurazione Documenti ha un rilievo locale separato L21-R01; nessuna correzione implicita. D15, notifiche reali, altri ambienti e D18 conservano i propri ordini e prerequisiti. Produzione1.2.291 e16/22 route fisiche cumulative invariati.
+
+<a id="cornice-matrice-riconciliata-2026-11-21"></a>
+
+## Cornice — residui assegnati dopo il raccordo, 21/11/2026
+
+La [matrice riconciliata](../evidenze/COLLAUDI.md#cornice-matrice-riconciliata-2026-11-21) è la sede degli esiti: sei PASS storici QA2/Chrome 270, riscontri PWA284–290 e sette checkpoint 291/cinque percorsi. D02 ordinario ha16 route osservate cumulativamente e 6 senza prova fisica specifica; nessuna chiusura globale dedotta. La v2 è già attiva: i passaggi canary a UID/claim/coorti e l'OFF finale obbligatorio del pilot sono storico, non una nuova lista da eseguire. C2 è la chiusura documentale e il riesame.
+
+L'ordine corrente è di riconciliare e assegnare: il piano sotto non avvia prove personali o cloud. Codex può preparare/raccordare banchi e fonti locali con dati inventati; i PASS sintetici non sostituiscono OS, passkey, appunti o applicazioni native. Diego esegue i gesti reali, Codex guida e registra. Una capacità non disponibile resta NE/LIMITE motivato da decidere.
+
+| Residui | Codex può fare | Intervento di Diego / prerequisito |
+|---|---|---|
+| D01.auth | Preflight e oracoli del banco corrente; leggere esiti tecnici sanificati. | Accesso ordinario/2FA/passkey reali; nessun segreto in chat. Una run Auth produttiva richiede ordine ed effetti dichiarati. |
+| D02.doc/general/company-edit/deadline-form/vehicle/recipients | Verificare i sei ingressi UI,22 route e ritorni nel banco; censire fixture mancanti. | Aprire/chiudere le sei destinazioni senza salvare, solo dopo percorso e dati disponibili. Non rifare per default le 16 già osservate. |
+| D03.parity | Parità/tab/query/anchor e annullamento su fixture locali. | Copia di contenuto innocuo e confronto visivo reale; non ripetere le linguette già confermate. |
+| D04.browser/state | Cronologia, query/anchor e rifiuto del ripristino sensibile nel banco. | Back/Forward/gesti reali dove presenti, X/Annulla distinto dalla freccia; capacità assente registrata. |
+| D05.parent/child/link/tab | Oracoli di isolamento e destinazione, reload reali solo sul banco locale. | Reload dell'app, eventuale reload solo figlio, link diretto e nuova scheda sul browser reale; nuovo sblocco dove previsto. |
+| D06.activity/passive/three | Raccordare le prove già verdi di clock/attività; eventuali lacune del banco. | Input e attese reali per rinnovo, navigazione passiva e 3 minuti, poi ripristino preferenza. Blocco/ripresa a 1 minuto già acquisiti sulla PWA. |
+| D07.expiry/lifecycle | Test locali di limiti, ritorno e continuazioni tardive. | Ritorno oltre soglia e osservazioni lifecycle effettivamente disponibili; nessuno scarto OS inventato o indotto con strumenti non concordati. |
+| D08.local-back/other-tab/epoch | Fence/epoca e vecchi documenti nel banco con identità inventate. | Back dopo logout e altra scheda reale; nuovo accesso. Logout locale riuscito già acquisito. Altra identità solo già disponibile e autorizzata. |
+| D09.fresh/cancel/fallback | Negativi e fallback locali; non può eseguire il tuo riconoscimento biometrico. | Conferma fresca, annullamento e Master alternativa nel sistema operativo. |
+| D10.media | UI e ciclo stream/risultati tardivi nel banco sintetico. | Camera/scanner/voce/picker, consensi e annullamento reali; contenuto innocuo, nessun salvataggio. |
+| D11.push | Worker, protocollo/ACK/fallback e dati sintetici nel banco. | Notifica reale e tocchi OS nei casi pronta/bloccata/assente. Invio solo con ordine, destinatario di prova e capacità disponibili concordati. |
+| D12.preview/export-print | Preview/ritorno e conferme con allegati inventati sul banco. | Piccola fixture sintetica già approvata, specifici picker/destinazioni non osservati e stampa reale annullata. Riutilizzare il PASS complessivo contatto283 nel contesto non precisato, senza trasferirlo alla PWA; nessun export di dati reali per la sola prova. |
+| D13.gates | Gate di tutte le cinque azioni e negativi locali. | Osservare conferma e annullare prima della scrittura; niente cambio Master, cancellazioni o condivisioni reali. |
+| D14.exit/native-return | Destinazioni/top-level/opener e ritorno nel banco. | Apertura/annullamento di percorsi nativi telefono/email/picker e ritorno, senza chiamate o invii. |
+| D15.network/live-off | Algoritmi offline/revoca nel banco e analisi del rapporto sanificato. | Perdita rete reale; OFF globale durante sessione aperta soltanto con ordine operativo e finestra concordati, non con il vecchio claim pilot. |
+| D16.boundaries | Raccordare suite già verdi su origine/URL/UID/fence/canali vietati; colmare eventuali lacune locali. | Solo osservazioni reali pertinenti; seconda identità disponibile/autorizzata. Nessun dump o attacco produttivo. |
+| D17.safe-area | Geometria sintetica; mantenere il PASS Anagrafica PWA nel proprio perimetro. | Safari iPhone distinto dalla PWA e stati nativi non osservati, scroll/orientamento e comandi finali. |
+| D18.real-upgrade | Preparare traccia versioni e oracoli; leggere manifest e rapporti. | Mantenere realmente aperto il vecchio contesto durante un prossimo rilascio autorizzato. Nessun deploy aggiuntivo solo per contare versioni. |
+| D19.diag-cycle | Schema, privacy e pulizia nei test locali. | Default/opt-in, Cancella, OFF, comando Copia reale e cancellazione dopo logout/cambio account; riusare l'attivazione e il rapporto già acquisiti senza attribuire un gesto Copia non confermato separatamente o il ciclo completo. |
+| Raccordo C2 | Raccogliere prove/versioni/limiti, controlli documentali e riesame indipendente. | Decidere capacità indisponibili e operazioni eventualmente necessarie; chiusura solo dopo gli obbligatori e i GO pertinenti. |
+
+Ordine pratico:1) raccordo e lacune locali di Codex;2) soli sottocasi PWA residui e Chrome Windows;3) Safari iPhone e Android reale se disponibile;4) D15 concordata e D18 in occasione di un rilascio previsto;5) ricevuta/riesame C2. Le prove fisiche procedono una alla volta. Non fissare un numero totale di tocchi/run dalla sola matrice: ci sono 19 famiglie e 4 ambienti, con capacità/prerequisiti da registrare, non 76 giri manuali identici da ripetere. Gli altri lotti dell'app restano separati.
+
 <a id="rilascio-1291-pubblico-2026-11-20"></a>
 
 ## 1.2.291 pubblicata — conferma e ritorno in uso continuo

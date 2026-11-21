@@ -1,5 +1,41 @@
 # Incarico corrente
 
+<a id="nuova-scadenza-filtro-1292-2026-11-21"></a>
+
+## Rilascio 1.2.292 — filtro di Nuova Scadenza
+
+Diego ordina PR, merge e deploy del correttivo, nuova versione e aggiornamento MD/GitHub, poi ricollaudo dal cellulare. Autorizzati confezione292, commit/push/PR e merge dopo due GO sulla testa finale e CI verde; solo Hosting tramite workflow protetto, verifica pubblica e ricevuta. Questo ordine supera il precedente limite locale per il solo F09; i tre lotti Claude restano separati e non integrati. Base40135f1b8e341e9b9a7df709b07dcb8d0971c75c, ramo codex/frame-test-matrix-20261121; root unico scrittore, supporti in lettura. [Evidenze](../evidenze/COLLAUDI.md#nuova-scadenza-filtro-1292-2026-11-21).
+
+Snapshot pre-bump,307 riferimenti, guida16/reviewed292, offline/QA rigenerati; confronto normalizzato367 pubblici con il solo scadenze.js funzionale. Nuovi due GO sullo SHA confezionato e CI PR completa; merge con testa attesa, CI master e validate Hosting con medesimo sorgente/digest, scope hosting e master remoto invariato prima di production protetto. Lease, inattività, blocco, Auth/chiavi, backend, workflow e protezioni conservati. Nessun PASS fisico della292 dedotto; nuova prova sul telefono soltanto dopo verifica online.
+
+<a id="nuova-scadenza-filtro-2026-11-21"></a>
+
+## Rilievo durante i controlli — Nuova Scadenza, 21/11/2026
+
+Seguito dell'ordine «dividi la task per dare l'ordine poi a Claude e continuiamo con la app»: separare le tre consegne documenti/otto lingue/residui prodotto, conservandole come proposte non integrate; riprendere il difetto F09 con correzione locale minima del produttore + e regressioni sui ritorni. Le analisi Claude già avviate restano in sola lettura, senza applicazione delle proposte. Il seguito non comprende commit, PR, merge, nuova versione o pubblicazione, né modifiche al comportamento del blocco.
+
+Esecuzione locale conclusa: delta del solo produttore + e test comportamentali esistenti estesi; [esiti e limiti](../evidenze/COLLAUDI.md#nuova-scadenza-filtro-2026-11-21). Consegnato file privato con i [tre lotti](PROGRAMMA.md#claude-consegne-separate-2026-11-21); salvare il file non invia un ordine alla distinta chat di Claude. Nessun seguito applicativo o rilascio deriva automaticamente dalle bozze.
+
+Nell'incarico di controllo l'utente conferma il ritorno corretto da Nuova azienda e segnala la perdita stabile del filtro dopo il modulo Nuova Scadenza. Completate diagnosi locale e proposta minima, [esiti](../evidenze/COLLAUDI.md#nuova-scadenza-filtro-2026-11-21). Nessun cambiamento applicativo, commit o pubblicazione dedotto dalla sola segnalazione. La guida si ferma sul caso; il seguito di correzione resta distinto dal collaudo e conserva i gate di versione/rilascio.
+
+<a id="cornice-ingressi-locali-2026-11-21"></a>
+
+## Eseguire i controlli locali; Claude in parallelo — 21/11/2026
+
+Diego prosegue con i controlli e chiede di fare lavorare Claude nel frattempo. Il seguito autorizza analisi/probe locali con dati inventati, raccordo delle prove già verdi e preparazione della guida fisica una prova alla volta, superando per queste attività il precedente solo piano. Root unico scrittore; subagenti e Claude soltanto revisori in lettura. [Esiti e limiti](../evidenze/COLLAUDI.md#cornice-ingressi-locali-2026-11-21).
+
+Claude è stato incaricato tramite CLI preesistente in modalità restricted/plan con soli Read/Grep/Glob; nessun controllo del desktop, shell, MCP o scrittura delegata. Nessun login personale automatizzato, credenziale, provisioning, record produttivo, Push, policy, preferenza, installazione, commit/push/PR/merge/deploy autorizzato da questo seguito. Le due legacy richiedono prima la verifica degli effetti automatici; la prossima prova fisica pronta riguarda il modulo nuova azienda, senza compilazione o salvataggio. I precedenti PASS del telefono si conservano senza nuove certificazioni globali.
+
+<a id="cornice-matrice-riconciliata-2026-11-21"></a>
+
+## Riconciliazione della matrice cornice — ordine del 21/11/2026
+
+Diego ordina di aggiornare la matrice con le prove già superate e precisare quali mancano, quali può svolgere Codex e quali richiedono Diego. Root unico scrittore; supporti in sola lettura. Base documentale 40135f1b8e341e9b9a7df709b07dcb8d0971c75c, ramo locale codex/frame-test-matrix-20261121; app online1.2.291 invariata. [Esiti](../evidenze/COLLAUDI.md#cornice-matrice-riconciliata-2026-11-21), [responsabilità e prerequisiti](PROGRAMMA.md#cornice-matrice-riconciliata-2026-11-21).
+
+Perimetro: quattro MD esistenti, raccordo di fonti/versioni/ambienti, sette checkpoint 291 e osservazioni precedenti; criteri ordinari 22 route e 19 famiglie. Conservare le ricevute canary come storico senza trasferire PASS o ricreare oggi coorti/claim. Dettagli personali e rapporti originali restano privati. Controlli documentali e riesame della coerenza prima della consegna, senza auto-certificare C1/C2.
+
+Questo ordine pianifica e assegna: non avvia nuovi login/run produttivi, provisioning, dati, Push, cambi policy o preferenze, installazioni, commit/push/PR/merge/deploy. Le prove fisiche già riferite vengono registrate, non rieseguite. La chiusura C2 resta successiva alle evidenze obbligatorie e al riesame; nessun nuovo MD creato e nessun cambiamento all'elenco dei 34.
+
 <a id="rilascio-1291-pubblico-2026-11-20"></a>
 
 ## Ordine291 eseguito — ricevuta e ricollaudo

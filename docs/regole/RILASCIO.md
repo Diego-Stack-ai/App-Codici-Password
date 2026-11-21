@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="nuova-scadenza-filtro-1292-2026-11-21"></a>
+
+## Filtro Nuova Scadenza1.2.292 — solo Hosting
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#nuova-scadenza-filtro-1292-2026-11-21): snapshot pre-bump, versione292, guida16/reviewed292 e derivati offline/QA;367 pubblici con un solo runtime funzionale. Due nuovi GO sullo SHA finale, CI PR completa e merge con testa attesa; CI master e validate Hosting con stesso sorgente/digest, scope hosting e master invariato prima di production protetto. Nessuna modifica a backend, regole server, workflow, protezioni o blocco della Vault. Manifest dai byte Git LF, verifica pubblica integrale e GET indipendente di scadenze.js/pagine interessate. Ricevuta MD/GitHub senza secondo Hosting; ricollaudo fisico successivo e distinto. [Evidenze](../evidenze/COLLAUDI.md#nuova-scadenza-filtro-1292-2026-11-21).
+
 <a id="rilascio-1291-pubblico-2026-11-20"></a>
 
 ## APP 1.2.291 — procedura eseguita, solo Hosting
