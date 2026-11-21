@@ -1,7 +1,7 @@
 import {beginFrameLogout,handleFrameBack,navigateDocument} from './frame-navigation.js';
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.292';
+import { auth } from './firebase-config.js?v=1.2.293';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
@@ -67,7 +67,7 @@ const AUTH_PATHS = new Set([
 ]);
 
 // The frame owns Back; standalone uses safe history or the hierarchical parent.
-function navigateBack(fallbackHref, preferHistory = true) {
+export function navigateBack(fallbackHref, preferHistory = true) {
     if (handleFrameBack(fallbackHref, preferHistory)) return;
     try {
         const previous = document.referrer ? new URL(document.referrer) : null;
@@ -80,7 +80,8 @@ function navigateBack(fallbackHref, preferHistory = true) {
 
         const deadlineListParent = current.pathname === '/dettaglio_scadenza.html'
             && fallbackHref === 'scadenze.html' && previous?.pathname === '/scadenze.html';
-        if ((preferHistory || deadlineListParent) && isSafeInternalPrevious && window.history.length > 1) {
+        const exactParent = previous?.href === new URL(fallbackHref, current).href;
+        if ((preferHistory || deadlineListParent || exactParent) && isSafeInternalPrevious && window.history.length > 1) {
             window.history.back();
             return;
         }

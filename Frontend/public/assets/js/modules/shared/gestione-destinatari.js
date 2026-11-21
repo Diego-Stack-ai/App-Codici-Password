@@ -1,5 +1,6 @@
 import {confirmFrameAction} from '../core/vault-frame-client.js';
-import { db, functions } from '../../firebase-config.js?v=1.2.292';
+import { navigateBack } from '../../components-v129.js';
+import { db, functions } from '../../firebase-config.js?v=1.2.293';
 import { addDoc, collection, doc, httpsCallable, serverTimestamp, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
@@ -261,6 +262,10 @@ export async function initGestioneDestinatari(user) {
     if (returnTarget) {
         returnLink.href = returnTarget;
         returnLink.classList.remove('hidden');
+        returnLink.addEventListener('click', event => {
+            event.preventDefault();
+            navigateBack(returnTarget, false);
+        });
     }
     document.getElementById('recipient-save')?.addEventListener('click', () => saveContact().catch(error => showToast(error.message, 'error')));
     document.getElementById('recipient-cancel')?.addEventListener('click', resetForm);

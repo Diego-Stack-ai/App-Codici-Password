@@ -1,6 +1,24 @@
 # Stato
 
+<a id="destinatari-ritorni-1293-2026-11-21"></a>
+
+## Ritorni Destinatari — correttivo293 autorizzato
+
+Online1.2.292; confezionato il [correttivo autorizzato293](INCARICO_CORRENTE.md#destinatari-ritorni-1293-2026-11-21) per la freccia che salta il modulo e il link che duplica la catena. [Tre runtime e22 regressioni mirate verdi](../evidenze/COLLAUDI.md#destinatari-ritorni-1293-2026-11-21); snapshot/derivati e confronto367 pubblici allineati. Verificati378 casi distinti di cornice (77 Back, inclusi i22 nuovi casi):373 verdi al primo giro, i5 header inizialmente fermi per il percorso mancante di firebase-tools diventano verdi dopo ripristino del solo collegamento alle dipendenze, a runtime invariato. Verdi anche199 navigazione,12 guida,16 offline,12 documenti, budget/sintassi/riferimenti. Due GO sulla testa finale, CI PR/master/Hosting e pubblicazione ancora da completare. Conservati i due PASS292 dei filtri,18/22 destinazioni positive cumulative e i limiti C1/C2; nessun nuovo esito fisico dedotto. Blocco e lotti Claude separati.
+
 <a id="stato-corrente"></a>
+
+<a id="destinatari-freccia-1292-2026-11-21"></a>
+
+## Cornice292 — ritorno Destinatari da correggere
+
+[TEL292-F11 e diagnosi](../evidenze/COLLAUDI.md#destinatari-freccia-1292-2026-11-21): sul telefono la freccia dentro Destinatari salta il modulo e torna alla Home, sia da Scadenze sia da Urgenze. Difetto riprodotto nei due ingressi nel banco locale; il distinto link esplicito torna al modulo ma il Back successivo rientra in Destinatari. Nessun blocco della Vault nel banco sintetico; la risposta fisica non specifica ulteriori sblocchi. Solo diagnosi/proposta, produzione1.2.292 e runtime invariati. Guida ferma sul caso; i due PASS precedenti e18/22 destinazioni cumulative positive restano validi, nessun C1/C2 completo.
+
+<a id="nuova-scadenza-1292-telefono-2026-11-21"></a>
+
+## Cornice292 — due ricollaudi del filtro riusciti sul telefono
+
+Versione292 confermata da Diego sulla PWA iPhone. [Due giri distinti](../evidenze/COLLAUDI.md#nuova-scadenza-1292-telefono-2026-11-21) da Scadenze e Urgenze al modulo Nuova Scadenza e ritorno con una freccia: filtri corretti, nessun nuovo sblocco riferito. Il difetto TEL291-F09 resta storico; ricollaudo riuscito soltanto nei percorsi osservati.18/22 destinazioni cumulative positive; C1/C2 e altri ambienti restano aperti. Prossima prova Destinatari → Torna al modulo precedente, ancora senza esito. Nessuna modifica applicativa o distribuzione aggiuntiva.
 
 <a id="nuova-scadenza-filtro-1292-pubblico-2026-11-21"></a>
 
