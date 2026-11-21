@@ -2,6 +2,13 @@
 
 <a id="stato-corrente"></a>
 
+<a id="destinatari-1293-pubblico-2026-11-21"></a>
+
+## APP1.2.293 — online e verificata
+
+Online1.2.293 dal sorgente ff90f241928977a9b4b5d56166a962e15ab0ff3c, sourceDirty=false. PR #354, due GO sulla testa finale, CI PR/master/Hosting concordi e [Hosting #1276](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44903067180) SUCCESS. Verifica pubblica367 hash/41 profili/23 GET PASS. [Ricevuta](../evidenze/COLLAUDI.md#destinatari-1293-pubblico-2026-11-21). Corrette entrambe le uscite da Destinatari e la catena al modulo/lista filtrata/Home; blocco invariato. Ricevuta MD/GitHub senza secondo Hosting; conferma versione e ricollaudo mirato dal cellulare ancora attesi.18/22 route cumulative e C1/C2 conservano i propri limiti; i checkpoint sotto sono storici.
+
+
 <a id="destinatari-ritorni-1293-2026-11-21"></a>
 
 ## Ritorni Destinatari — correttivo293 autorizzato

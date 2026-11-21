@@ -1,5 +1,11 @@
 # Interfaccia
 
+<a id="destinatari-1293-pubblico-2026-11-21"></a>
+
+## Ritorni Destinatari — distribuiti nella1.2.293
+
+Distribuiti ingresso coordinato e ritorni senza duplicati tramite freccia o comando esplicito, conservando bozza, query/allowlist, contesto e filtro della lista di origine. [Ricevuta e limiti](../evidenze/COLLAUDI.md#destinatari-1293-pubblico-2026-11-21). Navigazione e test collegano compositore, manager, helper condiviso e regressioni; nessun cambio grafico o di blocco, nessuna nuova prova fisica dedotta.
+
 <a id="destinatari-ritorni-1293-2026-11-21"></a>
 
 ## Ritorno da Destinatari — correzione293 in corso

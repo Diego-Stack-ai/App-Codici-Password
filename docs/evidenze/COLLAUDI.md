@@ -1,5 +1,17 @@
 # Collaudi
 
+<a id="destinatari-1293-pubblico-2026-11-21"></a>
+
+## APP1.2.293 — entrambi i ritorni Destinatari pubblicati
+
+PR #354 integrata dopo due GO sulla testa finale 48daf6f44570b4ec516f1db8aef67813ccae7ba0 e CI PR #1274 SUCCESS; merge/sorgente ff90f241928977a9b4b5d56166a962e15ab0ff3c. CI master #1275 e [Hosting #1276](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/44903067180) verdi sullo stesso sorgente e digest 96afb6e186bf825eed67269f1630d90074da45e2fd6c71807e309b34bd180d7c. Master invariato prima di production protetto, scope solo hosting, approvazione registrata; deploy completato 21/11/26, 13:51:35 Europe/Rome.
+
+Ogni validazione: 68 blocchi/3985 test, 3974 PASS e11 SKIP dichiarati, zero FAIL/annullati. Il precedente primo SHA è sostituito dalla sola correzione dell'anchor corrente; GO e gate sono riferiti esclusivamente alla testa finale. La CI esegue integralmente i casi della cornice, distinta dalla ricomposizione dei due giri locali.
+
+Avvio Hosting e approvazione production eseguiti da Codex nel browser integrato sull'ordine esplicito di Diego; nessuna protezione o permesso generale modificato. Verifica autonoma367 hash/41 profili e23 GET indipendenti PASS, inclusi i tre runtime e la pagina Destinatari; manifest sourceDirty=false. Nessuna aggiunta/rimozione pubblica e soli tre runtime funzionali dopo normalizzazione versione/EOL; [preparazione e limiti](#destinatari-ritorni-1293-2026-11-21).
+
+Freccia e Torna al modulo precedente conservano il modulo; il ritorno successivo raggiunge la lista filtrata e la Home senza duplicare Destinatari. Bozza/contesti/allowlist, blocco, lease, inattività, Auth/chiavi, backend, workflow e lotti Claude conservati. Nuovo riscontro fisico iPhone293 ancora da acquisire;18/22 destinazioni positive cumulative e C1/C2 restano aperti. Ricevuta documentale senza secondo Hosting.
+
 <a id="destinatari-ritorni-1293-2026-11-21"></a>
 
 ## Ritorni Destinatari1.2.293 — candidata e regressioni
