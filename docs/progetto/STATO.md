@@ -1,12 +1,12 @@
 # Stato
 
+<a id="stato-corrente"></a>
+
 <a id="destinatari-ritorni-1293-2026-11-21"></a>
 
 ## Ritorni Destinatari — correttivo293 autorizzato
 
 Online1.2.292; confezionato il [correttivo autorizzato293](INCARICO_CORRENTE.md#destinatari-ritorni-1293-2026-11-21) per la freccia che salta il modulo e il link che duplica la catena. [Tre runtime e22 regressioni mirate verdi](../evidenze/COLLAUDI.md#destinatari-ritorni-1293-2026-11-21); snapshot/derivati e confronto367 pubblici allineati. Verificati378 casi distinti di cornice (77 Back, inclusi i22 nuovi casi):373 verdi al primo giro, i5 header inizialmente fermi per il percorso mancante di firebase-tools diventano verdi dopo ripristino del solo collegamento alle dipendenze, a runtime invariato. Verdi anche199 navigazione,12 guida,16 offline,12 documenti, budget/sintassi/riferimenti. Due GO sulla testa finale, CI PR/master/Hosting e pubblicazione ancora da completare. Conservati i due PASS292 dei filtri,18/22 destinazioni positive cumulative e i limiti C1/C2; nessun nuovo esito fisico dedotto. Blocco e lotti Claude separati.
-
-<a id="stato-corrente"></a>
 
 <a id="destinatari-freccia-1292-2026-11-21"></a>
 
