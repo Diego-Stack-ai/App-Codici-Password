@@ -11,20 +11,23 @@ import {chromium} from 'playwright';
 const root = resolve(fileURLToPath(new URL('../Frontend/public/', import.meta.url)));
 const shell = module => `<!doctype html><html><head><link rel="stylesheet" href="/assets/css/core.css"><script src="/assets/js/private-auth-gate.js"></script><script type="module" src="/${module}"></script></head><body hidden inert>`;
 const parentHtml = shell('logout-parent.mjs') + '<div data-frame-safe-area style="padding:0"></div><iframe id="vault-frame" hidden inert></iframe></body></html>';
-const childHtml = shell('logout-child.mjs') + '<button id="logout">Esci</button><button id="legal">Privacy</button></body></html>';
-const publicHtml = '<!doctype html><html><body><label>Username<input id="username"></label><button id="login" onclick="this.dataset.clicked=1">Accedi</button></body></html>';
+const childHtml = shell('logout-child.mjs') + '<button id="logout">Esci</button><button id="legal">Privacy</button><button id="next">Account</button></body></html>';
+const publicHtml = '<!doctype html><html><body><script>sessionStorage.setItem("fixture-public-renders",String(Number(sessionStorage.getItem("fixture-public-renders")||0)+1))</script><label>Username<input id="username"></label><button id="login" onclick="this.dataset.clicked=1">Accedi</button></body></html>';
 const parentModule = `
 import {createVaultFrameOwner} from '/assets/js/modules/core/vault-frame-owner.mjs';
 import {authSessionFence} from '/assets/js/auth-session-fence.js';
 const options=window.fixtureOptions;
 window.recordFixture=value=>{const log=JSON.parse(sessionStorage.getItem('fixture-log')||'[]');log.push(value);sessionStorage.setItem('fixture-log',JSON.stringify(log));};
+// Model delayed/restored Auth before its callback can consult the fence. The
+// real presentation guard must leave logged-out history without that callback.
+if(options.pauseLoggedOutAuth && sessionStorage.getItem('codex_explicit_logout')==='1')await new Promise(()=>{});
 const permit=await authSessionFence.readPermit();
 window.privateAuthGate.acceptIdentity(window.privateAuthGate.begin('synthetic'),{uid:'synthetic',emailVerified:true});
 const iframe=document.querySelector('iframe');
 const owner=createVaultFrameOwner({window,iframe,release:'fixture',getIdentity:()=>({uid:'synthetic',epoch:'fixture'}),
  readPermit:async()=>({enabled:true,uid:'synthetic',version:1,expiresAt:Date.now()+3600000}),
  validateIdentity:async()=>authSessionFence.isLocallyAllowed(),readTimeout:async()=>720,
- unlock:async()=>'SYNTHETIC-MATERIAL',clearMaterial:()=>window.recordFixture({kind:'clear'}),
+ unlock:async()=>{window.recordFixture({kind:'unlock'});return 'SYNTHETIC-MATERIAL';},clearMaterial:()=>window.recordFixture({kind:'clear'}),
  onState:state=>{if(state.locked)window.recordFixture({kind:'locked',reason:state.reason});}});
 window.frameOwner=owner;
 if(options.interrupt){
@@ -34,6 +37,7 @@ if(options.interrupt){
  const remove=iframe.remove.bind(iframe);
  iframe.remove=()=>{remove();if(delegating){window.recordFixture({kind:'synthetic-caller-detached'});throw Error('SYNTHETIC_CALLER_DETACHED');}};
 }
+window.recordFixture({kind:'owner-start'});
 await owner.start('/home_page.html');`;
 const childModule = `
 import {authSessionFence} from '/assets/js/auth-session-fence.js';
@@ -55,6 +59,9 @@ document.querySelector('#logout').onclick=()=>logoutWithCleanup(async()=>{
  if(window.parent.fixtureOptions.mode==='pending')await new Promise(()=>{});
 },'/login.html?reauth=sessions-revoked');
 document.querySelector('#legal').onclick=()=>navigateDocument('/privacy.html',true);
+document.querySelector('#next').onclick=()=>navigateDocument(location.pathname==='/home_page.html'
+ ? '/area_privata.html' : location.pathname==='/area_privata.html'
+ ? '/account_privati.html?type=standard' : '/impostazioni.html');
 window.fixtureReady=true;`;
 
 let server, browser, base;
@@ -64,7 +71,7 @@ test.before(async () => {
     try {
       let body, type = 'text/html';
       if (pathname === '/app.html') body = parentHtml;
-      else if (pathname === '/home_page.html') body = childHtml;
+      else if (['/home_page.html','/area_privata.html','/account_privati.html','/impostazioni.html'].includes(pathname)) body = childHtml;
       else if (['/login.html', '/privacy.html'].includes(pathname)) body = publicHtml;
       else if (pathname === '/logout-parent.mjs') {body = parentModule; type = 'text/javascript';}
       else if (pathname === '/logout-child.mjs') {body = childModule; type = 'text/javascript';}
@@ -137,5 +144,51 @@ test('real child legal exit without cleanup hold remains protected during teardo
     assert.ok(log.some(value => value.kind === 'clear'));
     assert.ok(!log.some(value => value.kind === 'sdk'));
     assert.ok(!log.some(value => value.kind === 'synthetic-caller-detached'));
+  } finally {await f.context.close();}
+});
+
+for (const mode of ['success', 'failure']) test('historical private documents after logout return to usable login repeatedly despite paused Auth: ' + mode, {timeout: 25000}, async () => {
+  const f = await fixture({mode, interrupt: false, pauseLoggedOutAuth: true});
+  try {
+    for (const pathname of ['/area_privata.html','/account_privati.html','/impostazioni.html']) {
+      await f.child.locator('#next').click();
+      await f.page.waitForFunction(path => {
+        const child = document.querySelector('iframe')?.contentWindow;
+        return child?.location.pathname === path && child.fixtureReady;
+      }, pathname, {timeout: 5000});
+    }
+    const before = await f.page.evaluate(() => JSON.parse(sessionStorage.getItem('fixture-log'))
+      .filter(event => ['owner-start','unlock'].includes(event.kind)));
+    assert.ok(before.some(event => event.kind === 'owner-start'));
+    assert.ok(before.some(event => event.kind === 'unlock'));
+    await f.child.locator('#logout').click();
+    await assertPublicLogin(f, '/login.html?reauth=sessions-revoked');
+    for (let traversal = 0; traversal < 3; traversal++) {
+      const renders = await f.page.evaluate(() => Number(sessionStorage.getItem('fixture-public-renders')));
+      await f.page.goBack({waitUntil: 'commit'});
+      // A matching URL on the old login alone cannot count as a new return.
+      await f.page.waitForFunction(previous => location.pathname === '/login.html' &&
+        Number(sessionStorage.getItem('fixture-public-renders')) > previous, renders, {timeout: 5000});
+      await assertPublicLogin(f, '/login.html');
+      const after = await f.page.evaluate(() => JSON.parse(sessionStorage.getItem('fixture-log'))
+        .filter(event => ['owner-start','unlock'].includes(event.kind)));
+      assert.deepEqual(after, before, 'history must not start another owner or unlock');
+      assert.equal(await f.page.evaluate(() => sessionStorage.getItem('codex_explicit_logout')), '1');
+    }
+  } finally {await f.context.close();}
+});
+
+test('ordinary pageshow while real child logout is pending keeps cleanup and final target owned by parent', {timeout: 35000}, async () => {
+  const f = await fixture({mode: 'pending', interrupt: false});
+  try {
+    await f.child.locator('#logout').click();
+    await f.page.waitForFunction(() => JSON.parse(sessionStorage.getItem('fixture-log') || '[]').some(event => event.kind === 'sdk'));
+    const state = await f.page.evaluate(() => {
+      window.dispatchEvent(new PageTransitionEvent('pageshow', {persisted: false}));
+      return {path: location.pathname, childRetained: !!document.querySelector('iframe'),
+        parentHidden: document.body.hidden, unlocked: frameOwner.session.state().unlocked};
+    });
+    assert.deepEqual(state, {path: '/app.html', childRetained: true, parentHidden: true, unlocked: false});
+    await assertPublicLogin(f, '/login.html?reauth=sessions-revoked');
   } finally {await f.context.close();}
 });

@@ -1,5 +1,49 @@
 # Programma
 
+<a id="rilascio-1295-2026-11-23"></a>
+
+## Rilasciare insieme i tre correttivi, poi ricollaudare
+
+Ordine295 acquisito: preparare confezione unica, due riesami sulla testa finale, CI/PR/merge e Hosting protetto, verifica integrale e ricevuta MD/GitHub. [Mandato](INCARICO_CORRENTE.md#rilascio-1295-2026-11-23). Dopo conferma295 sul telefono, ricollaudare una volta Regole primo disegno/memoria, Annulla filtro e logout/Indietro, una prova alla volta. F44/F45 rete/ripresa già acquisiti non si ripetono; C1/C2 e altri residui restano aperti.
+
+<a id="regole-avvio-memoria-locale-2026-11-21"></a>
+
+## Raggruppare avvio Regole e ultima scelta, poi continuare i percorsi
+
+[Mandato locale](INCARICO_CORRENTE.md#regole-avvio-memoria-locale-2026-11-21): eliminare la selezione provvisoria di Personali prima dell'init e ricordare l'ultima linguetta per utente su questo dispositivo. Verificare primo disegno con init trattenuta, Back da configuratore e Destinatari, ingresso dalle Impostazioni dopo passaggio per Home, URL prevalente e isolamento/errore storage. Dati lenti non devono ritardare la scelta. Mantenere distinti corretto ritorno finale e difetto visivo della294; gli ulteriori giri fisici usano ancora294. Raggruppamento locale, senza nuova pubblicazione automatica.
+
+Lotto implementato e regressioni locali verdi, con controprova sul vecchio HTML. Conservare questo delta per il prossimo rilascio raggruppato; soltanto dopo quel rilascio verificare sull'iPhone assenza del flash e ricordo di Automezzi/Salute dopo uscita fino alla Home. Il collaudo C1/C2 conserva i residui già dichiarati.
+
+Nel seguito PWA294, acquisito [F19 sulle sezioni aziendali e F20 Annulla](../evidenze/COLLAUDI.md#cornice-telefono-1294-seguito-2026-11-21). Il nuovo caso D04 × Annulla del modulo vuoto torna alla lista con Tutti: perdita del filtro confermata sul telefono, continuità Vault riuscita. Su ordine successivo, [correzione minima aggiunta al lotto](../evidenze/COLLAUDI.md#annulla-scadenza-lotto-locale-2026-11-21) e14 regressioni locali verdi, anche per Urgenze/modifica/ingressi diretti. Conservate pulizia delle bozze e guardie del ritorno; blocco invariato. Poi continuare un sottocaso fisico non ancora osservato, senza ripetere freccia, sezioni o F20 sulla stessa294. Nessuna pubblicazione per ora.
+
+F21 D10.camera-cancel superato sulla PWA294: fotocamera aperta e annullata, ritorno al dettaglio utilizzabile senza allegato nuovo o ulteriore sblocco. Non ripetere; acquisizione/upload, diniego permessi, picker e risultati tardivi restano distinti. Il microfono della Ricerca non è usato come prova senza invio: una trascrizione finale può essere inoltrata automaticamente.
+
+F22–F26 D19: opt-in/Copia, raccolta, Cancella con ON, OFF e cleanup dopo logout/rientro dello stesso account riusciti. Lasciare OFF e non ripetere il ciclo; il login serviva solo al prerequisito del nuovo cleanup. Cambio identità resta distinto, solo con altra identità già disponibile/autorizzata; nessuna revoca globale, nuovo utente o C2 dedotti.
+
+F27–F28 D09.cancel/fallback superati: annullamento passkey→popup Master e sblocco manuale→Home riferiti da Diego, senza segreti acquisiti. F29 identifica Documento→selettore File iPhone e chiusura× con ritorno al dettaglio utilizzabile; chiarimento senza ripetizione del giro. Non riaprire Documento o ripetere D09, né dedurre PRF/RAM o famiglie complete.
+
+F30 Galleria annullata con dettaglio utilizzabile e nessun allegato nuovo/ulteriore sblocco riferita riuscita. Nel seguito23/11/2026 F31 D04.native-back è superato: gesto dal bordo sinistro dall'elenco Account Personali all'Area Privata senza nuovi sblocchi. La risposta tardiva sugli Allegati viene rettificata come incerta; non è una rettifica del PASS F31. Non ripetere i casi già superati.
+
+F32 Avanti nativo e F33 Indietro nativo con Archiviate conservato superati senza nuovi sblocchi. Non ripetere i gesti positivi. F33 aggiunge L23-PERF01: circa10s riferiti su Analisi dati al ritorno. Diagnosi statica separata; prima di una futura ottimizzazione misurare bootstrap/letture proprie-ricevute/render e identificare il collo. Non attribuire la durata alla rete, al permesso o alla Vault senza misure; niente cache aggiuntive, modifica del blocco o nuovo runtime prestazionale dedotti dal rilievo.
+
+F34 popup Note→Annulla e F35 clipboard superati nella PWA: nota invariata/Profilo utilizzabile; Nome e Cognome copiato uguale all'incollato, poi testo cancellato e Ricerca chiusa. Non ripetere né raccogliere il valore, distinti dallo storico QA2 Chrome270.
+
+F36 D06.activity superato: nel giro richiesto~90s con attività e soglia1 minuto il Profilo resta utilizzabile senza nuovi sblocchi;12 ore ripristinate confermate. Nessun ripristino ancora pendente; non ripetere questa prova o il vecchio idle1min. Passività e soglia3min restano distinti dal risultato, ammissione e codice invariati.
+
+F37 D14.web-return superato: sito aperto e ritorno al dettaglio Account utilizzabile senza nuove richieste di sblocco riferiti. Nessun URL richiesto o nuovo dato salvato per preparare il giro; non ripeterlo né estenderlo a tutte le uscite o al confine opener.
+
+F38 giro3min: telefono auto-bloccato/schermo nero durante l'attesa, app trovata nella pagina di sblocco al rientro e12 ore ripristinate riferiti da Diego. Protezione osservata; soglia3min in primo piano non isolata, niente PASS D06.three o causa di blocco dedotti. Non rifare ora né cambiare l'autoblocco iOS; conservare1min/attività già positivi e ripristino eseguito. Eventuale ripresa controllata separata, senza forzature; nessuna modifica del blocco o pubblicazione.
+
+F44 perdita rete/rientro protetto superato nel solo sottocaso osservabile: app bloccata offline e ancora bloccata dopo rete ripristinata, senza sblocco premuto. [Limiti e foto riferita](../evidenze/COLLAUDI.md#cornice-telefono-1294-seguito-2026-11-21). Non ripetere o lasciar pendente il ripristino della rete, già confermato. F45 successivo superato: sblocco esplicito completato e ritorno al Profilo utilizzabile confermati. Giro rete/ripresa acquisito nel suo perimetro; non ripetere né lasciare una richiesta di prova pendente. Nessun OFF amministrativo, nuova fixture, chiusura D15/C1/C2 o rilascio dedotti.
+
+F43 selettore File di Ripristina backup→Annulla senza file superato sul telefono: Impostazioni e comando utilizzabili, nessun nuovo sblocco. [Evidenza](../evidenze/COLLAUDI.md#cornice-telefono-1294-seguito-2026-11-21). Conservare il sottocaso senza ripeterlo né dedurre un ripristino vero. Prima del prossimo giro distinguere il controllo breve di perdita rete dai casi che richiedono fixture, altre identità/dispositivi o interventi amministrativi; nessuna revoca server o nuovo rilascio dedotti.
+
+F42 Archivio portabile→primo Annulla superato nella PWA: finestra chiusa, pagina utilizzabile e comando attivo confermati, senza password dedicata/file. Conservare separatamente dal gate sensibile e dalle prove di esportazione; nessuna ripetizione F40/F42 e nessuna chiusura D13. Proseguire soltanto con un sottocaso distinto e annullabile, lasciando il ricollaudo F41 al futuro rilascio autorizzato.
+
+F39 D12.native-share-cancel: ritorno al Profilo utilizzabile e richiesta della Vault prima della condivisione confermati da Diego; metodo di conferma non precisato. Non ripetere né richiedere file/contatti o invio/salvataggio per la prova. La ricognizione non trova un produttore mailto nei Contatti privati (valori e copia soltanto): non inventare un'azione per D14. L23-UI02: Annulla del cambio Master può mostrare Face ID spento pur lasciando invariata la configurazione, per mancata verifica dell'esito nel chiamante; proposta minima documentata, non applicata. Saltare per ora quel giro fisico e preparare un altro annullamento prima di operazioni sui dati. Famiglie D09/D12/D13 e C1/C2 ancora aperte.
+
+F40 Backup cifrato→primo Annulla riuscito: popup chiuso, Impostazioni utilizzabili e pulsante nuovamente attivo confermati da Diego. Non ripetere; esito limitato alla chiusura preliminare, non al gate fresco dell'export o all'integrità del backup. F41 D08.local-back ora osservato e fallito per Home visibile~2–3s e pagina bianca dopo gesti ripetuti. Nel secondo giro il tocco Account viene rinviato al login; non chiude la famiglia. L23-LOGOUT01: circoscrivere la correzione del ritorno storico e i test di gesti ripetuti, preservando il blocco; su ordine successivo correttivo locale ora verificato: [esiti](../evidenze/COLLAUDI.md#logout-cronologia-locale-2026-11-23). Nessuna nuova prova di F41 sul telefono prima del futuro rilascio autorizzato; nessun PR/deploy dedotto dal verde. Restano distinti i PASS logout stabile e gesti nella sessione aperta.
+
 <a id="regole-tab-1294-pubblico-2026-11-21"></a>
 
 ## Dopo294 — ricollaudare la linguetta sul telefono

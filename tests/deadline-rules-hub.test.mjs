@@ -4,6 +4,8 @@ import test from 'node:test';
 
 const publicRoot = new URL('../Frontend/public/', import.meta.url);
 const read = path => fs.readFile(new URL(path, publicRoot), 'utf8');
+const preferenceSource=await read('assets/js/modules/scadenze/deadline-rules-preference.js');
+const {readDeadlineRulesDomain,rememberDeadlineRulesDomain}=await import('data:text/javascript;base64,'+Buffer.from(preferenceSource).toString('base64'));
 
 test('the deadline hub exposes eight accessible domains and removes the generic tab and legacy cards', async () => {
   const html = await read('regole_scadenze.html');
@@ -43,7 +45,7 @@ test('the deadline hub loads profile documents and keeps keyboard navigation acc
   assert.match(source, /sourceDocumentId === documentItem\.id/);
   assert.match(source, /profile_deadline_card_configure/);
   assert.match(source, /profile_deadline_card_open/);
-  assert.match(source, /auth\.currentUser\?\.uid === user\.uid/);
+  assert.match(source, /auth\.currentUser\?\.uid === uid/);
   assert.match(source, /normalizeProfileDateInputValue/);
   assert.ok(
     main.indexOf("path.includes('regole_scadenze')") < main.indexOf("path.includes('scadenze')"),
@@ -97,7 +99,7 @@ test('personal document summary has loading, empty, error and responsive card st
   assert.match(css, /\.deadline-domain-resource-card/);
   assert.match(css, /\.deadline-domain-schedule-warning/);
   assert.match(css, /\.deadline-domain-tab\s*\{[\s\S]*?background:\s*transparent;/);
-  assert.match(css, /\.deadline-domain-tab\.is-active\s*\{[\s\S]*?background:\s*rgb\(var\(--accent-rgb\) \/ 0\.14\);/);
+  assert.match(css, /\.deadline-domain-tab\.is-active\s*\{[\s\S]*?background:\s*rgba?\(var\(--accent-rgb\)(?:\s*\/\s*|\s*,\s*)0\.14\);/);
   assert.match(css, /\.deadline-operational-panel\s*\{[\s\S]*?padding:\s*0;[\s\S]*?border:\s*0;[\s\S]*?background:\s*transparent;/);
   assert.match(css, /\.deadline-operational-panel \.deadline-domain-copy,[\s\S]*?\.deadline-personal-panel \.deadline-domain-copy\s*\{[\s\S]*?border:[\s\S]*?background:/);
   assert.match(css, /\.deadline-personal-summary\s*\{[\s\S]*?margin-top:\s*1\.1rem;/);
@@ -185,4 +187,26 @@ test('the deadline hub catalog has identical keys in all eight application langu
     assert.deepEqual(Object.keys(deadlineRulesCatalogs[language]).sort(), expected, `catalog mismatch for ${language}`);
     assert.ok(Object.values(deadlineRulesCatalogs[language]).every(value => typeof value === 'string' && value.trim()));
   }
+});
+
+
+
+const preferenceStore=()=>{const values=new Map();return {getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value),values};};
+test('last rules domain is optional and isolated between users',()=>{
+ const storage=preferenceStore();assert.equal(readDeadlineRulesDomain(storage,'user-a'),null);
+ assert.equal(rememberDeadlineRulesDomain(storage,'user-a','health'),true);
+ assert.equal(readDeadlineRulesDomain(storage,'user-a'),'health');assert.equal(readDeadlineRulesDomain(storage,'user-b'),null);
+ rememberDeadlineRulesDomain(storage,'user-b','vehicles');assert.equal(readDeadlineRulesDomain(storage,'user-a'),'health');assert.equal(readDeadlineRulesDomain(storage,'user-b'),'vehicles');
+});
+test('rules preference never uses a global anonymous fallback',()=>{
+ let reads=0,writes=0;const storage={getItem:()=>{reads++;return 'health';},setItem:()=>{writes++;}};
+ for(const uid of [undefined,null,'','  ']){assert.equal(readDeadlineRulesDomain(storage,uid),null);assert.equal(rememberDeadlineRulesDomain(storage,uid,'health'),false);}
+ assert.equal(reads,0);assert.equal(writes,0);
+});
+test('rules preference validates domains and tolerates denied or unavailable storage',()=>{
+ const storage=preferenceStore();for(const domain of ['personal','vehicles','home','health','sport','contracts','user-company','company']){assert.equal(rememberDeadlineRulesDomain(storage,'user-a',domain),true);assert.equal(readDeadlineRulesDomain(storage,'user-a'),domain);}
+ for(const domain of ['foreign','Health','<script>',null])assert.equal(rememberDeadlineRulesDomain(storage,'user-a',domain),false);
+ const invalid={getItem:()=>'<script>'};assert.equal(readDeadlineRulesDomain(invalid,'user-a'),null);
+ const denied={getItem:()=>{throw Error('denied');},setItem:()=>{throw Error('denied');}};
+ for(const broken of [null,undefined,denied,{}]){assert.equal(readDeadlineRulesDomain(broken,'user-a'),null);assert.equal(rememberDeadlineRulesDomain(broken,'user-a','health'),false);}
 });

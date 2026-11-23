@@ -1,5 +1,25 @@
 # Interfaccia
 
+<a id="logout-cronologia-locale-2026-11-23"></a>
+
+## Logout — presentazione locale dei ripristini storici
+
+Candidata locale autorizzata: il guard legge il marker esplicito di uscita all'avvio e a pageshow. Un documento ripristinato viene nascosto e reso inerte prima della verifica Auth; il top-level richiede Accedi senza riusare le sentinelle dell'uscita precedente. Il figlio continua a delegare al padre; un primo pageshow ordinario non interrompe il cleanup vivo. Senza marker conservare il normale ripristino autenticato; dopo nuovo login il marker non forza un loop. Recovery e i controlli su documento/ticket restano vincolati ai percorsi già consentiti. [Evidenze e mappa test](../evidenze/COLLAUDI.md#logout-cronologia-locale-2026-11-23): private-auth-gate.js→tests/private-auth-gate.test.mjs e tests/vault-frame-logout.browser.test.mjs; regressioni su Regole/ripresa e navigazione collegate. Stato locale, non una garanzia sull'immagine nativa iOS prima dell'esecuzione JS o un esito fisico distribuito.
+
+<a id="annulla-scadenza-lotto-locale-2026-11-21"></a>
+
+## Annulla Scadenza — ritorno condiviso, modifica locale
+
+Il comando × Annulla del footer usa navigateBack come la freccia dell'header: predecessore verificato con lista/filtro/query originali oppure fallback canonico. In aggiunta conserva prima del ritorno la rimozione delle bozze tecniche di origine; in modifica il fallback è il dettaglio dello stesso id. Nessun salvataggio o nuova finestra, nessun cambiamento a guardie, owner o blocco. [Ordine](../progetto/INCARICO_CORRENTE.md#annulla-scadenza-lotto-locale-2026-11-21) e [14 regressioni](../evidenze/COLLAUDI.md#annulla-scadenza-lotto-locale-2026-11-21); locale, non ancora distribuito.
+
+<a id="regole-avvio-memoria-locale-2026-11-21"></a>
+
+## Regole — avvio neutro e ultima linguetta, modifica locale
+
+Prima dell'init, nessun tab né contenuto Personali deve apparire come scelta provvisoria. L'init risolve domain valido della URL, altrimenti preferenza locale valida dell'UID corrente, altrimenti Personali; applica selezione/pannello prima dei caricamenti dei dati. URL esplicita e interazioni click/tastiera ricordano il dominio realmente mostrato; una scelta recuperata dallo storage viene fissata nella voce URL corrente senza push. La preferenza contiene soltanto uno degli otto domini, è facoltativa in caso di storage negato/invalido e non accede a chiavi anonime o di altri utenti. Nessun listener storage sposta una vista già aperta. Conservati gate/Auth, blocco e loader/errori dei dati. [Ordine](../progetto/INCARICO_CORRENTE.md#regole-avvio-memoria-locale-2026-11-21); non ancora distribuito.
+
+Oracoli locali in tests/vault-frame-back.browser.test.mjs: rAF sui primi frame effettivamente visibili, Back reali e ritorno da Home, priorità della URL e memoria click/tastiera. tests/deadline-rules-hub.test.mjs verifica enum, isolamento UID e storage opzionale. La prova automatica con dati sintetici non chiude il ricollaudo iPhone.
+
 <a id="regole-tab-1294-pubblico-2026-11-21"></a>
 
 ## Linguetta Regole294 — distribuita, prova fisica successiva
