@@ -10,21 +10,21 @@
     <title data-t="title_deadline_rules">Regole Scadenze - PROTOCOLLO BASE V5.0</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.294" />
+    <link rel="manifest" href="manifest.json?v=1.2.295" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.294">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.295">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.294">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.294">
-    <link rel="stylesheet" href="assets/css/regole_scadenze.css?v=1.2.294">
-    <link rel="stylesheet" href="assets/css/ui-tre-livelli.css?v=1.2.294">
-    <link rel="stylesheet" href="assets/css/ui-tre-livelli-moduli.css?v=1.2.294">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.295">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.295">
+    <link rel="stylesheet" href="assets/css/regole_scadenze.css?v=1.2.295">
+    <link rel="stylesheet" href="assets/css/ui-tre-livelli.css?v=1.2.295">
+    <link rel="stylesheet" href="assets/css/ui-tre-livelli-moduli.css?v=1.2.295">
 </head>
 
 <body data-private-auth hidden inert class="base-bg" data-ui-model="configuration" data-ui-revision="tre-livelli">
@@ -57,7 +57,7 @@
                     </div>
 
                     <div class="deadline-domain-tabs" role="tablist" aria-label="Ambiti delle scadenze" data-t-aria="deadline_hub_tabs_aria">
-                        <button type="button" class="deadline-domain-tab is-active" role="tab" aria-selected="true" aria-controls="deadline-panel-personal" id="deadline-tab-personal" data-deadline-domain="personal">
+                        <button type="button" class="deadline-domain-tab" role="tab" aria-selected="false" aria-controls="deadline-panel-personal" id="deadline-tab-personal" data-deadline-domain="personal">
                             <span class="material-symbols-outlined notranslate" translate="no">badge</span><span data-t="deadline_domain_personal">Documenti personali</span>
                         </button>
                         <button type="button" class="deadline-domain-tab" role="tab" aria-selected="false" aria-controls="deadline-panel-vehicles" id="deadline-tab-vehicles" data-deadline-domain="vehicles" tabindex="-1">
@@ -84,7 +84,7 @@
                     </div>
 
                     <div class="deadline-domain-panels">
-                        <div class="deadline-domain-panel deadline-personal-panel" role="tabpanel" id="deadline-panel-personal" aria-labelledby="deadline-tab-personal" data-deadline-panel="personal">
+                        <div class="deadline-domain-panel deadline-personal-panel" role="tabpanel" id="deadline-panel-personal" aria-labelledby="deadline-tab-personal" data-deadline-panel="personal" hidden>
                             <div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">badge</span><div><h3 data-t="deadline_personal_title">Scadenze dei documenti personali</h3><p data-t="deadline_personal_desc">Qui trovi i documenti del Profilo e configuri i relativi avvisi di scadenza senza creare copie.</p></div></div>
                             <div id="personal-documents-summary" class="deadline-personal-summary" aria-live="polite" aria-busy="true"></div>
                         </div>

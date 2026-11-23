@@ -5,7 +5,7 @@
     const AUTH_CHECK_TIMEOUT_MS = 45000;
     const FAILURE_MARKER_KEY = 'codex_auth_gate_last_failure_v1';
     let epoch = 0, blocked = false, ready = false, acceptedUid = null, redirecting = false;
-    let timer, armedAt = 0;
+    let timer, armedAt = 0, hasLeftPage = false;
     const setPendingState = pending => {
         const root = document.documentElement;
         if (!root?.dataset) return;
@@ -25,8 +25,7 @@
         try { if (window.parent !== window) window.parent.vaultFrameNavigation?.revokeFromChild(window, requestingDocument); } catch { /* No frame authority. */ }
         window.dispatchEvent(new Event('private-auth-blocked'));
     };
-    // Classic head script: keep this bounded predicate in parity with
-    // app-env.js without waiting for an ESM import.
+    // Keep recovery intent in parity with app-env.js.
     const hasFixedRecoveryIntent = () => {
         if (!/(?:^|\/)(?:login|impostazioni)\.html$/.test(window.location?.pathname || '')) return false;
         try {
@@ -34,7 +33,11 @@
             return values.length === 1 && values[0] === 'complete';
         } catch { return false; }
     };
-    const reject = (reason = '') => {
+    const hasExplicitLogout = () => {
+        try { return sessionStorage.getItem('codex_explicit_logout') === '1'; }
+        catch { return true; /* fail closed */ }
+    };
+    const reject = (reason = '', retryExit = false) => {
         if (window.document && requestingDocument !== window.document) return;
         if (reason) {
             try {
@@ -47,23 +50,31 @@
             } catch { /* La diagnostica non deve impedire il blocco fail-closed. */ }
         }
         block();
-        if (!redirecting) {
+        if (!redirecting || retryExit) {
             redirecting = true;
             window.dispatchEvent(new Event('frame-diagnostics-login'));
             const recovery = hasFixedRecoveryIntent();
             const target = recovery ? '/login.html?recovery=complete' : '/login.html';
             const destination = target + (reason ? (recovery ? '&' : '?') + 'authCheck=' + encodeURIComponent(String(reason)) : '');
-            if (window.vaultFrameNavigation?.deferExit(destination, true)) return;
-            try {
-                if (window.parent !== window && window.parent.vaultFrameNavigation) {
-                    window.parent.vaultFrameNavigation.navigateFromChild(window, requestingDocument, destination, true); return;
-                }
-            } catch { /* Standalone. */ }
+            // Ignore stale top-level exits on restore.
+            if (!(retryExit && window.parent === window)) {
+                if (window.vaultFrameNavigation?.deferExit(destination, true)) return;
+                try {
+                    if (window.parent !== window && window.parent.vaultFrameNavigation) {
+                        window.parent.vaultFrameNavigation.navigateFromChild(window, requestingDocument, destination, true); return;
+                    }
+                } catch { /* Standalone. */ }
+            }
             window.location.replace(destination);
         }
     };
-    // Safari/PWA può impiegare più di 15 secondi a ripristinare Firebase e IndexedDB.
-    // La pagina resta comunque nascosta e inert fino alla conferma dell'identità.
+    const rejectLoggedOutDocument = (retryExit = true) => {
+        if (window.document && requestingDocument !== window.document) return true;
+        if (!hasExplicitLogout()) return false;
+        reject('', retryExit);
+        return true;
+    };
+    // Auth restoration can be slow; keep the document hidden until verified.
     const arm = () => {
         clearTimeout(timer);
         armedAt = Date.now();
@@ -72,9 +83,7 @@
     window.privateAuthGate = Object.freeze({
         begin(uid) {
             hide(); ready = false;
-            let loggedOut = true;
-            try { loggedOut = sessionStorage.getItem('codex_explicit_logout') === '1'; } catch { /* fail closed */ }
-            if (blocked || loggedOut || (window.authSessionFence && !window.authSessionFence.isLocallyAllowed()) ||
+            if (blocked || hasExplicitLogout() || (window.authSessionFence && !window.authSessionFence.isLocallyAllowed()) ||
                 (acceptedUid && acceptedUid !== uid)) { reject(); return null; }
             arm();
             return ++epoch;
@@ -87,8 +96,7 @@
             document.body.hidden = false; document.body.inert = false;
             return true;
         },
-        // Identity readiness and first-page presentation are different states.
-        // The body remains usable by the real Vault modal while Home is held.
+        // Home stays held while its body-level Vault modal is usable.
         reveal(ticket) {
             if (window.document && window.document !== requestingDocument) return false;
             if (!ready || blocked || ticket === null || ticket !== epoch || !acceptedUid ||
@@ -106,6 +114,10 @@
     }
     setPendingState(true);
     arm();
-    window.addEventListener('pagehide', hide);
-    window.addEventListener('pageshow', event => { if (event.persisted) { hide(); window.location.reload(); } });
+    window.addEventListener('pagehide', () => { hasLeftPage = true; hide(); });
+    window.addEventListener('pageshow', event => {
+        if (rejectLoggedOutDocument(event.persisted || hasLeftPage)) return;
+        if (event.persisted) { hide(); window.location.reload(); }
+    });
+    rejectLoggedOutDocument();
 })();

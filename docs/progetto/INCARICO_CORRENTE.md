@@ -1,5 +1,35 @@
 # Incarico corrente
 
+<a id="rilascio-1295-2026-11-23"></a>
+
+## Ordine295 — rilascio congiunto Regole, Annulla e logout
+
+Diego ordina PR, merge e deploy dei tre correttivi con nuova versione e aggiornamento MD/GitHub, poi ricollaudo dal cellulare. L'ordine supera il precedente limite locale soltanto per Regole (primo disegno e ultima tab UID), Annulla di Nuova Scadenza e ritorno dopo logout. Root unico scrittore, supporti in sola lettura; base c7b94bcdce2eadc1b657165b7b064202ee30720b, candidata1.2.295. Snapshot funzionale pre-bump, confezione canonica/derivati, due GO sulla testa finale e CI PR completa prima del merge con SHA atteso. Master e validate Hosting concordi per sorgente/digest, scope hosting e master invariato prima di production protetto; approvazione secondo la delega già vigente. Nessuna modifica a backend, workflow/protezioni, chiavi, ammissione, lease o inattività. Verifica pubblica integrale e GET indipendenti, poi distinta ricevuta documentale/GitHub senza secondo Hosting. [Procedura](../regole/RILASCIO.md#rilascio-1295-2026-11-23). F20/F41 e difetto visivo Regole restano fisicamente aperti fino al nuovo ricollaudo; L23-UI02/L23-PERF01 non inclusi.
+
+<a id="logout-cronologia-locale-2026-11-23"></a>
+
+## Estensione locale — ritorno dopo logout sull’iPhone
+
+Dopo F41 e il chiarimento sulla distinzione fra logout e inattività, Diego ordina «Procedi»: aggiungere al lotto locale il correttivo del ritorno storico dopo uscita, senza pubblicare. Primo perimetro: guard di presentazione all’avvio/ripristino, marker esplicito di logout e sentinelle di redirect, con regressioni su callback tardive e gesti ripetuti. Evitare Home utilizzabile o attesa/bianco causati dal bootstrap dopo uscita. Preservare il protocollo di cleanup del figlio e la destinazione finale del logout pendente; nessuna modifica a timeout12ore, lease, chiavi, policy di ammissione, Rules o reset globale. Nessun bump/commit/push/PR/merge/deploy. Root unico scrittore, supporti in lettura, stesso ramo/base del lotto Regole/Annulla. [F41 e diagnosi](../evidenze/COLLAUDI.md#cornice-telefono-1294-seguito-2026-11-21). RED/GREEN locale circoscritto; gesto e immagine nativa iPhone da ricollaudare soltanto dopo un futuro rilascio autorizzato.
+
+Implementazione locale e39 casi mirati conclusi;11 regressioni selezionate e controlli statici/navigation/offline verdi. [Controprove, riesame e limiti](../evidenze/COLLAUDI.md#logout-cronologia-locale-2026-11-23). Attendere un distinto ordine di pubblicazione; F41 non si ricollauda sulla294 invariata.
+
+<a id="annulla-scadenza-lotto-locale-2026-11-21"></a>
+
+## Estensione locale — Annulla di Nuova Scadenza
+
+Diego ordina di correggere anche Annulla nel medesimo lotto locale, senza pubblicare, poi continuare le prove sul cellulare senza ripetere i casi superati. Correzione minima del solo ritorno nel footer: usare il predecessore verificato e relativo filtro, conservare la pulizia delle bozze in aggiunta e il dettaglio di fallback in modifica/ingresso diretto. Nessun cambio a owner/policy, lease, inattività, Auth/chiavi o blocco; nessun bump, commit/push, PR, merge o deploy. Root unico scrittore, supporti in lettura, stessa base e ramo del lotto Regole sotto. [Esito fisico F20](../evidenze/COLLAUDI.md#cornice-telefono-1294-seguito-2026-11-21). Preparare controprova e regressioni locali su Scadenze/Urgenze, altri filtri, modifica e ingressi diretti; poi prossimo sottocaso fisico distinto sulla294.
+
+Delta applicato e14 casi mirati verdi dopo la controprova4/4 rossa; [evidenze e limiti](../evidenze/COLLAUDI.md#annulla-scadenza-lotto-locale-2026-11-21). Mantenere il lotto locale e riprendere la guida su un sottocaso nuovo; non chiedere il ricollaudo del correttivo ancora non distribuito.
+
+<a id="regole-avvio-memoria-locale-2026-11-21"></a>
+
+## Correzione locale — primo disegno e ultima linguetta Regole
+
+Diego conferma il ritorno finale corretto sulla294 e chiede di eliminare il passaggio iniziale su Documenti personali. Nel chiarimento successivo autorizza esplicitamente anche la memoria dell'ultima linguetta fra ingressi separati. Lotto locale: markup iniziale neutro, dominio della URL prioritario, poi scelta locale per UID, poi Personali; nessuna memoria globale fra utenti o sincronizzazione backend. Root unico scrittore, supporti in lettura; base c7b94bcdce2eadc1b657165b7b064202ee30720b, ramo codex/rules-initial-paint-20261121. Blocco, lease, inattività, Auth/chiavi e policy invariati. [Evidenze](../evidenze/COLLAUDI.md#regole-avvio-memoria-locale-2026-11-21). Il seguito resta locale per il raggruppamento concordato: nessun bump, commit/push, PR, merge o deploy dedotto.
+
+Implementazione e verifiche locali concluse; includono Back reali da configuratore e Destinatari, primi frame visibili e nuovi ingressi con preferenza. Documentare gli esiti effettivi e continuare il collaudo fisico sulla294 separatamente dal correttivo non distribuito. Non trasformare un GO locale in autorizzazione di pubblicazione.
+
 <a id="regole-tab-1294-pubblico-2026-11-21"></a>
 
 ## Ordine294 eseguito — ricevuta e ricollaudo

@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createTourHarness} from '../scripts/lib/view-tour-harness.mjs';
 
+const rulesPaintHtml=(await readFile(new URL('../Frontend/public/regole_scadenze.html',import.meta.url),'utf8'))
+ .replace('src="assets/js/main-v129.js"','src="/__rules-paint-entry.mjs"');
+
 const shell=(await readFile(new URL('../Frontend/public/app.html',import.meta.url),'utf8'))
  .replace(/<script\b[\s\S]*?<\/script>/gi,'')
  .replace('</body>','<script type="module" src="/__back-parent.mjs"></script></body>');
@@ -273,6 +276,57 @@ const selectedDeadlineFilters=[
  ['all',null,'doc-0'],['urgent','urgenti','doc-0'],
  ['expiring','in_scadenza','doc-1'],['completed','archiviate','doc-3']
 ];
+for(const framed of [true,false])for(const [selected,query]of selectedDeadlineFilters)
+test('deadline footer Cancel restores '+selected+' list without losing the owner '+(framed?'framed':'standalone'),{timeout:45000},async()=>{
+ const f=framed?await fixture():await harness.open('home_page.html');
+ const view=()=>framed?child(f):f.page,wait=file=>framed?ready(f,file):standaloneReady(f,file);
+ try{
+  const entry=selected==='urgent'?'urgenti':'in_scadenza';
+  await view().locator('a[href="scadenze.html?filter='+entry+'"]').click();await wait('scadenze.html');
+  await view().locator('.filter-chip[data-filter="'+selected+'"]').click();
+  const listUrl=view().url(),writes=await f.page.evaluate(()=>Number(sessionStorage.getItem('ui313-local-mutation-count')||0));
+  await view().locator('#footer-center-actions .btn-fab-scadenza').click();await wait('aggiungi_scadenza.html');
+  await view().locator('#notes').fill('Synthetic unsaved deadline');
+  await view().evaluate(()=>{sessionStorage.setItem('profile-deadline-link-draft','synthetic-profile-draft');sessionStorage.setItem('account-deadline-link-draft','synthetic-account-draft');});
+  await view().locator('#footer-center-actions button.btn-fab-neutral').click();await wait('scadenze.html');
+  assert.equal(view().url(),listUrl,'footer Cancel returns to the exact predecessor including its filter');
+  assert.equal(await view().locator('.filter-chip.active').getAttribute('data-filter'),selected);
+  assert.equal(new URL(view().url()).searchParams.get('filter'),query);
+  assert.deepEqual(await view().evaluate(()=>[sessionStorage.getItem('profile-deadline-link-draft'),sessionStorage.getItem('account-deadline-link-draft')]),[null,null],'new-form cancellation discards only its existing source drafts');
+  assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('ui313-local-mutation-count')||0)),writes,'Cancel must not save the invented edit');
+  await view().locator('#header-left button.btn-icon-header').click();await wait('home_page.html');
+  if(framed)await intact(f);
+ }finally{await f.context.close();}
+});
+
+for(const framed of [true,false])test('deadline footer Cancel from real edit returns to the same detail without saving '+(framed?'framed':'standalone'),{timeout:45000},async()=>{
+ const f=framed?await fixture():await harness.open('home_page.html');
+ const view=()=>framed?child(f):f.page,wait=file=>framed?ready(f,file):standaloneReady(f,file);
+ try{
+  await view().locator('a[href="scadenze.html?filter=urgenti"]').click();await wait('scadenze.html');
+  await view().locator('#scadenze-list .deadline-card[data-id="doc-0"] .deadline-card-title').click();await wait('dettaglio_scadenza.html');
+  const detailUrl=view().url(),writes=await f.page.evaluate(()=>Number(sessionStorage.getItem('ui313-local-mutation-count')||0));
+  await view().locator('#footer-center-actions .btn-fab-scadenza').click();await wait('aggiungi_scadenza.html');
+  assert.equal(new URL(view().url()).searchParams.get('id'),'doc-0');
+  await view().locator('#notes').fill('Synthetic cancelled edit');
+  await view().locator('#footer-center-actions button.btn-fab-neutral').click();await wait('dettaglio_scadenza.html');
+  assert.equal(view().url(),detailUrl);assert.equal(await f.page.evaluate(()=>Number(sessionStorage.getItem('ui313-local-mutation-count')||0)),writes);
+  if(framed)await intact(f);
+ }finally{await f.context.close();}
+});
+
+for(const framed of [true,false])for(const id of ['', 'doc-0'])test('deadline footer Cancel without predecessor uses canonical '+(id?'detail':'list')+' '+(framed?'framed':'standalone'),{timeout:45000},async()=>{
+ const initial='aggiungi_scadenza.html'+(id?'?id='+id:'');
+ const f=framed?await fixture(initial):await harness.open('aggiungi_scadenza.html',{query:id?'?id='+id:''});
+ const view=()=>framed?child(f):f.page,wait=file=>framed?ready(f,file):standaloneReady(f,file);
+ try{
+  await view().locator('#footer-center-actions button.btn-fab-neutral').click();await wait(id?'dettaglio_scadenza.html':'scadenze.html');
+  assert.equal(new URL(view().url()).searchParams.get('id'),id||null);
+  if(!id)assert.equal(await view().locator('.filter-chip.active').getAttribute('data-filter'),'all');
+  if(framed)await intact(f);await noRuleWrites(f);
+ }finally{await f.context.close();}
+});
+
 for(const framed of [true,false])for(const entry of ['in_scadenza','urgenti'])for(const [selected,query,id]of selectedDeadlineFilters)
 test('selected '+selected+' deadline from '+entry+' returns from new form and detail to the selected list in '+(framed?'frame':'standalone'),{timeout:60000},async()=>{
  const f=framed?await fixture():await harness.open('home_page.html');
@@ -603,6 +657,7 @@ for(const framed of [true,false])test('rules keyboard tab preserves return query
   await ui().locator('#deadline-tab-vehicles').press('ArrowRight');
   const selected=await ui().locator('[data-deadline-domain][aria-selected="true"]').getAttribute('data-deadline-domain');
   const url=new URL(ui().url());assert.equal(selected,'home');assert.equal(url.searchParams.get('domain'),selected);
+  assert.equal(await ui().evaluate(()=>localStorage.getItem('codex_deadline_rules_domain:synthetic-local-only')),selected,'keyboard selection remembers the displayed tab');
   assert.equal(url.searchParams.get('return'),previous.searchParams.get('return'));assert.equal(url.hash,previous.hash);
   assert.equal(await f.page.evaluate(()=>history.length),length);
   await ui().locator('#deadline-tab-home').press('Home');
@@ -647,5 +702,152 @@ for(const framed of [true,false])test('real new-rule producer preserves return a
   assert.equal(ui().url(),hubUrl);assert.equal(await ui().locator('#deadline-tab-home').getAttribute('aria-selected'),'true');
   assert.equal(await ui().evaluate(()=>sessionStorage.getItem('deadline-editor-return-draft')),draft);
   if(framed)await intact(f);await noRuleWrites(f);
+ }finally{await f.context.close();}
+});
+
+
+// Keep the real head gate and markup; replace only the full application composition root.
+const rulesPaintEntry=String.raw`
+import * as Pages from '/assets/js/pages-init.js';
+import {initComponents} from '/assets/js/components-v129.js';
+import {loadLanguage,applyGlobalTranslations} from '/assets/js/translations.js';
+import {auth} from '/assets/js/firebase-config.js';
+import {authSessionFence} from '/assets/js/auth-session-fence.js';
+import {initCleanup} from '/assets/js/cleanup.js';
+import {vaultFrameClient} from '/assets/js/modules/core/vault-frame-client.js';
+window.__viewTour={errors:[]};
+window.addEventListener('error',e=>__viewTour.errors.push(String(e.message)));
+window.addEventListener('unhandledrejection',e=>__viewTour.errors.push(String(e.reason?.message||e.reason)));
+const probe=window.__rulesPaintProbe||={samples:[],phase:'early'};
+const frameLoaded=vaultFrameClient.isChild()?new Promise(resolve=>{
+ const loaded=e=>{if(e.source!==parent||e.origin!==location.origin||e.data!=='view-tour-frame-loaded')return;removeEventListener('message',loaded);resolve();};
+ addEventListener('message',loaded);
+}):Promise.resolve();
+(async()=>{try{
+ await loadLanguage('it');initCleanup();
+ await authSessionFence.readPermit();
+ const gate=window.privateAuthGate,ticket=gate.begin(auth.currentUser.uid);
+ if(!gate.acceptIdentity(ticket,auth.currentUser))throw Error('Synthetic identity not accepted by real presentation gate');
+ await frameLoaded;if(vaultFrameClient.isChild())await vaultFrameClient.request('key');
+ await initComponents();applyGlobalTranslations();document.documentElement.dataset.i18n='ready';
+ if(sessionStorage.getItem('rules-paint-hold')==='1'){
+  sessionStorage.removeItem('rules-paint-hold');probe.phase='waiting';await new Promise(resolve=>probe.release=resolve);
+ }
+ await Pages.initRegoleScadenze(auth.currentUser);probe.phase='ready';window.__viewTour.ready=true;
+}catch(error){window.__viewTour.bootError=String(error?.stack||error);probe.phase='error';}})();
+`;
+let paintHarness;
+test.after(async()=>{await paintHarness?.close();});
+async function rulesPaintFixture(framed){
+ if(!paintHarness)paintHarness=await createTourHarness({memory:true,frameIntegration:true,localFixtures:{
+  '/app.html':{type:'text/html',body:shell},'/__back-parent.mjs':{type:'text/javascript',body:parentModule},
+  '/login.html':{type:'text/html',body:'<!doctype html><title>Synthetic login predecessor</title>'},
+  '/regole_scadenze.html':{type:'text/html',body:rulesPaintHtml},
+  '/__rules-paint-entry.mjs':{type:'text/javascript',body:rulesPaintEntry}
+ }});
+ const f=await paintHarness.open('home_page.html',{query:'',memorySeeds:ruleSeeds,graphics:framed?'tre-livelli':'classica',theme:'light',palette:'lavender'});
+ f.paintErrors=[];f.page.on('pageerror',e=>f.paintErrors.push(e.message));
+ await f.context.addInitScript(()=>{
+  if(location.pathname!='/regole_scadenze.html')return;
+  const probe=window.__rulesPaintProbe={samples:[],phase:'early'};
+  const visible=element=>{
+   if(!element?.getClientRects().length)return false;
+   for(let node=element;node;node=node.parentElement){const style=getComputedStyle(node);if(node.hidden||style.display==='none'||style.visibility!=='visible'||Number(style.opacity)===0)return false;}
+   for(let win=window;win!==win.parent;win=win.parent){const frame=win.frameElement;if(!frame?.getClientRects().length)return false;
+    for(let node=frame;node;node=node.parentElement){const style=node.ownerDocument.defaultView.getComputedStyle(node);if(node.hidden||style.display==='none'||style.visibility!=='visible'||Number(style.opacity)===0)return false;}}
+   return true;
+  };
+  const sample=()=>{const tabs=[...document.querySelectorAll('[data-deadline-domain]')];
+   probe.samples.push({phase:probe.phase,pageVisible:visible(document.body),
+    selected:tabs.filter(tab=>visible(tab)&&(tab.getAttribute('aria-selected')==='true'||tab.classList.contains('is-active'))).map(tab=>tab.dataset.deadlineDomain),
+    panels:[...document.querySelectorAll('[data-deadline-panel]')].filter(visible).map(panel=>panel.dataset.deadlinePanel)});
+   if(probe.samples.length<600)requestAnimationFrame(sample);
+  };requestAnimationFrame(sample);
+ });
+ if(framed){await f.page.goto(paintHarness.base+'/login.html');await f.page.goto(paintHarness.base+'/app.html?route=%2Fhome_page.html');await ready(f,'home_page.html');f.ownerId=await f.page.evaluate(()=>backProbe.id);}
+ return f;
+}
+async function heldRulesSamples(f,framed){
+ try{await f.page.waitForFunction(framed=>{const win=framed?document.querySelector('iframe')?.contentWindow:window;
+  return win?.__rulesPaintProbe?.phase==='waiting'&&win.__rulesPaintProbe.samples.filter(x=>x.phase==='waiting'&&x.pageVisible).length>=4;
+ },framed,{timeout:7000});}catch(error){const state=await (framed?child(f):f.page).evaluate(()=>({url:location.href,probe:window.__rulesPaintProbe?{phase:__rulesPaintProbe.phase,samples:__rulesPaintProbe.samples.slice(-6)}:null,bootError:window.__viewTour?.bootError,gateReady:window.privateAuthGate?.isReady?.(),bodyHidden:document.body.hidden}));console.error(JSON.stringify({state,errors:f.paintErrors}));assert.fail(JSON.stringify({state,errors:f.paintErrors})+'; '+error.message);}
+ return (framed?child(f):f.page).evaluate(()=>__rulesPaintProbe.samples.filter(x=>x.pageVisible&&(x.phase==='early'||x.phase==='waiting')));
+}
+for(const framed of [true,false])test('rules first visible paint never presents Personal before requested Automezzi '+(framed?'framed':'standalone'),{timeout:45000},async()=>{
+ const f=await rulesPaintFixture(framed),ui=()=>framed?child(f):f.page;
+ try{
+  await f.page.evaluate(()=>sessionStorage.setItem('rules-paint-hold','1'));
+  if(framed)await f.page.evaluate(()=>{const frame=document.querySelector('iframe');vaultFrameNavigation.navigateFromChild(frame.contentWindow,frame.contentDocument,'/regole_scadenze.html?domain=vehicles',false);});
+  else await f.page.goto(paintHarness.base+'/regole_scadenze.html?domain=vehicles');
+  const samples=await heldRulesSamples(f,framed);
+  assert.ok(samples.length>=4,'observe actual paint opportunities with body and ancestor iframe visible');
+  const wrong=samples.filter(x=>x.selected.some(d=>d!=='vehicles')||x.panels.some(d=>d!=='vehicles'));
+  await ui().evaluate(()=>__rulesPaintProbe.release());
+  if(framed)await ready(f,'regole_scadenze.html');else await standaloneReady(f,'regole_scadenze.html');
+  assert.deepEqual(wrong,[],'no visible Personal selection or content while the real hub initializer is held');
+  assert.equal(await ui().locator('#deadline-tab-vehicles').getAttribute('aria-selected'),'true');
+  assert.equal(await ui().locator('#deadline-panel-vehicles').isVisible(),true,'correct content eventually becomes visible');
+  if(framed)await intact(f);await noRuleWrites(f);
+ }finally{await f.context.close();}
+});
+
+for(const framed of [true,false])for(const destination of ['editor','recipients'])test('rules first visible Back from '+destination+' restores Health without Personal flash '+(framed?'framed':'standalone'),{timeout:45000},async()=>{
+ const f=await rulesPaintFixture(framed),ui=()=>framed?child(f):f.page;
+ const wait=file=>framed?ready(f,file):standaloneReady(f,file);
+ try{
+  await ui().locator('a[href="impostazioni.html"]').click();await wait('impostazioni.html');
+  await ui().locator('#btn-expiry-rules').click();await wait('regole_scadenze.html');
+  await ui().locator('#deadline-tab-health').click();const selectedUrl=ui().url();
+  const link=destination==='editor'?'#deadline-panel-health a[href^="configurazione_automezzi.html"]':'a[href="gestione_destinatari.html"]';
+  await ui().locator(link).first().click();await wait(destination==='editor'?'configurazione_automezzi.html':'gestione_destinatari.html');
+  await f.page.evaluate(()=>sessionStorage.setItem('rules-paint-hold','1'));
+  await ui().locator('#header-left button.btn-icon-header').click();
+  const samples=await heldRulesSamples(f,framed);
+  const wrong=samples.filter(x=>x.selected.some(d=>d!=='health')||x.panels.some(d=>d!=='health'));
+  await ui().evaluate(()=>__rulesPaintProbe.release());await wait('regole_scadenze.html');
+  assert.deepEqual(wrong,[],'no incorrect tab or content during real Back initialization');
+  assert.equal(ui().url(),selectedUrl);assert.equal(await ui().locator('#deadline-panel-health').isVisible(),true);
+  await ui().locator('#header-left button.btn-icon-header').click();await wait('impostazioni.html');
+  await ui().locator('#header-left button.btn-icon-header').click();await wait('home_page.html');
+  if(framed)await intact(f);await noRuleWrites(f);assert.deepEqual(f.paintErrors,[]);
+ }finally{await f.context.close();}
+});
+
+for(const framed of [true,false])test('rules remember last tab across fresh Settings entry and explicit URL wins '+(framed?'framed':'standalone'),{timeout:45000},async()=>{
+ const f=await rulesPaintFixture(framed),ui=()=>framed?child(f):f.page;
+ const wait=file=>framed?ready(f,file):standaloneReady(f,file);
+ const visit=async target=>{
+  if(framed)await f.page.evaluate(target=>{const frame=document.querySelector('iframe');vaultFrameNavigation.navigateFromChild(frame.contentWindow,frame.contentDocument,target,false);},target);
+  else await f.page.goto(paintHarness.base+target);
+  await wait('regole_scadenze.html');
+ };
+ try{
+  await ui().locator('a[href="impostazioni.html"]').click();await wait('impostazioni.html');
+  await ui().locator('#btn-expiry-rules').click();await wait('regole_scadenze.html');
+  assert.equal(await ui().locator('#deadline-tab-personal').getAttribute('aria-selected'),'true','no preference defaults to Personal');
+  assert.equal(await ui().evaluate(()=>localStorage.getItem('codex_deadline_rules_domain:synthetic-local-only')),null);
+  await ui().locator('#deadline-tab-health').click();
+  assert.equal(await ui().evaluate(()=>localStorage.getItem('codex_deadline_rules_domain:synthetic-local-only')),'health');
+  await ui().locator('#header-left button.btn-icon-header').click();await wait('impostazioni.html');
+  await ui().locator('#header-left button.btn-icon-header').click();await wait('home_page.html');
+  await ui().locator('a[href="impostazioni.html"]').click();await wait('impostazioni.html');
+  await f.page.evaluate(()=>sessionStorage.setItem('rules-paint-hold','1'));
+  await ui().locator('#btn-expiry-rules').click();const samples=await heldRulesSamples(f,framed);
+  const wrong=samples.filter(x=>x.selected.some(d=>d!=='health')||x.panels.some(d=>d!=='health'));
+  await ui().evaluate(()=>__rulesPaintProbe.release());await wait('regole_scadenze.html');
+  assert.deepEqual(wrong,[]);assert.equal(await ui().locator('#deadline-tab-health').getAttribute('aria-selected'),'true');
+  assert.equal(new URL(ui().url()).searchParams.get('domain'),'health','remembered tab pins current history entry');
+  await visit('/regole_scadenze.html?domain=vehicles');
+  assert.equal(await ui().locator('#deadline-tab-vehicles').getAttribute('aria-selected'),'true');
+  assert.equal(await ui().evaluate(()=>localStorage.getItem('codex_deadline_rules_domain:synthetic-local-only')),'vehicles','explicit valid URL updates the last displayed tab');
+  const pinnedUrl=ui().url();
+  await ui().locator('#deadline-panel-vehicles a[href^="configurazione_automezzi.html"]').first().click();await wait('configurazione_automezzi.html');
+  await ui().evaluate(()=>localStorage.setItem('codex_deadline_rules_domain:synthetic-local-only','health'));
+  await ui().locator('#header-left button.btn-icon-header').click();await wait('regole_scadenze.html');
+  assert.equal(ui().url(),pinnedUrl);assert.equal(await ui().locator('#deadline-tab-vehicles').getAttribute('aria-selected'),'true','Back URL wins over another window preference');
+  await ui().evaluate(()=>localStorage.setItem('codex_deadline_rules_domain:synthetic-local-only','not-allowed'));
+  await visit(framed?'/regole_scadenze.html':'/regole_scadenze.html?domain=not-allowed');
+  assert.equal(await ui().locator('#deadline-tab-personal').getAttribute('aria-selected'),'true','invalid stored values and standalone requested values use safe default');
+  if(framed)await intact(f);await noRuleWrites(f);assert.deepEqual(f.paintErrors,[]);
  }finally{await f.context.close();}
 });

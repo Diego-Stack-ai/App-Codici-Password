@@ -4,9 +4,10 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.294';
+import { auth } from '../../firebase-config.js?v=1.2.295';
 import { getFooterReady } from '../../footer-state.js';
 import { navigateDocument } from '../../frame-navigation.js';
+import { navigateBack } from '../../components-v129.js';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 
@@ -689,8 +690,7 @@ export async function initAggiungiScadenza(user) {
                     discardProfileDocumentDraft();
                     discardAccountDeadlineDraft();
                 }
-                if (editingScadenzaId) window.location.href = `dettaglio_scadenza.html?id=${editingScadenzaId}`;
-                else window.location.href = 'scadenze.html';
+                navigateBack(editingScadenzaId ? `dettaglio_scadenza.html?id=${editingScadenzaId}` : 'scadenze.html');
             }
         }, [
             createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'close' })
@@ -1033,7 +1033,7 @@ async function loadScadenzaForEdit(id) {
             document.getElementById('linked-document-date-help')?.classList.remove('hidden');
             let sourceDraft = null;
             try {
-                const {loadLinkedDocumentDeadlineDraft} = await import('../privato/profile-document-deadline-link.js?v=1.2.294');
+                const {loadLinkedDocumentDeadlineDraft} = await import('../privato/profile-document-deadline-link.js?v=1.2.295');
                 sourceDraft = await loadLinkedDocumentDeadlineDraft(currentUser.uid, linkedSourceRef.id);
             } catch (error) {
                 console.warn('[TRACE] Documento sorgente non disponibile per il riepilogo:', error?.message || error);

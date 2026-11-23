@@ -1,4 +1,5 @@
-import {auth, db} from '../../firebase-config.js?v=1.2.294';
+import {readDeadlineRulesDomain, rememberDeadlineRulesDomain} from './deadline-rules-preference.js';
+import {auth, db} from '../../firebase-config.js?v=1.2.295';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {createElement, setChildren} from '../../dom-utils.js';
 import {getCurrentLanguage, t} from '../../translations.js';
@@ -426,11 +427,14 @@ export function initDeadlineRulesHub(user) {
     disposeMount = () => controller.abort();
     const root = document.querySelector('.deadline-hub');
     if (!root) return disposeMount;
+    const uid = user?.uid;
     const tabs = [...root.querySelectorAll(SELECTOR.tab)];
     const panels = [...root.querySelectorAll(SELECTOR.panel)];
     const active = () => root.isConnected && !controller.signal.aborted
-        && Boolean(user?.uid) && auth.currentUser?.uid === user.uid;
+        && Boolean(uid) && auth.currentUser?.uid === uid;
 
+    let storage;
+    if (active()) { try { storage = window.localStorage; } catch { /* UI preference is optional. */ } }
     const activate = (domain, {focus = false, persist = false} = {}) => {
         const next = tabs.find(tab => tab.dataset.deadlineDomain === domain) || tabs[0];
         if (!next || !active()) return;
@@ -447,6 +451,7 @@ export function initDeadlineRulesHub(user) {
             if (url.href !== window.location.href) {
                 window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
             }
+            if (active()) rememberDeadlineRulesDomain(storage, uid, next.dataset.deadlineDomain);
         }
         if (focus) next.focus();
     };
@@ -464,9 +469,10 @@ export function initDeadlineRulesHub(user) {
     }
 
     const requestedDomain = new URLSearchParams(window.location.search).get('domain');
-    activate(tabs.some(tab => tab.dataset.deadlineDomain === requestedDomain)
-        ? requestedDomain
-        : tabs.find(tab => tab.getAttribute('aria-selected') === 'true')?.dataset.deadlineDomain);
+    const rememberedDomain = active() ? readDeadlineRulesDomain(storage, uid) : null;
+    const initialDomain = tabs.some(tab => tab.dataset.deadlineDomain === requestedDomain)
+        ? requestedDomain : rememberedDomain || 'personal';
+    activate(initialDomain, {persist: initialDomain === requestedDomain || Boolean(rememberedDomain)});
     void loadPersonalDocuments(user, root.querySelector('#personal-documents-summary'), active);
     void loadDomainInventories(user, root, active);
     return disposeMount;

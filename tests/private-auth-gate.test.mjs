@@ -10,17 +10,19 @@ const logoutSource = (await readFile(new URL('assets/js/logout-session.js', root
 const vaultSource = (await readFile(new URL('assets/js/modules/core/vault-session.js', root), 'utf8')).replace(/^export /gm, '');
 const verifiedUser = {uid: 'synthetic', emailVerified: true};
 
-function fixture({page = '/fixture.html'} = {}) {
-    const redirects = [], events = [], timers = new Map(), handlers = new Map(), storage = new Map();
+function fixture({page = '/fixture.html', search = '', initialStorage = {}, bodyPresent = true, storageReadable = true} = {}) {
+    const redirects = [], events = [], timers = new Map(), handlers = new Map(), storage = new Map(Object.entries(initialStorage));
     let serial = 0;
     const body = {hidden: true, inert: true};
     const documentElement = {dataset: {}};
-    const window = {location: {pathname: page, replace: url => redirects.push(url), reload: () => redirects.push('reload')},
+    const document = {body: bodyPresent ? body : null, documentElement};
+    const window = {document, location: {pathname: page, search, replace: url => redirects.push(url), reload: () => redirects.push('reload')},
         dispatchEvent: event => events.push(event.type), addEventListener: (name, fn) => handlers.set(name, fn)};
-    const context = vm.createContext({beginFrameLogout: () => null, window, navigateDocument: target => window.location.replace(target), document: {body, documentElement}, Event, Promise,
+    window.parent = window;
+    const context = vm.createContext({beginFrameLogout: () => null, window, navigateDocument: target => window.location.replace(target), document, Event, Promise, URLSearchParams,
         setTimeout: (fn, ms) => { timers.set(++serial, {fn, ms}); return serial; },
         clearTimeout: id => timers.delete(id),
-        sessionStorage: {getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key)}});
+        sessionStorage: {getItem: key => {if (!storageReadable) throw Error('STORAGE_UNAVAILABLE'); return storage.get(key) ?? null;}, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key)}});
     vm.runInContext(gateSource, context);
     return {context, gate: window.privateAuthGate, body, documentElement, redirects, events, storage, timers, handlers};
 }
@@ -123,6 +125,122 @@ test('back-forward restoration remains hidden and reloads the authentication che
     const f = fixture(); f.gate.acceptIdentity(f.gate.begin('synthetic'), verifiedUser);
     f.handlers.get('pagehide')(); assert.equal(f.body.hidden, true);
     f.handlers.get('pageshow')({persisted: true}); assert.deepEqual(f.redirects, ['reload']);
+});
+
+for (const bodyPresent of [true, false]) test('logout marker denies startup before Auth even before body exists: ' + bodyPresent, () => {
+    const f = fixture({page: '/app.html', bodyPresent, initialStorage: {codex_explicit_logout: '1'}});
+    assert.deepEqual(f.redirects, ['/login.html']);
+    assert.equal(f.documentElement.dataset.privateAuthState, 'pending');
+    assert.equal(f.timers.size, 0);
+    assert.equal(f.gate.isReady(), false);
+    const ticket = f.gate.begin(verifiedUser.uid);
+    assert.equal(ticket, null);
+    assert.equal(f.gate.acceptIdentity(ticket, verifiedUser), false);
+    assert.equal(f.gate.reveal(ticket), false);
+    assert.equal(f.body.hidden, true); assert.equal(f.body.inert, true);
+});
+
+for (const persisted of [true, false]) test('logout marker on repeated pageshow bypasses stale top-level exit: ' + persisted, () => {
+    const f = fixture({page: '/app.html'}), ticket = f.gate.begin(verifiedUser.uid);
+    f.gate.acceptIdentity(ticket, verifiedUser);
+    let deferred = 0;
+    f.context.window.vaultFrameNavigation = {deferExit() {deferred++; return true;}};
+    // Simulate the old document's pending exit and its redirecting sentinel.
+    f.gate.reject();
+    assert.equal(deferred, 1); assert.deepEqual(f.redirects, []);
+    f.storage.set('codex_explicit_logout', '1');
+    for (let i = 0; i < 4; i++) {
+        f.handlers.get('pagehide')();
+        f.handlers.get('pageshow')({persisted});
+        assert.equal(f.body.hidden, true); assert.equal(f.body.inert, true);
+        assert.equal(f.gate.acceptIdentity(ticket, verifiedUser), false);
+        assert.equal(f.gate.reveal(ticket), false);
+    }
+    assert.deepEqual(f.redirects, Array(4).fill('/login.html'));
+    assert.equal(deferred, 1, 'restored top-level document must not reuse its old queued exit');
+    assert.equal(f.timers.size, 0);
+});
+
+test('first ordinary pageshow during pending logout waits for cleanup before top-level exit', async () => {
+    const f = fixture(); f.gate.acceptIdentity(f.gate.begin(verifiedUser.uid), verifiedUser);
+    let finishDeny, signOutCalls = 0, queued = 0;
+    const denied = new Promise(resolve => {finishDeny = resolve;});
+    f.context.window.authSessionFence = {deny: () => denied, isLocallyAllowed: () => false};
+    f.context.window.vaultFrameNavigation = {deferExit() {queued++; return true;}};
+    vm.runInContext(vaultSource + '\n' + logoutSource, f.context);
+    const logout = f.context.logoutWithCleanup(async () => {signOutCalls++;});
+    f.handlers.get('pageshow')({persisted: false});
+    assert.equal(signOutCalls, 0);
+    assert.deepEqual(f.redirects, [], 'initial load event must preserve the current logout hold');
+    assert.equal(queued, 1);
+    assert.equal(f.body.hidden, true); assert.equal(f.body.inert, true);
+    finishDeny(); await logout;
+    assert.equal(signOutCalls, 1);
+    assert.deepEqual(f.redirects, ['/login.html']);
+});
+
+test('unreadable logout storage at startup fails closed before Auth', () => {
+    const f = fixture({storageReadable: false});
+    assert.deepEqual(f.redirects, ['/login.html']);
+    assert.equal(f.body.hidden, true); assert.equal(f.body.inert, true);
+    assert.equal(f.timers.size, 0);
+});
+
+test('unreadable logout storage on restore cannot reveal a previously accepted document', () => {
+    const f = fixture(), ticket = f.gate.begin(verifiedUser.uid);
+    f.gate.acceptIdentity(ticket, verifiedUser);
+    f.context.sessionStorage.getItem = () => {throw Error('STORAGE_UNAVAILABLE');};
+    f.handlers.get('pagehide')(); f.handlers.get('pageshow')({persisted: true});
+    assert.deepEqual(f.redirects, ['/login.html']);
+    assert.equal(f.gate.reveal(ticket), false);
+    assert.equal(f.body.hidden, true); assert.equal(f.body.inert, true);
+});
+
+test('a logged-out restored child keeps cleanup and navigation owned by its parent', () => {
+    const f = fixture(), ticket = f.gate.begin(verifiedUser.uid);
+    f.gate.acceptIdentity(ticket, verifiedUser);
+    const calls = [];
+    f.context.window.parent = {vaultFrameNavigation: {
+        revokeFromChild: () => {},
+        navigateFromChild(source, doc, target, replace) {calls.push({source, doc, target, replace}); return true;}
+    }};
+    f.storage.set('codex_explicit_logout', '1');
+    for (let i = 0; i < 2; i++) f.handlers.get('pageshow')({persisted: true});
+    assert.equal(calls.length, 2);
+    assert.ok(calls.every(call => call.source === f.context.window && call.doc === f.context.document && call.target === '/login.html' && call.replace));
+    assert.deepEqual(f.redirects, [], 'child must not navigate its own frame to a public page');
+    assert.equal(f.body.hidden, true); assert.equal(f.body.inert, true);
+});
+
+test('ordinary pageshow stays usable; a new explicit login removes logout-only routing', () => {
+    const f = fixture(), ticket = f.gate.begin(verifiedUser.uid);
+    f.gate.acceptIdentity(ticket, verifiedUser);
+    f.handlers.get('pageshow')({persisted: false});
+    assert.equal(f.body.hidden, false); assert.deepEqual(f.redirects, []);
+    f.storage.set('codex_explicit_logout', '1');
+    f.handlers.get('pageshow')({persisted: true});
+    assert.deepEqual(f.redirects, ['/login.html']);
+    f.storage.delete('codex_explicit_logout');
+    f.handlers.get('pageshow')({persisted: true});
+    assert.deepEqual(f.redirects, ['/login.html', 'reload']);
+});
+
+test('obsolete pageshow cannot navigate or hide a replacement document', () => {
+    const f = fixture(); f.gate.acceptIdentity(f.gate.begin(verifiedUser.uid), verifiedUser);
+    f.context.window.document = {};
+    f.storage.set('codex_explicit_logout', '1');
+    f.handlers.get('pageshow')({persisted: true});
+    assert.deepEqual(f.redirects, []);
+    assert.equal(f.body.hidden, false);
+});
+
+for (const [page, search, target] of [
+    ['/impostazioni.html', '?recovery=complete', '/login.html?recovery=complete'],
+    ['/impostazioni.html', '?recovery=complete&recovery=complete', '/login.html'],
+    ['/app.html', '?recovery=complete&route=%2Fimpostazioni.html', '/login.html']
+]) test('logout startup keeps recovery intent bounded to allowed page/query: ' + page + search, () => {
+    const f = fixture({page, search, initialStorage: {codex_explicit_logout: '1'}});
+    assert.deepEqual(f.redirects, [target]);
 });
 
 for (const outcome of ['success','failure','timeout']) test('logout ' + outcome + ': locks and clears local Vault before signOut, then redirects', async () => {

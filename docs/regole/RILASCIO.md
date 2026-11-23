@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="rilascio-1295-2026-11-23"></a>
+
+## Candidata1.2.295 — tre correttivi, solo Hosting
+
+[Ordine diretto](../progetto/INCARICO_CORRENTE.md#rilascio-1295-2026-11-23): snapshot pre-bump e confronto normalizzato, versione295/catalogo guida riesaminato, derivati offline/QA allineati prima del commit. Due GO indipendenti sull'HEAD finale, CI PR completa, merge con testa attesa; CI master e validate Hosting stesso sorgente/digest, release_scope=hosting, master invariato e gate production conservato. Dopo deploy verificare manifest pulito sui byte Git LF, tutti hash/header/probe e GET dei cinque produttori funzionali; ricevuta MD/GitHub separata senza altro Hosting. Nessun ritocco alle soglie o ai workflow/backend/protezioni. [Collaudi del lotto](../evidenze/COLLAUDI.md#logout-cronologia-locale-2026-11-23); successiva prova iPhone distinta.
+
 <a id="regole-tab-1294-pubblico-2026-11-21"></a>
 
 ## APP1.2.294 — procedura eseguita, solo Hosting

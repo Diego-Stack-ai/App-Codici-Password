@@ -1,5 +1,31 @@
 # Decisioni
 
+<a id="rilascio-1295-2026-11-23"></a>
+
+## Autorizzare il rilascio raggruppato295 — 23/11/2026
+
+Diego autorizza PR, merge, deploy e nuova versione per Regole, Annulla e logout, con MD/GitHub e successivo ricollaudo sul cellulare. Superato il solo precedente vincolo di mantenere locale questo lotto; il perimetro non comprende gli altri rilievi o nuovi test invasivi. [Mandato e gate](INCARICO_CORRENTE.md#rilascio-1295-2026-11-23).
+
+<a id="logout-cronologia-locale-2026-11-23"></a>
+
+## Includere il ritorno dopo logout nel lotto locale — 23/11/2026
+
+Dopo F41, Diego autorizza «Procedi» alla proposta di aggiungere il correttivo locale senza pubblicare. Il chiarimento precedente distingue il ritorno dopo Esci dalle impostazioni di inattività: Accedi deve restare la destinazione sicura, senza ripresentare una Home utilizzabile o rimanere su bianco. [Mandato](INCARICO_CORRENTE.md#logout-cronologia-locale-2026-11-23). Si interviene sul guard di presentazione e sui ripristini; cleanup del logout in corso e scelta finale del padre restano obbligatori. [Implementazione e limiti](../evidenze/COLLAUDI.md#logout-cronologia-locale-2026-11-23). Il verde locale non chiude F41 sull'iPhone e non autorizza una pubblicazione.
+
+<a id="annulla-scadenza-lotto-locale-2026-11-21"></a>
+
+## Includere Annulla nel lotto locale — 21/11/2026
+
+Diego ordina di correggere Annulla di Nuova Scadenza insieme alle modifiche locali Regole, senza pubblicare per ora, poi continuare soltanto le prove fisiche non già superate. Ritorno alla lista/filtro d'origine con lo stesso contratto della freccia, pulizia delle bozze e fallback del modulo in modifica conservati; nessuna modifica del blocco. [Mandato](INCARICO_CORRENTE.md#annulla-scadenza-lotto-locale-2026-11-21). Un test locale verde non anticipa il ricollaudo fisico294, né autorizza un rilascio.
+
+<a id="regole-avvio-memoria-locale-2026-11-21"></a>
+
+## Ultima linguetta Regole e avvio senza selezione provvisoria — 21/11/2026
+
+Diego accetta il ritorno finale della294 e segnala il lampeggio Personali→tab d'origine, anche da Destinatari email. Alla domanda sul lotto risponde «Sì, anche l'ultima linguetta»: primo ingresso senza preferenza su Personali; se lascia Salute, al rientro ritrova Salute. Attuazione locale per UID e dispositivo, separata dai dati delle regole; [mandato](INCARICO_CORRENTE.md#regole-avvio-memoria-locale-2026-11-21). Non si introduce un reset a ogni ingresso o una preferenza remota. Il confronto precedente che separava la memoria dal solo flash è superato da questo chiarimento, non dall'ordine di rilascio294 già eseguito.
+
+La scelta esplicita nella URL prevale sulla memoria, così un ritorno verificato mantiene la propria origine anche se un'altra finestra cambia preferenza. Storage assente, cancellato, negato o invalido conserva il fallback Personali; il solo dominio ricordato non contiene dati di regole. Attuazione e test restano locali fino a un successivo ordine di rilascio.
+
 <a id="regole-tab-1294-2026-11-21"></a>
 
 ## Correggere il ritorno alla linguetta scelta — 21/11/2026
