@@ -1,5 +1,11 @@
 # Programma
 
+<a id="rilascio-1295-pubblico-2026-11-24"></a>
+
+## Ricollaudare i tre correttivi sulla 295 pubblicata
+
+Rilascio unico concluso: 1.2.295 online e verifica integrale PASS, PR #358 e Hosting #1286 SUCCESS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1295-pubblico-2026-11-24). Dopo la chiusura della sola ricevuta MD/GitHub, confermare295 sul telefono e ricollaudare Regole primo disegno/memoria, F20 Annulla e filtro, F41 logout/ritorni nativi. Una prova alla volta, senza ripetere F44/F45 o gli altri sottocasi già superati. Nessun secondo Hosting; C1/C2, L23-UI02 e L23-PERF01 restano distinti e aperti. Le sezioni di preparazione locale/rilascio sotto descrivono checkpoint precedenti.
+
 <a id="rilascio-1295-2026-11-23"></a>
 
 ## Rilasciare insieme i tre correttivi, poi ricollaudare

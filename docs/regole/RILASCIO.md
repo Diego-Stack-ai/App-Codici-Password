@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="rilascio-1295-pubblico-2026-11-24"></a>
+
+## APP 1.2.295 — rilascio Hosting eseguito
+
+PR #358 unita dopo due GO sulla testa finale e CI PR #1284 verde; master #1285 e validate Hosting #1286 concordi per sorgente/digest. Avvio manuale e approvazione production di Diego dopo il rifiuto CLI 403; job conferma master e scope solo Hosting, deploy SUCCESS e verifica pubblica integrale PASS. [Ricevuta completa](../evidenze/COLLAUDI.md#rilascio-1295-pubblico-2026-11-24). Sorgente distribuito `1eaa2da0ff1aec3aae9f8657fb65eb1d84845ab4`, sourceDirty=false; il merge della successiva ricevuta documentale resta distinto e non comporta altro Hosting. Workflow, protezioni, backend e blocco conservati; ricollaudo iPhone successivo, nessuna chiusura C1/C2.
+
 <a id="rilascio-1295-2026-11-23"></a>
 
 ## Candidata1.2.295 — tre correttivi, solo Hosting

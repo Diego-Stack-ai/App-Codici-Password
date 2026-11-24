@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="rilascio-1295-pubblico-2026-11-24"></a>
+
+## Esecuzione dell'ordine 295 — 24/11/2026
+
+[Ordine congiunto](#rilascio-1295-2026-11-23) eseguito: PR #358, Hosting #1286 e verifica pubblica conclusi per 1.2.295. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1295-pubblico-2026-11-24). Aggiornamento documentale successivo senza nuovo Hosting, poi ricollaudo fisico dei tre correttivi; gli altri limiti e residui restano invariati.
+
 <a id="rilascio-1295-2026-11-23"></a>
 
 ## Autorizzare il rilascio raggruppato295 — 23/11/2026
