@@ -16,7 +16,7 @@ Collaborazione reale Claude conclusa in sola lettura; Codex integra il controllo
 
 ## Isolare il ritorno visivo dopo logout; non ripetere Regole e Annulla
 
-Versione 295 confermata sulla PWA iPhone. [R01–R06 positivi e R07 FAIL visivo](../evidenze/COLLAUDI.md#cornice-telefono-1295-2026-11-24): acquisiti Regole avvio/memoria/ritorni, Annulla da Scadenze e Urgenze e stabilità del login dopo Esci. Resta il gesto nativo dopo logout che mostra Home/Urgenze e bianco per circa 1–2s. Prima di un ulteriore correttivo distinguere anteprima nativa, documento ripristinato e caricamento reale del guard; migliorare l'oracolo dei fotogrammi intermedi solo con un banco pertinente, senza spacciare Chromium per prova iPhone. Nessun nuovo rilascio o modifica del blocco da questo checkpoint; C1/C2 e altri residui restano aperti.
+Versione 295 confermata sulla PWA iPhone. [R01–R06 positivi e R07 FAIL visivo](../evidenze/COLLAUDI.md#cornice-telefono-1295-2026-11-24): acquisiti Regole avvio/memoria/ritorni, Annulla da Scadenze e Urgenze e stabilità del login dopo Esci. Restano i gesti nativi dopo logout: Home→Accedi, Urgenze→Accedi e poi una pagina bianca; l'ultimo chiarimento non ne precisa durata o ritorno. Prima di un ulteriore correttivo distinguere anteprima nativa, documento ripristinato e caricamento reale del guard; migliorare l'oracolo dei fotogrammi intermedi solo con un banco pertinente, senza spacciare Chromium per prova iPhone. Nessun nuovo rilascio o modifica del blocco da questo checkpoint; C1/C2 e altri residui restano aperti.
 
 <a id="rilascio-1295-pubblico-2026-11-24"></a>
 

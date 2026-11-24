@@ -18,7 +18,7 @@
 
 ## Collaudo iPhone 295 — Regole e Annulla positivi; F41 visivo non chiuso
 
-Diego conferma 1.2.295. R01–R03 Regole, R04/R05 Annulla e R06 logout ordinario superati nei sottocasi riferiti; R07 con i gesti nativi dopo logout mostra Home, Urgenze e una pagina bianca prima del ritorno ad Accedi. [Esiti, sequenza e limiti](../evidenze/COLLAUDI.md#cornice-telefono-1295-2026-11-24). Nessuna prova che le vecchie pagine fossero utilizzabili o che la causa sia uno snapshot iOS; controlli finali browser verdi non certificavano i fotogrammi dello swipe. Prove riuscite da non ripetere, F41 ancora aperto e diagnosi soltanto in lettura; nessun nuovo runtime o rilascio. Ricevuta #359 già unita, sorgente Hosting 295 invariato. Blocco della Vault conservato; C1/C2, L23-UI02 e L23-PERF01 aperti.
+Diego conferma 1.2.295. R01–R03 Regole, R04/R05 Annulla e R06 logout ordinario superati nei sottocasi riferiti; R07 con i gesti nativi dopo logout mostra Home→Accedi, Urgenze→Accedi e poi una pagina bianca; il chiarimento finale non precisa l'esito successivo al bianco. [Esiti, sequenza e limiti](../evidenze/COLLAUDI.md#cornice-telefono-1295-2026-11-24). Nessuna prova che le vecchie pagine fossero utilizzabili o che la causa sia uno snapshot iOS; controlli finali browser verdi non certificavano i fotogrammi dello swipe. Prove riuscite da non ripetere, F41 ancora aperto e diagnosi soltanto in lettura; nessun nuovo runtime o rilascio. Ricevuta #359 già unita, sorgente Hosting 295 invariato. Blocco della Vault conservato; C1/C2, L23-UI02 e L23-PERF01 aperti.
 
 <a id="rilascio-1295-pubblico-2026-11-24"></a>
 

@@ -24,7 +24,7 @@ Implementazione locale e controprove concluse: [esiti e integrazione di Codex](.
 
 ## Seguito del ricollaudo 295 — esiti e diagnosi in lettura
 
-Ricevuta #359 unita e versione 295 confermata sul telefono. [Esiti](../evidenze/COLLAUDI.md#cornice-telefono-1295-2026-11-24): Regole R01–R03, Annulla R04/R05 e logout ordinario R06 positivi; R07 dopo i gesti Indietro mostra brevemente Home, Urgenze e bianco prima del login. F41 visivo non chiuso. Registrare il chiarimento senza altri swipe ripetitivi; sola diagnosi del percorso e dei limiti del banco, nessuna nuova modifica runtime o pubblicazione da questa registrazione. Blocco della Vault conservato; gli altri residui restano separati.
+Ricevuta #359 unita e versione 295 confermata sul telefono. [Esiti](../evidenze/COLLAUDI.md#cornice-telefono-1295-2026-11-24): Regole R01–R03, Annulla R04/R05 e logout ordinario R06 positivi; R07: primo gesto Home→Accedi, secondo Urgenze→Accedi, ulteriore gesto→pagina bianca; il chiarimento finale non precisa l'esito successivo al bianco. F41 visivo non chiuso. Registrare il chiarimento senza altri swipe ripetitivi; sola diagnosi del percorso e dei limiti del banco, nessuna nuova modifica runtime o pubblicazione da questa registrazione. Blocco della Vault conservato; gli altri residui restano separati.
 
 <a id="rilascio-1295-pubblico-2026-11-24"></a>
 
