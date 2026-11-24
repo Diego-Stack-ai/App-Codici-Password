@@ -1,5 +1,13 @@
 # Rilascio
 
+<a id="rilascio-1296-pubblico-2026-11-24"></a>
+
+## APP 1.2.296 — procedura Hosting eseguita
+
+PR #360 unita dopo due GO sulla testa finale e CI PR #1288 SUCCESS; master #1289 e validate Hosting #1290 concordi per sorgente e digest. Scope hosting verificato e master invariato prima di production. Dispatch dal browser interno dopo HTTP 403 della CLI; approvazione finale di Diego, deploy SUCCESS e verifica pubblica integrale PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1296-pubblico-2026-11-24).
+
+Sorgente distribuito `2d15657e37fec82bde0588f455aad9847d580b4f`, sourceDirty=false e digest `35f5243759ea10b74dea956e0363b50b8d31aad147de06919b414e8ce186353b`. I commit/merge di questa ricevuta documentale non sostituiscono il sorgente Hosting né richiedono altro deploy. Workflow, protezioni, backend e blocco conservati; ricollaudo iPhone distinto e ancora da acquisire.
+
 <a id="rilascio-1296-2026-11-24"></a>
 
 ## Candidata 1.2.296 — avvio dopo logout, solo Hosting

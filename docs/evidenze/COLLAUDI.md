@@ -1,5 +1,19 @@
 # Collaudi
 
+<a id="rilascio-1296-pubblico-2026-11-24"></a>
+
+## APP 1.2.296 — pubblicata e verificata, 24/11/2026
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#rilascio-1296-2026-11-24) eseguito per il controllo anticipato dell'avvio dopo logout. [PR #360](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/360) unita dopo due GO indipendenti sulla testa finale `fca96d3bdcc56369ed04bf97483d0fe4385fb59d` e check PR/documenti/segreti verdi. Sorgente Hosting distribuito: `2d15657e37fec82bde0588f455aad9847d580b4f`. Questa ricevuta e i suoi successivi commit/merge documentali non lo sostituiscono nel manifest, non modificano runtime/versione/digest e non comportano altro Hosting.
+
+CI [PR #1288](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/45354640634) SUCCESS, validate 138309306298; CI [master #1289](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/45360365680) SUCCESS, validate 138328578601; [Hosting #1290](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/45360631629) SUCCESS, validate 138329497662 e deploy 138348316057. Ogni suite contiene 68 riepiloghi TAP: 4070 casi dichiarati, 4059 PASS, 11 SKIP e 0 FAIL. Gli SKIP non sono PASS né prove fisiche; i 53 casi guard/logout locali restano una verifica distinta. Master e Hosting attestano lo stesso sorgente distribuito e il digest `35f5243759ea10b74dea956e0363b50b8d31aad147de06919b414e8ce186353b`, concorde con la CI PR. Manifest pulito di 369 file, versione su 308 riferimenti, guida 16/reviewed296 e offline 349 risorse.
+
+Il dispatch CLI è stato rifiutato con HTTP 403; un solo avvio master/hosting è riuscito dall'interfaccia GitHub nel browser interno. Anche l'approvazione CLI è stata rifiutata con HTTP 403; il browser ha poi restituito Accesso negato senza eseguire il clic. Diego ha approvato production e l'API registra Diego-Stack-ai come approvatore. Le due validazioni erano concluse, scope hosting e master invariato verificati prima del gate; il job ricontrolla master e usa `--only hosting`. Job di pubblicazione concluso il 24/11/2026 alle 11:04:37 Europe/Rome, compresa la verifica pubblica del workflow. Nessuna modifica funzionale a workflow/protezioni, backend/Rules, guard completo, owner, cleanup vivo, Auth/MFA, chiavi, lease/inattività o blocco.
+
+Verifica indipendente root dal worktree pulito sul sorgente distribuito: manifest identico, sourceDirty=false, 369 hash, 41 profili di intestazioni, redirect/rewrite e 3 probe di normalizzazione PASS. Altre 26 GET200 con SHA-256 concordi comprendono i tre produttori modificati, pagine, dipendenze e derivati; rapporto concluso alle 11:05:36 Europe/Rome. Secondo agente in sola lettura, 11:06:08–11:06:09 Europe/Rome: manifest e tre produttori HTTP200, SHA-256 pubblico=manifest=blob Git LF, MIME corretti e cache no-cache/no-store/must-revalidate. Primo tentativo fermato dal DNS, poi rete autorizzata riuscita; nessuna scrittura, browser desktop, dato privato o prova fisica.
+
+Distribuito e verificato il controllo anticipato del documento nuovo; non è isolata la causa visiva R07 né dimostrata l'eliminazione dei fotogrammi nativi dello swipe. Conferma 296 sul telefono e ricollaudo F41 ancora da acquisire. R07 conserva Home→Accedi, Urgenze→Accedi e ulteriore gesto→bianco, senza durata o ritorno dal bianco confermati. Regole/Annulla 295 già positivi non si ripetono; C1/C2 e L23-UI02/L23-PERF01 restano aperti. I checkpoint locali e di preparazione sottostanti sono anteriori al presente esito.
+
 <a id="rilascio-1296-2026-11-24"></a>
 
 ## Candidata 1.2.296 — confezione del correttivo dopo logout

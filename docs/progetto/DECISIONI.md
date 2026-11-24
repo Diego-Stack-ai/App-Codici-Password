@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="rilascio-1296-pubblico-2026-11-24"></a>
+
+## Rilascio 296 eseguito, prova fisica distinta — 24/11/2026
+
+Eseguito il [mandato 296](INCARICO_CORRENTE.md#rilascio-1296-2026-11-24) con PR #360, due GO sulla testa finale, CI concordi e Hosting #1290 protetto approvato da Diego. [Verifica pubblica e limiti](../evidenze/COLLAUDI.md#rilascio-1296-pubblico-2026-11-24). Codex ha mantenuto orchestrazione e scrittura; il contributo Claude resta il precedente riesame locale in sola lettura. La ricevuta documentale non comporta nuova versione o pubblicazione. Il verde automatico non chiude F41 sul telefono; blocco e altri residui restano invariati.
+
 <a id="rilascio-1296-2026-11-24"></a>
 
 ## Rilasciare la correzione locale verificata con Claude — 24/11/2026
