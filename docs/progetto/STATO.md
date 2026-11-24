@@ -2,6 +2,14 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1296-pubblico-2026-11-24"></a>
+
+## APP 1.2.296 — online e verificata
+
+Pubblicata il 24/11/2026 solo Hosting dal sorgente `2d15657e37fec82bde0588f455aad9847d580b4f`: PR #360, CI PR/master/validate Hosting verdi e deploy #1290 SUCCESS dopo approvazione production di Diego. [Ricevuta completa](../evidenze/COLLAUDI.md#rilascio-1296-pubblico-2026-11-24). Manifest pulito di 369 file, digest concorde; verifica pubblica integrale, 26 GET mirate e riesame indipendente dei tre produttori PASS. Ricevuta soltanto documentale senza secondo Hosting.
+
+Distribuito il controllo anticipato dell'avvio dopo logout. La conferma 296 sul telefono e il ricollaudo R07/F41 restano da acquisire: non è dimostrata l'eliminazione dei fotogrammi nativi né isolata la causa visiva. Regole/Annulla 295 già positivi non si ripetono; blocco, C1/C2 e residui L23-UI02/L23-PERF01 conservati. Le sezioni di preparazione sottostanti sono checkpoint storici, non lo stato attuale di pubblicazione.
+
 <a id="rilascio-1296-2026-11-24"></a>
 
 ## Candidata 1.2.296 — rilascio autorizzato, produzione ancora 295

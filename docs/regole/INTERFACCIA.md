@@ -1,5 +1,13 @@
 # Interfaccia
 
+<a id="rilascio-1296-pubblico-2026-11-24"></a>
+
+## Avvio dopo logout — controllo anticipato distribuito nella 296
+
+Il [routing anticipato](#logout-avvio-locale-2026-11-24) è distribuito nella 1.2.296 e verificato sui byte pubblici, inclusi app.html, vault-frame-entry.js e vault-frame-logout-startup.js. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1296-pubblico-2026-11-24). Risorse versionate e precache allineato; nessuna nuova regola di blocco o modifica della UI visiva. La ricevuta aggiorna soltanto i documenti, senza altro Hosting.
+
+La verifica del documento e dei suoi asset non è una prova sui fotogrammi nativi iOS precedenti a JavaScript. R07/F41 richiede il ricollaudo sull'iPhone aggiornato; nessuna soluzione fisica dedotta dalla URL finale o dal verde Chromium. Il checkpoint di confezione seguente è anteriore al presente rilascio.
+
 <a id="rilascio-1296-2026-11-24"></a>
 
 ## Avvio dopo logout — confezione 296 autorizzata

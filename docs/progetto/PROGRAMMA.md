@@ -1,5 +1,13 @@
 # Programma
 
+<a id="rilascio-1296-pubblico-2026-11-24"></a>
+
+## Dopo il rilascio 296 — conferma versione e solo R07/F41
+
+1.2.296 online e verificata, PR #360 e Hosting #1290 SUCCESS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1296-pubblico-2026-11-24). Dopo questa chiusura MD/GitHub, confermare la versione sull'iPhone e riprendere il ricollaudo del gesto nativo dopo logout, una prova alla volta. Conservare i PASS Regole e Annulla 295 e gli altri sottocasi già acquisiti; nessun secondo Hosting dalla ricevuta.
+
+Il nuovo avvio del documento è distribuito e verificato; le immagini native dello swipe non sono certificate risolte. R07/F41, C1/C2 e i distinti L23-UI02/L23-PERF01 rimangono aperti; policy del blocco invariata. I piani locali e di confezione sottostanti precedono la presente pubblicazione.
+
 <a id="rilascio-1296-2026-11-24"></a>
 
 ## Pubblicare 296, poi ricollaudare il solo ritorno dopo logout

@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="rilascio-1296-pubblico-2026-11-24"></a>
+
+## Ordine 296 eseguito — pubblicazione verificata e ricollaudo iPhone
+
+1.2.296 pubblicata solo Hosting il 24/11/2026 dal sorgente `2d15657e37fec82bde0588f455aad9847d580b4f`: PR #360 unita dopo due GO sulla testa finale e CI PR verde; master #1289 e Hosting #1290 concordi, approvazione production di Diego e deploy SUCCESS. [Ricevuta ed evidenze](../evidenze/COLLAUDI.md#rilascio-1296-pubblico-2026-11-24). Verifica pubblica integrale e riesame indipendente dei tre produttori PASS. Questa ricevuta e i suoi commit/merge documentali non modificano il runtime, la versione o il digest e non richiedono altro Hosting.
+
+Prossimo passo: confermare 1.2.296 sull'iPhone, poi ricollaudare R07/F41 dopo logout, una prova alla volta. Regole e Annulla 295 positivi non si ripetono; nessuna eliminazione delle immagini native iOS è dimostrata dai test automatici. Blocco della Vault, C1/C2 e L23-UI02/L23-PERF01 invariati. I checkpoint locali e di preparazione sottostanti precedono questo esito.
+
 <a id="rilascio-1296-2026-11-24"></a>
 
 ## Ordine 296 — rilasciare il correttivo dell'avvio dopo logout
