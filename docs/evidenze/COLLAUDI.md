@@ -1,5 +1,19 @@
 # Collaudi
 
+<a id="rilascio-1295-pubblico-2026-11-24"></a>
+
+## APP 1.2.295 — pubblicata e verificata, 24/11/2026
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#rilascio-1295-2026-11-23) eseguito per i tre correttivi Regole, Annulla e logout. [PR #358](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/358) unita dopo due GO indipendenti sulla testa finale `da8d768de92995d573f45e4483c058a196514d06`, CI PR e check documenti/segreti verdi. Sorgente Hosting distribuito: `1eaa2da0ff1aec3aae9f8657fb65eb1d84845ab4`; la successiva ricevuta soltanto documentale non lo sostituisce nel manifest e non richiede nuova versione o altro Hosting.
+
+CI [PR #1284](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/45264315969) SUCCESS, job 138007053794; CI [master #1285](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/45271154564) SUCCESS, validate 138030993342; workflow manuale [Hosting #1286](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/45283314005) SUCCESS, validate 138073094026 e deploy 138092593000. Master e Hosting attestano lo stesso sorgente distribuito e il digest `6a6feec623f73ea7387332215bde2292c4a7ec5858084bb5e802c6aebe8cf486`, concorde con la CI PR. In ciascuna delle tre CI, i 68 riepiloghi TAP dichiarano 4056 casi: 4045 PASS, 11 SKIP e 0 FAIL. Gli SKIP non sono conteggiati come PASS né come prove fisiche; restano distinti dai 171 casi mirati locali senza skip. Versione coerente su 307 riferimenti, manifest pulito 368 file.
+
+L'avvio CLI era stato rifiutato con HTTP 403; Diego ha avviato il workflow manuale con `release_scope=hosting` e l'API registra l'approvazione production di Diego-Stack-ai. Le validazioni master e Hosting erano già concluse prima dell'avvio del job di pubblicazione; il job verifica nuovamente master prima del deploy. Scope `hosting` e comando `--only hosting` confermati nel log; deploy completato il 24/11/2026 alle 07:04:35 Europe/Rome, con successiva verifica pubblica del workflow riuscita. Nessuna modifica a workflow, protezioni, backend, Rules, chiavi, owner, lease o inattività; nessuna variazione del blocco della Vault dedotta dal rilascio.
+
+Verifica indipendente root del sito pubblico dal worktree pulito sul sorgente distribuito: manifest identico, `sourceDirty=false`, 368 hash, 41 profili di intestazioni, redirect/rewrite e 3 probe di normalizzazione PASS. Ulteriori 25 GET200 con hash concordi comprendono i cinque produttori corretti, pagine e dipendenze interessate, shell/owner/ammissione e derivati. Il primo tentativo di questo verificatore privato usava chiavi senza slash iniziale e non trovava il valore atteso; corretto il solo script ignorato,25/25 PASS. Non era una divergenza pubblica: la verifica integrale canonica era già passata. Secondo agente in sola lettura, 24/11/2026 ore 07:06:28 Europe/Rome: manifest e cinque produttori 200, SHA-256 pubblico=blob Git LF=manifest, MIME/cache corretti. Prima GET bloccata dal DNS della sandbox, poi accesso di rete autorizzato riuscito; nessun dato personale letto o browser desktop usato.
+
+Ricollaudo iPhone ancora da eseguire sulla 295 realmente aggiornata: conferma versione, poi Regole primo disegno/ultima linguetta, F20 Annulla con filtro conservato e F41 logout/ritorni nativi, una prova alla volta. I FAIL fisici294 restano storici fino ai nuovi esiti; F44/F45 rete/ripresa già acquisiti non si ripetono. C1/C2, L23-UI02 e L23-PERF01 rimangono aperti. I paragrafi locali/candidata sotto sono checkpoint storici, non lo stato di pubblicazione attuale.
+
 <a id="rilascio-1295-2026-11-23"></a>
 
 ## Candidata1.2.295 — confezione dei tre correttivi

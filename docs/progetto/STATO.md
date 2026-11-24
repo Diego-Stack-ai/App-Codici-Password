@@ -2,6 +2,14 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1295-pubblico-2026-11-24"></a>
+
+## APP 1.2.295 — online e verificata
+
+Pubblicata il 24/11/2026 solo Hosting dal sorgente `1eaa2da0ff1aec3aae9f8657fb65eb1d84845ab4`: PR #358, CI PR/master e Hosting #1286 SUCCESS, approvazione production di Diego e verifica pubblica integrale PASS. [Ricevuta e limiti](../evidenze/COLLAUDI.md#rilascio-1295-pubblico-2026-11-24).368 file, sourceDirty=false e digest concorde; 25 GET mirate e riesame pubblico indipendente dei cinque produttori superati. Ricevuta MD/GitHub separata senza altro Hosting; conferma versione sul telefono ancora da acquisire, poi ricollaudo Regole, F20 Annulla e F41 logout. Blocco invariato; C1/C2, L23-UI02 e L23-PERF01 aperti; F44/F45 già acquisiti non si ripetono.
+
+Le registrazioni sottostanti della candidata e del lotto soltanto locale sono checkpoint storici precedenti al rilascio 295; non indicano la produzione attuale né nuovi esiti fisici.
+
 Ordine di rilascio raggruppato295 acquisito: Regole, Annulla e logout passano dalla sola preparazione locale a PR/merge/Hosting autorizzati. Confezione e verifiche in corso; ultima versione pubblicata/telefono confermata294,295 non ancora distribuita. [Incarico](INCARICO_CORRENTE.md#rilascio-1295-2026-11-23). Prove fisiche del delta dopo pubblicazione, senza dedurre chiusura C1/C2 o soluzione di L23-UI02/L23-PERF01.
 
 F41 PWA iPhone294 conserva il FAIL fisico (Home~2–3s e bianco dopo logout/Back). Su successivo ordine di Diego, [correttivo locale del guard verificato](../evidenze/COLLAUDI.md#logout-cronologia-locale-2026-11-23): marker letto prima di Auth/reload, uscita ripristinata ritentata e cleanup vivo preservato.39/39 casi mirati,11/11 regressioni selezionate e controlli navigazione/offline/statici verdi. Riesame della prima candidata ha trovato un anticipo del cleanup, corretto con controprova e regressione prima del completamento. Ora attendere un futuro rilascio autorizzato per ricollaudare F41 sull'iPhone, senza ripetere la prova sulla294. Nessuna pubblicazione; lotto Regole/Annulla/Logout locale, L23-UI02 e L23-PERF01 ancora distinti.

@@ -1,5 +1,11 @@
 # Incarico corrente
 
+<a id="rilascio-1295-pubblico-2026-11-24"></a>
+
+## Ordine 295 eseguito — ricevuta e ricollaudo dal cellulare
+
+1.2.295 pubblicata solo Hosting e verificata dal sorgente `1eaa2da0ff1aec3aae9f8657fb65eb1d84845ab4`, PR #358 e workflow #1286 SUCCESS. [Ricevuta, gate ed evidenze](../evidenze/COLLAUDI.md#rilascio-1295-pubblico-2026-11-24). Completare la distinta PR documentale con controlli e due riesami, senza secondo Hosting o bump; poi guidare Diego sull'iPhone, una prova alla volta: conferma 295, Regole avvio/memoria, Annulla filtro, logout/Indietro. Nessuna chiusura fisica dal solo verde automatico. Blocco della Vault e altri residui invariati; i precedenti limiti locali sotto sono storici e superati soltanto nel perimetro dell'ordine 295.
+
 <a id="rilascio-1295-2026-11-23"></a>
 
 ## Ordine295 — rilascio congiunto Regole, Annulla e logout
