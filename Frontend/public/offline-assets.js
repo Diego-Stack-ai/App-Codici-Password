@@ -312,6 +312,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/ui-core-v129.js",
   "assets/js/utils.js",
   "assets/js/vault-frame-entry.js",
+  "assets/js/vault-frame-logout-startup.js",
   "assets/js/vendor/company-summary-pdf.js",
   "assets/js/vendor/firebase-runtime.js",
   "assets/js/vendor/firebase-sw-runtime.js",

@@ -1,5 +1,19 @@
 # Interfaccia
 
+<a id="rilascio-1296-2026-11-24"></a>
+
+## Avvio dopo logout — confezione 296 autorizzata
+
+Il [contratto locale sotto](#logout-avvio-locale-2026-11-24) è confezionato per il rilascio 1.2.296 secondo il [mandato](../progetto/INCARICO_CORRENTE.md#rilascio-1296-2026-11-24). Nessuna nuova regola di blocco o interfaccia visiva; risorse di startup versionate e precache allineato. Produzione 295 invariata finché deploy/verifica non conclusi, prova iPhone successiva distinta.
+
+<a id="logout-avvio-locale-2026-11-24"></a>
+
+## Shell nuova dopo logout — routing anticipato locale
+
+Per un documento top-level nuovo di app.html, controllare il marker esplicito prima di tema/CSS/entry: marker 1 o storage illeggibile indirizzano al target fisso /login.html, senza creare owner, leggere materiale o eseguire main. Il documento embedded è escluso prima dello storage. L'entry conserva un controllo di ripiego e gestisce il fallimento del guard se il logout è sopraggiunto; col guard già installato delega il diniego a quel guard senza doppia navigazione. Nessun listener aggiunto: non anticipare il cleanup vivo o la destinazione finale già posseduta dal padre.
+
+Il diniego di logout precede anche la rivelazione dello stub con switch compilato OFF; OFF senza marker conserva lo stub e non avvia guard/main/watchdog. Questo non abilita la cornice né cambia ammissione, inattività o chiavi. Il nuovo asset esterno è versionato e incluso nel precache. [Controprove e limiti](../evidenze/COLLAUDI.md#logout-avvio-locale-2026-11-24): vero HTML/entry, campioni DOM e singola richiesta login; nessuna garanzia sulle immagini native iOS. Candidata solo locale, produzione 295 e blocco invariati.
+
 <a id="logout-cronologia-locale-2026-11-23"></a>
 
 ## Logout — guard dei ripristini distribuito nella 295

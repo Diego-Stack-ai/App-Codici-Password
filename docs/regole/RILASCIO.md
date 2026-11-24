@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="rilascio-1296-2026-11-24"></a>
+
+## Candidata 1.2.296 — avvio dopo logout, solo Hosting
+
+[Ordine diretto](../progetto/INCARICO_CORRENTE.md#rilascio-1296-2026-11-24): snapshot funzionale pre-bump 369 pubblici con ZIP/hash coerenti, versione canonica 296 e derivati guida/offline/QA, confronto normalizzato delle sole versioni/EOL. Tre produttori funzionali: app.html, vault-frame-entry.js e nuovo vault-frame-logout-startup.js; offline-assets è derivato. Due GO indipendenti sulla testa finale, CI PR completa e merge con testa attesa. Master e validate Hosting devono concordare per sorgente/digest; scope hosting e master invariato prima del gate production conservato. Manifest dai byte Git LF, verifica pubblica integrale e GET dei tre produttori e dipendenze, poi ricevuta MD/GitHub separata senza altro Hosting. Nessun cambio a soglie, workflow/protezioni, backend o blocco. [Evidenze e limiti](../evidenze/COLLAUDI.md#rilascio-1296-2026-11-24); ricollaudo nativo successivo distinto.
+
 <a id="rilascio-1295-pubblico-2026-11-24"></a>
 
 ## APP 1.2.295 — rilascio Hosting eseguito

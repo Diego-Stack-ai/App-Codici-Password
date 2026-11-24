@@ -1,5 +1,31 @@
 # Incarico corrente
 
+<a id="rilascio-1296-2026-11-24"></a>
+
+## Ordine 296 — rilasciare il correttivo dell'avvio dopo logout
+
+Diego ordina «Procedi con il rilascio della nuova versione». Autorizzato il percorso PR, merge e deploy solo Hosting del correttivo locale verificato con Claude, con nuova versione 1.2.296 e aggiornamento MD/GitHub. Superato il precedente limite locale soltanto per questo lotto. Codex resta orchestratore/unico scrittore; Claude collabora in sola lettura. Base 352658c62add9e1a3fe13a9b9722054002b6789d, artefatto funzionale locale 301c8dae; non riusare i GO locali come GO sulla futura testa 296.
+
+Snapshot pre-bump 369 pubblici e ZIP verificati prima di qualsiasi builder; confezione canonica 296, 308 riferimenti, guida 16/reviewed296 e derivati offline/QA. Due nuovi GO indipendenti sulla testa finale e CI PR completa prima del merge con SHA atteso. CI master e validate Hosting sullo stesso sorgente/digest, scope hosting e master invariato prima di production protetto, secondo la delega già vigente; nessuna modifica a workflow/protezioni, backend/Rules, chiavi, owner, lease/inattività o blocco. Dopo deploy verificare tutti gli hash/header/probe e GET indipendenti dei produttori corretti, poi distinta ricevuta documentale senza secondo Hosting. [Procedura](../regole/RILASCIO.md#rilascio-1296-2026-11-24).
+
+F41 rimane il FAIL visivo della 295 fino al ricollaudo iPhone dopo la nuova pubblicazione; nessuna promessa di zero immagini native da Chromium. Regole/Annulla 295 positivi non si ripetono. C1/C2 e L23-UI02/L23-PERF01 restano separati.
+
+<a id="logout-295-claude-locale-2026-11-24"></a>
+
+## Correttivo locale F41 — Codex orchestra, Claude collabora
+
+Dopo il FAIL visivo del ricollaudo 295, Diego ordina «procediamo» e poi «tu come orchestratore fatti aiutare da Claude per sistemare i problemi riscontrati, rimani orchestratore». Lavoro locale autorizzato sul ritorno dopo logout: isolare una causa riproducibile, proposta circoscritta e test pertinenti prima del delta; nessun nuovo rilascio in questa fase. Codex resta orchestratore/unico scrittore e verifica l'integrazione; Claude Code riceve inizialmente un incarico indipendente in sola lettura, limitato a codice e test interessati. Plugin e strumenti non conferiscono autorita aggiuntiva.
+
+Preservare cleanup vivo e destinazione finale del logout, blocco, chiavi, lease/inattivita, Auth/MFA, ammissione, backend/Rules e dati. Distinguere ripristino del documento e immagini native iOS; niente PASS fisico da Chromium o da una URL finale corretta. Brief/risposta tecnici nei soli artefatti temporanei non Markdown, senza segreti o dati personali. [Ricollaudo e limiti](../evidenze/COLLAUDI.md#cornice-telefono-1295-2026-11-24). Gli esiti positivi Regole/Annulla non si ripetono; F41 resta aperto fino a evidenza nuova.
+
+Implementazione locale e controprove concluse: [esiti e integrazione di Codex](../evidenze/COLLAUDI.md#logout-avvio-locale-2026-11-24), Claude GO locale e 53/53 guard/logout dopo il rafforzamento degli oracoli. Riesame indipendente Codex completato con GO locale sulla patch congelata; nessuna risoluzione fisica o pubblicazione dedotta. Il perimetro resta distinto da PR/merge/deploy futuri.
+
+<a id="cornice-telefono-1295-2026-11-24"></a>
+
+## Seguito del ricollaudo 295 — esiti e diagnosi in lettura
+
+Ricevuta #359 unita e versione 295 confermata sul telefono. [Esiti](../evidenze/COLLAUDI.md#cornice-telefono-1295-2026-11-24): Regole R01–R03, Annulla R04/R05 e logout ordinario R06 positivi; R07 dopo i gesti Indietro mostra brevemente Home, Urgenze e bianco prima del login. F41 visivo non chiuso. Registrare il chiarimento senza altri swipe ripetitivi; sola diagnosi del percorso e dei limiti del banco, nessuna nuova modifica runtime o pubblicazione da questa registrazione. Blocco della Vault conservato; gli altri residui restano separati.
+
 <a id="rilascio-1295-pubblico-2026-11-24"></a>
 
 ## Ordine 295 eseguito — ricevuta e ricollaudo dal cellulare

@@ -2,6 +2,24 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1296-2026-11-24"></a>
+
+## Candidata 1.2.296 — rilascio autorizzato, produzione ancora 295
+
+[Ordine 296](INCARICO_CORRENTE.md#rilascio-1296-2026-11-24): PR/merge/Hosting del controllo anticipato dopo logout, poi verifica pubblica e ricevuta MD/GitHub. Confezione verificata localmente su base 352658c6, PR/CI/GO ancora da completare; snapshot pubblico di 369 file verificato, 308 riferimenti versionati, guida 16/reviewed296 e offline 349. Nessuna nuova distribuzione o prova iPhone ancora acquisita. F41 visivo resta aperto, Regole/Annulla 295 positivi non si ripetono; blocco, C1/C2 e altri residui invariati. Le sezioni locali sottostanti sono checkpoint antecedenti al presente ordine.
+
+<a id="logout-avvio-locale-2026-11-24"></a>
+
+## F41 — caricatore corretto localmente con supporto Claude
+
+[Delta e prove](../evidenze/COLLAUDI.md#logout-avvio-locale-2026-11-24): controllo anticipato del logout nel documento nuovo, nessun main in uscita, ripiego se fallisce il guard. Codex unico scrittore/orchestratore; Claude Code sola lettura con GO locale, poi ulteriore riesame Codex indipendente sulla patch congelata: GO senza rilievi concreti. Controprova 14 sul codice distribuito 10 FAIL/4 PASS; candidata 53/53 guard/logout PASS, navigazione 207 e offline 16, budget/statici verdi. La comparsa nativa Home/Urgenze/bianco non è isolata né certificata risolta: F41 fisico rimane aperto. Nessun bump o pubblicazione; produzione 1.2.295 e blocco invariati, sei MD aggiornati nel ramo locale. Regole/Annulla già positivi non si ripetono.
+
+<a id="cornice-telefono-1295-2026-11-24"></a>
+
+## Collaudo iPhone 295 — Regole e Annulla positivi; F41 visivo non chiuso
+
+Diego conferma 1.2.295. R01–R03 Regole, R04/R05 Annulla e R06 logout ordinario superati nei sottocasi riferiti; R07 con i gesti nativi dopo logout mostra Home, Urgenze e una pagina bianca prima del ritorno ad Accedi. [Esiti, sequenza e limiti](../evidenze/COLLAUDI.md#cornice-telefono-1295-2026-11-24). Nessuna prova che le vecchie pagine fossero utilizzabili o che la causa sia uno snapshot iOS; controlli finali browser verdi non certificavano i fotogrammi dello swipe. Prove riuscite da non ripetere, F41 ancora aperto e diagnosi soltanto in lettura; nessun nuovo runtime o rilascio. Ricevuta #359 già unita, sorgente Hosting 295 invariato. Blocco della Vault conservato; C1/C2, L23-UI02 e L23-PERF01 aperti.
+
 <a id="rilascio-1295-pubblico-2026-11-24"></a>
 
 ## APP 1.2.295 — online e verificata

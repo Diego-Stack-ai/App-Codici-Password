@@ -1,5 +1,23 @@
 # Programma
 
+<a id="rilascio-1296-2026-11-24"></a>
+
+## Pubblicare 296, poi ricollaudare il solo ritorno dopo logout
+
+[Ordine](INCARICO_CORRENTE.md#rilascio-1296-2026-11-24): confezione, due riesami nuovi sull'HEAD finale, CI/PR/merge, Hosting protetto e verifica pubblica integrale, poi ricevuta MD/GitHub senza secondo deploy. Dopo conferma 296 sull'iPhone ricollaudare R07, senza ripetere Regole e Annulla 295 positivi. L'effetto sulle anteprime native resta non dimostrato; F41/C1/C2 non chiusi dal rilascio o dai test automatici. Nessun ampliamento ai rilievi UI02/PERF01 o alla policy del blocco.
+
+<a id="logout-avvio-locale-2026-11-24"></a>
+
+## Avvio dopo logout verificato localmente; F41 fisico ancora aperto
+
+Collaborazione reale Claude conclusa in sola lettura; Codex integra il controllo anticipato del nuovo documento e il ripiego dell'entry. [Controprova 14 casi e 53/53 finali](../evidenze/COLLAUDI.md#logout-avvio-locale-2026-11-24), navigazione/offline/budget/statici verdi. Riesame locale sul delta concluso con GO indipendente; documenti verificati, senza nuovo rilascio in questa fase. L'osservazione sul telefono rimane da isolare: zero immagini native non è provato da Chromium. Conservare i PASS 295 Regole/Annulla; C1/C2 e residui distinti restano aperti.
+
+<a id="cornice-telefono-1295-2026-11-24"></a>
+
+## Isolare il ritorno visivo dopo logout; non ripetere Regole e Annulla
+
+Versione 295 confermata sulla PWA iPhone. [R01–R06 positivi e R07 FAIL visivo](../evidenze/COLLAUDI.md#cornice-telefono-1295-2026-11-24): acquisiti Regole avvio/memoria/ritorni, Annulla da Scadenze e Urgenze e stabilità del login dopo Esci. Resta il gesto nativo dopo logout che mostra Home/Urgenze e bianco per circa 1–2s. Prima di un ulteriore correttivo distinguere anteprima nativa, documento ripristinato e caricamento reale del guard; migliorare l'oracolo dei fotogrammi intermedi solo con un banco pertinente, senza spacciare Chromium per prova iPhone. Nessun nuovo rilascio o modifica del blocco da questo checkpoint; C1/C2 e altri residui restano aperti.
+
 <a id="rilascio-1295-pubblico-2026-11-24"></a>
 
 ## Ricollaudare i tre correttivi sulla 295 pubblicata
