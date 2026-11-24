@@ -1,5 +1,17 @@
 # Decisioni
 
+<a id="rilascio-1296-2026-11-24"></a>
+
+## Rilasciare la correzione locale verificata con Claude — 24/11/2026
+
+Diego autorizza il rilascio della nuova versione dopo la consegna locale. [Mandato 296 e gate](INCARICO_CORRENTE.md#rilascio-1296-2026-11-24). Codex resta orchestratore e unico scrittore, Claude supporto in lettura; nuova confezione e nuovi GO sulla testa finale, senza dedurre dal vecchio GO locale la pubblicabilità della 296. Restano distinti il miglioramento provato del caricatore e il difetto visivo iPhone non isolato; blocco e altri residui invariati.
+
+<a id="logout-avvio-locale-2026-11-24"></a>
+
+## F41 — supporto Claude, controllo finale Codex e routing locale
+
+Diego chiede a Codex di rimanere orchestratore e farsi aiutare da Claude per i problemi riscontrati. [Mandato](INCARICO_CORRENTE.md#logout-295-claude-locale-2026-11-24). Claude Code contribuisce in sola lettura; Codex decide/applica e verifica la patch. Scelta tecnica circoscritta: in un documento nuovo il logout esplicito prevale sulla presentazione dello stub OFF e ferma il bootstrap, senza attivare la cornice o cambiare blocco/chiavi/lease. Nessun intervento owner/popstate fondato su una causa non dimostrata e nessuna promessa di eliminare immagini native mediante il solo JS. [Evidenze locali](../evidenze/COLLAUDI.md#logout-avvio-locale-2026-11-24); nessuna nuova pubblicazione autorizzata da un verde automatico.
+
 <a id="rilascio-1295-pubblico-2026-11-24"></a>
 
 ## Esecuzione dell'ordine 295 — 24/11/2026

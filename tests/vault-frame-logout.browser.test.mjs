@@ -70,7 +70,7 @@ test.before(async () => {
     const pathname = new URL(req.url, 'http://fixture.invalid').pathname;
     try {
       let body, type = 'text/html';
-      if (pathname === '/app.html') body = parentHtml;
+      if (pathname === '/app.html') body = new URL(req.url, 'http://fixture.invalid').searchParams.get('fixture') === 'real-app' ? await readFile(resolve(root, 'app.html')) : parentHtml;
       else if (['/home_page.html','/area_privata.html','/account_privati.html','/impostazioni.html'].includes(pathname)) body = childHtml;
       else if (['/login.html', '/privacy.html'].includes(pathname)) body = publicHtml;
       else if (pathname === '/logout-parent.mjs') {body = parentModule; type = 'text/javascript';}
@@ -191,4 +191,181 @@ test('ordinary pageshow while real child logout is pending keeps cleanup and fin
     assert.deepEqual(state, {path: '/app.html', childRetained: true, parentHidden: true, unlocked: false});
     await assertPublicLogin(f, '/login.html?reauth=sessions-revoked');
   } finally {await f.context.close();}
+});
+
+
+// The real shell/entry are served unchanged. Only main is synthetic: no Auth,
+// admission or key material. Samples concern the DOM, not native iOS snapshots.
+const realShellPath = '/app.html?fixture=real-app&route=%2Fhome_page.html';
+const entryPath = '/assets/js/vault-frame-entry.js';
+const guardPath = '/assets/js/private-auth-gate.js';
+const startupPath = '/assets/js/vault-frame-logout-startup.js';
+const mainPath = '/assets/js/main-v129.js';
+function deferred() {
+  let resolve;
+  const promise = new Promise(done => {resolve = done;});
+  return {promise, resolve};
+}
+async function realShellFixture({logout = true, hold = [], fail = [], disabled = false, storageDenied = false} = {}) {
+  const context = await browser.newContext();
+  const requests = [], gates = new Map(hold.map(path => [path, deferred()]));
+  await context.addInitScript(({logout, storageDenied}) => {
+    if (!sessionStorage.getItem('fixture-real-seeded')) {
+      sessionStorage.setItem('fixture-real-seeded', '1');
+      sessionStorage.setItem('codex_explicit_logout', logout ? '1' : '0');
+    }
+    if (storageDenied) {
+      const read = Storage.prototype.getItem;
+      Storage.prototype.getItem = function(key) {
+        if (key === 'codex_explicit_logout') throw new DOMException('Synthetic storage denial', 'SecurityError');
+        return read.call(this, key);
+      };
+    }
+    if (location.pathname !== '/app.html') return;
+    window.realEntryLoaded = false;
+    document.addEventListener('load', event => {
+      if (event.target?.tagName === 'SCRIPT' && new URL(event.target.src).pathname === '/assets/js/vault-frame-entry.js') window.realEntryLoaded = true;
+    }, true);
+    const sample = phase => {
+      const body = document.body, frame = document.querySelector('#vault-frame');
+      const samples = JSON.parse(sessionStorage.getItem('fixture-real-samples') || '[]');
+      if (samples.length < 200 || phase === 'pagehide') {
+        samples.push({phase, bodyPresent: !!body, bodyHidden: body?.hidden ?? true, bodyInert: body?.inert ?? true,
+          framePresent: !!frame, frameHidden: frame?.hidden ?? true, frameInert: frame?.inert ?? true});
+        sessionStorage.setItem('fixture-real-samples', JSON.stringify(samples));
+      }
+    };
+    // Absence of a parsed body is explicit evidence, not an empty samples array.
+    sample('init');
+    new MutationObserver(() => sample('mutation')).observe(document, {childList: true, subtree: true, attributes: true});
+    const paint = () => {sample('paint'); requestAnimationFrame(paint);};
+    requestAnimationFrame(paint);
+    addEventListener('pagehide', () => sample('pagehide'));
+  }, {logout, storageDenied});
+  await context.route('**/*', async route => {
+    const url = new URL(route.request().url());
+    if (url.origin !== base) {await route.abort(); return;}
+    const path = url.pathname;
+    requests.push(path);
+    if (gates.has(path)) await gates.get(path).promise;
+    try {
+      if (fail.includes(path)) {await route.abort(); return;}
+      if (path === mainPath) {
+        await route.fulfill({contentType: 'text/javascript', body: 'window.realMainRuns=(window.realMainRuns||0)+1;'}); return;
+      }
+      if (disabled && path === '/assets/js/app-env.js') {
+        const original = await readFile(resolve(root, 'assets/js/app-env.js'), 'utf8');
+        assert.ok(original.includes('VAULT_FRAME_ENABLED = true;'));
+        await route.fulfill({contentType: 'text/javascript', body: original.replace('VAULT_FRAME_ENABLED = true;', 'VAULT_FRAME_ENABLED = false;')}); return;
+      }
+      await route.continue();
+    } catch (error) {
+      if (!/closed|cancel|intercept|invalid|disposed/i.test(String(error))) throw error;
+    }
+  });
+  const page = await context.newPage();
+  return {page, context, requests, release(path) {gates.get(path)?.resolve();},
+    async close() {for (const gate of gates.values()) gate.resolve(); await context.close();}};
+}
+async function assertRealLogin(f) {
+  await f.page.waitForURL(base + '/login.html', {timeout: 1800});
+  await f.page.locator('#username').waitFor({state: 'visible', timeout: 1800});
+  const samples = await f.page.evaluate(() => JSON.parse(sessionStorage.getItem('fixture-real-samples') || '[]'));
+  assert.ok(samples.length > 0, 'DOM observations must not be an empty evidence set');
+  assert.ok(samples.some(s => s.phase === 'pagehide'), 'include the departing shell, not just its initial state');
+  assert.ok(samples.every(s => (!s.bodyPresent || s.bodyHidden && s.bodyInert) && s.frameHidden && s.frameInert),
+    'every observed shell DOM state is absent or hidden/inert; this does not observe native iOS snapshots');
+  assert.equal(f.requests.filter(path => path === '/login.html').length, 1, 'request a single login navigation');
+  assert.equal(f.requests.filter(path => path === mainPath).length, 0);
+  assert.equal(f.page.frames().length, 1);
+  await f.page.locator('#username').fill('synthetic');
+}
+for (const asset of [entryPath, '/assets/js/app-env.js', '/assets/css/core.css', guardPath]) {
+  test('real shell: logged-out cold entry reaches login while dependency is held: ' + asset, {timeout: 10000}, async () => {
+    const f = await realShellFixture({hold: [asset]});
+    try {
+      await f.page.goto(base + realShellPath, {waitUntil: 'commit'});
+      await assertRealLogin(f);
+      // The dependency is deliberately released only in close(), after assertions.
+    } finally {await f.close();}
+  });
+}
+for (const asset of [guardPath, startupPath]) {
+  test('real shell: logged-out entry reaches login with a failed guard asset: ' + asset, {timeout: 10000}, async () => {
+    const f = await realShellFixture({fail: [asset]});
+    try {await f.page.goto(base + realShellPath, {waitUntil: 'commit'}); await assertRealLogin(f);}
+    finally {await f.close();}
+  });
+}
+test('real shell: marker appearing during guard load prevents main import', {timeout: 10000}, async () => {
+  const f = await realShellFixture({logout: false, hold: [guardPath, '/login.html']});
+  try {
+    await f.page.goto(base + realShellPath, {waitUntil: 'commit'});
+    await f.page.waitForFunction(() => document.querySelector('script[src="/assets/js/private-auth-gate.js"]'), null, {timeout: 3000});
+    await f.page.evaluate(() => sessionStorage.setItem('codex_explicit_logout', '1'));
+    f.release(guardPath);
+    await f.page.waitForFunction(() => window.realEntryLoaded, null, {timeout: 3000});
+    assert.equal(f.requests.filter(path => path === mainPath).length, 0, 'do not compete with login navigation by starting main');
+    f.release('/login.html'); await assertRealLogin(f);
+  } finally {await f.close();}
+});
+test('real shell: failed guard after marker appears still reaches login', {timeout: 10000}, async () => {
+  const f = await realShellFixture({logout: false, hold: [guardPath], fail: [guardPath]});
+  try {
+    await f.page.goto(base + realShellPath, {waitUntil: 'commit'});
+    await f.page.waitForFunction(() => document.querySelector('script[src="/assets/js/private-auth-gate.js"]'), null, {timeout: 3000});
+    await f.page.evaluate(() => sessionStorage.setItem('codex_explicit_logout', '1'));
+    f.release(guardPath); await assertRealLogin(f);
+  } finally {await f.close();}
+});
+test('real shell: failed guard without logout stays hidden and does not start main', {timeout: 10000}, async () => {
+  const f = await realShellFixture({logout: false, fail: [guardPath]});
+  try {
+    const failed = f.page.waitForEvent('pageerror');
+    await f.page.goto(base + realShellPath, {waitUntil: 'commit'}); await failed;
+    assert.equal(new URL(f.page.url()).pathname, '/app.html');
+    assert.deepEqual(await f.page.evaluate(() => ({hidden: document.body.hidden, inert: document.body.inert,
+      frameHidden: document.querySelector('#vault-frame').hidden})), {hidden: true, inert: true, frameHidden: true});
+    assert.equal(f.requests.filter(path => path === mainPath).length, 0);
+    assert.equal(f.requests.filter(path => path === '/login.html').length, 0);
+  } finally {await f.close();}
+});
+test('real shell: no logout preserves the ordinary main bootstrap', {timeout: 10000}, async () => {
+  const f = await realShellFixture({logout: false});
+  try {
+    await f.page.goto(base + realShellPath);
+    await f.page.waitForFunction(() => window.realMainRuns === 1);
+    assert.equal(new URL(f.page.url()).pathname, '/app.html');
+    assert.equal(f.requests.filter(path => path === '/login.html').length, 0);
+  } finally {await f.close();}
+});
+for (const logout of [false, true]) test('real shell: disabled switch preserves inert feature with logout precedence: ' + logout, {timeout: 10000}, async () => {
+  const f = await realShellFixture({logout, disabled: true, fail: [startupPath]});
+  try {
+    await f.page.goto(base + realShellPath, {waitUntil: 'commit'});
+    if (logout) await assertRealLogin(f);
+    else {
+      await f.page.waitForFunction(() => window.realEntryLoaded);
+      assert.equal(new URL(f.page.url()).pathname, '/app.html');
+      assert.equal(await f.page.evaluate(() => document.body.hidden), false);
+      assert.equal(f.requests.filter(path => path === guardPath || path === mainPath).length, 0);
+    }
+  } finally {await f.close();}
+});
+test('real shell: embedded entry cannot redirect its parent or bootstrap main', {timeout: 10000}, async () => {
+  const f = await realShellFixture({logout: true, storageDenied: true});
+  try {
+    await f.page.route(base + '/embedded.html', route => route.fulfill({contentType: 'text/html', body: '<iframe id="embedded" src="' + realShellPath + '"></iframe>'}));
+    await f.page.goto(base + '/embedded.html');
+    const child = f.page.frames().find(frame => new URL(frame.url()).pathname === '/app.html');
+    assert.ok(child); await child.waitForFunction(() => window.realEntryLoaded);
+    assert.equal(new URL(f.page.url()).pathname, '/embedded.html');
+    assert.equal(new URL(child.url()).pathname, '/app.html');
+    assert.equal(f.requests.filter(path => path === mainPath || path === '/login.html' || path === guardPath).length, 0);
+  } finally {await f.close();}
+});
+test('real shell: unavailable marker storage fails closed before module dependency', {timeout: 10000}, async () => {
+  const f = await realShellFixture({logout: false, storageDenied: true, hold: ['/assets/js/app-env.js']});
+  try {await f.page.goto(base + realShellPath, {waitUntil: 'commit'}); await assertRealLogin(f);}
+  finally {await f.close();}
 });

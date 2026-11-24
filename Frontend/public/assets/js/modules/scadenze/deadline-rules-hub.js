@@ -1,5 +1,5 @@
 import {readDeadlineRulesDomain, rememberDeadlineRulesDomain} from './deadline-rules-preference.js';
-import {auth, db} from '../../firebase-config.js?v=1.2.295';
+import {auth, db} from '../../firebase-config.js?v=1.2.296';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {createElement, setChildren} from '../../dom-utils.js';
 import {getCurrentLanguage, t} from '../../translations.js';
