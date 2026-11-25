@@ -18,7 +18,7 @@ export const APP_VERSION='fixture',auth={currentUser:{uid:'synthetic',emailVerif
 export const authSessionFence={isCurrent:async()=>true,isLocallyAllowed:()=>true};
 export const doc=()=>({}),onSnapshot=()=>()=>{},getUserProfile=async()=>({lock_timeout:720});
 export const emitFrameDiagnostic=()=>{};
-export const createProductionFrameAdmission=()=>({read:async()=>({enabled:true,uid:'synthetic',version:1,expiresAt:Date.now()+3600000}),dispose(){}});
+export const createProductionFrameAdmission=()=>({read:async()=>window.resumeFixture.denyAdmission?null:({enabled:true,uid:'synthetic',version:1,expiresAt:Date.now()+3600000}),dispose(){}});
 export const installFramePushNavigation=()=>()=>{};
 export const createVaultFrameOwner=options=>{const owner=realOwner(options);window.frameOwner=owner;return owner;};
 `;
@@ -28,6 +28,10 @@ import {startVaultFrame} from '/resume-production.mjs';
 import {showInputModal} from '/assets/js/ui-core-v129.js';
 const pause=()=>{let resolve;const promise=new Promise(r=>resolve=r);return {promise,resolve};};
 const state=window.resumeFixture={identity:pause(),proof:pause(),unlockCalled:false};
+const mode=new URL(location.href).searchParams.get('deny');
+state.mount=crypto.randomUUID();
+state.denyAdmission=mode==='always'||(mode==='once'&&!sessionStorage.getItem('denied-once'));
+if(state.denyAdmission)sessionStorage.setItem('denied-once','1');
 const held=sessionStorage.getItem('resume-hold')==='1';
 if(!held){state.identity.resolve();state.proof.resolve('SYNTHETIC-MATERIAL');}
 await state.identity.promise;
@@ -51,7 +55,7 @@ test.before(async()=>{
   const pathname=new URL(req.url,'http://fixture.invalid').pathname;
   let body,type='text/javascript';
   if(pathname==='/app.html'){body=app;type='text/html';}
-  else if(pathname==='/home_page.html'){body=child;type='text/html';}
+  else if(['/home_page.html','/dati_azienda.html'].includes(pathname)){body=child;type='text/html';}
   else if(pathname==='/resume-fixture.mjs')body=entry;
   else if(pathname==='/resume-production.mjs')body=productionFixture;
   else if(pathname==='/resume-dependencies.mjs')body=dependencies;
@@ -152,4 +156,49 @@ for(const outcome of ['success','error'])test('feedback ends after real transpor
   assert.equal(await f.page.locator('#frame-loading').getAttribute('aria-busy'),null);
   assert.deepEqual(f.errors,[]);
  }finally{await f.context.close();}
+});
+
+for(const mode of ['once','always'])test('startup admission denied '+mode+' retries the original company route through the gate',{timeout:20000},async()=>{
+ const context=await browser.newContext({viewport:{width:393,height:852}}),page=await context.newPage(),errors=[];
+ await context.route('**/*',r=>r.request().url().startsWith(base+'/')?r.continue():r.abort());
+ page.on('pageerror',e=>errors.push(e.message));
+ try{
+  const route='/dati_azienda.html?id=QA_COMPANY_001&profileTab=documents#wrapper-email-section';
+  await page.goto(base+'/app.html?route='+encodeURIComponent(route)+'&deny='+mode);
+  await page.locator('#frame-resume').waitFor();const original=page.url();
+  for(let attempt=0;attempt<(mode==='always'?2:1);attempt++){
+   assert.equal(await page.evaluate(()=>resumeFixture.unlockCalled),false);
+   assert.equal(await page.locator('iframe').count(),0);
+   const mount=await page.evaluate(()=>resumeFixture.mount);
+   const request=page.waitForRequest(r=>r.isNavigationRequest()&&r.frame()===page.mainFrame());
+   const navigation=page.waitForNavigation();await page.locator('#frame-resume').click();await navigation;
+   await page.waitForFunction(()=>window.resumeFixture);
+   assert.equal((await request).url(),original,'native fallback requests exactly the original document and full query');
+   assert.equal(new URL(page.url()).searchParams.get('route'),route,'owner normalization preserves nested query and fragment');
+   assert.notEqual(await page.evaluate(()=>resumeFixture.mount),mount,'a new gated document is loaded');
+   if(mode==='always')await page.locator('#frame-resume').waitFor();
+  }
+  if(mode==='once'){
+   await page.waitForFunction(()=>window.frameOwner?.session.state().unlocked&&document.querySelector('iframe')?.contentWindow?.syntheticReady);
+   assert.equal(await page.evaluate(()=>{const l=document.querySelector('iframe').contentWindow.location;return l.pathname+l.search+l.hash;}),route);
+   assert.equal(await page.evaluate(()=>resumeFixture.unlockCalled),true);
+  }else{
+   assert.equal(await page.evaluate(()=>resumeFixture.unlockCalled),false);
+   assert.equal(await page.evaluate(()=>frameOwner.session.state().unlocked),false);
+   assert.equal(await page.locator('iframe').count(),0);
+  }
+  assert.deepEqual(errors,[]);
+ }finally{await context.close();}
+});
+
+for(const route of ['https://outside.invalid/dati_azienda.html','/app.html'])test('resume cannot admit an invalid route '+route,async()=>{
+ const context=await browser.newContext(),page=await context.newPage(),external=[];
+ await context.route('**/*',r=>{if(r.request().url().startsWith(base+'/'))return r.continue();external.push(r.request().url());return r.abort();});
+ try{
+  await page.goto(base+'/app.html?route='+encodeURIComponent(route));await page.locator('#frame-resume').waitFor();
+  const original=page.url(),navigation=page.waitForNavigation();await page.locator('#frame-resume').click();await navigation;
+  await page.locator('#frame-resume').waitFor();assert.equal(page.url(),original);
+  assert.equal(await page.evaluate(()=>resumeFixture.unlockCalled),false);
+  assert.equal(await page.locator('iframe').count(),0);assert.deepEqual(external,[]);
+ }finally{await context.close();}
 });

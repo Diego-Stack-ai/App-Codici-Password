@@ -1,5 +1,13 @@
 # Programma
 
+**Priorità corrente: rilasciare la candidata1.2.298.** Completare due GO sulla testa definitiva, CI PR e merge, CI master/validate Hosting concordi, scope hosting/master invariato e production protetto; poi verifica pubblica, ricevuta MD/GitHub senza secondo Hosting. [Ordine](INCARICO_CORRENTE.md#rilascio-1298-2026-11-25), [evidenze](../evidenze/COLLAUDI.md#rilascio-1298-2026-11-25). Dopo pubblicazione confermare298 e ricollaudare Safari dal cellulare una prova alla volta con dati sintetici. Non ripetere i PASS né dichiarare S09/D05/D17/C1/C2 chiusi da test automatici; provider biometrico distinto e blocco conservato.
+
+<a id="profilo-superfici-1297-riscontro-2026-11-25"></a>
+
+## Dopo l'OK grafico 297 — riprendere dai residui della cornice
+
+[Riscontro generale positivo di Diego](../evidenze/COLLAUDI.md#profilo-superfici-1297-riscontro-2026-11-25) acquisito; ricevuta #363 già unita e nessun nuovo Hosting. Il confronto generale non va riproposto: riprendere una prova alla volta dai sottocasi della matrice non già superati, verificando prima ingresso UI e prerequisiti. R15 resta parziale e le famiglie D05/D17/C1/C2 non sono chiuse dall'OK grafico; gli altri PASS, L23-UI02/L23-PERF01 e il blocco conservano il proprio perimetro. Le richieste di riscontro seguenti precedono questa risposta.
+
 <a id="rilascio-1297-pubblico-2026-11-25"></a>
 
 ## Dopo la 1.2.297 — conferma sul telefono e superfici, poi residui cornice

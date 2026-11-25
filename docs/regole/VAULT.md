@@ -1,5 +1,13 @@
 # Vault
 
+<a id="gate-contenuti-privati-locale-2026-11-25"></a>
+
+## Materiale Vault obbligatorio prima degli inizializzatori privati
+
+Nel correttivo locale, tutte le pagine private devono interrompere il bootstrap quando l'acquisizione non restituisce materiale, anche dopo annullamento, errore o FRAME_HIDDEN. Non avviare inizializzatori, letture della pagina o preparazione offline/Ricerca in questo ramo. Il cleanup conserva la titolarità e rivalida tentativo/UID prima di mostrare soltanto lo stato neutro; l'identità Firebase verificata da sola non autorizza questa inizializzazione.
+
+La cornice conserva il blocco e il cleanup correnti; lo standalone offre Riprendi sulla stessa destinazione attraverso un nuovo avvio autenticato. Nessun materiale viene fabbricato o conservato in storage. Restano invariati ammissione, handshake/whenVisible, lease, inattività, revoca e conferme sensibili. La visibilità del trasporto non equivale alla concessione della chiave. [Verifiche e limiti locali](../evidenze/COLLAUDI.md#safari-vault-correttivo-locale-2026-11-25); nessuna nuova versione distribuita da questo checkpoint.
+
 <a id="rilascio-1291-pubblico-2026-11-20"></a>
 
 ## Cleanup tardivo291 — distribuzione verificata

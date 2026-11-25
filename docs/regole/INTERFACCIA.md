@@ -1,5 +1,13 @@
 # Interfaccia
 
+<a id="stato-vault-privato-locale-2026-11-25"></a>
+
+## Stato neutro dopo uno sblocco non completato
+
+Il bootstrap privato senza materiale mostra soltanto Vault bloccata e Sblocca e riprendi; sulle pagine diverse dalla Home il produttore main crea lo stesso stato a livello body, fuori dai contenuti nascosti. Riutilizza le traduzioni frame_locked_title/frame_unlock_resume e le classi esistenti private-entry-status/btn-modal/btn-primary. Il corpo non diventa inert con il retry al suo interno; gli inizializzatori dei contenuti non partono. Il collegamento Riprendi della cornice ritenta lo stesso documento, mantenendo la destinazione annidata e attraversando nuovamente i gate.
+
+Il registro privateEntry in scripts/ui-livery-contract.json collega le 22 pagine private, produttore, selettori, core/core_ui, ruoli --text-primary/--rev-fill e regressione nominata. Le sette palette, Chiaro/Scuro, Classica/Nuova e larghezze 320/1280 sono verificate sullo stato generato nell'HTML reale di Dati azienda (112 contesti, non 22 matrici di pagina): ruolo del titolo, colore/contrasto del pulsante bianco sulla tinta, focus e ingombri. Non si dichiara misurato il contrasto del titolo sul fondale sfumato; grafo observed:false e Safari fisico distinti. Nessun nuovo colore o modifica alle livree. [Evidenze locali](../evidenze/COLLAUDI.md#safari-vault-correttivo-locale-2026-11-25).
+
 <a id="rilascio-1297-pubblico-2026-11-25"></a>
 
 ## Superfici dei Profili — distribuite nella 1.2.297

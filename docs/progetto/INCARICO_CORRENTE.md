@@ -1,5 +1,29 @@
 # Incarico corrente
 
+<a id="rilascio-1298-2026-11-25"></a>
+
+## Ordine 298 — pubblicare il correttivo della Vault in Safari
+
+Diego ordina nuova versione, PR, merge e deploy del correttivo Safari, con aggiornamento MD/GitHub e successivo ricollaudo dal cellulare. Codex resta unico scrittore/orchestratore, supporti in lettura. Il precedente limite alla preparazione locale è superato per questo rilascio Hosting; non riaprire prove sui valori reali né modificare la policy del blocco, chiavi, ammissione, backend, workflow o protezioni.
+
+Preparare snapshot pre-bump, versione 1.2.298 e derivati canonici; due nuovi GO indipendenti sullo SHA definitivo e CI PR completa prima del merge con testa attesa. Master/validate Hosting devono concordare per sorgente/digest, scope hosting e master remoto invariato prima di production protetto. La pubblicazione autorizza anche dispatch e approvazione mediante strumenti disponibili senza alterare gate; eventuali limiti tecnici vanno riferiti con azione esatta. Dopo deploy verificare manifest/hash/header e i produttori modificati, aggiornare ricevuta MD/GitHub senza secondo Hosting, poi una prova alla volta sull'iPhone. Il verde locale non certifica Safari fisico o chiude D05/D17/C1/C2.
+
+<a id="safari-vault-correttivo-locale-2026-11-25"></a>
+
+## Preparare il correttivo locale e verificarne la disponibilità al rilascio
+
+Alla domanda di Diego «Hai corretto e si può deployare?» il seguito passa dalla proposta al correttivo locale verificabile: applicazione minima del blocco dei contenuti senza materiale e della ripresa che conserva la destinazione, regressioni prima/dopo e sui percorsi legittimi, registri UI/contratti ed evidenze aggiornati. Questa preparazione supera il precedente limite di sola proposta per il delta locale; non interpreta la domanda come ordine di commit/push, PR/merge o pubblicazione. Nessuna nuova versione online o disponibilità al deploy dichiarata prima dei controlli; il successivo rilascio resta distinto.
+
+Codex unico scrittore nel ramo isolato codex/safari-vault-gate-20261125 su base 112d5e8a, con le quattro annotazioni MD del collaudo conservate; supporti in lettura e verificationMode standard della skill di correzione sicurezza. Auth, ammissione, chiavi, lease/inattività, policy del blocco, handshake, backend/Rules e protezioni restano invariati. Chiudere il passaggio che inizializza pagine senza materiale, conservando sblocco normale, retry e assenza di dati dopo annullamento/background; niente altre prove sui dati reali. [Segnalazione e probe](../evidenze/COLLAUDI.md#cornice-safari-vault-prima-sblocco-2026-11-25). Le limitazioni della fase diagnostica sottostante sono checkpoint precedenti, superati soltanto per questa preparazione locale. Preparazione tecnica locale ora conclusa: regressioni applicabili superate e due GO indipendenti sul delta, con ricevuta finale in COLLAUDI. Nessuna nuova versione o pubblicazione avviata.
+
+Checkpoint diagnostico antecedente, superato per la sola preparazione locale sopra: [TEL297-S09](../evidenze/COLLAUDI.md#cornice-safari-vault-prima-sblocco-2026-11-25) richiede priorità: valori reali visibili in Safari dopo interruzione della richiesta Vault senza Master inserita. Sospendere i giri ordinari e non richiedere altre prove sui dati reali; indicata la chiusura delle schede. Diagnosi e proposta concreta completate con probe inventati, controlli negativi/positivi e supporti in lettura. Allora il mandato era limitato alla diagnosi/proposta; il checkpoint corrente sopra abilita ora applicazione e regressioni locali, mentre commit/push, PR/merge e pubblicazione restano distinti. Proteggere identificativi/valori reali nei rapporti; non attribuire al telefono una chiave concessa senza prova. Codex unico scrittore, politica del blocco conservata e provider Microsoft/Google ancora tema distinto.
+
+<a id="profilo-superfici-1297-riscontro-2026-11-25"></a>
+
+## Seguito 297 — riscontro positivo, registrazione e residui
+
+Diego riferisce «Tutto ok ora» dopo la pubblicazione grafica. Registrare l'[OK generale e i suoi limiti](../evidenze/COLLAUDI.md#profilo-superfici-1297-riscontro-2026-11-25) nei documenti esistenti; ricevuta #363 già unita. Nel seguito guidato scegliere soltanto un sottocaso della cornice non superato, senza ripetere i PASS o trasformare il riscontro in copertura fisica completa. Questa risposta non ordina altri cambi runtime, commit/push, PR, merge o Hosting. Produzione297, blocco e residui distinti conservati; Codex unico scrittore, supporti in lettura.
+
 <a id="rilascio-1297-pubblico-2026-11-25"></a>
 
 ## Ordine 297 eseguito — ricevuta e osservazione grafica successiva

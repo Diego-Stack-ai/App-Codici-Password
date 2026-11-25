@@ -2,6 +2,14 @@
 
 <a id="stato-corrente"></a>
 
+**Candidata 1.2.298 — rilascio Safari Vault autorizzato.** [Ordine](INCARICO_CORRENTE.md#rilascio-1298-2026-11-25), [confezione e gate](../evidenze/COLLAUDI.md#rilascio-1298-2026-11-25). Correttivo locale verificato, snapshot pre-bump e confezione298 eseguiti; commit definitivo/due GO e CI PR/master/Hosting da completare. Produzione297 fino alla verifica pubblica; nessuna nuova attestazione Safari fisica. Politica del blocco, altri PASS e residui conservati. I checkpoint locali seguenti sono antecedenti al nuovo ordine di rilascio.
+
+<a id="profilo-superfici-1297-riscontro-2026-11-25"></a>
+
+## Profili 297 — OK grafico generale riferito da Diego
+
+[Riscontro «Tutto ok ora» acquisito](../evidenze/COLLAUDI.md#profilo-superfici-1297-riscontro-2026-11-25) dopo il rilascio grafico; non equivale a nuovi PASS fisici per ogni palette/grafica. Ricevuta #363 già unita, produzione 1.2.297 invariata. Proseguire dai residui della cornice senza ripetere il confronto generale o i percorsi già superati; limiti e blocco conservati. Le attese di riscontro nelle sezioni seguenti sono antecedenti alla risposta.
+
 <a id="rilascio-1297-pubblico-2026-11-25"></a>
 
 ## APP 1.2.297 — online e verificata

@@ -23,7 +23,7 @@ html.dark[data-private-page-state="pending"]::before {
     color: #f8fafc;
 }
 
-/* Hold only initial Home content. The real body-level Vault modal stays usable. */
+/* Hold initial Home or blocked private content; keep the body-level Vault modal usable. */
 html[data-private-page-state] body > :not(.modal-overlay):not(#private-entry-status),
 html[data-private-page-state] body > :not(.modal-overlay):not(#private-entry-status) * {
     visibility: hidden !important;

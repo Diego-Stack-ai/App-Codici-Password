@@ -4,6 +4,7 @@ import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {resolve,sep} from 'node:path';
 import {chromium} from 'playwright';
+import {inspectDynamicPaint} from '../scripts/dynamic-visual-map.mjs';
 const root=resolve(import.meta.dirname,'../Frontend/public');
 const main=(await readFile(resolve(root,'assets/js/main-v129.js'),'utf8')).replace(/\r\n/g,'\n');
 function cut(from,to){const a=main.indexOf(from),b=main.indexOf(to,a);assert.ok(a>=0&&b>a,from);return main.slice(a,b);}
@@ -13,12 +14,15 @@ const key=cut('let vaultKeyMaterial = null;','if (vaultKeyMaterial) {').trim();
 const reveal=cut('switch (currentPage) {',"if (currentPage === 'home' && !firstConfigurationComplete)");
 const failure=main.split('\n').find(line=>line.includes("gate.active(authAttempt)")&&line.includes("gate.reject('error')"));
 assert.ok(failure);
-const html=(await readFile(resolve(root,'home_page.html'),'utf8')).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,'')
+async function pageHtml(name){return (await readFile(resolve(root,name),'utf8')).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,'')
  .replace('<head>','<head><script src="/assets/js/private-auth-gate.js"></script>')
- .replace('</body>','<script type="module" src="/entry-fixture.mjs"></script></body>');
+ .replace('</body>','<script type="module" src="/entry-fixture.mjs"></script></body>');}
 const fixture=[
 "import {showInputModal} from '/entry-ui.mjs';",
-"const gate=window.privateAuthGate,currentPage='home',fenceTicket={};",
+"import {createElement} from '/assets/js/dom-utils.js';import {t} from '/entry-labels.mjs';",
+"import {loadLanguage,applyGlobalTranslations} from '/assets/js/translations.js';await loadLanguage('it');applyGlobalTranslations();",
+cut('function getCurrentPage() {','async function bootstrapMain()'),
+"const gate=window.privateAuthGate,currentPage=getCurrentPage(),fenceTicket={};",
 "const wait=()=>{let resolve;const promise=new Promise(r=>resolve=r);return {promise,resolve};};",
 "const phases={identity:wait(),routing:wait(),key:wait(),init:wait(),finalFence:wait()};",
 "const state=window.entry={phase:'identity',clear:0,init:0,current:true};",
@@ -34,23 +38,23 @@ const fixture=[
 "if(result==='prompt')return showInputModal('SBLOCCO VAULT','','Master Password','',{vaultSecret:true});",
 "if(result==='throw')throw Error('synthetic unlock failure');return result;",
 "}}];",
-"const Pages={initHomePage:async()=>{state.phase='init';state.init++;if(await phases.init.promise==='throw')throw Error('synthetic init failure');state.phase='finalFence';}};",
+"const Pages=new Proxy({},{get:()=>async()=>{state.phase='init';state.init++;if(await phases.init.promise==='throw')throw Error('synthetic init failure');state.phase='finalFence';}});",
 "const navigateDocument=destination=>location.assign(destination),hasCompleteRecoveryIntent=()=>false,COMPLETE_RECOVERY_LOGIN_PATH='/login.html';",
-"window.entryDone=(async()=>{try{",
+"window.runEntry=async()=>{try{",
 identity,
 routing.replace("await import('./modules/core/vault-frame-routing.js')","await Promise.resolve({maybeEnterVaultFrame:window.routeEntry})"),
 key,reveal,
 "state.phase='shown';",
-"}catch(error){"+failure+";state.phase='error';}})();"
+"}catch(error){"+failure+";state.phase='error';}};window.entryDone=window.runEntry();"
 ].join('\n');
 let server,browser,base;
 test.before(async()=>{
  server=createServer(async(req,res)=>{try{
  const url=new URL(req.url,'http://fixture.invalid');let body,type='text/javascript';
- if(url.pathname==='/home_page.html'){body=html;type='text/html';}
+ if(['/home_page.html','/dati_azienda.html','/profilo_privato.html','/account_privati.html'].includes(url.pathname)){body=await pageHtml(url.pathname.slice(1));type='text/html';}
  else if(url.pathname==='/entry-fixture.mjs')body=fixture;
  else if(url.pathname==='/entry-ui.mjs')body=(await readFile(resolve(root,'assets/js/ui-core-v129.js'),'utf8')).replace("'./dom-utils.js'","'/assets/js/dom-utils.js'").replace("'./translations.js'","'/entry-labels.mjs'").replace("'./modules/core/password-policy.js'","'/entry-policy.mjs'");
- else if(url.pathname==='/entry-labels.mjs')body="export const t=k=>({cancel:'Annulla',confirm:'Conferma'})[k]||k;";
+ else if(url.pathname==='/entry-labels.mjs')body="export const t=k=>({cancel:'Annulla',confirm:'Conferma',frame_locked_title:'Vault bloccata',frame_unlock_resume:'Sblocca e riprendi'})[k]||k;";
  else if(url.pathname==='/entry-policy.mjs')body='export const generateSecurePassword=()=>"";export const bindPasswordChecklist=()=>()=>{};';
  else if(url.pathname==='/login.html'){body='<p>Login</p>';type='text/html';}
  else{const file=resolve(root,'.'+url.pathname);if(!file.startsWith(root+sep))throw Error();body=await readFile(file);type=file.endsWith('.css')?'text/css':'text/javascript';}
@@ -60,11 +64,11 @@ test.before(async()=>{
  browser=await chromium.launch({channel:'chrome',headless:true});
 });
 test.after(async()=>{await browser?.close();server?.closeAllConnections();await new Promise(r=>server?.close(r));});
-async function open(width=393,query=''){
+async function open(width=393,query='',name='home_page.html'){
  const context=await browser.newContext({viewport:{width,height:852}}),page=await context.newPage();
  await context.route('**/*',r=>r.request().url().startsWith(base)?r.continue():r.abort());
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto(base+'/home_page.html'+query);await page.waitForFunction(()=>window.entry);
+ await page.goto(base+'/'+name+query);await page.waitForFunction(()=>window.entry);
  return {context,page,errors};
 }
 const release=(page,name,value)=>page.evaluate(({name,value})=>window.release(name,value),{name,value});
@@ -138,5 +142,75 @@ test('the Home waiting label follows the selected catalogue before reveal',async
  assert.equal(result.label,result.expected);assert.ok(result.paint.includes(result.label));await hiddenHome(f.page);
  }
  assert.deepEqual(f.errors,[]);
+ }finally{await f.context.close();}
+});
+
+async function privateKey(page){
+ await release(page,'identity');await page.waitForFunction(()=>window.entry.phase==='routing');
+ await release(page,'routing',false);await page.waitForFunction(()=>window.entry.phase==='key');
+}
+for(const name of ['dati_azienda.html','profilo_privato.html','account_privati.html'])for(const outcome of ['empty','error','cancel'])
+test('private non-Home entry blocks '+name+' after '+outcome,{timeout:20000},async()=>{
+ const f=await open(393,'?id=QA_RECORD_001',name);try{
+  assert.equal(await f.page.locator('#private-entry-status').count(),0,'real non-Home HTML has no prebuilt Home status');
+  await privateKey(f.page);
+  await release(f.page,'init');
+  await release(f.page,'key',outcome==='cancel'?'prompt':outcome==='error'?'throw':null);
+  if(outcome==='cancel'){await f.page.locator('#protocol-input-modal.active').waitFor();await f.page.locator('#modal-cancel-btn').click();}
+  await f.page.evaluate(()=>window.entryDone);
+  assert.equal(await f.page.evaluate(()=>window.entry.init),0,'missing material must stop every private initializer');
+  assert.equal(await f.page.locator('#private-entry-status').count(),1);
+  assert.equal(await f.page.locator('#private-entry-retry').count(),1);
+  assert.equal(await f.page.locator('#private-entry-status').evaluate(e=>e.parentElement===document.body),true);
+  assert.equal(await f.page.locator('#private-entry-status').isVisible(),true);
+  assert.equal(await f.page.locator('#private-entry-retry').isEnabled(),true);
+  assert.equal(await f.page.locator('#private-entry-status').getAttribute('role'),'status');
+  assert.equal(await f.page.locator('#private-entry-retry').getAttribute('data-t'),'frame_unlock_resume');
+  assert.equal(await f.page.locator('html').getAttribute('data-private-page-state'),'blocked');
+  assert.equal(await f.page.locator('.base-container').isVisible(),false,'private content is hidden behind the neutral status');
+  assert.deepEqual(f.errors,[]);
+ }finally{await f.context.close();}
+});
+
+test('private standalone retry retains URL, creates no duplicate status and allows a later valid unlock',{timeout:25000},async()=>{
+ const f=await open(393,'?id=QA_RECORD_001&profileTab=documents#wrapper-email-section','dati_azienda.html');try{
+  const original=f.page.url();await privateKey(f.page);await release(f.page,'init');await release(f.page,'key',null);await f.page.evaluate(()=>entryDone);
+  assert.equal(await f.page.evaluate(()=>entry.init),0);
+  await f.page.evaluate(()=>window.runEntry());
+  assert.equal(await f.page.locator('#private-entry-status').count(),1);assert.equal(await f.page.locator('#private-entry-retry').count(),1);
+  const navigation=f.page.waitForNavigation();await f.page.locator('#private-entry-retry').click();await navigation;
+  assert.equal(f.page.url(),original,'retry preserves pathname, query and fragment');
+  await f.page.waitForFunction(()=>window.entry);await privateKey(f.page);await release(f.page,'key','SYNTHETIC');
+  await f.page.waitForFunction(()=>entry.phase==='init');await release(f.page,'init');await f.page.evaluate(()=>entryDone);
+  assert.equal(await f.page.evaluate(()=>entry.init),1);assert.equal(await f.page.locator('html').getAttribute('data-private-page-state'),null);
+  assert.equal(await f.page.locator('.base-container').isVisible(),true);assert.deepEqual(f.errors,[]);
+ }finally{await f.context.close();}
+});
+
+test('private blocked status follows seven palettes in both liveries and sizes',{timeout:40000},async()=>{
+ const f=await open(320,'?id=QA_RECORD_001','dati_azienda.html');try{
+  await privateKey(f.page);await release(f.page,'init');await release(f.page,'key',null);await f.page.evaluate(()=>entryDone);
+  await f.page.addStyleTag({content:'*,*::before,*::after{transition:none!important;animation:none!important}'});
+  for(const width of [320,1280])for(const graphics of ['classic','new'])for(const theme of ['light','dark'])for(const palette of ['blue','green','red','sand','petrol','lavender','dusty-rose']){
+   await f.page.setViewportSize({width,height:852});
+   const heading=await f.page.evaluate(({graphics,theme,palette})=>{
+    const root=document.documentElement;root.dataset.uiGraphics=graphics;root.dataset.colorTheme=palette;root.classList.toggle('dark',theme==='dark');
+    const probe=document.createElement('span');probe.style.color='var(--text-primary)';document.body.append(probe);
+    const expected=getComputedStyle(probe).color;probe.remove();return {actual:getComputedStyle(document.querySelector('#private-entry-status h1')).color,expected};
+   },{graphics,theme,palette});
+   assert.equal(heading.actual,heading.expected);
+   for(const paint of [{selector:'#private-entry-retry',property:'backgroundColor',role:'--rev-fill'},{selector:'#private-entry-retry',property:'color',role:'#fff',minimum:4.5}]){
+    const values=await inspectDynamicPaint(f.page,paint,{graphics,theme});assert.equal(values.length,1);
+    assert.equal(values[0].rolePass,true,JSON.stringify({width,graphics,theme,palette,paint,values}));
+    if(paint.minimum)assert.equal(values[0].contrast.pass,true,JSON.stringify(values));
+   }
+   const button=f.page.locator('#private-entry-retry');await button.focus();
+   assert.equal(await button.evaluate(e=>document.activeElement===e),true);
+   for(const selector of ['#private-entry-status h1','#private-entry-retry']){
+    const box=await f.page.locator(selector).boundingBox();assert.ok(box&&box.x>=0&&box.y>=0&&box.x+box.width<=width&&box.y+box.height<=852);
+   }
+   assert.equal(await f.page.locator('.base-container').isVisible(),false);
+  }
+  assert.deepEqual(f.errors,[]);
  }finally{await f.context.close();}
 });
