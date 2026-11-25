@@ -32,6 +32,96 @@ export function decorationState(){
 }
 const validDecorations=(state,symbol)=>state.revision==='tre-livelli'&&state.largeCount===1&&state.large.symbol===symbol&&state.large.hidden==='true'&&state.large.display!=='none'&&Number(state.large.opacity)>0&&state.large.pointer==='none'&&state.title.content?.includes(symbol)&&state.title.pointer==='none'&&state.small.content?.includes(symbol)&&state.small.display==='block'&&state.small.fontSize==='72px'&&Number(state.small.opacity)>0&&state.small.pointer==='none';
 
+test('profile cards and dark bands share common materials in both liveries and all seven palettes',{timeout:180000},async()=>{
+ const harness=await createTourHarness({memory:true}),results=[],failures=[],geometry=new Map();
+ const capture=process.env.PROFILE_SURFACE_CAPTURE||'current';
+ await mkdir(output,{recursive:true});
+ try{
+  for(const file of ['profilo_privato.html','dati_azienda.html'])for(const graphics of ['classica','tre-livelli']){
+   const f=await harness.open(file,{graphics});
+   const reference=await harness.open('aggiungi_scadenza.html',{graphics});
+   try{
+    await f.page.locator('[data-profile-tab-target=overview],[data-company-tab=overview]').click();
+    await f.page.locator('.profile-summary-card').first().waitFor();
+    for(const width of [320,393,1280]){
+     await f.page.setViewportSize({width,height:852});
+     await reference.page.setViewportSize({width,height:852});
+     // Keep the pointer away from cards: hover is tested separately below.
+     await f.page.mouse.move(0,0);
+     for(const theme of contract.themes)for(const palette of contract.palettes){
+      await f.page.evaluate(({theme,palette})=>{document.documentElement.classList.toggle('dark',theme==='dark');document.documentElement.dataset.colorTheme=palette;},{theme,palette});
+      await reference.page.evaluate(({theme,palette})=>{document.documentElement.classList.toggle('dark',theme==='dark');document.documentElement.dataset.colorTheme=palette;},{theme,palette});
+      const state=await f.page.evaluate(()=>{
+       const paint=e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return {background:s.backgroundColor,border:s.borderTopColor,blur:s.backdropFilter,mask:s.maskImage,pseudo:getComputedStyle(e,'::before').content,width:r.width,height:r.height};};
+       const summary=document.querySelector('.profile-summary-card'),tab=document.querySelector('.profile-tabs'),ordinary=summary.closest('section,main').querySelector('.form-card');
+       return {header:paint(document.querySelector('#header-placeholder')),footer:paint(document.querySelector('#footer-placeholder')),tabs:paint(tab),summary:paint(summary),ordinary:paint(ordinary),
+        active:document.querySelector('.profile-tab[aria-selected=true]')?.textContent,overflow:document.documentElement.scrollWidth>innerWidth,
+        data:[...document.querySelectorAll('.profile-summary-card')].map(e=>e.textContent),writes:window.__viewTourWrites||0};
+      });
+      state.otherPageCard=await reference.page.locator('#deadline-rule-selector-section').evaluate(e=>{const s=getComputedStyle(e);return {background:s.backgroundColor,border:s.borderTopColor,blur:s.backdropFilter};});
+      const label=`${file}/${graphics}/${width}/${theme}/${palette}`;
+      const expect=(ok,reason)=>{if(!ok)failures.push({label,reason});};
+      expect(state.summary.background===state.ordinary.background,'summary card fill');
+      expect(state.summary.border===state.ordinary.border,'summary card border');
+      expect(state.summary.blur===state.ordinary.blur,'summary card glass');
+      for(const property of ['background','border','blur'])expect(state.summary[property]===state.otherPageCard[property],'other page card '+property);
+      if(theme==='dark'){
+       expect(state.header.background===state.footer.background,'header/footer tint');
+       expect(state.header.blur===state.footer.blur,'header/footer blur');
+       expect(state.footer.mask.includes('to top')&&state.header.mask===state.footer.mask.replace('to top, ',''),'mirrored band fade');
+       if(width<=600)expect(state.footer.pseudo==='none','one mobile footer veil');
+       expect(state.tabs.background===state.ordinary.background,'tab container card fill');
+      }
+      assert.equal(state.overflow,false,label+': no horizontal page overflow');
+      const invariant={data:state.data,writes:state.writes,boxes:Object.fromEntries(['header','footer','tabs','summary','ordinary'].map(k=>[k,{width:state[k].width,height:state[k].height}]))};
+      const key=`${file}/${width}`;
+      if(!geometry.has(key))geometry.set(key,invariant);
+      assert.deepEqual(invariant,geometry.get(key),label+': palettes and graphics preserve geometry and synthetic data');
+      assert.equal(state.writes,0,label+': consultation never writes data');
+      for(const paint of [
+       {selector:'.profile-summary-card .data-label',role:'--text-secondary',minimum:4.5},
+       {selector:'.profile-summary-card .data-value',role:'--text-primary',minimum:4.5},
+       {selector:'.profile-summary-card > .material-symbols-outlined',role:'--card-icon-ink',minimum:3}
+      ]){
+       const values=await inspectDynamicPaint(f.page,{...paint,property:'color'},{theme,graphics});
+       expect(values.length===state.data.length&&values.length>0,'all summary contrast targets exist '+paint.selector);
+       for(const value of values)expect(value.visible&&value.rolePass&&value.contrast?.pass,'summary visibility/contrast/role '+paint.selector);
+      }
+      results.push({file,graphics,width,theme,palette,...state});
+      if(width===393&&palette==='blue'){
+       await f.page.locator('.profile-tabs').scrollIntoViewIfNeeded();
+       await f.page.screenshot({path:`${output}/surfaces-${capture}-${theme}-${file}-${graphics}.png`,animations:'disabled'});
+       if(file==='profilo_privato.html'&&graphics==='tre-livelli')await f.page.locator('.profile-summary-grid').screenshot({path:`${output}/summary-${capture}-${theme}.png`,animations:'disabled'});
+      }
+     }
+    }
+    // Actual summary actions must still select their section, retain focus and never write data.
+    await f.page.setViewportSize({width:393,height:852});
+    const action=f.page.locator('.profile-summary-card-action').first();
+    const actionPaint=e=>{const s=getComputedStyle(e);return {focused:document.activeElement===e,border:s.borderTopColor,style:s.borderTopStyle,width:parseFloat(s.borderTopWidth)};};
+    await f.page.mouse.move(0,0);
+    const idle=await action.evaluate(actionPaint);
+    await action.hover();
+    const hover=await action.evaluate(actionPaint);
+    assert.ok(hover.border!==idle.border&&hover.style!=='none'&&hover.width>0,file+'/'+graphics+': summary hover border remains visible');
+    await f.page.mouse.move(0,0);
+    await f.page.keyboard.press('Tab');
+    await action.focus();
+    const focus=await action.evaluate(actionPaint);
+    assert.ok(focus.focused&&focus.border!==idle.border&&focus.style!=='none'&&focus.width>0,file+'/'+graphics+': summary keyboard focus remains visible '+JSON.stringify(focus));
+    if(file==='dati_azienda.html'){
+     await action.press('Enter');
+     await f.page.locator('.profile-tab[aria-selected=true][data-company-tab=personal]').waitFor();
+    }
+    assert.equal(await f.page.evaluate(()=>window.__viewTourWrites||0),0,'consultation never writes data');
+   }finally{await f.context.close();await reference.context.close();}
+  }
+  assert.equal(results.length,168);
+  await writeFile(`${output}/profile-surfaces-${capture}.json`,JSON.stringify({status:failures.length?'FAIL':'PASS',contexts:results,failures},null,2));
+  assert.equal(failures.length,0,`${failures.length} surface mismatches; see profile-surfaces-${capture}.json`);
+ }finally{await harness.close();}
+});
+
 
 test('approved profile typography keeps values and QR intact across both liveries',{timeout:180000},async()=>{
  const harness=await createTourHarness({memory:true}),results=[];

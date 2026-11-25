@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="rilascio-1297-2026-11-25"></a>
+
+## Candidata 1.2.297 — superfici dei Profili, solo Hosting
+
+[Ordine diretto](../progetto/INCARICO_CORRENTE.md#rilascio-1297-2026-11-25). Unico pubblico funzionale `profile-layout.css`: Panoramica dei due Profili usa i materiali comuni in Chiaro/Scuro; footer e linguette allineati in Scuro. Registri e test aggiornati, nessuna nuova palette o modifica alla cornice. Snapshot pre-bump verificato, confezione297/catalogo guida riesaminato senza nuovi contenuti, derivati offline/QA e confronto versioni/EOL; due GO indipendenti sulla testa finale e CI PR completa prima del merge con SHA atteso. CI master/validate Hosting stesso sorgente/digest, scope hosting e master invariato prima del gate production conservato. Verifica pubblica integrale e GET indipendente del CSS, poi ricevuta documentale senza altro Hosting. [Esiti e limiti](../evidenze/COLLAUDI.md#rilascio-1297-2026-11-25). Nessun cambio a workflow/protezioni, backend o blocco; ricollaudo fisico successivo distinto.
+
 <a id="rilascio-1296-pubblico-2026-11-24"></a>
 
 ## APP 1.2.296 — procedura Hosting eseguita

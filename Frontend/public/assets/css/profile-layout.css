@@ -1,14 +1,25 @@
 /* One translucent contrast veil: text >=4.5:1, icons >=3:1 over light/dark content. */
-#header-placeholder.base-header {
+#header-placeholder.base-header,
+.dark #footer-placeholder.base-footer {
     background: color-mix(in srgb, var(--rev-popup) 88%, transparent);
     backdrop-filter: blur(14px) saturate(110%);
     -webkit-backdrop-filter: blur(14px) saturate(110%);
+}
+
+#header-placeholder.base-header {
     mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
 }
 
+.dark #footer-placeholder.base-footer {
+    /* Same protected glass, fading toward the page from the opposite edge. */
+    mask-image: linear-gradient(to top, black 82%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to top, black 82%, transparent 100%);
+}
+
 @media (max-width: 600px) {
-    #header-placeholder.base-header::before {
+    #header-placeholder.base-header::before,
+    .dark #footer-placeholder.base-footer::before {
         /* Avoid a second mobile veil. */
         content: none;
     }
@@ -33,6 +44,8 @@
 }
 
 .profile-tabs::-webkit-scrollbar { display: none; }
+
+.dark [data-ui-revision] .profile-tabs { background: var(--rev-surface); }
 
 .profile-tab {
     flex: 0 0 auto;
@@ -93,6 +106,13 @@
 .profile-overview-name { margin: 0.25rem 0 0; color: var(--text-primary); font: var(--font-title); }
 .profile-summary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 1rem 0; }
 .profile-summary-card { display: flex; align-items: flex-start; gap: 0.75rem; min-width: 0; padding: 1rem; border: 1px solid var(--border-color); border-radius: 1rem; background: var(--surface-glass); }
+/* Keep keyboard/hover rules below authoritative, including on summary actions. */
+[data-ui-revision] .profile-summary-card {
+    background: var(--rev-surface);
+    border-color: var(--rev-border);
+    backdrop-filter: var(--rev-glass-blur);
+    -webkit-backdrop-filter: var(--rev-glass-blur);
+}
 .profile-summary-card .data-value { margin: 0.2rem 0 0; overflow-wrap: anywhere; }
 .profile-summary-card-action { width: 100%; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .profile-summary-card-action:hover,

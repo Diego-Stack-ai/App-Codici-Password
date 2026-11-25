@@ -308,9 +308,11 @@ export function buildDynamicThemeTopology({ registryPath = defaultDynamicThemePa
       collector.addEdge(uiEdge(caseId, paintId, 'ui_declares_paint', declared));
       for (const state of paintStates) collector.addEdge(uiEdge(`${caseId}:state:${state}`, paintId, 'ui_expects_state_paint', declared));
       if(paint.newRole!==undefined&&(typeof paint.newRole!=='string'||!paint.newRole.startsWith('--')))errors.push(`${item.id}: invalid variant CSS role`);
-      const variants=[{role:String(paint.role),graphics:paint.newRole?['classica']:undefined},
+      if(paint.darkRole!==undefined&&(typeof paint.darkRole!=='string'||!paint.darkRole.startsWith('--')))errors.push(`${item.id}: invalid dark CSS role`);
+      const variants=[{role:String(paint.role),graphics:paint.newRole?['classica']:undefined,themes:paint.darkRole?['light']:undefined},
+        ...(paint.darkRole?[{role:String(paint.darkRole),graphics:paint.newRole?['classica']:undefined,themes:['dark']}]:[]),
         ...(paint.newRole?[{role:String(paint.newRole),graphics:['tre-livelli']}]:[])];
-      for(const {role,graphics} of variants){
+      for(const {role,graphics,themes} of variants){
       const escapedRole = role.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const rolePattern = new RegExp(`${escapedRole}\\s*:`);
       const definition = role.startsWith('--') ? caseRoleSources.find(({text}) => rolePattern.test(text)) : null;
@@ -321,7 +323,7 @@ export function buildDynamicThemeTopology({ registryPath = defaultDynamicThemePa
         source_file: definition ? relativeToProject(definition.file) : relativeToProject(registryPath),
         source_location: definition ? `L${lineOf(definition.text, definition.text.search(rolePattern))}` : undefined
       }));
-      collector.addEdge(uiEdge(paintId, roleId, 'ui_expects_color_role', {...declared,...(graphics?{graphics}:{})}));
+      collector.addEdge(uiEdge(paintId, roleId, 'ui_expects_color_role', {...declared,...(graphics?{graphics}:{}),...(themes?{themes}:{})}));
       for (const [, variable] of role.matchAll(/var\((--[a-z0-9-]+)\)/g)) {
         const pattern = new RegExp(`${variable}\\s*:`);
         const origin = caseRoleSources.find(({text}) => pattern.test(text));
@@ -427,6 +429,7 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
     {id:'home-actions',pages:['home_page.html'],selectors:['.fab-group .btn-fab-privato','.fab-group .btn-fab-scadenza','.fab-group .btn-fab-azienda'],roles:[registry.footer?.fillRole,registry.footer?.deepRole,'--theme-fill','--theme-fill-deep'],producers:[registry.footer?.homeProducer]},
     {id:'profile-guide',pages:['profilo_privato.html'],selectors:[registry.footer?.guide],roles:[registry.footer?.inkRole,'--text-primary'],producers:[registry.footer?.producer]},
     {id:'profile-typography',pages:[registry.profileTypography?.page],selectors:registry.profileTypography?.selectors,roles:[],producers:[registry.profileTypography?.producer],styles:registry.profileTypography?.styles,test:registry.profileTypography?.test,translations:registry.profileTypography?.translations},
+    {id:'profile-surfaces',...registry.profileSurfaces},
     ...[
       {id:'contact-export',metadata:registry.contactExport,expectedPages:['profilo_privato.html','dati_azienda.html'],requiredStates:['open','save-unavailable','share-unavailable','saved','shared','save-error','share-error','cancelled','download-started','revoked','pending','preparing','ready','options-open']},
       {id:'company-card-qr',metadata:registry.companyCardQr,expectedPages:['dati_azienda.html'],requiredStates:['card-inline','card-zoom','unsaved-selection-zoom','header-zoom','closed','revoked']}
@@ -438,13 +441,18 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
         .map(paint=>paint?.role).filter(role=>typeof role==='string'&&role.startsWith('--')))]}))
   ];
   for(const component of components){
-    const id=collector.addNode(uiNode(`ui:livery-component:${component.id}`,component.id,'ui_livery_component',{...declared,...(component.test?{test_name:component.test.name}:{})}));
+    const scope=component.themes?{themes:component.themes}:{};
+    const id=collector.addNode(uiNode(`ui:livery-component:${component.id}`,component.id,'ui_livery_component',{...declared,...scope,...(component.test?{test_name:component.test.name}:{})}));
     for(const variant of variants)collector.addEdge(uiEdge(variant,id,'ui_shares_component',{...declared,graphics:['classic','new']}));
     for(const page of component.pages){if(!pages.includes(page)){errors.push(`liveries: ${component.id} has unknown page ${page}`);continue;}collector.addEdge(uiEdge(`ui:page:${page}`,id,'ui_declares_livery_component',declared));}
     for(const target of [styles,!component.native&&testSource].filter(Boolean))collector.addEdge(uiEdge(id,target,target===testSource?'ui_declares_test':'ui_loads_stylesheet',declared));
     for(const file of Array.isArray(component.styles)?component.styles:[]){const target=source(file);if(target)collector.addEdge(uiEdge(id,target,'ui_loads_stylesheet',declared));}
     let componentTestSource=null;
     if(component.test){componentTestSource=source(component.test.file);if(componentTestSource)collector.addEdge(uiEdge(id,componentTestSource,'ui_declares_test',declared));if(!component.test.name)errors.push(`liveries: ${component.id} has no named test`);}
+    if(component.id==='profile-surfaces'){
+      if(JSON.stringify(component.themes)!=='["light","dark"]')errors.push('liveries: profile surfaces must declare light and dark scope');
+      if(!componentTestSource||!component.test?.name||!fs.readFileSync(path.resolve(projectRoot,component.test.file),'utf8').includes(component.test.name))errors.push('liveries: missing named profile surface regression');
+    }
     if(component.id==='profile-typography'){
       if(!Array.isArray(component.styles)||!component.styles.length)errors.push('liveries: missing typography stylesheet');
       if(!componentTestSource||typeof component.test?.name!=='string'||!component.test.name||!fs.readFileSync(path.resolve(projectRoot,component.test.file),'utf8').includes(component.test.name))errors.push('liveries: missing named typography regression');
@@ -535,7 +543,7 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
     if(!Array.isArray(component.selectors)||!component.selectors.length)errors.push(`liveries: ${component.id} has no selectors`);
     for(const [index,selector] of (Array.isArray(component.selectors)?component.selectors:[]).entries()){
       if(typeof selector!=='string'||!selector.trim()){errors.push(`liveries: ${component.id} has an invalid selector`);continue;}
-      const selectorId=collector.addNode(uiNode(`${id}:selector:${index}`,selector,'ui_livery_selector',{selector,...declared}));collector.addEdge(uiEdge(id,selectorId,'ui_declares_selector',declared));
+      const selectorId=collector.addNode(uiNode(`${id}:selector:${index}`,selector,'ui_livery_selector',{selector,...declared,...(component.surfaceScopes?.[selector]?{themes:component.surfaceScopes[selector]}:{})}));collector.addEdge(uiEdge(id,selectorId,'ui_declares_selector',declared));
     }
     if(!Array.isArray(component.producers)||!component.producers.length)errors.push(`liveries: ${component.id} has no producers`);
     for(const file of Array.isArray(component.producers)?component.producers:[]){const target=source(file);if(target)collector.addEdge(uiEdge(id,target,'ui_rendered_by',declared));}
@@ -543,8 +551,8 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
       if(typeof role!=='string'||!role.startsWith('--')){errors.push(`liveries: ${component.id} has an invalid role`);continue;}
       const definitions=roleSources.filter(entry=>entry.text.includes(role+':'));
       if(!definitions.length)errors.push(`liveries: ${component.id} has unknown color role ${role}`);
-      const graphics=role.startsWith('--companion-')?['new']:component.native||['home-urgency','account-mode-counts'].includes(component.id)||role==='--card-icon-ink'?['classic','new']:['classic'];
-      roles.add(role);const roleId=collector.addNode(uiNode(`ui:livery-color-role:${role}`,role,'ui_color_role',declared));collector.addEdge(uiEdge(id,roleId,'ui_expects_color_role',{...declared,graphics}));
+      const graphics=role.startsWith('--companion-')?['new']:component.native||['home-urgency','account-mode-counts','profile-surfaces'].includes(component.id)||role==='--card-icon-ink'?['classic','new']:['classic'];
+      roles.add(role);const roleId=collector.addNode(uiNode(`ui:livery-color-role:${role}`,role,'ui_color_role',declared));collector.addEdge(uiEdge(id,roleId,'ui_expects_color_role',{...declared,...scope,graphics}));
       for(const definition of definitions)collector.addEdge(uiEdge(roleId,definition.id,'ui_role_defined_in',declared));
     }
   }

@@ -1,5 +1,43 @@
 # Incarico corrente
 
+<a id="rilascio-1297-2026-11-25"></a>
+
+## Ordine 297 — pubblicare il correttivo grafico e la sua mappa
+
+Diego ordina «pública» dopo il confronto delle card e la conferma della mappatura. Autorizzati nuova versione 1.2.297, commit/push, PR, merge e deploy solo Hosting del lotto locale verificato, con MD e GitHub aggiornati. Superato il precedente limite locale per questo solo lotto. Base GitHub verificata `f5e6a69760ab3dcf6ada645f7525f0b8dd88149b`; Codex unico scrittore, due riesami indipendenti in lettura sulla testa finale, distinti dai GO locali precedenti.
+
+Prima dei builder acquisire snapshot/ZIP/hash dei pubblici funzionali; confezione canonica297, guida riesaminata e derivati offline/QA, confronto normalizzato versioni/EOL. CI PR completa, merge con SHA atteso; CI master e validate Hosting sullo stesso sorgente/digest, scope hosting e master invariato prima del gate production conservato. Verifica pubblica integrale più GET indipendente del CSS, quindi ricevuta documentale senza secondo Hosting. Nessun cambio a workflow/protezioni, backend, Auth, Vault/blocco, navigazione, faro o palette delle icone. Ricollaudo fisico successivo distinto. [Lotto ed esiti locali](../evidenze/COLLAUDI.md#profilo-superfici-scuro-locale-2026-11-25).
+
+<a id="profilo-superfici-scuro-locale-2026-11-25"></a>
+
+## Lotto locale — superfici coerenti dei Profili in Scuro
+
+Il 25/11 Diego segnala, durante il collaudo Safari, header/footer diversi, card Panoramica e contenitore delle linguette non coerenti con le altre card; autorizza «procedi». Correzione locale mirata in `profile-layout.css`, condiviso da Profilo privato e Dati azienda: coordinare il vetro del footer all'header e collegare riepiloghi/linguette ai ruoli delle card in Scuro. Preservare contrasto protetto dell'header, geometria, decorazioni, palette delle icone e stati interattivi. Verificare entrambe le grafiche, sette palette, larghezze telefono/desktop e assenza di regressioni in Chiaro; registrare componenti, ruoli e test nel contratto/mappa UI esistenti.
+
+Codex unico scrittore, supporti indipendenti in sola lettura; base `f5e6a69760ab3dcf6ada645f7525f0b8dd88149b`, ramo `codex/profile-dark-surfaces-20261125`. Autorizzati CSS/test/mappatura e normale aggiornamento degli MD esistenti. Nessun nuovo rilascio/versione, commit/push, PR/merge/Hosting da questo ordine; Auth, Vault, blocco, navigazione, chiavi, backend e workflow invariati. Conservare gli esiti telefonici già acquisiti e i loro limiti; il banco sintetico non certifica Safari/PWA fisici.
+
+Nello stesso lavoro Diego precisa che anche in Chiaro i riepiloghi Panoramica sono trasparenti e chiede «verifica e fai un confronto». Estendere il confronto e l'allineamento delle sole card Panoramica anche al Chiaro; fasce e contenitore linguette Chiaro restano distinti. Confrontare superficie effettiva con card comuni reali, non soltanto i nomi dei token, e conservare immagini sintetiche prima/dopo.
+
+Implementazione e verifiche locali concluse, due riesami Codex in lettura con GO locale: [confronto e limiti](../evidenze/COLLAUDI.md#profilo-superfici-scuro-locale-2026-11-25). Consegnare il prima/dopo; qualsiasi nuovo rilascio richiede un distinto ordine.
+
+<a id="cornice-telefono-1296-2026-11-24"></a>
+
+## Seguito 296 — acquisiti logout e rientro oltre soglia, conservare i limiti
+
+Diego conferma 296 sull'iPhone e riferisce soltanto Accedi nel gesto nativo Indietro dopo logout; ulteriori gesti spontanei non mostrano altre pagine. [Esito e perimetro](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24). Registrare il PASS del percorso R07/F41 osservato nella matrice; non ripetere questo giro né Regole/Annulla già acquisiti. Le famiglie complete, altre schede e gli altri browser/dispositivi restano distinti. Annotazioni locali, senza modifiche runtime, nuova versione o Hosting; blocco conservato.
+
+Acquisito anche [TEL296-R08/D07](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24): rientro da altra app oltre la soglia1min con schermo acceso, blocco e ripresa positivi;12ore ripristinate. Non ripetere il giro; non dedurre cause lifecycle o chiusura completa D07/C1/C2.
+
+Acquisito [TEL296-R09/D14 Privacy](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24): pagina pubblica leggibile, ritorno a Impostazioni utilizzabili e richiesta Vault; breve UI generica prima del prompt, senza foto/nome riferiti. Non ripetere il giro né proporre un correttivo dal solo risultato; gli altri sottocasi D14 restano distinti.
+
+Acquisito anche [TEL296-R10/D14 Termini](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24): apertura/leggibilità e ritorno a Impostazioni dopo nuovo sblocco Vault confermati. Conservare il PASS circoscritto, senza altre ripetizioni; residui D14 e ambienti distinti restano aperti.
+
+Acquisito [TEL296-R11/D03 Documenti aziendali](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24): pannello corretto/leggibile senza nuovi sblocchi e senza aprire/modificare file. Non ripetere il sottocaso né dedurre prove su allegati o nuove destinazioni.
+
+Acquisito [TEL296-R12/D03 pannello PDF](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24), con soli stati iniziali dei comandi, nessuno sblocco aggiuntivo o PDF preparato/consegnato. Proseguire sul residuo già pianificato Safari iPhone/D17; prima ingresso e versione, poi sola verifica di presentazione. Fixture/PC/invii/OFF/D18 restano distinti e non autorizzati da questa scelta.
+
+Acquisito [TEL296-R13/D17 Safari](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24): solo Anagrafica nei due orientamenti, Safari296 e Home utilizzabile confermati, senza modifiche. Prossimi casi già pianificati: tastiera nel popup Ricerca Safari e ricarica completa del padre Safari D05-A; nessun esito ancora acquisito o nuova pubblicazione autorizzata da questa registrazione.
+
 <a id="rilascio-1296-pubblico-2026-11-24"></a>
 
 ## Ordine 296 eseguito — pubblicazione verificata e ricollaudo iPhone
