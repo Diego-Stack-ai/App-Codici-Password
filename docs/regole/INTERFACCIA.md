@@ -1,5 +1,13 @@
 # Interfaccia
 
+<a id="rilascio-1297-pubblico-2026-11-25"></a>
+
+## Superfici dei Profili — distribuite nella 1.2.297
+
+Il [contratto delle superfici](#profilo-superfici-scuro-locale-2026-11-25) è distribuito nella 1.2.297 e verificato sui byte pubblici. Panoramica usa i materiali comuni in Chiaro/Scuro; footer e contenitore linguette sono coordinati in Scuro, con l'header protetto conservato. Entrambi i Profili e le grafiche seguono i ruoli della palette; icone bicolore/+15% soltanto Nuova, geometria, faro e filigrane conservati. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1297-pubblico-2026-11-25).
+
+Il registro profileSurfaces e UI275-09 mantengono pagina→produttore→selettore/proprietà/ruolo→test con perimetri Chiaro/Scuro distinti; la regressione copre 168 contesti delle sette palette. Il grafo dichiarato non diventa un'osservazione fisica. Un futuro tema richiede l'allineamento di palette/registri e verifiche previste, non una copia di colori fissi nelle pagine. Conferma grafica sul telefono ancora distinta; la ricevuta non cambia runtime o blocco e non richiede altro Hosting.
+
 <a id="rilascio-1296-pubblico-2026-11-24"></a>
 
 ## Avvio dopo logout — controllo anticipato distribuito nella 296

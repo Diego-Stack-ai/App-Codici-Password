@@ -1,5 +1,13 @@
 # Rilascio
 
+<a id="rilascio-1297-pubblico-2026-11-25"></a>
+
+## APP 1.2.297 — procedura Hosting eseguita
+
+PR #362 unita dopo due GO sulla testa finale e CI PR #1292 verde; master #1293 e validate Hosting #1294 concordi per merge/digest. Scope hosting e master remoto invariato verificati prima di production; dispatch e approvazione da browser interno secondo la delega di pubblicazione, senza modificare protezioni. Deploy SUCCESS e verifica pubblica integrale/indipendente PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1297-pubblico-2026-11-25).
+
+Sorgente distribuito `1eabf8e095451cf18cf79168a97415d6b160f471`, sourceDirty=false, 369 file e digest `b91ab7dbe89b193877f13a945fe1d601ef6e1efef43de29f398410f8348d0b03`. Il futuro merge di questa ricevuta soltanto documentale non sostituisce il sorgente Hosting né richiede altro deploy. Backend, workflow, gate e blocco conservati; prova telefonica distinta e successiva.
+
 <a id="rilascio-1297-2026-11-25"></a>
 
 ## Candidata 1.2.297 — superfici dei Profili, solo Hosting

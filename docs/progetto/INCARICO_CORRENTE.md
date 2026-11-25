@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="rilascio-1297-pubblico-2026-11-25"></a>
+
+## Ordine 297 eseguito — ricevuta e osservazione grafica successiva
+
+1.2.297 pubblicata solo Hosting il 25/11/2026, sorgente `1eabf8e095451cf18cf79168a97415d6b160f471`: PR #362 unita dopo due GO sulla testa finale e CI PR verde; master/Hosting concordi e deploy #1294 SUCCESS. Codex ha approvato production secondo l'ordine diretto, senza alterare protezioni. [Ricevuta e verifiche pubbliche](../evidenze/COLLAUDI.md#rilascio-1297-pubblico-2026-11-25).
+
+Completare la distinta ricevuta documentale con controlli/due riesami e merge, senza secondo Hosting o bump; il sorgente pubblico resta il merge runtime indicato. Poi confermare 297 sul telefono e osservare soltanto le superfici corrette, prima di riprendere un residuo nuovo della cornice. Non ripetere i PASS acquisiti né dedurre prove fisiche da CI/grafo. Blocco, Auth, navigazione, altri residui e lotti separati conservati; Codex unico scrittore e supporti in lettura.
+
 <a id="rilascio-1297-2026-11-25"></a>
 
 ## Ordine 297 — pubblicare il correttivo grafico e la sua mappa

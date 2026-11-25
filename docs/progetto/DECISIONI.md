@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="rilascio-1297-pubblico-2026-11-25"></a>
+
+## Rilascio 297 eseguito — superfici e mappa, prova fisica distinta
+
+Eseguito il [mandato 297](INCARICO_CORRENTE.md#rilascio-1297-2026-11-25) con PR #362, due nuovi GO sulla testa finale, CI concordi e Hosting #1294 protetto. Codex ha svolto l'approvazione production nell'ordine già esplicito di pubblicazione; nessuna modifica a permessi o protezioni. [Ricevuta pubblica e limiti](../evidenze/COLLAUDI.md#rilascio-1297-pubblico-2026-11-25). Ricevuta documentale distinta dal sorgente Hosting, senza nuova versione/deploy. Osservazione delle superfici sul telefono ancora da acquisire; policy del blocco e residui invariati.
+
 <a id="rilascio-1296-pubblico-2026-11-24"></a>
 
 ## Rilascio 296 eseguito, prova fisica distinta — 24/11/2026

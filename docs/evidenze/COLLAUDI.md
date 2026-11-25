@@ -1,5 +1,19 @@
 # Collaudi
 
+<a id="rilascio-1297-pubblico-2026-11-25"></a>
+
+## APP 1.2.297 — ricevuta della pubblicazione grafica
+
+[Ordine](../progetto/INCARICO_CORRENTE.md#rilascio-1297-2026-11-25) eseguito il 25/11/2026. [PR #362](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/362), testa finale `d91a9f33c14565ac7f106dd4601431a217d72099`; due nuovi riesami Codex indipendenti in sola lettura con GO su questa testa, distinti dai precedenti GO locali. Sorgente unito `1eabf8e095451cf18cf79168a97415d6b160f471`, albero identico alla testa riesaminata (`5f0ec04b395b464fa80ee3ed14c1ea861558fc41`).
+
+CI [PR #1292](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/45573062677), [master #1293](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/45577981489) e [Hosting #1294](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/45578244581) SUCCESS. Ciascuna: 68 blocchi TAP, 4074 test dichiarati, 4063 PASS, 11 SKIP, 0 FAIL/annullati; soglie e script canonici conservati. Master e validate Hosting attestano lo stesso merge e digest. Dispatch da browser interno dopo HTTP 403 della CLI; Codex ha approvato production sulla delega esplicita di pubblicazione, con protezioni conservate e master remoto invariato. Job deploy 139100240055 SUCCESS alle 10:21:37 Europe/Rome: sorgente e master dopo deploy concordi, scope soltanto hosting.
+
+Manifest pubblico: appVersion 1.2.297, sourceCommit `1eabf8e095451cf18cf79168a97415d6b160f471`, sourceDirty=false, 369 file, digest `b91ab7dbe89b193877f13a945fe1d601ef6e1efef43de29f398410f8348d0b03`. Verifica canonica integrale PASS alle 10:22:40 Europe/Rome: 369 hash, 41 profili di intestazione, redirect/normalizzazioni/probe. Altre 20 GET mirate PASS alle 10:22:55, con hash/MIME/cache. Riesame indipendente alle 10:23:00–10:23:03: manifest e sei asset HTTP 200; CSS, due pagine Profilo e tre produttori con SHA256 remoto = manifest = blob Git LF. CSS text/css e max-age=3600; HTML/JS e manifest no-cache/no-store/must-revalidate. SHA256 del CSS corretto `689f24e21f62fbcee7f7caf428a6f3c1683572ca6de90ad2003c4bdc8f3fa8e4`. Artefatti ignorati `.codex-tmp/release297-{public-verification,public-gets}.json` e screenshot `release297-production-success.jpg` nel checkout isolato; nessun segreto o dato Vault acquisito.
+
+Distribuito il [contratto delle superfici](../regole/INTERFACCIA.md#profilo-superfici-scuro-locale-2026-11-25): riepiloghi Panoramica dei due Profili con materiali delle card comuni in Chiaro/Scuro, fasce e linguette coordinate in Scuro. Registri e test collegano pagine, produttori, selettori CSS, ruoli e regressione in 168 contesti; il grafo dichiarato resta observed:false. Unico pubblico funzionale profile-layout.css, altre differenze pubbliche di confezione versione. Le fasi di preparazione e locali sotto sono storiche, non la versione corrente.
+
+Questa ricevuta è soltanto documentale: nessun secondo Hosting, bump o sostituzione del sourceCommit pubblico con il futuro merge degli MD. Da acquisire conferma 297 e confronto grafico sul telefono; Chromium e byte pubblici non certificano Safari/PWA fisici. Conservati i PASS telefonici 296 e i rispettivi limiti, C1/C2/D05/D17 e gli altri residui; L23-UI02 e L23-PERF01 separati. Auth, Vault/blocco, navigazione, decorazioni/faro, backend e workflow invariati.
+
 <a id="rilascio-1297-2026-11-25"></a>
 
 ## Candidata 1.2.297 — preparazione del rilascio grafico
