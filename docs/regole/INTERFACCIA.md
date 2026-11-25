@@ -305,6 +305,14 @@ L'applicazione del ruolo card comprende i glifi prodotti da `home-deadline-dashb
 
 Solo in Nuova le archiviate evitano l'opacità globale della card, che riduceva il contrasto del companion oro sotto3:1. Conservati colori secondari dei testi, chevron e opacità Classica. I due produttori/selettori sono nel [registro livrea](../../scripts/ui-livery-contract.json); UI275-11 separa il ruolo delle date da quello dell'identità e conserva il rosso. La regressione usa record sintetici reali, identità esplicite/fallback, sette palette, due aspetti e due larghezze, con rifiuto di rame fisso e recolorazione degli avvisi. [Evidenze e limiti del banco](../evidenze/COLLAUDI.md#icone-scadenze-verifiche-2026-11-16); distribuzione attestata dalla ricevuta279. La sezione278 sotto documenta la base comune precedente.
 
+<a id="profilo-superfici-scuro-locale-2026-11-25"></a>
+
+## Superfici dei Profili — lotto locale, 25/11/2026
+
+[Ordine locale](../progetto/INCARICO_CORRENTE.md#profilo-superfici-scuro-locale-2026-11-25). Nei soli Profilo privato e Dati azienda, entrambe le grafiche in Scuro condividono il medesimo vetro delle fasce: miscela88% di `--rev-popup`, blur14/saturazione110%, dissolvenze speculari verso il contenuto e un solo velo mobile. L'header protetto resta invariato: la coerenza non autorizza a ridurne la leggibilità su contenuto bianco/nero. Le card Panoramica in Chiaro e Scuro usano `--rev-surface`, `--rev-border` e `--rev-glass-blur`, come le card ordinarie; la barra linguette Scuro usa lo stesso riempimento, conservando sticky, selezione, focus e blur esistenti. Fasce e linguette Chiaro, geometria, icone e decorazioni conservano i comportamenti precedenti.
+
+Il chiarimento successivo di Diego include le card Panoramica anche in Chiaro: stessi ruoli delle card ordinarie nei due modi, mentre header/footer e linguette Chiaro conservano il materiale precedente. Il componente `profileSurfaces` nel [registro delle livree](../../scripts/ui-livery-contract.json) collega due pagine, produttore delle fasce e due produttori Panoramica, CSS, selettori, ruoli e regressione nominata, con perimetri distinti; il grafo conserva `observed:false`. Il dipinto delle linguette `UI275-09` nel [registro dinamico](../../scripts/ui-dynamic-theme-contract.json) distingue il ruolo Scuro da quello Chiaro con `darkRole`; fonti e temi sono validati, senza allargare le eccezioni cromatiche. [Evidenze locali](../evidenze/COLLAUDI.md#profilo-superfici-scuro-locale-2026-11-25). Nessuna distribuzione o certificazione Safari fisica implicita.
+
 <a id="livree-comuni-ui-2026-11-16"></a>
 
 ## Base evoluta comune e livree — pubblicate nella 1.2.278, 16/11/2026

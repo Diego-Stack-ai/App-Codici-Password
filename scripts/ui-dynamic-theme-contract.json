@@ -641,7 +641,8 @@
         {
           "selector": ".profile-tabs",
           "property": "backgroundColor",
-          "role": "color-mix(in srgb,var(--rev-popup) 88%,transparent)"
+          "role": "color-mix(in srgb,var(--rev-popup) 88%,transparent)",
+          "darkRole": "--rev-surface"
         },
         {
           "selector": ".profile-tab.is-active",

@@ -8,6 +8,50 @@ import {buildDynamicThemeTopology, buildLiveryTopology, buildUiTopology, injectU
 const contractPath = new URL('../scripts/ui-dynamic-theme-contract.json', import.meta.url);
 const contract = JSON.parse(await readFile(contractPath, 'utf8'));
 
+test('profile surfaces map both producers, shared roles and the named visual regression',()=>{
+ const result=buildLiveryTopology();assert.deepEqual(result.errors,[]);
+ const id='ui:livery-component:profile-surfaces',node=result.nodes.find(n=>n.id===id);
+ assert.deepEqual(node.themes,['light','dark']);assert.equal(node.observed,false);
+ assert.equal(node.test_name,'profile cards and dark bands share common materials in both liveries and all seven palettes');
+ const edges=result.edges.filter(e=>e.source===id);
+ for(const page of ['profilo_privato.html','dati_azienda.html'])assert.ok(result.edges.some(e=>e.source==='ui:page:'+page&&e.target===id));
+ for(const file of ['Frontend/public/assets/js/components-v129.js','Frontend/public/assets/js/modules/privato/profilo-dashboard.js','Frontend/public/assets/js/modules/azienda/company-profile-ui.js','Frontend/public/assets/css/profile-layout.css','tests/ui-livery.browser.test.mjs'])assert.ok(edges.some(e=>e.target==='ui:source:'+file),file);
+ for(const role of ['--rev-popup','--rev-surface','--rev-border']){
+  const edge=edges.find(e=>e.target==='ui:livery-color-role:'+role);
+  assert.deepEqual(edge.graphics,['classic','new']);assert.deepEqual(edge.themes,['light','dark']);
+ }
+ assert.equal(edges.filter(e=>e.relation==='ui_declares_selector').length,4);
+ assert.deepEqual(result.nodes.find(n=>n.id.startsWith(id+':selector:')&&n.selector==='.profile-summary-card').themes,['light','dark']);
+ assert.deepEqual(result.nodes.find(n=>n.id.startsWith(id+':selector:')&&n.selector==='#footer-placeholder.base-footer').themes,['dark']);
+});
+
+test('dark dynamic roles keep their theme scope, stylesheet provenance and unknown-role rejection',async()=>{
+ const result=buildDynamicThemeTopology();assert.deepEqual(result.errors,[]);
+ const paint=result.nodes.find(n=>n.id.startsWith('ui:dynamic-theme:UI275-09:paint:')&&n.selector==='.profile-tabs');
+ const roles=result.edges.filter(e=>e.source===paint.id&&e.relation==='ui_expects_color_role');
+ assert.deepEqual(roles.find(e=>e.target==='ui:css-role:--rev-surface').themes,['dark']);
+ assert.deepEqual(roles.find(e=>e.target.includes('color-mix')).themes,['light']);
+ assert.equal(result.nodes.find(n=>n.id==='ui:css-role:--rev-surface').source_file,'Frontend/public/assets/css/core_ui.css');
+ const dir=await mkdtemp(path.join(tmpdir(),'ui-dark-role-'));
+ try{
+  const bad=structuredClone(contract);bad.cases.find(c=>c.id==='UI275-09').paints[0].darkRole='--missing-dark-role';
+  const registryPath=path.join(dir,'contract.json');await writeFile(registryPath,JSON.stringify(bad));
+  assert.ok(buildDynamicThemeTopology({registryPath}).errors.some(e=>e.includes('UI275-09: unknown CSS role --missing-dark-role')));
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
+
+test('profile surface mapping rejects invented regressions and an incomplete theme scope',async()=>{
+ const dir=await mkdtemp(path.join(tmpdir(),'ui-profile-surface-'));
+ try{
+  const registry=JSON.parse(await readFile(new URL('../scripts/ui-livery-contract.json',import.meta.url),'utf8'));
+  registry.profileSurfaces.test.name='invented surface regression';registry.profileSurfaces.themes=['light'];
+  const registryPath=path.join(dir,'contract.json');await writeFile(registryPath,JSON.stringify(registry));
+  const errors=buildLiveryTopology({registryPath}).errors;
+  assert.ok(errors.includes('liveries: missing named profile surface regression'));
+  assert.ok(errors.includes('liveries: profile surfaces must declare light and dark scope'));
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
+
 
 test('local dynamic roles retain stylesheet provenance and cannot leak between cases',async()=>{
  const result=buildDynamicThemeTopology();assert.deepEqual(result.errors,[]);
@@ -56,7 +100,7 @@ test('typography mapping rejects invalid sources and unknown translated labels',
 
 test('shared-base liveries connect all 22 pages, selectors, roles, producers and tests without inventing observations',()=>{
   const result=buildLiveryTopology();assert.deepEqual(result.errors,[]);
-  assert.deepEqual(result.summary,{pages:22,variants:2,components:11,roles:18});
+  assert.deepEqual(result.summary,{pages:22,variants:2,components:12,roles:19});
   const countersId='ui:livery-component:account-mode-counts',counters=result.edges.filter(edge=>edge.source===countersId);
   assert.deepEqual(result.edges.filter(edge=>edge.target===countersId&&edge.relation==='ui_declares_livery_component').map(edge=>edge.source),['ui:page:area_privata.html','ui:page:lista_aziende.html']);
   assert.ok(counters.some(edge=>edge.relation==='ui_rendered_by'&&edge.target==='ui:source:Frontend/public/assets/js/modules/azienda/lista_aziende.js'));

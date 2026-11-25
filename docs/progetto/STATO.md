@@ -2,6 +2,38 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1297-2026-11-25"></a>
+
+## Candidata 1.2.297 — pubblicazione ordinata, produzione ancora 296
+
+[Ordine](INCARICO_CORRENTE.md#rilascio-1297-2026-11-25) di pubblicare il correttivo grafico locale e la relativa mappatura, con PR/merge/solo Hosting. Confezione e gate finali in preparazione; [esiti e limiti](../evidenze/COLLAUDI.md#rilascio-1297-2026-11-25). Nessun nuovo deploy o ricollaudo fisico acquisito. Le limitazioni locali riportate nelle sezioni seguenti precedono questo ordine e sono superate soltanto nel suo perimetro; blocco e gli altri residui conservati.
+
+<a id="profilo-superfici-scuro-locale-2026-11-25"></a>
+
+## Profili in Scuro — allineamento locale, produzione 296 invariata
+
+[Ordine locale](INCARICO_CORRENTE.md#profilo-superfici-scuro-locale-2026-11-25): coordinati footer/header e superficie linguette in Scuro; riepiloghi Panoramica corretti anche in Chiaro dopo il chiarimento di Diego. [Regola UI](../regole/INTERFACCIA.md#profilo-superfici-scuro-locale-2026-11-25) e [prove/limiti](../evidenze/COLLAUDI.md#profilo-superfici-scuro-locale-2026-11-25). Banco sintetico:168 contesti dei due Profili, entrambe le grafiche/sette palette/tre larghezze/due modi; confronto anche con Nuova Scadenza, materiali e contrasto PASS. Regressioni e documenti verificati, due riesami Codex in lettura con GO locale e mappa code-only aggiornata. Non è una nuova versione pubblicata né un esito fisico; blocco Vault e navigazione invariati.
+
+Safari296: Ricerca con tastiera e chiusura × positive (TEL296-R14); alla ricarica riferito ritorno ad Anagrafica (R15), senza conferma separata del numero di sblocchi. Dettagli nella stessa evidenza telefonica sotto; non ripetere i PASS e non chiudere D05/D17 complessivi.
+
+<a id="cornice-telefono-1296-2026-11-24"></a>
+
+## iPhone 296 — logout e rientro oltre soglia positivi nei giri osservati
+
+[Esito fisico R07/F41](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24): dopo logout il gesto nativo Indietro mostra soltanto Accedi, con refresh riferito; ulteriore Indietro non disponibile e gesto opposto ancora su Accedi. PASS del percorso osservato, senza chiusura globale D08/C1/C2 o attribuzione della causa agli snapshot. I FAIL precedenti restano storici e non si ripetono i PASS Regole/Annulla. Produzione 1.2.296 e blocco invariati; nessun altro Hosting. Le indicazioni di ricollaudo ancora pendente nella ricevuta seguente precedono questa osservazione fisica.
+
+[TEL296-R08/D07](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24) positivo: soglia temporanea1min, rientro dopo altra app con schermo sempre acceso e attesa monitorata120s, Vault bloccata; ripresa Home utilizzabile e12ore ripristinate. Restano distinti causa/tempi del lifecycle e D07 complessivo; nessuna nuova prova di RAM o inattività3min in primo piano.
+
+[TEL296-R09/D14 Privacy](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24): apertura/leggibilità e ritorno a Impostazioni utilizzabili confermati, con richiesta Vault al rientro. Prima del prompt è riferita soltanto una breve struttura in caricamento senza foto/nome: compatibile con la presentazione generica, nessuna causa snapshot o riservatezza globale dedotta. Non ripetere questo giro; Termini resta distinto.
+
+[TEL296-R10/D14 Termini](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24): pagina completa aperta/leggibile, ritorno a Impostazioni utilizzabili dopo nuovo sblocco Vault confermato. PASS del percorso osservato; non ripetere Privacy/Termini né dedurre chiusura D14/C1/C2.
+
+[TEL296-R11/D03 Documenti aziendali](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24) positivo: linguetta selezionata e Allegati leggibili, nessun nuovo sblocco, nessun file aperto/modificato. Non estendere ad anteprima allegati o tutte le sezioni; route cumulative invariate.
+
+[TEL296-R12/D03 Scheda PDF](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24): pannello iniziale leggibile, Prepara disponibile e Scarica/Condividi disattivati, nessun nuovo sblocco né interazione con pulsanti/caselle. Solo apertura, nessuna prova di generazione/export D12. Prossimo ambiente proposto Safari iPhone/D17, senza trasferire i PASS PWA.
+
+[TEL296-R13/D17 Safari](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24): ingresso/versione296 e Home utilizzabile confermati; Anagrafica verticale/orizzontale intera e raggiungibile senza coperture barra, ritorno verticale e nessun dato modificato. PASS circoscritti; altri popup/stati nativi restano distinti. La prima schermata Safari non qualificata non dimostra una causa cache o bypass.
+
 <a id="rilascio-1296-pubblico-2026-11-24"></a>
 
 ## APP 1.2.296 — online e verificata

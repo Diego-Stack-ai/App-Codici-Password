@@ -593,5 +593,63 @@
       "name": "private account counters match Companies across seven palettes and both liveries"
     },
     "scope": "Quattro contatori Privato con la stessa UI Aziende; palette principale in entrambe le grafiche. Identita, valori e destinazioni conservati; badge Home separati. Geometria delle quattro card private misurata a 320/359/360/393/600/601/1280: quadrate fino a 600px, titoli e contatori interi senza sovrapposizione o vecchio spacer, font e icone conservati. Tutti i sette temi in Chiaro/Scuro e nelle due grafiche; desktop invariato."
+  },
+  "profileSurfaces": {
+    "pages": [
+      "profilo_privato.html",
+      "dati_azienda.html"
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "selectors": [
+      "#header-placeholder.base-header",
+      "#footer-placeholder.base-footer",
+      ".profile-summary-card",
+      ".profile-tabs"
+    ],
+    "roles": [
+      "--rev-popup",
+      "--rev-surface",
+      "--rev-border"
+    ],
+    "producers": [
+      "Frontend/public/assets/js/components-v129.js",
+      "Frontend/public/assets/js/modules/privato/profilo-dashboard.js",
+      "Frontend/public/assets/js/modules/azienda/company-profile-ui.js"
+    ],
+    "styles": [
+      "Frontend/public/assets/css/core_fascie.css",
+      "Frontend/public/assets/css/core_ui.css",
+      "Frontend/public/assets/css/profile-layout.css",
+      "Frontend/public/assets/css/ui-tre-livelli-moduli.css"
+    ],
+    "test": {
+      "file": "tests/ui-livery.browser.test.mjs",
+      "name": "profile cards and dark bands share common materials in both liveries and all seven palettes"
+    },
+    "scope": "Overview cards in light/dark share common card material; dark footer mirrors the unchanged header and dark tab container shares card fill. Light bands/tabs and all geometry preserved.",
+    "surfaceScopes": {
+      "#header-placeholder.base-header": [
+        "light",
+        "dark"
+      ],
+      "#footer-placeholder.base-footer": [
+        "dark"
+      ],
+      ".profile-summary-card": [
+        "light",
+        "dark"
+      ],
+      ".profile-tabs": [
+        "dark"
+      ]
+    },
+    "comparison": {
+      "page": "aggiungi_scadenza.html",
+      "selector": "#deadline-rule-selector-section",
+      "styles": "Frontend/public/assets/css/ui-tre-livelli-moduli.css"
+    }
   }
 }

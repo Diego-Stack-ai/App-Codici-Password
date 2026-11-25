@@ -1,5 +1,29 @@
 # Programma
 
+## Ordine 297 — completare il rilascio grafico, poi riprendere il collaudo
+
+Eseguire [nuovo ordine](INCARICO_CORRENTE.md#rilascio-1297-2026-11-25) con confezione/GO/CI/Hosting protetto e verifica pubblica, quindi distinta ricevuta MD/GitHub. [Procedura](../regole/RILASCIO.md#rilascio-1297-2026-11-25), [evidenze](../evidenze/COLLAUDI.md#rilascio-1297-2026-11-25). Dopo la pubblicazione confermare297 sul telefono e osservare soltanto le superfici corrette; proseguire poi i residui cornice senza ripetere i PASS già acquisiti. Nessuna chiusura fisica da un verde automatico.
+
+## Priorità locale 25/11 — uniformare le superfici dei Profili
+
+Consegnare [lotto autorizzato](INCARICO_CORRENTE.md#profilo-superfici-scuro-locale-2026-11-25), [contratto](../regole/INTERFACCIA.md#profilo-superfici-scuro-locale-2026-11-25) e [verifiche](../evidenze/COLLAUDI.md#profilo-superfici-scuro-locale-2026-11-25) locali su due Profili/due grafiche/sette palette; card Panoramica incluse anche in Chiaro. Un futuro ordine di pubblicazione e ricollaudo fisico resterà distinto. Dopo la consegna riprendere soltanto i residui della matrice cornice: Safari Ricerca R14 già positivo, R15 acquisisce la sola destinazione Anagrafica al reload; nessuna ripetizione dei percorsi superati o modifica del blocco da questo lotto.
+
+<a id="cornice-telefono-1296-2026-11-24"></a>
+
+## Dopo il ricollaudo iPhone 296 — scegliere soltanto i residui non superati
+
+Versione confermata e [R07/F41 positivo nel percorso osservato](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24): non ripetere gli swipe del giro né i PASS Regole/Annulla 295. Distinguere questo esito dalle famiglie complete D08/C1/C2 e dagli altri browser/dispositivi; scegliere la prossima prova dalla matrice, con ingresso UI reale e fixture dichiarata quando necessaria. Nessuna nuova pubblicazione o modifica del blocco da questa registrazione. Il piano di conferma/ricollaudo della ricevuta seguente precede l'esito qui acquisito.
+
+Acquisito anche [TEL296-R08/D07](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24): rientro oltre soglia con schermo acceso, Vault bloccata e ripresa riuscita,12ore ripristinate. Non ripetere questa prova; restano distinti lifecycle strumentato e inattività3min in primo piano. Prima del prossimo giro verificare se servano altro browser, fixture o gate esterni.
+
+Acquisito [TEL296-R09/D14 Privacy](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24), con richiesta Vault al rientro e breve struttura generica senza foto/nome riferita. Non ripetere Privacy. Acquisito anche TEL296-R10: Termini completi aperti/leggibili, ritorno a Impostazioni utilizzabili dopo nuovo sblocco Vault confermato. Non ripetere questo giro; scegliere il prossimo residuo soltanto dopo la verifica di ingresso UI, prerequisiti e assenza di effetti reali.
+
+Acquisito [TEL296-R11/D03 Documenti aziendali](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24), senza apertura di file o nuovi sblocchi. Conservare il PASS e verificare nel sorgente eventuali ulteriori sezioni prima di proporle; nessun nuovo esito per Scheda PDF o altro browser da questa osservazione.
+
+Acquisito [TEL296-R12/D03 pannello PDF](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24), senza generazione/export o nuovo sblocco. Prossimo ambiente utile Safari iPhone/D17: acquisire ingresso/versione, poi Profilo/Anagrafica, fondo e orientamento. Non duplicare i giri PWA; i residui con fixture, PC, invii/OFF amministrativo o futuro rilascio D18 restano separati e non chiudono C1/C2.
+
+Acquisito [TEL296-R13/D17 Safari](../evidenze/COLLAUDI.md#cornice-telefono-1296-2026-11-24) su Anagrafica verticale/orizzontale, con versione296 e ritorno verticale confermati. Per questa tornata Safari: tastiera Ricerca, poi ricarica completa del padre D05-A con sblocco e stessa destinazione; acquisire separatamente gli esiti. Non ripetere gli orientamenti già riusciti né chiudere D05/D17/C1/C2 complessivi.
+
 <a id="rilascio-1296-pubblico-2026-11-24"></a>
 
 ## Dopo il rilascio 296 — conferma versione e solo R07/F41

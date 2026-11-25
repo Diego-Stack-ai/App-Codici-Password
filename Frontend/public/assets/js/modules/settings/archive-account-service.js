@@ -1,5 +1,5 @@
 import {confirmFrameAction} from '../core/vault-frame-client.js';
-import { auth, db, functions } from '../../firebase-config.js?v=1.2.296';
+import { auth, db, functions } from '../../firebase-config.js?v=1.2.297';
 import { deleteField, doc, httpsCallable, onAuthStateChanged, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createArchiveMetadata } from './archive-account-model.js';
