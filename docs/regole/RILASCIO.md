@@ -1,5 +1,13 @@
 # Rilascio
 
+<a id="rilascio-1298-2026-11-25"></a>
+
+## Candidata 1.2.298 — gate dei contenuti Safari, solo Hosting
+
+[Ordine diretto](../progetto/INCARICO_CORRENTE.md#rilascio-1298-2026-11-25): snapshot pre-bump dei 369 pubblici verificato prima della confezione298; versione canonica e catalogo guida riesaminato (contenuto16), offline349 e inventario QA aggiornati. Confronto normalizzato di versioni/EOL; i soli pubblici funzionali sono app.html/main-v129.js, core.css cambia un commento. Due nuovi GO indipendenti sullo SHA definitivo e CI PR completa prima del merge con testa attesa; master/validate Hosting devono concordare per sorgente/digest, scope hosting e master invariato prima di production protetto. Nessuna modifica a backend, workflow, protezioni o politica di blocco.
+
+Manifest sui byte Git LF e verifica pubblica integrale dopo il deploy, più GET indipendente dei produttori e dipendenze di gate/ripresa. Ricevuta documentale MD/GitHub senza secondo Hosting; il successivo ricollaudo Safari resta distinto da CI/hash e non chiude automaticamente TEL297-S09, D05/D17/C1/C2. [Confezione e verifiche](../evidenze/COLLAUDI.md#rilascio-1298-2026-11-25).
+
 <a id="rilascio-1297-pubblico-2026-11-25"></a>
 
 ## APP 1.2.297 — procedura Hosting eseguita

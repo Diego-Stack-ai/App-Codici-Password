@@ -8,6 +8,25 @@ import {buildDynamicThemeTopology, buildLiveryTopology, buildUiTopology, injectU
 const contractPath = new URL('../scripts/ui-dynamic-theme-contract.json', import.meta.url);
 const contract = JSON.parse(await readFile(contractPath, 'utf8'));
 
+test('private entry maps every private page to its gate producer, shared materials and named regression',async()=>{
+ const result=buildLiveryTopology();assert.deepEqual(result.errors,[]);
+ const id='ui:livery-component:private-entry',node=result.nodes.find(n=>n.id===id);
+ assert.equal(node.observed,false);assert.deepEqual(node.themes,['light','dark']);
+ const edges=result.edges.filter(e=>e.source===id);
+ assert.equal(result.edges.filter(e=>e.target===id&&e.relation==='ui_declares_livery_component').length,22);
+ for(const file of ['Frontend/public/assets/js/main-v129.js','Frontend/public/home_page.html','Frontend/public/assets/css/core.css','Frontend/public/assets/css/core_ui.css','tests/entry-flow.browser.test.mjs'])assert.ok(edges.some(e=>e.target==='ui:source:'+file),file);
+ for(const role of ['--text-primary','--rev-fill'])assert.deepEqual(edges.find(e=>e.target==='ui:livery-color-role:'+role).graphics,['classic','new']);
+ assert.equal(edges.filter(e=>e.relation==='ui_declares_selector').length,2);
+ const dir=await mkdtemp(path.join(tmpdir(),'ui-private-entry-'));
+ try{
+  const registry=JSON.parse(await readFile(new URL('../scripts/ui-livery-contract.json',import.meta.url),'utf8'));
+  registry.privateEntry.pages.pop();registry.privateEntry.producers=[];registry.privateEntry.test.name='invented private entry regression';
+  const registryPath=path.join(dir,'contract.json');await writeFile(registryPath,JSON.stringify(registry));
+  const errors=buildLiveryTopology({registryPath}).errors;
+  for(const text of ['must cover every private page','missing private entry producer','missing named private entry regression'])assert.ok(errors.some(e=>e.includes(text)),text);
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
+
 test('profile surfaces map both producers, shared roles and the named visual regression',()=>{
  const result=buildLiveryTopology();assert.deepEqual(result.errors,[]);
  const id='ui:livery-component:profile-surfaces',node=result.nodes.find(n=>n.id===id);
@@ -100,7 +119,7 @@ test('typography mapping rejects invalid sources and unknown translated labels',
 
 test('shared-base liveries connect all 22 pages, selectors, roles, producers and tests without inventing observations',()=>{
   const result=buildLiveryTopology();assert.deepEqual(result.errors,[]);
-  assert.deepEqual(result.summary,{pages:22,variants:2,components:12,roles:19});
+  assert.deepEqual(result.summary,{pages:22,variants:2,components:13,roles:19});
   const countersId='ui:livery-component:account-mode-counts',counters=result.edges.filter(edge=>edge.source===countersId);
   assert.deepEqual(result.edges.filter(edge=>edge.target===countersId&&edge.relation==='ui_declares_livery_component').map(edge=>edge.source),['ui:page:area_privata.html','ui:page:lista_aziende.html']);
   assert.ok(counters.some(edge=>edge.relation==='ui_rendered_by'&&edge.target==='ui:source:Frontend/public/assets/js/modules/azienda/lista_aziende.js'));

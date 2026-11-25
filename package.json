@@ -12,7 +12,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.297",
+  "version": "1.2.298",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -160,7 +160,7 @@
     "test:assistant-session-browser": "node --test tests/assistant-ui-lifecycle.browser.test.mjs",
     "test:vault-frame-lab": "node --test experiments/persistent-vault-frame/*.test.mjs",
     "prototype:vault-frame-lab": "node experiments/persistent-vault-frame/serve.mjs",
-    "test:vault-frame-runtime": "node --test tests/vault-frame-permit.test.mjs tests/vault-frame-runtime.test.mjs tests/vault-frame-exit.test.mjs tests/vault-frame-navigation.test.mjs tests/vault-frame-back.browser.test.mjs tests/vault-frame-logout.browser.test.mjs tests/vault-frame-boundaries.test.mjs tests/vault-frame-runtime.browser.test.mjs tests/vault-frame-resume.browser.test.mjs tests/entry-flow.browser.test.mjs tests/vault-frame-modal.browser.test.mjs tests/vault-frame-media.browser.test.mjs tests/vault-frame-headers.browser.test.mjs tests/vault-frame-push.test.mjs tests/vault-frame-push.browser.test.mjs tests/vault-frame-diagnostics.test.mjs tests/vault-frame-diagnostics.browser.test.mjs",
+    "test:vault-frame-runtime": "node --test tests/vault-frame-permit.test.mjs tests/vault-frame-runtime.test.mjs tests/vault-frame-exit.test.mjs tests/vault-frame-navigation.test.mjs tests/vault-frame-back.browser.test.mjs tests/vault-frame-logout.browser.test.mjs tests/vault-frame-boundaries.test.mjs tests/vault-frame-runtime.browser.test.mjs tests/vault-frame-resume.browser.test.mjs tests/entry-flow.browser.test.mjs tests/vault-private-entry-background.browser.test.mjs tests/vault-frame-modal.browser.test.mjs tests/vault-frame-media.browser.test.mjs tests/vault-frame-headers.browser.test.mjs tests/vault-frame-push.test.mjs tests/vault-frame-push.browser.test.mjs tests/vault-frame-diagnostics.test.mjs tests/vault-frame-diagnostics.browser.test.mjs",
     "test:ui-deep": "node --test tests/ui313-deep.browser.test.mjs"
   },
   "repository": {

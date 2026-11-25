@@ -594,6 +594,57 @@
     },
     "scope": "Quattro contatori Privato con la stessa UI Aziende; palette principale in entrambe le grafiche. Identita, valori e destinazioni conservati; badge Home separati. Geometria delle quattro card private misurata a 320/359/360/393/600/601/1280: quadrate fino a 600px, titoli e contatori interi senza sovrapposizione o vecchio spacer, font e icone conservati. Tutti i sette temi in Chiaro/Scuro e nelle due grafiche; desktop invariato."
   },
+  "privateEntry": {
+    "pages": [
+      "home_page.html",
+      "area_privata.html",
+      "account_privati.html",
+      "form_account_privato.html",
+      "dettaglio_account_privato.html",
+      "account_azienda.html",
+      "form_account_azienda.html",
+      "dettaglio_account_azienda.html",
+      "profilo_privato.html",
+      "impostazioni.html",
+      "archivio_account.html",
+      "scadenze.html",
+      "aggiungi_scadenza.html",
+      "dettaglio_scadenza.html",
+      "regole_scadenze.html",
+      "gestione_destinatari.html",
+      "configurazione_automezzi.html",
+      "configurazione_documenti.html",
+      "configurazione_generali.html",
+      "lista_aziende.html",
+      "modifica_azienda.html",
+      "dati_azienda.html"
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "selectors": [
+      "#private-entry-status",
+      "#private-entry-retry"
+    ],
+    "roles": [
+      "--text-primary",
+      "--rev-fill"
+    ],
+    "producers": [
+      "Frontend/public/assets/js/main-v129.js",
+      "Frontend/public/home_page.html"
+    ],
+    "styles": [
+      "Frontend/public/assets/css/core.css",
+      "Frontend/public/assets/css/core_ui.css"
+    ],
+    "test": {
+      "file": "tests/entry-flow.browser.test.mjs",
+      "name": "private blocked status follows seven palettes in both liveries and sizes"
+    },
+    "scope": "Shared missing-key standalone state; no private initializer runs. Existing text-primary and rev-fill/white button materials, no new palette. Tests measure button contrast; title role, focus and bounds checked, no title backdrop contrast claim."
+  },
   "profileSurfaces": {
     "pages": [
       "profilo_privato.html",

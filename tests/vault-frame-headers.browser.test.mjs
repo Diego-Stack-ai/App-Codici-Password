@@ -9,6 +9,7 @@ import {resolve,relative,sep} from 'node:path';
 import {chromium} from 'playwright';
 import {effectiveHostingHeaders,FRAME_CHILD_PATHS,frameHeaderProfile,buildFrameHostingHeaders} from '../scripts/lib/hosting-frame-headers.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
+const firebaseCli=fileURLToPath(import.meta.resolve('firebase-tools/lib/bin/firebase.js'));
 const firebase=JSON.parse(await readFile(new URL('../firebase.json',import.meta.url),'utf8'));
 let child,browser,base,log='';
 const freePort=async()=>{const server=createServer();await new Promise(done=>server.listen(0,'127.0.0.1',done));const port=server.address().port;await new Promise(done=>server.close(done));return port;};
@@ -24,7 +25,7 @@ test.before(async()=>{
  const config={hosting:{...firebase.hosting,public:relative(scratch,resolve(root,'Frontend/public')).split(sep).join('/')},emulators:{hosting:{host:'127.0.0.1',port},hub:{host:'127.0.0.1',port:hub},logging:{host:'127.0.0.1',port:logging},ui:{enabled:false},singleProjectMode:true}};
  const configPath=resolve(scratch,'firebase.json');await writeFile(configPath,JSON.stringify(config));
  const env={...process.env,XDG_CONFIG_HOME:resolve(scratch,'config')};for(const key of ['FIREBASE_TOKEN','GOOGLE_APPLICATION_CREDENTIALS','CLOUDSDK_AUTH_ACCESS_TOKEN'])delete env[key];
- child=spawn(process.execPath,[resolve(root,'node_modules/firebase-tools/lib/bin/firebase.js'),'emulators:start','--only','hosting','--project','demo-vault-frame-headers','--config',configPath],{cwd:scratch,env,stdio:['pipe','pipe','pipe'],windowsHide:true});
+ child=spawn(process.execPath,[firebaseCli,'emulators:start','--only','hosting','--project','demo-vault-frame-headers','--config',configPath],{cwd:scratch,env,stdio:['pipe','pipe','pipe'],windowsHide:true});
  for(const stream of [child.stdout,child.stderr])stream.on('data',bytes=>{log=(log+bytes.toString()).slice(-10000);});
  let started=false;for(let i=0;i<300;i++){if(child.exitCode!==null)throw Error('Hosting exited: '+log);try{const result=await response('/app.html');if(result.status===200){started=true;break;}}catch{}await pause(100);}
  if(!started)throw Error('Hosting start timeout: '+log);
