@@ -1,8 +1,16 @@
 # Programma
 
+<a id="rilascio-1297-pubblico-2026-11-25"></a>
+
+## Dopo la 1.2.297 — conferma sul telefono e superfici, poi residui cornice
+
+[Pubblicazione verificata](../evidenze/COLLAUDI.md#rilascio-1297-pubblico-2026-11-25), PR #362 e Hosting #1294 SUCCESS. Chiudere la sola ricevuta MD/GitHub, senza altro Hosting. Il prossimo passo fisico è confermare 297 sull'iPhone, poi confrontare Panoramica e fasce/linguette dei Profili nel Chiaro/Scuro pertinenti; sette palette e due grafiche sono coperte dal banco, non da nuovi PASS telefonici.
+
+Proseguire quindi la matrice della cornice da un sottocaso non ancora superato, una prova alla volta e con prerequisiti verificati; non ripetere R07–R14 riusciti né trasformare R15 parziale in un PASS completo. Blocco, C1/C2 e residui L23-UI02/L23-PERF01 conservati. Le priorità locali e di rilascio seguenti sono checkpoint antecedenti alla297 online.
+
 ## Ordine 297 — completare il rilascio grafico, poi riprendere il collaudo
 
-Eseguire [nuovo ordine](INCARICO_CORRENTE.md#rilascio-1297-2026-11-25) con confezione/GO/CI/Hosting protetto e verifica pubblica, quindi distinta ricevuta MD/GitHub. [Procedura](../regole/RILASCIO.md#rilascio-1297-2026-11-25), [evidenze](../evidenze/COLLAUDI.md#rilascio-1297-2026-11-25). Dopo la pubblicazione confermare297 sul telefono e osservare soltanto le superfici corrette; proseguire poi i residui cornice senza ripetere i PASS già acquisiti. Nessuna chiusura fisica da un verde automatico.
+Eseguire [nuovo ordine](INCARICO_CORRENTE.md#rilascio-1297-2026-11-25) con confezione/GO/CI/Hosting protetto e verifica pubblica, quindi distinta ricevuta MD/GitHub. [Procedura](../regole/RILASCIO.md#rilascio-1297-2026-11-25), [evidenze](../evidenze/COLLAUDI.md#rilascio-1297-2026-11-25). Dopo la pubblicazione confermare 297 sul telefono e osservare soltanto le superfici corrette; proseguire poi i residui cornice senza ripetere i PASS già acquisiti. Nessuna chiusura fisica da un verde automatico.
 
 ## Priorità locale 25/11 — uniformare le superfici dei Profili
 

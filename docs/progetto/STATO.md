@@ -2,6 +2,14 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1297-pubblico-2026-11-25"></a>
+
+## APP 1.2.297 — online e verificata
+
+Pubblicata il 25/11/2026 solo Hosting dal sorgente `1eabf8e095451cf18cf79168a97415d6b160f471`: [PR #362](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/362), due GO sulla testa finale, CI PR/master/Hosting verdi e deploy #1294 SUCCESS. [Ricevuta completa](../evidenze/COLLAUDI.md#rilascio-1297-pubblico-2026-11-25). Manifest pulito, 369 file/digest concorde; verifica integrale con 41 profili, 20 GET mirate e confronto indipendente di CSS/pagine/produttori PASS.
+
+Distribuiti riepiloghi Panoramica più coerenti con le card comuni in Chiaro/Scuro e fasce/linguette coordinate in Scuro, nei due Profili e nelle due grafiche; registri/test aggiornati per sette palette. Conferma 297 e resa grafica sul telefono ancora da acquisire. I PASS fisici 296 e i limiti del collaudo restano validi nel proprio contesto; blocco e residui distinti conservati. Ricevuta MD/GitHub senza altro Hosting; i checkpoint locali/candidati sottostanti precedono questa pubblicazione.
+
 <a id="rilascio-1297-2026-11-25"></a>
 
 ## Candidata 1.2.297 — pubblicazione ordinata, produzione ancora 296
