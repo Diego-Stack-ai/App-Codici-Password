@@ -1,5 +1,13 @@
 # Vault
 
+<a id="rilascio-1298-pubblico-2026-11-25"></a>
+
+## Gate dei contenuti privati — distribuito nella 1.2.298
+
+1.2.298 pubblicata solo Hosting dal sorgente `7fa22b14e91948196ba29cef3e2e0f1c1c4abe5f`: PR #364, due GO sulla testa finale, CI PR/master/Hosting concordi e deploy #1299 SUCCESS. Verifica pubblica integrale e riesame indipendente PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1298-pubblico-2026-11-25).
+
+Un’acquisizione senza materiale ferma ogni inizializzatore privato, anche dopo annullamento o background. Stato neutro e retry attraversano i gate correnti; nessuna nuova concessione di chiavi o variazione di lease/inattività/revoca. I test sintetici e i byte pubblici non certificano la chiave o il comportamento sul telefono; S09/D05 restano da ricollaudare.
+
 <a id="gate-contenuti-privati-locale-2026-11-25"></a>
 
 ## Materiale Vault obbligatorio prima degli inizializzatori privati

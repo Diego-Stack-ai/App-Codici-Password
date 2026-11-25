@@ -1,6 +1,6 @@
 # Programma
 
-**Priorità corrente: rilasciare la candidata1.2.298.** Completare due GO sulla testa definitiva, CI PR e merge, CI master/validate Hosting concordi, scope hosting/master invariato e production protetto; poi verifica pubblica, ricevuta MD/GitHub senza secondo Hosting. [Ordine](INCARICO_CORRENTE.md#rilascio-1298-2026-11-25), [evidenze](../evidenze/COLLAUDI.md#rilascio-1298-2026-11-25). Dopo pubblicazione confermare298 e ricollaudare Safari dal cellulare una prova alla volta con dati sintetici. Non ripetere i PASS né dichiarare S09/D05/D17/C1/C2 chiusi da test automatici; provider biometrico distinto e blocco conservato.
+**Dopo la 1.2.298: ricevuta e ricollaudo Safari.** 1.2.298 pubblicata solo Hosting dal sorgente `7fa22b14e91948196ba29cef3e2e0f1c1c4abe5f`: PR #364, due GO sulla testa finale, CI PR/master/Hosting concordi e deploy #1299 SUCCESS. Verifica pubblica integrale e riesame indipendente PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1298-pubblico-2026-11-25). Completare la chiusura soltanto documentale senza secondo Hosting, poi chiedere la versione sul cellulare e riprendere una prova alla volta con dati sintetici. Non ripetere i PASS acquisiti né chiudere S09/D05/D17/C1/C2 con CI/hash; blocco e altri residui conservati.
 
 <a id="profilo-superfici-1297-riscontro-2026-11-25"></a>
 
