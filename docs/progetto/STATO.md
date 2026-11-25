@@ -2,7 +2,15 @@
 
 <a id="stato-corrente"></a>
 
-**Candidata 1.2.298 — rilascio Safari Vault autorizzato.** [Ordine](INCARICO_CORRENTE.md#rilascio-1298-2026-11-25), [confezione e gate](../evidenze/COLLAUDI.md#rilascio-1298-2026-11-25). Correttivo locale verificato, snapshot pre-bump e confezione298 eseguiti; commit definitivo/due GO e CI PR/master/Hosting da completare. Produzione297 fino alla verifica pubblica; nessuna nuova attestazione Safari fisica. Politica del blocco, altri PASS e residui conservati. I checkpoint locali seguenti sono antecedenti al nuovo ordine di rilascio.
+<a id="rilascio-1298-pubblico-2026-11-25"></a>
+
+## APP 1.2.298 — online e verificata
+
+1.2.298 pubblicata solo Hosting dal sorgente `7fa22b14e91948196ba29cef3e2e0f1c1c4abe5f`: PR #364, due GO sulla testa finale, CI PR/master/Hosting concordi e deploy #1299 SUCCESS. Verifica pubblica integrale e riesame indipendente PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1298-pubblico-2026-11-25).
+
+Correttivo dei contenuti senza sblocco e ripresa della destinazione distribuiti. Ricevuta esclusivamente documentale senza altro Hosting; conferma versione e ricollaudo fisico Safari ancora da acquisire. TEL297-S09, D05/D17/C1/C2 e gli altri residui non diventano PASS dal verde automatico. I checkpoint candidati seguenti sono storici.
+
+**Checkpoint precedente — candidata 1.2.298.** [Ordine](INCARICO_CORRENTE.md#rilascio-1298-2026-11-25), [confezione e gate](../evidenze/COLLAUDI.md#rilascio-1298-2026-11-25). Correttivo locale verificato, snapshot pre-bump e confezione298 eseguiti; commit definitivo/due GO e CI PR/master/Hosting da completare. Produzione297 fino alla verifica pubblica; nessuna nuova attestazione Safari fisica. Politica del blocco, altri PASS e residui conservati. I checkpoint locali seguenti sono antecedenti al nuovo ordine di rilascio.
 
 <a id="profilo-superfici-1297-riscontro-2026-11-25"></a>
 

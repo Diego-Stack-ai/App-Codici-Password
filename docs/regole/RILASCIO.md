@@ -1,5 +1,13 @@
 # Rilascio
 
+<a id="rilascio-1298-pubblico-2026-11-25"></a>
+
+## APP 1.2.298 — procedura Hosting eseguita
+
+1.2.298 pubblicata solo Hosting dal sorgente `7fa22b14e91948196ba29cef3e2e0f1c1c4abe5f`: PR #364, due GO sulla testa finale, CI PR/master/Hosting concordi e deploy #1299 SUCCESS. Verifica pubblica integrale e riesame indipendente PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1298-pubblico-2026-11-25).
+
+Master fissato e scope hosting controllati prima di production protetto; dispatch e approvazione da browser interno senza alterare gate. Manifest Git/LF pulito, 369 file e digest 35e4e29d7bfc8772819f3eab7ca477852d11123d25d9069fb38c7dca4ccfb5ff. Questa chiusura documentale non cambia il sourceCommit pubblico né avvia altro Hosting. Ricollaudo Safari fisico distinto.
+
 <a id="rilascio-1298-2026-11-25"></a>
 
 ## Candidata 1.2.298 — gate dei contenuti Safari, solo Hosting

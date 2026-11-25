@@ -1,5 +1,13 @@
 # Interfaccia
 
+<a id="rilascio-1298-pubblico-2026-11-25"></a>
+
+## Stato neutro Vault — distribuito nella 1.2.298
+
+1.2.298 pubblicata solo Hosting dal sorgente `7fa22b14e91948196ba29cef3e2e0f1c1c4abe5f`: PR #364, due GO sulla testa finale, CI PR/master/Hosting concordi e deploy #1299 SUCCESS. Verifica pubblica integrale e riesame indipendente PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1298-pubblico-2026-11-25).
+
+Lo stato condiviso mantiene traduzioni e materiali delle due grafiche/sette palette; nessun colore nuovo. privateEntry collega le 22 pagine ai produttori, CSS, selettori, ruoli e test: grafo dichiarato observed:false, matrice di 56 contesti / 112 verifiche paint sullo stato generato in Dati azienda. Contrasto del pulsante misurato, del titolo verificato il ruolo senza dichiararne misurato il fondale sfumato. Il ricollaudo Safari resta separato.
+
 <a id="stato-vault-privato-locale-2026-11-25"></a>
 
 ## Stato neutro dopo uno sblocco non completato

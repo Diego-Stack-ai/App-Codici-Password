@@ -1,5 +1,24 @@
 # Collaudi
 
+<a id="rilascio-1298-pubblico-2026-11-25"></a>
+
+## APP 1.2.298 — Safari Vault pubblicata e verificata
+
+Ordine di Diego eseguito solo Hosting: PR #364 unita dopo due GO indipendenti sulla testa `3d27f34b7f68601154d9cebea930c229b45503f7` e CI PR verde. Sorgente distribuito `7fa22b14e91948196ba29cef3e2e0f1c1c4abe5f`, sourceDirty=false, 369 file, digest `35e4e29d7bfc8772819f3eab7ca477852d11123d25d9069fb38c7dca4ccfb5ff`. Il merge conserva esattamente il contenuto approvato; workflow, backend, ammissione, chiavi, timer e politica del blocco non modificati.
+
+| Validazione | Esecuzione | Test dichiarati | PASS | SKIP | FAIL/annullati |
+|---|---|---:|---:|---:|---:|
+| pr | [#1297](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/45678110791) | 4093 | 4082 | 11 | 0 |
+| master | [#1298](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/45684912847) | 4093 | 4082 | 11 | 0 |
+| hosting | [#1299](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/45685124345) | 4093 | 4082 | 11 | 0 |
+
+Master e Hosting validati in parallelo sullo stesso sorgente/digest; scope hosting e master remoto invariato verificati prima di production protetto. Dispatch e approvazione mediante browser interno su ordine esplicito, senza modificare protezioni. Deploy #1299 SUCCESS; verifica pubblica integrale a 2026-11-25T20:13:23.256Z: 369 hash, 41 profili header e probe del manifest PASS; 31 GET aggiuntive su produttori, gate, broker e dipendenze PASS. Riesame pubblico indipendente anonimo degli asset PASS, nessuna lettura di account o dati Vault.
+
+Distribuiti: arresto del bootstrap di ogni pagina privata senza materiale, stato neutro standalone e Riprendi sulla destinazione originale. Registri pagina/produttore/selettore/ruolo/test e regressioni sono nel sorgente approvato. Matrice dello stato generato: 56 contesti/112 verifiche paint su Dati azienda, 22 pagine dichiarate nella topologia. Non è una certificazione fisica di tutte le pagine/browser. [Preparazione e prove](#rilascio-1298-2026-11-25).
+
+La ricevuta è soltanto documentale: il suo futuro merge non sostituisce il sourceCommit Hosting né richiede un secondo deploy o bump. Da acquisire conferma298 sul telefono e ricollaudo mirato Safari con dati sintetici; TEL297-S09 resta FAIL fisico storico fino al nuovo esito. Non dedurre concessione di chiavi senza prova, chiusura D05/D17/C1/C2 o soluzione del provider biometrico. Conservati gli altri PASS e i residui L23-UI02/L23-PERF01. Le fasi candidate sottostanti sono checkpoint antecedenti alla pubblicazione.
+
+
 <a id="rilascio-1298-2026-11-25"></a>
 
 ## Candidata 1.2.298 — preparazione del rilascio Safari Vault

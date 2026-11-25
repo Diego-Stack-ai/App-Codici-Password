@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="rilascio-1298-pubblico-2026-11-25"></a>
+
+## Ordine 298 eseguito — ricevuta e seguito dal cellulare
+
+1.2.298 pubblicata solo Hosting dal sorgente `7fa22b14e91948196ba29cef3e2e0f1c1c4abe5f`: PR #364, due GO sulla testa finale, CI PR/master/Hosting concordi e deploy #1299 SUCCESS. Verifica pubblica integrale e riesame indipendente PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1298-pubblico-2026-11-25).
+
+Chiudere la sola ricevuta MD/GitHub con controlli, due riesami e PR/merge senza secondo Hosting. Poi confermare la 1.2.298 dal cellulare e guidare il ricollaudo Safari una prova alla volta, con dati sintetici e senza ripetere i PASS acquisiti. Blocco, altri residui e provider biometrico conservano il proprio perimetro. Il mandato di preparazione sotto descrive fasi già eseguite; Codex unico scrittore, supporti in lettura.
+
 <a id="rilascio-1298-2026-11-25"></a>
 
 ## Ordine 298 — pubblicare il correttivo della Vault in Safari
