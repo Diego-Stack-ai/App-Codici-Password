@@ -702,5 +702,51 @@
       "selector": "#deadline-rule-selector-section",
       "styles": "Frontend/public/assets/css/ui-tre-livelli-moduli.css"
     }
+  },
+  "deadlineSelectors": {
+    "pages": [
+      "aggiungi_scadenza.html"
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "selectors": [
+      ".deadline-select-field",
+      "#deadline-rule-select",
+      "#deadline-parameter-select",
+      "#deadline-company-context-select",
+      "#deadline-external-company-name"
+    ],
+    "roles": [
+      "--rev-surface",
+      "--rev-border",
+      "--input-bg-focus",
+      "--accent",
+      "--input-text"
+    ],
+    "producers": [
+      "Frontend/public/aggiungi_scadenza.html",
+      "Frontend/public/assets/js/modules/scadenze/aggiungi_scadenza.js",
+      "Frontend/public/assets/js/modules/scadenze/deadline-company-context-controller.js"
+    ],
+    "styles": [
+      "Frontend/public/assets/css/aggiungi_scadenza.css",
+      "Frontend/public/assets/css/moduli.css",
+      "Frontend/public/assets/css/core.css",
+      "Frontend/public/assets/css/core_ui.css"
+    ],
+    "test": {
+      "file": "tests/ui-livery.browser.test.mjs",
+      "name": "deadline native selectors share themed field materials across seven palettes and both liveries"
+    },
+    "states": [
+      "unselected",
+      "rule-selected",
+      "reference-enabled",
+      "focused",
+      "company-context"
+    ],
+    "scope": "Native select behavior, shared rounded field, themed idle/focus material; generated UI fixture only, native iPhone picker not observed."
   }
 }

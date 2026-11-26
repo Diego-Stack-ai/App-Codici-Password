@@ -119,7 +119,14 @@ test('typography mapping rejects invalid sources and unknown translated labels',
 
 test('shared-base liveries connect all 22 pages, selectors, roles, producers and tests without inventing observations',()=>{
   const result=buildLiveryTopology();assert.deepEqual(result.errors,[]);
-  assert.deepEqual(result.summary,{pages:22,variants:2,components:13,roles:19});
+  assert.deepEqual(result.summary,{pages:22,variants:2,components:14,roles:21});
+  const deadlineComponent='ui:livery-component:deadline-selectors';
+  assert.equal(result.nodes.find(node=>node.id===deadlineComponent)?.observed,false);
+  assert.ok(result.edges.some(edge=>edge.source===deadlineComponent&&edge.relation==='ui_declares_test'&&edge.target==='ui:source:tests/ui-livery.browser.test.mjs'));
+  assert.equal(result.edges.filter(edge=>edge.source===deadlineComponent&&edge.relation==='ui_declares_state').length,5);
+  const selectorRoles=result.edges.filter(edge=>edge.source===deadlineComponent&&edge.relation==='ui_expects_color_role');
+  assert.equal(selectorRoles.length,5);
+  for(const edge of selectorRoles)assert.deepEqual(edge.graphics,['classic','new']);
   const countersId='ui:livery-component:account-mode-counts',counters=result.edges.filter(edge=>edge.source===countersId);
   assert.deepEqual(result.edges.filter(edge=>edge.target===countersId&&edge.relation==='ui_declares_livery_component').map(edge=>edge.source),['ui:page:area_privata.html','ui:page:lista_aziende.html']);
   assert.ok(counters.some(edge=>edge.relation==='ui_rendered_by'&&edge.target==='ui:source:Frontend/public/assets/js/modules/azienda/lista_aziende.js'));

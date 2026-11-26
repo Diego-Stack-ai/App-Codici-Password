@@ -430,6 +430,7 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
     {id:'profile-guide',pages:['profilo_privato.html'],selectors:[registry.footer?.guide],roles:[registry.footer?.inkRole,'--text-primary'],producers:[registry.footer?.producer]},
     {id:'profile-typography',pages:[registry.profileTypography?.page],selectors:registry.profileTypography?.selectors,roles:[],producers:[registry.profileTypography?.producer],styles:registry.profileTypography?.styles,test:registry.profileTypography?.test,translations:registry.profileTypography?.translations},
     {id:'profile-surfaces',...registry.profileSurfaces},
+    {id:'deadline-selectors',...registry.deadlineSelectors},
     {id:'private-entry',...registry.privateEntry},
     ...[
       {id:'contact-export',metadata:registry.contactExport,expectedPages:['profilo_privato.html','dati_azienda.html'],requiredStates:['open','save-unavailable','share-unavailable','saved','shared','save-error','share-error','cancelled','download-started','revoked','pending','preparing','ready','options-open']},
@@ -461,6 +462,15 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
       for(const file of ['Frontend/public/assets/js/main-v129.js','Frontend/public/home_page.html'])if(!component.producers?.includes(file))errors.push('liveries: missing private entry producer '+file);
       for(const file of ['Frontend/public/assets/css/core.css','Frontend/public/assets/css/core_ui.css'])if(!component.styles?.includes(file))errors.push('liveries: missing private entry stylesheet '+file);
       if(!componentTestSource||!component.test?.name||!fs.readFileSync(path.resolve(projectRoot,component.test.file),'utf8').includes(component.test.name))errors.push('liveries: missing named private entry regression');
+    }
+    if(component.id==='deadline-selectors'){
+      const states=['unselected','rule-selected','reference-enabled','focused','company-context'];
+      if(!equalList(component.states,states))errors.push('liveries: incomplete deadline selector states');
+      if(!componentTestSource||!component.test?.name||!fs.readFileSync(path.resolve(projectRoot,component.test.file),'utf8').includes(component.test.name))errors.push('liveries: missing named deadline selector regression');
+      for(const state of states){
+        const target=collector.addNode(uiNode(`${id}:state:${state}`,state,'ui_livery_state',declared));
+        collector.addEdge(uiEdge(id,target,'ui_declares_state',declared));
+      }
     }
     if(component.id==='profile-typography'){
       if(!Array.isArray(component.styles)||!component.styles.length)errors.push('liveries: missing typography stylesheet');
@@ -560,7 +570,7 @@ export function buildLiveryTopology({registryPath = defaultLiveryPath} = {}) {
       if(typeof role!=='string'||!role.startsWith('--')){errors.push(`liveries: ${component.id} has an invalid role`);continue;}
       const definitions=roleSources.filter(entry=>entry.text.includes(role+':'));
       if(!definitions.length)errors.push(`liveries: ${component.id} has unknown color role ${role}`);
-      const graphics=role.startsWith('--companion-')?['new']:component.native||['home-urgency','account-mode-counts','profile-surfaces','private-entry'].includes(component.id)||role==='--card-icon-ink'?['classic','new']:['classic'];
+      const graphics=role.startsWith('--companion-')?['new']:component.native||['home-urgency','account-mode-counts','profile-surfaces','private-entry','deadline-selectors'].includes(component.id)||role==='--card-icon-ink'?['classic','new']:['classic'];
       roles.add(role);const roleId=collector.addNode(uiNode(`ui:livery-color-role:${role}`,role,'ui_color_role',declared));collector.addEdge(uiEdge(id,roleId,'ui_expects_color_role',{...declared,...scope,graphics}));
       for(const definition of definitions)collector.addEdge(uiEdge(roleId,definition.id,'ui_role_defined_in',declared));
     }

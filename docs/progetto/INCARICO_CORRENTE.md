@@ -1,5 +1,19 @@
 # Incarico corrente
 
+<a id="rilascio-1299-2026-11-26"></a>
+
+## Ordine299 — commit e pubblicazione dei due correttivi
+
+Diego ordina «per ora si può fare il commit in modo sicuro e pubblicare?». Autorizzati confezione1.2.299, commit/push su ramo codex, PR, merge e deploy del solo Hosting dopo i gate. Si riprende il lotto locale già preparato e sospeso; non si migra né si sposta il progetto e non si modifica il lavoro separato dell'altro agente. Codex unico scrittore, supporti in lettura sulla testa finale. Base remota65912ad8 verificata invariata; correzioni: select del form tematizzati e cancellazione definitiva Scadenze con sola conferma, già scelta esplicitamente dall'utente informato. Snapshot pre-bump, derivati canonici e confronto normalizzato; due GO e CI PR prima del merge, master/Hosting stesso sorgente/digest, scope hosting/master invariato prima di production protetto, approvazione normale da strumenti disponibili senza cambiare gate. Poi verifica pubblica e ricevuta MD/GitHub senza secondo Hosting. Nessun backend/Rules, modifica generale fresh o politica di blocco. Il limite locale/solaPR precedente è superato per questo rilascio. Rami/worktree ereditati sono conservati: nessuna pulizia o blocco worktree già rifiutata dalla revisione automatica.
+
+<a id="scadenze-campi-eliminazione-2026-11-26"></a>
+
+## Scadenze — selettori e conferma, lotto locale
+
+**Seguito GitHub:** Diego chiede di attivare la nuova procedura e scrivere dalla chat in GitHub. Per il lotto corrente preparare commit/push su ramo codex e PR revisionabile dopo i controlli; non scrivere direttamente in master. L’esecuzione corrente resta locale; la preferenza su Codex Cloud è distinta. Nessun nuovo ordine di merge, bump o Hosting. Il limite locale del mandato preparatorio sotto è superato solo per commit/push e apertura PR.
+
+Ordine di Diego del26/11: rendere Regola/Riferimento coerenti col tema e correggere la riconferma durante Elimina. Dopo verifica che Elimina è definitivo, Diego sceglie esplicitamente «Eliminazione definitiva con sola conferma, senza Master Password». Eccezione limitata ai due ingressi di cancellazione Scadenze, con Vault già sbloccata e corrente; nessun Face ID automatico. Altre operazioni sensibili e policy globale del blocco restano invariate. Codex unico scrittore, supporti in lettura; ramo isolato codex/deadline-select-delete-ux-20261126, base65912ad8. Non modificare/spostare il checkout principale mentre l'altro agente migra i progetti. Solo preparazione locale/test/mapping/MD: nessuna nuova versione, commit/push, PR/merge o pubblicazione da questo ordine. [Evidenze](../evidenze/COLLAUDI.md#scadenze-campi-eliminazione-2026-11-26).
+
 <a id="rilascio-1298-pubblico-2026-11-25"></a>
 
 ## Ordine 298 eseguito — ricevuta e seguito dal cellulare

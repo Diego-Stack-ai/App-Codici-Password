@@ -1,6 +1,6 @@
 # Programma
 
-**Dopo la 1.2.298: ricevuta e ricollaudo Safari.** 1.2.298 pubblicata solo Hosting dal sorgente `7fa22b14e91948196ba29cef3e2e0f1c1c4abe5f`: PR #364, due GO sulla testa finale, CI PR/master/Hosting concordi e deploy #1299 SUCCESS. Verifica pubblica integrale e riesame indipendente PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1298-pubblico-2026-11-25). Completare la chiusura soltanto documentale senza secondo Hosting, poi chiedere la versione sul cellulare e riprendere una prova alla volta con dati sintetici. Non ripetere i PASS acquisiti né chiudere S09/D05/D17/C1/C2 con CI/hash; blocco e altri residui conservati.
+**Priorità corrente: rilasciare1.2.299.** Due correttivi Scadenze verificati localmente e pubblicazione autorizzata: [ordine](INCARICO_CORRENTE.md#rilascio-1299-2026-11-26). Completare due GO sul commit finale, CI PR e merge, master/Hosting concordi, scope/master fissato e production protetto; poi verifica pubblica e ricevuta documentale senza secondo Hosting. Riprendere il ricollaudo guidato con dati sintetici dopo la conferma della versione. Migrazione progetti/Cloud resta lavoro separato; conservare i PASS e i residui SafariS09/D05/D17/C1/C2.
 
 <a id="profilo-superfici-1297-riscontro-2026-11-25"></a>
 

@@ -1,4 +1,4 @@
-import {auth} from '../../firebase-config.js?v=1.2.298';
+import {auth} from '../../firebase-config.js?v=1.2.299';
 import {onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {authSessionFence} from '../../auth-session-fence.js';
 import {executeFrameNativeAction} from '../core/vault-frame-client.js';

@@ -10,6 +10,34 @@ const strip = value => value.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^ex
 const model = strip(await readFile(new URL('deadline-model.js', root), 'utf8'));
 const tick = () => new Promise(setImmediate);
 const deferred = () => { let resolve; return {promise: new Promise(done => { resolve = done; }), resolve}; };
+
+test('deadline detail deletes after explicit confirmation without a fresh Vault prompt',async()=>{
+ const f=fixture();let fresh=0;f.context.confirmFrameAction=async()=>{fresh++;};
+ await f.init();await f.deleteButton().onclick();
+ assert.equal(f.calls.filter(([type])=>type==='confirm').length,1);assert.equal(fresh,0);
+ assert.ok(f.writes.length>0);
+});
+
+test('deadline detail cancels background confirmation and remains usable for a new action',async()=>{
+ const f=fixture();await f.init();const gate=f.holdConfirmation(),pending=f.deleteButton().onclick();await tick();
+ f.context.document.visibilityState='hidden';f.context.document.dispatchEvent(new Event('visibilitychange'));
+ f.context.document.visibilityState='visible';gate.resolve(true);await pending;
+ assert.equal(f.writes.length,0,'old background confirmation cannot delete');
+ f.context.respondConfirm=async()=>true;await f.deleteButton().onclick();assert.ok(f.writes.length>0,'a fresh explicit confirmation works');
+});
+
+test('deadline detail frame deletion never requests fresh, consume or another key',async()=>{
+ const f=fixture();let requests=0,keys=0;
+ f.context.vaultFrameClient={isChild:()=>true,isUnlocked:()=>true,generation:()=>1,suspensionGeneration:()=>0,onClear:()=>()=>{},request(){requests++;throw Error('No authentication expected');}};
+ f.context.authSessionFence={readPermit:async()=>({synthetic:true}),isLocallyCurrent:()=>true,isCurrent:async()=>true};
+ f.context.ensureVaultKeyMaterial=async()=>{keys++;throw Error('No key recovery expected');};
+ await f.init();await f.deleteButton().onclick();assert.ok(f.writes.length>0);assert.equal(requests,0);assert.equal(keys,0);
+});
+
+test('deadline detail never opens confirmation from an already hidden page',async()=>{
+ const f=fixture();await f.init();f.context.document.visibilityState='hidden';await f.deleteButton().onclick();
+ assert.equal(f.calls.filter(([type])=>type==='confirm').length,0);assert.equal(f.writes.length,0);
+});
 class Element {
     constructor(tag = 'div', props = {}, children = []) {
         this.tag = tag; this.children = []; this.value = ''; this.textContent = ''; this.isConnected = true;
@@ -92,7 +120,7 @@ test('late deadline A cannot replace same UID B or install old footer actions', 
 
 test('deadline delete confirmation is owned and cannot target a new user or deadline', async () => {
     const f = fixture(); await f.init(); const gate = f.holdConfirmation(), oldDelete = f.deleteButton().onclick;
-    const pending = oldDelete(); const oldModal = f.nodes['protocol-confirm-modal'];
+    const pending = oldDelete(); await tick(); const oldModal = f.nodes['protocol-confirm-modal'];
     assert.equal(f.calls.find(([type]) => type === 'confirm')[4], 'Annulla');
     f.changeUid('ownerB'); f.window.location.search = '?id=B'; await f.init(); gate.resolve(true); await pending; await oldDelete();
     assert.equal(f.writes.length, 0); assert.equal(f.window.location.href, ''); assert.equal(oldModal.isConnected, false);

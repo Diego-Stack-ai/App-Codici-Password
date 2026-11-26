@@ -1,4 +1,4 @@
-import {auth, db, functions} from '../../firebase-config.js?v=1.2.298';
+import {auth, db, functions} from '../../firebase-config.js?v=1.2.299';
 import {doc, getDocFromServer, httpsCallable, onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {COMPLETE_RECOVERY_ENABLED} from './complete-recovery-config.js';
 import {mountCompleteRecoveryUi, promptCompleteRecoveryMasterPassword} from './complete-recovery-ui.js';

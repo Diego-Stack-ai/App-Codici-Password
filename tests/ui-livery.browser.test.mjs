@@ -12,6 +12,71 @@ const {pageSymbols}=await import('data:text/javascript;base64,'+Buffer.from(symb
 
 const contract=JSON.parse(await readFile(new URL('../scripts/ui-livery-contract.json',import.meta.url),'utf8'));
 const output='.codex-tmp/livery-verification';
+
+test('deadline native selectors share themed field materials across seven palettes and both liveries',{timeout:180000},async()=>{
+ const harness=await createTourHarness({memory:true}),results=[];
+ await mkdir(output,{recursive:true});
+ try{for(const graphics of ['classica','tre-livelli']){
+  const f=await harness.open('aggiungi_scadenza.html',{graphics,query:'',memorySeeds:[{path:'users/synthetic-local-only/settings/generalConfig',value:{deadlineTypes:[{id:'company-rule',name:'Regola azienda sintetica',domain:'company',freq:7,period:14,emailObjects:[{id:'company-reference',objectText:'Riferimento azienda sintetico',freq:7,period:14}]}]}}]});
+  try{
+   await f.page.locator('[data-deadline-domain=vehicles]').click();
+   const rule=f.page.locator('#deadline-rule-select'),parameter=f.page.locator('#deadline-parameter-select');
+   await rule.selectOption({index:1});await parameter.selectOption({index:1});
+   for(const width of [320,393,1280])for(const theme of contract.themes)for(const palette of contract.palettes){
+    await f.page.setViewportSize({width,height:852});
+    await f.page.evaluate(({theme,palette})=>{document.documentElement.classList.toggle('dark',theme==='dark');document.documentElement.dataset.colorTheme=palette;},{theme,palette});
+    const label=`${graphics}/${width}/${theme}/${palette}`;
+    for(const id of ['deadline-rule-select','deadline-parameter-select']){
+     const select=f.page.locator('#'+id);await select.blur();
+     const idle=await select.evaluate(e=>{
+      const field=e.closest('.input-wrapper'),s=getComputedStyle(field||e),probe=document.createElement('span');
+      probe.style.background='var(--rev-surface)';probe.style.borderColor='var(--rev-border)';e.parentElement.append(probe);const p=getComputedStyle(probe);
+      const value={background:s.backgroundColor,border:s.borderColor,expectedBackground:p.backgroundColor,expectedBorder:p.borderColor};probe.remove();return value;
+     });
+     assert.equal(idle.background,idle.expectedBackground,label+': themed field surface');
+     assert.equal(idle.border,idle.expectedBorder,label+': themed field border');
+     await select.focus();
+     const state=await select.evaluate(e=>{
+      const field=e.closest('.input-wrapper'),s=getComputedStyle(field||e),r=(field||e).getBoundingClientRect();
+      const expected=document.createElement('span');expected.style.background='var(--input-bg-focus)';expected.style.borderColor='var(--accent)';e.parentElement.append(expected);const p=getComputedStyle(expected);
+      const value={tag:e.tagName,value:e.value,required:e.required,disabled:e.disabled,radius:parseFloat(s.borderRadius),height:r.height,width:r.width,
+       focus:document.activeElement===e,background:s.backgroundColor,expectedBackground:p.backgroundColor,border:s.borderColor,expectedBorder:p.borderColor,
+       shadow:s.boxShadow,appearance:getComputedStyle(e).appearance,overflow:document.documentElement.scrollWidth>innerWidth,writes:window.__viewTourWrites||0};expected.remove();return value;
+     });
+     assert.equal(state.tag,'SELECT',label);assert.ok(state.value,label);assert.equal(state.required,true);assert.equal(state.disabled,false);
+     assert.ok(state.radius>=12&&state.height>=44,label+': rounded touch field '+id);
+     assert.equal(state.background,state.expectedBackground,label+': themed focus surface');assert.equal(state.border,state.expectedBorder,label+': themed focus border');
+     assert.notEqual(state.shadow,'none',label+': visible focus');assert.notEqual(state.appearance,'none',label+': native picker retained');
+     assert.equal(state.overflow,false,label+': no page overflow');assert.equal(state.writes,0);
+     const paints=await inspectDynamicPaint(f.page,{selector:'#'+id,property:'color',role:'--input-text',minimum:4.5});
+     assert.equal(paints.length,1);assert.ok(paints[0].visible&&paints[0].rolePass&&paints[0].contrast?.pass,label+': field text contrast');
+     results.push({graphics,width,theme,palette,id,idle,paint:paints[0],...state});
+    }
+   }
+   await rule.selectOption('');
+   assert.equal(await parameter.isDisabled(),true,'reference remains disabled until a rule is selected');
+   await rule.selectOption({index:1});await parameter.selectOption({index:1});
+   await f.page.locator('[data-deadline-domain=company]').click();await rule.selectOption({index:1});
+   const company=f.page.locator('#deadline-company-context-select');await company.waitFor();
+   assert.equal(await company.evaluate(e=>e.closest('.deadline-select-field')!==null),true,'company reuses the same field component');
+   await company.selectOption('external');
+   const external=f.page.locator('#deadline-external-company-name');await external.waitFor();
+   assert.equal(await external.evaluate(e=>e.closest('.deadline-select-field')!==null),true,'external company reuses the field component');
+   const long='Regola sintetica con una descrizione molto lunga che deve restare nel selettore';
+   await rule.evaluate((e,text)=>{e.selectedOptions[0].textContent=text;},long);
+   await f.page.setViewportSize({width:320,height:852});
+   assert.equal(await f.page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'long native option never enlarges the page');
+   await f.page.locator('[data-deadline-domain=vehicles]').click();await rule.selectOption({index:1});await parameter.selectOption({index:1});
+   await f.page.setViewportSize({width:393,height:852});
+   for(const theme of ['light','dark']){
+    await f.page.evaluate(theme=>{document.documentElement.classList.toggle('dark',theme==='dark');document.documentElement.dataset.colorTheme='green';},theme);
+    await rule.scrollIntoViewIfNeeded();
+    await f.page.screenshot({path:`${output}/deadline-selectors-${graphics}-${theme}.png`,animations:'disabled'});
+   }
+  }finally{await f.context.close();}
+ }}finally{await harness.close();}
+ await writeFile(`${output}/deadline-selectors.json`,JSON.stringify({status:'PASS',contexts:results},null,2));
+});
 const hsl=([r,g,b])=>{
   r/=255;g/=255;b/=255;
   const max=Math.max(r,g,b),min=Math.min(r,g,b),l=(max+min)/2,d=max-min;

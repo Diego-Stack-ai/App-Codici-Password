@@ -1,5 +1,11 @@
 # Cancellazione
 
+<a id="scadenze-campi-eliminazione-2026-11-26"></a>
+
+## Scadenze — eliminazione definitiva distinta da Archiviate
+
+Per Scadenze, Archiviate indica completed:true e Ripristina ne inverte il flag. Elimina opera invece su users/{uid}/scadenze/{id}, scollega l'eventuale riferimento del Documento e tenta la rimozione degli allegati noti confinati al prefisso della scadenza; il trigger già esistente pulisce le copie ricevute. Non sposta la Scadenza in Archiviate, non introduce un cestino né una retention temporale. L'Archivio Account e le relative politiche non si trasferiscono alle Scadenze. Diego autorizza la sola conferma esplicita per questo Elimina: [decisione](../progetto/DECISIONI.md#scadenze-campi-eliminazione-2026-11-26). La semantica dei dati/backend non viene modificata; nuovo flusso UI solo locale.
+
 ## Chiusura operativa M7 — 09/10/2026
 
 M7 è chiuso per il ciclo corrente mantenendo il purge automatico hard-off. Archivio, ripristino e protezioni distribuite restano attivi nel perimetro già verificato; il motore distruttivo non viene abilitato senza future prove GCS/CAS reali e un nuovo incarico esplicito. La scelta safe-off è l'esito finale, non una certificazione del purge automatico.
