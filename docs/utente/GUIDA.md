@@ -2,9 +2,9 @@
 
 <a id="scadenze-campi-eliminazione-2026-11-26"></a>
 
-## Scadenze — comportamento candidato1.2.299, non ancora online
+## Scadenze — comportamento disponibile nella 1.2.299
 
-Nel lotto locale del26/11, Regola e Riferimento seguono gli stessi materiali e arrotondamenti degli altri campi. Con Vault già sbloccata, Elimina chiede una conferma esplicita: la Scadenza viene eliminata definitivamente e non si trova in Archiviate. Per conservarla e poterla ripristinare usa invece Archivia. Il nuovo Elimina non richiede una seconda Master Password o Face ID; il normale sblocco della Vault resta necessario. Disponibilità effettiva nello [stato corrente](../progetto/STATO.md#stato-corrente).
+Nella 1.2.299 pubblicata il 26/11, Regola e Riferimento seguono gli stessi materiali e arrotondamenti degli altri campi. Con Vault già sbloccata, Elimina chiede una conferma esplicita: la Scadenza viene eliminata definitivamente e non si trova in Archiviate. Per conservarla e poterla ripristinare usa invece Archivia. Il nuovo Elimina non richiede una seconda Master Password o Face ID; il normale sblocco della Vault resta necessario. Disponibilità effettiva nello [stato corrente](../progetto/STATO.md#stato-corrente).
 
 <a id="rilascio-1282-pubblico-guida-2026-11-18"></a>
 

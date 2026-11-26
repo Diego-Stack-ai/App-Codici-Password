@@ -1,6 +1,6 @@
 # Programma
 
-**Priorità corrente: rilasciare1.2.299.** Due correttivi Scadenze verificati localmente e pubblicazione autorizzata: [ordine](INCARICO_CORRENTE.md#rilascio-1299-2026-11-26). Completare due GO sul commit finale, CI PR e merge, master/Hosting concordi, scope/master fissato e production protetto; poi verifica pubblica e ricevuta documentale senza secondo Hosting. Riprendere il ricollaudo guidato con dati sintetici dopo la conferma della versione. Migrazione progetti/Cloud resta lavoro separato; conservare i PASS e i residui SafariS09/D05/D17/C1/C2.
+**Dopo la 1.2.299: ricollaudo mirato.** 1.2.299 pubblicata solo Hosting dal sorgente `560f3f55b2372f1cdb12ce1288ba6468cbfc886a`: PR #367, due GO sulla testa finale, CI PR/master/Hosting concordi e deploy #1305 SUCCESS. Verifica pubblica integrale e riesame indipendente PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1299-pubblico-2026-11-26). Il merge di questa ricevuta è soltanto documentale e non richiede un secondo Hosting; poi confermare la versione sul telefono e proseguire una prova alla volta con dati sintetici. Conservare PASS e residui SafariS09/D05/D17/C1/C2; picker iOS non certificato dal banco. Migrazione/Cloud e PR #366 separate; ref/worktree ereditati conservati.
 
 <a id="profilo-superfici-1297-riscontro-2026-11-25"></a>
 

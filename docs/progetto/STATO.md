@@ -2,16 +2,24 @@
 
 <a id="stato-corrente"></a>
 
+<a id="rilascio-1299-pubblico-2026-11-26"></a>
+
+## APP 1.2.299 — online e verificata
+
+1.2.299 pubblicata solo Hosting dal sorgente `560f3f55b2372f1cdb12ce1288ba6468cbfc886a`: PR #367, due GO sulla testa finale, CI PR/master/Hosting concordi e deploy #1305 SUCCESS. Verifica pubblica integrale e riesame indipendente PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1299-pubblico-2026-11-26).
+
+Materiali comuni dei campi e sola conferma per Elimina Scadenza distribuiti; Vault già sbloccata obbligatoria e blocco invariato. Conferma 299 e ricollaudo fisico mirato ancora da acquisire. Ricevuta esclusivamente documentale senza altro Hosting; nessuna chiusura SafariS09/D05/D17/C1/C2 dal verde automatico. Gli stati candidati e locali sottostanti sono checkpoint storici.
+
 <a id="rilascio-1299-2026-11-26"></a>
 
-## Candidata1.2.299 — rilascio autorizzato
+## Checkpoint precedente — candidata1.2.299
 
 Ordine di pubblicazione dei due correttivi Scadenze, su ramo isolato codex/deadline-select-delete-ux-20261126 e base65912ad8. Preparati370pubblici, snapshot pre-bump e versione canonica299; nuovo modulo guard passivo, form/campi e mapping/test correlati. Produzione resta1.2.298 fino alla verifica pubblica. Due GO finali, CI PR/master/Hosting e approvazione protetta da completare. Nessuna prova fisica nuova né chiusura SafariS09/C1/C2. [Ordine](INCARICO_CORRENTE.md#rilascio-1299-2026-11-26).
 
 
 <a id="scadenze-campi-eliminazione-2026-11-26"></a>
 
-## Scadenze — correttivo locale in verifica
+## Checkpoint precedente — correttivo Scadenze locale
 
 Produzione resta1.2.298. Due segnalazioni del26/11: selettori Regola/Riferimento bianchi squadrati e Master aggiuntiva durante Elimina. Preparati materiali comuni e guard passivo/conferma esplicita secondo la scelta informata di Diego, su ramo isolato da65912ad8. Test mirati/grafici/sicurezza/cornice e documenti superati; chiusura dei riesami e PR GitHub in preparazione su ordine successivo. Nessun deploy o nuova prova fisica. Ricollaudo Safari S09 e altri residui restano separati. [Mandato](INCARICO_CORRENTE.md#scadenze-campi-eliminazione-2026-11-26).
 

@@ -4,7 +4,7 @@
 
 ## Scadenze — eliminazione definitiva distinta da Archiviate
 
-Per Scadenze, Archiviate indica completed:true e Ripristina ne inverte il flag. Elimina opera invece su users/{uid}/scadenze/{id}, scollega l'eventuale riferimento del Documento e tenta la rimozione degli allegati noti confinati al prefisso della scadenza; il trigger già esistente pulisce le copie ricevute. Non sposta la Scadenza in Archiviate, non introduce un cestino né una retention temporale. L'Archivio Account e le relative politiche non si trasferiscono alle Scadenze. Diego autorizza la sola conferma esplicita per questo Elimina: [decisione](../progetto/DECISIONI.md#scadenze-campi-eliminazione-2026-11-26). La semantica dei dati/backend non viene modificata; nuovo flusso UI solo locale.
+Per Scadenze, Archiviate indica completed:true e Ripristina ne inverte il flag. Elimina opera invece su users/{uid}/scadenze/{id}, scollega l'eventuale riferimento del Documento e tenta la rimozione degli allegati noti confinati al prefisso della scadenza; il trigger già esistente pulisce le copie ricevute. Non sposta la Scadenza in Archiviate, non introduce un cestino né una retention temporale. L'Archivio Account e le relative politiche non si trasferiscono alle Scadenze. Diego autorizza la sola conferma esplicita per questo Elimina: [decisione](../progetto/DECISIONI.md#scadenze-campi-eliminazione-2026-11-26). La semantica dei dati/backend non viene modificata; nuovo flusso UI distribuito nella 1.2.299. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1299-pubblico-2026-11-26).
 
 ## Chiusura operativa M7 — 09/10/2026
 

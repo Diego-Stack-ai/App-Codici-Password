@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="rilascio-1299-pubblico-2026-11-26"></a>
+
+## Ordine 299 eseguito — ricevuta e seguito dal cellulare
+
+1.2.299 pubblicata solo Hosting dal sorgente `560f3f55b2372f1cdb12ce1288ba6468cbfc886a`: PR #367, due GO sulla testa finale, CI PR/master/Hosting concordi e deploy #1305 SUCCESS. Verifica pubblica integrale e riesame indipendente PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1299-pubblico-2026-11-26).
+
+Questa ricevuta aggiorna MD/GitHub mediante controlli, due riesami e PR/merge documentale senza secondo Hosting. Dopo il suo merge, confermare 299 sul telefono e riprendere una prova alla volta dai residui, con dati sintetici e senza ripetere i PASS. Codex unico scrittore, supporti in lettura; migrazione/Cloud e PR #366 separate. Conservare tutti i ref/worktree ereditati, senza pulizia o lock. Il mandato preparatorio seguente è storico; blocco e altri residui conservano il proprio perimetro.
+
 <a id="rilascio-1299-2026-11-26"></a>
 
 ## Ordine299 — commit e pubblicazione dei due correttivi

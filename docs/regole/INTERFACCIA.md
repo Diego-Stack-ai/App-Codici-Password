@@ -1,10 +1,18 @@
 # Interfaccia
 
+<a id="rilascio-1299-pubblico-2026-11-26"></a>
+
+## Campi Scadenze — materiali comuni distribuiti
+
+1.2.299 pubblicata solo Hosting dal sorgente `560f3f55b2372f1cdb12ce1288ba6468cbfc886a`: PR #367, due GO sulla testa finale, CI PR/master/Hosting concordi e deploy #1305 SUCCESS. Verifica pubblica integrale e riesame indipendente PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1299-pubblico-2026-11-26).
+
+Regola/Riferimento e campi correlati Azienda riusano superfici, bordi, focus e arrotondamenti comuni; picker nativo preservato. Il contratto deadlineSelectors collega pagine, produttori, selettori, stati, ruoli e test nelle due grafiche. Matrice sintetica 84 contesti/168 misure dei selettori, non prova fisica iOS; rami Azienda/esterno coperti una volta per grafica. Topologia observed:false, senza nuova palette.
+
 <a id="scadenze-campi-eliminazione-2026-11-26"></a>
 
 ## Scadenze — campi nativi tematizzati e conferma definitiva
 
-Regola, Riferimento e i campi del contesto Azienda riusano input-wrapper con materiale rev-surface/rev-border e focus comune, senza colori fissi o sostituzione del picker nativo. Label, required/disabled, ID, selezione e pulsante + conservati. Livree/sette palette e stati sono collegati in ui-livery-contract.json al produttore HTML/JS, CSS e test nominato; topologia dichiarata observed:false. Elimina nell'elenco e nel dettaglio mostra la stessa conferma localizzata definitiva e non una seconda richiesta Vault: [eccezione autorizzata](VAULT.md#scadenze-campi-eliminazione-2026-11-26). Archivia/Ripristina restano distinti. Solo locale, [evidenze](../evidenze/COLLAUDI.md#scadenze-campi-eliminazione-2026-11-26).
+Regola, Riferimento e i campi del contesto Azienda riusano input-wrapper con materiale rev-surface/rev-border e focus comune, senza colori fissi o sostituzione del picker nativo. Label, required/disabled, ID, selezione e pulsante + conservati. Livree/sette palette e stati sono collegati in ui-livery-contract.json al produttore HTML/JS, CSS e test nominato; topologia dichiarata observed:false. Elimina nell'elenco e nel dettaglio mostra la stessa conferma localizzata definitiva e non una seconda richiesta Vault: [eccezione autorizzata](VAULT.md#scadenze-campi-eliminazione-2026-11-26). Archivia/Ripristina restano distinti. Distribuito nella 1.2.299; [ricevuta](../evidenze/COLLAUDI.md#rilascio-1299-pubblico-2026-11-26) e [evidenze](../evidenze/COLLAUDI.md#scadenze-campi-eliminazione-2026-11-26).
 
 <a id="rilascio-1298-pubblico-2026-11-25"></a>
 

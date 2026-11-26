@@ -1,5 +1,13 @@
 # Rilascio
 
+<a id="rilascio-1299-pubblico-2026-11-26"></a>
+
+## APP 1.2.299 — Hosting eseguito
+
+1.2.299 pubblicata solo Hosting dal sorgente `560f3f55b2372f1cdb12ce1288ba6468cbfc886a`: PR #367, due GO sulla testa finale, CI PR/master/Hosting concordi e deploy #1305 SUCCESS. Verifica pubblica integrale e riesame indipendente PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1299-pubblico-2026-11-26).
+
+Manifest Git/LF pulito, 370 file e digest 1d890a42919f51fb142b74516142e2b60defb9b5ee207ef78fce84507ed0c2ba. Scope hosting e master remoto fissato verificati prima di production protetto. Ricevuta MD/GitHub senza altro Hosting; nessuna pulizia di ref/worktree ereditati, lavoro parallelo #366 conservato. Prove fisiche ancora distinte.
+
 <a id="rilascio-1299-2026-11-26"></a>
 
 ## Candidata1.2.299 — procedura Hosting
