@@ -1,4 +1,7 @@
-import {confirmFrameAction} from '../core/vault-frame-client.js';
+import {vaultFrameClient} from '../core/vault-frame-client.js';
+import {authSessionFence} from '../../auth-session-fence.js';
+import {isVaultUnlocked} from '../core/security-manager.js';
+import {createDeadlineDeleteGuard} from './deadline-delete-guard.mjs';
 import {navigateDocument} from '../../frame-navigation.js';
 /**
  * SCADENZE MODULE (V4.1)
@@ -6,7 +9,7 @@ import {navigateDocument} from '../../frame-navigation.js';
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.298';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.299';
 import { getFooterReady } from '../../footer-state.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
@@ -15,7 +18,7 @@ import { updateDoc, deleteDoc, doc, onAuthStateChanged, runTransaction, serverTi
 import {deleteObject, ref} from "/assets/js/vendor/firebase-runtime.js";
 import { deadlineDate, deadlineBucket, deadlinePresentation } from './deadline-model.js';
 import { t } from '../../translations.js';
-import { initComponents } from '../../components-v129.js?v=1.2.298';
+import { initComponents } from '../../components-v129.js?v=1.2.299';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import {listDeadlines, listReceivedDeadlines} from '../data/vault-repository.js';
@@ -32,6 +35,8 @@ let stopDeadlineList = null;
 let deadlineSwipeList = null;
 let listEpoch = 0;
 let listMount = 0;
+let deletePending = null;
+let deleteAbort = null;
 const listActive = () => currentUser?.uid && auth.currentUser?.uid === currentUser.uid
     && (!window.privateAuthGate || window.privateAuthGate.isReady());
 
@@ -154,7 +159,8 @@ export async function initScadenze(user) {
 // --- INTERNAL HELPER FUNCTIONS ---
 
 function startDeadlineListLifecycle(uid) {
-    let stopped = false, timer, unsubscribe;
+    let stopped = false, timer, unsubscribe, offClear;
+    deleteAbort = new AbortController();
     const stop = () => {
         if (stopped) return;
         stopped = true;
@@ -162,6 +168,9 @@ function startDeadlineListLifecycle(uid) {
         ++listEpoch;
         clearTimeout(timer);
         unsubscribe?.();
+        offClear?.();
+        deleteAbort?.abort();
+        deletePending = null;
         deadlineSwipeList?.destroy();
         deadlineSwipeList = null;
         currentUser = null;
@@ -170,8 +179,13 @@ function startDeadlineListLifecycle(uid) {
         document.removeEventListener('visibilitychange', visible);
         window.removeEventListener('pagehide', stop);
         window.removeEventListener('private-auth-blocked', stop);
+        window.removeEventListener('vault-session-locked', stop);
     };
     const visible = () => {
+        if (document.visibilityState === 'hidden') {
+            deleteAbort?.abort();
+            deleteAbort = new AbortController();
+        }
         if (!listActive()) { stop(); return; }
         if (document.visibilityState === 'visible') {
             renderFilteredScadenze();
@@ -192,6 +206,8 @@ function startDeadlineListLifecycle(uid) {
     document.addEventListener('visibilitychange', visible);
     window.addEventListener('pagehide', stop);
     window.addEventListener('private-auth-blocked', stop);
+    window.addEventListener('vault-session-locked', stop);
+    offClear = vaultFrameClient.onClear(stop);
     unsubscribe = onAuthStateChanged(auth, next => { if (next?.uid !== uid) stop(); });
     if (stopped) unsubscribe?.();
     schedule();
@@ -460,47 +476,55 @@ async function setDeadlineArchived(id, archived) {
 }
 
 async function requestDeleteDeadline(id) {
+    if (document.visibilityState === 'hidden' || !listActive() || deletePending) return;
     const deadline = allScadenze.find(item => item.id === id && !item.received);
     if (!deadline) {
         renderFilteredScadenze();
         return;
     }
-    const confirmed = await showConfirmModal(
-        t('confirm_delete_title'),
-        t('deadline_delete_confirm'),
-        t('deadline_delete_action'),
-        t('cancel') || 'Annulla'
-    );
-    if (!listActive()) return;
-    if (!confirmed) {
-        renderFilteredScadenze();
-        return;
-    }
-    await deleteScadenza(id);
+    const ownerUid = currentUser.uid, mount = listMount, action = {};
+    const signal = deleteAbort.signal;
+    deletePending = action;
+    const active = () => deletePending === action && !signal.aborted && mount === listMount
+        && listActive() && currentUser?.uid === ownerUid;
+    try {
+        const current = await createDeadlineDeleteGuard({uid: ownerUid, isActive: active, auth,
+            transport: vaultFrameClient, fence: authSessionFence, isUnlocked: isVaultUnlocked});
+        const confirmed = await showConfirmModal(
+            t('confirm_delete_title'),
+            t('deadline_delete_confirm'),
+            t('deadline_delete_action'),
+            t('cancel') || 'Annulla', {signal}
+        );
+        if (!active()) return;
+        if (!confirmed) {
+            renderFilteredScadenze();
+            return;
+        }
+        await deleteScadenza(id, deadline, ownerUid, active, current);
+    } catch { if (active()) showToast('Eliminazione della scadenza non riuscita.', 'error'); }
+    finally { if (deletePending === action) deletePending = null; }
 }
 
-async function deleteScadenza(id) {
-    if (!currentUser) return;
+async function deleteScadenza(id, deadline, ownerUid, active, current) {
+    if (!active()) return;
     try {
-        // Qui potresti mettere un confirm, ma lo swipe � un'azione veloce.
-        // Se preferisci conferma, scommenta:
-
-        const ownerUid = currentUser.uid;
-        const deadline = allScadenze.find(item => item.id === id);
         const attachmentPaths = (Array.isArray(deadline?.attachments) ? deadline.attachments : [])
             .map(item => String(item?.storagePath || ''))
             .filter(path => path.startsWith(`users/${ownerUid}/scadenze/${id}/`));
-        await confirmFrameAction('permanent-delete', {ownerUid, id});
-        if (!listActive() || currentUser?.uid !== ownerUid) return;
+        await current();
+        if (!active()) return;
         const docRef = doc(db, "users", ownerUid, "scadenze", id);
         if (deadline?.sourceRef?.type !== 'profileDocument') {
+            current.assertLocal();
             await deleteDoc(docRef);
         } else {
             const profileRef = doc(db, 'users', ownerUid);
             const documentId = deadline.sourceRef.id;
             await runTransaction(db, async transaction => {
-                if (!listActive()) throw new Error('DEADLINE_LIST_INACTIVE');
+                if (!active()) throw new Error('DEADLINE_LIST_INACTIVE');
                 const snapshot = await transaction.get(profileRef);
+                current.assertLocal();
                 let changed = false;
                 let documents = [];
                 if (snapshot.exists()) {
@@ -515,18 +539,22 @@ async function deleteScadenza(id) {
                         return item;
                     });
                 }
+                current.assertLocal();
                 transaction.delete(docRef);
                 if (changed) transaction.update(profileRef, {documenti: documents});
             });
         }
-        const results = await Promise.allSettled(attachmentPaths.map(path => deleteObject(ref(storage, path))));
+        current.assertLocal();
+        const results = await Promise.allSettled(attachmentPaths.map(path => {current.assertLocal(); return deleteObject(ref(storage, path));}));
         const failure = results.find(result => result.status === 'rejected' && result.reason?.code !== 'storage/object-not-found');
         if (failure) throw failure.reason;
 
+        if (!active()) return;
         allScadenze = allScadenze.filter(s => s.id !== id);
         showToast("Scadenza eliminata", "error");
         setTimeout(() => renderFilteredScadenze(), 400);
     } catch (error) {
+        if (!active()) return;
         console.error(error);
         showToast("Errore eliminazione", "error");
     }

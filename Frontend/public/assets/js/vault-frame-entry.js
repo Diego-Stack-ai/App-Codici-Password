@@ -34,6 +34,6 @@ if (leaveLoggedOutShell()) {
   if (guardLoaded) {
     // The loaded gate owns any exit already requested: do not navigate twice.
     if (hasTopLevelLogout()) window.privateAuthGate.reject();
-    else await import('./main-v129.js?v=1.2.298');
+    else await import('./main-v129.js?v=1.2.299');
   }
 }

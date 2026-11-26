@@ -1,11 +1,13 @@
-import {confirmFrameAction} from '../core/vault-frame-client.js';
+import {vaultFrameClient} from '../core/vault-frame-client.js';
+import {authSessionFence} from '../../auth-session-fence.js';
+import {createDeadlineDeleteGuard} from './deadline-delete-guard.mjs';
 /**
  * DETTAGLIO SCADENZA MODULE (V4.1)
  * Gestisce la visualizzazione del dettaglio di una scadenza.
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.298';
+import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.299';
 import { deleteDoc, doc, serverTimestamp, updateDoc, runTransaction, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteObject, getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
@@ -13,7 +15,7 @@ import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { ensureVaultKeyMaterial } from '../core/security-manager.js';
+import { ensureVaultKeyMaterial, isVaultUnlocked } from '../core/security-manager.js';
 import { decryptAttachmentBytes, openDecryptedAttachment, openExternalUrl } from '../shared/attachment-security.js';
 import {
     getDeadline,
@@ -30,14 +32,15 @@ import {
 
 let mountedDeadline = null;
 
-async function deleteScadenza(userId, scadenzaId, sourceRef, attachments, active) {
-    await confirmFrameAction('permanent-delete', {userId, scadenzaId});
+async function deleteScadenza(userId, scadenzaId, sourceRef, attachments, active, current) {
+    await current();
     if (!active()) return;
     const deadlineRef = doc(db, 'users', userId, 'scadenze', scadenzaId);
     const attachmentPaths = (Array.isArray(attachments) ? attachments : [])
         .map(item => String(item?.storagePath || ''))
         .filter(path => path.startsWith(`users/${userId}/scadenze/${scadenzaId}/`));
     if (sourceRef?.type !== 'profileDocument') {
+        current.assertLocal();
         await deleteDoc(deadlineRef);
     } else {
         const profileRef = doc(db, 'users', userId);
@@ -46,6 +49,7 @@ async function deleteScadenza(userId, scadenzaId, sourceRef, attachments, active
             if (!active()) return;
             const snapshot = await transaction.get(profileRef);
             if (!active()) return;
+            current.assertLocal();
             let changed = false, documents = [];
             if (snapshot.exists()) {
                 documents = snapshot.data()?.documenti ?? [];
@@ -58,11 +62,13 @@ async function deleteScadenza(userId, scadenzaId, sourceRef, attachments, active
                     return item;
                 });
             }
+            current.assertLocal();
             transaction.delete(deadlineRef);
             if (changed) transaction.update(profileRef, {documenti: documents});
         });
     }
-    const results = await Promise.allSettled(attachmentPaths.map(path => deleteObject(ref(storage, path))));
+    current.assertLocal();
+    const results = await Promise.allSettled(attachmentPaths.map(path => {current.assertLocal(); return deleteObject(ref(storage, path));}));
     const failure = results.find(result => result.status === 'rejected' && result.reason?.code !== 'storage/object-not-found');
     if (failure) throw failure.reason;
 }
@@ -132,6 +138,7 @@ export async function initDettaglioScadenza(user, options = {}) {
     options.signal?.addEventListener('abort', mount.destroy, {once: true});
     globalThis.addEventListener?.('vault-session-locked', mount.destroy, {once: true});
     globalThis.addEventListener?.('pagehide', mount.destroy, {once: true});
+    mount.own(vaultFrameClient.onClear(mount.destroy));
     unsubscribe = onAuthStateChanged(auth, current => { if (current?.uid !== scope.uid) mount.destroy(); });
     if (!mount.active()) { unsubscribe(); return mount; }
     const existingFooter = getFooterReady();
@@ -227,23 +234,35 @@ function setupFooterActions(mount) {
 }
 
 async function handleDelete(mount) {
-    if (!mount.active() || mount.scope.receivedId || !mount.record || mount.actionPending) return;
+    if (document.visibilityState === 'hidden' || !mount.active() || mount.scope.receivedId || !mount.record || mount.actionPending) return;
     if (mount.record.sourceRef?.type === 'profileDocument' && globalThis.navigator?.onLine === false) {
         showToast('Per eliminare una scadenza collegata a un documento del Profilo serve la connessione.', 'warning');
         return;
     }
     mount.actionPending = true;
     const {uid, id} = mount.scope;
+    const actionAbort = new AbortController();
+    const abort = () => actionAbort.abort();
+    const visibility = () => { if (document.visibilityState === 'hidden') abort(); };
+    const active = () => mount.active() && !actionAbort.signal.aborted;
+    mount.signal.signal.addEventListener('abort', abort, {once: true});
+    document.addEventListener('visibilitychange', visibility);
     const sourceRef = mount.record.sourceRef ? {...mount.record.sourceRef} : null;
     const attachments = Array.isArray(mount.record.attachments) ? [...mount.record.attachments] : [];
     try {
-        const ok = await mount.confirmAction('ELIMINA SCADENZA', 'Sei sicuro?', 'Elimina', t('cancel') || 'Annulla');
-        if (mount.active() && ok) {
-            await deleteScadenza(uid, id, sourceRef, attachments, () => mount.active());
-            if (mount.active()) window.location.href = 'scadenze.html';
+        const current = await createDeadlineDeleteGuard({uid, isActive: active, auth,
+            transport: vaultFrameClient, fence: authSessionFence, isUnlocked: isVaultUnlocked});
+        const ok = await mount.confirmAction(t('confirm_delete_title'), t('deadline_delete_confirm'), t('deadline_delete_action'), t('cancel') || 'Annulla', {signal: actionAbort.signal});
+        if (active() && ok) {
+            await deleteScadenza(uid, id, sourceRef, attachments, active, current);
+            if (active()) window.location.href = 'scadenze.html';
         }
-    } catch (error) { if (mount.active()) showToast('Eliminazione della scadenza non riuscita.', 'error'); }
-    finally { mount.actionPending = false; }
+    } catch (error) { if (active()) showToast('Eliminazione della scadenza non riuscita.', 'error'); }
+    finally {
+        document.removeEventListener('visibilitychange', visibility);
+        mount.signal.signal.removeEventListener('abort', abort);
+        mount.actionPending = false;
+    }
 }
 
 async function handleReceivedDeadlineAction(action, nextDueDate, mount, active) {

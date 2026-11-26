@@ -136,7 +136,13 @@ function currentDeadlineDeletion(clientDb, clientStorage) {
   const source = readFileSync(resolve(dependencyRoot, 'Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js'), 'utf8'), start = source.indexOf('async function deleteScadenza('), end = source.indexOf('\nfunction clearDeadline(', start);
   assert.ok(start >= 0 && end > start);
   const deps = {confirmFrameAction: async () => undefined, db: clientDb, storage: clientStorage, doc: firestoreSdk.doc, deleteDoc: firestoreSdk.deleteDoc, runTransaction: firestoreSdk.runTransaction, deleteObject, ref: storageRef};
-  return new Function(...Object.keys(deps), `${source.slice(start, end)}\nreturn deleteScadenza;`)(...Object.values(deps));
+  const operation = new Function(...Object.keys(deps), `${source.slice(start, end)}\nreturn deleteScadenza;`)(...Object.values(deps));
+  return (ownerUid, id, sourceRef, attachments, active) => {
+    // The fixture verifies restored data, not Vault cryptography or grants.
+    const assertCurrent = () => { assert.equal(ownerUid, uid); assert.equal(active(), true); };
+    return operation(ownerUid, id, sourceRef, attachments, active,
+      Object.assign(async () => assertCurrent(), {assertLocal: assertCurrent}));
+  };
 }
 test('actual Phase A random payload publishes fresh URLs, canonical profile metadata, authority and released fence', async () => {
   const f = await fixture({large: true}), service = runtime(), handler = callable(service), operationId = 'synthetic-operation';

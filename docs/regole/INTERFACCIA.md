@@ -1,5 +1,11 @@
 # Interfaccia
 
+<a id="scadenze-campi-eliminazione-2026-11-26"></a>
+
+## Scadenze — campi nativi tematizzati e conferma definitiva
+
+Regola, Riferimento e i campi del contesto Azienda riusano input-wrapper con materiale rev-surface/rev-border e focus comune, senza colori fissi o sostituzione del picker nativo. Label, required/disabled, ID, selezione e pulsante + conservati. Livree/sette palette e stati sono collegati in ui-livery-contract.json al produttore HTML/JS, CSS e test nominato; topologia dichiarata observed:false. Elimina nell'elenco e nel dettaglio mostra la stessa conferma localizzata definitiva e non una seconda richiesta Vault: [eccezione autorizzata](VAULT.md#scadenze-campi-eliminazione-2026-11-26). Archivia/Ripristina restano distinti. Solo locale, [evidenze](../evidenze/COLLAUDI.md#scadenze-campi-eliminazione-2026-11-26).
+
 <a id="rilascio-1298-pubblico-2026-11-25"></a>
 
 ## Stato neutro Vault — distribuito nella 1.2.298

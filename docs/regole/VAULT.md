@@ -1,5 +1,11 @@
 # Vault
 
+<a id="scadenze-campi-eliminazione-2026-11-26"></a>
+
+## Eccezione Scadenze — conferma esplicita, senza fresh
+
+Scelta esplicita di Diego del26/11 in [DECISIONI](../progetto/DECISIONI.md#scadenze-campi-eliminazione-2026-11-26): per la sola eliminazione definitiva delle Scadenze basta la conferma esplicita localizzata, con Vault già sbloccata e stessa sessione. Non richiedere fresh/consume, nuova Master o Face ID. Il guard passivo prima del dialogo e delle scritture lega UID, montaggio, generazione/sospensione e fence corrente; revoca, blocco, background, pagehide e cambio identità invalidano la conferma. Doppio comando deduplicato; annullamento non scrive. Una richiesta già inviata resta non annullabile. La regola fresh generale sotto rimane valida per tutte le altre operazioni sensibili. Correttivo locale non distribuito; [prove e limiti](../evidenze/COLLAUDI.md#scadenze-campi-eliminazione-2026-11-26).
+
 <a id="rilascio-1298-pubblico-2026-11-25"></a>
 
 ## Gate dei contenuti privati — distribuito nella 1.2.298
@@ -262,7 +268,7 @@ Nascondere/sospendere le funzioni sensibili, fermare camera/microfono e annullar
 
 Raccordo implementativo locale del18/11: il callback owner può abilitare la nuova PRF per lo scopo backup-export; gli altri scopi conservano il percorso corrente. La modalità forzata continua a escludere materiale cached e restore. Il segnale dell'operazione arriva alla richiesta WebAuthn con userVerification required; controlli dopo PRF/derivazione/decifratura e nelle varianti legacy scartano risposte tardive dopo aborto, blocco o mutazione UID/generazione. Un ripiego Master richiede la verifica completa, mai il solo possesso della sessione aperta. Questo attua l'alternativa già ammessa sotto e non amplia la policy, i permessi o le altre reautenticazioni. [Prove locali e limite fisico](../evidenze/COLLAUDI.md#contatti-conferma-biometrica-collaudi-2026-11-18).
 
-Vault aperta non equivale a conferma recente per backup/export, archivio portabile, cambio Master Password, condivisione/variazione permessi o cancellazione definitiva. Richiedere nuova biometria PRF reale oppure Master Password e un'autorizzazione monouso legata a UID/generazione/documento/scopo/bersaglio/scadenza; un normale handoff della cornice non soddisfa il requisito. Restano distinti tutti gli altri vincoli di reautenticazione Firebase/2FA già esistenti. Annullamento, errore o timeout non autorizzano l'operazione; nessuna richiesta o grant è riusata dopo blocco.
+Vault aperta non equivale a conferma recente per backup/export, archivio portabile, cambio Master Password, condivisione/variazione permessi o cancellazione definitiva salvo la [specifica eccezione Scadenze](#scadenze-campi-eliminazione-2026-11-26). Richiedere nuova biometria PRF reale oppure Master Password e un'autorizzazione monouso legata a UID/generazione/documento/scopo/bersaglio/scadenza; un normale handoff della cornice non soddisfa il requisito. Restano distinti tutti gli altri vincoli di reautenticazione Firebase/2FA già esistenti. Annullamento, errore o timeout non autorizzano l'operazione; nessuna richiesta o grant è riusata dopo blocco.
 
 Fermare l'attivazione per perdita di controllo su copie RAM o grant, mancata revoca/cambio UID, ammissione da storage o URL, file navigabile nel frame, header effettivi contraddittori, regressione Auth/App Check/PRF/media/download/back o impossibilità di ripiego senza loop. Nessuna prova mancante diventa PASS usando Master Password al posto di una PRF prima funzionante. I problemi di sicurezza aperti diversi da questo perimetro e la nuova grafica restano incarichi separati.
 

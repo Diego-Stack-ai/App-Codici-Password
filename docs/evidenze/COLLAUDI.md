@@ -1,5 +1,33 @@
 # Collaudi
 
+<a id="rilascio-1299-2026-11-26"></a>
+
+## Preparazione299 — confezione dei correttivi Scadenze
+
+Primo gate PR #367 / run #1302: FAIL prima del manifest, con sei errori della stessa compilazione esbuild nel banco dinamico. Il producer Scadenze ora importa vaultFrameClient/isVaultUnlocked; gli adapter sintetici non li esportavano. Corretto soltanto scripts/lib/dynamic-theme-harness.mjs con stato Vault chiuso e registrazione onClear senza effetti, mantenendo tutti i denied e il runtime pubblico invariato. Ripetizione locale della matrice dinamica8/8 PASS. Adeguati inoltre i tre adapter di full-recovery, residui allegati e CAS della scadenza al callback current obbligatorio; assert di proprietario/attività e mancata scrittura a sessione mutata conservati. Il tentativo emulatore locale non parte per dipendenza firebase-tools assente dal worktree (nessun esito SDK acquisito); esecuzione vincolante nella CI pulita. Nuova testa/due GO/CI restano obbligatori; nessun merge/deploy da questo esito.
+
+Il nuovo ordine di Diego supera la sospensione e abilita il rilascio solo Hosting: [mandato](../progetto/INCARICO_CORRENTE.md#rilascio-1299-2026-11-26). Base65912ad8 invariata sul remoto. Prima del bump archiviati e verificati370pubblici con relativi hash; asset/query/app-env/Home/SW e package/lock portati a299, catalogo guida contenuto16/riesaminato299, offline350 e QA31pagine/126istruzioni/111target/167campi. Confronto normalizzato tra snapshot e confezione senza delta inattesi; rispetto alla base i soli pubblici funzionali sono aggiungi_scadenza.html, aggiungi_scadenza.css, scadenze.js, dettaglio_scadenza.js, nuovo deadline-delete-guard.mjs e lista derivata offline-assets.js. I confronti pre-bump sono conservati separatamente dalle evidenze298. Il primo aggiornamento del catalogo si è fermato per decodificaWindows; corretto usando UTF-8 prima dei controlli finali. Mirati aggiornati48/48PASS, inclusi comandi trattenuti mentre il documento era già nascosto. Versione coerente308riferimenti, guida12/12, offline16/16, hardening87/87 e documenti12/12PASS. Restano due riesami sul commit finale e CI PR/master/Hosting; produzione298 e prove fisiche distinte.
+
+<a id="scadenze-campi-eliminazione-2026-11-26"></a>
+
+## Scadenze — selettori e conferma definitiva, locale26/11
+
+Segnalazioni di Diego: Regola/Riferimento bianchi e squadrati nel form e seconda richiesta Master durante Elimina. Sorgente iniziale65912ad8/produzione1.2.298; ramo locale codex/deadline-select-delete-ux-20261126, unico scrittore Codex e supporti in lettura. La copia principale locale è ancora arretrata: non aggiornata/spostata, lavoro isolato mentre prosegue la migrazione degli altri progetti.
+
+Verificata la semantica: Elimina usa deleteDoc/transazione e rimuove gli allegati noti confinati al prefisso; il trigger esistente pulisce copie ricevute, senza cestino. Archiviate è completed:true, ripristinabile senza una retention Scadenze implementata. L'utente viene informato e sceglie «Eliminazione definitiva con sola conferma, senza Master Password»: [decisione](../progetto/DECISIONI.md#scadenze-campi-eliminazione-2026-11-26). Nessuna cancellazione o prova su dati reali.
+
+Causa grafica: select.input diretto senza input-wrapper; radius/bordo azzerati da moduli.css e override card-bg neutro. Wrapper condiviso applicato anche al contesto Azienda/testo esterno correlato, materiale rev-surface/rev-border e focus comune, senza appearance:none o cambio della selezione nativa. Nuovo componente deadline-selectors nel registro livree/topologia: HTML/produttori JS, stylesheet, cinque ruoli/stati e test nominato, entrambe le grafiche con observed:false.
+
+Causa Master: i due consumer chiamavano permanent-delete/fresh; l'owner consentiva PRF fresh solo per backup-export. Ora la sola cancellazione Scadenze riusa passivamente la Vault aperta, con identità/montaggio/generazioni/fence correnti prima della conferma e delle scritture. Annullamento, blocco, background, cambio UID, sospensione e rimontaggio impediscono la continuazione; doppio comando deduplicato. Resta non annullabile una scrittura già inviata. Fresh generale, altre cancellazioni, backend/Rules e policy del blocco non modificati.
+
+Controprove: prima del delta entrambi i nuovi test consumer rilevano1fresh anziché0; il browser reale del form fallisce per radius0 sul primo contesto. Dopo il delta i controlli passano. Il riesame trova una lacuna del lotto locale nel background del dettaglio standalone: nuova prova fallisce con1scrittura, poi controller della singola azione/signal e nuovo tentativo la portano aPASS. Non è una prova di incidente sui dati o sul telefono.
+
+Verifiche sintetiche locali:48/48 test guard/lista/dettaglio/residui allegati PASS; sicurezza60/60, navigazione216/216, cornice runtime460/460 nella fase locale prima dei due ulteriori casi pagina già nascosta (comprende i propri sottocasi, non sommare come copertura fisica). Matrice del form con vero inizializzatore e SDK/dati sintetici:84contesti per Regola/Riferimento (7palette ×2modi ×2grafiche ×3larghezze320/393/1280),168misure con normale/focus/ruolo/contrasto testo almeno4.5, geometria, selezione/disabled, nessun overflow o scrittura; Azienda/testo esterno provati puntualmente per ciascuna grafica. Snapshot Verde Chiaro/Scuro nelle due grafiche. Non certifica il picker nativo iOS fisico.
+
+Ulteriori controlli: topologia24/24, HTML31senza inline/ID duplicati, riferimenti346file, sintassi255moduli, budget31pagine e4test diagnostica PASS. Stylelint su tutto il glob canonico PASS tramite CLI della dipendenza già installata risolta dal worktree, senza installazioni. Controllo documentale12/12 PASS; riesami in chiusura. Log/probe locali in .codex-tmp/deadline26-* e livery-verification/deadline-selectors.json, esclusi da Git.
+
+Stato preparatorio: locale, nessun bump o deploy; resta pubblica1.2.298. Il successivo ordine sulla nuova procedura abilita commit/push su ramo e PR revisionabile, senza merge o Hosting. Ricollaudo SafariS09 e prove fisiche precedenti non diventano PASS. La successiva domanda sulla nuova procedura GitHub/Cloud richiede distinguere pubblicazione su ramo dall'ambiente di esecuzione.
+
 <a id="rilascio-1298-pubblico-2026-11-25"></a>
 
 ## APP 1.2.298 — Safari Vault pubblicata e verificata

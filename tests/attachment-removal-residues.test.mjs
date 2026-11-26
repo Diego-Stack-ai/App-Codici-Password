@@ -131,7 +131,8 @@ function deleteFixture({linked = false} = {}) {
     return {context, calls, writes, states,
         run: () => context.deleteScadenza('owner', 'deadline-1',
             linked ? {type: 'profileDocument', id: 'doc-1'} : null,
-            states.get('users/owner/scadenze/deadline-1')?.attachments || [], () => true)};
+            states.get('users/owner/scadenze/deadline-1')?.attachments || [], () => true,
+            Object.assign(async () => {}, {assertLocal() {}}))};
 }
 
 test('T-26: cancellare una Scadenza elimina il documento e i byte allegati', async () => {

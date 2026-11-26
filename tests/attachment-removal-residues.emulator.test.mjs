@@ -45,7 +45,10 @@ async function deleteScadenza(userId, scadenzaId, sourceRef, active) {
     const attachments = snapshot.exists() ? snapshot.data().attachments || [] : [];
     const factory = new Function('confirmFrameAction', 'db', 'storage', 'deleteDoc', 'deleteObject', 'doc', 'ref', 'runTransaction', 'console',
         `${sliceFunction(detailSource, 'deleteScadenza')}\nreturn deleteScadenza;`);
-    return factory(async () => undefined, db, storage, deleteDoc, deleteObject, doc, ref, runTransaction, {warn() {}})(userId, scadenzaId, sourceRef, attachments, active);
+    // This emulator fixture models only its fixed owner and active operation.
+    const assertCurrent = () => { assert.equal(userId, OWNER); assert.equal(active(), true); };
+    const current = Object.assign(async () => assertCurrent(), {assertLocal: assertCurrent});
+    return factory(async () => undefined, db, storage, deleteDoc, deleteObject, doc, ref, runTransaction, {warn() {}})(userId, scadenzaId, sourceRef, attachments, active, current);
 }
 
 // `saveDeadline` reale: compone `attachments: [...existingAttachments, ...nuovi]`

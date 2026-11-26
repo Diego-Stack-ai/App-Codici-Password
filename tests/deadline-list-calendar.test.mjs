@@ -136,3 +136,44 @@ test('left swipe permanently deletes active and archived owned deadlines after c
   assert.deepEqual(f.writes.at(-1),['delete','users/A/scadenze/same']);
  }
 });
+
+test('deadline deletion uses one explicit confirmation without a fresh Vault prompt',async()=>{
+ const f=fixture();f.data.received=[];let fresh=0;
+ f.context.confirmFrameAction=async()=>{fresh++;};
+ await f.start();await f.swipes.at(-1).options.onSwipeLeft({dataset:{id:'same',archived:'false'}});
+ assert.equal(f.confirmations.length,1);assert.equal(fresh,0);
+ assert.deepEqual(f.writes.at(-1),['delete','users/A/scadenze/same']);
+});
+
+test('deadline list cancels stale or repeated deletion without losing the current owner',async()=>{
+ for(const outcome of ['cancel','lock','background','pagehide','remount','uid']){
+  const f=fixture();f.data.received=[];await f.start();
+  let release;f.context.showConfirmModal=(...args)=>{f.confirmations.push(args);return new Promise(resolve=>{release=resolve;});};
+  const remove=f.swipes.at(-1).options.onSwipeLeft;
+  const pending=remove({dataset:{id:'same'}});for(let i=0;i<12;i++)await Promise.resolve();
+  await remove({dataset:{id:'same'}});assert.equal(f.confirmations.length,1,'deduplicated');
+  const signal=f.confirmations[0][4].signal;
+  if(outcome==='lock')await f.fire('vault-session-locked');
+  if(outcome==='background'){f.context.document.visibilityState='hidden';await f.fire('visibilitychange');}
+  if(outcome==='pagehide')await f.fire('pagehide');
+  if(outcome==='remount')await f.start();
+  if(outcome==='uid')f.auth.currentUser={uid:'B'};
+  release(outcome!=='cancel');await pending;
+  assert.equal(f.writes.length,0,outcome);
+  if(['lock','background','pagehide','remount'].includes(outcome))assert.equal(signal.aborted,true,outcome);
+ }
+});
+
+test('deadline list uses the passive guard in a frame and never requests fresh or consume',async()=>{
+ const f=fixture();f.data.received=[];let requests=0;
+ f.context.vaultFrameClient={isChild:()=>true,isUnlocked:()=>true,generation:()=>1,suspensionGeneration:()=>0,onClear:()=>()=>{},request(){requests++;throw Error('No authentication expected');}};
+ f.context.authSessionFence={readPermit:async()=>({synthetic:true}),isLocallyCurrent:()=>true,isCurrent:async()=>true};
+ await f.start();await f.swipes.at(-1).options.onSwipeLeft({dataset:{id:'same'}});
+ assert.equal(f.confirmations.length,1);assert.equal(requests,0);assert.deepEqual(f.writes.at(-1),['delete','users/A/scadenze/same']);
+});
+
+test('deadline list never opens confirmation from an already hidden page',async()=>{
+ const f=fixture();f.data.received=[];await f.start();f.context.document.visibilityState='hidden';
+ await f.swipes.at(-1).options.onSwipeLeft({dataset:{id:'same'}});
+ assert.equal(f.confirmations.length,0);assert.equal(f.writes.length,0);
+});

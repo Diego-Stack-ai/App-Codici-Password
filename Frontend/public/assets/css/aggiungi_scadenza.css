@@ -194,12 +194,18 @@
     margin-top: 1rem;
 }
 
-.deadline-rule-grid select,
-#deadline-parameter-select {
+.deadline-select-field {
+    min-width: 0;
+    background: var(--rev-surface);
+    border-color: var(--rev-border);
+}
+
+.deadline-select-field > .input {
     width: 100%;
+    min-width: 0;
     min-height: var(--touch-target-min, 44px);
-    color: var(--text-primary);
-    background: var(--card-bg);
+    color: var(--input-text);
+    background: transparent;
 }
 
 .deadline-rule-select-row {

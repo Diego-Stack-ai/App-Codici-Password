@@ -1,5 +1,11 @@
 # Decisioni
 
+<a id="scadenze-campi-eliminazione-2026-11-26"></a>
+
+## Scadenze — scelta informata su eliminazione e Master
+
+Diego viene informato che Archivia imposta completed e consente Ripristina, mentre Elimina cancella definitivamente documento/allegati noti e il backend ripulisce copie ricevute; non esiste un passaggio da Elimina a un cestino Scadenze. Alla scelta fra archiviazione recuperabile e cancellazione definitiva con sola conferma risponde «Eliminazione definitiva con sola conferma, senza Master Password». La conferma deve dichiarare la definitività; nessuno sblocco automatico biometrico al posto della decisione esplicita. La Vault iniziale resta obbligatoria e corrente. Eccezione solo Scadenze, non estesa ad Account, backup, export, condivisioni o cambio Master. [Contratto](../regole/VAULT.md#scadenze-campi-eliminazione-2026-11-26).
+
 <a id="rilascio-1297-pubblico-2026-11-25"></a>
 
 ## Rilascio 297 eseguito — superfici e mappa, prova fisica distinta

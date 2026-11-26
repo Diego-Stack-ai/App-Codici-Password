@@ -1,5 +1,11 @@
 # Rilascio
 
+<a id="rilascio-1299-2026-11-26"></a>
+
+## Candidata1.2.299 — procedura Hosting
+
+[Ordine diretto](../progetto/INCARICO_CORRENTE.md#rilascio-1299-2026-11-26) autorizza nuova versione, commit/push/PR/merge e solo Hosting dei due correttivi Scadenze. Snapshot370pubblici prima del bump, guida contenuto16 riesaminata299, offline350 e inventario QA aggiornati; confronto versioni/EOL e soli delta funzionali approvati. Due GO sullo SHA definitivo e CI PR verde prima del merge con testa attesa. Master e validate Hosting devono concordare per sorgente/digest, scope hosting e master remoto invariato prima di production protetto. Approvazione normale da strumenti disponibili senza cambiare protezioni. Manifest dai byte Git LF, verifica pubblica integrale più GET indipendenti dei produttori e del guard; ricevuta documentale senza altro Hosting. Nessuna operazione backend/Rules/dati reali o cambiamento generale fresh/blocco. Le ref e i worktree estranei sono preservati esplicitamente; preflight globale non dichiarato verde se segnala il patrimonio ereditato. Nessun nuovo tentativo di pulizia già rifiutata.
+
 <a id="rilascio-1298-pubblico-2026-11-25"></a>
 
 ## APP 1.2.298 — procedura Hosting eseguita

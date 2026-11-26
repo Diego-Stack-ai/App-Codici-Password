@@ -1,7 +1,7 @@
 import {beginFrameLogout,handleFrameBack,navigateDocument} from './frame-navigation.js';
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.298';
+import { auth } from './firebase-config.js?v=1.2.299';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
