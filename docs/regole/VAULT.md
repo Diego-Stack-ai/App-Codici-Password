@@ -1,10 +1,18 @@
 # Vault
 
+<a id="rilascio-1299-pubblico-2026-11-26"></a>
+
+## Scadenze — eccezione alla riconferma distribuita
+
+1.2.299 pubblicata solo Hosting dal sorgente `560f3f55b2372f1cdb12ce1288ba6468cbfc886a`: PR #367, due GO sulla testa finale, CI PR/master/Hosting concordi e deploy #1305 SUCCESS. Verifica pubblica integrale e riesame indipendente PASS. [Ricevuta](../evidenze/COLLAUDI.md#rilascio-1299-pubblico-2026-11-26).
+
+Solo Elimina Scadenza da elenco/dettaglio usa conferma esplicita senza nuova Master/Face ID, con Vault già sbloccata e corrente. Guard passivo, controlli fence/generazione e annullamento lifecycle conservano il rifiuto dopo blocco/background/cambio utente; nessun recupero chiavi o fresh implicito. Altre azioni sensibili e politica del blocco invariate. Non dedurre chiusure SafariS09/D05/D17/C1/C2 dai test automatici.
+
 <a id="scadenze-campi-eliminazione-2026-11-26"></a>
 
 ## Eccezione Scadenze — conferma esplicita, senza fresh
 
-Scelta esplicita di Diego del26/11 in [DECISIONI](../progetto/DECISIONI.md#scadenze-campi-eliminazione-2026-11-26): per la sola eliminazione definitiva delle Scadenze basta la conferma esplicita localizzata, con Vault già sbloccata e stessa sessione. Non richiedere fresh/consume, nuova Master o Face ID. Il guard passivo prima del dialogo e delle scritture lega UID, montaggio, generazione/sospensione e fence corrente; revoca, blocco, background, pagehide e cambio identità invalidano la conferma. Doppio comando deduplicato; annullamento non scrive. Una richiesta già inviata resta non annullabile. La regola fresh generale sotto rimane valida per tutte le altre operazioni sensibili. Correttivo locale non distribuito; [prove e limiti](../evidenze/COLLAUDI.md#scadenze-campi-eliminazione-2026-11-26).
+Scelta esplicita di Diego del26/11 in [DECISIONI](../progetto/DECISIONI.md#scadenze-campi-eliminazione-2026-11-26): per la sola eliminazione definitiva delle Scadenze basta la conferma esplicita localizzata, con Vault già sbloccata e stessa sessione. Non richiedere fresh/consume, nuova Master o Face ID. Il guard passivo prima del dialogo e delle scritture lega UID, montaggio, generazione/sospensione e fence corrente; revoca, blocco, background, pagehide e cambio identità invalidano la conferma. Doppio comando deduplicato; annullamento non scrive. Una richiesta già inviata resta non annullabile. La regola fresh generale sotto rimane valida per tutte le altre operazioni sensibili. Correttivo distribuito nella 1.2.299, [ricevuta](../evidenze/COLLAUDI.md#rilascio-1299-pubblico-2026-11-26); [prove e limiti](../evidenze/COLLAUDI.md#scadenze-campi-eliminazione-2026-11-26).
 
 <a id="rilascio-1298-pubblico-2026-11-25"></a>
 

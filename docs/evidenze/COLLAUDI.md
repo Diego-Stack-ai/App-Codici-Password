@@ -1,5 +1,30 @@
 # Collaudi
 
+<a id="rilascio-1299-pubblico-2026-11-26"></a>
+
+## APP 1.2.299 — campi e conferma Scadenze pubblicati
+
+Ordine di Diego eseguito solo Hosting: PR #367 unita dopo due GO indipendenti sulla testa `2dd160913f2d9e943e8b22ad052297cf3a844ea6` e CI PR verde. Sorgente distribuito `560f3f55b2372f1cdb12ce1288ba6468cbfc886a`, sourceDirty=false, 370 file, digest `1d890a42919f51fb142b74516142e2b60defb9b5ee207ef78fce84507ed0c2ba`. Il merge conserva esattamente il contenuto approvato. Nessun cambio a backend, Rules, workflow, protezioni, ammissione, chiavi, inattività o politica del blocco; l'eccezione alla riconferma fresh riguarda soltanto Elimina Scadenza, scelta esplicitamente dall'utente informato.
+
+| Validazione | Esecuzione | Test dichiarati | PASS | SKIP | FAIL/annullati |
+|---|---|---:|---:|---:|---:|
+| pr | [#1303](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/45782951772) | 4103 | 4092 | 11 | 0 |
+| master | [#1304](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/45787712060) | 4103 | 4092 | 11 | 0 |
+| hosting | [#1305](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/45787942679) | 4103 | 4092 | 11 | 0 |
+
+Master e Hosting validati sullo stesso sorgente/digest; scope hosting e master remoto invariato verificati prima di production protetto. Dispatch (github-ui-user) e approvazione (internal-browser) su ordine esplicito, senza modificare i gate. Deploy #1305 SUCCESS; verifica pubblica integrale a 2026-11-26T09:42:39.272Z: 370 hash, 41 profili header e probe del manifest PASS; 38 GET aggiuntive su form, CSS, elenco/dettaglio, guard, produttori Vault e dipendenze PASS. Riesame pubblico indipendente anonimo degli asset PASS, nessuna lettura di account o dati Vault.
+
+Distribuiti: Regola/Riferimento e campi correlati del contesto Azienda condividono i materiali/arrotondamenti comuni, conservando il picker nativo. Elimina da elenco e dettaglio richiede una sola conferma esplicita di cancellazione definitiva, senza seconda Master o Face ID. Rimane obbligatoria una Vault già sbloccata e corrente; guard passivo e annullamento invalidano l'azione dopo blocco, background o cambio identità/montaggio/generazione. Archivia/Ripristina restano distinti. Una scrittura già inviata non è revocabile dal client. Nessuna cancellazione reale eseguita nel collaudo.
+
+Il banco sintetico ha coperto 84 contesti (sette palette × Chiaro/Scuro × due grafiche × tre larghezze) e 168 misure dei due selettori; i rami contesto Azienda/esterno sono stati verificati una volta per grafica, non in tutti gli 84 contesti. Componenti, stati, ruoli e test sono collegati nel contratto UI e nella topologia, con observed:false. Non è una certificazione del picker iOS fisico. [Preparazione e limiti](#rilascio-1299-2026-11-26).
+
+Dopo il primo gate fallito sono passati anche localmente gli 8 test della matrice dinamica e gli 80 casi delle tre suite emulatore interessate (residui allegati 3, full-recovery 36, vault-mutation 41). Riutilizzate dipendenze già installate con copie ignorate dei launcher che correggono soltanto i percorsi root/CLI del worktree; sorgenti/test/Rules del ramo, progetti sintetici e vincoli loopback conservati. Il primo tentativo canonico privo della dipendenza locale resta documentato sotto; la CI pulita sulla testa finale verifica i comandi canonici.
+
+Il preflight del ramo runtime revisionato 2dd16091 è pulito e pubblicato; il preflight globale conserva exit1 soltanto per ref/worktree ereditati, esplicitamente preservati fuori dal lotto. Nessuna pulizia o blocco worktree già rifiutata viene ritentata. La PR #366 su AGENTS.md e la migrazione progetti/Cloud restano separate.
+
+Questa ricevuta è soltanto documentale: il suo merge non sostituisce il sourceCommit Hosting né richiede un secondo deploy o bump. Da acquisire conferma 299 sul telefono, poi soltanto ricollaudi mirati ancora aperti, con dati sintetici. TEL297-S09 resta FAIL fisico storico fino al nuovo esito; D05/D17/C1/C2, provider biometrico e gli altri residui restano distinti. Conservati tutti i PASS precedenti nel loro contesto. Le fasi candidate sottostanti sono checkpoint antecedenti alla pubblicazione.
+
+
 <a id="rilascio-1299-2026-11-26"></a>
 
 ## Preparazione299 — confezione dei correttivi Scadenze
