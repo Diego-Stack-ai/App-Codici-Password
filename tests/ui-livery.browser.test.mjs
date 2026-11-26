@@ -50,7 +50,7 @@ test('deadline native selectors share themed field materials across seven palett
      assert.equal(state.overflow,false,label+': no page overflow');assert.equal(state.writes,0);
      const paints=await inspectDynamicPaint(f.page,{selector:'#'+id,property:'color',role:'--input-text',minimum:4.5});
      assert.equal(paints.length,1);assert.ok(paints[0].visible&&paints[0].rolePass&&paints[0].contrast?.pass,label+': field text contrast');
-     results.push({graphics,width,theme,palette,id,idle,paint:paints[0],...state});
+     results.push({graphics,viewportWidth:width,theme,palette,id,idle,paint:paints[0],...state});
     }
    }
    await rule.selectOption('');
