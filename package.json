@@ -178,5 +178,10 @@
   "dependencies": {
     "@pdf-lib/fontkit": "1.1.1",
     "pdf-lib": "1.17.1"
+  },
+  "overrides": {
+    "@firebase/firestore": {
+      "@grpc/grpc-js": "1.14.7"
+    }
   }
 }
