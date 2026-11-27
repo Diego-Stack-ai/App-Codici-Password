@@ -427,3 +427,32 @@ test('servizio: blocco, uscita pagina, abort, logout e cambio utente durante una
         assert.equal(env.observers.size, 0, `${trigger}: osservatore rimosso`);
     }
 });
+
+test('servizio: invalidazione nell\'ultimo onProgress, nessuna lettura successiva', async () => {
+    for (const stage of ['records', 'profile-attachments']) {
+        const env = serviceContext();
+        const calls = {profileAttachments: 0, identity: 0};
+        Object.assign(env.context, {
+            collectOwnerBackup: async () => ({records: [
+                {kind: 'record', scope: 'contact', id: 'c1', data: {a: 'chiaro'}},
+                {kind: 'record', scope: 'contact', id: 'c2', data: {a: 'chiaro'}}
+            ], storagePaths: []}),
+            listBackupProfileDocumentAttachments: async () => {
+                calls.profileAttachments++;
+                return [{id: 'p1', nota: 'chiaro'}];
+            },
+            getBackupSharingPublicIdentity: async () => { calls.identity++; return null; },
+            getBackupSharingPrivateIdentity: async () => { calls.identity++; return null; }
+        });
+        const api = await loadService(env.context);
+        const lastProcessed = stage === 'records' ? 2 : 3;
+        const onProgress = ({processed}) => {
+            if (processed === lastProcessed) env.target.dispatchEvent(new Event('vault-session-locked'));
+        };
+        await assert.rejects(() => api.runVaultFormatCensus(UID, PRIMARY, {authRef: env.authRef,
+            observeAuth: env.context.onAuthStateChanged, target: env.target, onProgress}), /CENSUS_CANCELLED/, stage);
+        assert.equal(calls.profileAttachments, stage === 'records' ? 0 : 1, `${stage}: letture allegati profilo`);
+        assert.equal(calls.identity, 0, `${stage}: nessuna lettura dell'identità`);
+        assert.equal(env.observers.size, 0);
+    }
+});

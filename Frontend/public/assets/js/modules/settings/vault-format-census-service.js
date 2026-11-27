@@ -78,13 +78,14 @@ export async function runVaultFormatCensus(uid, vaultKeyMaterial, options = {}) 
         session.check();
         for (const record of records) await runner.addRecord(record);
         const listProfileAttachments = options.listProfileDocumentAttachments || listBackupProfileDocumentAttachments;
+        session.check(); // l'ultimo onProgress può avere invalidato la sessione: nessuna lettura in quel caso
         const profileAttachments = await listProfileAttachments(uid);
         session.check();
         for (const attachment of profileAttachments) {
             const {id, ...data} = attachment || {};
             await runner.addRecord({kind: 'record', scope: 'profile-document-attachment', id, data});
         }
-        session.check();
+        session.check(); // prima delle letture dell'identità
         const readPublic = options.getSharingPublicIdentity || getBackupSharingPublicIdentity;
         const readPrivate = options.getSharingPrivateIdentity || getBackupSharingPrivateIdentity;
         const [publicIdentity, privateEnvelope] = await Promise.all([readPublic(uid), readPrivate(uid)]);
