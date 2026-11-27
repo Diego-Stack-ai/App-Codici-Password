@@ -133,7 +133,7 @@
       "id": "settings-menu-icons",
       "page": "impostazioni.html",
       "selector": ".settings-icon-box[data-icon-role=\"theme\"]",
-      "count": 24,
+      "count": 25,
       "property": "color",
       "role": "--card-icon-ink",
       "reason": "Voci del menu Impostazioni (anche le classic-settings-* del registro): icone di destinazione, non esiti."

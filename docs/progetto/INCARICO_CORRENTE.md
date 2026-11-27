@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="censimento-vault-interfaccia-2026-11-27"></a>
+
+## Censimento — collegamento all'interfaccia, solo preparazione
+
+Diego ordina in chat il 27/11/2026 di collegare all'interfaccia il censimento già in `master` (`1d6ec199`). Claude Code è l'unico scrittore; Codex rivede prima della decisione di Diego sull'integrazione. Il perimetro è una voce in Impostazioni con conferma esplicita, sblocco normale della Vault, attesa annullabile, risultati in soli conteggi e scaricamento locale del rapporto JSON, più traduzioni, contratto di topologia e test.
+
+Autorizzati: ramo `claude/`, commit, push e PR in bozza. Esclusi: merge, versione, deploy ed esecuzione sui dati reali. La voce raggiunge i dati reali solo dopo un rilascio, che richiede un ordine separato; il primo collaudo resta sull'account di prova (D2). Restano invariati formati, busta, verificatore, backend e Rules; nessuna scrittura né invio del rapporto.
+
 <a id="censimento-vault-merge-2026-11-27"></a>
 
 ## Censimento fase 1 — merge eseguito, ricevuta

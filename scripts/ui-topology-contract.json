@@ -87,6 +87,14 @@
       "translations": ["settings_credential_health_title", "settings_credential_health_desc"]
     },
     {
+      "id": "settings-vault-format-census-dialog",
+      "page": "impostazioni.html",
+      "trigger": "#btn-vault-format-census",
+      "event": "click",
+      "target": { "kind": "symbol", "value": "showVaultFormatCensusResults" },
+      "translations": ["settings_census_title", "settings_census_desc"]
+    },
+    {
       "id": "settings-account-field-usage-dialog",
       "page": "impostazioni.html",
       "trigger": "#btn-account-field-usage",

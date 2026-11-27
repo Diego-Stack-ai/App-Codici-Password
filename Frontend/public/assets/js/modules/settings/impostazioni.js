@@ -59,6 +59,7 @@ export async function initImpostazioni(user) {
     }
     setupCredentialHealth(user);
     setupAccountFieldUsage(user);
+    setupVaultFormatCensus(user);
     setupSharedCredentials(user);
     await setupPushSettings(user);
     showPendingSecurityNotice();
@@ -201,6 +202,59 @@ function setupCredentialHealth(user) {
     };
     button.addEventListener('click', click);
     disposeCredentialHealthSetup = () => {
+        action?.dispose(); action = null; running = false; button.disabled = false;
+        button.removeEventListener('click', click);
+    };
+}
+
+let disposeVaultCensusSetup = () => {};
+function setupVaultFormatCensus(user) {
+    disposeVaultCensusSetup();
+    const button = document.getElementById('btn-vault-format-census');
+    if (!button) return;
+    let action = null, running = false;
+    const click = async () => {
+        if (running || auth.currentUser?.uid !== user.uid) return;
+        action?.dispose();
+        const current = action = createBackupRestoreAction(user.uid, button);
+        running = true;
+        button.disabled = true;
+        let working = null;
+        try {
+            // Accesso esplicito: nulla parte senza conferma e senza lo sblocco normale della Vault.
+            const confirmed = await showConfirmModal(t('settings_census_confirm_title'), t('settings_census_confirm_text'),
+                t('settings_census_start'), t('cancel'), {signal: current.signal});
+            current.check();
+            if (!confirmed) throw new Error('USER_CANCELLED');
+            const vaultKeyMaterial = await ensureVaultKeyMaterial({promptImmediately: true});
+            current.check();
+            if (!vaultKeyMaterial) throw new Error('USER_CANCELLED');
+            working = showBackupWorking(t('settings_census_working_title'), t('settings_census_working_text'), current);
+            const [{runVaultFormatCensus}, {summarizeCensusReport}, {showVaultFormatCensusResults}] = await Promise.all([
+                import('./vault-format-census-service.js?v=1.2.299'),
+                import('./vault-format-census-model.js'),
+                import('./vault-format-census-dialog.js')
+            ]);
+            current.check();
+            const report = await runVaultFormatCensus(user.uid, vaultKeyMaterial, {
+                signal: current.signal, isActive: current.active,
+                onProgress: ({processed}) => working.update(tf('settings_census_progress', {count: processed}))
+            });
+            current.check();
+            working.close();
+            showVaultFormatCensusResults(report, summarizeCensusReport(report), current);
+        } catch (error) {
+            working?.close();
+            if (current.active() && error?.message !== 'USER_CANCELLED') {
+                showToast(t('settings_census_incomplete'), 'error');
+            }
+            current.dispose();
+        } finally {
+            if (action === current) { button.disabled = false; running = false; }
+        }
+    };
+    button.addEventListener('click', click);
+    disposeVaultCensusSetup = () => {
         action?.dispose(); action = null; running = false; button.disabled = false;
         button.removeEventListener('click', click);
     };
@@ -590,13 +644,14 @@ function showBackupWorking(title, message, action) {
         type: 'button', className: 'btn-modal btn-secondary', textContent: t('cancel'),
         onclick: () => action.dispose()
     }) : null;
+    const messageNode = createElement('p', {className: 'modal-text', textContent: message});
     modal.appendChild(createElement('div', {className: 'modal-box backup-working-modal'}, [
         createElement('span', {
             className: 'material-symbols-outlined modal-icon animate-spin icon-accent-blue notranslate',
             textContent: 'progress_activity', 'aria-hidden': 'true'
         }),
         createElement('h3', {className: 'modal-title', textContent: title}),
-        createElement('p', {className: 'modal-text', textContent: message}),
+        messageNode,
         ...(cancelButton ? [createElement('div', {className: 'modal-actions'}, [cancelButton])] : [])
     ]));
     document.body.appendChild(modal);
@@ -604,6 +659,7 @@ function showBackupWorking(title, message, action) {
     let closed = false;
     let unregister = () => {};
     const working = {
+        update(text) { if (!closed) messageNode.textContent = text; },
         close() {
             if (closed) return;
             closed = true;

@@ -6,7 +6,7 @@
 
 ## Censimento Vault — in master, non distribuito
 
-Produzione resta 1.2.299. I moduli del censimento in sola lettura e i loro test sintetici sono in `master` dal merge della PR #374 (`1d6ec199`): classificazione e conteggi, prova a candidato singolo equivalente a `decrypt`, servizio sull'enumerazione dei backup. Non sono collegati all'interfaccia, non sono distribuiti e non sono stati eseguiti su dati reali. `crypto-utils.js`, formati, busta, backend e Rules sono invariati. [Ricevuta del merge](INCARICO_CORRENTE.md#censimento-vault-merge-2026-11-27).
+Produzione resta 1.2.299. I moduli del censimento in sola lettura e i loro test sintetici sono in `master` dal merge della PR #374 (`1d6ec199`): classificazione e conteggi, prova a candidato singolo equivalente a `decrypt`, servizio sull'enumerazione dei backup. Non sono collegati all'interfaccia, non sono distribuiti e non sono stati eseguiti su dati reali. `crypto-utils.js`, formati, busta, backend e Rules sono invariati. [Ricevuta del merge](INCARICO_CORRENTE.md#censimento-vault-merge-2026-11-27). La voce in Impostazioni, il riepilogo con anomalie e il collaudo browser con account sintetico sono candidati nella PR #375, non integrati né distribuiti. [Mandato](INCARICO_CORRENTE.md#censimento-vault-interfaccia-2026-11-27).
 
 <a id="rilascio-1299-pubblico-2026-11-26"></a>
 

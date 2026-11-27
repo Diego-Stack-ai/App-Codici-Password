@@ -243,6 +243,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/settings/recovery-asset-reader.js",
   "assets/js/modules/settings/recovery-transport-limits.js",
   "assets/js/modules/settings/shared-credentials-controller.js",
+  "assets/js/modules/settings/vault-format-census-dialog.js",
   "assets/js/modules/settings/vault-format-census-model.js",
   "assets/js/modules/settings/vault-format-census-probe.js",
   "assets/js/modules/settings/vault-format-census-service.js",

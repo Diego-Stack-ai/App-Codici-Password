@@ -298,7 +298,7 @@ test('Settings markup classifies decorative icons and preserves destructive role
         red: element.classList.contains('icon-red')
       }));
     }, pageSources.get('impostazioni.html'));
-    assert.equal(icons.length, 26, 'all static Settings icons remain covered');
+    assert.equal(icons.length, 27, 'all static Settings icons remain covered');
     for (const icon of icons) {
       if (['btn-reset-vault', 'btn-revoke-all-sessions'].includes(icon.owner)) {
         assert.equal(icon.themed, null, `${icon.owner}: destructive icon must not be reclassified`);
