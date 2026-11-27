@@ -292,30 +292,42 @@ export function createCensusRunner({keyMaterial, probes, check = () => {}, onPro
 }
 
 // Riepilogo per l'interfaccia: solo somme dei conteggi del rapporto.
+// unopened = anomalie certe (CPFE2 non aperti o malformati, allegati non aperti o non validi,
+// identità non aperta); ambiguous = valori con aspetto v1 non aperti, che possono essere testo
+// in chiaro: restano distinti per non gonfiare le anomalie.
 export function summarizeCensusReport(report) {
     const rows = [];
-    const totals = {records: 0, fields: 0, old: 0, legacy: 0, unopened: 0, errors: 0, attachmentsNeedFull: 0, uncovered: 0};
+    const totals = {records: 0, fields: 0, old: 0, legacy: 0, unopened: 0, ambiguous: 0, errors: 0,
+        attachmentsNeedFull: 0, uncovered: 0};
     for (const area of report?.areas || []) {
         if (area.status !== 'censita') { totals.uncovered++; continue; }
         if (area.id === 'sharing-identity') continue;
         const f = area.fields;
         const old = f.v1.primary + f.v1.legacy;
         const legacy = f.v1.legacy + f.cpfe2.legacy;
-        const unopened = f.cpfe2.none + f.cpfe2.malformed + (area.attachments?.none || 0);
+        const unopened = f.cpfe2.none + f.cpfe2.malformed + (area.attachments?.none || 0) + (area.attachments?.invalid || 0);
+        const ambiguous = f.v1.none + f.v1.malformed;
         const attachmentsNeedFull = area.attachments?.needsFullKeyring || 0;
         totals.records += area.records;
         totals.fields += area.read;
         totals.old += old;
         totals.legacy += legacy;
         totals.unopened += unopened;
+        totals.ambiguous += ambiguous;
         totals.errors += area.errors;
         totals.attachmentsNeedFull += attachmentsNeedFull;
-        if (area.records > 0) rows.push({id: area.id, records: area.records, old, legacy, errors: area.errors});
+        if (area.records > 0) rows.push({id: area.id, records: area.records, old, legacy, unopened, ambiguous, errors: area.errors});
     }
-    const identity = (report?.areas || []).find(area => area.id === 'sharing-identity');
+    const identityArea = (report?.areas || []).find(area => area.id === 'sharing-identity');
+    const identity = {
+        present: Boolean(identityArea?.present),
+        unopened: Boolean(identityArea?.present && !identityArea.opensFull),
+        needsFullKeyring: Boolean(identityArea?.present && identityArea.opensFull && !identityArea.opensWithPrimaryAlone)
+    };
+    if (identity.unopened) totals.unopened++;
     return {
-        totals, rows,
-        identityNeedsFullKeyring: Boolean(identity?.present && identity.opensFull && !identity.opensWithPrimaryAlone),
+        totals, rows, identity,
+        identityNeedsFullKeyring: identity.needsFullKeyring,
         legacyKeyPresent: Boolean(report?.security?.legacyKeyPresent)
     };
 }

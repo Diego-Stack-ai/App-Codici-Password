@@ -465,11 +465,34 @@ test('riepilogo per l\'interfaccia: solo somme dei conteggi', async () => {
     await runner.addRecord({kind: 'record', scope: 'settings', id: 'security', data: {vaultKeyEnvelope: {version: 2, iterations: 600000, keyOrigin: 'random-with-legacy-fallback'}}});
     await runner.addIdentity(await sharingIdentity.createSharingIdentity({uid: UID, vaultKeyMaterial: KEYRING}));
     const summary = summarizeCensusReport(runner.report());
-    assert.deepEqual(summary.totals, {records: 3, fields: 4, old: 2, legacy: 2, unopened: 0, errors: 0,
+    assert.deepEqual(summary.totals, {records: 3, fields: 4, old: 2, legacy: 2, unopened: 0, ambiguous: 0, errors: 0,
         attachmentsNeedFull: 1, uncovered: CENSUS_AREAS.filter(area => area.source === 'not-covered').length});
     assert.deepEqual(summary.rows.map(row => row.id), ['settings', 'private-accounts', 'private-account-attachments']);
-    assert.deepEqual(summary.rows.find(row => row.id === 'private-accounts'), {id: 'private-accounts', records: 1, old: 2, legacy: 2, errors: 0});
+    assert.deepEqual(summary.rows.find(row => row.id === 'private-accounts'),
+        {id: 'private-accounts', records: 1, old: 2, legacy: 2, unopened: 0, ambiguous: 0, errors: 0});
     assert.equal(summary.identityNeedsFullKeyring, true);
+    assert.deepEqual(summary.identity, {present: true, unopened: false, needsFullKeyring: true});
     assert.equal(summary.legacyKeyPresent, true);
     assert.deepEqual(summarizeCensusReport(null).rows, []);
+});
+
+test('riepilogo: anomalie certe e valori ambigui restano distinti e visibili', async () => {
+    const otherKey = generateVaultKey();
+    const runner = createCensusRunner({keyMaterial: PRIMARY, probes: realProbes});
+    await runner.addRecord({kind: 'record', scope: 'contact', id: 'c', data: {
+        illeggibile: await encrypt('x', otherKey), rotto: 'CPFE2.' + Buffer.from('{"version":2}').toString('base64'),
+        codiceLungo: 'Q'.repeat(40)}});
+    await runner.addRecord({kind: 'record', scope: 'private-account-attachment', id: 'a', data: {
+        size: 1, encryption: {version: 9}}});
+    await runner.addRecord({kind: 'record', scope: 'private-account-attachment', id: 'b', data: {
+        size: 1, encryption: await attachmentEncryption(otherKey)}});
+    await runner.addIdentity(await sharingIdentity.createSharingIdentity({uid: UID, vaultKeyMaterial: otherKey}));
+    const summary = summarizeCensusReport(runner.report());
+    assert.equal(summary.totals.errors, 0, 'nessuna eccezione di lettura');
+    // 1 CPFE2 non aperto + 1 CPFE2 malformato + 1 allegato non valido + 1 allegato non aperto + identità non aperta.
+    assert.equal(summary.totals.unopened, 5);
+    assert.equal(summary.totals.ambiguous, 1, 'il valore con aspetto v1 resta ambiguo');
+    assert.deepEqual(summary.identity, {present: true, unopened: true, needsFullKeyring: false});
+    assert.equal(summary.rows.find(row => row.id === 'contacts').unopened, 2);
+    assert.equal(summary.rows.find(row => row.id === 'private-account-attachments').unopened, 2);
 });
