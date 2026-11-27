@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="recupero-documentale-worktree-2026-11-27"></a>
+
+## Riesame delle copie conservate — due PR documentali
+
+Diego ordina il riesame delle dodici copie rimaste e la preparazione di due PR con le sole informazioni utili mancanti dai documenti canonici di GitHub. Dopo il coordinamento richiesto con «Riepiloga gestione progetti e GitHub», l'altro agente conferma assenza di modifiche o rami concorrenti su COLLAUDI, INVENTARI e INCARICO_CORRENTE; questa chat resta l'unico scrittore dei due recuperi. Base verificata `acca9a62`, produzione 1.2.299. Un lotto raccorda evidenze della cornice e ricevute storiche, l'altro provenienza e unità dei vecchi rilievi UI. [Inventario ed esclusioni](../evidenze/INVENTARI.md#riesame-worktree-2026-11-27).
+
+Sono autorizzati preparazione, verifiche, commit su rami distinti e apertura delle PR; nessun merge o deploy da questo incarico. Copie originali, backup, codice applicativo e comportamento della Vault conservati. AGENTS, migrazione/Cloud e PR #366 restano separati. Non ripubblicare configurazioni private né reintrodurre vecchi stati, ipotesi superate o nuovi PASS. I mandati sottostanti descrivono gli incarichi precedenti e mantengono i rispettivi limiti.
+
 <a id="rilascio-1299-pubblico-2026-11-26"></a>
 
 ## Ordine 299 eseguito — ricevuta e seguito dal cellulare
