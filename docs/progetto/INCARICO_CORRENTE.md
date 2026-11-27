@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="censimento-vault-2026-11-27"></a>
+
+## Censimento dei formati della Vault — fase 1, solo preparazione
+
+Diego dà il GO operativo il 27/11/2026 dopo la proposta e la revisione Codex nella issue #373. Claude Code è l'unico scrittore di questo incarico; Codex rivede prima della decisione di Diego sull'integrazione. Base `77f66053`, produzione 1.2.299. Il perimetro è il solo censimento in sola lettura: modulo di classificazione, prova a candidato singolo, servizio collegato all'enumerazione dei backup, matrice di copertura e test sintetici. [Decisioni D1–D6](DECISIONI.md#censimento-vault-2026-11-27).
+
+Autorizzati: ramo `claude/`, commit, push e PR in bozza. Esclusi: merge, versione, deploy, collegamento all'interfaccia ed esecuzione sui dati reali. Restano invariati `crypto-utils.js`, busta, verificatore, formati scritti, backend e Rules. Le fasi 2–4 (migrazione, ritiro dei lettori legacy, Secret Key) richiedono un progetto rivisto e ordini separati.
+
 <a id="recupero-documentale-worktree-2026-11-27"></a>
 
 ## Riesame delle copie conservate — due PR documentali

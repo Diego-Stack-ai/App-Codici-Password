@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+<a id="censimento-vault-2026-11-27"></a>
+
+## Censimento Vault — candidato in PR, produzione invariata
+
+Produzione resta 1.2.299. Nel ramo della PR ci sono i moduli del censimento in sola lettura e i loro test sintetici: classificazione e conteggi, prova a candidato singolo equivalente a `decrypt`, servizio sull'enumerazione dei backup. Non sono collegati all'interfaccia e non sono stati eseguiti su dati reali. `crypto-utils.js`, formati, busta, backend e Rules sono invariati. [Incarico](INCARICO_CORRENTE.md#censimento-vault-2026-11-27).
+
 <a id="rilascio-1299-pubblico-2026-11-26"></a>
 
 ## APP 1.2.299 — online e verificata

@@ -1,5 +1,22 @@
 # Decisioni
 
+<a id="censimento-vault-2026-11-27"></a>
+
+## Vault — censimento, migrazione e Secret Key (issue #373)
+
+Decisioni di Diego del 27/11/2026, comunicate nella issue #373 dopo la proposta di Claude e la revisione Codex.
+
+| ID | Decisione | Stato |
+|---|---|---|
+| D1 | Censimento dall'app in sola lettura, con i vincoli della revisione Codex: annullamento a blocco, logout e cambio utente, rapporto locale di soli conteggi, collaudo su dati sintetici | Fase 1 in preparazione |
+| D2 | Esther e l'account di prova si possono cancellare e ricreare quando servirà; l'account di prova resta per i collaudi della fase 1 | Approvata |
+| D3 | Solo la Vault di Diego contiene dati reali. Prima di migrarla: archivio portabile scaricato da Diego, suo GO e prova di ripristino isolata su record, allegati e condivisioni. Conversione o rifiuto dei vecchi backup: ancora aperta | Parzialmente aperta |
+| D4 | Obiettivo di 650.000 iterazioni PBKDF2-SHA256 per busta e verificatore nella fase di migrazione | Approvata, non implementata |
+| D5 | Prima il progetto della Secret Key; l'eventuale password unica si valuta in un rilascio separato | Approvata |
+| D6 | Le decisioni approvate si registrano in DECISIONI e nella baseline `regole/SICUREZZA` | Approvata |
+
+D4 e D5 sono obiettivi: la baseline in `regole/SICUREZZA` cambia solo quando un rilascio li implementa. Il GO operativo copre soltanto la fase 1 ([incarico](INCARICO_CORRENTE.md#censimento-vault-2026-11-27)). Migrazione, ritiro del lettore a 100.000 iterazioni e della chiave legacy, e Secret Key restano subordinati a progetto rivisto, prove e nuovi ordini. Rilievo tecnico collegato: allegati e identità di condivisione derivano la propria chiave dall'intera stringa del keyring, quindi togliere `legacyKey` senza ri-avvolgerli li renderebbe illeggibili ([audit](../evidenze/AUDIT.md#confronto-1password-2026-11-27)).
+
 <a id="scadenze-campi-eliminazione-2026-11-26"></a>
 
 ## Scadenze — scelta informata su eliminazione e Master
