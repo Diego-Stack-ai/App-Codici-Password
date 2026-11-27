@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="censimento-vault-merge-2026-11-27"></a>
+
+## Censimento fase 1 — merge eseguito, ricevuta
+
+Diego autorizza il solo merge della PR #374 dopo il riesame Codex favorevole sul commit `7995d9381c1bca1adc7d3356fc75ca3a5056273e`. Mandato su GitHub nel commento 7219159869 e conferma in chat. Claude ha verificato che la testa fosse invariata e che `validate`, `docs` e Gitleaks fossero verdi. Ha poi tolto la bozza e unito con merge commit vincolato a quello SHA: `1d6ec199b101ecb1569f07fb9b1d722858c8b20d`.
+
+Run su `master` dopo il push: Documentazione controllata 46006007692 SUCCESS, Secret scanning 46006007695 SUCCESS, Validate Firebase 46006007804 SUCCESS. Il job di deploy richiede `workflow_dispatch` e l'ambiente `production`, quindi non è partito. Nessun deploy, migrazione, cambio versione, collegamento all'interfaccia o accesso a dati reali. Produzione resta 1.2.299. Il limite «esclusi: merge» del mandato sotto è superato solo per questo merge; collegamento all'interfaccia, prova sull'account di prova e fasi 2–4 richiedono ordini separati.
+
 <a id="censimento-vault-2026-11-27"></a>
 
 ## Censimento dei formati della Vault — fase 1, solo preparazione
