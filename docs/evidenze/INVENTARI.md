@@ -1,5 +1,28 @@
 # Inventari
 
+<a id="riesame-worktree-2026-11-27"></a>
+
+## 27/11/2026 — riesame delle dodici copie conservate
+
+Confronto con `origin/master` a `acca9a6238728a7f5a524c63e4e3787ab63faee6`, dopo il riordino autorizzato del 26/11: master principale avanzato solo in fast-forward e pulito; 45 worktree già integrati e tre residui Recovery messi da parte, nessun ramo eliminato. Il backup esterno locale conserva 61 snapshot, tutti i ref/reflog e i file locali utili; hash e ripristino di prova verificati, senza caricare i materiali privati su GitHub. Queste informazioni descrivono lo stato rilevato, non una nuova procedura di migrazione o autorizzazione a cancellare copie.
+
+| Copia | Esito del confronto e destinazione utile |
+| --- | --- |
+| c1-phase1-receipts-20261113 | `0f39df3c` non raggiungibile dai remoti, ma tutte le aggiunte nei quattro MD già presenti in master; solo conservazione. |
+| claude-doc-completion-20261121 | Quasi interamente confluita; vecchi stati provvisori della 291 e matrice successivamente aggiornata non recuperati. |
+| frame-ordinary-1.2.275-20261114 | `004dad37` equivalente alla patch già integrata; nessun codice da reinserire. |
+| header-model-normalization-20261110 | Aggiunte documentali già presenti; nessun recupero ulteriore. |
+| logout-mobile-1285-20261119 | E04 già riepiloga F16–F20; recuperato soltanto il [dettaglio storico della freccia](COLLAUDI.md#cornice-e04-provenienza-recuperata-2026-11-27). Proposta CSS a 160 px superata, esclusa. |
+| private-square-cards-20261120 | CSS e test identici a master; aggiunte MD già presenti. |
+| release-1271-receipts-20261113 | Recupero della ricevuta Hosting e del distinto giro breve QA2 ancora proposto/DA_REVISIONARE. |
+| release-1272-merged-20261113 | Recupero della ricevuta statica Hosting, senza nuovi esiti funzionali. |
+| release-1273-receipts-20261114 | Recupero della ricevuta Hosting e della sua attribuzione, senza ripetere il confronto già presente nel checkpoint 274. |
+| search-footer-colors-20261116 | Ipotesi diagnostiche preliminari superate dalla correzione logout; nessuna riapertura. |
+| security-closure-20261107 | Sorgenti, test e bootstrap già integrati o evoluti; vecchi programmi e inventari intermedi esclusi. |
+| settings-theme-pairing-20261113 | Patch e correzioni già integrate; recupero separato del collegamento alla consegna UI e delle sue unità di conteggio, senza ripubblicare il diff applicativo. |
+
+[Ricevute storiche selezionate](COLLAUDI.md#ricevute-storiche-recuperate-2026-11-27). Le dodici copie originali e i loro delta restano conservati; il riesame non applica i vecchi diff a master. C1/C2, residui fisici, versione e protezioni non cambiano per l'importazione documentale. Il distinto materiale UI è trattato nella seconda PR dello stesso incarico; le istruzioni Cloud della #366 non sono modificate.
+
 ## 03/11/2026 — baseline componenti per sorveglianza sicurezza
 
 La baseline rilevata sul PC di sviluppo comprende Windows con toolchain locale, Node.js `24.22.1`, npm `11.19.1`, Git for Windows `2.47.0`, GitHub CLI `2.101.0`, Firebase CLI `15.30.1`, Chrome `156.0.8078.80` ed Edge `156.0.4314.58`. La versione di Windows non è stata acquisita dal processo sandbox e deve essere letta dal monitor locale con un controllo che non richieda dati personali.

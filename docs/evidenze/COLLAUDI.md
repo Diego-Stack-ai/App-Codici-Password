@@ -1,5 +1,19 @@
 # Collaudi
 
+<a id="ricevute-storiche-recuperate-2026-11-27"></a>
+
+## Ricevute storiche 1.2.271–1.2.273 — recupero del 27/11/2026
+
+Recupero selettivo dal [riesame delle copie conservate](INVENTARI.md#riesame-worktree-2026-11-27). Le fonti seguenti erano già disponibili nei rami/commenti GitHub, ma mancavano questi raccordi nei documenti canonici. I job delle tre esecuzioni sono stati riletti: validazione, deploy Hosting e verifica pubblica risultano SUCCESS. È una verifica documentale odierna di ricevute storiche, non una nuova pubblicazione o un ricollaudo autenticato; la produzione corrente resta quella nello [stato](../progetto/STATO.md#stato-corrente).
+
+| Versione e data della ricevuta | Fonte immutabile e pubblicazione | Attestazioni recuperate e limiti |
+| --- | --- | --- |
+| 1.2.271, 13/11/2026 | [Ricevuta `beefe4ac`](https://github.com/Diego-Stack-ai/App-Codici-Password/blob/beefe4ac46a5c266cb0730667fba98b7efacf7f0/docs/evidenze/COLLAUDI.md); [Hosting #1136](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43472275913), sorgente `fb6e9e361687fd3c8f502fe687766e81a21181e0`. | [Ricevuta #300](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/300#issuecomment-6861098889): 365 hash coincidenti, digest `e1e2fcc1edba669eb8814384e1204159b879573319e6c126e8be3788fcd3a6ad`. La pubblicazione era già richiamata in master; si completa la provenienza, senza nuovi PASS funzionali. |
+| 1.2.272, 13/11/2026 | [Ricevuta `c07a38bf`](https://github.com/Diego-Stack-ai/App-Codici-Password/blob/c07a38bff1d5ee940d776ff01a7ecc758048c190/docs/evidenze/COLLAUDI.md); [Hosting #1145](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43517358282), sorgente `0d2e3cfcbc94346834995aab01bd05307dcd43a9`. | [Ricevuta #303](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/303#issuecomment-6866619601): 365/365 hash, 41 profili header, tre probe Hosting e verifica indipendente exit 0; digest `4dc3ea44141ae3fcb688d9ba313ae152ae0c6442a866a5970544d7ad02497725`. Distribuzione statica, non C1 fisico. |
+| 1.2.273, 14/11/2026 | [Ricevuta `9c7dbb13`](https://github.com/Diego-Stack-ai/App-Codici-Password/blob/9c7dbb1322baa6c1d3c7bf2ad9e93e0e0c62c5d9/docs/evidenze/COLLAUDI.md); [Hosting #1152](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/43579360260), sorgente `fa72c010507f713bc6014c89af5f45dd6185d91d`. | [Ricevuta #306](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/306#issuecomment-6875939484): 365 hash, 41 profili header, tre probe e verifica indipendente exit 0; digest `57fdf61ffdeb1cf67dfd376aab5cbf92938eecf8e4d623ee9f5447a1a8c52db8`. La ricevuta attribuisce il clic production a Codex su delega esplicita, limitata a quella run; non è una delega generale per altri rilasci. |
+
+**Distinto giro breve 1.2.271:** il [rapporto QA2/Chrome Windows della #301](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/301#issuecomment-6862206357) conserva 36 eventi e una deviazione di navigazione dichiarata. Lo stato resta **PASS osservato proposto / DA_REVISIONARE**, senza GO acquisito o chiusura C1. Non sostituisce i sei sottocasi QA2 già attestati né trasferisce esiti agli iPhone o ad altre versioni. Vecchi incarichi, programmi e stati candidati non vengono ripristinati come correnti.
+
 <a id="rilascio-1299-pubblico-2026-11-26"></a>
 
 ## APP 1.2.299 — campi e conferma Scadenze pubblicati
@@ -611,12 +625,22 @@ La [v2 ordinaria](../regole/VAULT.md#cornice-ordinaria-vault-2026-11-14) supera 
 | E01 H | QA2/Chrome Windows 1.2.270 | [Sei sottocasi](#cornice-c1-fase1-prioritari-2026-11-13): D02 allora10 pagine, D04-core, D05-A, D06-1, D06-3, D08-local. Non diventano22 route o PASS sui telefoni. |
 | E02 | PWA iPhone, contesto 1.2.284 | [TEL284-F01–F08](#cornice-telefono-guidato-2026-11-19): navigazione, dettaglio privato, timer1 minuto/ripresa, background e schermo bloccato brevi, swipe/riapertura. Preferenza 12 ore ripristinata. TEL284-F03 è lettura, non prova timer. |
 | E03 | PWA iPhone, contesto 1.2.285 | [Logout stabile](#logout-mobile-1285-telefono-2026-11-19) e [TEL285-F10–F15](#cornice-telefono-rientro-1285-2026-11-19): rientro con Authenticator/passkey, elenco/dati/dettaglio aziendale e Ricerca. Nessuna prova RAM o altre schede. |
-| E04 | PWA iPhone, contesto 1.2.286 nella sessione | Rotellina visibile, ripresa riuscita e 12 ore ripristinate; tutte le sezioni Profilo; Anagrafica a fondo pagina verticale/orizzontale con comandi raggiungibili. Il difetto successivo della freccia resta distinto dalla geometria. |
+| E04 | PWA iPhone, contesto 1.2.286 nella sessione | Rotellina visibile, ripresa riuscita e 12 ore ripristinate; tutte le sezioni Profilo; Anagrafica a fondo pagina verticale/orizzontale con comandi raggiungibili. Il [difetto successivo della freccia](#cornice-e04-provenienza-recuperata-2026-11-27) resta distinto dalla geometria. |
 | E05 | PWA iPhone, contesti 1.2.287–1.2.288 nella sessione | Ritorno dal Profilo, Ricerca con tastiera/chiusura e guida; sulla 288 ritorno aziendale corretto, Note private, Account/Note condivisi e card quadrate. Nei giri espressamente confermati nessun nuovo sblocco; non estendere risposte generiche a un nuovo sottocaso. |
 | E06 | PWA iPhone, contesti 1.2.289–1.2.290 | Sulla 289 Scadenze/Urgenze tornano alla lista di origine senza nuovo sblocco; il ritorno completo alla Home non è stato ribadito separatamente, resta il flash iniziale del chip Tutti. Sulla 290 registro acceso e rapporto ricevuto; l'episodio di scadenza e la sua causa non diventano PASS del ritorno. |
 | E07 | PWA iPhone 1.2.291 confermata | Sette checkpoint sotto, cinque percorsi senza nuovi sblocchi; ricollaudo mirato completato. Non certifica C1/C2, tutte le 22 route o altri dispositivi. |
 | E08 | Telefono non precisato per il punto1; PWA iPhone per il successivo giro grafico, contesto 1.2.283 | [Fonte del punto1 e giro grafico](#telefono-1283-riscontro-grafica-2026-11-18): PASS complessivo riferito per accesso/Face ID, comando contatto nelle due Tessere, salvataggio/condivisione e nome file; il contesto del punto1 non è precisato e non viene attribuito retroattivamente alla PWA. Separatamente, QR/popup interi e richiudibili nel giro PWA. Nessuna prova delle singole API/destinazioni native, stampa, PRF o Master alternativa. |
 | E09 L | Pacchetto 1.2.291, dati inventati | [Ricevuta locale e pubblicazione](#rilascio-1291-pubblico-2026-11-20): 78 sessione/fence, 356 cornice, 199 navigazione e controlli correlati. Non sono nuovi test fisici; source/digest e limiti del banco restano quelli della ricevuta. |
+
+<a id="cornice-e04-provenienza-recuperata-2026-11-27"></a>
+
+### Precisazione storica della fonte E04 — recupero del 27/11/2026
+
+**TEL286-F20-BACK, 19/11/2026.** Nel contesto PWA iPhone 1.2.286 già riepilogato in E04, Diego riferì due giri ripetuti tra le sezioni del Profilo, in verticale e orizzontale, con ricarica/verifica accesso e successiva Vault bloccata oppure richiesta passkey. Precisò di aver usato la «Freccia dentro l’app — iPhone».
+
+I ritorni positivi F17/F18 riguardavano la **casetta Home**; F19/F20 attestavano soltanto leggibilità e raggiungibilità dei contenuti nelle due orientazioni. Il FAIL riferito della freccia resta distinto da quei riscontri. La successiva diagnosi e le regressioni sintetiche appartengono al [correttivo 1.2.287 già documentato](https://github.com/Diego-Stack-ai/App-Codici-Password/blob/621e55a152cda76eb4c3b7a1f255420d7387b2a3/docs/evidenze/COLLAUDI.md#L3); non sono nuove prove fisiche.
+
+Fonte: annotazioni locali non committate, preservate nel backup verificato del 26/11/2026, SHA-256 del file `6156518aee3ec710b326ce7174775dcccc1e955ff9f42d72675a376df191e47f`; non attribuire quel testo al commit di base del worktree. [E04 era già presente nella riconciliazione](https://github.com/Diego-Stack-ai/App-Codici-Password/blob/2f59750e2ded801282d5615c13ec22b2aa2cf592/docs/evidenze/COLLAUDI.md#L80): questo raccordo aggiunge il dettaglio di provenienza, senza nuovi PASS, variazioni degli esiti successivi o riapertura del difetto sulla versione corrente. I sottocasi D03/D06/D17 e i residui conservano il perimetro della matrice.
 
 ### Sette checkpoint acquisiti sulla1.2.291
 
