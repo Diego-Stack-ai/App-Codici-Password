@@ -1,5 +1,50 @@
 # Audit
 
+<a id="confronto-1password-2026-11-27"></a>
+
+## Confronto con il modello di sicurezza di 1Password — 27/11/2026
+
+Revisione statica consultiva di Claude Code, chiesta da Diego dopo l'incidente reso noto da 1Password il 25/11/2026. In quell'incidente l'account GitHub aziendale di un dipendente compromesso ha dato accesso a repository privati, CI/CD e metadati dei clienti; secondo l'azienda, il contenuto delle cassaforti non è stato esposto.
+
+**Fonti**
+- Il white paper pubblico *1Password Security Design* (PDF del 10/12/2024, 62 pagine), caricato da Diego. Lette le sezioni 3–5, 8–10, 12.4–12.6, 14–15 e l'appendice A.
+- Il codice della 1.2.299 (`acca9a62`), invariato fino a `ca7c7b5f` per `Frontend`, `functions` e `firestore.rules`. Letti `crypto-utils.js`, `security-manager.js`, `vault-session.js`, `sharing-identity.js`, `record-sharing-crypto.js`, `password-policy.js`, `mfa-manager.js`, `backup-crypto.js` e `full-recovery-*.js`.
+
+Nessun reverse engineering del client di 1Password: il confronto usa solo la loro documentazione pubblica.
+
+| ID | Rilievo | 1Password (white paper) | Codici & Password | Proposta |
+|---|---|---|---|---|
+| CP1 | Secondo segreto assente | 2SKD: PBKDF2-SHA256 a 650.000 iterazioni sulla password, combinato in XOR con HKDF della Secret Key da 128 bit, che resta solo sui dispositivi. I dati del server non bastano a verificare un tentativo di password (§3.2, §4.1.3, §8.2.5). | `vaultKeyEnvelope` e `verifier` in `users/{uid}/settings/security` dipendono solo dalla Master Password (PBKDF2-SHA256, 600.000 iterazioni). Chi ne ottiene una copia può verificare tentativi offline. | Chiave segreta del dispositivo da 128 bit + kit di emergenza; KEK derivata da entrambi i segreti; verificatore remoto eliminato o derivato allo stesso modo. Il segreto non protegge dal dispositivo compromesso (App. A.10.2). |
+| CP2 | Integrità del client web | Rischio dichiarato: chi altera l'host o la consegna serve un client malevolo (App. A.1). | L'app è solo web (Firebase Hosting); il deploy passa da GitHub Actions. È la stessa catena colpita nell'incidente. | Passkey o chiave fisica su GitHub e Google; deploy in un Environment con approvazione manuale e OIDC; controllo periodico automatico degli hash pubblicati con allarme; CSP restrittiva. |
+| CP3 | Chiave legacy | Gli account vecchi hanno meno iterazioni e si aggiornano al cambio password (nota 14). Il cambio password non rigenera il keyset (App. A.5). | Nei vault `random-with-legacy-fallback` il keyring `CPVK2` conserva in `legacyKey` la Master Password originale. I campi senza prefisso `CPFE2.` usano PBKDF2 a 100.000 iterazioni con quella password. Chi conosce la password precedente può ancora leggerli. | Ricifratura atomica nel formato nuovo, rimozione di `legacyKey`, rifiuto del formato a 100.000 iterazioni. |
+| CP4 | AAD dei campi | Non specificato nel documento. | I campi `CPFE2` sono AES-GCM senza AAD. `decryptIfPossible` restituisce invariato un valore che non sembra cifrato. Già indicato come "AAD generico" tra i limiti del [07/11](#sicurezza-candidata-2026-11-07). | Formato `CPFE3` con AAD `uid\|collezione\|record\|campo\|versione`, come nei backup; rifiuto del testo in chiaro sui campi obbligatoriamente cifrati. |
+| CP5 | Costo per campo | La chiave della cassaforte è usata direttamente (§5). | PBKDF2 a 600.000 iterazioni per ogni campo, a partire da una chiave già casuale a 256 bit. È un costo di prestazioni, non di sicurezza. | HKDF con salt per campo, nella stessa migrazione di CP3 e CP4. |
+| CP6 | Autenticazione | SRP: la password non viene trasmessa, autenticazione reciproca, secondo strato cifrato oltre TLS (§4, §14.3). | Firebase Auth con password di login distinta dalla Master Password; TOTP disponibile ma facoltativo. La Master Password non lascia il dispositivo. | Promuovere o rendere obbligatorio il TOTP; spiegare agli utenti che le due password devono essere diverse. |
+| CP7 | Chiavi pubbliche | Nessuna verifica pratica, MITM possibile da un server malevolo (App. A.3). | Stesso limite per l'identità ECDH. | Impronta confrontabile di persona tra i due utenti. |
+| CP8 | Trasparenza | Elenco pubblico dei metadati in chiaro (§15.2) e dei limiti (App. A). | Inventario dei metadati non documentato. | Documento pubblico sul modello di sicurezza e sui suoi limiti. |
+
+**Parità o vantaggio**
+- Condivisione: ECDH P-256 effimero con HKDF legato a record e destinatario, contro RSA-OAEP 2048 (§5.2).
+- Sblocco con passkey tramite WebAuthn PRF + HKDF.
+- Chiave di sessione AES non estraibile, tenuta solo in RAM.
+- Chiave di recupero casuale da 192 bit e backup AES-GCM con AAD.
+- Policy della Master Password (minimo 16 caratteri, quattro classi).
+- Doppio GO, CI e Gitleaks sul rilascio.
+- La normalizzazione NFC al posto di NFKD (§8.2.2) è accettabile purché non cambi mai.
+
+**Priorità proposte**
+1. CP2.
+2. CP3 insieme a CP4 e CP5, in un'unica migrazione.
+3. CP1.
+4. CP6.
+5. CP7 e CP8.
+
+**Limiti**
+- Lettura statica e parziale: non sono stati letti integralmente il repository né le Rules, nessuna esecuzione o prova su dispositivo.
+- Revoca e blocco non sono stati riesaminati.
+- Le affermazioni su 1Password riportano il loro documento, non verifiche indipendenti.
+- I rilievi sono proposte: non sono decisioni né correzioni autorizzate.
+
 ## Distribuzione delle cinque correzioni — 08/11/2026
 
 Le correzioni del lotto del 07/11 sono ora pubblicate nella **1.2.261**, sorgente `eab609be3a7e9a13514562724888ea73c7af2ece`, con pipeline backend/Rules e Hosting riuscite e confronto remoto indipendente. Le [ricevute canoniche](COLLAUDI.md#pubblicazione-sicurezza-1-2-261) conservano test, hash, sorgente e limiti. Il rapporto dello scan descrive lo snapshot iniziale e non viene riscritto per farlo apparire una nuova scansione della produzione. Restano i seguiti circoscritti e il programma di certificazione, senza estendere la conclusione a tutta l'app.
