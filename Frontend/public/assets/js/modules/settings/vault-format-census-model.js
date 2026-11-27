@@ -290,3 +290,32 @@ export function createCensusRunner({keyMaterial, probes, check = () => {}, onPro
         }
     };
 }
+
+// Riepilogo per l'interfaccia: solo somme dei conteggi del rapporto.
+export function summarizeCensusReport(report) {
+    const rows = [];
+    const totals = {records: 0, fields: 0, old: 0, legacy: 0, unopened: 0, errors: 0, attachmentsNeedFull: 0, uncovered: 0};
+    for (const area of report?.areas || []) {
+        if (area.status !== 'censita') { totals.uncovered++; continue; }
+        if (area.id === 'sharing-identity') continue;
+        const f = area.fields;
+        const old = f.v1.primary + f.v1.legacy;
+        const legacy = f.v1.legacy + f.cpfe2.legacy;
+        const unopened = f.cpfe2.none + f.cpfe2.malformed + (area.attachments?.none || 0);
+        const attachmentsNeedFull = area.attachments?.needsFullKeyring || 0;
+        totals.records += area.records;
+        totals.fields += area.read;
+        totals.old += old;
+        totals.legacy += legacy;
+        totals.unopened += unopened;
+        totals.errors += area.errors;
+        totals.attachmentsNeedFull += attachmentsNeedFull;
+        if (area.records > 0) rows.push({id: area.id, records: area.records, old, legacy, errors: area.errors});
+    }
+    const identity = (report?.areas || []).find(area => area.id === 'sharing-identity');
+    return {
+        totals, rows,
+        identityNeedsFullKeyring: Boolean(identity?.present && identity.opensFull && !identity.opensWithPrimaryAlone),
+        legacyKeyPresent: Boolean(report?.security?.legacyKeyPresent)
+    };
+}

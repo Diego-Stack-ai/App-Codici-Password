@@ -14,7 +14,7 @@ const model = await asModule(await read('settings/vault-format-census-model.js')
 const {probeFieldKey} = await asModule(await read('settings/vault-format-census-probe.js'));
 
 const {encrypt, decrypt, createVaultKeyring, generateVaultKey, getLastCryptoError} = cryptoUtils;
-const {createCensusRunner, classifyFieldValue, parseKeyMaterial, singleCandidate, CENSUS_AREAS} = model;
+const {createCensusRunner, classifyFieldValue, parseKeyMaterial, singleCandidate, summarizeCensusReport, CENSUS_AREAS} = model;
 const one = singleCandidate;
 
 // Dati sintetici: nessuna password o chiave reale.
@@ -455,4 +455,21 @@ test('servizio: invalidazione nell\'ultimo onProgress, nessuna lettura successiv
         assert.equal(calls.identity, 0, `${stage}: nessuna lettura dell'identità`);
         assert.equal(env.observers.size, 0);
     }
+});
+
+test('riepilogo per l\'interfaccia: solo somme dei conteggi', async () => {
+    const runner = createCensusRunner({keyMaterial: KEYRING, probes: realProbes});
+    await runner.addRecord({kind: 'record', scope: 'private-account', id: 'a', data: {
+        p: await encryptV1('x', LEGACY), q: await encryptV1('y', PRIMARY), r: await encrypt('z', LEGACY), s: 'chiaro'}});
+    await runner.addRecord({kind: 'record', scope: 'private-account-attachment', id: 'b', data: {size: 1, encryption: await attachmentEncryption(KEYRING)}});
+    await runner.addRecord({kind: 'record', scope: 'settings', id: 'security', data: {vaultKeyEnvelope: {version: 2, iterations: 600000, keyOrigin: 'random-with-legacy-fallback'}}});
+    await runner.addIdentity(await sharingIdentity.createSharingIdentity({uid: UID, vaultKeyMaterial: KEYRING}));
+    const summary = summarizeCensusReport(runner.report());
+    assert.deepEqual(summary.totals, {records: 3, fields: 4, old: 2, legacy: 2, unopened: 0, errors: 0,
+        attachmentsNeedFull: 1, uncovered: CENSUS_AREAS.filter(area => area.source === 'not-covered').length});
+    assert.deepEqual(summary.rows.map(row => row.id), ['settings', 'private-accounts', 'private-account-attachments']);
+    assert.deepEqual(summary.rows.find(row => row.id === 'private-accounts'), {id: 'private-accounts', records: 1, old: 2, legacy: 2, errors: 0});
+    assert.equal(summary.identityNeedsFullKeyring, true);
+    assert.equal(summary.legacyKeyPresent, true);
+    assert.deepEqual(summarizeCensusReport(null).rows, []);
 });
