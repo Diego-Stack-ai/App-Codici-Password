@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="censimento-vault-interfaccia-merge-2026-11-27"></a>
+
+## Censimento, voce Impostazioni — merge eseguito, ricevuta
+
+Diego conferma in chat il solo merge della PR #375 dopo il riesame finale Codex favorevole sul commit `99527093d95bc041373b97b55221535c76d83739` (commento 7222633214; GO anche nel commento 7222656449). Claude ha verificato che la testa fosse invariata e che `validate`, `docs` e Gitleaks fossero verdi, poi ha tolto la bozza e unito con merge commit vincolato a quello SHA: `573989dfd7b2809350e97d801a9e460198473f19`.
+
+Run su `master` dopo il push: Validate Firebase 46029242352 SUCCESS, Documentazione controllata 46029242317 SUCCESS, Secret scanning 46029242257 SUCCESS. Il job di deploy richiede `workflow_dispatch` e l'ambiente `production`, quindi non è partito. Nessun deploy, migrazione, cambio versione o accesso a dati reali; produzione 1.2.299. Il limite «esclusi: merge» del mandato sotto è superato solo per questo merge. Prima di proporre un rilascio resta il collaudo del flusso con Auth e Firestore in emulatore indicato da Codex: il collaudo browser incluso sostituisce Firebase e lo sblocco. Rilascio, prova sull'account di prova e fasi 2–4 richiedono ordini separati.
+
 <a id="censimento-vault-interfaccia-2026-11-27"></a>
 
 ## Censimento — collegamento all'interfaccia, solo preparazione

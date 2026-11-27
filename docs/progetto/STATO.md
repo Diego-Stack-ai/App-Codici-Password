@@ -4,9 +4,9 @@
 
 <a id="censimento-vault-2026-11-27"></a>
 
-## Censimento Vault — in master, non distribuito
+## Censimento Vault — in master con voce Impostazioni, non distribuito
 
-Produzione resta 1.2.299. I moduli del censimento in sola lettura e i loro test sintetici sono in `master` dal merge della PR #374 (`1d6ec199`): classificazione e conteggi, prova a candidato singolo equivalente a `decrypt`, servizio sull'enumerazione dei backup. Non sono collegati all'interfaccia, non sono distribuiti e non sono stati eseguiti su dati reali. `crypto-utils.js`, formati, busta, backend e Rules sono invariati. [Ricevuta del merge](INCARICO_CORRENTE.md#censimento-vault-merge-2026-11-27). La voce in Impostazioni, il riepilogo con anomalie e il collaudo browser con account sintetico sono candidati nella PR #375, non integrati né distribuiti. [Mandato](INCARICO_CORRENTE.md#censimento-vault-interfaccia-2026-11-27).
+Produzione resta 1.2.299. In `master` ci sono i moduli del censimento in sola lettura (PR #374, `1d6ec199`; [ricevuta](INCARICO_CORRENTE.md#censimento-vault-merge-2026-11-27)) e la voce «Censimento formati Vault» in Impostazioni (PR #375, `573989df`; [ricevuta](INCARICO_CORRENTE.md#censimento-vault-interfaccia-merge-2026-11-27)). La voce comprende conferma esplicita, sblocco normale, attesa annullabile, riepilogo con anomalie, valori ambigui e dipendenza dell'identità, e scaricamento locale del rapporto. Nulla è distribuito e niente è stato eseguito su dati reali. Il collaudo browser con account sintetico sostituisce Firebase e lo sblocco; il collaudo con Auth e Firestore in emulatore resta da fare prima di un rilascio. `crypto-utils.js`, formati, busta, backend e Rules sono invariati.
 
 <a id="rilascio-1299-pubblico-2026-11-26"></a>
 
