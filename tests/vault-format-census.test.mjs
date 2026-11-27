@@ -14,7 +14,8 @@ const model = await asModule(await read('settings/vault-format-census-model.js')
 const {probeFieldKey} = await asModule(await read('settings/vault-format-census-probe.js'));
 
 const {encrypt, decrypt, createVaultKeyring, generateVaultKey, getLastCryptoError} = cryptoUtils;
-const {createCensusRunner, classifyFieldValue, parseKeyMaterial, CENSUS_AREAS} = model;
+const {createCensusRunner, classifyFieldValue, parseKeyMaterial, singleCandidate, CENSUS_AREAS} = model;
+const one = singleCandidate;
 
 // Dati sintetici: nessuna password o chiave reale.
 const PRIMARY = generateVaultKey();
@@ -38,7 +39,8 @@ async function encryptV1(text, password) {
 async function attachmentEncryption(keyMaterial) {
     const fileKey = crypto.getRandomValues(new Uint8Array(32));
     const wrap = await attachmentSecurity.wrapAttachmentFileKey(fileKey, keyMaterial);
-    return {version: 1, cipher: 'AES-GCM-256', iv: b64(crypto.getRandomValues(new Uint8Array(12))), ...wrap};
+    return {version: 1, cipher: 'AES-GCM-256', ...wrap, contentIv: b64(crypto.getRandomValues(new Uint8Array(12))),
+        originalType: 'application/pdf', originalSize: 1200};
 }
 
 const realProbes = {
@@ -64,11 +66,15 @@ test('classificazione sintattica allineata a isEncryptedValue', () => {
 });
 
 test('il materiale viene separato in primaria e legacy senza fallback', () => {
-    assert.deepEqual(parseKeyMaterial(PRIMARY), {kind: 'raw', full: PRIMARY, primary: PRIMARY, legacy: null});
+    const raw = parseKeyMaterial(PRIMARY);
+    assert.equal(raw.kind, 'raw');
+    assert.deepEqual(raw.primary, {kind: 'single-candidate', value: PRIMARY});
+    assert.equal(raw.legacy, null);
     const parsed = parseKeyMaterial(KEYRING);
     assert.equal(parsed.kind, 'keyring');
-    assert.equal(parsed.primary, PRIMARY);
-    assert.equal(parsed.legacy, LEGACY);
+    assert.equal(parsed.full, KEYRING);
+    assert.equal(parsed.primary.value, PRIMARY);
+    assert.equal(parsed.legacy.value, LEGACY);
     assert.throws(() => parseKeyMaterial('CPVK2:@@@'), /CENSUS_KEYRING_INVALID/);
     assert.throws(() => parseKeyMaterial(''), /CENSUS_KEY_MATERIAL_REQUIRED/);
 });
@@ -81,13 +87,15 @@ test('probeFieldKey prova un solo candidato, senza log né stato globale', async
     console.error = console.warn = console.log = (...args) => logs.push(args);
     const before = getLastCryptoError();
     try {
-        assert.equal(await probeFieldKey(cpfe2, PRIMARY), 'opened');
-        assert.equal(await probeFieldKey(cpfe2, LEGACY), 'closed');
-        assert.equal(await probeFieldKey(v1Legacy, LEGACY), 'opened');
-        assert.equal(await probeFieldKey(v1Legacy, PRIMARY), 'closed');
-        assert.equal(await probeFieldKey('CPFE2.non-base64!', PRIMARY), 'malformed');
-        assert.equal(await probeFieldKey('A'.repeat(32), PRIMARY), 'malformed');
+        assert.equal(await probeFieldKey(cpfe2, one(PRIMARY)), 'opened');
+        assert.equal(await probeFieldKey(cpfe2, one(LEGACY)), 'closed');
+        assert.equal(await probeFieldKey(v1Legacy, one(LEGACY)), 'opened');
+        assert.equal(await probeFieldKey(v1Legacy, one(PRIMARY)), 'closed');
+        assert.equal(await probeFieldKey('CPFE2.non-base64!', one(PRIMARY)), 'malformed');
+        assert.equal(await probeFieldKey('A'.repeat(32), one(PRIMARY)), 'malformed');
+        // Le stringhe sono sempre rifiutate: un keyring passato per errore non diventa una chiave.
         await assert.rejects(() => probeFieldKey(cpfe2, KEYRING), /PROBE_SINGLE_KEY_REQUIRED/);
+        await assert.rejects(() => probeFieldKey(cpfe2, PRIMARY), /PROBE_SINGLE_KEY_REQUIRED/);
     } finally {
         Object.assign(console, original);
     }
@@ -110,7 +118,7 @@ test('probeFieldKey apre esattamente ciò che decrypt apre con lo stesso singolo
             for (const key of [PRIMARY, LEGACY]) {
                 const result = await decrypt(value, key);
                 const decryptOpens = result !== '--ERRORE--' && result !== value;
-                assert.equal(await probeFieldKey(value, key) === 'opened', decryptOpens);
+                assert.equal(await probeFieldKey(value, one(key)) === 'opened', decryptOpens);
             }
         }
     } finally {
@@ -144,7 +152,7 @@ test('censimento di un vault legacy: formati, chiavi, archiviati, allegati e ide
     assert.deepEqual(report.security, {envelopePresent: true, envelopeVersion: 2, envelopeIterations: 600000,
         keyOrigin: 'random-with-legacy-fallback', verifierPresent: true, verifierIterations: 600000,
         keyringKind: 'keyring', legacyKeyPresent: true});
-    assert.equal(area('settings').omitted, 1);
+    assert.equal(area('settings').omitted.securityDocument, 1);
     assert.equal(area('settings').read, 0, 'busta e verificatore non vengono provati come campi');
 
     assert.deepEqual(area('profile').fields.cpfe2, {primary: 1, legacy: 0, none: 0, malformed: 0});
@@ -167,6 +175,8 @@ test('censimento di un vault legacy: formati, chiavi, archiviati, allegati e ide
     assert.equal(attachments.bytesKnown, 1200);
     assert.equal(attachments.bytesUnknown, 1);
     assert.equal(area('private-account-attachments').fields.v1.none, 0, 'i metadati encryption non sono campi');
+    assert.equal(area('private-account-attachments').omitted.attachmentEncryptionMetadata, 1);
+    assert.equal(accounts.omitted.typedValues, 1, 'il timestamp è un\'omissione esplicita');
 
     const sharing = area('sharing-identity');
     assert.equal(sharing.opensFull, true);
@@ -309,4 +319,111 @@ test('l\'invalidazione della raccolta diventa CENSUS_CANCELLED', async () => {
     const api = await loadService(env.context);
     await assert.rejects(() => api.runVaultFormatCensus(UID, PRIMARY, {authRef: env.authRef,
         observeAuth: env.context.onAuthStateChanged, target: env.target}), /CENSUS_CANCELLED/);
+});
+
+test('vecchia Master che inizia con «CPVK2:»: lettore normale e censimento concordano', async () => {
+    const prefixedLegacy = 'CPVK2:Sintetica-Master-Storica!';
+    const keyring = createVaultKeyring(PRIMARY, prefixedLegacy);
+    const value = await encryptV1('storico sintetico', prefixedLegacy);
+    assert.equal(await decrypt(value, keyring), 'storico sintetico');
+    assert.equal(parseKeyMaterial(keyring).legacy.value, prefixedLegacy);
+    assert.equal(await probeFieldKey(value, one(prefixedLegacy)), 'opened');
+    await assert.rejects(() => probeFieldKey(value, prefixedLegacy), /PROBE_SINGLE_KEY_REQUIRED/);
+    const runner = createCensusRunner({keyMaterial: keyring, probes: realProbes});
+    await runner.addRecord({kind: 'record', scope: 'contact', id: 'c', data: {nota: value}});
+    const entry = runner.report().areas.find(item => item.id === 'contacts');
+    assert.deepEqual(entry.fields.v1, {primary: 0, legacy: 1, none: 0, malformed: 0});
+});
+
+test('copertura: sottoalberi legittimi chiamati $type o encryption sono classificati', async () => {
+    const cipher = await encrypt('annidato', PRIMARY);
+    const runner = createCensusRunner({keyMaterial: PRIMARY, probes: realProbes});
+    await runner.addRecord({kind: 'record', scope: 'contact', id: 'c', data: {
+        etichetta: {$type: 'nota-utente', testo: cipher},
+        encryption: {preferenza: cipher},
+        falsaData: {$type: 'date', value: 'non è una data'},
+        creato: {$type: 'timestamp', seconds: 1, nanoseconds: 2},
+        quando: {$type: 'date', value: '2026-11-27T00:00:00.000Z'},
+        firma: {$type: 'bytes', value: [1, 2, 3]}
+    }});
+    await runner.addRecord({kind: 'record', scope: 'private-account-attachment', id: 'a', data: {
+        size: 3, encryption: {...await attachmentEncryption(PRIMARY), campoSconosciuto: cipher}
+    }});
+    const report = runner.report();
+    const contacts = report.areas.find(item => item.id === 'contacts');
+    assert.equal(contacts.fields.cpfe2.primary, 2, '$type e encryption non fanno saltare i campi utente');
+    assert.equal(contacts.omitted.typedValues, 3, 'solo date, timestamp e byte con forma esatta');
+    assert.equal(contacts.omitted.attachmentEncryptionMetadata, 0);
+    const attachments = report.areas.find(item => item.id === 'private-account-attachments');
+    assert.equal(attachments.omitted.attachmentEncryptionMetadata, 0, 'metadati con chiavi inattese non vengono omessi');
+    assert.equal(attachments.fields.cpfe2.primary, 1);
+    assert.ok(attachments.fields.v1.none + attachments.fields.v1.malformed >= 1, 'la chiave avvolta resta visibile nei conteggi');
+});
+
+function invalidatingProbes(stage) {
+    const state = {valid: true, progress: 0};
+    const flip = async result => { state.valid = false; return result; };
+    const probes = {
+        field: (value, key) => stage === 'field' ? flip('opened') : realProbes.field(value, key),
+        attachment: (encryption, key) => stage === 'attachment' ? flip('opened') : realProbes.attachment(encryption, key),
+        identity: (identity, key) => stage === 'identity' ? flip('opened') : realProbes.identity(identity, key)
+    };
+    const check = () => { if (!state.valid) throw Object.assign(new Error('CENSUS_CANCELLED'), {code: 'CENSUS_CANCELLED'}); };
+    return {state, probes, check};
+}
+
+test('una prova già avviata quando la sessione si invalida viene scartata', async () => {
+    for (const stage of ['field', 'attachment', 'identity']) {
+        const {state, probes, check} = invalidatingProbes(stage);
+        const runner = createCensusRunner({keyMaterial: KEYRING, probes, check, onProgress: () => state.progress++});
+        const run = async () => {
+            if (stage === 'identity') {
+                await runner.addIdentity(await sharingIdentity.createSharingIdentity({uid: UID, vaultKeyMaterial: KEYRING}));
+            } else {
+                await runner.addRecord({kind: 'record', scope: 'private-account-attachment', id: 'a', data: {
+                    nota: stage === 'field' ? await encrypt('x', PRIMARY) : 'chiaro',
+                    size: 1, encryption: await attachmentEncryption(KEYRING)}});
+            }
+        };
+        await assert.rejects(run, /CENSUS_CANCELLED/, stage);
+        state.valid = true;
+        const report = runner.report();
+        const attachments = report.areas.find(item => item.id === 'private-account-attachments');
+        assert.equal(attachments.fields.cpfe2.primary, 0, `${stage}: esito scartato`);
+        assert.equal(attachments.attachments.total, 0, `${stage}: allegato non contato`);
+        assert.equal(attachments.attachments.opensFull, 0);
+        assert.equal(attachments.errors, 0);
+        assert.equal(report.areas.find(item => item.id === 'sharing-identity').opensFull, undefined);
+        assert.equal(state.progress, 0, `${stage}: nessuna notifica di avanzamento`);
+    }
+});
+
+test('servizio: blocco, uscita pagina, abort, logout e cambio utente durante una prova', async () => {
+    for (const trigger of ['lock', 'pagehide', 'abort', 'logout', 'auth']) {
+        const env = serviceContext();
+        const controller = new AbortController();
+        let started = false;
+        const fire = () => {
+            if (trigger === 'lock') env.target.dispatchEvent(new Event('vault-session-locked'));
+            if (trigger === 'pagehide') env.target.dispatchEvent(new Event('pagehide'));
+            if (trigger === 'abort') controller.abort();
+            if (trigger === 'logout') env.authRef.currentUser = null;
+            if (trigger === 'auth') { env.authRef.currentUser = {uid: 'altro-utente'}; env.observers.forEach(fn => fn({uid: 'altro-utente'})); }
+        };
+        Object.assign(env.context, {
+            collectOwnerBackup: async () => ({records: [
+                {kind: 'record', scope: 'contact', id: 'c1', data: {a: await encrypt('x', PRIMARY)}},
+                {kind: 'record', scope: 'contact', id: 'c2', data: {a: await encrypt('y', PRIMARY)}}
+            ], storagePaths: []}),
+            probeFieldKey: async () => { started = true; fire(); return 'opened'; }
+        });
+        const api = await loadService(env.context);
+        const progress = [];
+        await assert.rejects(() => api.runVaultFormatCensus(UID, PRIMARY, {signal: controller.signal, authRef: env.authRef,
+            observeAuth: env.context.onAuthStateChanged, target: env.target, onProgress: p => progress.push(p)}),
+            /CENSUS_CANCELLED/, trigger);
+        assert.equal(started, true, trigger);
+        assert.deepEqual(progress, [], `${trigger}: nessun avanzamento dopo l'invalidazione`);
+        assert.equal(env.observers.size, 0, `${trigger}: osservatore rimosso`);
+    }
 });

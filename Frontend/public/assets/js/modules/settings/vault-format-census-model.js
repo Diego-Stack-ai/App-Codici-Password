@@ -36,15 +36,26 @@ export const CENSUS_AREAS = Object.freeze([
 const SCOPE_TO_AREA = new Map(CENSUS_AREAS.flatMap(area => area.scopes?.map(scope => [scope, area.id]) || []));
 const ATTACHMENT_SCOPES = new Set(['private-account-attachment', 'company-account-attachment', 'profile-document-attachment']);
 const ARCHIVABLE_SCOPES = new Set(['private-account', 'company-account']);
-// Sottoalberi tecnici non classificati come campi: hanno controlli dedicati.
-const SKIPPED_KEYS = new Set(['encryption']);
 const BASE64_CIPHER = /^[A-Za-z0-9+/]+={0,2}$/;
 const FIELD_V2_PREFIX = 'CPFE2.';
+// Chiavi esatte dei metadati prodotti da attachment-security e chunked-attachment-security.
+const ATTACHMENT_ENCRYPTION_KEYS = new Set(['version', 'cipher', 'keyWrap', 'wrapSalt', 'wrapIv', 'wrappedFileKey',
+    'contentIv', 'originalType', 'originalSize', 'chunked', 'chunkVersion', 'chunkBinding', 'chunkSize', 'chunkCount']);
+
+// Candidato singolo estratto dal keyring: un oggetto, mai una stringa, così un keyring
+// passato per errore non viene scambiato per una chiave, anche quando la vecchia
+// Master inizia letteralmente con «CPVK2:».
+export function singleCandidate(value) {
+    if (typeof value !== 'string' || !value) throw new Error('CENSUS_CANDIDATE_INVALID');
+    return Object.freeze({kind: 'single-candidate', value});
+}
 
 export function parseKeyMaterial(vaultKeyMaterial) {
     const value = String(vaultKeyMaterial || '');
     if (!value) throw new Error('CENSUS_KEY_MATERIAL_REQUIRED');
-    if (!value.startsWith('CPVK2:')) return {kind: 'raw', full: value, primary: value, legacy: null};
+    if (!value.startsWith('CPVK2:')) {
+        return {kind: 'raw', full: value, primary: singleCandidate(value), primaryRaw: value, legacy: null};
+    }
     let keyring;
     try {
         const binary = atob(value.slice(6));
@@ -54,8 +65,8 @@ export function parseKeyMaterial(vaultKeyMaterial) {
         throw new Error('CENSUS_KEYRING_INVALID');
     }
     if (typeof keyring?.primaryKey !== 'string' || !keyring.primaryKey) throw new Error('CENSUS_KEYRING_INVALID');
-    const legacy = typeof keyring.legacyKey === 'string' && keyring.legacyKey ? keyring.legacyKey : null;
-    return {kind: 'keyring', full: value, primary: keyring.primaryKey, legacy};
+    const legacy = typeof keyring.legacyKey === 'string' && keyring.legacyKey ? singleCandidate(keyring.legacyKey) : null;
+    return {kind: 'keyring', full: value, primary: singleCandidate(keyring.primaryKey), primaryRaw: keyring.primaryKey, legacy};
 }
 
 // Classificazione sintattica, allineata a isEncryptedValue di crypto-utils.
@@ -64,6 +75,25 @@ export function classifyFieldValue(value) {
     if (value.startsWith(FIELD_V2_PREFIX)) return 'cpfe2';
     if (value.length >= 30 && BASE64_CIPHER.test(value)) return 'v1';
     return 'plain';
+}
+
+// Valori non testuali prodotti da encodeFirestoreValue: riconosciuti dalla forma esatta,
+// non dal solo nome «$type».
+export function isEncodedTypedValue(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+    const keys = Object.keys(value).sort().join(',');
+    if (value.$type === 'date') return keys === '$type,value' && typeof value.value === 'string' && !Number.isNaN(Date.parse(value.value));
+    if (value.$type === 'timestamp') return keys === '$type,nanoseconds,seconds' && Number.isInteger(value.seconds) && Number.isInteger(value.nanoseconds);
+    if (value.$type === 'bytes') return keys === '$type,value' && Array.isArray(value.value) && value.value.every(byte => Number.isInteger(byte) && byte >= 0 && byte <= 255);
+    return false;
+}
+
+// Metadati di cifratura di un allegato: solo al livello radice dei record allegato
+// e solo con la forma di attachment-security (version 1, AES-GCM-256, chiave avvolta).
+export function isAttachmentEncryptionMetadata(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+    if (value.version !== 1 || value.cipher !== 'AES-GCM-256' || typeof value.wrappedFileKey !== 'string') return false;
+    return Object.keys(value).every(key => ATTACHMENT_ENCRYPTION_KEYS.has(key));
 }
 
 function emptyFieldCounters() {
@@ -84,34 +114,23 @@ function emptyAttachmentCounters() {
 function createAreaEntry(area) {
     if (area.source === 'not-covered') return {id: area.id, status: 'non-censita', reason: area.reason};
     return {
-        id: area.id, status: 'censita', records: 0, archived: 0, read: 0, classified: 0, errors: 0, omitted: 0,
+        id: area.id, status: 'censita', records: 0, archived: 0, read: 0, classified: 0, errors: 0,
+        omitted: {securityDocument: 0, attachmentEncryptionMetadata: 0, typedValues: 0},
         fields: emptyFieldCounters(),
         ...(area.id.endsWith('attachments') ? {attachments: emptyAttachmentCounters()} : {})
     };
 }
 
-// Visita le foglie stringa del valore codificato da encodeFirestoreValue.
-function collectStringLeaves(value, out) {
+// Visita le foglie stringa del valore codificato. Le omissioni sono contate, mai silenziose.
+function collectStringLeaves(value, out, omitted) {
     if (typeof value === 'string') { out.push(value); return; }
-    if (Array.isArray(value)) { value.forEach(item => collectStringLeaves(item, out)); return; }
+    if (Array.isArray(value)) { value.forEach(item => collectStringLeaves(item, out, omitted)); return; }
     if (!value || typeof value !== 'object') return;
-    if (typeof value.$type === 'string') return; // date, timestamp, bytes: non sono campi testuali
-    for (const [key, child] of Object.entries(value)) {
-        if (SKIPPED_KEYS.has(key)) continue;
-        collectStringLeaves(child, out);
-    }
+    if (isEncodedTypedValue(value)) { omitted.typedValues++; return; }
+    for (const child of Object.values(value)) collectStringLeaves(child, out, omitted);
 }
 
-async function probeAgainst(probe, value, keys) {
-    // Candidati provati uno alla volta, in ordine esplicito: il primo che apre identifica la chiave.
-    for (const [label, key] of keys) {
-        if (!key) continue;
-        const result = await probe(value, key);
-        if (result === 'malformed') return 'malformed';
-        if (result === 'opened') return label;
-    }
-    return 'none';
-}
+const isCancellation = error => error?.code === 'CENSUS_CANCELLED' || error?.code === 'BACKUP_SESSION_INVALIDATED';
 
 export function createCensusRunner({keyMaterial, probes, check = () => {}, onProgress = () => {}}) {
     if (!probes?.field || !probes?.attachment || !probes?.identity) throw new Error('CENSUS_PROBES_REQUIRED');
@@ -125,15 +144,40 @@ export function createCensusRunner({keyMaterial, probes, check = () => {}, onPro
 
     const noteAnomaly = (area, index, type) => { anomalies.push({area, index, type}); };
 
-    async function classifyRecordFields(entry, data, index) {
+    // Ogni prova parte solo con sessione valida e il suo esito vale solo se la sessione
+    // è ancora valida al ritorno: altrimenti viene scartato e il censimento termina.
+    async function guarded(run) {
+        check();
+        const result = await run();
+        check();
+        return result;
+    }
+
+    async function probeAgainst(value) {
+        for (const [label, candidate] of keys) {
+            if (!candidate) continue;
+            const result = await guarded(() => probes.field(value, candidate));
+            if (result === 'malformed') return 'malformed';
+            if (result === 'opened') return label;
+        }
+        return 'none';
+    }
+
+    async function classifyRecordFields(entry, data, index, scope) {
         const leaves = [];
-        collectStringLeaves(data, leaves);
+        let source = data;
+        if (ATTACHMENT_SCOPES.has(scope) && isAttachmentEncryptionMetadata(data.encryption)) {
+            const {encryption: _metadata, ...rest} = data;
+            source = rest;
+            entry.omitted.attachmentEncryptionMetadata++;
+        }
+        collectStringLeaves(source, leaves, entry.omitted);
         for (const leaf of leaves) {
             check();
             const kind = classifyFieldValue(leaf);
+            if (kind === 'empty' || kind === 'plain') { entry.read++; entry.fields[kind]++; entry.classified++; continue; }
+            const outcome = await probeAgainst(leaf);
             entry.read++;
-            if (kind === 'empty' || kind === 'plain') { entry.fields[kind]++; entry.classified++; continue; }
-            const outcome = await probeAgainst(probes.field, leaf, keys);
             entry.fields[kind][outcome]++;
             entry.classified++;
             if (outcome === 'legacy') noteAnomaly(entry.id, index, `${kind}-legacy`);
@@ -144,19 +188,25 @@ export function createCensusRunner({keyMaterial, probes, check = () => {}, onPro
 
     async function classifyAttachment(entry, encryption, size, index) {
         const counters = entry.attachments;
+        if (!encryption || typeof encryption !== 'object') {
+            counters.total++; counters.invalid++; tallySize(counters, size);
+            noteAnomaly(entry.id, index, 'attachment-encryption-missing');
+            return;
+        }
+        const full = await guarded(() => probes.attachment(encryption, material.full));
+        const primaryAlone = material.kind === 'raw' ? full : await guarded(() => probes.attachment(encryption, material.primaryRaw));
         counters.total++;
-        if (Number.isFinite(size) && size >= 0) counters.bytesKnown += size; else counters.bytesUnknown++;
-        if (!encryption || typeof encryption !== 'object') { counters.invalid++; noteAnomaly(entry.id, index, 'attachment-encryption-missing'); return; }
+        tallySize(counters, size);
         if (encryption.chunked === true) counters.chunked++;
-        check();
-        const full = await probes.attachment(encryption, material.full);
-        check();
-        const primaryOnly = material.kind === 'raw' ? full : await probes.attachment(encryption, material.primary);
         if (full === 'invalid') { counters.invalid++; noteAnomaly(entry.id, index, 'attachment-encryption-invalid'); return; }
         if (full !== 'opened') { counters.none++; noteAnomaly(entry.id, index, 'attachment-unopened'); return; }
         counters.opensFull++;
-        if (primaryOnly === 'opened') counters.opensWithPrimaryAlone++;
+        if (primaryAlone === 'opened') counters.opensWithPrimaryAlone++;
         else counters.needsFullKeyring++;
+    }
+
+    function tallySize(counters, size) {
+        if (Number.isFinite(size) && size >= 0) counters.bytesKnown += size; else counters.bytesUnknown++;
     }
 
     function addSecurity(value) {
@@ -188,17 +238,18 @@ export function createCensusRunner({keyMaterial, probes, check = () => {}, onPro
             if (ARCHIVABLE_SCOPES.has(scope) && data.isArchived === true) entry.archived++;
             try {
                 if (scope === 'settings' && record.id === 'security') {
-                    entry.omitted++; // busta e verificatore: solo metadati, mai provati come campi
+                    entry.omitted.securityDocument++; // busta e verificatore: solo metadati, mai provati come campi
                     addSecurity(data);
                 } else {
-                    await classifyRecordFields(entry, data, index);
+                    await classifyRecordFields(entry, data, index, scope);
                     if (ATTACHMENT_SCOPES.has(scope)) await classifyAttachment(entry, data.encryption, data.size, index);
                 }
             } catch (error) {
-                if (error?.code === 'CENSUS_CANCELLED' || error?.code === 'BACKUP_SESSION_INVALIDATED') throw error;
+                if (isCancellation(error)) throw error;
                 entry.errors++;
                 noteAnomaly(areaId, index, 'record-error');
             }
+            check();
             processed++;
             onProgress({processed});
         },
@@ -209,13 +260,12 @@ export function createCensusRunner({keyMaterial, probes, check = () => {}, onPro
             check();
             const entry = areas.get('sharing-identity');
             if (!identity?.privateEnvelope) { entry.present = false; return; }
+            const full = await guarded(() => probes.identity(identity, material.full));
+            const primaryAlone = material.kind === 'raw' ? full : await guarded(() => probes.identity(identity, material.primaryRaw));
             entry.present = true;
             entry.records = 1;
-            const full = await probes.identity(identity, material.full);
-            check();
-            const primaryOnly = material.kind === 'raw' ? full : await probes.identity(identity, material.primary);
             entry.opensFull = full === 'opened';
-            entry.opensWithPrimaryAlone = primaryOnly === 'opened';
+            entry.opensWithPrimaryAlone = primaryAlone === 'opened';
             if (!entry.opensFull) noteAnomaly('sharing-identity', 0, 'identity-unopened');
         },
 
@@ -233,6 +283,7 @@ export function createCensusRunner({keyMaterial, probes, check = () => {}, onPro
                     'Solo conteggi: nessun valore, chiave, UID o ID dei record.',
                     'Gli indici delle anomalie valgono solo per questa esecuzione.',
                     'Le aree non censite non sono contate come zero.',
+                    'omitted elenca ciò che non è stato classificato come campo: documento di sicurezza, metadati di cifratura degli allegati, valori tipizzati (date, timestamp, byte).',
                     'v1.none può includere testo in chiaro con aspetto base64 (codici, identificativi): non indica da solo dati illeggibili.'
                 ]
             };

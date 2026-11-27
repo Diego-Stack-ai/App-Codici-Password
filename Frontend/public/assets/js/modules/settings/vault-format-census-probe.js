@@ -57,11 +57,13 @@ function parseV1(value) {
     };
 }
 
-export async function probeFieldKey(serializedValue, keyString) {
-    const candidate = String(keyString || '');
-    if (!candidate.normalize('NFC').trim() || candidate.startsWith('CPVK2:')) {
-        throw new Error('PROBE_SINGLE_KEY_REQUIRED');
-    }
+// Il candidato arriva come oggetto creato da singleCandidate (modello del censimento):
+// una stringa viene sempre rifiutata, così un keyring CPVK2 passato per errore non è
+// mai provato come chiave, mentre una vecchia Master che inizia con «CPVK2:» resta valida.
+export async function probeFieldKey(serializedValue, singleCandidate) {
+    const candidate = singleCandidate?.kind === 'single-candidate' && typeof singleCandidate.value === 'string'
+        ? singleCandidate.value : '';
+    if (!candidate.normalize('NFC').trim()) throw new Error('PROBE_SINGLE_KEY_REQUIRED');
     const value = String(serializedValue || '');
     const parts = value.startsWith(CPFE2_PREFIX) ? parseCpfe2(value) : parseV1(value);
     if (!parts) return 'malformed';
