@@ -35,7 +35,7 @@ export async function buildDynamicBundle(publicRoot) {
   const stubs = new Map([
     ['firebase-config.js',synthetic],['firebase-runtime.js',firebase],['vault-repository.js',data],
     ['security-manager.js',`${denied} export const ensureVaultKeyMaterial=async()=>null,encrypt=denied,decrypt=denied,isVaultUnlocked=()=>false;`],
-    ['vault-frame-client.js',`${denied} export const confirmFrameAction=denied;export const vaultFrameClient=Object.freeze({isChild:()=>false,onClear:()=>()=>{}});`],
+    ['vault-frame-client.js',`${denied} export const confirmFrameAction=denied,executeFrameNativeAction=denied;export const vaultFrameClient=Object.freeze({isChild:()=>false,onClear:()=>()=>{}});`],
     ['frame-navigation.js',`${denied} export const navigateDocument=denied,beginFrameLogout=denied,handleFrameBack=denied;`],
     ['utils.js',`export const logError=(label,error)=>{throw error};export const formatDateToIT=value=>String(value);`],
     ['attachment-security.js',`${denied} export const MAX_ATTACHMENT_BYTES=33554432;export const encryptAttachmentFile=denied,decryptAttachmentBytes=denied,openDecryptedAttachment=denied,validateAttachmentFile=denied,createStorageObjectName=denied,openExternalUrl=denied,resolveAccountAttachmentMime=denied,unwrapAttachmentFileKey=denied,validateAccountAttachmentFile=denied;`],
