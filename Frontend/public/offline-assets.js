@@ -169,6 +169,8 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/privato/dettaglio-privato-attachments.js",
   "assets/js/modules/privato/dettaglio-privato-sharing.js",
   "assets/js/modules/privato/dettaglio_account_privato.js",
+  "assets/js/modules/privato/digital-card-pdf-model.js",
+  "assets/js/modules/privato/digital-card-pdf.js",
   "assets/js/modules/privato/form-privato-save.js",
   "assets/js/modules/privato/form_account_privato.js",
   "assets/js/modules/privato/private-account-offline-policy.js",

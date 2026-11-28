@@ -1,14 +1,18 @@
 // Static, non-user assets may survive view changes. Generated PDFs never do.
 const fontAssets = new Map();
+// Riusato dalla Tessera digitale del profilo: nome del file, titolo di condivisione e
+// generatore sono parametri; i valori predefiniti restano quelli della scheda aziendale.
 export function createCompanyPdfActions({assertActive, fetchImpl = fetch, loadGenerator = () => import('/assets/js/vendor/company-summary-pdf.js'),
-    navigatorApi = navigator, documentApi = document, urlApi = URL, FileClass = File, nativeAction = (_bytes, action) => action()}) {
+    navigatorApi = navigator, documentApi = document, urlApi = URL, FileClass = File, nativeAction = (_bytes, action) => action(),
+    fileName = 'scheda-azienda.pdf', shareTitle = 'Scheda aziendale', generatorName = 'generateCompanySummaryPdf'}) {
     let disposed = false; const urls = new Set();
     const check = () => {if (disposed) throw Error('VIEW_DISPOSED'); assertActive();};
-    const file = bytes => new FileClass([bytes], 'scheda-azienda.pdf', {type: 'application/pdf'});
+    const file = bytes => new FileClass([bytes], fileName, {type: 'application/pdf'});
     const revoke = url => {if (urls.delete(url)) urlApi.revokeObjectURL(url);};
     return Object.freeze({
         async generate(model) {
-            check(); const {generateCompanySummaryPdf} = await loadGenerator(); check();
+            check(); const generator = (await loadGenerator())[generatorName]; check();
+            if (typeof generator !== 'function') throw Error('PDF_GENERATOR_UNAVAILABLE');
             const loadFont = async name => {
                 const fetchAsset = async () => {
                     const response = await fetchImpl(`/assets/pdf/${name}`);
@@ -21,16 +25,16 @@ export function createCompanyPdfActions({assertActive, fetchImpl = fetch, loadGe
                 const bytes = await fontAssets.get(name); check(); return bytes;
             };
             const [regularFont, boldFont] = await Promise.all([loadFont('LiberationSans-Regular.ttf'), loadFont('LiberationSans-Bold.ttf')]);
-            check(); return generateCompanySummaryPdf(model, {regularFont, boldFont, assertActive: check});
+            check(); return generator(model, {regularFont, boldFont, assertActive: check});
         },
         canShare(bytes) {
             try {check(); return typeof navigatorApi.share === 'function' && typeof navigatorApi.canShare === 'function' && navigatorApi.canShare({files: [file(bytes)]});} catch {return false;}
         },
-        share(bytes) {check(); const output = bytes.slice(); return nativeAction(output, () => {check(); return navigatorApi.share({files: [file(output)], title: 'Scheda aziendale'});});},
+        share(bytes) {check(); const output = bytes.slice(); return nativeAction(output, () => {check(); return navigatorApi.share({files: [file(output)], title: shareTitle});});},
         download(bytes) {
             check(); const output = bytes.slice(); return nativeAction(output, () => {
             check(); const url = urlApi.createObjectURL(file(output)); urls.add(url);
-            const anchor = documentApi.createElement('a'); anchor.href = url; anchor.download = 'scheda-azienda.pdf'; anchor.rel = 'noopener';
+            const anchor = documentApi.createElement('a'); anchor.href = url; anchor.download = fileName; anchor.rel = 'noopener';
             try {check(); documentApi.body.append(anchor); anchor.click();}
             finally {anchor.remove(); anchor.removeAttribute('href'); setTimeout(() => revoke(url), 1000);}
             });

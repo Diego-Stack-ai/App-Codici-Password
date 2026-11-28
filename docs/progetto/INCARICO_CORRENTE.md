@@ -1,5 +1,15 @@
 # Incarico corrente
 
+<a id="tessera-digitale-pdf-2026-11-28"></a>
+
+## Tessera digitale — Scarica PDF e Condividi PDF, solo preparazione
+
+Mandato di Diego nella issue #379 del 28/11/2026, riferito in chat. Claude Code è l'unico scrittore; Codex rivede diff ed evidenze. Base `master` osservata `21325b3b` e verificata all'avvio: `21325b3b66d832ae4bde4dd51923d76eb99b1cc8`. Il perimetro è Profilo utente → Tessera digitale: Prepara PDF, poi Scarica PDF e Condividi PDF, con il flusso PDF della scheda aziendale come riferimento. [Esiti e limiti](../evidenze/COLLAUDI.md#tessera-digitale-pdf-2026-11-28).
+
+Il PDF contiene solo i campi scelti nella Tessera, con le stesse regole del QR e le stesse esclusioni dei campi sensibili; la foto entra solo se attivata. L'avviso sui dati esportati resta visibile. Condividi usa il menu nativo solo dove il browser condivide file e parte dal clic, senza attese; Scarica resta sempre disponibile.
+
+Autorizzati: ramo `claude/`, commit, push e PR in bozza. Esclusi: merge, versione, deploy, migrazione e dati reali. Prima di proporre un rilascio va verificato cosa porta `master` rispetto alla produzione.
+
 <a id="censimento-emulatore-2026-11-28"></a>
 
 ## Censimento — collaudo con Auth e Firestore in emulatore

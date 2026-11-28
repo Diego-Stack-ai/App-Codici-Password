@@ -123,9 +123,33 @@ function qrChoice(label, checked, onChange, warning = '') {
     ]);
 }
 
+let disposeCardPdf = null, cardPdfGeneration = 0;
+
+// Stessa sorgente della vCard della Tessera (getProfileVCard): dati del profilo con la
+// foto mostrata, scelte della Tessera, contatti e campi personalizzati.
+function cardPdfSource() {
+    const state = _getState();
+    return {
+        userData: {...state.currentUserData, photoURL: document.getElementById('profile-avatar')?.getAttribute('src') || state.currentUserData?.photoURL},
+        inclusions: state.qrCodeInclusions,
+        options: {contactPhones: state.contactPhones, contactEmails: state.contactEmails, userAddresses: state.userAddresses,
+            customFields: (state.customWidgets || []).flatMap(widget => widget.fields || [])}
+    };
+}
+
+function mountCardPdf(previewSection) {
+    const generation = ++cardPdfGeneration;
+    import('./digital-card-pdf.js').then(({mountDigitalCardPdf}) => {
+        if (generation !== cardPdfGeneration || !previewSection.isConnected) return;
+        disposeCardPdf = mountDigitalCardPdf(previewSection, {getSource: cardPdfSource});
+    }).catch(error => console.warn('[CARD PDF] Modulo non disponibile.', error?.message));
+}
+
 export function renderDigitalCard() {
     const container = document.getElementById('profile-digital-card');
     if (!container || !_getState) return;
+    // Ogni ridisegno (anche per una selezione cambiata) azzera il PDF eventualmente preparato.
+    disposeCardPdf?.(); disposeCardPdf = null; cardPdfGeneration++;
     const state = _getState();
     const vcardSize = new TextEncoder().encode(_callbacks.getQRPayload?.() || _callbacks.getVCard()).length;
     const capacityWarning = vcardSize > 1200;
@@ -144,6 +168,7 @@ export function renderDigitalCard() {
                 value => _callbacks.setWidgetFieldQr(widget.id, field.id, value))))
     ];
     const qrWrapper = document.querySelector('.qr-code-wrapper');
+    const pdfRoot = createElement('div', { className: 'digital-card-pdf-root' });
     setChildren(container, [
         createElement('div', { className: 'digital-card-layout' }, [
             createElement('section', { className: 'form-card digital-card-preview' }, [
@@ -158,7 +183,8 @@ export function renderDigitalCard() {
                 }),
                 createElement('div', { className: 'digital-card-actions' }, [
                     createElement('button', { className: 'btn-upload-trigger', 'data-contact-export': '', textContent: t('contact_export_entry'), onclick: () => _callbacks.downloadVCard() })
-                ])
+                ]),
+                pdfRoot
             ]),
             createElement('section', { className: 'form-card digital-card-fields' }, [
                 createElement('h2', { className: 'form-section-title', textContent: t('digital_card_included_data') }),
@@ -167,4 +193,5 @@ export function renderDigitalCard() {
             ])
         ])
     ]);
+    mountCardPdf(pdfRoot);
 }

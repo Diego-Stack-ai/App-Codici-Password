@@ -2,11 +2,17 @@
 
 <a id="stato-corrente"></a>
 
+<a id="tessera-digitale-pdf-2026-11-28"></a>
+
+## Tessera digitale in PDF — PR in bozza, non distribuita
+
+Produzione resta 1.2.299. La issue #379 è in preparazione su un ramo `claude/` con PR in bozza: PDF della Tessera digitale generato sul dispositivo dai soli campi selezionati, Scarica sempre disponibile e Condividi dove il browser condivide file. I test sintetici e il collaudo in Chromium sono verdi ([esiti](../evidenze/COLLAUDI.md#tessera-digitale-pdf-2026-11-28)). La prova su Safari iPhone non è ancora stata fatta. Merge e deploy attendono il riesame Codex e il via libera di Diego.
+
 <a id="censimento-vault-2026-11-27"></a>
 
 ## Censimento Vault — in master con voce Impostazioni, non distribuito
 
-Produzione resta 1.2.299. In `master` ci sono i moduli del censimento in sola lettura (PR #374, `1d6ec199`; [ricevuta](INCARICO_CORRENTE.md#censimento-vault-merge-2026-11-27)) e la voce «Censimento formati Vault» in Impostazioni (PR #375, `573989df`; [ricevuta](INCARICO_CORRENTE.md#censimento-vault-interfaccia-merge-2026-11-27)). La voce comprende conferma esplicita, sblocco normale, attesa annullabile, riepilogo con anomalie, valori ambigui e dipendenza dell'identità, e scaricamento locale del rapporto. Nulla è distribuito e niente è stato eseguito su dati reali. Il collaudo browser con account sintetico sostituisce Firebase e lo sblocco. Il collaudo con Auth e Firestore in emulatore, con login e sblocco reali, è candidato nella PR di soli test del 28/11 ([esiti](../evidenze/COLLAUDI.md#censimento-emulatore-2026-11-28)) e non autorizza un rilascio. `crypto-utils.js`, formati, busta, backend e Rules sono invariati.
+Produzione resta 1.2.299. In `master` ci sono i moduli del censimento in sola lettura (PR #374, `1d6ec199`; [ricevuta](INCARICO_CORRENTE.md#censimento-vault-merge-2026-11-27)) e la voce «Censimento formati Vault» in Impostazioni (PR #375, `573989df`; [ricevuta](INCARICO_CORRENTE.md#censimento-vault-interfaccia-merge-2026-11-27)). La voce comprende conferma esplicita, sblocco normale, attesa annullabile, riepilogo con anomalie, valori ambigui e dipendenza dell'identità, e scaricamento locale del rapporto. Nulla è distribuito e niente è stato eseguito su dati reali. Il collaudo browser con account sintetico sostituisce Firebase e lo sblocco. Il collaudo con Auth e Firestore in emulatore, con login e sblocco reali, è in `master` con la PR #378 (`21325b3b`; [esiti](../evidenze/COLLAUDI.md#censimento-emulatore-2026-11-28)) e non autorizza un rilascio. `crypto-utils.js`, formati, busta, backend e Rules sono invariati.
 
 <a id="rilascio-1299-pubblico-2026-11-26"></a>
 

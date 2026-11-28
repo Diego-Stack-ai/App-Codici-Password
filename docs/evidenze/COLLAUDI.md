@@ -1,5 +1,16 @@
 # Collaudi
 
+<a id="tessera-digitale-pdf-2026-11-28"></a>
+
+## 28/11/2026 — Tessera digitale in PDF, collaudo sintetico
+
+Issue #379, base `21325b3b`. Solo dati sintetici, nessun Firebase reale, emulatore o rete esterna.
+
+- **Selezione.** Il modello del PDF riporta esattamente i valori del vCard della Tessera in sette combinazioni di scelte, compresa la selezione vuota. Campi segreti, cifrati, con busta, di tipo password o non scelti non entrano mai. Una selezione vuota viene rifiutata invece di produrre un PDF bianco. `tests/digital-card-pdf.test.mjs`.
+- **Contenuto.** Il testo estratto dal PDF contiene i campi scelti e nessuno di quelli esclusi. Con la foto attiva c'è una sola immagine, senza foto nessuna. Il PDF ha il titolo «Tessera digitale» e non contiene azioni automatiche. Il generatore rifiuta chiavi in più, titolo diverso, foto non PNG/JPEG e caratteri non supportati. Le tessere lunghe vanno su più pagine (al massimo 10), e un blocco durante la generazione impedisce l'output.
+- **Browser (Chromium, pannello reale).** Senza condivisione di file, Scarica produce `tessera-digitale.pdf` e Condividi resta disattivato. Con la condivisione, `navigator.share` riceve il file PDF mentre l'attivazione del clic è attiva, e Scarica resta disponibile. Un annullamento viene segnalato senza perdere il PDF. Una foto non disponibile mostra un errore e non offre il PDF. Il blocco della Vault, il blocco della sessione e il cambio di account rimuovono il pannello e azzerano i byte. Con la Vault bloccata la preparazione è rifiutata. Nessuna richiesta esterna. `tests/digital-card-pdf.browser.test.mjs`, dentro `npm run test:company-pdf`.
+- **Limiti.** Safari su iPhone non è provato: servono la prova fisica di Diego sul menu Condividi e il ripiego su Scarica. Le etichette del PDF sono in italiano in tutte le lingue. Valori in alfabeti non latini (cinese, hindi) vengono rifiutati con un messaggio, perché il font incorporato non li copre.
+
 <a id="censimento-emulatore-2026-11-28"></a>
 
 ## Censimento dei formati — collaudo con Auth e Firestore in emulatore, 28/11/2026
