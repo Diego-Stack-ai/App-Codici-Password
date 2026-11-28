@@ -149,3 +149,5 @@ export async function generateCompanySummaryPdf(model, {regularFont, boldFont, a
     document.setTitle('Scheda aziendale'); document.setCreator('Codici & Password'); document.setProducer('Codici & Password');
     check(); const bytes = await document.save(); check(); return bytes;
 }
+
+export {generateDigitalCardPdf} from './digital-card-pdf.mjs';
