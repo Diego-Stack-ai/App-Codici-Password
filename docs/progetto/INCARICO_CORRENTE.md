@@ -1,5 +1,13 @@
 # Incarico corrente
 
+<a id="censimento-emulatore-2026-11-28"></a>
+
+## Censimento — collaudo con Auth e Firestore in emulatore
+
+Mandato di Diego nel commento 7223790122 della PR #375, confermato in chat il 28/11/2026. Claude Code è l'unico scrittore; Codex rivede. Base `master` `548e0c8f`. Il perimetro è un collaudo con la pagina Impostazioni reale, login e sblocco normali, progetto Firebase emulato isolato e soli dati sintetici, più una PR di soli test e documenti. [Esiti e limiti](../evidenze/COLLAUDI.md#censimento-emulatore-2026-11-28).
+
+Autorizzati: ramo `claude/`, commit, push e PR in bozza. Esclusi: merge, versione, deploy, migrazione e dati reali. Il codice applicativo non cambia.
+
 <a id="censimento-vault-interfaccia-merge-2026-11-27"></a>
 
 ## Censimento, voce Impostazioni — merge eseguito, ricevuta

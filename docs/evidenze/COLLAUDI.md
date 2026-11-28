@@ -1,5 +1,42 @@
 # Collaudi
 
+<a id="censimento-emulatore-2026-11-28"></a>
+
+## Censimento dei formati — collaudo con Auth e Firestore in emulatore, 28/11/2026
+
+Mandato di Diego nel commento 7223790122 della PR #375, ripreso in chat il 28/11. Base `master` `548e0c8f`, che contiene il merge #375 `573989df` e la ricevuta #377. Solo test: nessun deploy, migrazione, cambio versione o dato reale.
+
+**Comando:** `npm run test:vault-census-emulators`, cioè `scripts/run-vault-census-emulators.mjs`, che esegue `tests/vault-format-census.emulator.test.mjs`.
+- **Emulatori:** Auth e Firestore del progetto isolato `demo-vault-census`, con le `firestore.rules` del repository.
+- **Reali:** pagine `login.html` e `impostazioni.html`, tutti i moduli dell'app, login con email e password sintetiche, sblocco con la Master Password sintetica, SDK Firebase dello stesso pacchetto e della stessa versione del runtime di produzione.
+- **Sostituiti dal solo server di test:**
+  - `firebase-config.js`: progetto demo collegato agli emulatori, App Check disattivato;
+  - `firebase-runtime.js`: costruito in `.codex-tmp` con le stesse esportazioni più `connectAuthEmulator` e `connectFirestoreEmulator`. Il connettore Auth non è nel bundle di produzione, che resta invariato.
+- **Dati sintetici** generati con le funzioni crittografiche dell'app: busta `random-with-legacy-fallback` e verificatore v2 della Master sintetica, keyring con `legacyKey`, profilo CPFE2, account con v1 legacy, CPFE2 primaria, CPFE2 di altra chiave e valore ambiguo, account archiviato con v1 primaria, allegato avvolto con il keyring intero, allegato con metadati non validi, identità di condivisione sul keyring intero.
+
+| Scenario | Esito |
+|---|---|
+| Sblocco annullato all'apertura di Impostazioni | PASS: la pagina mostra «Vault bloccata», la voce del censimento resta nascosta e non si apre nessuna attesa né dialogo; poi «Sblocca e riprendi» con la Master sintetica |
+| Conferma rifiutata | PASS: nessuna attesa né dialogo; pulsante riattivato |
+| Scansione completa | PASS: senza nuova richiesta della Master. Formato vecchio 2, solo legacy 1, allegati dipendenti dal keyring 1, non aperti 2, ambigui 1, errori 0, riga sull'identità; `private-accounts` = 2/2/1/1/1/0, archiviati 1. Rapporto `vault-format-census/v1` scaricato con `keyOrigin` e `legacyKeyPresent`. Né dialogo né file contengono valori, chiavi, Master, password di login, email, UID o ID sintetici |
+| Annullamento durante l'attesa | PASS: nessun dialogo dei risultati; pulsante riattivato |
+| Blocco reale con `softLock()` a dialogo aperto | PASS: dialogo rimosso, pulsante di download assente, nessun file |
+| Nessuna modifica persistente rilevata | PASS: istantanea ricorsiva di tutto Firestore emulato (8 documenti) identica prima e dopo gli scenari, sblocco compreso. È un confronto di stato, non un'osservazione delle singole operazioni: una scrittura che lasciasse il dato identico non verrebbe rilevata |
+
+Tre esecuzioni consecutive locali hanno dato 7/7 PASS ciascuna; richieste esterne bloccate, nessun errore di pagina.
+
+**Chiusura dopo un guasto nella preparazione:** con `VAULT_CENSUS_FAIL_SEED=1` la semina si interrompe dopo la creazione dell'utente. Il collaudo termina con esito di errore in circa 30 s e gli emulatori si spengono. `after()` si conclude comunque: chiude l'app `firebase-admin`, chiude browser e server solo se avviati, e verifica le richieste esterne. Se il login fallisce, `openSettings` chiude il proprio contesto del browser. Con la versione precedente lo stesso guasto chiudeva il processo in 10 s, senza blocchi riprodotti, ma `after()` restava in attesa di un server mai avviato e l'app `firebase-admin` non veniva chiusa.
+
+**Comportamento osservato:** la pagina Impostazioni chiede lo sblocco all'apertura e senza Vault sbloccata non mostra le voci. Il ramo di sblocco interno al censimento è quindi una protezione aggiuntiva, non un percorso raggiungibile in uso normale. Dopo «Sblocca e riprendi» la pagina si ricarica: il test ripete il clic finché la conferma reale compare, perché i gestori vengono collegati dopo che il pulsante è già visibile.
+
+**Limiti:**
+- App Check disattivato e configurazione sostituita;
+- nessun Storage né Functions emulati, perché il censimento non li usa;
+- solo browser Chromium headless e lingua italiana;
+- nessun dispositivo fisico né passkey;
+- la CLI Firebase tenta di contattare `firebase-public.firebaseio.com`, bloccato in questo ambiente senza effetti sull'esito;
+- nessun dato reale; il collaudo non autorizza un rilascio.
+
 <a id="ricevute-storiche-recuperate-2026-11-27"></a>
 
 ## Ricevute storiche 1.2.271–1.2.273 — recupero del 27/11/2026
