@@ -1,0 +1,60 @@
+name: Collaudo in anteprima (dati sintetici)
+# Pubblica su un canale di anteprima di Firebase Hosting, che scade da solo, un sito di
+# collaudo isolato: pannello reale con adattatori sintetici, nessun servizio collegato.
+# Parte solo quando qualcuno con accesso in scrittura aggiunge l'etichetta
+# «collaudo-anteprima» a una PR di questo repository. Il sito di produzione
+# (canale live), i deploy di produzione e i domini autorizzati di Auth non sono toccati.
+
+on:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: read
+
+jobs:
+  tessera-pdf:
+    name: Anteprima Tessera PDF
+    if: github.event.label.name == 'collaudo-anteprima' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: collaudo-anteprima-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    env:
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      CHANNEL: collaudo-pr-${{ github.event.pull_request.number }}
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build isolated preview site
+        run: node scripts/build-card-pdf-preview.mjs --out "$RUNNER_TEMP/collaudo" --sha "$HEAD_SHA"
+
+      - name: Deploy preview channel (expires in 7 days)
+        shell: bash
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${FIREBASE_TOKEN:-}" ]; then
+            echo "::error::FIREBASE_TOKEN non disponibile per questo job: l'anteprima non può essere pubblicata."
+            exit 1
+          fi
+          node node_modules/firebase-tools/lib/bin/firebase.js hosting:channel:deploy "$CHANNEL" \
+            --project appcodici-password --config "$RUNNER_TEMP/collaudo/firebase.json" \
+            --expires 7d --no-authorized-domains --json --non-interactive --token "$FIREBASE_TOKEN" > "$RUNNER_TEMP/channel.json"
+          url="$(node -e "const r=require(process.argv[1]);const v=Object.values(r.result||{})[0]||{};if(r.status!=='success'||!/^https:\/\/appcodici-password--collaudo-pr-/.test(v.url||''))process.exit(1);console.log(v.url+' scade '+v.expireTime)" "$RUNNER_TEMP/channel.json")"
+          echo "ANTEPRIMA: $url (commit $HEAD_SHA)"
+          echo "Anteprima Tessera PDF: $url — commit \`$HEAD_SHA\`" >> "$GITHUB_STEP_SUMMARY"

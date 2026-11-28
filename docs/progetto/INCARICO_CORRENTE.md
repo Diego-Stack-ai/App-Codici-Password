@@ -10,6 +10,8 @@ Il PDF contiene solo i campi scelti nella Tessera, con le stesse regole del QR e
 
 Autorizzati: ramo `claude/`, commit, push e PR in bozza. Esclusi: merge, versione, deploy, migrazione e dati reali. Prima di proporre un rilascio va verificato cosa porta `master` rispetto alla produzione.
 
+Collaudo fisico: dopo il riesame Codex favorevole su `25bf42fc` (commento 7238452121 della PR #380), Diego sceglie in chat il 28/11/2026 un canale di anteprima di Firebase Hosting. Il sito di collaudo è generato a parte da `scripts/build-card-pdf-preview.mjs`: pannello reale, dati e foto sintetici, nessun servizio collegato, CSP limitata alla propria origine. Lo pubblica il workflow `collaudo-anteprima.yml` quando la PR riceve l'etichetta `collaudo-anteprima`, su un canale che scade in 7 giorni e senza toccare il canale live né i domini autorizzati di Auth. La PR resta in bozza fino all'esito su Safari iPhone.
+
 <a id="censimento-emulatore-2026-11-28"></a>
 
 ## Censimento — collaudo con Auth e Firestore in emulatore
