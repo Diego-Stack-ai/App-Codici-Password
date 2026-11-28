@@ -14,7 +14,7 @@ import {chromium} from 'playwright';
 // firebase-config.js (progetto demo collegato agli emulatori, App Check disattivato)
 // e firebase-runtime.js (stesso SDK con i connettori dell'emulatore).
 const require = createRequire(import.meta.url);
-const {initializeApp} = require('firebase-admin/app');
+const {initializeApp, deleteApp} = require('firebase-admin/app');
 const {getFirestore} = require('firebase-admin/firestore');
 const {getAuth} = require('firebase-admin/auth');
 const PROJECT = 'demo-vault-census';
@@ -78,6 +78,8 @@ const externalRequests = [];
 async function seed() {
     const user = await adminAuth.createUser({email: EMAIL, password: LOGIN_PASSWORD, emailVerified: true});
     uid = user.uid;
+    // Guasto simulato a metà semina: serve a verificare che il collaudo si chiuda comunque.
+    if (process.env.VAULT_CENSUS_FAIL_SEED === '1') throw new Error('SEED_FAILURE_INJECTED');
     const identity = await sharingIdentity.createSharingIdentity({uid, vaultKeyMaterial: KEYRING});
     const now = new Date().toISOString();
     const userRef = firestore.doc(`users/${uid}`);
@@ -141,6 +143,8 @@ async function respond(request, response) {
 }
 
 before(async () => {
+    // L'ordine conta: se la semina fallisce non si avviano server né browser, e after() chiude
+    // comunque ciò che esiste, compresa l'app firebase-admin che altrimenti terrebbe vivo il processo.
     await seed();
     server = createServer(respond);
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -150,8 +154,13 @@ before(async () => {
         : existsSync(chromium.executablePath()) ? {} : {channel: 'chrome'})});
 });
 after(async () => {
-    await browser?.close();
-    await new Promise(resolve => server?.close(resolve));
+    const closing = [deleteApp(adminApp).catch(() => {})];
+    if (browser) closing.push(browser.close().catch(() => {}));
+    if (server?.listening) {
+        server.closeAllConnections?.();
+        closing.push(new Promise(resolve => server.close(() => resolve())));
+    }
+    await Promise.all(closing);
     assert.deepEqual([...new Set(externalRequests)].filter(host => !/^127\.0\.0\.1(:\d+)?$/.test(host)), []);
 });
 
@@ -163,6 +172,15 @@ async function openSettings() {
         if (url.hostname !== '127.0.0.1') { externalRequests.push(url.host); return route.abort(); }
         return route.continue();
     });
+    try {
+        return await loginAndOpenSettings(context);
+    } catch (error) {
+        await context.close().catch(() => {});
+        throw error;
+    }
+}
+
+async function loginAndOpenSettings(context) {
     const page = await context.newPage();
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(String(error.message)));
@@ -213,7 +231,7 @@ async function openCensusConfirm(page) {
 }
 const settleMs = (page, ms = 300) => page.waitForTimeout(ms);
 
-test('collaudo in emulatore: conferma, sblocco, conteggi, download, annullamento, blocco e nessuna scrittura', {timeout: 600000}, async t => {
+test('collaudo in emulatore: conferma, sblocco, conteggi, download, annullamento, blocco e nessuna modifica persistente rilevata', {timeout: 600000}, async t => {
     const {context, page, pageErrors} = await openSettings();
     const before = await snapshot();
     const downloads = [];
@@ -304,8 +322,10 @@ test('collaudo in emulatore: conferma, sblocco, conteggi, download, annullamento
             assert.equal(downloads.length, downloadsBefore);
         });
 
-        await t.test('nessuna scrittura sui dati applicativi durante gli scenari', async () => {
+        await t.test('nessuna modifica persistente rilevata su Firestore durante gli scenari', async () => {
             const afterSnapshot = await snapshot();
+            // Confronto di stato, non osservazione delle singole scritture: una scrittura che
+            // lasciasse il dato identico non sarebbe rilevata.
             // L'istantanea copre tutto il database: gli 8 documenti seminati, più quelli eventualmente
             // creati dall'app all'apertura della pagina (prima della prima istantanea).
             assert.ok(Object.keys(before).length >= 8, `istantanea incompleta: ${Object.keys(before).length}`);
