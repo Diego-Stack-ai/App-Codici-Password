@@ -18,6 +18,9 @@ jobs:
     if: github.event.label.name == 'collaudo-anteprima' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # La chiave Firebase è nell'ambiente production (scelta di Diego del 28/11/2026).
+    # Questo job pubblica solo il canale di anteprima, mai il canale live.
+    environment: production
     concurrency:
       group: collaudo-anteprima-${{ github.event.pull_request.number }}
       cancel-in-progress: true
